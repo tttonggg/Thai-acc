@@ -1,0 +1,90 @@
+
+> nextjs_tailwind_shadcn_ts@0.2.0 build
+> next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 18.5s
+  Skipping validation of types
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/42) ...
+  Generating static pages using 7 workers (10/42) 
+  Generating static pages using 7 workers (20/42) 
+  Generating static pages using 7 workers (31/42) 
+✓ Generating static pages using 7 workers (42/42) in 229.9ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api
+├ ƒ /api/accounts
+├ ƒ /api/accounts/[id]
+├ ƒ /api/accounts/export
+├ ƒ /api/assets
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/backup/export
+├ ƒ /api/backup/import
+├ ƒ /api/bank-accounts
+├ ƒ /api/bank-accounts/[id]/reconcile
+├ ƒ /api/cheques
+├ ƒ /api/cheques/[id]
+├ ƒ /api/customers
+├ ƒ /api/customers/[id]
+├ ƒ /api/dashboard
+├ ƒ /api/employees
+├ ƒ /api/invoices
+├ ƒ /api/invoices/[id]
+├ ƒ /api/invoices/[id]/export/pdf
+├ ƒ /api/invoices/[id]/issue
+├ ƒ /api/invoices/next-number
+├ ƒ /api/journal
+├ ƒ /api/journal-entries/[id]/export/pdf
+├ ƒ /api/journal/[id]
+├ ƒ /api/journal/[id]/post
+├ ƒ /api/journal/post
+├ ƒ /api/payroll
+├ ƒ /api/payroll/[id]
+├ ƒ /api/payroll/[id]/payslip
+├ ƒ /api/petty-cash/funds
+├ ƒ /api/petty-cash/vouchers
+├ ƒ /api/petty-cash/vouchers/[id]
+├ ƒ /api/petty-cash/vouchers/[id]/approve
+├ ƒ /api/petty-cash/vouchers/[id]/reimburse
+├ ƒ /api/products
+├ ƒ /api/purchases
+├ ƒ /api/purchases/[id]
+├ ƒ /api/receipts/[id]/export/pdf
+├ ƒ /api/reports/balance-sheet
+├ ƒ /api/reports/balance-sheet/export/excel
+├ ƒ /api/reports/balance-sheet/export/pdf
+├ ƒ /api/reports/general-ledger
+├ ƒ /api/reports/income-statement
+├ ƒ /api/reports/income-statement/export/excel
+├ ƒ /api/reports/income-statement/export/pdf
+├ ƒ /api/reports/trial-balance
+├ ƒ /api/reports/trial-balance/export/excel
+├ ƒ /api/reports/trial-balance/export/pdf
+├ ƒ /api/reports/wht
+├ ƒ /api/stock-balances
+├ ƒ /api/stock-movements
+├ ƒ /api/stock/transfers
+├ ƒ /api/upload
+├ ƒ /api/users
+├ ƒ /api/users/[id]
+├ ƒ /api/vendors
+├ ƒ /api/vendors/[id]
+├ ƒ /api/warehouses
+├ ƒ /api/wht
+├ ƒ /api/wht/[id]
+└ ƒ /api/wht/[id]/pdf
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

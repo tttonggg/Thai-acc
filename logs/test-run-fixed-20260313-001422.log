@@ -1,0 +1,2813 @@
+
+Running 91 tests using 4 workers
+
+[1A[2K[1/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+[1A[2K[2/91] [chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+[1A[2K[3/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:152:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials
+[1A[2K[4/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+[1A[2K[chromium] › e2e/agents/01-auth-navigation.spec.ts:152:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/01-auth-navigation.spec.ts:152:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/01-auth-navigation.spec.ts:152:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/01-auth-navigation.spec.ts:152:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/01-auth-navigation.spec.ts:152:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K✓ Sidebar found with selector: aside
+
+[1A[2K✅ Login successful - Sidebar visible
+
+[1A[2K
+==========================================
+
+[1A[2KTEST: Login with valid credentials
+
+[1A[2K==========================================
+
+
+[1A[2K✓ Dashboard loaded (sidebar visible)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/01-auth-navigation.spec.ts:152:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials
+✓ Screenshot saved: screenshots/auth/login-success.png
+
+[1A[2K
+✅ LOGIN TEST PASSED
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[5/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-DASHBOARD] Navigate to ภาพรวม
+[1A[2K[chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-DASHBOARD] Navigate to ภาพรวม
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-DASHBOARD] Navigate to ภาพรวม
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K✓ Sidebar found with selector: aside
+
+[1A[2K✅ Login successful - Sidebar visible
+
+[1A[2K✅ Login successful
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K✓ Sidebar found with selector: aside
+
+[1A[2K✅ Login successful - Sidebar visible
+
+[1A[2K✅ Login successful
+
+[1A[2K[chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-DASHBOARD] Navigate to ภาพรวม
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-DASHBOARD] Navigate to ภาพรวม
+✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+Testing Summary Cards...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+Testing Invoices Header Section...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+  Found 6 potential card elements
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+  ✅ Page title visible
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+  ✅ Card found: รอออกใบกำกับภาษี
+
+[1A[2K  ✅ Card found: รอรับชำระ
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:137:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements
+  ✅ "สร้างเอกสารใหม่" button visible
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:153:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards)
+  ✅ Card found: รับชำระแล้ว
+
+[1A[2K  ✅ Card found: ภาษีขายรวม
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+✓ Page loaded, filling credentials...
+
+[1A[2K[6/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+[1A[2K[7/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:241:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:241:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:241:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:241:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:241:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-DASHBOARD] Navigate to ภาพรวม
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K✓ Sidebar found with selector: aside
+
+[1A[2K✅ Login successful - Sidebar visible
+
+[1A[2K
+==========================================
+
+[1A[2KTEST: Navigate to ภาพรวม
+
+[1A[2K==========================================
+
+
+[1A[2K✓ Sidebar is visible
+
+[1A[2KAvailable buttons:
+
+[1A[2K  - "Dashboard"
+
+[1A[2K  - "ผังบัญชี"
+
+[1A[2K  - "บันทึกบัญชี"
+
+[1A[2K  - "ใบกำกับภาษี"
+
+[1A[2K  - "ภาษีมูลค่าเพิ่ม"
+
+[1A[2K  - "ภาษีหัก ณ ที่จ่าย"
+
+[1A[2K  - "ลูกหนี้ (AR)"
+
+[1A[2K  - "เจ้าหนี้ (AP)"
+
+[1A[2K  - "สต็อกสินค้า"
+
+[1A[2K  - "ธนาคาร"
+
+[1A[2K  - "ทรัพย์สินถาวร"
+
+[1A[2K  - "เงินเดือน"
+
+[1A[2K  - "เงินสดย่อย"
+
+[1A[2K  - "รายงาน"
+
+[1A[2K  - "ตั้งค่า"
+
+[1A[2K  - "จัดการผู้ใช้"
+
+[1A[2K
+❌ NAVIGATION TEST FAILED: ภาพรวม Error: Button with label "ภาพรวม" not found
+    at [90m/Users/tong/Thai-acc/[39me2e/agents/01-auth-navigation.spec.ts:224:17
+    at [90m/Users/tong/Thai-acc/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:323:9
+    at [90m/Users/tong/Thai-acc/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:320:11
+    at TimeoutManager.withRunnable [90m(/Users/tong/Thai-acc/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
+    at TestInfoImpl._runWithTimeout [90m(/Users/tong/Thai-acc/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:318:7[90m)[39m
+    at [90m/Users/tong/Thai-acc/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:321:7
+    at WorkerMain._runTest [90m(/Users/tong/Thai-acc/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:296:5[90m)[39m
+    at WorkerMain.runTestGroup [90m(/Users/tong/Thai-acc/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:196:11[90m)[39m
+    at process.<anonymous> [90m(/Users/tong/Thai-acc/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:72:22[90m)[39m
+
+[1A[2K  1) [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-DASHBOARD] Navigate to ภาพรวม 
+
+    Error: Button with label "ภาพรวม" not found
+
+      222 |             console.log(`  - "${text?.trim()}"`)
+      223 |           }
+    > 224 |           throw new Error(`Button with label "${navItem.label}" not found`)
+          |                 ^
+      225 |         }
+      226 |
+      227 |         // Click the button
+        at /Users/tong/Thai-acc/e2e/agents/01-auth-navigation.spec.ts:224:17
+
+    Error Context: test-results/agents-01-auth-navigation--c1d75-ASHBOARD-Navigate-to-ภาพรวม-chromium/error-context.md
+
+
+[1A[2K[8/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-ACCOUNTS] Navigate to ผังบัญชี
+[1A[2K[9/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-JOURNAL] Navigate to บันทึกบัญชี
+[1A[2K[10/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-INVOICES] Navigate to ใบกำกับภาษี
+[1A[2K[11/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-VAT] Navigate to ภาษีมูลค่าเพิ่ม
+[1A[2K[12/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-WHT] Navigate to ภาษีหัก ณ ที่จ่าย
+[1A[2K[13/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-CUSTOMERS] Navigate to ลูกหนี้
+[1A[2K[14/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-VENDORS] Navigate to เจ้าหนี้
+[1A[2K[15/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-INVENTORY] Navigate to สต็อกสินค้า
+[1A[2K[16/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-BANKING] Navigate to ธนาคาร
+[1A[2K[17/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-ASSETS] Navigate to ทรัพย์สิน
+[1A[2K[18/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-PAYROLL] Navigate to เงินเดือน
+[1A[2K[19/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-PETTY-CASH] Navigate to เงินสดย่อย
+[1A[2K[20/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-REPORTS] Navigate to รายงาน
+[1A[2K[21/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-SETTINGS] Navigate to ตั้งค่า
+[1A[2K[22/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-USERS] Navigate to จัดการผู้ใช้
+[1A[2K[23/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:268:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-COUNT] Verify total navigation items
+[1A[2K[24/91] [chromium] › e2e/agents/01-auth-navigation.spec.ts:304:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [SUMMARY] Generate test summary report
+[1A[2K[25/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:278:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:278:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K✓ Sidebar found with selector: aside
+
+[1A[2K✅ Login successful - Sidebar visible
+
+[1A[2K✓ Login successful
+
+[1A[2K  Available sidebar buttons:
+
+[1A[2K    - "Dashboard"
+
+[1A[2K    - "ผังบัญชี"
+
+[1A[2K    - "บันทึกบัญชี"
+
+[1A[2K    - "ใบกำกับภาษี"
+
+[1A[2K    - "ภาษีมูลค่าเพิ่ม"
+
+[1A[2K    - "ภาษีหัก ณ ที่จ่าย"
+
+[1A[2K    - "ลูกหนี้ (AR)"
+
+[1A[2K    - "เจ้าหนี้ (AP)"
+
+[1A[2K    - "สต็อกสินค้า"
+
+[1A[2K    - "ธนาคาร"
+
+[1A[2K    - "ทรัพย์สินถาวร"
+
+[1A[2K    - "เงินเดือน"
+
+[1A[2K    - "เงินสดย่อย"
+
+[1A[2K    - "รายงาน"
+
+[1A[2K    - "ตั้งค่า"
+
+[1A[2K    - "จัดการผู้ใช้"
+
+[1A[2K  2) [chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components 
+
+    Error: Could not find module button: ภาพรวม
+
+      140 |       console.log(`    - "${text}"`)
+      141 |     }
+    > 142 |     throw new Error(`Could not find module button: ${label}`)
+          |           ^
+      143 |   }
+      144 |   
+      145 |   await page.waitForTimeout(2000)
+        at navigateToModule (/Users/tong/Thai-acc/e2e/agents/02-core-financial.spec.ts:142:11)
+        at /Users/tong/Thai-acc/e2e/agents/02-core-financial.spec.ts:153:5
+
+    Error Context: test-results/agents-02-core-financial-C-c51bf-e-loads-with-all-components-chromium/error-context.md
+
+
+[1A[2K[26/91] [chromium] › e2e/agents/02-core-financial.spec.ts:204:7 › Core Financial Modules › Chart of Accounts module loads with all buttons
+[1A[2K[27/91] [chromium] › e2e/agents/02-core-financial.spec.ts:289:7 › Core Financial Modules › Journal Entries module loads with all form elements
+[1A[2K[28/91] [chromium] › e2e/agents/02-core-financial.spec.ts:373:7 › Core Financial Modules › Reports module loads with all report options
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:241:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K✓ Sidebar found with selector: aside
+
+[1A[2K✅ Login successful - Sidebar visible
+
+[1A[2K✅ Login successful
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[29/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:318:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:318:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:241:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns
+Testing Invoice Table...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:241:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns
+  ✅ Invoice table visible
+
+[1A[2K  Found 9 header cells
+
+[1A[2K  ✅ Column header found: เลขที่
+
+[1A[2K  ✅ Column header found: วันที่
+
+[1A[2K  ✅ Column header found: ประเภท
+
+[1A[2K  ✅ Column header found: ลูกค้า
+
+[1A[2K  ✅ Column header found: มูลค่าก่อน VAT
+
+[1A[2K  ✅ Column header found: VAT
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:241:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns
+  ✅ Column header found: ยอดรวม
+
+[1A[2K  ✅ Column header found: สถานะ
+
+[1A[2K  ✅ Column header found: จัดการ
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+✓ Credentials filled, submitting...
+
+[1A[2K[30/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:376:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:376:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:376:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page
+✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:278:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K✓ Sidebar found with selector: aside
+
+[1A[2K✅ Login successful - Sidebar visible
+
+[1A[2K✅ Login successful
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:318:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:278:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row
+Testing Action Buttons per Row...
+
+[1A[2K  Found 20 table rows
+
+[1A[2K  Found 4 action elements in first row
+
+[1A[2K  ✅ View button (Eye icon) found
+
+[1A[2K  ✅ Print button (Printer icon) found
+
+[1A[2K  ✅ Download button found
+
+[1A[2K[31/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:408:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:408:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:376:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:318:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:376:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:408:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K✓ Sidebar found with selector: aside
+
+[1A[2K✅ Login successful - Sidebar visible
+
+[1A[2K✅ Login successful
+
+[1A[2K🔴 Console Error: TypeError: Cannot read properties of undefined (reading 'toLocaleString')
+    at http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129905
+    at Array.map (<anonymous>)
+    at NL (http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129170)
+    at av (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:63230)
+    at oY (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:83503)
+    at io (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:94935)
+    at sc (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137956)
+    at http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137801
+    at ss (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137809)
+    at u9 (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:133734)
+
+[1A[2K🔴 Console Error: ErrorBoundary caught: TypeError: Cannot read properties of undefined (reading 'toLocaleString')
+    at http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129905
+    at Array.map (<anonymous>)
+    at NL (http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129170)
+    at av (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:63230)
+    at oY (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:83503)
+    at io (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:94935)
+    at sc (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137956)
+    at http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137801
+    at ss (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137809)
+    at u9 (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:133734) {componentStack: 
+    at NL (http://localhost:3000/_next/static/chu…_next/static/chunks/d53d9979c17c2432.js:1:223158)}
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:318:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K✓ Sidebar found with selector: aside
+
+[1A[2K✅ Login successful - Sidebar visible
+
+[1A[2K✅ Login successful
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:408:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table
+Testing Customer List Table...
+
+[1A[2K  ✅ Customer list/table visible
+
+[1A[2K  3) [chromium] › e2e/agents/03-sales-ar.spec.ts:408:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table 
+
+    Error: Should have at least 2 customer-related columns
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: >= [32m2[39m
+    Received:    [31m0[39m
+
+      432 |       }
+      433 |       
+    > 434 |       expect(foundHeaders, 'Should have at least 2 customer-related columns').toBeGreaterThanOrEqual(2)
+          |                                                                               ^
+      435 |     })
+      436 |
+      437 |     test('[VERIFY] Add Customer button', async ({ page }) => {
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:434:79
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-74150--VERIFY-Customer-list-table-chromium/error-context.md
+
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K✓ Sidebar found with selector: aside
+
+[1A[2K✅ Login successful - Sidebar visible
+
+[1A[2K✅ Login successful
+
+[1A[2K[32/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:437:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:376:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K✓ Sidebar found with selector: aside
+
+[1A[2K✅ Login successful - Sidebar visible
+
+[1A[2K✅ Login successful
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:437:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:318:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog
+Testing Create Document Dialog...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:437:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section
+Testing Search & Filter Section...
+
+[1A[2K  ✅ Search input found with placeholder: ค้นหา...
+
+[1A[2K  ✅ Status filter dropdown found
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:318:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog
+  ✅ Create Document dialog is visible
+
+[1A[2K  4) [chromium] › e2e/agents/03-sales-ar.spec.ts:318:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog 
+
+    Error: Should have at least 2 document type options
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: >= [32m2[39m
+    Received:    [31m0[39m
+
+      356 |         }
+      357 |         
+    > 358 |         expect(foundDocTypes, 'Should have at least 2 document type options').toBeGreaterThanOrEqual(2)
+          |                                                                               ^
+      359 |         
+      360 |         // Close dialog
+      361 |         await page.keyboard.press('Escape')
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:358:79
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-1756d-RIFY-Create-Document-Dialog-chromium/error-context.md
+
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:376:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page
+  📸 Screenshot saved: screenshots/sales/invoices-list.png
+
+[1A[2K[33/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:510:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:510:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K  5) [chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section 
+
+    Error: Should have at least 2 status options
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: >= [32m2[39m
+    Received:    [31m0[39m
+
+      235 |         await page.keyboard.press('Escape')
+      236 |         
+    > 237 |         expect(foundOptions, 'Should have at least 2 status options').toBeGreaterThanOrEqual(2)
+          |                                                                       ^
+      238 |       }
+      239 |     })
+      240 |
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:237:71
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-39e36-Y-Search-and-Filter-section-chromium/error-context.md
+
+
+[1A[2K[34/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:470:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row
+[1A[2K[35/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:555:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:470:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:555:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:437:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:510:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:437:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:470:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:555:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:510:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:470:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:555:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:437:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:510:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:437:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:470:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:555:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:510:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:470:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:555:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:437:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:555:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:437:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button
+⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:510:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:470:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:555:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K  6) [chromium] › e2e/agents/03-sales-ar.spec.ts:437:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button 
+
+    Error: Login failed after all retries
+
+      90 |     }
+      91 |   }
+    > 92 |   throw new Error('Login failed after all retries')
+         |         ^
+      93 | }
+      94 |
+      95 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:92:9)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:111:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-72c0f--VERIFY-Add-Customer-button-chromium/error-context.md
+
+
+[1A[2K[36/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:579:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:579:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K  7) [chromium] › e2e/agents/03-sales-ar.spec.ts:510:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row 
+
+    Error: Login failed after all retries
+
+      90 |     }
+      91 |   }
+    > 92 |   throw new Error('Login failed after all retries')
+         |         ^
+      93 | }
+      94 |
+      95 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:92:9)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:111:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-32535-ete-Customer-button-per-row-chromium/error-context.md
+
+
+[1A[2K[37/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:620:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:620:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K  8) [chromium] › e2e/agents/03-sales-ar.spec.ts:470:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row 
+
+    Error: Login failed after all retries
+
+      90 |     }
+      91 |   }
+    > 92 |   throw new Error('Login failed after all retries')
+         |         ^
+      93 | }
+      94 |
+      95 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:92:9)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:111:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-a88af-dit-Customer-button-per-row-chromium/error-context.md
+
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K  9) [chromium] › e2e/agents/03-sales-ar.spec.ts:555:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality 
+
+    Error: Login failed after all retries
+
+      90 |     }
+      91 |   }
+    > 92 |   throw new Error('Login failed after all retries')
+         |         ^
+      93 | }
+      94 |
+      95 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:92:9)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:111:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-5b922-stomer-search-functionality-chromium/error-context.md
+
+
+[1A[2K[38/91] [chromium] › e2e/agents/03-sales-ar.spec.ts:633:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:633:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K[39/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:118:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:118:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:579:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:620:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:579:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:633:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:118:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:620:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:633:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:118:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:579:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:620:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:579:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:633:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:118:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:620:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:633:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:118:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:579:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:620:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/03-sales-ar.spec.ts:633:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:118:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K  10) [chromium] › e2e/agents/03-sales-ar.spec.ts:579:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view 
+
+    Error: Login failed after all retries
+
+      90 |     }
+      91 |   }
+    > 92 |   throw new Error('Login failed after all retries')
+         |         ^
+      93 | }
+      94 |
+      95 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:92:9)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:111:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-b6fc4-ูกหนี้-VERIFY-AR-Aging-view-chromium/error-context.md
+
+
+[1A[2K  11) [chromium] › e2e/agents/03-sales-ar.spec.ts:633:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons 
+
+    Error: Login failed after all retries
+
+      90 |     }
+      91 |   }
+    > 92 |   throw new Error('Login failed after all retries')
+         |         ^
+      93 | }
+      94 |
+      95 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:92:9)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:111:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-c7e2e-All-Sales-AR-module-buttons-chromium/error-context.md
+
+
+[1A[2K[40/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:134:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector
+[1A[2K[41/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:150:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed
+[1A[2K  12) [chromium] › e2e/agents/03-sales-ar.spec.ts:620:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page 
+
+    Error: Login failed after all retries
+
+      90 |     }
+      91 |   }
+    > 92 |   throw new Error('Login failed after all retries')
+         |         ^
+      93 | }
+      94 |
+      95 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:92:9)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:111:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-3f51f-EENSHOT-Customers-list-page-chromium/error-context.md
+
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:134:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:150:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[42/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:179:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:179:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:134:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:150:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:179:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:134:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:150:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:179:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:134:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:150:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:179:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:134:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:150:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K  13) [chromium] › e2e/agents/04-tax-modules.spec.ts:118:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      110 |   test.describe('VAT Module (ภาษีมูลค่าเพิ่ม)', () => {
+      111 |     
+    > 112 |     test.beforeEach(async ({ page }) => {
+          |          ^
+      113 |       // Navigate to VAT module
+      114 |       await page.click('aside button:has-text("ภาษีมูลค่าเพิ่ม")')
+      115 |       await page.waitForTimeout(2000)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:112:10
+
+    Error: page.click: Test ended.
+    Call log:
+    [2m  - waiting for locator('aside button:has-text("ภาษีมูลค่าเพิ่ม")')[22m
+
+
+      112 |     test.beforeEach(async ({ page }) => {
+      113 |       // Navigate to VAT module
+    > 114 |       await page.click('aside button:has-text("ภาษีมูลค่าเพิ่ม")')
+          |                  ^
+      115 |       await page.waitForTimeout(2000)
+      116 |     })
+      117 |     
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:114:18
+
+    Error Context: test-results/agents-04-tax-modules-Tax--04879-le-loads-with-summary-cards-chromium/error-context.md
+
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[43/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:206:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:179:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:206:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:134:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:206:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs
+✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:134:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:150:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:179:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:206:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K  14) [chromium] › e2e/agents/04-tax-modules.spec.ts:134:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      110 |   test.describe('VAT Module (ภาษีมูลค่าเพิ่ม)', () => {
+      111 |     
+    > 112 |     test.beforeEach(async ({ page }) => {
+          |          ^
+      113 |       // Navigate to VAT module
+      114 |       await page.click('aside button:has-text("ภาษีมูลค่าเพิ่ม")')
+      115 |       await page.waitForTimeout(2000)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:112:10
+
+    Error: page.click: Test ended.
+    Call log:
+    [2m  - waiting for locator('aside button:has-text("ภาษีมูลค่าเพิ่ม")')[22m
+
+
+      112 |     test.beforeEach(async ({ page }) => {
+      113 |       // Navigate to VAT module
+    > 114 |       await page.click('aside button:has-text("ภาษีมูลค่าเพิ่ม")')
+          |                  ^
+      115 |       await page.waitForTimeout(2000)
+      116 |     })
+      117 |     
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:114:18
+
+    Error Context: test-results/agents-04-tax-modules-Tax--cde41--module-has-period-selector-chromium/error-context.md
+
+
+[1A[2K  15) [chromium] › e2e/agents/04-tax-modules.spec.ts:150:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      110 |   test.describe('VAT Module (ภาษีมูลค่าเพิ่ม)', () => {
+      111 |     
+    > 112 |     test.beforeEach(async ({ page }) => {
+          |          ^
+      113 |       // Navigate to VAT module
+      114 |       await page.click('aside button:has-text("ภาษีมูลค่าเพิ่ม")')
+      115 |       await page.waitForTimeout(2000)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:112:10
+
+    Error: page.click: Test ended.
+    Call log:
+    [2m  - waiting for locator('aside button:has-text("ภาษีมูลค่าเพิ่ม")')[22m
+
+
+      112 |     test.beforeEach(async ({ page }) => {
+      113 |       // Navigate to VAT module
+    > 114 |       await page.click('aside button:has-text("ภาษีมูลค่าเพิ่ม")')
+          |                  ^
+      115 |       await page.waitForTimeout(2000)
+      116 |     })
+      117 |     
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:114:18
+
+    Error Context: test-results/agents-04-tax-modules-Tax--993fa-output-tables-are-displayed-chromium/error-context.md
+
+
+[1A[2K[44/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+[1A[2K✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[45/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K  16) [chromium] › e2e/agents/04-tax-modules.spec.ts:179:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      110 |   test.describe('VAT Module (ภาษีมูลค่าเพิ่ม)', () => {
+      111 |     
+    > 112 |     test.beforeEach(async ({ page }) => {
+          |          ^
+      113 |       // Navigate to VAT module
+      114 |       await page.click('aside button:has-text("ภาษีมูลค่าเพิ่ม")')
+      115 |       await page.waitForTimeout(2000)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:112:10
+
+    Error: page.click: Test ended.
+    Call log:
+    [2m  - waiting for locator('aside button:has-text("ภาษีมูลค่าเพิ่ม")')[22m
+
+
+      112 |     test.beforeEach(async ({ page }) => {
+      113 |       // Navigate to VAT module
+    > 114 |       await page.click('aside button:has-text("ภาษีมูลค่าเพิ่ม")')
+          |                  ^
+      115 |       await page.waitForTimeout(2000)
+      116 |     })
+      117 |     
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:114:18
+
+    Error Context: test-results/agents-04-tax-modules-Tax--9610d-พิ่ม-VAT-chart-is-displayed-chromium/error-context.md
+
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[46/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:269:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:269:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:269:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:269:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:269:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:269:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns
+⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:269:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K  17) [chromium] › e2e/agents/04-tax-modules.spec.ts:206:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      198 |   test.describe('WHT Module (ภาษีหัก ณ ที่จ่าย)', () => {
+      199 |     
+    > 200 |     test.beforeEach(async ({ page }) => {
+          |          ^
+      201 |       // Navigate to WHT module
+      202 |       await page.click('aside button:has-text("ภาษีหัก")')
+      203 |       await page.waitForTimeout(2000)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:200:10
+
+    Error: page.click: Test ended.
+    Call log:
+    [2m  - waiting for locator('aside button:has-text("ภาษีหัก")')[22m
+
+
+      200 |     test.beforeEach(async ({ page }) => {
+      201 |       // Navigate to WHT module
+    > 202 |       await page.click('aside button:has-text("ภาษีหัก")')
+          |                  ^
+      203 |       await page.waitForTimeout(2000)
+      204 |     })
+      205 |     
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:202:18
+
+    Error Context: test-results/agents-04-tax-modules-Tax--80c89-dule-loads-with-report-tabs-chromium/error-context.md
+
+
+[1A[2K🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[47/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:301:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:301:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:269:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:301:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K  18) [chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      198 |   test.describe('WHT Module (ภาษีหัก ณ ที่จ่าย)', () => {
+      199 |     
+    > 200 |     test.beforeEach(async ({ page }) => {
+          |          ^
+      201 |       // Navigate to WHT module
+      202 |       await page.click('aside button:has-text("ภาษีหัก")')
+      203 |       await page.waitForTimeout(2000)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:200:10
+
+    Error: page.click: Test ended.
+    Call log:
+    [2m  - waiting for locator('aside button:has-text("ภาษีหัก")')[22m
+
+
+      200 |     test.beforeEach(async ({ page }) => {
+      201 |       // Navigate to WHT module
+    > 202 |       await page.click('aside button:has-text("ภาษีหัก")')
+          |                  ^
+      203 |       await page.waitForTimeout(2000)
+      204 |     })
+      205 |     
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:202:18
+
+    Error Context: test-results/agents-04-tax-modules-Tax--6f9d4-has-period-and-type-filters-chromium/error-context.md
+
+
+[1A[2K  19) [chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      198 |   test.describe('WHT Module (ภาษีหัก ณ ที่จ่าย)', () => {
+      199 |     
+    > 200 |     test.beforeEach(async ({ page }) => {
+          |          ^
+      201 |       // Navigate to WHT module
+      202 |       await page.click('aside button:has-text("ภาษีหัก")')
+      203 |       await page.waitForTimeout(2000)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:200:10
+
+    Error: page.click: Test ended.
+    Call log:
+    [2m  - waiting for locator('aside button:has-text("ภาษีหัก")')[22m
+
+
+      200 |     test.beforeEach(async ({ page }) => {
+      201 |       // Navigate to WHT module
+    > 202 |       await page.click('aside button:has-text("ภาษีหัก")')
+          |                  ^
+      203 |       await page.waitForTimeout(2000)
+      204 |     })
+      205 |     
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:202:18
+
+    Error Context: test-results/agents-04-tax-modules-Tax--a2639-plays-correct-table-columns-chromium/error-context.md
+
+
+[1A[2K[48/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+[1A[2K✓ Page hydrated, looking for sidebar...
+
+[1A[2K[49/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K  20) [chromium] › e2e/agents/04-tax-modules.spec.ts:269:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      198 |   test.describe('WHT Module (ภาษีหัก ณ ที่จ่าย)', () => {
+      199 |     
+    > 200 |     test.beforeEach(async ({ page }) => {
+          |          ^
+      201 |       // Navigate to WHT module
+      202 |       await page.click('aside button:has-text("ภาษีหัก")')
+      203 |       await page.waitForTimeout(2000)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:200:10
+
+    Error: page.click: Test ended.
+    Call log:
+    [2m  - waiting for locator('aside button:has-text("ภาษีหัก")')[22m
+
+
+      200 |     test.beforeEach(async ({ page }) => {
+      201 |       // Navigate to WHT module
+    > 202 |       await page.click('aside button:has-text("ภาษีหัก")')
+          |                  ^
+      203 |       await page.waitForTimeout(2000)
+      204 |     })
+      205 |     
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:202:18
+
+    Error Context: test-results/agents-04-tax-modules-Tax--8e84b-plays-correct-table-columns-chromium/error-context.md
+
+
+[1A[2K[50/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:357:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:357:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:357:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:357:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:357:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K  21) [chromium] › e2e/agents/04-tax-modules.spec.ts:301:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      293 |   test.describe('WHT Management (จัดการภาษีหัก ณ ที่จ่าย)', () => {
+      294 |     
+    > 295 |     test.beforeEach(async ({ page }) => {
+          |          ^
+      296 |       // Navigate to WHT section
+      297 |       await page.click('aside button:has-text("ภาษีหัก")')
+      298 |       await page.waitForTimeout(2000)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:295:10
+
+    Error: page.click: Test ended.
+    Call log:
+    [2m  - waiting for locator('aside button:has-text("ภาษีหัก")')[22m
+
+
+      295 |     test.beforeEach(async ({ page }) => {
+      296 |       // Navigate to WHT section
+    > 297 |       await page.click('aside button:has-text("ภาษีหัก")')
+          |                  ^
+      298 |       await page.waitForTimeout(2000)
+      299 |     })
+      300 |     
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:297:18
+
+    Error Context: test-results/agents-04-tax-modules-Tax--62ff7-nt-loads-with-summary-cards-chromium/error-context.md
+
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:357:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[51/91] [chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns
+⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:357:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K  22) [chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    Error Context: test-results/agents-04-tax-modules-Tax--3a7e0-VAT-and-WHT-works-correctly-chromium/error-context.md
+
+
+[1A[2K[52/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:133:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/05-expansion-modules.spec.ts:133:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K  23) [chromium] › e2e/agents/04-tax-modules.spec.ts:357:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    Error Context: test-results/agents-04-tax-modules-Tax--b818d-ectors-work-in-both-modules-chromium/error-context.md
+
+
+[1A[2K[53/91] [chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/05-expansion-modules.spec.ts:133:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/05-expansion-modules.spec.ts:133:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+🔐 Starting login process...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/05-expansion-modules.spec.ts:133:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K  24) [chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:103:5
+
+    [31mTest timeout of 30000ms exceeded while running "beforeEach" hook.[39m
+
+      293 |   test.describe('WHT Management (จัดการภาษีหัก ณ ที่จ่าย)', () => {
+      294 |     
+    > 295 |     test.beforeEach(async ({ page }) => {
+          |          ^
+      296 |       // Navigate to WHT section
+      297 |       await page.click('aside button:has-text("ภาษีหัก")')
+      298 |       await page.waitForTimeout(2000)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:295:10
+
+    Error: page.click: Test ended.
+    Call log:
+    [2m  - waiting for locator('aside button:has-text("ภาษีหัก")')[22m
+
+
+      295 |     test.beforeEach(async ({ page }) => {
+      296 |       // Navigate to WHT section
+    > 297 |       await page.click('aside button:has-text("ภาษีหัก")')
+          |                  ^
+      298 |       await page.waitForTimeout(2000)
+      299 |     })
+      300 |     
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:297:18
+
+    Error Context: test-results/agents-04-tax-modules-Tax--6ded7-le-displays-correct-columns-chromium/error-context.md
+
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2K[chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[54/91] [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:130:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts)
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+Page body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/05-expansion-modules.spec.ts:133:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/07-ui-db-alignment.spec.ts:130:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts)
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K  25) [chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary 
+
+    Error: Login failed after all retries
+
+       95 |     }
+       96 |   }
+    >  97 |   throw new Error('Login failed after all retries')
+          |         ^
+       98 | }
+       99 |
+      100 | test.describe('Tax Modules (ภาษี)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:97:9)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:384:5
+
+    Error Context: test-results/agents-04-tax-modules-Tax--b73c0-ate-tax-module-test-summary-chromium/error-context.md
+
+
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K[chromium] › e2e/agents/05-expansion-modules.spec.ts:133:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/07-ui-db-alignment.spec.ts:130:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts)
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 1 failed, retrying...
+
+[1A[2K[chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section
+✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K  26) [chromium] › e2e/agents/05-expansion-modules.spec.ts:133:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module 
+
+    Error: Login failed after all retries
+
+       96 |     }
+       97 |   }
+    >  98 |   throw new Error('Login failed after all retries')
+          |         ^
+       99 | }
+      100 |
+      101 | // Helper: Find and click sidebar button
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/05-expansion-modules.spec.ts:98:9)
+        at /Users/tong/Thai-acc/e2e/agents/05-expansion-modules.spec.ts:126:5
+
+    Error Context: test-results/agents-05-expansion-module-d4c05-entory---Navigate-to-module-chromium/error-context.md
+
+
+[1A[2K[55/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:143:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Balance Tab (สต็อกคงเหลือ)
+[1A[2K[56/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:172:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Movements Tab (การเคลื่อนไหว)
+[1A[2K[57/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:207:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Warehouses Tab (คลังสินค้า)
+[1A[2K[58/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:227:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Transfers Tab (โอนสต็อก)
+[1A[2K[59/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:247:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Navigate to module
+[1A[2K[60/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:257:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Bank Accounts Tab (บัญชีธนาคาร)
+[1A[2K[61/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:274:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Cheque Register Tab (สมุดเช็ค)
+[1A[2K[62/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:299:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Reconciliation Tab (กระทบยอด)
+[1A[2K[63/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:319:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Navigate to module
+[1A[2K[64/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:329:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Asset List with Summary Cards
+[1A[2K[65/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:365:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Add Asset Dialog
+[1A[2K[66/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:391:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Navigate to module
+[1A[2K[67/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:401:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Employees Tab (พนักงาน)
+[1A[2K[68/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:437:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Payroll Runs Tab (รอบเงินเดือน)
+[1A[2K[69/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:462:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Create Payroll Run Dialog
+[1A[2K[70/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:499:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Navigate to module
+[1A[2K[71/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:509:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Funds Tab (กองทุน)
+[1A[2K[72/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:529:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Vouchers Tab (ใบสำคัญ)
+[1A[2K[73/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:554:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Create Fund Dialog
+[1A[2K[74/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:580:9 › AGENT_MODULES - Expansion Modules Test Suite › WHT Module (Withholding Tax) › WHT - Navigate to module
+[1A[2K[75/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:590:9 › AGENT_MODULES - Expansion Modules Test Suite › WHT Module (Withholding Tax) › WHT - WHT List Tab
+[1A[2K[76/91] [chromium] › e2e/agents/05-expansion-modules.spec.ts:611:9 › AGENT_MODULES - Expansion Modules Test Suite › Summary - All Expansion Module Buttons › Verify all expansion module buttons are present
+[1A[2K[chromium] › e2e/agents/07-ui-db-alignment.spec.ts:130:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts)
+🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K  27) [chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section 
+
+    Error: Login failed after all retries
+
+      109 |     }
+      110 |   }
+    > 111 |   throw new Error('Login failed after all retries')
+          |         ^
+      112 | }
+      113 |
+      114 | test.describe('AGENT_ADMIN - Administration Modules (ADMIN only)', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/06-admin-modules.spec.ts:111:9)
+        at /Users/tong/Thai-acc/e2e/agents/06-admin-modules.spec.ts:120:5
+
+    Error Context: test-results/agents-06-admin-modules-AG-b6f24----Company-Settings-section-chromium/error-context.md
+
+
+[1A[2K[77/91] [chromium] › e2e/agents/06-admin-modules.spec.ts:230:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-002] Settings module - Document Numbering section
+[1A[2K[78/91] [chromium] › e2e/agents/06-admin-modules.spec.ts:334:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-003] Settings module - Backup section
+[1A[2K[79/91] [chromium] › e2e/agents/06-admin-modules.spec.ts:381:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-004] User Management module - User List
+[1A[2K[80/91] [chromium] › e2e/agents/06-admin-modules.spec.ts:462:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-005] User Management module - Add User Dialog
+[1A[2K[81/91] [chromium] › e2e/agents/06-admin-modules.spec.ts:542:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-006] User Management module - Edit User Dialog
+[1A[2K[82/91] [chromium] › e2e/agents/06-admin-modules.spec.ts:618:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-007] User Management module - Delete User Dialog
+[1A[2K[83/91] [chromium] › e2e/agents/06-admin-modules.spec.ts:676:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-008] User Management module - Role Badge Colors
+[1A[2K[84/91] [chromium] › e2e/agents/06-admin-modules.spec.ts:730:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-009] Settings module - Save Company Info
+[1A[2K[85/91] [chromium] › e2e/agents/06-admin-modules.spec.ts:770:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [SUMMARY] Generate test summary report
+[1A[2K✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 2 failed, retrying...
+
+[1A[2K🔐 Starting login process...
+
+[1A[2K✓ Page loaded, filling credentials...
+
+[1A[2K✓ Credentials filled, submitting...
+
+[1A[2K✓ Login submitted, waiting for page hydration...
+
+[1A[2K✓ Page hydrated, looking for sidebar...
+
+[1A[2K⚠️ Sidebar not found with standard selectors, checking page content...
+
+[1A[2KPage body preview: Thai Accounting ERPโปรแกรมบัญชีมาตรฐานไทยเข้าสู่ระบบกรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบอีเมลหรือรหัสผ่านไม่ถูกต้องอีเมลรหัสผ่านเข้าสู่ระบบ🔧 บัญชีทดสอบ:Admin: admin@thaiaccounting.com / admin123Accountant: accountant@thaiaccounting.com / acc123User: user@thaiaccounting.com / user123© 2024 Thai Accounting ERP. All rights reserved.(self.__next_f=self.__next_f||[]).push([0])self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[1661,[\"/_next/static/chunks/c226a4daa1e620f8.js\",\"/_next/static/ch
+
+[1A[2KLogin attempt 3 failed, retrying...
+
+[1A[2K  28) [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:130:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts) 
+
+    Error: Login failed after all retries
+
+      109 |     }
+      110 |   }
+    > 111 |   throw new Error('Login failed after all retries')
+          |         ^
+      112 | }
+      113 |
+      114 | test.describe('AGENT_VALIDATOR - UI-DB Alignment Verification', () => {
+        at loginWithRetry (/Users/tong/Thai-acc/e2e/agents/07-ui-db-alignment.spec.ts:111:9)
+        at /Users/tong/Thai-acc/e2e/agents/07-ui-db-alignment.spec.ts:120:5
+
+    Error Context: test-results/agents-07-ui-db-alignment--6d28f-nt-matches-DB-181-accounts--chromium/error-context.md
+
+
+[1A[2K[86/91] [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:210:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-002] Users: UI matches DB records
+[1A[2K[87/91] [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:299:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-003] Module APIs return successful responses
+[1A[2K[88/91] [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:388:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-004] All required database tables exist
+[1A[2K[89/91] [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:500:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-005] Chart of Accounts structure verification
+[1A[2K[90/91] [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:611:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-006] UI-API data consistency check
+[1A[2K[91/91] [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:677:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [SUMMARY] Generate alignment verification summary
+[1A[2K  28 failed
+    [chromium] › e2e/agents/01-auth-navigation.spec.ts:189:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-DASHBOARD] Navigate to ภาพรวม 
+    [chromium] › e2e/agents/02-core-financial.spec.ts:149:7 › Core Financial Modules › Dashboard module loads with all components 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:181:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:318:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:408:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:437:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:470:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:510:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:555:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:579:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:620:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:633:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:118:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:134:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:150:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:179:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:206:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:230:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:246:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:269:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:301:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:312:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:338:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:357:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:382:7 › Tax Module Summary Report › generate tax module test summary 
+    [chromium] › e2e/agents/05-expansion-modules.spec.ts:133:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module 
+    [chromium] › e2e/agents/06-admin-modules.spec.ts:130:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section 
+    [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:130:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts) 
+  57 did not run
+  6 passed (3.1m)

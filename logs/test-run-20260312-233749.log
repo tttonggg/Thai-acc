@@ -1,0 +1,2255 @@
+
+Running 276 tests using 4 workers
+
+
+==========================================
+TEST: Login with valid credentials
+==========================================
+
+✓ Navigated to login page
+✓ Login form is visible
+✓ Filled credentials: admin@thaiaccounting.com
+✓ Clicked submit button
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+✓ Login successful
+  Available sidebar buttons:
+    - "Dashboard"
+    - "ผังบัญชี"
+    - "บันทึกบัญชี"
+    - "ใบกำกับภาษี"
+    - "ภาษีมูลค่าเพิ่ม"
+    - "ภาษีหัก ณ ที่จ่าย"
+    - "ลูกหนี้ (AR)"
+    - "เจ้าหนี้ (AP)"
+    - "สต็อกสินค้า"
+    - "ธนาคาร"
+    - "ทรัพย์สินถาวร"
+    - "เงินเดือน"
+    - "เงินสดย่อย"
+    - "รายงาน"
+    - "ตั้งค่า"
+    - "จัดการผู้ใช้"
+  ✘    4 [chromium] › e2e/agents/02-core-financial.spec.ts:77:7 › Core Financial Modules › Dashboard module loads with all components (61ms)
+  -    5 [chromium] › e2e/agents/02-core-financial.spec.ts:132:7 › Core Financial Modules › Chart of Accounts module loads with all buttons
+  -    6 [chromium] › e2e/agents/02-core-financial.spec.ts:217:7 › Core Financial Modules › Journal Entries module loads with all form elements
+  -    7 [chromium] › e2e/agents/02-core-financial.spec.ts:301:7 › Core Financial Modules › Reports module loads with all report options
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+❌ LOGIN TEST FAILED: ExpectError: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+Locator: locator('aside nav').first()
+Expected: visible
+Timeout: 10000ms
+Error: element(s) not found
+
+Call log:
+[2m  - Expect "toBeVisible" with timeout 10000ms[22m
+[2m  - waiting for locator('aside nav').first()[22m
+
+    at [90m/Users/tong/Thai-acc/[39me2e/agents/01-auth-navigation.spec.ts:91:29 {
+  matcherResult: {
+    message: [32m'\x1B[2mexpect(\x1B[22m\x1B[31mlocator\x1B[39m\x1B[2m).\x1B[22mtoBeVisible\x1B[2m(\x1B[22m\x1B[2m)\x1B[22m failed\n'[39m +
+      [32m'\n'[39m +
+      [32m"Locator: locator('aside nav').first()\n"[39m +
+      [32m'Expected: visible\n'[39m +
+      [32m'Timeout: 10000ms\n'[39m +
+      [32m'Error: element(s) not found\n'[39m +
+      [32m'\n'[39m +
+      [32m'Call log:\n'[39m +
+      [32m'\x1B[2m  - Expect "toBeVisible" with timeout 10000ms\x1B[22m\n'[39m +
+      [32m"\x1B[2m  - waiting for locator('aside nav').first()\x1B[22m\n"[39m,
+    pass: [33mfalse[39m,
+    actual: [90mundefined[39m,
+    name: [32m'toBeVisible'[39m,
+    expected: [32m'visible'[39m,
+    log: [
+      [32m'  - Expect "toBeVisible" with timeout 10000ms'[39m,
+      [32m"  - waiting for locator('aside nav').first()"[39m
+    ],
+    timeout: [33m10000[39m
+  },
+  [32mSymbol(step)[39m: {
+    category: [32m'expect'[39m,
+    apiName: [32m'expect.toBeVisible'[39m,
+    title: [32m`Expect "toBeVisible" locator('aside nav').first()`[39m,
+    shortTitle: [32m'Expect "toBeVisible"'[39m,
+    params: { expected: [36m[Object][39m },
+    infectParentStepsWithError: [90mundefined[39m,
+    stepId: [32m'expect@42'[39m,
+    group: [90mundefined[39m,
+    boxedStack: [90mundefined[39m,
+    location: {
+      file: [32m'/Users/tong/Thai-acc/e2e/agents/01-auth-navigation.spec.ts'[39m,
+      line: [33m91[39m,
+      column: [33m29[39m
+    },
+    steps: [],
+    attachmentIndices: [],
+    info: TestStepInfoImpl {
+      annotations: [],
+      _testInfo: [36m[TestInfoImpl][39m,
+      _stepId: [32m'expect@42'[39m,
+      _title: [32m`Expect "toBeVisible" locator('aside nav').first()`[39m,
+      _parentStep: [90mundefined[39m,
+      skip: [36m[Function (anonymous)][39m
+    },
+    complete: [36m[Function: complete][39m,
+    endWallTime: [33m1773333486572[39m,
+    error: {
+      message: [32m'Error: \x1B[2mexpect(\x1B[22m\x1B[31mlocator\x1B[39m\x1B[2m).\x1B[22mtoBeVisible\x1B[2m(\x1B[22m\x1B[2m)\x1B[22m failed\n'[39m +
+        [32m'\n'[39m +
+        [32m"Locator: locator('aside nav').first()\n"[39m +
+        [32m'Expected: visible\n'[39m +
+        [32m'Timeout: 10000ms\n'[39m +
+        [32m'Error: element(s) not found\n'[39m +
+        [32m'\n'[39m +
+        [32m'Call log:\n'[39m +
+        [32m'\x1B[2m  - Expect "toBeVisible" with timeout 10000ms\x1B[22m\n'[39m +
+        [32m"\x1B[2m  - waiting for locator('aside nav').first()\x1B[22m\n"[39m,
+      stack: [32m'Error: \x1B[2mexpect(\x1B[22m\x1B[31mlocator\x1B[39m\x1B[2m).\x1B[22mtoBeVisible\x1B[2m(\x1B[22m\x1B[2m)\x1B[22m failed\n'[39m +
+        [32m'\n'[39m +
+        [32m"Locator: locator('aside nav').first()\n"[39m +
+        [32m'Expected: visible\n'[39m +
+        [32m'Timeout: 10000ms\n'[39m +
+        [32m'Error: element(s) not found\n'[39m +
+        [32m'\n'[39m +
+        [32m'Call log:\n'[39m +
+        [32m'\x1B[2m  - Expect "toBeVisible" with timeout 10000ms\x1B[22m\n'[39m +
+        [32m"\x1B[2m  - waiting for locator('aside nav').first()\x1B[22m\n"[39m +
+        [32m'\n'[39m +
+        [32m'    at /Users/tong/Thai-acc/e2e/agents/01-auth-navigation.spec.ts:91:29'[39m,
+      cause: [90mundefined[39m
+    }
+  }
+}
+  ✘    2 [chromium] › e2e/agents/01-auth-navigation.spec.ts:65:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials (10.9s)
+  -    9 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-DASHBOARD] Navigate to ภาพรวม
+  -   10 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-ACCOUNTS] Navigate to ผังบัญชี
+  -   11 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-JOURNAL] Navigate to บันทึกบัญชี
+  -   12 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-INVOICES] Navigate to ใบกำกับภาษี
+  -   13 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-VAT] Navigate to ภาษีมูลค่าเพิ่ม
+  -   14 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-WHT] Navigate to ภาษีหัก ณ ที่จ่าย
+  -   15 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-CUSTOMERS] Navigate to ลูกหนี้
+  -   16 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-VENDORS] Navigate to เจ้าหนี้
+  -   17 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-INVENTORY] Navigate to สต็อกสินค้า
+  -   18 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-BANKING] Navigate to ธนาคาร
+  -   19 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-ASSETS] Navigate to ทรัพย์สิน
+  -   20 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-PAYROLL] Navigate to เงินเดือน
+  -   21 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-PETTY-CASH] Navigate to เงินสดย่อย
+  -   22 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-REPORTS] Navigate to รายงาน
+  -   23 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-SETTINGS] Navigate to ตั้งค่า
+  -   24 [chromium] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-USERS] Navigate to จัดการผู้ใช้
+  -   25 [chromium] › e2e/agents/01-auth-navigation.spec.ts:213:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-COUNT] Verify total navigation items
+  -   26 [chromium] › e2e/agents/01-auth-navigation.spec.ts:261:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [SUMMARY] Generate test summary report
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+  ✘    1 [chromium] › e2e/agents/03-sales-ar.spec.ts:70:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards) (12.8s)
+  ✘    3 [chromium] › e2e/agents/03-sales-ar.spec.ts:54:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements (12.8s)
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+  ✘    8 [chromium] › e2e/agents/03-sales-ar.spec.ts:98:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section (12.3s)
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+  ✘   27 [chromium] › e2e/agents/03-sales-ar.spec.ts:158:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns (12.3s)
+  ✘   29 [chromium] › e2e/agents/03-sales-ar.spec.ts:195:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row (12.3s)
+  ✘   28 [chromium] › e2e/agents/03-sales-ar.spec.ts:235:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog (12.3s)
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+  ✘   30 [chromium] › e2e/agents/03-sales-ar.spec.ts:293:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page (12.3s)
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+  ✘   31 [chromium] › e2e/agents/03-sales-ar.spec.ts:325:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table (12.4s)
+  ✘   32 [chromium] › e2e/agents/03-sales-ar.spec.ts:354:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button (12.4s)
+  ✘   33 [chromium] › e2e/agents/03-sales-ar.spec.ts:387:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row (12.4s)
+🔴 Console Error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+✅ Login successful
+🔴 Console Error: TypeError: Cannot read properties of undefined (reading 'toLocaleString')
+    at http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129905
+    at Array.map (<anonymous>)
+    at NL (http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129170)
+    at av (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:63230)
+    at oY (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:83503)
+    at io (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:94935)
+    at sc (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137956)
+    at http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137801
+    at ss (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137809)
+    at u9 (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:133734)
+🔴 Console Error: ErrorBoundary caught: TypeError: Cannot read properties of undefined (reading 'toLocaleString')
+    at http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129905
+    at Array.map (<anonymous>)
+    at NL (http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129170)
+    at av (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:63230)
+    at oY (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:83503)
+    at io (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:94935)
+    at sc (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137956)
+    at http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137801
+    at ss (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137809)
+    at u9 (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:133734) {componentStack: 
+    at NL (http://localhost:3000/_next/static/chu…_next/static/chunks/d53d9979c17c2432.js:1:223158)}
+✅ Login successful
+🔴 Console Error: TypeError: Cannot read properties of undefined (reading 'toLocaleString')
+    at http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129905
+    at Array.map (<anonymous>)
+    at NL (http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129170)
+    at av (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:63230)
+    at oY (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:83503)
+    at io (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:94935)
+    at sc (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137956)
+    at http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137801
+    at ss (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137809)
+    at u9 (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:133734)
+🔴 Console Error: ErrorBoundary caught: TypeError: Cannot read properties of undefined (reading 'toLocaleString')
+    at http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129905
+    at Array.map (<anonymous>)
+    at NL (http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129170)
+    at av (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:63230)
+    at oY (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:83503)
+    at io (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:94935)
+    at sc (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137956)
+    at http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137801
+    at ss (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137809)
+    at u9 (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:133734) {componentStack: 
+    at NL (http://localhost:3000/_next/static/chu…_next/static/chunks/d53d9979c17c2432.js:1:223158)}
+Testing AR Aging View...
+  ✘   36 [chromium] › e2e/agents/03-sales-ar.spec.ts:496:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view (2.8s)
+  📸 Screenshot saved: screenshots/sales/customers-list.png
+  ✓   37 [chromium] › e2e/agents/03-sales-ar.spec.ts:537:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page (2.7s)
+  ✘   34 [chromium] › e2e/agents/03-sales-ar.spec.ts:427:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row (12.3s)
+✅ Login successful
+
+=== SALES & AR MODULE BUTTON SUMMARY ===
+
+Checking Invoices module buttons...
+  ✘   40 [chromium] › e2e/agents/04-tax-modules.spec.ts:71:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector (3.4s)
+🔴 Console Error: TypeError: Cannot read properties of undefined (reading 'toLocaleString')
+    at http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129905
+    at Array.map (<anonymous>)
+    at NL (http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129170)
+    at av (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:63230)
+    at oY (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:83503)
+    at io (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:94935)
+    at sc (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137956)
+    at http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137801
+    at ss (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137809)
+    at u9 (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:133734)
+🔴 Console Error: ErrorBoundary caught: TypeError: Cannot read properties of undefined (reading 'toLocaleString')
+    at http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129905
+    at Array.map (<anonymous>)
+    at NL (http://localhost:3000/_next/static/chunks/ee279ff6ddfcabf3.js:5:129170)
+    at av (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:63230)
+    at oY (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:83503)
+    at io (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:94935)
+    at sc (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137956)
+    at http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137801
+    at ss (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:137809)
+    at u9 (http://localhost:3000/_next/static/chunks/d53d9979c17c2432.js:1:133734) {componentStack: 
+    at NL (http://localhost:3000/_next/static/chu…_next/static/chunks/d53d9979c17c2432.js:1:223158)}
+
+📋 SALES & RECEIVABLES MODULE BUTTON SUMMARY
+
+📁 ใบกำกับภาษี (Invoices)
+   ✅ สร้างเอกสารใหม่ (Create New Document)
+   ✅ Search input
+   ✅ Status filter
+   ✅ View button (per row)
+   ❌ Edit button (per row)
+   ✅ Print button (per row)
+   ✅ Download button (per row)
+   ❌ ใบกำกับภาษี (Tax Invoice)
+   ❌ ใบเสร็จรับเงิน (Receipt)
+   ❌ ใบส่งของ (Delivery Note)
+   ❌ ใบลดหนี้ (Credit Note)
+
+📁 ลูกหนี้ (Customers/AR)
+   ❌ เพิ่มลูกค้า (Add Customer)
+   ❌ Search input
+   ❌ Edit button (per row)
+   ❌ Delete button (per row)
+
+📸 Screenshots saved to: screenshots/sales/
+   - invoices-list.png
+   - create-document-dialog.png
+   - customers-list.png
+  ✓   39 [chromium] › e2e/agents/03-sales-ar.spec.ts:550:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons (6.0s)
+  ✘   35 [chromium] › e2e/agents/03-sales-ar.spec.ts:472:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality (12.4s)
+  ✘   41 [chromium] › e2e/agents/04-tax-modules.spec.ts:92:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed (3.4s)
+  ✘   38 [chromium] › e2e/agents/04-tax-modules.spec.ts:49:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards (10.4s)
+  ✘   42 [chromium] › e2e/agents/04-tax-modules.spec.ts:123:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed (3.3s)
+  ✘   43 [chromium] › e2e/agents/04-tax-modules.spec.ts:146:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs (3.4s)
+  ✘   44 [chromium] › e2e/agents/04-tax-modules.spec.ts:176:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters (3.4s)
+  ✘   45 [chromium] › e2e/agents/04-tax-modules.spec.ts:197:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns (3.4s)
+  ✘   46 [chromium] › e2e/agents/04-tax-modules.spec.ts:222:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns (3.4s)
+  ✘   50 [chromium] › e2e/agents/04-tax-modules.spec.ts:295:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly (4.1s)
+  ✘   47 [chromium] › e2e/agents/04-tax-modules.spec.ts:250:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards (4.1s)
+  ✘   49 [chromium] › e2e/agents/04-tax-modules.spec.ts:316:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules (4.1s)
+  ✘   48 [chromium] › e2e/agents/04-tax-modules.spec.ts:267:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns (4.1s)
+
+==========================================
+TEST: Settings - Company Settings
+==========================================
+
+
+==========================================
+TEST: Chart of Accounts Alignment
+==========================================
+
+
+============================================================
+TAX MODULES TEST SUMMARY (สรุปการทดสอบโมดูลภาษี)
+============================================================
+
+📊 VAT Module (ภาษีมูลค่าเพิ่ม)
+----------------------------------------
+Summary Cards:
+  ✅ ภาษีขาย (Output VAT)
+  ✅ ภาษีซื้อ (Input VAT)
+  ✅ ภาษีที่ต้องชำระ
+
+Period Selector:
+  ✅ Month Selector
+  ✅ Year Selector
+  ✅ Print Button
+  ✅ Export PP30 Button
+
+Tables:
+  ✅ VAT Output (Sales) Table
+  ✅ VAT Input (Purchase) Table
+
+Table Columns:
+  ✅ วันที่ (Date)
+  ✅ เลขที่เอกสาร (Document No)
+  ✅ คู่ค้า (Partner)
+  ✅ มูลค่าสินค้า/บริการ (Amount)
+  ✅ ภาษีมูลค่าเพิ่ม (VAT Amount)
+
+Chart:
+  ✅ กราฟเปรียบเทียบภาษีขาย-ภาษีซื้อ
+
+
+📊 WHT Module (ภาษีหัก ณ ที่จ่าย)
+----------------------------------------
+Tabs:
+  ✅ PND53 (ภงด.53) - ค่าบริการ/ค่าเช่า
+  ✅ PND3 (ภงด.3) - เงินเดือน/ค่าจ้าง
+
+Summary Cards:
+  ✅ ภงด.3 (เงินเดือน/ค่าจ้าง)
+  ✅ ภงด.53 (ค่าบริการ/ค่าเช่า)
+  ✅ รวมภาษีที่ต้องยื่น
+
+Period Selector:
+  ✅ Month Selector
+  ✅ Year Selector
+  ✅ Print Button
+  ✅ Export Button
+
+PND53 Table Columns:
+  ✅ วันที่ (Date)
+  ✅ เลขที่หนังสือรับรอง (WHT Certificate No)
+  ✅ ผู้ถูกหักภาษี (Payee)
+  ✅ ประเภทเงินได้ (Income Type)
+  ✅ จำนวนเงินที่จ่าย (Payment Amount)
+  ✅ อัตราภาษี (Tax Rate)
+  ✅ ภาษีที่หัก (WHT Amount)
+
+PND3 Table Columns:
+  ✅ วันที่ (Date)
+  ✅ เลขที่หนังสือรับรอง (WHT Certificate No)
+  ✅ พนักงาน (Employee)
+  ✅ เงินได้ (Income)
+  ✅ อัตราภาษี (Tax Rate)
+  ✅ ภาษีที่หัก (WHT Amount)
+
+============================================================
+All Tax Module tests completed successfully!
+============================================================
+  ✓   51 [chromium] › e2e/agents/04-tax-modules.spec.ts:343:7 › Tax Module Summary Report › generate tax module test summary (4.1s)
+  ✘   55 [firefox] › e2e/agents/01-auth-navigation.spec.ts:65:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials (1ms)
+  -   56 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-DASHBOARD] Navigate to ภาพรวม
+  -   57 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-ACCOUNTS] Navigate to ผังบัญชี
+  -   58 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-JOURNAL] Navigate to บันทึกบัญชี
+  -   59 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-INVOICES] Navigate to ใบกำกับภาษี
+  -   60 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-VAT] Navigate to ภาษีมูลค่าเพิ่ม
+  -   61 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-WHT] Navigate to ภาษีหัก ณ ที่จ่าย
+  -   62 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-CUSTOMERS] Navigate to ลูกหนี้
+  -   63 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-VENDORS] Navigate to เจ้าหนี้
+  -   64 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-INVENTORY] Navigate to สต็อกสินค้า
+  -   65 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-BANKING] Navigate to ธนาคาร
+  -   66 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-ASSETS] Navigate to ทรัพย์สิน
+  -   67 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-PAYROLL] Navigate to เงินเดือน
+  -   68 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-PETTY-CASH] Navigate to เงินสดย่อย
+  -   69 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-REPORTS] Navigate to รายงาน
+  -   70 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-SETTINGS] Navigate to ตั้งค่า
+  -   71 [firefox] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-USERS] Navigate to จัดการผู้ใช้
+  -   72 [firefox] › e2e/agents/01-auth-navigation.spec.ts:213:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-COUNT] Verify total navigation items
+  -   73 [firefox] › e2e/agents/01-auth-navigation.spec.ts:261:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [SUMMARY] Generate test summary report
+  ✘   74 [firefox] › e2e/agents/02-core-financial.spec.ts:77:7 › Core Financial Modules › Dashboard module loads with all components (0ms)
+  -   75 [firefox] › e2e/agents/02-core-financial.spec.ts:132:7 › Core Financial Modules › Chart of Accounts module loads with all buttons
+  -   76 [firefox] › e2e/agents/02-core-financial.spec.ts:217:7 › Core Financial Modules › Journal Entries module loads with all form elements
+  -   77 [firefox] › e2e/agents/02-core-financial.spec.ts:301:7 › Core Financial Modules › Reports module loads with all report options
+  ✘   78 [firefox] › e2e/agents/03-sales-ar.spec.ts:54:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements (1ms)
+  ✘   79 [firefox] › e2e/agents/03-sales-ar.spec.ts:70:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards) (1ms)
+  ✘   80 [firefox] › e2e/agents/03-sales-ar.spec.ts:98:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section (1ms)
+  ✘   81 [firefox] › e2e/agents/03-sales-ar.spec.ts:158:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns (1ms)
+  ✘   82 [firefox] › e2e/agents/03-sales-ar.spec.ts:195:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row (1ms)
+  ✘   83 [firefox] › e2e/agents/03-sales-ar.spec.ts:235:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog (1ms)
+  ✘   84 [firefox] › e2e/agents/03-sales-ar.spec.ts:293:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page (1ms)
+  ✘   85 [firefox] › e2e/agents/03-sales-ar.spec.ts:325:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table (1ms)
+  ✘   86 [firefox] › e2e/agents/03-sales-ar.spec.ts:354:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button (1ms)
+  ✘   87 [firefox] › e2e/agents/03-sales-ar.spec.ts:387:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row (1ms)
+  ✘   88 [firefox] › e2e/agents/03-sales-ar.spec.ts:427:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row (1ms)
+  ✘   89 [firefox] › e2e/agents/03-sales-ar.spec.ts:472:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality (1ms)
+
+❌ COMPANY SETTINGS TEST FAILED: ExpectError: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+Locator: locator('aside nav').first()
+Expected: visible
+Timeout: 10000ms
+Error: element(s) not found
+
+Call log:
+[2m  - Expect "toBeVisible" with timeout 10000ms[22m
+[2m  - waiting for locator('aside nav').first()[22m
+
+    at loginAsAdmin [90m(/Users/tong/Thai-acc/[39me2e/agents/06-admin-modules.spec.ts:52:27[90m)[39m
+    at [90m/Users/tong/Thai-acc/[39me2e/agents/06-admin-modules.spec.ts:69:7 {
+  matcherResult: {
+    message: [32m'\x1B[2mexpect(\x1B[22m\x1B[31mlocator\x1B[39m\x1B[2m).\x1B[22mtoBeVisible\x1B[2m(\x1B[22m\x1B[2m)\x1B[22m failed\n'[39m +
+      [32m'\n'[39m +
+      [32m"Locator: locator('aside nav').first()\n"[39m +
+      [32m'Expected: visible\n'[39m +
+      [32m'Timeout: 10000ms\n'[39m +
+      [32m'Error: element(s) not found\n'[39m +
+      [32m'\n'[39m +
+      [32m'Call log:\n'[39m +
+      [32m'\x1B[2m  - Expect "toBeVisible" with timeout 10000ms\x1B[22m\n'[39m +
+      [32m"\x1B[2m  - waiting for locator('aside nav').first()\x1B[22m\n"[39m,
+    pass: [33mfalse[39m,
+    actual: [90mundefined[39m,
+    name: [32m'toBeVisible'[39m,
+    expected: [32m'visible'[39m,
+    log: [
+      [32m'  - Expect "toBeVisible" with timeout 10000ms'[39m,
+      [32m"  - waiting for locator('aside nav').first()"[39m
+    ],
+    timeout: [33m10000[39m
+  },
+  [32mSymbol(step)[39m: {
+    category: [32m'expect'[39m,
+    apiName: [32m'expect.toBeVisible'[39m,
+    title: [32m`Expect "toBeVisible" locator('aside nav').first()`[39m,
+    shortTitle: [32m'Expect "toBeVisible"'[39m,
+    params: { expected: [36m[Object][39m },
+    infectParentStepsWithError: [90mundefined[39m,
+    stepId: [32m'expect@42'[39m,
+    group: [90mundefined[39m,
+    boxedStack: [90mundefined[39m,
+    location: {
+      file: [32m'/Users/tong/Thai-acc/e2e/agents/06-admin-modules.spec.ts'[39m,
+      line: [33m52[39m,
+      column: [33m27[39m,
+      function: [32m'loginAsAdmin'[39m
+    },
+    steps: [],
+    attachmentIndices: [],
+    info: TestStepInfoImpl {
+      annotations: [],
+      _testInfo: [36m[TestInfoImpl][39m,
+      _stepId: [32m'expect@42'[39m,
+      _title: [32m`Expect "toBeVisible" locator('aside nav').first()`[39m,
+      _parentStep: [90mundefined[39m,
+      skip: [36m[Function (anonymous)][39m
+    },
+    complete: [36m[Function: complete][39m,
+    endWallTime: [33m1773333555735[39m,
+    error: {
+      message: [32m'Error: \x1B[2mexpect(\x1B[22m\x1B[31mlocator\x1B[39m\x1B[2m).\x1B[22mtoBeVisible\x1B[2m(\x1B[22m\x1B[2m)\x1B[22m failed\n'[39m +
+        [32m'\n'[39m +
+        [32m"Locator: locator('aside nav').first()\n"[39m +
+        [32m'Expected: visible\n'[39m +
+        [32m'Timeout: 10000ms\n'[39m +
+        [32m'Error: element(s) not found\n'[39m +
+        [32m'\n'[39m +
+        [32m'Call log:\n'[39m +
+        [32m'\x1B[2m  - Expect "toBeVisible" with timeout 10000ms\x1B[22m\n'[39m +
+        [32m"\x1B[2m  - waiting for locator('aside nav').first()\x1B[22m\n"[39m,
+      stack: [32m'Error: \x1B[2mexpect(\x1B[22m\x1B[31mlocator\x1B[39m\x1B[2m).\x1B[22mtoBeVisible\x1B[2m(\x1B[22m\x1B[2m)\x1B[22m failed\n'[39m +
+        [32m'\n'[39m +
+        [32m"Locator: locator('aside nav').first()\n"[39m +
+        [32m'Expected: visible\n'[39m +
+        [32m'Timeout: 10000ms\n'[39m +
+        [32m'Error: element(s) not found\n'[39m +
+        [32m'\n'[39m +
+        [32m'Call log:\n'[39m +
+        [32m'\x1B[2m  - Expect "toBeVisible" with timeout 10000ms\x1B[22m\n'[39m +
+        [32m"\x1B[2m  - waiting for locator('aside nav').first()\x1B[22m\n"[39m +
+        [32m'\n'[39m +
+        [32m'    at loginAsAdmin (/Users/tong/Thai-acc/e2e/agents/06-admin-modules.spec.ts:52:27)\n'[39m +
+        [32m'    at /Users/tong/Thai-acc/e2e/agents/06-admin-modules.spec.ts:69:7'[39m,
+      cause: [90mundefined[39m
+    }
+  }
+}
+
+❌ CHART OF ACCOUNTS ALIGNMENT TEST FAILED: ExpectError: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+Locator: locator('aside nav').first()
+Expected: visible
+Timeout: 10000ms
+Error: element(s) not found
+
+Call log:
+[2m  - Expect "toBeVisible" with timeout 10000ms[22m
+[2m  - waiting for locator('aside nav').first()[22m
+
+    at loginAsAdmin [90m(/Users/tong/Thai-acc/[39me2e/agents/07-ui-db-alignment.spec.ts:52:27[90m)[39m
+    at [90m/Users/tong/Thai-acc/[39me2e/agents/07-ui-db-alignment.spec.ts:69:7 {
+  matcherResult: {
+    message: [32m'\x1B[2mexpect(\x1B[22m\x1B[31mlocator\x1B[39m\x1B[2m).\x1B[22mtoBeVisible\x1B[2m(\x1B[22m\x1B[2m)\x1B[22m failed\n'[39m +
+      [32m'\n'[39m +
+      [32m"Locator: locator('aside nav').first()\n"[39m +
+      [32m'Expected: visible\n'[39m +
+      [32m'Timeout: 10000ms\n'[39m +
+      [32m'Error: element(s) not found\n'[39m +
+      [32m'\n'[39m +
+      [32m'Call log:\n'[39m +
+      [32m'\x1B[2m  - Expect "toBeVisible" with timeout 10000ms\x1B[22m\n'[39m +
+      [32m"\x1B[2m  - waiting for locator('aside nav').first()\x1B[22m\n"[39m,
+    pass: [33mfalse[39m,
+    actual: [90mundefined[39m,
+    name: [32m'toBeVisible'[39m,
+    expected: [32m'visible'[39m,
+    log: [
+      [32m'  - Expect "toBeVisible" with timeout 10000ms'[39m,
+      [32m"  - waiting for locator('aside nav').first()"[39m
+    ],
+    timeout: [33m10000[39m
+  },
+  [32mSymbol(step)[39m: {
+    category: [32m'expect'[39m,
+    apiName: [32m'expect.toBeVisible'[39m,
+    title: [32m`Expect "toBeVisible" locator('aside nav').first()`[39m,
+    shortTitle: [32m'Expect "toBeVisible"'[39m,
+    params: { expected: [36m[Object][39m },
+    infectParentStepsWithError: [90mundefined[39m,
+    stepId: [32m'expect@44'[39m,
+    group: [90mundefined[39m,
+    boxedStack: [90mundefined[39m,
+    location: {
+      file: [32m'/Users/tong/Thai-acc/e2e/agents/07-ui-db-alignment.spec.ts'[39m,
+      line: [33m52[39m,
+      column: [33m27[39m,
+      function: [32m'loginAsAdmin'[39m
+    },
+    steps: [],
+    attachmentIndices: [],
+    info: TestStepInfoImpl {
+      annotations: [],
+      _testInfo: [36m[TestInfoImpl][39m,
+      _stepId: [32m'expect@44'[39m,
+      _title: [32m`Expect "toBeVisible" locator('aside nav').first()`[39m,
+      _parentStep: [90mundefined[39m,
+      skip: [36m[Function (anonymous)][39m
+    },
+    complete: [36m[Function: complete][39m,
+    endWallTime: [33m1773333555735[39m,
+    error: {
+      message: [32m'Error: \x1B[2mexpect(\x1B[22m\x1B[31mlocator\x1B[39m\x1B[2m).\x1B[22mtoBeVisible\x1B[2m(\x1B[22m\x1B[2m)\x1B[22m failed\n'[39m +
+        [32m'\n'[39m +
+        [32m"Locator: locator('aside nav').first()\n"[39m +
+        [32m'Expected: visible\n'[39m +
+        [32m'Timeout: 10000ms\n'[39m +
+        [32m'Error: element(s) not found\n'[39m +
+        [32m'\n'[39m +
+        [32m'Call log:\n'[39m +
+        [32m'\x1B[2m  - Expect "toBeVisible" with timeout 10000ms\x1B[22m\n'[39m +
+        [32m"\x1B[2m  - waiting for locator('aside nav').first()\x1B[22m\n"[39m,
+      stack: [32m'Error: \x1B[2mexpect(\x1B[22m\x1B[31mlocator\x1B[39m\x1B[2m).\x1B[22mtoBeVisible\x1B[2m(\x1B[22m\x1B[2m)\x1B[22m failed\n'[39m +
+        [32m'\n'[39m +
+        [32m"Locator: locator('aside nav').first()\n"[39m +
+        [32m'Expected: visible\n'[39m +
+        [32m'Timeout: 10000ms\n'[39m +
+        [32m'Error: element(s) not found\n'[39m +
+        [32m'\n'[39m +
+        [32m'Call log:\n'[39m +
+        [32m'\x1B[2m  - Expect "toBeVisible" with timeout 10000ms\x1B[22m\n'[39m +
+        [32m"\x1B[2m  - waiting for locator('aside nav').first()\x1B[22m\n"[39m +
+        [32m'\n'[39m +
+        [32m'    at loginAsAdmin (/Users/tong/Thai-acc/e2e/agents/07-ui-db-alignment.spec.ts:52:27)\n'[39m +
+        [32m'    at /Users/tong/Thai-acc/e2e/agents/07-ui-db-alignment.spec.ts:69:7'[39m,
+      cause: [90mundefined[39m
+    }
+  }
+}
+  ✘   54 [chromium] › e2e/agents/06-admin-modules.spec.ts:62:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section (13.3s)
+  -   90 [chromium] › e2e/agents/06-admin-modules.spec.ts:164:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-002] Settings module - Document Numbering section
+  -   91 [chromium] › e2e/agents/06-admin-modules.spec.ts:270:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-003] Settings module - Backup section
+  -   92 [chromium] › e2e/agents/06-admin-modules.spec.ts:319:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-004] User Management module - User List
+  -   93 [chromium] › e2e/agents/06-admin-modules.spec.ts:402:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-005] User Management module - Add User Dialog
+  -   94 [chromium] › e2e/agents/06-admin-modules.spec.ts:484:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-006] User Management module - Edit User Dialog
+  -   95 [chromium] › e2e/agents/06-admin-modules.spec.ts:562:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-007] User Management module - Delete User Dialog
+  -   96 [chromium] › e2e/agents/06-admin-modules.spec.ts:622:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-008] User Management module - Role Badge Colors
+  -   97 [chromium] › e2e/agents/06-admin-modules.spec.ts:678:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-009] Settings module - Save Company Info
+  -   98 [chromium] › e2e/agents/06-admin-modules.spec.ts:720:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [SUMMARY] Generate test summary report
+  ✘   52 [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:62:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts) (13.3s)
+  -   99 [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:144:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-002] Users: UI matches DB records
+  -  100 [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:235:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-003] Module APIs return successful responses
+  -  101 [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:326:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-004] All required database tables exist
+  -  102 [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:440:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-005] Chart of Accounts structure verification
+  -  103 [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:553:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-006] UI-API data consistency check
+  -  104 [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:621:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [SUMMARY] Generate alignment verification summary
+  ✘  105 [firefox] › e2e/agents/03-sales-ar.spec.ts:496:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view (1ms)
+  ✘  106 [firefox] › e2e/agents/03-sales-ar.spec.ts:550:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons (1ms)
+  ✘  107 [firefox] › e2e/agents/03-sales-ar.spec.ts:537:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page (1ms)
+  ✘  108 [firefox] › e2e/agents/04-tax-modules.spec.ts:49:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards (1ms)
+  ✘  110 [firefox] › e2e/agents/04-tax-modules.spec.ts:92:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed (1ms)
+  ✘  109 [firefox] › e2e/agents/04-tax-modules.spec.ts:71:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector (1ms)
+  ✘  111 [firefox] › e2e/agents/04-tax-modules.spec.ts:123:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed (1ms)
+  ✘  112 [firefox] › e2e/agents/04-tax-modules.spec.ts:176:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters (1ms)
+  ✘  113 [firefox] › e2e/agents/04-tax-modules.spec.ts:146:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs (1ms)
+  ✘  114 [firefox] › e2e/agents/04-tax-modules.spec.ts:197:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns (1ms)
+  ✘  115 [firefox] › e2e/agents/04-tax-modules.spec.ts:250:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards (1ms)
+  ✘  116 [firefox] › e2e/agents/04-tax-modules.spec.ts:222:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns (1ms)
+  ✘   53 [chromium] › e2e/agents/05-expansion-modules.spec.ts:71:7 › AGENT_MODULES - Expansion Modules Test Suite › [LOGIN] Login as admin (16.0s)
+  -  117 [chromium] › e2e/agents/05-expansion-modules.spec.ts:80:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module
+  -  118 [chromium] › e2e/agents/05-expansion-modules.spec.ts:91:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Balance Tab (สต็อกคงเหลือ)
+  -  119 [chromium] › e2e/agents/05-expansion-modules.spec.ts:121:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Movements Tab (การเคลื่อนไหว)
+  -  120 [chromium] › e2e/agents/05-expansion-modules.spec.ts:157:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Warehouses Tab (คลังสินค้า)
+  -  121 [chromium] › e2e/agents/05-expansion-modules.spec.ts:178:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Transfers Tab (โอนสต็อก)
+  -  122 [chromium] › e2e/agents/05-expansion-modules.spec.ts:199:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Navigate to module
+  -  123 [chromium] › e2e/agents/05-expansion-modules.spec.ts:210:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Bank Accounts Tab (บัญชีธนาคาร)
+  -  124 [chromium] › e2e/agents/05-expansion-modules.spec.ts:228:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Cheque Register Tab (สมุดเช็ค)
+  -  125 [chromium] › e2e/agents/05-expansion-modules.spec.ts:254:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Reconciliation Tab (กระทบยอด)
+  -  126 [chromium] › e2e/agents/05-expansion-modules.spec.ts:275:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Navigate to module
+  -  127 [chromium] › e2e/agents/05-expansion-modules.spec.ts:286:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Asset List with Summary Cards
+  -  128 [chromium] › e2e/agents/05-expansion-modules.spec.ts:323:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Add Asset Dialog
+  -  129 [chromium] › e2e/agents/05-expansion-modules.spec.ts:350:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Navigate to module
+  -  130 [chromium] › e2e/agents/05-expansion-modules.spec.ts:361:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Employees Tab (พนักงาน)
+  -  131 [chromium] › e2e/agents/05-expansion-modules.spec.ts:398:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Payroll Runs Tab (รอบเงินเดือน)
+  -  132 [chromium] › e2e/agents/05-expansion-modules.spec.ts:424:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Create Payroll Run Dialog
+  -  133 [chromium] › e2e/agents/05-expansion-modules.spec.ts:462:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Navigate to module
+  -  134 [chromium] › e2e/agents/05-expansion-modules.spec.ts:473:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Funds Tab (กองทุน)
+  -  135 [chromium] › e2e/agents/05-expansion-modules.spec.ts:494:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Vouchers Tab (ใบสำคัญ)
+  -  136 [chromium] › e2e/agents/05-expansion-modules.spec.ts:520:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Create Fund Dialog
+  -  137 [chromium] › e2e/agents/05-expansion-modules.spec.ts:547:9 › AGENT_MODULES - Expansion Modules Test Suite › WHT Module (Withholding Tax) › WHT - Navigate to module
+  -  138 [chromium] › e2e/agents/05-expansion-modules.spec.ts:558:9 › AGENT_MODULES - Expansion Modules Test Suite › WHT Module (Withholding Tax) › WHT - WHT List Tab
+  -  139 [chromium] › e2e/agents/05-expansion-modules.spec.ts:580:9 › AGENT_MODULES - Expansion Modules Test Suite › Summary - All Expansion Module Buttons › Verify all expansion module buttons are present
+  ✘  140 [firefox] › e2e/agents/04-tax-modules.spec.ts:267:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns (1ms)
+  ✘  142 [firefox] › e2e/agents/04-tax-modules.spec.ts:295:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly (1ms)
+  ✘  143 [firefox] › e2e/agents/04-tax-modules.spec.ts:343:7 › Tax Module Summary Report › generate tax module test summary (1ms)
+  ✘  141 [firefox] › e2e/agents/04-tax-modules.spec.ts:316:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules (1ms)
+  ✘  144 [firefox] › e2e/agents/05-expansion-modules.spec.ts:71:7 › AGENT_MODULES - Expansion Modules Test Suite › [LOGIN] Login as admin (1ms)
+  -  145 [firefox] › e2e/agents/05-expansion-modules.spec.ts:80:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module
+  -  146 [firefox] › e2e/agents/05-expansion-modules.spec.ts:91:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Balance Tab (สต็อกคงเหลือ)
+  -  147 [firefox] › e2e/agents/05-expansion-modules.spec.ts:121:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Movements Tab (การเคลื่อนไหว)
+  -  148 [firefox] › e2e/agents/05-expansion-modules.spec.ts:157:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Warehouses Tab (คลังสินค้า)
+  -  149 [firefox] › e2e/agents/05-expansion-modules.spec.ts:178:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Transfers Tab (โอนสต็อก)
+  -  150 [firefox] › e2e/agents/05-expansion-modules.spec.ts:199:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Navigate to module
+  -  151 [firefox] › e2e/agents/05-expansion-modules.spec.ts:210:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Bank Accounts Tab (บัญชีธนาคาร)
+  -  152 [firefox] › e2e/agents/05-expansion-modules.spec.ts:228:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Cheque Register Tab (สมุดเช็ค)
+  -  153 [firefox] › e2e/agents/05-expansion-modules.spec.ts:254:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Reconciliation Tab (กระทบยอด)
+  -  154 [firefox] › e2e/agents/05-expansion-modules.spec.ts:275:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Navigate to module
+  -  155 [firefox] › e2e/agents/05-expansion-modules.spec.ts:286:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Asset List with Summary Cards
+  -  156 [firefox] › e2e/agents/05-expansion-modules.spec.ts:323:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Add Asset Dialog
+  -  157 [firefox] › e2e/agents/05-expansion-modules.spec.ts:350:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Navigate to module
+  -  158 [firefox] › e2e/agents/05-expansion-modules.spec.ts:361:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Employees Tab (พนักงาน)
+  -  159 [firefox] › e2e/agents/05-expansion-modules.spec.ts:398:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Payroll Runs Tab (รอบเงินเดือน)
+  -  160 [firefox] › e2e/agents/05-expansion-modules.spec.ts:424:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Create Payroll Run Dialog
+  -  161 [firefox] › e2e/agents/05-expansion-modules.spec.ts:462:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Navigate to module
+  -  162 [firefox] › e2e/agents/05-expansion-modules.spec.ts:473:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Funds Tab (กองทุน)
+  -  163 [firefox] › e2e/agents/05-expansion-modules.spec.ts:494:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Vouchers Tab (ใบสำคัญ)
+  -  164 [firefox] › e2e/agents/05-expansion-modules.spec.ts:520:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Create Fund Dialog
+  -  165 [firefox] › e2e/agents/05-expansion-modules.spec.ts:547:9 › AGENT_MODULES - Expansion Modules Test Suite › WHT Module (Withholding Tax) › WHT - Navigate to module
+  -  166 [firefox] › e2e/agents/05-expansion-modules.spec.ts:558:9 › AGENT_MODULES - Expansion Modules Test Suite › WHT Module (Withholding Tax) › WHT - WHT List Tab
+  -  167 [firefox] › e2e/agents/05-expansion-modules.spec.ts:580:9 › AGENT_MODULES - Expansion Modules Test Suite › Summary - All Expansion Module Buttons › Verify all expansion module buttons are present
+  ✘  168 [firefox] › e2e/agents/07-ui-db-alignment.spec.ts:62:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts) (1ms)
+  -  171 [firefox] › e2e/agents/07-ui-db-alignment.spec.ts:144:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-002] Users: UI matches DB records
+  -  172 [firefox] › e2e/agents/07-ui-db-alignment.spec.ts:235:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-003] Module APIs return successful responses
+  -  173 [firefox] › e2e/agents/07-ui-db-alignment.spec.ts:326:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-004] All required database tables exist
+  -  174 [firefox] › e2e/agents/07-ui-db-alignment.spec.ts:440:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-005] Chart of Accounts structure verification
+  -  175 [firefox] › e2e/agents/07-ui-db-alignment.spec.ts:553:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-006] UI-API data consistency check
+  -  176 [firefox] › e2e/agents/07-ui-db-alignment.spec.ts:621:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [SUMMARY] Generate alignment verification summary
+  ✘  169 [webkit] › e2e/agents/01-auth-navigation.spec.ts:65:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials (1ms)
+  -  177 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-DASHBOARD] Navigate to ภาพรวม
+  -  178 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-ACCOUNTS] Navigate to ผังบัญชี
+  -  179 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-JOURNAL] Navigate to บันทึกบัญชี
+  -  180 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-INVOICES] Navigate to ใบกำกับภาษี
+  -  181 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-VAT] Navigate to ภาษีมูลค่าเพิ่ม
+  -  182 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-WHT] Navigate to ภาษีหัก ณ ที่จ่าย
+  -  183 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-CUSTOMERS] Navigate to ลูกหนี้
+  -  184 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-VENDORS] Navigate to เจ้าหนี้
+  -  185 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-INVENTORY] Navigate to สต็อกสินค้า
+  -  186 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-BANKING] Navigate to ธนาคาร
+  -  187 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-ASSETS] Navigate to ทรัพย์สิน
+  -  188 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-PAYROLL] Navigate to เงินเดือน
+  -  189 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-PETTY-CASH] Navigate to เงินสดย่อย
+  -  190 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-REPORTS] Navigate to รายงาน
+  -  191 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-SETTINGS] Navigate to ตั้งค่า
+  -  192 [webkit] › e2e/agents/01-auth-navigation.spec.ts:120:9 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-USERS] Navigate to จัดการผู้ใช้
+  -  193 [webkit] › e2e/agents/01-auth-navigation.spec.ts:213:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [NAV-COUNT] Verify total navigation items
+  -  194 [webkit] › e2e/agents/01-auth-navigation.spec.ts:261:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [SUMMARY] Generate test summary report
+  ✘  170 [firefox] › e2e/agents/06-admin-modules.spec.ts:62:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section (1ms)
+  -  195 [firefox] › e2e/agents/06-admin-modules.spec.ts:164:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-002] Settings module - Document Numbering section
+  -  196 [firefox] › e2e/agents/06-admin-modules.spec.ts:270:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-003] Settings module - Backup section
+  -  197 [firefox] › e2e/agents/06-admin-modules.spec.ts:319:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-004] User Management module - User List
+  -  198 [firefox] › e2e/agents/06-admin-modules.spec.ts:402:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-005] User Management module - Add User Dialog
+  -  199 [firefox] › e2e/agents/06-admin-modules.spec.ts:484:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-006] User Management module - Edit User Dialog
+  -  200 [firefox] › e2e/agents/06-admin-modules.spec.ts:562:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-007] User Management module - Delete User Dialog
+  -  201 [firefox] › e2e/agents/06-admin-modules.spec.ts:622:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-008] User Management module - Role Badge Colors
+  -  202 [firefox] › e2e/agents/06-admin-modules.spec.ts:678:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-009] Settings module - Save Company Info
+  -  203 [firefox] › e2e/agents/06-admin-modules.spec.ts:720:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [SUMMARY] Generate test summary report
+  ✘  204 [webkit] › e2e/agents/02-core-financial.spec.ts:77:7 › Core Financial Modules › Dashboard module loads with all components (0ms)
+  -  205 [webkit] › e2e/agents/02-core-financial.spec.ts:132:7 › Core Financial Modules › Chart of Accounts module loads with all buttons
+  -  206 [webkit] › e2e/agents/02-core-financial.spec.ts:217:7 › Core Financial Modules › Journal Entries module loads with all form elements
+  -  207 [webkit] › e2e/agents/02-core-financial.spec.ts:301:7 › Core Financial Modules › Reports module loads with all report options
+  ✘  208 [webkit] › e2e/agents/03-sales-ar.spec.ts:70:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards) (1ms)
+  ✘  209 [webkit] › e2e/agents/03-sales-ar.spec.ts:54:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements (1ms)
+  ✘  210 [webkit] › e2e/agents/03-sales-ar.spec.ts:98:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section (1ms)
+  ✘  211 [webkit] › e2e/agents/03-sales-ar.spec.ts:158:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns (1ms)
+  ✘  212 [webkit] › e2e/agents/03-sales-ar.spec.ts:195:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row (1ms)
+  ✘  213 [webkit] › e2e/agents/03-sales-ar.spec.ts:235:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog (1ms)
+  ✘  214 [webkit] › e2e/agents/03-sales-ar.spec.ts:293:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page (1ms)
+  ✘  215 [webkit] › e2e/agents/03-sales-ar.spec.ts:325:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table (1ms)
+  ✘  216 [webkit] › e2e/agents/03-sales-ar.spec.ts:387:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row (1ms)
+  ✘  217 [webkit] › e2e/agents/03-sales-ar.spec.ts:354:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button (1ms)
+  ✘  218 [webkit] › e2e/agents/03-sales-ar.spec.ts:427:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row (1ms)
+  ✘  219 [webkit] › e2e/agents/03-sales-ar.spec.ts:472:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality (1ms)
+  ✘  220 [webkit] › e2e/agents/03-sales-ar.spec.ts:496:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view (1ms)
+  ✘  221 [webkit] › e2e/agents/03-sales-ar.spec.ts:537:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page (1ms)
+  ✘  222 [webkit] › e2e/agents/03-sales-ar.spec.ts:550:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons (1ms)
+  ✘  223 [webkit] › e2e/agents/04-tax-modules.spec.ts:49:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards (1ms)
+  ✘  225 [webkit] › e2e/agents/04-tax-modules.spec.ts:71:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector (1ms)
+  ✘  224 [webkit] › e2e/agents/04-tax-modules.spec.ts:92:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed (3ms)
+  ✘  226 [webkit] › e2e/agents/04-tax-modules.spec.ts:123:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed (1ms)
+  ✘  227 [webkit] › e2e/agents/04-tax-modules.spec.ts:146:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs (1ms)
+  ✘  229 [webkit] › e2e/agents/04-tax-modules.spec.ts:222:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns (1ms)
+  ✘  228 [webkit] › e2e/agents/04-tax-modules.spec.ts:176:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters (1ms)
+  ✘  230 [webkit] › e2e/agents/04-tax-modules.spec.ts:197:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns (1ms)
+  ✘  231 [webkit] › e2e/agents/04-tax-modules.spec.ts:250:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards (1ms)
+  ✘  232 [webkit] › e2e/agents/04-tax-modules.spec.ts:267:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns (2ms)
+  ✘  233 [webkit] › e2e/agents/04-tax-modules.spec.ts:295:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly (1ms)
+  ✘  234 [webkit] › e2e/agents/04-tax-modules.spec.ts:316:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules (1ms)
+  ✘  235 [webkit] › e2e/agents/04-tax-modules.spec.ts:343:7 › Tax Module Summary Report › generate tax module test summary (1ms)
+  ✘  236 [webkit] › e2e/agents/07-ui-db-alignment.spec.ts:62:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts) (1ms)
+  -  239 [webkit] › e2e/agents/07-ui-db-alignment.spec.ts:144:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-002] Users: UI matches DB records
+  -  240 [webkit] › e2e/agents/07-ui-db-alignment.spec.ts:235:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-003] Module APIs return successful responses
+  -  241 [webkit] › e2e/agents/07-ui-db-alignment.spec.ts:326:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-004] All required database tables exist
+  -  242 [webkit] › e2e/agents/07-ui-db-alignment.spec.ts:440:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-005] Chart of Accounts structure verification
+  -  243 [webkit] › e2e/agents/07-ui-db-alignment.spec.ts:553:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-006] UI-API data consistency check
+  -  244 [webkit] › e2e/agents/07-ui-db-alignment.spec.ts:621:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [SUMMARY] Generate alignment verification summary
+  ✘  237 [webkit] › e2e/agents/06-admin-modules.spec.ts:62:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section (1ms)
+  -  245 [webkit] › e2e/agents/06-admin-modules.spec.ts:164:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-002] Settings module - Document Numbering section
+  -  246 [webkit] › e2e/agents/06-admin-modules.spec.ts:270:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-003] Settings module - Backup section
+  -  247 [webkit] › e2e/agents/06-admin-modules.spec.ts:319:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-004] User Management module - User List
+  -  248 [webkit] › e2e/agents/06-admin-modules.spec.ts:402:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-005] User Management module - Add User Dialog
+  -  249 [webkit] › e2e/agents/06-admin-modules.spec.ts:484:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-006] User Management module - Edit User Dialog
+  -  250 [webkit] › e2e/agents/06-admin-modules.spec.ts:562:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-007] User Management module - Delete User Dialog
+  -  251 [webkit] › e2e/agents/06-admin-modules.spec.ts:622:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-008] User Management module - Role Badge Colors
+  -  252 [webkit] › e2e/agents/06-admin-modules.spec.ts:678:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-009] Settings module - Save Company Info
+  -  253 [webkit] › e2e/agents/06-admin-modules.spec.ts:720:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [SUMMARY] Generate test summary report
+  ✘  238 [webkit] › e2e/agents/05-expansion-modules.spec.ts:71:7 › AGENT_MODULES - Expansion Modules Test Suite › [LOGIN] Login as admin (1ms)
+  -  254 [webkit] › e2e/agents/05-expansion-modules.spec.ts:80:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Navigate to module
+  -  255 [webkit] › e2e/agents/05-expansion-modules.spec.ts:91:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Balance Tab (สต็อกคงเหลือ)
+  -  256 [webkit] › e2e/agents/05-expansion-modules.spec.ts:121:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Movements Tab (การเคลื่อนไหว)
+  -  257 [webkit] › e2e/agents/05-expansion-modules.spec.ts:157:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Warehouses Tab (คลังสินค้า)
+  -  258 [webkit] › e2e/agents/05-expansion-modules.spec.ts:178:9 › AGENT_MODULES - Expansion Modules Test Suite › Inventory Module › Inventory - Stock Transfers Tab (โอนสต็อก)
+  -  259 [webkit] › e2e/agents/05-expansion-modules.spec.ts:199:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Navigate to module
+  -  260 [webkit] › e2e/agents/05-expansion-modules.spec.ts:210:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Bank Accounts Tab (บัญชีธนาคาร)
+  -  261 [webkit] › e2e/agents/05-expansion-modules.spec.ts:228:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Cheque Register Tab (สมุดเช็ค)
+  -  262 [webkit] › e2e/agents/05-expansion-modules.spec.ts:254:9 › AGENT_MODULES - Expansion Modules Test Suite › Banking Module › Banking - Reconciliation Tab (กระทบยอด)
+  -  263 [webkit] › e2e/agents/05-expansion-modules.spec.ts:275:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Navigate to module
+  -  264 [webkit] › e2e/agents/05-expansion-modules.spec.ts:286:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Asset List with Summary Cards
+  -  265 [webkit] › e2e/agents/05-expansion-modules.spec.ts:323:9 › AGENT_MODULES - Expansion Modules Test Suite › Fixed Assets Module › Assets - Add Asset Dialog
+  -  266 [webkit] › e2e/agents/05-expansion-modules.spec.ts:350:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Navigate to module
+  -  267 [webkit] › e2e/agents/05-expansion-modules.spec.ts:361:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Employees Tab (พนักงาน)
+  -  268 [webkit] › e2e/agents/05-expansion-modules.spec.ts:398:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Payroll Runs Tab (รอบเงินเดือน)
+  -  269 [webkit] › e2e/agents/05-expansion-modules.spec.ts:424:9 › AGENT_MODULES - Expansion Modules Test Suite › Payroll Module › Payroll - Create Payroll Run Dialog
+  -  270 [webkit] › e2e/agents/05-expansion-modules.spec.ts:462:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Navigate to module
+  -  271 [webkit] › e2e/agents/05-expansion-modules.spec.ts:473:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Funds Tab (กองทุน)
+  -  272 [webkit] › e2e/agents/05-expansion-modules.spec.ts:494:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Vouchers Tab (ใบสำคัญ)
+  -  273 [webkit] › e2e/agents/05-expansion-modules.spec.ts:520:9 › AGENT_MODULES - Expansion Modules Test Suite › Petty Cash Module › Petty Cash - Create Fund Dialog
+  -  274 [webkit] › e2e/agents/05-expansion-modules.spec.ts:547:9 › AGENT_MODULES - Expansion Modules Test Suite › WHT Module (Withholding Tax) › WHT - Navigate to module
+  -  275 [webkit] › e2e/agents/05-expansion-modules.spec.ts:558:9 › AGENT_MODULES - Expansion Modules Test Suite › WHT Module (Withholding Tax) › WHT - WHT List Tab
+  -  276 [webkit] › e2e/agents/05-expansion-modules.spec.ts:580:9 › AGENT_MODULES - Expansion Modules Test Suite › Summary - All Expansion Module Buttons › Verify all expansion module buttons are present
+
+
+  1) [chromium] › e2e/agents/01-auth-navigation.spec.ts:65:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('aside nav').first()
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('aside nav').first()[22m
+
+
+      89 |       // Wait for dashboard to load (sidebar visible)
+      90 |       const sidebar = page.locator('aside nav').first()
+    > 91 |       await expect(sidebar).toBeVisible({ timeout: 10000 })
+         |                             ^
+      92 |       console.log('✓ Dashboard loaded (sidebar visible)')
+      93 |
+      94 |       // Take screenshot
+        at /Users/tong/Thai-acc/e2e/agents/01-auth-navigation.spec.ts:91:29
+
+    Error Context: test-results/agents-01-auth-navigation--63d3b-ogin-with-valid-credentials-chromium/error-context.md
+
+  2) [chromium] › e2e/agents/02-core-financial.spec.ts:77:7 › Core Financial Modules › Dashboard module loads with all components 
+
+    Error: Could not find module button: ภาพรวม
+
+      68 |       console.log(`    - "${text}"`)
+      69 |     }
+    > 70 |     throw new Error(`Could not find module button: ${label}`)
+         |           ^
+      71 |   }
+      72 |   
+      73 |   await page.waitForTimeout(2000)
+        at navigateToModule (/Users/tong/Thai-acc/e2e/agents/02-core-financial.spec.ts:70:11)
+        at /Users/tong/Thai-acc/e2e/agents/02-core-financial.spec.ts:81:5
+
+    Error Context: test-results/agents-02-core-financial-C-c51bf-e-loads-with-all-components-chromium/error-context.md
+
+  3) [chromium] › e2e/agents/03-sales-ar.spec.ts:54:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-25386-IFY-Header-section-elements-chromium/error-context.md
+
+  4) [chromium] › e2e/agents/03-sales-ar.spec.ts:70:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards) 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-1f8c4-RIFY-Summary-cards-4-cards--chromium/error-context.md
+
+  5) [chromium] › e2e/agents/03-sales-ar.spec.ts:98:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-39e36-Y-Search-and-Filter-section-chromium/error-context.md
+
+  6) [chromium] › e2e/agents/03-sales-ar.spec.ts:158:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-4f916-ERIFY-Invoice-table-columns-chromium/error-context.md
+
+  7) [chromium] › e2e/agents/03-sales-ar.spec.ts:195:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-1c085-RIFY-Action-buttons-per-row-chromium/error-context.md
+
+  8) [chromium] › e2e/agents/03-sales-ar.spec.ts:235:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-1756d-RIFY-Create-Document-Dialog-chromium/error-context.md
+
+  9) [chromium] › e2e/agents/03-sales-ar.spec.ts:293:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-5b92b-REENSHOT-Invoices-list-page-chromium/error-context.md
+
+  10) [chromium] › e2e/agents/03-sales-ar.spec.ts:325:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-74150--VERIFY-Customer-list-table-chromium/error-context.md
+
+  11) [chromium] › e2e/agents/03-sales-ar.spec.ts:354:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-72c0f--VERIFY-Add-Customer-button-chromium/error-context.md
+
+  12) [chromium] › e2e/agents/03-sales-ar.spec.ts:387:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-a88af-dit-Customer-button-per-row-chromium/error-context.md
+
+  13) [chromium] › e2e/agents/03-sales-ar.spec.ts:427:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-32535-ete-Customer-button-per-row-chromium/error-context.md
+
+  14) [chromium] › e2e/agents/03-sales-ar.spec.ts:472:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('aside nav') to be visible[22m
+
+
+       7 |   await page.fill('input[type="password"]', 'admin123')
+       8 |   await page.click('button[type="submit"]')
+    >  9 |   await page.waitForSelector('aside nav', { timeout: 10000 })
+         |              ^
+      10 | }
+      11 |
+      12 | test.describe('AGENT_SALES - Sales & Receivables Module', () => {
+        at login (/Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:9:14)
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:28:5
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-5b922-stomer-search-functionality-chromium/error-context.md
+
+  15) [chromium] › e2e/agents/03-sales-ar.spec.ts:496:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view 
+
+    Error: Should have at least 1 AR Aging related element
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: >= [32m1[39m
+    Received:    [31m0[39m
+
+      532 |       }
+      533 |       
+    > 534 |       expect(foundAgingElements, 'Should have at least 1 AR Aging related element').toBeGreaterThanOrEqual(1)
+          |                                                                                     ^
+      535 |     })
+      536 |
+      537 |     test('[SCREENSHOT] Customers list page', async ({ page }) => {
+        at /Users/tong/Thai-acc/e2e/agents/03-sales-ar.spec.ts:534:85
+
+    Error Context: test-results/agents-03-sales-ar-AGENT-S-b6fc4-ูกหนี้-VERIFY-AR-Aging-view-chromium/error-context.md
+
+  16) [chromium] › e2e/agents/04-tax-modules.spec.ts:49:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('h1:has-text("ภาษีมูลค่าเพิ่ม")')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('h1:has-text("ภาษีมูลค่าเพิ่ม")')[22m
+
+
+      55 |
+      56 |       // Verify page title
+    > 57 |       await expect(page.locator('h1:has-text("ภาษีมูลค่าเพิ่ม")')).toBeVisible()
+         |                                                                    ^
+      58 |       await expect(page.locator('text=รายงานภาษีขายและภาษีซื้อ')).toBeVisible()
+      59 |
+      60 |       // Verify Summary Cards
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:57:68
+
+    Error Context: test-results/agents-04-tax-modules-Tax--04879-le-loads-with-summary-cards-chromium/error-context.md
+
+  17) [chromium] › e2e/agents/04-tax-modules.spec.ts:71:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector 
+
+    Error: Login failed - sidebar/nav not visible
+
+      32 |     // Take screenshot for debugging
+      33 |     await page.screenshot({ path: 'test-results/login-failed.png' })
+    > 34 |     throw new Error('Login failed - sidebar/nav not visible')
+         |           ^
+      35 |   }
+      36 | }
+      37 |
+        at login (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:34:11)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:72:7
+
+    Error Context: test-results/agents-04-tax-modules-Tax--cde41--module-has-period-selector-chromium/error-context.md
+
+  18) [chromium] › e2e/agents/04-tax-modules.spec.ts:92:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed 
+
+    Error: Login failed - sidebar/nav not visible
+
+      32 |     // Take screenshot for debugging
+      33 |     await page.screenshot({ path: 'test-results/login-failed.png' })
+    > 34 |     throw new Error('Login failed - sidebar/nav not visible')
+         |           ^
+      35 |   }
+      36 | }
+      37 |
+        at login (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:34:11)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:93:7
+
+    Error Context: test-results/agents-04-tax-modules-Tax--993fa-output-tables-are-displayed-chromium/error-context.md
+
+  19) [chromium] › e2e/agents/04-tax-modules.spec.ts:123:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed 
+
+    Error: Login failed - sidebar/nav not visible
+
+      32 |     // Take screenshot for debugging
+      33 |     await page.screenshot({ path: 'test-results/login-failed.png' })
+    > 34 |     throw new Error('Login failed - sidebar/nav not visible')
+         |           ^
+      35 |   }
+      36 | }
+      37 |
+        at login (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:34:11)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:124:7
+
+    Error Context: test-results/agents-04-tax-modules-Tax--9610d-พิ่ม-VAT-chart-is-displayed-chromium/error-context.md
+
+  20) [chromium] › e2e/agents/04-tax-modules.spec.ts:146:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs 
+
+    Error: Login failed - sidebar/nav not visible
+
+      32 |     // Take screenshot for debugging
+      33 |     await page.screenshot({ path: 'test-results/login-failed.png' })
+    > 34 |     throw new Error('Login failed - sidebar/nav not visible')
+         |           ^
+      35 |   }
+      36 | }
+      37 |
+        at login (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:34:11)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:147:7
+
+    Error Context: test-results/agents-04-tax-modules-Tax--80c89-dule-loads-with-report-tabs-chromium/error-context.md
+
+  21) [chromium] › e2e/agents/04-tax-modules.spec.ts:176:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters 
+
+    Error: Login failed - sidebar/nav not visible
+
+      32 |     // Take screenshot for debugging
+      33 |     await page.screenshot({ path: 'test-results/login-failed.png' })
+    > 34 |     throw new Error('Login failed - sidebar/nav not visible')
+         |           ^
+      35 |   }
+      36 | }
+      37 |
+        at login (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:34:11)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:177:7
+
+    Error Context: test-results/agents-04-tax-modules-Tax--6f9d4-has-period-and-type-filters-chromium/error-context.md
+
+  22) [chromium] › e2e/agents/04-tax-modules.spec.ts:197:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns 
+
+    Error: Login failed - sidebar/nav not visible
+
+      32 |     // Take screenshot for debugging
+      33 |     await page.screenshot({ path: 'test-results/login-failed.png' })
+    > 34 |     throw new Error('Login failed - sidebar/nav not visible')
+         |           ^
+      35 |   }
+      36 | }
+      37 |
+        at login (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:34:11)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:198:7
+
+    Error Context: test-results/agents-04-tax-modules-Tax--a2639-plays-correct-table-columns-chromium/error-context.md
+
+  23) [chromium] › e2e/agents/04-tax-modules.spec.ts:222:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns 
+
+    Error: Login failed - sidebar/nav not visible
+
+      32 |     // Take screenshot for debugging
+      33 |     await page.screenshot({ path: 'test-results/login-failed.png' })
+    > 34 |     throw new Error('Login failed - sidebar/nav not visible')
+         |           ^
+      35 |   }
+      36 | }
+      37 |
+        at login (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:34:11)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:223:7
+
+    Error Context: test-results/agents-04-tax-modules-Tax--8e84b-plays-correct-table-columns-chromium/error-context.md
+
+  24) [chromium] › e2e/agents/04-tax-modules.spec.ts:250:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards 
+
+    Error: Login failed - sidebar/nav not visible
+
+      32 |     // Take screenshot for debugging
+      33 |     await page.screenshot({ path: 'test-results/login-failed.png' })
+    > 34 |     throw new Error('Login failed - sidebar/nav not visible')
+         |           ^
+      35 |   }
+      36 | }
+      37 |
+        at login (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:34:11)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:251:7
+
+    Error Context: test-results/agents-04-tax-modules-Tax--62ff7-nt-loads-with-summary-cards-chromium/error-context.md
+
+  25) [chromium] › e2e/agents/04-tax-modules.spec.ts:267:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns 
+
+    Error: Login failed - sidebar/nav not visible
+
+      32 |     // Take screenshot for debugging
+      33 |     await page.screenshot({ path: 'test-results/login-failed.png' })
+    > 34 |     throw new Error('Login failed - sidebar/nav not visible')
+         |           ^
+      35 |   }
+      36 | }
+      37 |
+        at login (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:34:11)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:268:7
+
+    Error Context: test-results/agents-04-tax-modules-Tax--6ded7-le-displays-correct-columns-chromium/error-context.md
+
+  26) [chromium] › e2e/agents/04-tax-modules.spec.ts:295:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly 
+
+    Error: Login failed - sidebar/nav not visible
+
+      32 |     // Take screenshot for debugging
+      33 |     await page.screenshot({ path: 'test-results/login-failed.png' })
+    > 34 |     throw new Error('Login failed - sidebar/nav not visible')
+         |           ^
+      35 |   }
+      36 | }
+      37 |
+        at login (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:34:11)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:296:7
+
+    Error Context: test-results/agents-04-tax-modules-Tax--3a7e0-VAT-and-WHT-works-correctly-chromium/error-context.md
+
+  27) [chromium] › e2e/agents/04-tax-modules.spec.ts:316:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules 
+
+    Error: Login failed - sidebar/nav not visible
+
+      32 |     // Take screenshot for debugging
+      33 |     await page.screenshot({ path: 'test-results/login-failed.png' })
+    > 34 |     throw new Error('Login failed - sidebar/nav not visible')
+         |           ^
+      35 |   }
+      36 | }
+      37 |
+        at login (/Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:34:11)
+        at /Users/tong/Thai-acc/e2e/agents/04-tax-modules.spec.ts:317:7
+
+    Error Context: test-results/agents-04-tax-modules-Tax--b818d-ectors-work-in-both-modules-chromium/error-context.md
+
+  28) [chromium] › e2e/agents/05-expansion-modules.spec.ts:71:7 › AGENT_MODULES - Expansion Modules Test Suite › [LOGIN] Login as admin 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('aside nav').first()
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('aside nav').first()[22m
+
+
+      36 |
+      37 |   // Verify login successful
+    > 38 |   await expect(sidebar).toBeVisible({ timeout: 10000 })
+         |                         ^
+      39 | }
+      40 |
+      41 | // Helper: Find and click sidebar button
+        at loginAsAdmin (/Users/tong/Thai-acc/e2e/agents/05-expansion-modules.spec.ts:38:25)
+        at /Users/tong/Thai-acc/e2e/agents/05-expansion-modules.spec.ts:72:5
+
+    Error Context: test-results/agents-05-expansion-module-4a488--Suite-LOGIN-Login-as-admin-chromium/error-context.md
+
+  29) [chromium] › e2e/agents/06-admin-modules.spec.ts:62:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('aside nav').first()
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('aside nav').first()[22m
+
+
+      50 |     
+      51 |     const sidebar = page.locator('aside nav').first()
+    > 52 |     await expect(sidebar).toBeVisible({ timeout: 10000 })
+         |                           ^
+      53 |   }
+      54 |
+      55 |   /**
+        at loginAsAdmin (/Users/tong/Thai-acc/e2e/agents/06-admin-modules.spec.ts:52:27)
+        at /Users/tong/Thai-acc/e2e/agents/06-admin-modules.spec.ts:69:7
+
+    Error Context: test-results/agents-06-admin-modules-AG-b6f24----Company-Settings-section-chromium/error-context.md
+
+  30) [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:62:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts) 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('aside nav').first()
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('aside nav').first()[22m
+
+
+      50 |     
+      51 |     const sidebar = page.locator('aside nav').first()
+    > 52 |     await expect(sidebar).toBeVisible({ timeout: 10000 })
+         |                           ^
+      53 |   }
+      54 |
+      55 |   /**
+        at loginAsAdmin (/Users/tong/Thai-acc/e2e/agents/07-ui-db-alignment.spec.ts:52:27)
+        at /Users/tong/Thai-acc/e2e/agents/07-ui-db-alignment.spec.ts:69:7
+
+    Error Context: test-results/agents-07-ui-db-alignment--6d28f-nt-matches-DB-181-accounts--chromium/error-context.md
+
+  31) [firefox] › e2e/agents/01-auth-navigation.spec.ts:65:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  32) [firefox] › e2e/agents/02-core-financial.spec.ts:77:7 › Core Financial Modules › Dashboard module loads with all components 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    TypeError: Cannot read properties of undefined (reading 'close')
+
+      43 |
+      44 | test.afterAll(async () => {
+    > 45 |   await page.close()
+         |              ^
+      46 | })
+      47 |
+      48 | async function navigateToModule(label) {
+        at /Users/tong/Thai-acc/e2e/agents/02-core-financial.spec.ts:45:14
+
+  33) [firefox] › e2e/agents/03-sales-ar.spec.ts:54:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  34) [firefox] › e2e/agents/03-sales-ar.spec.ts:70:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards) 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  35) [firefox] › e2e/agents/03-sales-ar.spec.ts:98:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  36) [firefox] › e2e/agents/03-sales-ar.spec.ts:158:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  37) [firefox] › e2e/agents/03-sales-ar.spec.ts:195:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  38) [firefox] › e2e/agents/03-sales-ar.spec.ts:235:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  39) [firefox] › e2e/agents/03-sales-ar.spec.ts:293:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  40) [firefox] › e2e/agents/03-sales-ar.spec.ts:325:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  41) [firefox] › e2e/agents/03-sales-ar.spec.ts:354:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  42) [firefox] › e2e/agents/03-sales-ar.spec.ts:387:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  43) [firefox] › e2e/agents/03-sales-ar.spec.ts:427:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  44) [firefox] › e2e/agents/03-sales-ar.spec.ts:472:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  45) [firefox] › e2e/agents/03-sales-ar.spec.ts:496:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  46) [firefox] › e2e/agents/03-sales-ar.spec.ts:537:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  47) [firefox] › e2e/agents/03-sales-ar.spec.ts:550:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  48) [firefox] › e2e/agents/04-tax-modules.spec.ts:49:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  49) [firefox] › e2e/agents/04-tax-modules.spec.ts:71:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  50) [firefox] › e2e/agents/04-tax-modules.spec.ts:92:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  51) [firefox] › e2e/agents/04-tax-modules.spec.ts:123:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  52) [firefox] › e2e/agents/04-tax-modules.spec.ts:146:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  53) [firefox] › e2e/agents/04-tax-modules.spec.ts:176:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  54) [firefox] › e2e/agents/04-tax-modules.spec.ts:197:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  55) [firefox] › e2e/agents/04-tax-modules.spec.ts:222:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  56) [firefox] › e2e/agents/04-tax-modules.spec.ts:250:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  57) [firefox] › e2e/agents/04-tax-modules.spec.ts:267:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  58) [firefox] › e2e/agents/04-tax-modules.spec.ts:295:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  59) [firefox] › e2e/agents/04-tax-modules.spec.ts:316:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  60) [firefox] › e2e/agents/04-tax-modules.spec.ts:343:7 › Tax Module Summary Report › generate tax module test summary 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  61) [firefox] › e2e/agents/05-expansion-modules.spec.ts:71:7 › AGENT_MODULES - Expansion Modules Test Suite › [LOGIN] Login as admin 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  62) [firefox] › e2e/agents/06-admin-modules.spec.ts:62:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  63) [firefox] › e2e/agents/07-ui-db-alignment.spec.ts:62:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts) 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/firefox-1509/firefox/Nightly.app/Contents/MacOS/firefox
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  64) [webkit] › e2e/agents/01-auth-navigation.spec.ts:65:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  65) [webkit] › e2e/agents/02-core-financial.spec.ts:77:7 › Core Financial Modules › Dashboard module loads with all components 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    TypeError: Cannot read properties of undefined (reading 'close')
+
+      43 |
+      44 | test.afterAll(async () => {
+    > 45 |   await page.close()
+         |              ^
+      46 | })
+      47 |
+      48 | async function navigateToModule(label) {
+        at /Users/tong/Thai-acc/e2e/agents/02-core-financial.spec.ts:45:14
+
+  66) [webkit] › e2e/agents/03-sales-ar.spec.ts:54:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  67) [webkit] › e2e/agents/03-sales-ar.spec.ts:70:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards) 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  68) [webkit] › e2e/agents/03-sales-ar.spec.ts:98:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  69) [webkit] › e2e/agents/03-sales-ar.spec.ts:158:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  70) [webkit] › e2e/agents/03-sales-ar.spec.ts:195:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  71) [webkit] › e2e/agents/03-sales-ar.spec.ts:235:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  72) [webkit] › e2e/agents/03-sales-ar.spec.ts:293:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  73) [webkit] › e2e/agents/03-sales-ar.spec.ts:325:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  74) [webkit] › e2e/agents/03-sales-ar.spec.ts:354:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  75) [webkit] › e2e/agents/03-sales-ar.spec.ts:387:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  76) [webkit] › e2e/agents/03-sales-ar.spec.ts:427:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  77) [webkit] › e2e/agents/03-sales-ar.spec.ts:472:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  78) [webkit] › e2e/agents/03-sales-ar.spec.ts:496:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  79) [webkit] › e2e/agents/03-sales-ar.spec.ts:537:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  80) [webkit] › e2e/agents/03-sales-ar.spec.ts:550:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  81) [webkit] › e2e/agents/04-tax-modules.spec.ts:49:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  82) [webkit] › e2e/agents/04-tax-modules.spec.ts:71:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  83) [webkit] › e2e/agents/04-tax-modules.spec.ts:92:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  84) [webkit] › e2e/agents/04-tax-modules.spec.ts:123:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  85) [webkit] › e2e/agents/04-tax-modules.spec.ts:146:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  86) [webkit] › e2e/agents/04-tax-modules.spec.ts:176:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  87) [webkit] › e2e/agents/04-tax-modules.spec.ts:197:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  88) [webkit] › e2e/agents/04-tax-modules.spec.ts:222:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  89) [webkit] › e2e/agents/04-tax-modules.spec.ts:250:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  90) [webkit] › e2e/agents/04-tax-modules.spec.ts:267:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  91) [webkit] › e2e/agents/04-tax-modules.spec.ts:295:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  92) [webkit] › e2e/agents/04-tax-modules.spec.ts:316:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  93) [webkit] › e2e/agents/04-tax-modules.spec.ts:343:7 › Tax Module Summary Report › generate tax module test summary 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  94) [webkit] › e2e/agents/05-expansion-modules.spec.ts:71:7 › AGENT_MODULES - Expansion Modules Test Suite › [LOGIN] Login as admin 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  95) [webkit] › e2e/agents/06-admin-modules.spec.ts:62:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  96) [webkit] › e2e/agents/07-ui-db-alignment.spec.ts:62:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts) 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/tong/Library/Caches/ms-playwright/webkit-2248/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+  96 failed
+    [chromium] › e2e/agents/01-auth-navigation.spec.ts:65:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials 
+    [chromium] › e2e/agents/02-core-financial.spec.ts:77:7 › Core Financial Modules › Dashboard module loads with all components 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:54:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:70:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards) 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:98:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:158:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:195:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:235:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:293:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:325:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:354:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:387:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:427:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:472:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality 
+    [chromium] › e2e/agents/03-sales-ar.spec.ts:496:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:49:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:71:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:92:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:123:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:146:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:176:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:197:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:222:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:250:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:267:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:295:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly 
+    [chromium] › e2e/agents/04-tax-modules.spec.ts:316:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules 
+    [chromium] › e2e/agents/05-expansion-modules.spec.ts:71:7 › AGENT_MODULES - Expansion Modules Test Suite › [LOGIN] Login as admin 
+    [chromium] › e2e/agents/06-admin-modules.spec.ts:62:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section 
+    [chromium] › e2e/agents/07-ui-db-alignment.spec.ts:62:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts) 
+    [firefox] › e2e/agents/01-auth-navigation.spec.ts:65:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials 
+    [firefox] › e2e/agents/02-core-financial.spec.ts:77:7 › Core Financial Modules › Dashboard module loads with all components 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:54:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:70:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards) 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:98:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:158:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:195:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:235:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:293:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:325:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:354:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:387:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:427:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:472:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:496:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:537:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page 
+    [firefox] › e2e/agents/03-sales-ar.spec.ts:550:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:49:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:71:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:92:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:123:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:146:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:176:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:197:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:222:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:250:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:267:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:295:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:316:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules 
+    [firefox] › e2e/agents/04-tax-modules.spec.ts:343:7 › Tax Module Summary Report › generate tax module test summary 
+    [firefox] › e2e/agents/05-expansion-modules.spec.ts:71:7 › AGENT_MODULES - Expansion Modules Test Suite › [LOGIN] Login as admin 
+    [firefox] › e2e/agents/06-admin-modules.spec.ts:62:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section 
+    [firefox] › e2e/agents/07-ui-db-alignment.spec.ts:62:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts) 
+    [webkit] › e2e/agents/01-auth-navigation.spec.ts:65:7 › AGENT_AUTH - Authentication & Sidebar Navigation › [LOGIN-001] Login with valid credentials 
+    [webkit] › e2e/agents/02-core-financial.spec.ts:77:7 › Core Financial Modules › Dashboard module loads with all components 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:54:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Header section elements 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:70:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Summary cards (4 cards) 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:98:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Search and Filter section 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:158:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Invoice table columns 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:195:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Action buttons per row 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:235:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [VERIFY] Create Document Dialog 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:293:9 › AGENT_SALES - Sales & Receivables Module › Invoices Module (ใบกำกับภาษี) › [SCREENSHOT] Invoices list page 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:325:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer list table 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:354:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Add Customer button 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:387:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Edit Customer button per row 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:427:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Delete Customer button per row 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:472:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] Customer search functionality 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:496:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [VERIFY] AR Aging view 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:537:9 › AGENT_SALES - Sales & Receivables Module › Customers/AR Module (ลูกหนี้) › [SCREENSHOT] Customers list page 
+    [webkit] › e2e/agents/03-sales-ar.spec.ts:550:7 › AGENT_SALES - Sales & Receivables Module › [SUMMARY] All Sales & AR module buttons 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:49:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module loads with summary cards 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:71:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT module has period selector 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:92:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT input and output tables are displayed 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:123:9 › Tax Modules (ภาษี) › VAT Module (ภาษีมูลค่าเพิ่ม) › VAT chart is displayed 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:146:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module loads with report tabs 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:176:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT module has period and type filters 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:197:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND53 tab displays correct table columns 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:222:9 › Tax Modules (ภาษี) › WHT Module (ภาษีหัก ณ ที่จ่าย) › WHT PND3 tab displays correct table columns 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:250:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT Management loads with summary cards 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:267:9 › Tax Modules (ภาษี) › WHT Management (จัดการภาษีหัก ณ ที่จ่าย) › WHT records table displays correct columns 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:295:9 › Tax Modules (ภาษี) › Tax Module Integration › Navigation between VAT and WHT works correctly 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:316:9 › Tax Modules (ภาษี) › Tax Module Integration › Period selectors work in both modules 
+    [webkit] › e2e/agents/04-tax-modules.spec.ts:343:7 › Tax Module Summary Report › generate tax module test summary 
+    [webkit] › e2e/agents/05-expansion-modules.spec.ts:71:7 › AGENT_MODULES - Expansion Modules Test Suite › [LOGIN] Login as admin 
+    [webkit] › e2e/agents/06-admin-modules.spec.ts:62:7 › AGENT_ADMIN - Administration Modules (ADMIN only) › [ADMIN-001] Settings module - Company Settings section 
+    [webkit] › e2e/agents/07-ui-db-alignment.spec.ts:62:7 › AGENT_VALIDATOR - UI-DB Alignment Verification › [ALIGN-001] Chart of Accounts: UI count matches DB (181 accounts) 
+  177 did not run
+  3 passed (1.6m)
