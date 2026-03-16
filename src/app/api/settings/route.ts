@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { requireRole } from '@/lib/api-auth'
 
 // Validation schemas
 const taxRatesSchema = z.object({
@@ -105,6 +106,9 @@ export async function GET(req: NextRequest) {
 // PUT /api/settings - Update settings
 export async function PUT(req: NextRequest) {
   try {
+    // Require ADMIN role for settings updates
+    await requireRole('ADMIN')
+
     const body = await req.json()
     const validated = settingsUpdateSchema.parse(body)
 

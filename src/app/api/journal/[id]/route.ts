@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { z } from 'zod'
+import { requireAuth, requireRole } from '@/lib/api-auth'
 
 // Validation schema
 const journalLineSchema = z.object({
@@ -33,6 +34,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireRole(['ACCOUNTANT', 'ADMIN'])
     const { id } = await params
     
     const entry = await prisma.journalEntry.findUnique({
@@ -69,6 +71,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireRole(['ACCOUNTANT', 'ADMIN'])
     const { id } = await params
     const body = await request.json()
     const validatedData = journalEntrySchema.parse(body)
@@ -148,6 +151,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireRole(['ACCOUNTANT', 'ADMIN'])
     const { id } = await params
     
     const existing = await prisma.journalEntry.findUnique({

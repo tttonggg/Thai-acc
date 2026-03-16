@@ -129,6 +129,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
   }, { subtotal: 0, vatAmount: 0, totalAmount: 0 })
 
   const onSubmit = async (values: z.infer<typeof debitNoteSchema>) => {
+    if (loading) return
     setLoading(true)
     try {
       const payload = {

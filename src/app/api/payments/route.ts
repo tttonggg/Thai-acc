@@ -23,7 +23,7 @@ const paymentSchema = z.object({
   unallocated: z.number().min(0).default(0),
   notes: z.string().optional(),
   allocations: z.array(paymentAllocationSchema).min(1, "ต้องมีการจัดจ่ายอย่างน้อย 1 รายการ"),
-  status: z.enum(["DRAFT", "POSTED"]).default("DRAFT"),
+  status: z.enum(["DRAFT", "POSTED", "CANCELLED"]).default("DRAFT"),
 })
 
 // GET /api/payments - List payments

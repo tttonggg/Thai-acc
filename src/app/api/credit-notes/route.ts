@@ -161,78 +161,110 @@ export async function POST(request: NextRequest) {
 
     // Create credit note with status ISSUED (no draft for credit notes in Thai accounting)
     const creditNote = await db.$transaction(async (tx) => {
+      // Get system settings for configurable account IDs
+      const settings = await tx.systemSettings.findFirst()
+
+      // Look up required accounts by code
+      const [
+        salesReturnsAccount,
+        vatOutputAccount,
+        arAccount
+      ] = await Promise.all([
+        // Sales Returns and Allowances (4xxx) - Default to '4130'
+        tx.chartOfAccount.findFirst({
+          where: { code: settings?.salesReturnsAccountId || '4130' }
+        }),
+        // VAT Output (2xxx) - Default to '2132'
+        tx.chartOfAccount.findFirst({
+          where: { code: settings?.vatOutputAccountId || '2132' }
+        }),
+        // Accounts Receivable (1xxx) - Default to '1121'
+        tx.chartOfAccount.findFirst({
+          where: { code: settings?.arAccountId || '1121' }
+        })
+      ])
+
+      if (!salesReturnsAccount) {
+        throw new Error(`Sales returns account not found: ${settings?.salesReturnsAccountId || '4130'}`)
+      }
+      if (!vatOutputAccount) {
+        throw new Error(`VAT output account not found: ${settings?.vatOutputAccountId || '2132'}`)
+      }
+      if (!arAccount) {
+        throw new Error(`AR account not found: ${settings?.arAccountId || '1121'}`)
+      }
+
       const note = await tx.creditNote.create({
-      data: {
-        creditNoteNo,
-        creditNoteDate: validatedData.creditNoteDate,
-        customerId: validatedData.customerId,
-        invoiceId: validatedData.invoiceId,
-        reason: validatedData.reason,
-        subtotal: validatedData.subtotal,
-        vatRate: validatedData.vatRate,
-        vatAmount: validatedData.vatAmount,
-        totalAmount: validatedData.totalAmount,
-        status: 'ISSUED',
-        notes: validatedData.notes,
-      },
-      include: {
-        customer: true,
-        invoice: true,
-      },
-    })
-
-    // Credit Note Accounting Entry:
-    // Credit Note Accounting Entry:
-    // Debit Sales Returns (4xxx) - Reverse revenue
-    // Debit VAT Output (2xxx) - Reverse output VAT
-    // Credit Accounts Receivable (11xx) - Reduce customer debt
-    const journalEntry = await db.journalEntry.create({
-      data: {
-        entryNo: await generateDocNumber('JOURNAL_ENTRY', 'JE'),
-        date: validatedData.creditNoteDate,
-        description: `ใบลดหนี้ ${creditNoteNo} - ${customer.name}`,
-        reference: creditNoteNo,
-        documentType: 'CREDIT_NOTE',
-        documentId: creditNote.id,
-        totalDebit: creditNote.totalAmount,
-        totalCredit: creditNote.totalAmount,
-        status: 'POSTED',
-        lines: {
-          create: [
-            {
-              lineNo: 1,
-              accountId: '4201', // Sales Returns and Allowances (should be configured)
-              description: `คืนสินค้า/ลดหนี้ ${creditNoteNo}`,
-              debit: validatedData.subtotal,
-              credit: 0,
-            },
-            {
-              lineNo: 2,
-              accountId: '2104', // VAT Output (should be configured)
-              description: `VAT ใบลดหนี้ ${creditNoteNo}`,
-              debit: validatedData.vatAmount,
-              credit: 0,
-            },
-            {
-              lineNo: 3,
-              accountId: '1101', // Accounts Receivable (should be configured per customer)
-              description: `ลดหนี้ลูกค้า ${customer.name}`,
-              debit: 0,
-              credit: creditNote.totalAmount,
-            },
-          ],
+        data: {
+          creditNoteNo,
+          creditNoteDate: validatedData.creditNoteDate,
+          customerId: validatedData.customerId,
+          invoiceId: validatedData.invoiceId,
+          reason: validatedData.reason,
+          subtotal: validatedData.subtotal,
+          vatRate: validatedData.vatRate,
+          vatAmount: validatedData.vatAmount,
+          totalAmount: validatedData.totalAmount,
+          status: 'ISSUED',
+          notes: validatedData.notes,
         },
-      },
-    })
+        include: {
+          customer: true,
+          invoice: true,
+        },
+      })
 
-    // Update credit note with journal entry ID
-    await tx.creditNote.update({
-      where: { id: note.id },
-      data: { journalEntryId: journalEntry.id }
-    })
+      // Credit Note Accounting Entry:
+      // Debit Sales Returns (4xxx) - Reverse revenue
+      // Debit VAT Output (2xxx) - Reverse output VAT
+      // Credit Accounts Receivable (11xx) - Reduce customer debt
+      const journalEntry = await tx.journalEntry.create({
+        data: {
+          entryNo: await generateDocNumber('JOURNAL_ENTRY', 'JE'),
+          date: validatedData.creditNoteDate,
+          description: `ใบลดหนี้ ${creditNoteNo} - ${customer.name}`,
+          reference: creditNoteNo,
+          documentType: 'CREDIT_NOTE',
+          documentId: note.id,
+          totalDebit: note.totalAmount,
+          totalCredit: note.totalAmount,
+          status: 'POSTED',
+          lines: {
+            create: [
+              {
+                lineNo: 1,
+                accountId: salesReturnsAccount.id,
+                description: `คืนสินค้า/ลดหนี้ ${creditNoteNo}`,
+                debit: validatedData.subtotal,
+                credit: 0,
+              },
+              {
+                lineNo: 2,
+                accountId: vatOutputAccount.id,
+                description: `VAT ใบลดหนี้ ${creditNoteNo}`,
+                debit: validatedData.vatAmount,
+                credit: 0,
+              },
+              {
+                lineNo: 3,
+                accountId: arAccount.id,
+                description: `ลดหนี้ลูกค้า ${customer.name}`,
+                debit: 0,
+                credit: note.totalAmount,
+              },
+            ],
+          },
+        },
+      })
 
-    return note
-  })
+      // Update credit note with journal entry ID
+      await tx.creditNote.update({
+        where: { id: note.id },
+        data: { journalEntryId: journalEntry.id }
+      })
+
+      return note
+    })
 
     // Handle stock returns if configured (outside transaction)
     for (const line of validatedData.lines) {
@@ -295,6 +327,9 @@ export async function POST(request: NextRequest) {
     }
     if (error instanceof z.ZodError) {
       return apiError('ข้อมูลไม่ถูกต้อง', 400)
+    }
+    if (error instanceof Error && error.message.includes('account not found')) {
+      return apiError(`บัญชีไม่ถูกต้อง: ${error.message}`, 400)
     }
     console.error('Error message:', error?.message)
     return apiError('เกิดข้อผิดพลาดในการสร้างใบลดหนี้')

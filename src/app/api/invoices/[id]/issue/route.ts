@@ -1,5 +1,5 @@
 import { db } from "@/lib/db"
-import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError } from "@/lib/api-utils"
+import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, generateDocNumber } from "@/lib/api-utils"
 import { recordStockMovement } from "@/lib/inventory-service"
 
 // POST /api/invoices/[id]/issue - Issue invoice
@@ -221,6 +221,87 @@ export async function POST(
       }
     } catch (cogsError) {
       // COGS journal entry creation failed but don't fail the invoice issuance
+      // Continue with successful response
+    }
+
+    // Create Revenue journal entry for the invoice
+    try {
+      // Get required accounts: AR (1101), Revenue (4100), VAT Output (2104)
+      const arAccount = await db.chartOfAccount.findUnique({
+        where: { code: '1101' }
+      })
+
+      const revenueAccount = await db.chartOfAccount.findUnique({
+        where: { code: '4100' }
+      })
+
+      const vatOutputAccount = await db.chartOfAccount.findUnique({
+        where: { code: '2104' }
+      })
+
+      if (arAccount && revenueAccount && vatOutputAccount) {
+        // Generate journal entry number for revenue entry
+        const entryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE')
+
+        // Calculate line amounts
+        const totalAmount = existing.totalAmount
+        const subtotal = existing.subtotal
+        const vatAmount = existing.vatAmount
+
+        // Create journal entry for Revenue
+        const revenueJournalEntry = await db.journalEntry.create({
+          data: {
+            entryNo,
+            date: existing.invoiceDate,
+            description: `รายได้ขาย ${existing.invoiceNo}`,
+            reference: existing.invoiceNo,
+            documentType: 'INVOICE_REVENUE',
+            documentId: existing.id,
+            totalDebit: totalAmount,
+            totalCredit: totalAmount,
+            status: 'POSTED',
+            createdById: user.id,
+            approvedById: user.id,
+            approvedAt: new Date(),
+            lines: {
+              create: [
+                {
+                  lineNo: 1,
+                  accountId: arAccount.id,
+                  description: 'ลูกหนี้การค้า',
+                  debit: totalAmount,
+                  credit: 0,
+                  reference: existing.invoiceNo
+                },
+                {
+                  lineNo: 2,
+                  accountId: revenueAccount.id,
+                  description: 'รายได้ขาย',
+                  debit: 0,
+                  credit: subtotal,
+                  reference: existing.invoiceNo
+                },
+                {
+                  lineNo: 3,
+                  accountId: vatOutputAccount.id,
+                  description: 'ภาษีมูลค่าเพิ่มขาย',
+                  debit: 0,
+                  credit: vatAmount,
+                  reference: existing.invoiceNo
+                }
+              ]
+            }
+          }
+        })
+
+        // Note: We don't update invoice.journalEntryId here since it already 
+        // references the COGS entry. The revenue entry is tracked separately
+        // via documentId reference.
+      } else {
+        // One or more required accounts not found, skipping revenue journal entry
+      }
+    } catch (revenueError) {
+      // Revenue journal entry creation failed but don't fail the invoice issuance
       // Continue with successful response
     }
 

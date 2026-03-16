@@ -5,39 +5,49 @@ import prisma from '@/lib/db';
  * This creates a PND.3 or PND.53 record depending on the vendor type (Individual vs Corporate).
  */
 export async function generateWhtFromPayment(paymentId: string) {
-  // 1. Fetch the Payment and its related PurchaseInvoice
+  // 1. Fetch the Payment and its related PurchaseInvoice through allocations
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
     include: {
-      purchase: {
+      allocations: {
         include: {
-          vendor: true,
-          lines: {
-            include: { product: true }
+          invoice: {
+            include: {
+              vendor: true,
+              lines: {
+                include: { product: true }
+              }
+            }
           }
         }
       }
     }
   });
 
-  if (!payment || !payment.purchase) return null;
+  if (!payment || !payment.allocations || payment.allocations.length === 0) return null;
+
+  // Get the first allocated invoice (primary invoice for this payment)
+  const allocation = payment.allocations[0];
+  const purchaseInvoice = allocation?.invoice;
+  
+  if (!purchaseInvoice) return null;
 
   // 2. Check if there was WHT deducted on this invoice
-  if (payment.purchase.withholdingAmount > 0) {
+  if (purchaseInvoice.withholdingAmount > 0) {
     // Generate document number WHT202603-0001
     const count = await prisma.withholdingTax.count();
     const docNo = `WHT${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(count + 1).padStart(4, '0')}`;
     
     // Determine type: PND3 for Individual, PND53 for Company
-    const isCompany = payment.purchase.vendor.taxId?.startsWith('0') || payment.purchase.vendor.name.includes('บริษัท');
+    const isCompany = purchaseInvoice.vendor.taxId?.startsWith('0') || purchaseInvoice.vendor.name.includes('บริษัท');
     const whtType = isCompany ? 'PND53' : 'PND3';
     
     // Extract primary income type from lines
     let incomeType = "ค่าบริการ"; // default
-    let whtRate = payment.purchase.withholdingRate || 3;
+    let whtRate = purchaseInvoice.withholdingRate || 3;
     
     // Find the first service line that has an income type to determine the base
-    const serviceLine = payment.purchase.lines.find(l => l.product?.type === 'SERVICE' && l.product?.incomeType != null);
+    const serviceLine = purchaseInvoice.lines.find(l => l.product?.type === 'SERVICE' && l.product?.incomeType != null);
     if (serviceLine && serviceLine.product?.incomeType) {
       incomeType = serviceLine.product.incomeType.replace(/\d+%/, '').trim() || incomeType;
     }
@@ -50,15 +60,15 @@ export async function generateWhtFromPayment(paymentId: string) {
         documentDate: payment.paymentDate,
         documentType: 'PAYMENT',
         referenceId: payment.id,
-        payeeId: payment.purchase.vendor.id,
-        payeeName: payment.purchase.vendor.name,
-        payeeTaxId: payment.purchase.vendor.taxId,
-        payeeAddress: payment.purchase.vendor.address || "-",
+        payeeId: purchaseInvoice.vendor.id,
+        payeeName: purchaseInvoice.vendor.name,
+        payeeTaxId: purchaseInvoice.vendor.taxId,
+        payeeAddress: purchaseInvoice.vendor.address || "-",
         description: `WHT from Payment ${payment.paymentNo}`,
         incomeType,
-        incomeAmount: Math.max(0, payment.purchase.subtotal - payment.purchase.discountAmount),
+        incomeAmount: Math.max(0, purchaseInvoice.subtotal - purchaseInvoice.discountAmount),
         whtRate,
-        whtAmount: payment.purchase.withholdingAmount,
+        whtAmount: purchaseInvoice.withholdingAmount,
         taxMonth: payment.paymentDate.getMonth() + 1,
         taxYear: payment.paymentDate.getFullYear(),
         reportStatus: 'PENDING'

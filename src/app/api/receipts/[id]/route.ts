@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { z } from 'zod'
-import { requireAuth } from '@/lib/api-auth'
+import { requireAuth, requireRole } from '@/lib/api-auth'
 import { generateDocumentNumber } from '@/lib/thai-accounting'
 
 // Validation schema for receipt allocation
@@ -89,6 +89,7 @@ export async function PUT(
 ) {
   try {
     await requireAuth()
+    await requireRole(['ACCOUNTANT', 'ADMIN'])
 
     const { id } = await params
     const body = await request.json()
@@ -200,6 +201,7 @@ export async function DELETE(
 ) {
   try {
     await requireAuth()
+    await requireRole(['ACCOUNTANT', 'ADMIN'])
 
     const { id } = await params
 

@@ -160,77 +160,110 @@ export async function POST(request: NextRequest) {
 
     // Create debit note with status ISSUED
     const debitNote = await db.$transaction(async (tx) => {
+      // Get system settings for configurable account IDs
+      const settings = await tx.systemSettings.findFirst()
+
+      // Look up required accounts by code
+      const [
+        purchasesAccount,
+        vatInputAccount,
+        apAccount
+      ] = await Promise.all([
+        // Purchases/Expenses (5xxx) - Default to '5110' (Cost of Goods Sold)
+        tx.chartOfAccount.findFirst({
+          where: { code: settings?.purchaseAccountId || '5110' }
+        }),
+        // VAT Input (1xxx) - Default to '1160'
+        tx.chartOfAccount.findFirst({
+          where: { code: settings?.vatInputAccountId || '1160' }
+        }),
+        // Accounts Payable (2xxx) - Default to '2110'
+        tx.chartOfAccount.findFirst({
+          where: { code: settings?.apAccountId || '2110' }
+        })
+      ])
+
+      if (!purchasesAccount) {
+        throw new Error(`Purchases account not found: ${settings?.purchaseAccountId || '5110'}`)
+      }
+      if (!vatInputAccount) {
+        throw new Error(`VAT input account not found: ${settings?.vatInputAccountId || '1160'}`)
+      }
+      if (!apAccount) {
+        throw new Error(`AP account not found: ${settings?.apAccountId || '2110'}`)
+      }
+
       const note = await tx.debitNote.create({
-      data: {
-        debitNoteNo,
-        debitNoteDate: validatedData.debitNoteDate,
-        vendorId: validatedData.vendorId,
-        purchaseInvoiceId: validatedData.purchaseInvoiceId,
-        reason: validatedData.reason,
-        subtotal: validatedData.subtotal,
-        vatRate: validatedData.vatRate,
-        vatAmount: validatedData.vatAmount,
-        totalAmount: validatedData.totalAmount,
-        status: 'ISSUED',
-        notes: validatedData.notes,
-      },
-      include: {
-        vendor: true,
-        purchaseInvoice: true,
-      },
-    })
-
-    // Debit Note Accounting Entry:
-    // Debit Purchases (5xxx) - Additional purchases
-    // Debit VAT Input (1xxx) - Additional input VAT
-    // Credit Accounts Payable (21xx) - Increase vendor debt
-    const journalEntry = await tx.journalEntry.create({
-      data: {
-        entryNo: await generateDocNumber('JOURNAL_ENTRY', 'JE'),
-        date: validatedData.debitNoteDate,
-        description: `ใบเพิ่มหนี้ ${debitNoteNo} - ${vendor.name}`,
-        reference: debitNoteNo,
-        documentType: 'DEBIT_NOTE',
-        documentId: debitNote.id,
-        totalDebit: debitNote.totalAmount,
-        totalCredit: debitNote.totalAmount,
-        status: 'POSTED',
-        lines: {
-          create: [
-            {
-              lineNo: 1,
-              accountId: '5101', // Purchases (should be configured)
-              description: `ค่าใช้จ่ายเพิ่มเติม ${debitNoteNo}`,
-              debit: validatedData.subtotal,
-              credit: 0,
-            },
-            {
-              lineNo: 2,
-              accountId: '1105', // VAT Input (should be configured)
-              description: `VAT ใบเพิ่มหนี้ ${debitNoteNo}`,
-              debit: validatedData.vatAmount,
-              credit: 0,
-            },
-            {
-              lineNo: 3,
-              accountId: '2101', // Accounts Payable (should be configured per vendor)
-              description: `เพิ่มหนี้ผู้ขาย ${vendor.name}`,
-              debit: 0,
-              credit: debitNote.totalAmount,
-            },
-          ],
+        data: {
+          debitNoteNo,
+          debitNoteDate: validatedData.debitNoteDate,
+          vendorId: validatedData.vendorId,
+          purchaseInvoiceId: validatedData.purchaseInvoiceId,
+          reason: validatedData.reason,
+          subtotal: validatedData.subtotal,
+          vatRate: validatedData.vatRate,
+          vatAmount: validatedData.vatAmount,
+          totalAmount: validatedData.totalAmount,
+          status: 'ISSUED',
+          notes: validatedData.notes,
         },
-      },
-    })
+        include: {
+          vendor: true,
+          purchaseInvoice: true,
+        },
+      })
 
-    // Update debit note with journal entry ID
-    await tx.debitNote.update({
-      where: { id: note.id },
-      data: { journalEntryId: journalEntry.id }
-    })
+      // Debit Note Accounting Entry:
+      // Debit Purchases (5xxx) - Additional purchases
+      // Debit VAT Input (1xxx) - Additional input VAT
+      // Credit Accounts Payable (21xx) - Increase vendor debt
+      const journalEntry = await tx.journalEntry.create({
+        data: {
+          entryNo: await generateDocNumber('JOURNAL_ENTRY', 'JE'),
+          date: validatedData.debitNoteDate,
+          description: `ใบเพิ่มหนี้ ${debitNoteNo} - ${vendor.name}`,
+          reference: debitNoteNo,
+          documentType: 'DEBIT_NOTE',
+          documentId: note.id,
+          totalDebit: note.totalAmount,
+          totalCredit: note.totalAmount,
+          status: 'POSTED',
+          lines: {
+            create: [
+              {
+                lineNo: 1,
+                accountId: purchasesAccount.id,
+                description: `ค่าใช้จ่ายเพิ่มเติม ${debitNoteNo}`,
+                debit: validatedData.subtotal,
+                credit: 0,
+              },
+              {
+                lineNo: 2,
+                accountId: vatInputAccount.id,
+                description: `VAT ใบเพิ่มหนี้ ${debitNoteNo}`,
+                debit: validatedData.vatAmount,
+                credit: 0,
+              },
+              {
+                lineNo: 3,
+                accountId: apAccount.id,
+                description: `เพิ่มหนี้ผู้ขาย ${vendor.name}`,
+                debit: 0,
+                credit: note.totalAmount,
+              },
+            ],
+          },
+        },
+      })
 
-    return note
-  })
+      // Update debit note with journal entry ID
+      await tx.debitNote.update({
+        where: { id: note.id },
+        data: { journalEntryId: journalEntry.id }
+      })
+
+      return note
+    })
 
     // Handle stock additions for returned goods (outside transaction)
     if (validatedData.reason === 'RETURNED_GOODS') {
@@ -295,6 +328,9 @@ export async function POST(request: NextRequest) {
     }
     if (error instanceof z.ZodError) {
       return apiError('ข้อมูลไม่ถูกต้อง', 400)
+    }
+    if (error instanceof Error && error.message.includes('account not found')) {
+      return apiError(`บัญชีไม่ถูกต้อง: ${error.message}`, 400)
     }
     console.error('Error message:', error?.message)
     return apiError('เกิดข้อผิดพลาดในการสร้างใบเพิ่มหนี้')

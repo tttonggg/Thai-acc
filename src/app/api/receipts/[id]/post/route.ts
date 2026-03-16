@@ -1,28 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { requireAuth, requireRole } from '@/lib/api-auth'
-import { UserRole } from '@prisma/client'
+import { db } from '@/lib/db'
+import { requireRole } from '@/lib/api-auth'
+import { generateDocNumber } from '@/lib/api-utils'
 
 // POST - Post receipt (create journal entry)
-// FIXED: Added authorization check and transaction boundary
+// Debits Cash/Bank and credits AR for customer payments
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // ✅ FIXED: Check authorization - only ADMIN and ACCOUNTANT can post receipts
-    const user = await requireAuth()
-    if (user.role !== 'ADMIN' && user.role !== 'ACCOUNTANT') {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์ลงบัญชีใบเสร็จรับเงิน' },
-        { status: 403 }
-      )
-    }
+    // Require ACCOUNTANT or ADMIN role
+    const user = await requireRole(['ADMIN', 'ACCOUNTANT'], request)
 
     const { id } = await params
 
-    // ✅ FIXED: Wrap all operations in a transaction for data consistency
-    const result = await prisma.$transaction(
+    // Execute in transaction for data consistency
+    const result = await db.$transaction(
       async (tx) => {
         // Get receipt with all related data
         const receipt = await tx.receipt.findUnique({
@@ -46,30 +40,34 @@ export async function POST(
           throw new Error('ใบเสร็จรับเงินถูกลงบัญชีแล้ว')
         }
 
-        if (receipt.allocations.length === 0) {
-          throw new Error('กรุณาจัดจ่ายใบเสร็จรับเงินอย่างน้อย 1 ใบ')
-        }
-
         // Get GL accounts
-        // Cash/Bank account based on payment method
+        // Cash (1101) or Bank (1102) based on payment method
         let cashAccountId: string | null = null
         if (receipt.paymentMethod === 'CASH') {
-          // Find cash account (1110 - เงินสด)
+          // Find cash account (1101 - เงินสด)
           const cashAccount = await tx.chartOfAccount.findFirst({
-            where: { code: '1110' }
+            where: { code: '1101' }
           })
           cashAccountId = cashAccount?.id || null
-        } else if (receipt.bankAccountId) {
-          cashAccountId = receipt.bankAccount.glAccountId
+        } else {
+          // Bank account (1102) or use bank account's GL account
+          const bankAccount = await tx.chartOfAccount.findFirst({
+            where: { code: '1102' }
+          })
+          if (receipt.bankAccount?.glAccountId) {
+            cashAccountId = receipt.bankAccount.glAccountId
+          } else {
+            cashAccountId = bankAccount?.id || null
+          }
         }
 
         if (!cashAccountId) {
           throw new Error('ไม่พบบัญชีเงินสด/ธนาคาร')
         }
 
-        // AR account (1120 - ลูกหนี้การค้า)
+        // AR account (1103 - ลูกหนี้การค้า)
         const arAccount = await tx.chartOfAccount.findFirst({
-          where: { code: '1120' }
+          where: { code: '1103' }
         })
 
         if (!arAccount) {
@@ -81,13 +79,57 @@ export async function POST(
           where: { code: '2130' }
         })
 
-        // Generate journal entry number
-        const journalCount = await tx.journalEntry.count()
-        const entryNo = `JE-${String(journalCount + 1).padStart(6, '0')}`
+        // Generate journal entry number using utility
+        const entryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE')
 
-        // Calculate total allocated
-        const totalAllocated = receipt.allocations.reduce((sum, alloc) => sum + alloc.amount, 0)
+        // Calculate total WHT
         const totalWht = receipt.whtAmount
+
+        // Create journal entry lines
+        const journalLines: Array<{
+          lineNo: number
+          accountId: string
+          description: string
+          debit: number
+          credit: number
+        }> = []
+
+        let lineNo = 1
+
+        // Debit: Cash/Bank for total amount received
+        journalLines.push({
+          lineNo: lineNo++,
+          accountId: cashAccountId,
+          description: `รับเงินจาก ${receipt.customer.name}`,
+          debit: receipt.amount,
+          credit: 0,
+        })
+
+        // Credit: AR for each invoice allocation
+        for (const alloc of receipt.allocations) {
+          journalLines.push({
+            lineNo: lineNo++,
+            accountId: arAccount.id,
+            description: `ชำระ ${alloc.invoice.invoiceNo}`,
+            debit: 0,
+            credit: alloc.amount,
+          })
+        }
+
+        // Credit: WHT Payable (if any)
+        if (totalWht > 0 && whtPayableAccount) {
+          journalLines.push({
+            lineNo: lineNo++,
+            accountId: whtPayableAccount.id,
+            description: `ภาษีหัก ณ ที่จ่าย`,
+            debit: 0,
+            credit: totalWht,
+          })
+        }
+
+        // Calculate total for balancing
+        const totalDebit = journalLines.reduce((sum, line) => sum + line.debit, 0)
+        const totalCredit = journalLines.reduce((sum, line) => sum + line.credit, 0)
 
         // Create journal entry
         const journalEntry = await tx.journalEntry.create({
@@ -98,45 +140,21 @@ export async function POST(
             reference: receipt.receiptNo,
             documentType: 'RECEIPT',
             documentId: receipt.id,
-            totalDebit: receipt.amount,
-            totalCredit: receipt.amount,
+            totalDebit,
+            totalCredit,
             status: 'POSTED',
             createdById: user.id,
             approvedById: user.id,
             approvedAt: new Date(),
             lines: {
-              create: [
-                // Debit: Cash/Bank
-                {
-                  lineNo: 1,
-                  accountId: cashAccountId,
-                  description: `รับเงินจาก ${receipt.customer.name}`,
-                  debit: receipt.amount,
-                  credit: 0,
-                },
-                // Credit: AR (for each invoice allocation)
-                ...receipt.allocations.map((alloc, index) => ({
-                  lineNo: 2 + index,
-                  accountId: arAccount.id,
-                  description: `ชำระ ${alloc.invoice.invoiceNo}`,
-                  debit: 0,
-                  credit: alloc.amount,
-                })),
-                // Credit: WHT Payable (if any)
-                ...(totalWht > 0 && whtPayableAccount ? [{
-                  lineNo: 2 + receipt.allocations.length + 1,
-                  accountId: whtPayableAccount.id,
-                  description: `ภาษีหัก ณ ที่จ่าย`,
-                  debit: 0,
-                  credit: totalWht,
-                }] : []),
-              ]
+              create: journalLines
             }
           }
         })
 
         // Update invoice paid amounts and status
         for (const alloc of receipt.allocations) {
+          // Increment paid amount
           await tx.invoice.update({
             where: { id: alloc.invoiceId },
             data: {
@@ -146,18 +164,18 @@ export async function POST(
             }
           })
 
-          // Update invoice status based on payment
-          const invoice = await tx.invoice.findUnique({
+          // Get updated invoice to check status
+          const updatedInvoice = await tx.invoice.findUnique({
             where: { id: alloc.invoiceId }
           })
 
-          if (invoice) {
-            const balance = invoice.totalAmount - invoice.paidAmount - alloc.amount
-            let newStatus = invoice.status
+          if (updatedInvoice) {
+            const balance = updatedInvoice.totalAmount - updatedInvoice.paidAmount
+            let newStatus = updatedInvoice.status
 
             if (balance <= 0.01) {
               newStatus = 'PAID'
-            } else if (invoice.paidAmount > 0) {
+            } else if (updatedInvoice.paidAmount > 0) {
               newStatus = 'PARTIAL'
             }
 
@@ -168,7 +186,7 @@ export async function POST(
           }
         }
 
-        // Update receipt status
+        // Update receipt status to POSTED
         const updatedReceipt = await tx.receipt.update({
           where: { id },
           data: {
@@ -190,9 +208,8 @@ export async function POST(
         return updatedReceipt
       },
       {
-        // Transaction configuration
-        maxWait: 5000,  // Maximum time to wait for transaction
-        timeout: 10000, // Maximum time for transaction to complete
+        maxWait: 5000,
+        timeout: 10000,
       }
     )
 
@@ -200,12 +217,15 @@ export async function POST(
   } catch (error: any) {
     console.error('Error posting receipt:', error)
 
-    // Handle specific error messages
     const errorMessage = error.message || 'เกิดข้อผิดพลาดในการลงบัญชีใบเสร็จรับเงิน'
 
     // Determine appropriate status code
     let statusCode = 500
-    if (errorMessage.includes('ไม่พบ') || errorMessage.includes('ไม่มีสิทธิ์')) {
+    if (errorMessage.includes('ไม่พบ')) {
+      statusCode = 404
+    } else if (errorMessage.includes('ไม่มีสิทธิ์')) {
+      statusCode = 403
+    } else if (errorMessage.includes('ถูกลงบัญชีแล้ว')) {
       statusCode = 400
     }
 

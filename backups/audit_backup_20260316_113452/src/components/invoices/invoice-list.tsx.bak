@@ -1,0 +1,188 @@
+'use client'
+
+import { useState } from 'react'
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
+  Download,
+  Printer,
+  FileText
+} from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { InvoiceForm } from '@/components/invoices/invoice-form'
+import { InvoiceEditDialog } from '@/components/invoices/invoice-edit-dialog'
+
+interface Invoice {
+  id: string
+  invoiceNo: string
+  date: string
+  customerName: string
+  subtotal: number
+  vatAmount: number
+  totalAmount: number
+  status: string
+  type: string
+}
+
+const sampleInvoices: Invoice[] = [
+  { id: '1', invoiceNo: 'INV-2024-0001', date: '01/01/2567', customerName: 'บริษัท ABC จำกัด', subtotal: 50000, vatAmount: 3500, totalAmount: 53500, status: 'ISSUED', type: 'TAX_INVOICE' },
+  { id: '2', invoiceNo: 'INV-2024-0002', date: '02/01/2567', customerName: 'บริษัท XYZ จำกัด', subtotal: 100000, vatAmount: 7000, totalAmount: 107000, status: 'PAID', type: 'TAX_INVOICE' },
+  { id: '3', invoiceNo: 'INV-2024-0003', date: '03/01/2567', customerName: 'ห้างหุ้นส่วน 123', subtotal: 25000, vatAmount: 1750, totalAmount: 26750, status: 'PARTIAL', type: 'RECEIPT' },
+  { id: '4', invoiceNo: 'CN-2024-0001', date: '04/01/2567', customerName: 'บริษัท ABC จำกัด', subtotal: 5000, vatAmount: 350, totalAmount: 5350, status: 'ISSUED', type: 'CREDIT_NOTE' },
+  { id: '5', invoiceNo: 'INV-2024-0004', date: '05/01/2567', customerName: 'บริษัท DEF จำกัด', subtotal: 75000, vatAmount: 5250, totalAmount: 80250, status: 'DRAFT', type: 'TAX_INVOICE' },
+]
+
+const statusColors: Record<string, string> = {
+  DRAFT: 'bg-gray-100 text-gray-800',
+  ISSUED: 'bg-blue-100 text-blue-800',
+  PARTIAL: 'bg-yellow-100 text-yellow-800',
+  PAID: 'bg-green-100 text-green-800',
+  CANCELLED: 'bg-red-100 text-red-800',
+}
+
+const statusLabels: Record<string, string> = {
+  DRAFT: 'ร่าง',
+  ISSUED: 'ออกแล้ว',
+  PARTIAL: 'รับชำระบางส่วน',
+  PAID: 'รับชำระเต็มจำนวน',
+  CANCELLED: 'ยกเลิก',
+}
+
+const typeLabels: Record<string, string> = {
+  TAX_INVOICE: 'ใบกำกับภาษี',
+  RECEIPT: 'ใบเสร็จรับเงิน',
+  DELIVERY_NOTE: 'ใบส่งของ',
+  CREDIT_NOTE: 'ใบลดหนี้',
+  DEBIT_NOTE: 'ใบเพิ่มหนี้',
+}
+
+export function InvoiceList() {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [invoiceFormType, setInvoiceFormType] = useState<'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE'>('TAX_INVOICE')
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [editInvoiceId, setEditInvoiceId] = useState<string | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+
+  const filteredInvoices = sampleInvoices.filter(invoice => {
+    const matchesSearch = invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          invoice.invoiceNo.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = filterStatus === 'all' || invoice.status === filterStatus
+    return matchesSearch && matchesStatus
+  })
+
+  const handleInvoiceSuccess = () => {
+    setRefreshKey(prev => prev + 1)
+    setIsAddDialogOpen(false)
+  }
+
+  const handleEditInvoiceSuccess = () => {
+    setRefreshKey(prev => prev + 1)
+    setIsEditDialogOpen(false)
+    setEditInvoiceId(null)
+  }
+
+  const openEditDialog = (invoiceId: string) => {
+    setEditInvoiceId(invoiceId)
+    setIsEditDialogOpen(true)
+  }
+
+  const openInvoiceForm = (type: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE') => {
+    setInvoiceFormType(type)
+    setIsAddDialogOpen(true)
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">ใบกำกับภาษี / เอกสารการขาย</h1>
+          <p className="text-gray-500 mt-1">จัดการใบกำกับภาษี ใบเสร็จ และเอกสารที่เกี่ยวข้อง</p>
+        </div>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="h-4 w-4 mr-2" />
+              สร้างเอกสารใหม่
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>สร้างเอกสารใหม่</DialogTitle>
+              <DialogDescription>
+                เลือกประเภทเอกสารที่ต้องการสร้าง
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <Button variant="outline" className="h-24 flex-col" onClick={() => openInvoiceForm('TAX_INVOICE')}>
+                <FileText className="h-8 w-8 mb-2 text-blue-600" />
+                <span>ใบกำกับภาษี</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex-col" onClick={() => openInvoiceForm('RECEIPT')}>
+                <FileText className="h-8 w-8 mb-2 text-green-600" />
+                <span>ใบเสร็จรับเงิน</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex-col" onClick={() => openInvoiceForm('DELIVERY_NOTE')}>
+                <FileText className="h-8 w-8 mb-2 text-orange-600" />
+                <span>ใบส่งของ</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex-col" onClick={() => openInvoiceForm('CREDIT_NOTE')}>
+                <FileText className="h-8 w-8 mb-2 text-red-600" />
+                <span>ใบลดหนี้</span>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <InvoiceForm
+          open={isAddDialogOpen}
+          onClose={() => setIsAddDialogOpen(false)}
+          onSuccess={handleInvoiceSuccess}
+          defaultType={invoiceFormType}
+        />
+      </div>
+
+      {editInvoiceId && (
+        <InvoiceEditDialog
+          invoiceId={editInvoiceId}
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          onSuccess={handleEditInvoiceSuccess}
+        />
+      )}
+    </div>
+  )
+}

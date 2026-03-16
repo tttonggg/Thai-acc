@@ -25,7 +25,7 @@ export async function GET(
     return NextResponse.json({ success: true, data: employee })
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลพนักงาน' },
       { status: 500 }
     )
   }
@@ -84,7 +84,7 @@ export async function PATCH(
     return NextResponse.json({ success: true, data: updated })
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: 'ไม่สามารถอัปเดตข้อมูลพนักงานได้' },
       { status: 500 }
     )
   }
@@ -130,7 +130,7 @@ export async function DELETE(
     return NextResponse.json({ success: true, message: 'ลบพนักงานสำเร็จ' })
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: 'ไม่สามารถลบพนักงานได้' },
       { status: 500 }
     )
   }

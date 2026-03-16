@@ -37,7 +37,7 @@ export async function GET(
       }
     })
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลสินทรัพย์' }, { status: 500 })
   }
 }
 
@@ -173,7 +173,7 @@ export async function PUT(
       }
     })
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'ไม่สามารถอัปเดตข้อมูลสินทรัพย์ได้' }, { status: 500 })
   }
 }
 
@@ -229,6 +229,6 @@ export async function DELETE(
       message: 'ลบสินทรัพย์สำเร็จ'
     })
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'ไม่สามารถลบสินทรัพย์ได้' }, { status: 500 })
   }
 }

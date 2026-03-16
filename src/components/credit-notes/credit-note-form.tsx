@@ -200,6 +200,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
   const totals = calculateTotals()
 
   const onSubmit = async (values: z.infer<typeof creditNoteSchema>) => {
+    if (loading) return
     setLoading(true)
     try {
       const payload = {

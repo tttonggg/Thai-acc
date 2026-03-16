@@ -22,6 +22,7 @@ const paymentUpdateSchema = z.object({
   unallocated: z.number().min(0).default(0).optional(),
   notes: z.string().optional(),
   allocations: z.array(paymentAllocationSchema).optional(),
+  status: z.enum(["DRAFT", "POSTED", "CANCELLED"]).optional(),
 })
 
 // GET /api/payments/[id] - Get single payment

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ success: true, data: record })
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลภาษีหัก ณ ที่จ่าย' }, { status: 500 })
   }
 }
 
@@ -38,6 +38,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ success: true, data: record })
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'ไม่สามารถอัปเดตสถานะรายงานได้' }, { status: 500 })
   }
 }

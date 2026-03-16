@@ -288,6 +288,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
   }
 
   const onSubmit = async (values: ReceiptFormValues) => {
+    if (loading) return
     setLoading(true)
     try {
       const totalAllocated = allocations.reduce((sum, a) => sum + a.amount, 0)
