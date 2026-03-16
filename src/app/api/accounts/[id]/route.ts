@@ -5,6 +5,15 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// Helper functions for consistent API responses
+function apiSuccess<T>(data: T, status: number = 200) {
+  return NextResponse.json({ success: true, data }, { status })
+}
+
+function apiError(message: string, status: number = 400) {
+  return NextResponse.json({ success: false, error: message }, { status })
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -12,7 +21,7 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions)
     if (!session || session.user?.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return apiError('ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ', 401)
     }
 
     const { id } = await params
@@ -23,9 +32,7 @@ export async function DELETE(
     })
 
     if (children) {
-      return NextResponse.json({
-        error: 'ไม่สามารถลบบัญชีที่มีบัญชีย่อยได้ กรุณาลบบัญชีย่อยก่อน'
-      }, { status: 400 })
+      return apiError('ไม่สามารถลบบัญชีที่มีบัญชีย่อยได้ กรุณาลบบัญชีย่อยก่อน', 400)
     }
 
     // Check if account is used in journal entries
@@ -34,9 +41,7 @@ export async function DELETE(
     })
 
     if (journalLines) {
-      return NextResponse.json({
-        error: 'ไม่สามารถลบบัญชีที่มีรายการบันทึกบัญชีได้'
-      }, { status: 400 })
+      return apiError('ไม่สามารถลบบัญชีที่มีรายการบันทึกบัญชีได้', 400)
     }
 
     // Soft delete by setting isActive to false
@@ -45,11 +50,9 @@ export async function DELETE(
       data: { isActive: false }
     })
 
-    return NextResponse.json({ success: true })
+    return apiSuccess({ message: 'ลบบัญชีสำเร็จ' })
   } catch (error) {
-    return NextResponse.json({
-      error: 'Failed to delete account'
-    }, { status: 500 })
+    return apiError('เกิดข้อผิดพลาดในการลบบัญชี', 500)
   }
 }
 
@@ -60,7 +63,7 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return apiError('ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ', 401)
     }
 
     const { id } = await params
@@ -78,7 +81,7 @@ export async function PUT(
       }
     })
 
-    return NextResponse.json({
+    return apiSuccess({
       id: account.id,
       code: account.code,
       name: account.name,
@@ -91,8 +94,6 @@ export async function PUT(
       notes: account.notes,
     })
   } catch (error) {
-    return NextResponse.json({
-      error: 'Failed to update account'
-    }, { status: 500 })
+    return apiError('เกิดข้อผิดพลาดในการอัปเดตบัญชี', 500)
   }
 }

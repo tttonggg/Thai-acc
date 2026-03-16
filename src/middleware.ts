@@ -5,10 +5,13 @@ import { rateLimit, rateLimitPresets } from './lib/rate-limit'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Bypass rate limiting for local development
-  const isLocalDev = request.headers.get('host')?.includes('localhost:3000')
+  // DEV ONLY: Bypass rate limiting for local development
+  // WARNING: Remove or disable this in production!
+  const isLocalDev = process.env.NODE_ENV === 'development' && 
+                     (request.headers.get('host')?.includes('localhost:3000') ||
+                      request.headers.get('host')?.includes('127.0.0.1:3000'))
   if (isLocalDev) {
-    return NextResponse.next() // Skip all rate limiting for localhost
+    return NextResponse.next() // Skip all rate limiting for localhost (development only)
   }
 
   // Bypass rate limiting for automated tests

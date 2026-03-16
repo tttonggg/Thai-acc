@@ -287,8 +287,73 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
     form.setValue('allocations', newAllocations)
   }
 
+  const validateForm = (values: ReceiptFormValues): boolean => {
+    // Validate customer selected
+    if (!values.customerId) {
+      toast({
+        title: 'กรุณาเลือกลูกค้า',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate amount > 0
+    if (values.amount <= 0) {
+      toast({
+        title: 'กรุณาระบุจำนวนเงินมากกว่า 0',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate at least 1 allocation
+    if (!allocations || allocations.length === 0) {
+      toast({
+        title: 'กรุณาจัดจ่ายอย่างน้อย 1 รายการ',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate totalAllocated <= amount
+    const totalAllocated = allocations.reduce((sum, a) => sum + a.amount, 0)
+    if (totalAllocated > values.amount) {
+      toast({
+        title: 'ยอดจัดจ่ายเกินกว่ายอดรับเงิน',
+        description: `จัดจ่ายรวม: ฿${totalAllocated.toLocaleString()} เกินกว่ายอดรับ: ฿${values.amount.toLocaleString()}`,
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate bank account for transfer/cheque
+    if ((values.paymentMethod === 'TRANSFER' || values.paymentMethod === 'CHEQUE') && !values.bankAccountId) {
+      toast({
+        title: 'กรุณาเลือกบัญชีธนาคาร',
+        description: 'วิธีการชำระเงินแบบโอนเงินหรือเช็คต้องระบุบัญชีธนาคาร',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate cheque number for cheque payment
+    if (values.paymentMethod === 'CHEQUE' && !values.chequeNo) {
+      toast({
+        title: 'กรุณาระบุเลขที่เช็ค',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    return true
+  }
+
   const onSubmit = async (values: ReceiptFormValues) => {
     if (loading) return
+
+    // Client-side validation
+    if (!validateForm(values)) return
+
     setLoading(true)
     try {
       const totalAllocated = allocations.reduce((sum, a) => sum + a.amount, 0)

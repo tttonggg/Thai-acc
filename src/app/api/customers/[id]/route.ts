@@ -1,5 +1,5 @@
 import { db } from "@/lib/db"
-import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError } from "@/lib/api-utils"
+import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError } from "@/lib/api-utils"
 import { customerSchema } from "@/lib/validations"
 
 // GET /api/customers/[id] - Get single customer
@@ -55,8 +55,9 @@ export async function PUT(
     const user = await requireAuth()
     const { id } = await params
     
-    if (user.role === "VIEWER") {
-      return apiError("ไม่มีสิทธิ์แก้ไขลูกค้า", 403)
+    // IDOR Protection: Only ADMIN and ACCOUNTANT can update customers
+    if (user.role !== "ADMIN" && user.role !== "ACCOUNTANT") {
+      return forbiddenError()
     }
     
     const body = await request.json()
@@ -106,8 +107,9 @@ export async function DELETE(
     const user = await requireAuth()
     const { id } = await params
     
+    // IDOR Protection: Only ADMIN can delete customers
     if (user.role !== "ADMIN") {
-      return apiError("เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถลบลูกค้าได้", 403)
+      return forbiddenError()
     }
     
     const existing = await db.customer.findUnique({

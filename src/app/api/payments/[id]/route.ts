@@ -31,7 +31,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAuth()
+    const user = await requireAuth()
 
     const payment = await db.payment.findUnique({
       where: { id: params.id },
@@ -62,6 +62,11 @@ export async function GET(
 
     if (!payment) {
       return apiError("ไม่พบใบจ่ายเงิน", 404)
+    }
+
+    // IDOR Protection: Check ownership - only ADMIN can access any payment
+    if (user.role !== "ADMIN" && payment.createdById && payment.createdById !== user.id) {
+      return forbiddenError()
     }
 
     return apiResponse(payment)
@@ -95,6 +100,11 @@ export async function PUT(
 
     if (!existingPayment) {
       return apiError("ไม่พบใบจ่ายเงิน", 404)
+    }
+
+    // IDOR Protection: Check ownership - only ADMIN can modify any payment
+    if (user.role !== "ADMIN" && existingPayment.createdById && existingPayment.createdById !== user.id) {
+      return forbiddenError()
     }
 
     // Only draft payments can be edited
@@ -223,6 +233,11 @@ export async function DELETE(
       return apiError("ไม่พบใบจ่ายเงิน", 404)
     }
 
+    // IDOR Protection: Check ownership - only ADMIN can delete any payment
+    if (user.role !== "ADMIN" && payment.createdById && payment.createdById !== user.id) {
+      return forbiddenError()
+    }
+
     // Only draft payments can be deleted
     if (payment.status !== "DRAFT") {
       return apiError("สามารถลบเฉพาะสถานะร่างเท่านั้น", 403)
@@ -268,6 +283,11 @@ export async function POST(
 
     if (!payment) {
       return apiError("ไม่พบใบจ่ายเงิน", 404)
+    }
+
+    // IDOR Protection: Check ownership - only ADMIN can post any payment
+    if (user.role !== "ADMIN" && payment.createdById && payment.createdById !== user.id) {
+      return forbiddenError()
     }
 
     if (payment.status !== "DRAFT") {

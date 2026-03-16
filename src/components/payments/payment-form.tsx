@@ -189,7 +189,72 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
   const totalWHT = allocations.reduce((sum, a) => sum + (a.whtAmount || 0), 0)
   const unallocated = Math.max(0, amount - totalAllocated)
 
+  const validateForm = (values: FormValues): boolean => {
+    // Validate vendor selected
+    if (!values.vendorId) {
+      toast({
+        title: 'กรุณาเลือกผู้ขาย',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate amount > 0
+    if (values.amount <= 0) {
+      toast({
+        title: 'กรุณาระบุจำนวนเงินมากกว่า 0',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate bank account for transfer/cheque
+    if ((values.paymentMethod === 'TRANSFER' || values.paymentMethod === 'CHEQUE') && !values.bankAccountId) {
+      toast({
+        title: 'กรุณาเลือกบัญชีธนาคาร',
+        description: 'วิธีการจ่ายเงินแบบโอนเงินหรือเช็คต้องระบุบัญชีธนาคาร',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate cheque number for cheque payment
+    if (values.paymentMethod === 'CHEQUE' && !values.chequeNo) {
+      toast({
+        title: 'กรุณาระบุเลขที่เช็ค',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate at least 1 allocation
+    if (!values.allocations || values.allocations.length === 0) {
+      toast({
+        title: 'กรุณาจัดจ่ายอย่างน้อย 1 รายการ',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate totalAllocated <= amount
+    if (totalAllocated > values.amount) {
+      toast({
+        title: 'ยอดจัดจ่ายเกินกว่ายอดจ่ายเงิน',
+        description: `จัดจ่ายรวม: ฿${totalAllocated.toLocaleString()} เกินกว่ายอดจ่าย: ฿${values.amount.toLocaleString()}`,
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    return true
+  }
+
   const onSubmit = async (values: FormValues) => {
+    if (submitting) return
+
+    // Client-side validation
+    if (!validateForm(values)) return
+
     setSubmitting(true)
     try {
       const res = await fetch('/api/payments', {

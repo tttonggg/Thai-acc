@@ -79,6 +79,7 @@ export class AuthError extends Error {
 
 /**
  * Standard API error response
+ * Format: { success: false, error: string }
  */
 export function apiError(
   message: string,
@@ -97,6 +98,7 @@ export function apiError(
 
 /**
  * Standard success response
+ * Format: { success: true, data: T }
  */
 export function apiSuccess<T>(
   data: T,

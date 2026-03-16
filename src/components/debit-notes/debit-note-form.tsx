@@ -128,8 +128,64 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
     return { subtotal: acc.subtotal + amount, vatAmount: acc.vatAmount + vat, totalAmount: acc.totalAmount + amount + vat }
   }, { subtotal: 0, vatAmount: 0, totalAmount: 0 })
 
+  const validateForm = (): boolean => {
+    // Validate vendor selected
+    if (!form.getValues('vendorId')) {
+      toast({
+        title: 'กรุณาเลือกผู้ขาย',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate at least 1 line
+    const currentLines = form.getValues('lines')
+    if (!currentLines || currentLines.length === 0) {
+      toast({
+        title: 'กรุณาเพิ่มรายการ',
+        variant: 'destructive',
+      })
+      return false
+    }
+
+    // Validate each line
+    for (let i = 0; i < currentLines.length; i++) {
+      const line = currentLines[i]
+      
+      if (!line.description || line.description.trim() === '') {
+        toast({
+          title: `รายการที่ ${i + 1}: กรุณาระบุรายการ`,
+          variant: 'destructive',
+        })
+        return false
+      }
+
+      if (line.quantity <= 0) {
+        toast({
+          title: `รายการที่ ${i + 1}: จำนวนต้องมากกว่า 0`,
+          variant: 'destructive',
+        })
+        return false
+      }
+
+      if (line.unitPrice < 0) {
+        toast({
+          title: `รายการที่ ${i + 1}: ราคาต่อหน่วยต้องไม่ติดลบ`,
+          variant: 'destructive',
+        })
+        return false
+      }
+    }
+
+    return true
+  }
+
   const onSubmit = async (values: z.infer<typeof debitNoteSchema>) => {
     if (loading) return
+
+    // Client-side validation
+    if (!validateForm()) return
+
     setLoading(true)
     try {
       const payload = {

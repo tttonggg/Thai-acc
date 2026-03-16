@@ -31,7 +31,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth()
+    const user = await requireAuth()
 
     const { id } = await params
 
@@ -57,6 +57,15 @@ export async function GET(
       return NextResponse.json(
         { success: false, error: 'ไม่พบใบเสร็จรับเงิน' },
         { status: 404 }
+      )
+    }
+
+    // IDOR Protection: Only ADMIN and ACCOUNTANT can access any receipt
+    // Regular users should not access receipts directly by ID
+    if (user.role !== 'ADMIN' && user.role !== 'ACCOUNTANT') {
+      return NextResponse.json(
+        { success: false, error: 'ไม่มีสิทธิ์เข้าถึงข้อมูลนี้' },
+        { status: 403 }
       )
     }
 

@@ -1,5 +1,6 @@
 // Thai Accounting ERP System - Prisma Schema
 // โปรแกรมบัญชีมาตรฐานไทย
+// Monetary values are stored in Satang (สตางค์) - 1/100 of Baht
 
 generator client {
   provider = "prisma-client-js"
@@ -40,18 +41,18 @@ model Company {
 // ตั้งค่าระบบ / System Settings
 // ============================================
 model SystemSettings {
-  id              String   @id @default(cuid())
-  companyId       String   @unique
-  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  vatRate         Float    @default(7) // อัตราภาษีมูลค่าเพิ่ม
-  whtPnd53Service Float    @default(3) // อัตราภาษีหัก ณ ที่จ่าย ค่าบริการ
-  whtPnd53Rent    Float    @default(5) // อัตราภาษีหัก ณ ที่จ่าย ค่าเช่า
-  whtPnd53Prof    Float    @default(3) // อัตราภาษีหัก ณ ที่จ่าย ค่าบริการวิชาชีพ
-  whtPnd53Contract Float   @default(1) // อัตราภาษีหัก ณ ที่จ่าย ค่าจ้างทำของ
-  whtPnd53Advert  Float    @default(2) // อัตราภาษีหัก ณ ที่จ่าย ค่าโฆษณา
-  metadata        Json? // ข้อมูลส่วนขยาย
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String  @id @default(cuid())
+  companyId        String  @unique
+  company          Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vatRate          Float   @default(7) // อัตราภาษีมูลค่าเพิ่ม (%)
+  whtPnd53Service  Float   @default(3) // อัตราภาษีหัก ณ ที่จ่าย ค่าบริการ (%)
+  whtPnd53Rent     Float   @default(5) // อัตราภาษีหัก ณ ที่จ่าย ค่าเช่า (%)
+  whtPnd53Prof     Float   @default(3) // อัตราภาษีหัก ณ ที่จ่าย ค่าบริการวิชาชีพ (%)
+  whtPnd53Contract Float   @default(1) // อัตราภาษีหัก ณ ที่จ่าย ค่าจ้างทำของ (%)
+  whtPnd53Advert   Float   @default(2) // อัตราภาษีหัก ณ ที่จ่าย ค่าโฆษณา (%)
+  metadata         Json? // ข้อมูลส่วนขยาย
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 // ============================================
@@ -74,6 +75,8 @@ model ChartOfAccount {
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   journalLines JournalLine[]
+
+  @@index([parentId])
 }
 
 enum AccountType {
@@ -88,37 +91,45 @@ enum AccountType {
 // บันทึกบัญชี / Journal Entry
 // ============================================
 model JournalEntry {
-  id           String        @id @default(cuid())
-  entryNo      String        @unique // เลขที่บันทึก
-  date         DateTime // วันที่
-  description  String? // รายการ
-  reference    String? // เอกสารอ้างอิง
-  documentType String? // ประเภทเอกสาร
-  documentId   String? // ID เอกสารต้นทาง
-  totalDebit   Float         @default(0) // รวมเดบิต
-  totalCredit  Float         @default(0) // รวมเครดิต
-  status       EntryStatus   @default(DRAFT)
-  isAdjustment Boolean       @default(false) // รายการปรับปรุง
-  isReversing  Boolean       @default(false) // รายการย้อนกลับ
-  reversingId  String? // ID ของรายการที่ย้อน
+  id              String         @id @default(cuid())
+  entryNo         String         @unique // เลขที่บันทึก
+  date            DateTime // วันที่
+  description     String? // รายการ
+  reference       String? // เอกสารอ้างอิง
+  documentType    String? // ประเภทเอกสาร
+  documentId      String? // ID เอกสารต้นทาง
+  totalDebit      Int            @default(0) // รวมเดบิต (สตางค์)
+  totalCredit     Int            @default(0) // รวมเครดิต (สตางค์)
+  status          EntryStatus    @default(DRAFT)
+  isAdjustment    Boolean        @default(false) // รายการปรับปรุง
+  isReversing     Boolean        @default(false) // รายการย้อนกลับ
+  reversingId     String? // ID ของรายการที่ย้อน
   createdById     String? // ผู้สร้าง
   approvedById    String? // ผู้อนุมัติ
   approvedAt      DateTime? // วันที่อนุมัติ
   idempotencyKey  String? @unique // ✅ FIXED: Prevent duplicate journal entries
   notes           String? // หมายเหตุ
+  isActive        Boolean        @default(true)
+  deletedAt       DateTime?
+  deletedBy       String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  lines        JournalLine[]
-  invoices     Invoice[]              @relation("InvoiceJournal")
-  purchaseInvoices PurchaseInvoice[]  @relation("PurchaseInvoiceJournal")
-  receipts     Receipt[]              @relation("ReceiptJournal")
-  payments     Payment[]              @relation("PaymentJournal")
-  creditNotes  CreditNote[]           @relation("CreditNoteJournal")
-  debitNotes   DebitNote[]            @relation("DebitNoteJournal")
-  payrollRuns  PayrollRun[]           @relation("PayrollRunJournal")
-  cheques      Cheque[]               @relation("ChequeJournal")
-  pettyCashVouchers PettyCashVoucher[] @relation("PettyCashVoucherJournal")
-  stockTakes   StockTake[]            @relation("StockTakeJournal")
+  lines           JournalLine[]
+  invoices        Invoice[]              @relation("InvoiceJournal")
+  purchaseInvoices PurchaseInvoice[]      @relation("PurchaseInvoiceJournal")
+  receipts        Receipt[]              @relation("ReceiptJournal")
+  payments        Payment[]              @relation("PaymentJournal")
+  creditNotes     CreditNote[]           @relation("CreditNoteJournal")
+  debitNotes      DebitNote[]            @relation("DebitNoteJournal")
+  payrollRuns     PayrollRun[]           @relation("PayrollRunJournal")
+  cheques         Cheque[]               @relation("ChequeJournal")
+  pettyCashVouchers PettyCashVoucher[]   @relation("PettyCashVoucherJournal")
+  stockTakes      StockTake[]            @relation("StockTakeJournal")
+
+  @@index([createdById])
+  @@index([approvedById])
+  @@index([reversingId])
+  @@index([deletedAt])
 }
 
 model JournalLine {
@@ -129,8 +140,8 @@ model JournalLine {
   accountId   String
   account     ChartOfAccount @relation(fields: [accountId], references: [id])
   description String? // รายการ
-  debit       Float          @default(0) // เดบิต
-  credit      Float          @default(0) // เครดิต
+  debit       Int            @default(0) // เดบิต (สตางค์)
+  credit      Int            @default(0) // เครดิต (สตางค์)
   reference   String? // เอกสารอ้างอิง
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -166,9 +177,11 @@ model Customer {
   website       String? // เว็บไซต์
   contactName   String? // ชื่อผู้ติดต่อ
   contactPhone  String? // โทรศัพท์ผู้ติดต่อ
-  creditLimit   Float        @default(0) // วงเงินเครดิต
+  creditLimit   Int          @default(0) // วงเงินเครดิต (สตางค์)
   creditDays    Int          @default(30) // เครดิต (วัน)
   isActive      Boolean      @default(true)
+  deletedAt     DateTime?
+  deletedBy     String?
   notes         String? // หมายเหตุ
   externalRefId String?      @unique // สำหรับเชื่อมต่อระบบภายนอก (CRM/POS)
   metadata      Json? // ข้อมูลส่วนขยาย
@@ -177,6 +190,8 @@ model Customer {
   invoices      Invoice[]
   receipts      Receipt[]
   creditNotes   CreditNote[]
+
+  @@index([deletedAt])
 }
 
 // ============================================
@@ -205,6 +220,8 @@ model Vendor {
   bankAccountName  String? // ชื่อบัญชี
   creditDays       Int               @default(30) // เครดิต (วัน)
   isActive         Boolean           @default(true)
+  deletedAt        DateTime?
+  deletedBy        String?
   notes            String? // หมายเหตุ
   externalRefId    String?           @unique // สำหรับเชื่อมต่อระบบภายนอก
   metadata         Json? // ข้อมูลส่วนขยาย
@@ -213,6 +230,8 @@ model Vendor {
   purchaseInvoices PurchaseInvoice[]
   payments         Payment[]
   debitNotes       DebitNote[]
+
+  @@index([deletedAt])
 }
 
 // ============================================
@@ -227,16 +246,18 @@ model Product {
   category             String? // หมวดหมู่
   unit                 String                @default("ชิ้น") // หน่วย
   type                 ProductType           @default(PRODUCT) // ประเภท
-  salePrice            Float                 @default(0) // ราคาขาย
-  costPrice            Float                 @default(0) // ราคาทุน
+  salePrice            Int                   @default(0) // ราคาขาย (สตางค์)
+  costPrice            Int                   @default(0) // ราคาทุน (สตางค์)
   vatRate              Float                 @default(7) // อัตรา VAT (%)
   vatType              VatType               @default(EXCLUSIVE) // ประเภท VAT
   isInventory          Boolean               @default(false) // ติดตามสต็อก
-  quantity             Float                 @default(0) // จำนวนคงเหลือ
-  minQuantity          Float                 @default(0) // จำนวนต่ำสุด
+  quantity             Float                 @default(0) // จำนวนคงเหลือ (หน่วย)
+  minQuantity          Float                 @default(0) // จำนวนต่ำสุด (หน่วย)
   incomeType           String? // ประเภทรายได้ (สำหรับหัก ณ ที่จ่าย 50 ทวิ)
   costingMethod        CostingMethod         @default(WEIGHTED_AVERAGE)
   isActive             Boolean               @default(true)
+  deletedAt            DateTime?
+  deletedBy            String?
   notes                String? // หมายเหตุ
   metadata             Json? // ข้อมูลส่วนขยาย
   createdAt            DateTime              @default(now())
@@ -248,6 +269,8 @@ model Product {
   stockTransferLines   StockTransferLine[]
   stockTakeLines       StockTakeLine[]
   productCostHistories ProductCostHistory[]
+
+  @@index([deletedAt])
 }
 
 enum CostingMethod {
@@ -279,16 +302,16 @@ model Invoice {
   type              InvoiceType   @default(TAX_INVOICE)
   reference         String? // เอกสารอ้างอิง
   poNumber          String? // เลขที่ใบสั่งซื้อ
-  subtotal          Float         @default(0) // มูลค่าก่อน VAT
-  vatRate           Float         @default(7) // อัตรา VAT
-  vatAmount         Float         @default(0) // ภาษีมูลค่าเพิ่ม
-  totalAmount       Float         @default(0) // ยอดรวม
-  discountAmount    Float         @default(0) // ส่วนลด
-  discountPercent   Float         @default(0) // ส่วนลด %
-  withholdingRate   Float         @default(0) // อัตราภาษีหัก ณ ที่จ่าย
-  withholdingAmount Float         @default(0) // ภาษีหัก ณ ที่จ่าย
-  netAmount         Float         @default(0) // ยอดสุทธิ
-  paidAmount        Float         @default(0) // ยอดชำระแล้ว
+  subtotal          Int           @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate           Float         @default(7) // อัตรา VAT (%)
+  vatAmount         Int           @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount       Int           @default(0) // ยอดรวม (สตางค์)
+  discountAmount    Int           @default(0) // ส่วนลด (สตางค์)
+  discountPercent   Float         @default(0) // ส่วนลด (%)
+  withholdingRate   Float         @default(0) // อัตราภาษีหัก ณ ที่จ่าย (%)
+  withholdingAmount Int           @default(0) // ภาษีหัก ณ ที่จ่าย (สตางค์)
+  netAmount         Int           @default(0) // ยอดสุทธิ (สตางค์)
+  paidAmount        Int           @default(0) // ยอดชำระแล้ว (สตางค์)
   status            InvoiceStatus @default(DRAFT)
   notes             String? // หมายเหตุ
   internalNotes     String? // หมายเหตุภายใน
@@ -296,6 +319,9 @@ model Invoice {
   sourceChannel     String? // ช่องทางที่มา (เช่น POS, WEB, API)
   metadata          Json? // ข้อมูลส่วนขยาย
   createdById       String?
+  isActive          Boolean       @default(true)
+  deletedAt         DateTime?
+  deletedBy         String?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
   lines             InvoiceLine[]
@@ -303,6 +329,11 @@ model Invoice {
   journalEntryId    String? // ID บันทึกบัญชี
   journalEntry      JournalEntry?  @relation("InvoiceJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
   creditNotes       CreditNote[] // ใบลดหนี้ที่อ้างอิงใบกำกับภาษีนี้
+
+  @@index([customerId])
+  @@index([journalEntryId])
+  @@index([createdById])
+  @@index([deletedAt])
 }
 
 model InvoiceLine {
@@ -313,18 +344,19 @@ model InvoiceLine {
   productId   String?
   product     Product? @relation(fields: [productId], references: [id])
   description String // รายการ
-  quantity    Float    @default(1) // จำนวน
+  quantity    Float    @default(1) // จำนวน (หน่วย)
   unit        String   @default("ชิ้น") // หน่วย
-  unitPrice   Float    @default(0) // ราคาต่อหน่วย
-  discount    Float    @default(0) // ส่วนลด
-  amount      Float    @default(0) // จำนวนเงิน
-  vatRate     Float    @default(7) // อัตรา VAT
-  vatAmount   Float    @default(0) // ภาษีมูลค่าเพิ่ม
+  unitPrice   Int      @default(0) // ราคาต่อหน่วย (สตางค์)
+  discount    Int      @default(0) // ส่วนลด (สตางค์)
+  amount      Int      @default(0) // จำนวนเงิน (สตางค์)
+  vatRate     Float    @default(7) // อัตรา VAT (%)
+  vatAmount   Int      @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
   notes       String? // หมายเหตุ
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([invoiceId])
+  @@index([productId])
 }
 
 enum InvoiceType {
@@ -357,29 +389,40 @@ model Receipt {
   bankAccount    BankAccount?        @relation(fields: [bankAccountId], references: [id])
   chequeNo       String? // เลขที่เช็ค
   chequeDate     DateTime? // วันที่เช็ค
-  amount         Float               @default(0) // จำนวนเงินรับโดยสิ้นเชิง
-  whtAmount      Float               @default(0) // ภาษีหัก ณ ที่จ่ายรวม
-  unallocated    Float               @default(0) // ยอดที่ยังไม่ได้จัดจ่าย (เครดิตลูกค้า)
+  amount         Int                 @default(0) // จำนวนเงินรับโดยสิ้นเชิง (สตางค์)
+  whtAmount      Int                 @default(0) // ภาษีหัก ณ ที่จ่ายรวม (สตางค์)
+  unallocated    Int                 @default(0) // ยอดที่ยังไม่ได้จัดจ่าย (สตางค์)
   notes          String? // หมายเหตุ
   status         ReceiptStatus       @default(DRAFT)
   journalEntryId String? // ID บันทึกบัญชี
   idempotencyKey  String? @unique // ✅ FIXED: Prevent duplicate receipts
+  isActive       Boolean             @default(true)
+  deletedAt      DateTime?
+  deletedBy      String?
   journalEntry   JournalEntry?       @relation("ReceiptJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
   allocations    ReceiptAllocation[]
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
+
+  @@index([customerId])
+  @@index([bankAccountId])
+  @@index([journalEntryId])
+  @@index([deletedAt])
 }
 
 model ReceiptAllocation {
   id          String    @id @default(cuid())
   receiptId   String
   invoiceId   String
-  amount      Float     // จำนวนเงินที่จ่าย
+  amount      Int       // จำนวนเงินที่จ่าย (สตางค์)
   whtRate     Float     @default(0) // อัตราหัก ณ ที่จ่าย (%)
-  whtAmount   Float     @default(0) // ภาษีหัก ณ ที่จ่าย
+  whtAmount   Int       @default(0) // ภาษีหัก ณ ที่จ่าย (สตางค์)
   receipt     Receipt   @relation(fields: [receiptId], references: [id], onDelete: Cascade)
   invoice     Invoice   @relation(fields: [invoiceId], references: [id])
   createdAt   DateTime  @default(now())
+
+  @@index([receiptId])
+  @@index([invoiceId])
 }
 
 enum PaymentMethod {
@@ -408,16 +451,24 @@ model CreditNote {
   invoiceId      String? // อ้างอิงใบกำกับภาษี
   invoice        Invoice?         @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
   reason         String? // เหตุผล
-  subtotal       Float            @default(0) // มูลค่าก่อน VAT
-  vatRate        Float            @default(7) // อัตรา VAT
-  vatAmount      Float            @default(0) // ภาษีมูลค่าเพิ่ม
-  totalAmount    Float            @default(0) // ยอดรวม
+  subtotal       Int              @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate        Float            @default(7) // อัตรา VAT (%)
+  vatAmount      Int              @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount    Int              @default(0) // ยอดรวม (สตางค์)
   status         CreditNoteStatus @default(ISSUED)
   notes          String? // หมายเหตุ
+  isActive       Boolean          @default(true)
+  deletedAt      DateTime?
+  deletedBy      String?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   journalEntryId String? // ID บันทึกบัญชี
   journalEntry  JournalEntry?  @relation("CreditNoteJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+
+  @@index([customerId])
+  @@index([invoiceId])
+  @@index([journalEntryId])
+  @@index([deletedAt])
 }
 
 enum CreditNoteStatus {
@@ -437,16 +488,24 @@ model DebitNote {
   invoiceId      String? // อ้างอิงใบซื้อ
   purchaseInvoice PurchaseInvoice? @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
   reason         String? // เหตุผล
-  subtotal       Float           @default(0) // มูลค่าก่อน VAT
-  vatRate        Float           @default(7) // อัตรา VAT
-  vatAmount      Float           @default(0) // ภาษีมูลค่าเพิ่ม
-  totalAmount    Float           @default(0) // ยอดรวม
+  subtotal       Int             @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate        Float           @default(7) // อัตรา VAT (%)
+  vatAmount      Int             @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount    Int             @default(0) // ยอดรวม (สตางค์)
   status         DebitNoteStatus @default(ISSUED)
   notes          String? // หมายเหตุ
+  isActive       Boolean         @default(true)
+  deletedAt      DateTime?
+  deletedBy      String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   journalEntryId String? // ID บันทึกบัญชี
   journalEntry  JournalEntry?  @relation("DebitNoteJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+
+  @@index([vendorId])
+  @@index([invoiceId])
+  @@index([journalEntryId])
+  @@index([deletedAt])
 }
 
 enum DebitNoteStatus {
@@ -468,28 +527,36 @@ model PurchaseInvoice {
   type              InvoiceType           @default(TAX_INVOICE)
   reference         String? // เอกสารอ้างอิง
   poNumber          String? // เลขที่ใบสั่งซื้อ
-  subtotal          Float                 @default(0) // มูลค่าก่อน VAT
-  vatRate           Float                 @default(7) // อัตรา VAT
-  vatAmount         Float                 @default(0) // ภาษีมูลค่าเพิ่ม
-  totalAmount       Float                 @default(0) // ยอดรวม
-  discountAmount    Float                 @default(0) // ส่วนลด
-  withholdingRate   Float                 @default(0) // อัตราภาษีหัก ณ ที่จ่าย
-  withholdingAmount Float                 @default(0) // ภาษีหัก ณ ที่จ่าย
-  netAmount         Float                 @default(0) // ยอดสุทธิ
-  paidAmount        Float                 @default(0) // ยอดชำระแล้ว
+  subtotal          Int                   @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate           Float                 @default(7) // อัตรา VAT (%)
+  vatAmount         Int                   @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount       Int                   @default(0) // ยอดรวม (สตางค์)
+  discountAmount    Int                   @default(0) // ส่วนลด (สตางค์)
+  withholdingRate   Float                 @default(0) // อัตราภาษีหัก ณ ที่จ่าย (%)
+  withholdingAmount Int                   @default(0) // ภาษีหัก ณ ที่จ่าย (สตางค์)
+  netAmount         Int                   @default(0) // ยอดสุทธิ (สตางค์)
+  paidAmount        Int                   @default(0) // ยอดชำระแล้ว (สตางค์)
   status            InvoiceStatus         @default(DRAFT)
   notes             String? // หมายเหตุ
   internalNotes     String? // หมายเหตุภายใน
   sourceChannel     String? // ช่องทางที่มา (เช่น POS, WEB, API)
   metadata          Json? // ข้อมูลส่วนขยาย
   createdById       String?
+  isActive          Boolean               @default(true)
+  deletedAt         DateTime?
+  deletedBy         String?
   createdAt         DateTime              @default(now())
   updatedAt         DateTime              @updatedAt
   lines             PurchaseInvoiceLine[]
-  paymentAllocations PaymentAllocation[] @relation("PaymentAllocations")
+  paymentAllocations PaymentAllocation[]  @relation("PaymentAllocations")
   journalEntryId    String? // ID บันทึกบัญชี
   journalEntry      JournalEntry?  @relation("PurchaseInvoiceJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
   debitNotes        DebitNote[] // ใบเพิ่มหนี้ที่อ้างอิงใบซื้อนี้
+
+  @@index([vendorId])
+  @@index([journalEntryId])
+  @@index([createdById])
+  @@index([deletedAt])
 }
 
 model PurchaseInvoiceLine {
@@ -500,13 +567,13 @@ model PurchaseInvoiceLine {
   productId   String?
   product     Product?        @relation(fields: [productId], references: [id])
   description String // รายการ
-  quantity    Float           @default(1) // จำนวน
+  quantity    Float           @default(1) // จำนวน (หน่วย)
   unit        String          @default("ชิ้น") // หน่วย
-  unitPrice   Float           @default(0) // ราคาต่อหน่วย
-  discount    Float           @default(0) // ส่วนลด
-  amount      Float           @default(0) // จำนวนเงิน
-  vatRate     Float           @default(7) // อัตรา VAT
-  vatAmount   Float           @default(0) // ภาษีมูลค่าเพิ่ม
+  unitPrice   Int             @default(0) // ราคาต่อหน่วย (สตางค์)
+  discount    Int             @default(0) // ส่วนลด (สตางค์)
+  amount      Int             @default(0) // จำนวนเงิน (สตางค์)
+  vatRate     Float           @default(7) // อัตรา VAT (%)
+  vatAmount   Int             @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
   notes       String? // หมายเหตุ
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
@@ -528,19 +595,27 @@ model Payment {
   bankAccount    BankAccount?        @relation("PaymentBankAccount", fields: [bankAccountId], references: [id])
   chequeNo       String? // เลขที่เช็ค
   chequeDate     DateTime? // วันที่เช็ค
-  amount         Float               @default(0) // จำนวนเงินรวม
-  whtAmount      Float               @default(0) // ภาษีหัก ณ ที่จ่ายรวม
-  unallocated    Float               @default(0) // ยอดคงเหลือ (เครดิตเจ้าหนี้)
+  amount         Int                 @default(0) // จำนวนเงินรวม (สตางค์)
+  whtAmount      Int                 @default(0) // ภาษีหัก ณ ที่จ่ายรวม (สตางค์)
+  unallocated    Int                 @default(0) // ยอดคงเหลือ (สตางค์)
   notes          String? // หมายเหตุ
   status         PaymentStatus       @default(DRAFT)
   createdById    String?
   idempotencyKey  String? @unique // ✅ FIXED: Prevent duplicate payments
+  isActive       Boolean             @default(true)
+  deletedAt      DateTime?
+  deletedBy      String?
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
   journalEntryId String? // ID บันทึกบัญชี
   journalEntry  JournalEntry?       @relation("PaymentJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
   allocations    PaymentAllocation[]
   cheques        Cheque[]            @relation("PaymentCheque")
+
+  @@index([vendorId])
+  @@index([bankAccountId])
+  @@index([journalEntryId])
+  @@index([deletedAt])
 }
 
 model PaymentAllocation {
@@ -549,9 +624,9 @@ model PaymentAllocation {
   payment     Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   invoiceId   String
   invoice     PurchaseInvoice @relation("PaymentAllocations", fields: [invoiceId], references: [id], onDelete: Restrict)
-  amount      Float // จำนวนเงินที่จ่าย
+  amount      Int             // จำนวนเงินที่จ่าย (สตางค์)
   whtRate     Float           @default(0) // อัตราหัก ณ ที่จ่าย (%)
-  whtAmount   Float           @default(0) // ภาษีหัก ณ ที่จ่าย
+  whtAmount   Int             @default(0) // ภาษีหัก ณ ที่จ่าย (สตางค์)
   notes       String?
   createdAt   DateTime        @default(now())
 
@@ -583,10 +658,10 @@ model VatRecord {
   vendorName    String? // ชื่อผู้ขาย
   vendorTaxId   String? // เลขประจำตัวผู้เสียภาษีผู้ขาย
   description   String? // รายการ
-  subtotal      Float           @default(0) // มูลค่าก่อน VAT
-  vatRate       Float           @default(7) // อัตรา VAT
-  vatAmount     Float           @default(0) // ภาษีมูลค่าเพิ่ม
-  totalAmount   Float           @default(0) // ยอดรวม
+  subtotal      Int             @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate       Float           @default(7) // อัตรา VAT (%)
+  vatAmount     Int             @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount   Int             @default(0) // ยอดรวม (สตางค์)
   taxMonth      Int // เดือนที่ยื่นภาษี
   taxYear       Int // ปีที่ยื่นภาษี
   reportStatus  VatReportStatus @default(PENDING)
@@ -622,9 +697,9 @@ model WithholdingTax {
   payeeAddress String? // ที่อยู่ผู้ถูกหักภาษี
   description  String? // รายการ
   incomeType   String? // ประเภทเงินได้
-  incomeAmount Float           @default(0) // จำนวนเงินที่จ่าย
-  whtRate      Float           @default(3) // อัตราภาษีหัก ณ ที่จ่าย
-  whtAmount    Float           @default(0) // ภาษีที่หัก
+  incomeAmount Int             @default(0) // จำนวนเงินที่จ่าย (สตางค์)
+  whtRate      Float           @default(3) // อัตราภาษีหัก ณ ที่จ่าย (%)
+  whtAmount    Int             @default(0) // ภาษีที่หัก (สตางค์)
   taxMonth     Int // เดือนที่ยื่นภาษี
   taxYear      Int // ปีที่ยื่นภาษี
   reportStatus WhtReportStatus @default(PENDING)
@@ -722,7 +797,7 @@ model Reconciliation {
   debitType   String? // ประเภทรายการเดบิต
   creditId    String? // ID รายการเครดิต
   creditType  String? // ประเภทรายการเครดิต
-  amount      Float                @default(0) // จำนวนเงิน
+  amount      Int                  @default(0) // จำนวนเงิน (สตางค์)
   status      ReconciliationStatus @default(PENDING)
   matchedAt   DateTime? // วันที่จับคู่
   matchedById String? // ผู้จับคู่
@@ -806,9 +881,9 @@ model StockBalance {
   product     Product   @relation(fields: [productId], references: [id])
   warehouseId String
   warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
-  quantity    Float     @default(0) // จำนวนคงเหลือ
-  unitCost    Float     @default(0) // ต้นทุนต่อหน่วย (Weighted Average)
-  totalCost   Float     @default(0) // ต้นทุนรวม
+  quantity    Float     @default(0) // จำนวนคงเหลือ (หน่วย)
+  unitCost    Int       @default(0) // ต้นทุนต่อหน่วย (สตางค์)
+  totalCost   Int       @default(0) // ต้นทุนรวม (สตางค์)
   updatedAt   DateTime  @updatedAt
 
   @@unique([productId, warehouseId])
@@ -821,9 +896,9 @@ model StockMovement {
   warehouseId   String
   warehouse     Warehouse    @relation(fields: [warehouseId], references: [id])
   type          MovementType // ประเภทการเคลื่อนไหว
-  quantity      Float // จำนวน (บวก/ลบ)
-  unitCost      Float // ต้นทุนต่อหน่วย
-  totalCost     Float // ต้นทุนรวม
+  quantity      Float // จำนวน (บวก/ลบ) (หน่วย)
+  unitCost      Int // ต้นทุนต่อหน่วย (สตางค์)
+  totalCost     Int // ต้นทุนรวม (สตางค์)
   date          DateTime
   referenceId   String? // อ้างอิงเอกสาร (Invoice ID, Purchase ID, Transfer ID)
   referenceNo   String? // เลขที่เอกสารอ้างอิง
@@ -834,7 +909,11 @@ model StockMovement {
   // Multi-currency support
   currency      String?      @default("THB")
   exchangeRate  Float?       @default(1.0)
-  foreignCost   Float?
+  foreignCost   Int?
+
+  @@index([productId])
+  @@index([warehouseId])
+  @@index([referenceId])
 }
 
 model StockTransfer {
@@ -851,6 +930,9 @@ model StockTransfer {
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
   lines           StockTransferLine[]
+
+  @@index([fromWarehouseId])
+  @@index([toWarehouseId])
 }
 
 model StockTransferLine {
@@ -859,7 +941,7 @@ model StockTransferLine {
   transfer   StockTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
   productId  String
   product    Product       @relation(fields: [productId], references: [id])
-  quantity   Float
+  quantity   Float // จำนวน (หน่วย)
   notes      String?
 }
 
@@ -893,11 +975,11 @@ model StockTakeLine {
   stockTake     StockTake @relation(fields: [stockTakeId], references: [id], onDelete: Cascade)
   productId     String
   product       Product   @relation(fields: [productId], references: [id])
-  expectedQty   Float
-  actualQty     Float
-  varianceQty   Float
-  varianceValue Float
-  costPerUnit   Float
+  expectedQty   Float // จำนวนคาดหมาย (หน่วย)
+  actualQty     Float // จำนวนตรวจนับจริง (หน่วย)
+  varianceQty   Float // ผลต่างจำนวน (หน่วย)
+  varianceValue Int // ผลต่างมูลค่า (สตางค์)
+  costPerUnit   Int // ต้นทุนต่อหน่วย (สตางค์)
   notes         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -911,8 +993,8 @@ model ProductCostHistory {
   productId   String
   product     Product  @relation(fields: [productId], references: [id])
   date        DateTime
-  oldUnitCost Float
-  newUnitCost Float
+  oldUnitCost Int // ต้นทุนเดิม (สตางค์)
+  newUnitCost Int // ต้นทุนใหม่ (สตางค์)
   reason      String?
   referenceId String?
   createdAt   DateTime @default(now())
@@ -960,18 +1042,25 @@ model Asset {
   code                String                 @unique
   name                String
   purchaseDate        DateTime
-  purchaseCost        Float
-  salvageValue        Float                  @default(1.0) // ค่าซาก 1 บาท
+  purchaseCost        Int                    // มูลค่าซื้อ (สตางค์)
+  salvageValue        Int                    @default(100) // ค่าซาก 1 บาท (สตางค์)
   usefulLifeYears     Int
   depreciationRate    Float
   glAccountId         String // บัญชีสินทรัพย์
   accumDepAccountId   String // บัญชีค่าเสื่อมราคาสะสม
   depExpenseAccountId String // บัญชีค่าเสื่อมราคา
   isActive            Boolean                @default(true)
+  deletedAt           DateTime?
+  deletedBy           String?
   metadata            Json?
   createdAt           DateTime               @default(now())
   updatedAt           DateTime               @updatedAt
   schedules           DepreciationSchedule[]
+
+  @@index([glAccountId])
+  @@index([accumDepAccountId])
+  @@index([depExpenseAccountId])
+  @@index([deletedAt])
 }
 
 model DepreciationSchedule {
@@ -979,9 +1068,9 @@ model DepreciationSchedule {
   assetId        String
   asset          Asset    @relation(fields: [assetId], references: [id])
   date           DateTime // สิ้นเดือน
-  amount         Float
-  accumulated    Float
-  netBookValue   Float
+  amount         Int      // ค่าเสื่อมราคาประจำงวด (สตางค์)
+  accumulated    Int      // ค่าเสื่อมราคาสะสม (สตางค์)
+  netBookValue   Int      // มูลค่าตามบัญชี (สตางค์)
   journalEntryId String? // เลขที่บันทึกบัญชีที่ Post ไป GL
   posted         Boolean  @default(false)
   createdAt      DateTime @default(now())
@@ -1015,7 +1104,7 @@ model Cheque {
   bankAccountId    String
   bankAccount      BankAccount         @relation(fields: [bankAccountId], references: [id])
   dueDate          DateTime
-  amount           Float
+  amount           Int                 // จำนวนเงิน (สตางค์)
   payeeName        String?
   status           ChequeStatus // ON_HAND, DEPOSITED, CLEARED, BOUNCED, CANCELLED
   documentRef      String? // Links to Receipt / Payment
@@ -1029,6 +1118,10 @@ model Cheque {
   payment          Payment?            @relation("PaymentCheque", fields: [paymentId], references: [id])
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
+
+  @@index([bankAccountId])
+  @@index([paymentId])
+  @@index([journalEntryId])
 }
 
 enum ChequeType {
@@ -1050,9 +1143,9 @@ model BankReconciliation {
   bankAccountId    String
   bankAccount      BankAccount          @relation(fields: [bankAccountId], references: [id])
   statementDate    DateTime // วันที่รายการเดินบัญชี
-  statementBalance Float                @default(0) // ยอดเงินตามรายการเดินบัญชี
-  bookBalance      Float                @default(0) // ยอดเงินตามสมุดบัญชี
-  difference       Float                @default(0) // ผลต่าง (statement - book)
+  statementBalance Int                  @default(0) // ยอดเงินตามรายการเดินบัญชี (สตางค์)
+  bookBalance      Int                  @default(0) // ยอดเงินตามสมุดบัญชี (สตางค์)
+  difference       Int                  @default(0) // ผลต่าง statement - book (สตางค์)
   status           ReconciliationStatus @default(PENDING)
   reconciledAt     DateTime?
   reconciledById   String?
@@ -1072,13 +1165,16 @@ model PettyCashFund {
   custodianId    String
   custodian      User               @relation(fields: [custodianId], references: [id])
   glAccountId    String
-  maxAmount      Float
-  currentBalance Float
+  maxAmount      Int                // วงเงินสูงสุด (สตางค์)
+  currentBalance Int                // ยอดคงเหลือปัจจุบัน (สตางค์)
   isActive       Boolean            @default(true)
   metadata       Json?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
   vouchers       PettyCashVoucher[]
+
+  @@index([custodianId])
+  @@index([glAccountId])
 }
 
 model PettyCashVoucher {
@@ -1087,7 +1183,7 @@ model PettyCashVoucher {
   fundId             String
   fund               PettyCashFund @relation(fields: [fundId], references: [id])
   date               DateTime
-  amount             Float
+  amount             Int           // จำนวนเงิน (สตางค์)
   payee              String
   description        String
   glExpenseAccountId String
@@ -1095,6 +1191,9 @@ model PettyCashVoucher {
   journalEntry       JournalEntry?  @relation("PettyCashVoucherJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
   isReimbursed       Boolean       @default(false)
   createdAt          DateTime      @default(now())
+
+  @@index([fundId])
+  @@index([journalEntryId])
 }
 
 // ============================================
@@ -1108,7 +1207,7 @@ model Employee {
   lastName         String
   idCardNumber     String?
   hireDate         DateTime
-  baseSalary       Float // Decimal (Satang)
+  baseSalary       Int       // เงินเดือนพื้นฐาน (สตางค์)
   position         String?
   department       String?
   socialSecurityNo String?
@@ -1116,10 +1215,14 @@ model Employee {
   bankAccountNo    String?
   bankName         String?
   isActive         Boolean   @default(true)
+  deletedAt        DateTime?
+  deletedBy        String?
   metadata         Json?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   payrolls         Payroll[]
+
+  @@index([deletedAt])
 }
 
 model PayrollRun {
@@ -1128,18 +1231,20 @@ model PayrollRun {
   periodMonth     Int
   periodYear      Int
   paymentDate     DateTime
-  totalBaseSalary Float
-  totalAdditions  Float
-  totalDeductions Float
-  totalSsc        Float // Employer + Employee portions
-  totalTax        Float
-  totalNetPay     Float
+  totalBaseSalary Int           // รวมเงินเดือนพื้นฐาน (สตางค์)
+  totalAdditions  Int           // รวมรายได้อื่น (สตางค์)
+  totalDeductions Int           // รวมรายหัก (สตางค์)
+  totalSsc        Int           // รวมประกันสังคม (สตางค์)
+  totalTax        Int           // รวมภาษี (สตางค์)
+  totalNetPay     Int           // รวมจ่ายสุทธิ (สตางค์)
   status          PayrollStatus // DRAFT, APPROVED, PAID
   journalEntryId  String? // Linked to GL Posting
   journalEntry    JournalEntry?  @relation("PayrollRunJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   payrolls        Payroll[]
+
+  @@index([journalEntryId])
 }
 
 model Payroll {
@@ -1148,12 +1253,12 @@ model Payroll {
   payrollRun     PayrollRun @relation(fields: [payrollRunId], references: [id])
   employeeId     String
   employee       Employee   @relation(fields: [employeeId], references: [id])
-  baseSalary     Float
-  additions      Float // OT, Bonus
-  deductions     Float // Leave without pay
-  socialSecurity Float // Deducted from employee (usually 5% capped at 750)
-  withholdingTax Float // PND 1
-  netPay         Float
+  baseSalary     Int        // เงินเดือนพื้นฐาน (สตางค์)
+  additions      Int        // OT, Bonus (สตางค์)
+  deductions     Int        // Leave without pay (สตางค์)
+  socialSecurity Int        // ประกันสังคม (สตางค์)
+  withholdingTax Int        // ภาษี ภงด.1 (สตางค์)
+  netPay         Int        // จ่ายสุทธิ (สตางค์)
   payslipUrl     String?
   createdAt      DateTime   @default(now())
 }

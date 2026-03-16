@@ -121,15 +121,21 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
     if (open) {
       fetchInitialData()
     }
+    
+    return () => {
+      // Cleanup handled by AbortController in fetchInitialData
+    }
   }, [open])
 
   const fetchInitialData = async () => {
     setFetchingData(true)
+    const controller = new AbortController()
+    
     try {
       const [customersRes, productsRes, invoiceNumRes] = await Promise.all([
-        fetch('/api/customers'),
-        fetch('/api/products').catch(() => ({ ok: false, json: async () => ({ data: [] }) })),
-        fetch('/api/invoices/next-number?type=' + formData.type).catch(() => ({ ok: false, json: async () => ({ data: '' }) })),
+        fetch('/api/customers', { signal: controller.signal }),
+        fetch('/api/products', { signal: controller.signal }).catch(() => ({ ok: false, json: async () => ({ data: [] }) })),
+        fetch('/api/invoices/next-number?type=' + formData.type, { signal: controller.signal }).catch(() => ({ ok: false, json: async () => ({ data: '' }) })),
       ])
 
       if (customersRes.ok) {
@@ -147,10 +153,13 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
         setInvoiceNumber(invoiceNumData.data || '')
       }
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return
       console.error('Error fetching initial data:', error)
     } finally {
       setFetchingData(false)
     }
+    
+    return () => controller.abort()
   }
 
   // Calculate totals

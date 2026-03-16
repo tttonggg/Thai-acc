@@ -1,5 +1,5 @@
 import { db } from "@/lib/db"
-import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, calculateInvoiceTotals } from "@/lib/api-utils"
+import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError, calculateInvoiceTotals } from "@/lib/api-utils"
 import { invoiceSchema } from "@/lib/validations"
 
 // GET /api/invoices/[id] - Get single invoice
@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth()
+    const user = await requireAuth()
     const { id } = await params
     
     const invoice = await db.invoice.findUnique({
@@ -43,6 +43,11 @@ export async function GET(
       return notFoundError("ไม่พบใบกำกับภาษี")
     }
     
+    // IDOR Protection: Check ownership - only ADMIN can access any invoice
+    if (user.role !== "ADMIN" && invoice.createdById && invoice.createdById !== user.id) {
+      return forbiddenError()
+    }
+    
     return apiResponse(invoice)
   } catch (error) {
     if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
@@ -71,6 +76,11 @@ export async function PUT(
     
     if (!existing) {
       return notFoundError("ไม่พบใบกำกับภาษี")
+    }
+    
+    // IDOR Protection: Check ownership - only ADMIN can modify any invoice
+    if (user.role !== "ADMIN" && existing.createdById && existing.createdById !== user.id) {
+      return forbiddenError()
     }
     
     if (existing.status !== "DRAFT") {
@@ -193,6 +203,11 @@ export async function DELETE(
     
     if (!existing) {
       return notFoundError("ไม่พบใบกำกับภาษี")
+    }
+    
+    // IDOR Protection: Check ownership - only ADMIN can delete any invoice
+    if (user.role !== "ADMIN" && existing.createdById && existing.createdById !== user.id) {
+      return forbiddenError()
     }
     
     if (existing.status === "CANCELLED") {

@@ -13,8 +13,12 @@ export interface RateLimitConfig {
   limit: number
   /** Time window in milliseconds */
   window: number
-  /** Custom identifier generator */
+  /** Custom identifier generator (defaults to IP-based) */
   identifier?: (request: Request) => string
+  /** Use user-based limiting (per user ID) - requires session lookup */
+  useUserBased?: boolean
+  /** Optional function to extract user ID from request/session */
+  getUserId?: (request: Request) => string | null
 }
 
 /**
@@ -26,16 +30,21 @@ export async function rateLimit(
   request: Request,
   config: RateLimitConfig
 ): Promise<Response | null> {
-  const { limit, window, identifier } = config
+  const { limit, window, identifier, useUserBased, getUserId } = config
 
-  // Completely bypass rate limiting for localhost development
-  const url = new URL(request.url)
-  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
-    return null
+  // Generate identifier from request (IP address, custom, or user-based)
+  let key: string
+  if (useUserBased && getUserId) {
+    const userId = getUserId(request)
+    if (userId) {
+      key = `user:${userId}`
+    } else {
+      // Fall back to IP-based if no user session found
+      key = identifier ? identifier(request) : getClientIdentifier(request)
+    }
+  } else {
+    key = identifier ? identifier(request) : getClientIdentifier(request)
   }
-
-  // Generate identifier from request (IP address or custom)
-  const key = identifier ? identifier(request) : getClientIdentifier(request)
 
   const now = Date.now()
 
@@ -112,31 +121,65 @@ function getClientIdentifier(request: Request): string {
 }
 
 /**
+ * Extract user ID from session cookie for user-based rate limiting
+ * Note: This is a basic implementation - consider using a JWT parser for production
+ */
+export function extractUserIdFromRequest(request: Request): string | null {
+  // Check for session token in cookie
+  const cookie = request.headers.get('cookie')
+  if (!cookie) return null
+
+  // Look for NextAuth session token
+  const sessionMatch = cookie.match(/next-auth\.session-token=([^;]+)/)
+  if (sessionMatch) {
+    // Return the session token as the identifier
+    // In production, you should decode the JWT and extract the actual user ID
+    return sessionMatch[1].substring(0, 32)
+  }
+
+  // Check for Authorization header (Bearer token)
+  const authHeader = request.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.substring(7).substring(0, 32)
+  }
+
+  return null
+}
+
+/**
  * Rate limit configuration presets
  */
 export const rateLimitPresets = {
   // Strict: For sensitive operations (login, password reset)
+  // 5 attempts per 15 minutes to prevent brute force attacks
   strict: {
-    limit: 100,
-    window: 60 * 1000 // 100 requests per minute
+    limit: 5,
+    window: 15 * 60 * 1000, // 5 requests per 15 minutes
+    useUserBased: false
   },
 
   // Moderate: For general API operations
+  // 60 requests per minute per IP/user
   moderate: {
-    limit: 500,
-    window: 60 * 1000 // 500 requests per minute
+    limit: 60,
+    window: 60 * 1000, // 60 requests per minute
+    useUserBased: true,
+    getUserId: extractUserIdFromRequest
   },
 
   // Relaxed: For public read operations
   relaxed: {
     limit: 100,
-    window: 60 * 1000 // 100 requests per minute
+    window: 60 * 1000, // 100 requests per minute
+    useUserBased: false
   },
 
   // Per hour: For bulk operations
   hourly: {
     limit: 1000,
-    window: 60 * 60 * 1000 // 1000 requests per hour
+    window: 60 * 60 * 1000, // 1000 requests per hour
+    useUserBased: true,
+    getUserId: extractUserIdFromRequest
   }
 }
 

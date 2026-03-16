@@ -39,13 +39,16 @@ export async function canView() {
   return !!user // Any authenticated user can view
 }
 
-// API Response helpers
+// API Response helpers - Standardized format
+// Success: { success: true, data: T }
+// Error: { success: false, error: string }
+
 export function apiResponse<T>(data: T, status: number = 200) {
-  return Response.json(data, { status })
+  return Response.json({ success: true, data }, { status })
 }
 
 export function apiError(message: string, status: number = 400) {
-  return Response.json({ error: message }, { status })
+  return Response.json({ success: false, error: message }, { status })
 }
 
 export function unauthorizedError() {
@@ -58,6 +61,10 @@ export function forbiddenError() {
 
 export function notFoundError(message: string = "ไม่พบข้อมูล") {
   return apiError(message, 404)
+}
+
+export function serverError(message: string = "เกิดข้อผิดพลาดในเซิร์ฟเวอร์") {
+  return apiError(message, 500)
 }
 
 // Generate document number with transaction safety
