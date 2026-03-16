@@ -1,0 +1,40 @@
+# ============================================
+# Thai Accounting ERP - Development Dockerfile
+# Optimized for local development with hot reload
+# ============================================
+
+FROM node:20-alpine
+
+# Install development tools
+RUN apk add --no-cache \
+    libc6-compat \
+    openssl \
+    git \
+    curl \
+    bash
+
+WORKDIR /app
+
+# Copy package files first for better layer caching
+COPY package.json package-lock.json* ./
+COPY prisma ./prisma/
+
+# Install all dependencies (including devDependencies)
+RUN npm ci && \
+    npm cache clean --force
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Set environment
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+ENV WATCHPACK_POLLING=true
+
+# Expose port
+EXPOSE 3000
+
+# Start development server
+CMD ["npm", "run", "dev"]

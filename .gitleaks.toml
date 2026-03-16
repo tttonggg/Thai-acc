@@ -1,0 +1,45 @@
+title = "GitLeaks Config"
+
+[extend]
+# Use default rules plus custom
+useDefault = true
+
+[[rules]]
+id = "thai-erp-custom-secrets"
+description = "Custom secret patterns for Thai ERP"
+regex = '''(?i)(password|secret|key|token)\s*=\s*['"]([^'"]+)['"]'''
+keywords = ["password", "secret", "key", "token"]
+
+[[rules]]
+id = "database-url"
+description = "Database connection strings"
+regex = '''(postgres|mysql|mongodb)://[^:]+:[^@]+@[^/]+'''
+keywords = ["postgres://", "mysql://", "mongodb://"]
+
+[[rules]]
+id = "nextauth-secret"
+description = "NextAuth secrets"
+regex = '''NEXTAUTH_SECRET\s*=\s*['"]([^'"]+)['"]'''
+keywords = ["NEXTAUTH_SECRET"]
+
+[[rules]]
+id = "api-key-header"
+description = "API Key in headers"
+regex = '''(?i)(x-api-key|api-key|authorization):\s*['"]?[a-zA-Z0-9_\-]{20,}['"]?'''
+keywords = ["x-api-key", "api-key", "authorization"]
+
+[allowlist]
+paths = [
+  '''\.env\.example$''',
+  '''\.env\.production\.example$''',
+  '''infrastructure\/terraform\/.*\.tfvars\.example$''',
+]
+commits = [
+  # Allow specific test commits
+]
+regexes = [
+  # Allow example/test patterns
+  '''example-password''',
+  '''test-secret''',
+  '''dummy-key''',
+]

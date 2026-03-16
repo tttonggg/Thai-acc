@@ -1,0 +1,300 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # Next.js Application
+  # ============================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: thai-erp-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/thai_erp
+      - REDIS_URL=redis://redis:6379
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=local-development-secret-do-not-use-in-production
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET=thai-erp-uploads
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - thai-erp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: thai-erp-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=thai_erp
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+    networks:
+      - thai-erp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Redis Cache & Session Store
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: thai-erp-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - thai-erp-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # MinIO Object Storage (S3 compatible)
+  # ============================================
+  minio:
+    image: minio/minio:latest
+    container_name: thai-erp-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - thai-erp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # ============================================
+  # MinIO Bucket Setup
+  # ============================================
+  minio-setup:
+    image: minio/minio:latest
+    container_name: thai-erp-minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/thai-erp-uploads || true;
+      /usr/bin/mc policy set public myminio/thai-erp-uploads;
+      exit 0;
+      "
+    networks:
+      - thai-erp-network
+
+  # ============================================
+  # Database Migration Runner
+  # ============================================
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: thai-erp-migrate
+    command: ["npx", "prisma", "migrate", "deploy"]
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/thai_erp
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./prisma:/app/prisma:ro
+    networks:
+      - thai-erp-network
+    profiles:
+      - migrate
+
+  # ============================================
+  # Database Seeder
+  # ============================================
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: thai-erp-seed
+    command: ["npm", "run", "seed"]
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/thai_erp
+      - NODE_ENV=development
+    depends_on:
+      - migrate
+    volumes:
+      - ./prisma:/app/prisma:ro
+    networks:
+      - thai-erp-network
+    profiles:
+      - seed
+
+  # ============================================
+  # pgAdmin (Database Management)
+  # ============================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: thai-erp-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@thai-erp.local
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - thai-erp-network
+    profiles:
+      - tools
+
+  # ============================================
+  # Redis Commander (Redis Management)
+  # ============================================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: thai-erp-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - thai-erp-network
+    profiles:
+      - tools
+
+  # ============================================
+  # Mailhog (Email Testing)
+  # ============================================
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: thai-erp-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - thai-erp-network
+    profiles:
+      - tools
+
+  # ============================================
+  # Prometheus (Metrics Collection)
+  # ============================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: thai-erp-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - thai-erp-network
+    profiles:
+      - monitoring
+
+  # ============================================
+  # Grafana (Metrics Visualization)
+  # ============================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: thai-erp-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - thai-erp-network
+    profiles:
+      - monitoring
+
+# ============================================
+# Volumes
+# ============================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# ============================================
+# Networks
+# ============================================
+networks:
+  thai-erp-network:
+    driver: bridge

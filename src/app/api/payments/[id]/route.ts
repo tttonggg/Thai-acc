@@ -1,5 +1,6 @@
 import { db } from "@/lib/db"
 import { requireAuth, apiResponse, apiError, unauthorizedError, forbiddenError } from "@/lib/api-utils"
+import { checkPeriodStatus } from "@/lib/period-service"
 import { z } from "zod"
 
 // Validation schema
@@ -292,6 +293,12 @@ export async function POST(
 
     if (payment.status !== "DRAFT") {
       return apiError("สามารถลงบัญชีเฉพาะสถานะร่างเท่านั้น", 403)
+    }
+
+    // B1. Period Locking - Check if period is open
+    const periodCheck = await checkPeriodStatus(payment.paymentDate)
+    if (!periodCheck.isValid) {
+      return apiError(periodCheck.error || "ไม่สามารถลงบัญชีในงวดที่ปิดแล้ว", 400)
     }
 
     // Import the posting function

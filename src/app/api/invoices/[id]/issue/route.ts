@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, generateDocNumber } from "@/lib/api-utils"
 import { recordStockMovement } from "@/lib/inventory-service"
+import { checkPeriodStatus } from "@/lib/period-service"
 
 // POST /api/invoices/[id]/issue - Issue invoice
 export async function POST(
@@ -33,6 +34,12 @@ export async function POST(
     
     if (existing.lines.length === 0) {
       return apiError("ใบกำกับภาษีต้องมีอย่างน้อย 1 รายการ")
+    }
+    
+    // B1. Period Locking - Check if period is open
+    const periodCheck = await checkPeriodStatus(existing.invoiceDate)
+    if (!periodCheck.isValid) {
+      return apiError(periodCheck.error || "ไม่สามารถออกใบกำกับภาษีในงวดที่ปิดแล้ว")
     }
     
     // Update status to issued

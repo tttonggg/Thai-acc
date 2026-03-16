@@ -1,0 +1,10 @@
+# ============================================
+# Trivy Ignore File
+# Vulnerabilities to ignore with justification
+# ============================================
+
+# Example format:
+# CVE-2023-XXXX # Justification: This vulnerability only affects feature X which we don't use
+
+# Ignore false positives for development dependencies
+# CVE-2023-1234 # Dev-only dependency, not exposed in production

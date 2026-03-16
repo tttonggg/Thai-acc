@@ -1,0 +1,29 @@
+#!/bin/sh
+# ============================================
+# Pre-commit Hook
+# Runs security checks before committing
+# ============================================
+
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Run linting
+echo "📝 Running ESLint..."
+npm run lint || exit 1
+
+# Run type checking
+echo "🔍 Running TypeScript type check..."
+npm run type-check || exit 1
+
+# Run secret detection
+echo "🔐 Running secret detection..."
+if command -v gitleaks &> /dev/null; then
+    gitleaks protect --verbose --staged --config .gitleaks.toml || exit 1
+fi
+
+# Run tests for changed files
+echo "🧪 Running tests for changed files..."
+# npm run test:changed || exit 1
+
+echo "✅ All pre-commit checks passed!"

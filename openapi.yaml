@@ -1,0 +1,998 @@
+openapi: 3.0.3
+info:
+  title: Thai Accounting ERP API
+  description: |
+    RESTful API for Thai Accounting ERP System (โปรแกรมบัญชีมาตรฐานไทย)
+    
+    ## Features
+    - Double-entry bookkeeping
+    - Thai VAT (7%) and withholding tax support
+    - Multi-currency support
+    - Inventory management with WAC costing
+    - Fixed assets with depreciation
+    - Payroll with social security calculations
+    
+    ## Authentication
+    The API uses session-based authentication via NextAuth.js.
+    Include the session cookie in your requests.
+    
+    ## API Versions
+    - **v1** (stable): `/api/v1/*` - Base functionality
+    - **v2** (stable): `/api/v2/*` - Enhanced with GraphQL, field selection, cursor pagination
+    - **Latest**: Use `/api/*` for the most recent stable version
+    
+    ## Rate Limiting
+    - Authentication endpoints: 5 requests per minute
+    - Other endpoints: 100 requests per minute
+    - Headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@thaiaccounting.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development
+  - url: http://localhost:3000/api/v1
+    description: Version 1 (Stable)
+  - url: http://localhost:3000/api/v2
+    description: Version 2 (Latest with GraphQL)
+  - url: http://localhost:3000/api/graphql
+    description: GraphQL Endpoint
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Accounts
+    description: Chart of accounts management (ผังบัญชี)
+  - name: Journal
+    description: Journal entries and posting (บันทึกบัญชี)
+  - name: Invoices
+    description: Sales invoices (ใบกำกับภาษี)
+  - name: Customers
+    description: Customer management (ลูกค้า)
+  - name: Vendors
+    description: Vendor management (ผู้ขาย)
+  - name: Products
+    description: Product and service management (สินค้า)
+  - name: Inventory
+    description: Stock management (สต็อกสินค้า)
+  - name: Receipts
+    description: Receipts and AR payments (ใบเสร็จ)
+  - name: Payments
+    description: Payments and AP (ใบจ่ายเงิน)
+  - name: Banking
+    description: Bank accounts and cheques (ธนาคารและเช็ค)
+  - name: Assets
+    description: Fixed assets and depreciation (ทรัพย์สิน)
+  - name: Payroll
+    description: Employee payroll (เงินเดือน)
+  - name: Reports
+    description: Financial reports (รายงาน)
+  - name: Tax
+    description: VAT and withholding tax (ภาษี)
+  - name: GraphQL
+    description: GraphQL API endpoint
+  - name: Webhooks
+    description: Webhook management
+  - name: Analytics
+    description: API analytics and metrics
+  - name: Admin
+    description: Administration
+
+paths:
+  /auth/signin:
+    post:
+      tags: [Authentication]
+      summary: User login
+      description: Authenticate user and create session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@thaiaccounting.com
+                password:
+                  type: string
+                  format: password
+                  example: admin123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/signout:
+    post:
+      tags: [Authentication]
+      summary: User logout
+      description: End user session
+      responses:
+        '200':
+          description: Logout successful
+
+  /v1/invoices:
+    get:
+      tags: [Invoices]
+      summary: List invoices (v1)
+      description: Get all sales invoices with offset pagination
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, ISSUED, PARTIAL, PAID, CANCELLED]
+        - name: customerId
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of invoices
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceListResponse'
+              headers:
+                X-API-Version:
+                  schema:
+                    type: string
+                  description: API version used
+    post:
+      tags: [Invoices]
+      summary: Create invoice (v1)
+      description: Create a new sales invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceRequest'
+      responses:
+        '201':
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+
+  /v2/invoices:
+    get:
+      tags: [Invoices]
+      summary: List invoices (v2)
+      description: |
+        Get invoices with enhanced features:
+        - Field selection with `?fields=`
+        - Cursor pagination with `?cursor=`
+        - Include relations with `?include=`
+        - Automatic summary calculations
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Cursor for pagination
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, ISSUED, PARTIAL, PAID, CANCELLED]
+        - name: customerId
+          in: query
+          schema:
+            type: string
+        - name: fields
+          in: query
+          schema:
+            type: string
+          description: Comma-separated field names to include
+          example: id,invoiceNo,totalAmount,status
+        - name: include
+          in: query
+          schema:
+            type: string
+          description: Comma-separated relations to include
+          example: customer,lines,journalEntry
+      responses:
+        '200':
+          description: List of invoices with summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceListResponseV2'
+
+  /v1/invoices/{id}:
+    get:
+      tags: [Invoices]
+      summary: Get invoice by ID (v1)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invoice details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '404':
+          description: Invoice not found
+    put:
+      tags: [Invoices]
+      summary: Update invoice (v1)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateInvoiceRequest'
+      responses:
+        '200':
+          description: Invoice updated
+        '400':
+          description: Cannot update non-draft invoice
+    delete:
+      tags: [Invoices]
+      summary: Delete invoice (v1)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invoice deleted
+
+  /accounts:
+    get:
+      tags: [Accounts]
+      summary: List chart of accounts
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE]
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of accounts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChartOfAccount'
+
+  /journal:
+    get:
+      tags: [Journal]
+      summary: List journal entries
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, POSTED, REVERSED]
+      responses:
+        '200':
+          description: List of journal entries
+    post:
+      tags: [Journal]
+      summary: Create journal entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJournalEntryRequest'
+      responses:
+        '201':
+          description: Journal entry created
+
+  /customers:
+    get:
+      tags: [Customers]
+      summary: List customers
+      responses:
+        '200':
+          description: List of customers
+    post:
+      tags: [Customers]
+      summary: Create customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomerRequest'
+      responses:
+        '201':
+          description: Customer created
+
+  /products:
+    get:
+      tags: [Products]
+      summary: List products
+      responses:
+        '200':
+          description: List of products
+    post:
+      tags: [Products]
+      summary: Create product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '201':
+          description: Product created
+
+  /reports/trial-balance:
+    get:
+      tags: [Reports]
+      summary: Trial Balance Report
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Trial balance report
+
+  /reports/balance-sheet:
+    get:
+      tags: [Reports]
+      summary: Balance Sheet
+      parameters:
+        - name: asOfDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Balance sheet report
+
+  /reports/income-statement:
+    get:
+      tags: [Reports]
+      summary: Income Statement
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Income statement report
+
+  /graphql:
+    post:
+      tags: [GraphQL]
+      summary: GraphQL Endpoint
+      description: Execute GraphQL queries and mutations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  example: |
+                    query {
+                      invoices(limit: 10) {
+                        edges {
+                          node {
+                            id
+                            invoiceNo
+                            totalAmount
+                            status
+                          }
+                        }
+                      }
+                    }
+                variables:
+                  type: object
+                operationName:
+                  type: string
+      responses:
+        '200':
+          description: GraphQL response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  errors:
+                    type: array
+
+  /admin/webhooks:
+    get:
+      tags: [Webhooks]
+      summary: List webhooks
+      description: Get all webhook subscriptions (Admin only)
+      responses:
+        '200':
+          description: List of webhooks
+    post:
+      tags: [Webhooks]
+      summary: Create webhook
+      description: Create a new webhook subscription (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookRequest'
+      responses:
+        '201':
+          description: Webhook created
+
+  /analytics:
+    get:
+      tags: [Analytics]
+      summary: API Analytics Dashboard
+      description: Get API usage analytics (Admin/Accountant only)
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: path
+          in: query
+          schema:
+            type: string
+        - name: view
+          in: query
+          schema:
+            type: string
+            enum: [dashboard, realtime, ratelimits]
+      responses:
+        '200':
+          description: Analytics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsResponse'
+
+  /versions:
+    get:
+      tags: [Admin]
+      summary: API Versions
+      description: Get information about available API versions
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+          description: Source version for migration guide
+        - name: to
+          in: query
+          schema:
+            type: string
+          description: Target version for migration guide
+      responses:
+        '200':
+          description: API versions information
+
+  /docs:
+    get:
+      tags: [Admin]
+      summary: OpenAPI Specification
+      description: Get the OpenAPI/Swagger specification
+      responses:
+        '200':
+          description: OpenAPI spec
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+        version:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, ACCOUNTANT, USER, VIEWER]
+
+    ChartOfAccount:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+          description: Account code (e.g., 1100, 4100)
+        name:
+          type: string
+          description: Account name in Thai
+        nameEn:
+          type: string
+        type:
+          type: string
+          enum: [ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE]
+        level:
+          type: integer
+        isDetail:
+          type: boolean
+        isSystem:
+          type: boolean
+        isActive:
+          type: boolean
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+        invoiceNo:
+          type: string
+          description: Invoice number (เลขที่ใบกำกับภาษี)
+        invoiceDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        customerId:
+          type: string
+        customer:
+          $ref: '#/components/schemas/Customer'
+        status:
+          type: string
+          enum: [DRAFT, ISSUED, PARTIAL, PAID, CANCELLED]
+        subtotal:
+          type: integer
+          description: Amount in satang (สตางค์)
+        vatRate:
+          type: number
+        vatAmount:
+          type: integer
+        totalAmount:
+          type: integer
+        paidAmount:
+          type: integer
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceLine'
+
+    InvoiceLine:
+      type: object
+      properties:
+        id:
+          type: string
+        lineNo:
+          type: integer
+        productId:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        unitPrice:
+          type: integer
+          description: Price in satang
+        amount:
+          type: integer
+
+    CreateInvoiceRequest:
+      type: object
+      required: [customerId, lines]
+      properties:
+        customerId:
+          type: string
+        invoiceDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        reference:
+          type: string
+        poNumber:
+          type: string
+        notes:
+          type: string
+        vatRate:
+          type: number
+          default: 7
+        lines:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+              description:
+                type: string
+              quantity:
+                type: number
+              unitPrice:
+                type: integer
+              discount:
+                type: integer
+
+    UpdateInvoiceRequest:
+      type: object
+      properties:
+        invoiceDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        reference:
+          type: string
+        poNumber:
+          type: string
+        notes:
+          type: string
+
+    InvoiceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        version:
+          type: string
+        data:
+          $ref: '#/components/schemas/Invoice'
+
+    InvoiceListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        version:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invoice'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    InvoiceListResponseV2:
+      type: object
+      properties:
+        success:
+          type: boolean
+        version:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invoice'
+        pagination:
+          $ref: '#/components/schemas/PaginationV2'
+        summary:
+          type: object
+          properties:
+            count:
+              type: integer
+            subtotal:
+              type: integer
+            vatAmount:
+              type: integer
+            totalAmount:
+              type: integer
+            paidAmount:
+              type: integer
+            balance:
+              type: integer
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    PaginationV2:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        nextCursor:
+          type: string
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        nameEn:
+          type: string
+        taxId:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+
+    CreateCustomerRequest:
+      type: object
+      required: [name]
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        taxId:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        unit:
+          type: string
+        salePrice:
+          type: integer
+        costPrice:
+          type: integer
+        isInventory:
+          type: boolean
+
+    CreateProductRequest:
+      type: object
+      required: [name]
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        unit:
+          type: string
+        salePrice:
+          type: integer
+        costPrice:
+          type: integer
+
+    CreateJournalEntryRequest:
+      type: object
+      required: [date, lines]
+      properties:
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+        reference:
+          type: string
+        lines:
+          type: array
+          items:
+            type: object
+            properties:
+              accountId:
+                type: string
+              description:
+                type: string
+              debit:
+                type: integer
+              credit:
+                type: integer
+
+    CreateWebhookRequest:
+      type: object
+      required: [name, url, events]
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+            enum:
+              - INVOICE_CREATED
+              - INVOICE_UPDATED
+              - INVOICE_PAID
+              - INVOICE_VOIDED
+              - RECEIPT_CREATED
+              - PAYMENT_CREATED
+              - JOURNAL_ENTRY_POSTED
+        secret:
+          type: string
+
+    AnalyticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            summary:
+              type: object
+            percentiles:
+              type: object
+            topEndpoints:
+              type: array
+            errorBreakdown:
+              type: array
+
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: next-auth.session-token
+      description: NextAuth session cookie
+
+security:
+  - sessionAuth: []

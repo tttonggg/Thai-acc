@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { checkPeriodStatus } from '@/lib/period-service'
 
 // POST - Post journal entry (change status from DRAFT to POSTED)
 export async function POST(
@@ -26,6 +27,15 @@ export async function POST(
     if (existing.status === 'POSTED') {
       return NextResponse.json(
         { success: false, error: 'รายการนี้ลงบัญชีแล้ว' },
+        { status: 400 }
+      )
+    }
+    
+    // B1. Period Locking - Check if period is open
+    const periodCheck = await checkPeriodStatus(existing.date)
+    if (!periodCheck.isValid) {
+      return NextResponse.json(
+        { success: false, error: periodCheck.error },
         { status: 400 }
       )
     }

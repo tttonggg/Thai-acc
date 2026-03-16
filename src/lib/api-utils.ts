@@ -51,6 +51,9 @@ export function apiError(message: string, status: number = 400) {
   return Response.json({ success: false, error: message }, { status })
 }
 
+// Alias for compatibility
+export const errorResponse = apiError
+
 export function unauthorizedError() {
   return apiError("ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ", 401)
 }

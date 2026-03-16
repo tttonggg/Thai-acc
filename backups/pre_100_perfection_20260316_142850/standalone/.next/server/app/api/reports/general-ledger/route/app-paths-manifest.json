@@ -1,0 +1,3 @@
+{
+  "/api/reports/general-ledger/route": "app/api/reports/general-ledger/route.js"
+}

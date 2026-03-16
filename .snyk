@@ -1,0 +1,37 @@
+# Snyk Security Policy
+# https://snyk.io/docs/snyk-policy
+
+version: v1.25.0
+
+# Ignore certain vulnerabilities with justification
+ignore:
+  # Example:
+  # SNYK-JS-EXAMPLE-123:
+  #   - '*':
+  #       reason: 'Not exploitable in our usage'
+  #       expires: '2026-12-31T00:00:00.000Z'
+
+patch: {}
+
+# Language settings
+language-settings:
+  javascript:
+    # Allow using dev dependencies for patching
+    allowDevDependencies: true
+
+# Policy for auto-fixing
+policy:
+  # Auto-fix vulnerabilities when possible
+  auto-fix: true
+  
+  # Minimum severity to report
+  severity-threshold: high
+
+# Exclude paths from scanning
+exclude:
+  - 'node_modules/**'
+  - '.next/**'
+  - 'coverage/**'
+  - '*.test.ts'
+  - '*.spec.ts'
+  - 'e2e/**'

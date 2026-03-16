@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: thai-erp-config
+  namespace: thai-erp
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  HOSTNAME: "0.0.0.0"
+  NEXT_TELEMETRY_DISABLED: "1"
+  
+  # Database
+  DATABASE_URL: "postgresql://$(DB_USER):$(DB_PASSWORD)@postgres:5432/thai_erp"
+  
+  # Redis
+  REDIS_URL: "redis://redis:6379"
+  
+  # MinIO / S3
+  MINIO_ENDPOINT: "minio"
+  MINIO_PORT: "9000"
+  MINIO_BUCKET: "thai-erp-uploads"
+  MINIO_USE_SSL: "false"
+  
+  # Logging
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  
+  # Feature flags
+  ENABLE_SWAGGER: "false"
+  ENABLE_DEBUG_ROUTES: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: thai-erp-nginx-config
+  namespace: thai-erp
+data:
+  nginx.conf: |
+    upstream nextjs {
+      server 127.0.0.1:3000;
+      keepalive 64;
+    }
+
+    server {
+      listen 80;
+      server_name _;
+      
+      # Security headers
+      add_header X-Frame-Options "SAMEORIGIN" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      
+      # Gzip compression
+      gzip on;
+      gzip_vary on;
+      gzip_proxied any;
+      gzip_comp_level 6;
+      gzip_types text/plain text/css text/xml application/json application/javascript application/rss+xml application/atom+xml image/svg+xml;
+      
+      # Static files caching
+      location /_next/static {
+        proxy_cache STATIC;
+        proxy_pass http://nextjs;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+      }
+      
+      location /static {
+        proxy_cache STATIC;
+        proxy_pass http://nextjs;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+      }
+      
+      # API routes
+      location /api {
+        proxy_pass http://nextjs;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 60s;
+      }
+      
+      # Health check
+      location /api/health {
+        proxy_pass http://nextjs;
+        access_log off;
+      }
+      
+      # All other routes
+      location / {
+        proxy_pass http://nextjs;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+      }
+    }

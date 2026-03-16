@@ -96,6 +96,7 @@ export default defineConfig({
 
   // Test projects
   projects: [
+    // Desktop browsers
     {
       name: 'chromium',
       use: {
@@ -123,6 +124,16 @@ export default defineConfig({
       },
     },
 
+    // Microsoft Edge
+    {
+      name: 'Microsoft Edge',
+      use: {
+        ...devices['Desktop Edge'],
+        viewport: { width: 1920, height: 1080 },
+        channel: 'msedge',
+      },
+    },
+
     // Mobile testing
     {
       name: 'Mobile Chrome',
@@ -134,6 +145,30 @@ export default defineConfig({
       name: 'Mobile Safari',
       use: {
         ...devices['iPhone 12'],
+      },
+    },
+    {
+      name: 'iPhone SE',
+      use: {
+        ...devices['iPhone SE'],
+      },
+    },
+    {
+      name: 'Galaxy S8',
+      use: {
+        ...devices['Galaxy S8'],
+      },
+    },
+    {
+      name: 'iPad',
+      use: {
+        ...devices['iPad (gen 6)'],
+      },
+    },
+    {
+      name: 'iPad Pro',
+      use: {
+        ...devices['iPad Pro 11'],
       },
     },
   ],

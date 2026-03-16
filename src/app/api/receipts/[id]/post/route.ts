@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/api-auth'
 import { generateDocNumber } from '@/lib/api-utils'
+import { checkPeriodStatus } from '@/lib/period-service'
 
 // POST - Post receipt (create journal entry)
 // Debits Cash/Bank and credits AR for customer payments
@@ -14,6 +15,34 @@ export async function POST(
     const user = await requireRole(['ADMIN', 'ACCOUNTANT'], request)
 
     const { id } = await params
+
+    // B1. Period Locking - Check receipt date before transaction
+    const receipt = await db.receipt.findUnique({
+      where: { id },
+      select: { receiptDate: true, status: true }
+    })
+
+    if (!receipt) {
+      return NextResponse.json(
+        { success: false, error: 'ไม่พบใบเสร็จรับเงิน' },
+        { status: 404 }
+      )
+    }
+
+    if (receipt.status !== 'DRAFT') {
+      return NextResponse.json(
+        { success: false, error: 'ใบเสร็จรับเงินถูกลงบัญชีแล้ว' },
+        { status: 400 }
+      )
+    }
+
+    const periodCheck = await checkPeriodStatus(receipt.receiptDate)
+    if (!periodCheck.isValid) {
+      return NextResponse.json(
+        { success: false, error: periodCheck.error },
+        { status: 400 }
+      )
+    }
 
     // Execute in transaction for data consistency
     const result = await db.$transaction(
@@ -34,10 +63,6 @@ export async function POST(
 
         if (!receipt) {
           throw new Error('ไม่พบใบเสร็จรับเงิน')
-        }
-
-        if (receipt.status !== 'DRAFT') {
-          throw new Error('ใบเสร็จรับเงินถูกลงบัญชีแล้ว')
         }
 
         // Get GL accounts

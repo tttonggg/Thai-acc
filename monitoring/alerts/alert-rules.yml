@@ -1,0 +1,110 @@
+groups:
+  - name: thai-erp-alerts
+    interval: 30s
+    rules:
+      # ============================================
+      # High Availability Alerts
+      # ============================================
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status_code=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% for more than 5 minutes"
+          runbook_url: "https://wiki.internal/runbooks/high-error-rate"
+
+      - alert: ServiceDown
+        expr: up{job="thai-erp"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Thai ERP service is down"
+          description: "The Thai ERP service has been down for more than 1 minute"
+          runbook_url: "https://wiki.internal/runbooks/service-down"
+
+      # ============================================
+      # Performance Alerts
+      # ============================================
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High latency detected"
+          description: "95th percentile latency is above 1 second for more than 5 minutes"
+
+      - alert: HighMemoryUsage
+        expr: (memory_usage_bytes{type="heap_used"} / memory_usage_bytes{type="heap_total"}) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is above 85% for more than 5 minutes"
+
+      # ============================================
+      # Database Alerts
+      # ============================================
+      - alert: DatabaseConnectionHigh
+        expr: database_connections{state="active"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High database connection count"
+          description: "Database has more than 80 active connections"
+
+      - alert: DatabaseConnectionExhausted
+        expr: database_connections{state="active"} > 95
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Database connections exhausted"
+          description: "Database connection pool is nearly exhausted"
+
+      # ============================================
+      # Business Alerts
+      # ============================================
+      - alert: LowInvoiceCreationRate
+        expr: rate(invoices_created_total[1h]) < 0.1
+        for: 30m
+        labels:
+          severity: info
+          team: business
+        annotations:
+          summary: "Low invoice creation rate"
+          description: "Invoice creation rate is unusually low"
+
+      # ============================================
+      # Infrastructure Alerts
+      # ============================================
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Disk space low"
+          description: "Disk space is below 10%"
+
+      - alert: CPUHigh
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is above 80% for more than 10 minutes"

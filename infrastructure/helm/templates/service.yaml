@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "thai-erp.fullname" . }}
+  labels:
+    {{- include "thai-erp.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "thai-erp.selectorLabels" . | nindent 4 }}
+    color: {{ .Values.color }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "thai-erp.fullname" . }}-blue
+  labels:
+    {{- include "thai-erp.labels" . | nindent 4 }}
+    color: blue
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "thai-erp.selectorLabels" . | nindent 4 }}
+    color: blue
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "thai-erp.fullname" . }}-green
+  labels:
+    {{- include "thai-erp.labels" . | nindent 4 }}
+    color: green
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "thai-erp.selectorLabels" . | nindent 4 }}
+    color: green

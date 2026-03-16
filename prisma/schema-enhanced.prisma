@@ -1,0 +1,1589 @@
+// Thai Accounting ERP System - Enhanced Prisma Schema with PostgreSQL Support
+// โปรแกรมบัญชีมาตรฐานไทย - Schema ที่ปรับปรุงสำหรับ PostgreSQL
+// Monetary values are stored in Satang (สตางค์) - 1/100 of Baht
+// Version: 2.0 - Database Perfection Phase
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions", "views"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions = [pgcrypto, pg_trgm, uuid_ossp]
+}
+
+// ============================================
+// ข้อมูลบริษัท / Company Profile
+// ============================================
+model Company {
+  id              String   @id @default(uuid())
+  name            String   @db.VarChar(255)
+  nameEn          String?  @db.VarChar(255)
+  taxId           String?  @db.VarChar(13) // เลขประจำตัวผู้เสียภาษี (13 digits)
+  branchCode      String?  @db.VarChar(5)
+  address         String?  @db.Text
+  subDistrict     String?  @db.VarChar(100)
+  district        String?  @db.VarChar(100)
+  province        String?  @db.VarChar(100)
+  postalCode      String?  @db.VarChar(5)
+  phone           String?  @db.VarChar(20)
+  fax             String?  @db.VarChar(20)
+  email           String?  @db.VarChar(255)
+  website         String?  @db.VarChar(255)
+  logo            String?  @db.VarChar(500)
+  fiscalYearStart Int      @default(1) // เริ่มปีบัญชี (เดือน)
+  metadata        Json?    @db.JsonB
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+  systemSettings  SystemSettings?
+
+  @@index([taxId])
+}
+
+// ============================================
+// ตั้งค่าระบบ / System Settings
+// ============================================
+model SystemSettings {
+  id               String  @id @default(uuid())
+  companyId        String  @unique
+  company          Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vatRate          Float   @default(7) @db.Real // อัตราภาษีมูลค่าเพิ่ม (%)
+  whtPnd53Service  Float   @default(3) @db.Real // อัตราภาษีหัก ณ ที่จ่าย ค่าบริการ (%)
+  whtPnd53Rent     Float   @default(5) @db.Real // อัตราภาษีหัก ณ ที่จ่าย ค่าเช่า (%)
+  whtPnd53Prof     Float   @default(3) @db.Real // อัตราภาษีหัก ณ ที่จ่าย ค่าบริการวิชาชีพ (%)
+  whtPnd53Contract Float   @default(1) @db.Real // อัตราภาษีหัก ณ ที่จ่าย ค่าจ้างทำของ (%)
+  whtPnd53Advert   Float   @default(2) @db.Real // อัตราภาษีหัก ณ ที่จ่าย ค่าโฆษณา (%)
+  metadata         Json?   @db.JsonB
+  createdAt        DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime @updatedAt @db.Timestamptz(3)
+
+  @@check(vatRate >= 0 AND vatRate <= 100)
+  @@check(whtPnd53Service >= 0 AND whtPnd53Service <= 100)
+  @@check(whtPnd53Rent >= 0 AND whtPnd53Rent <= 100)
+  @@check(whtPnd53Prof >= 0 AND whtPnd53Prof <= 100)
+  @@check(whtPnd53Contract >= 0 AND whtPnd53Contract <= 100)
+  @@check(whtPnd53Advert >= 0 AND whtPnd53Advert <= 100)
+}
+
+// ============================================
+// ผังบัญชี / Chart of Accounts
+// ============================================
+model ChartOfAccount {
+  id           String           @id @default(uuid())
+  code         String           @unique @db.VarChar(10) // รหัสบัญชี (1000, 1100, 1110, etc.)
+  name         String           @db.VarChar(255)
+  nameEn       String?          @db.VarChar(255)
+  type         AccountType
+  level        Int              @default(1) // ระดับ (1-4)
+  parentId     String?          @db.Uuid
+  parent       ChartOfAccount?  @relation("AccountHierarchy", fields: [parentId], references: [id])
+  children     ChartOfAccount[] @relation("AccountHierarchy")
+  isDetail     Boolean          @default(true) // เป็นบัญชีรายละเอียดหรือไม่
+  isSystem     Boolean          @default(false) // เป็นบัญชีระบบหรือไม่
+  isActive     Boolean          @default(true)
+  notes        String?          @db.Text
+  createdAt    DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime         @updatedAt @db.Timestamptz(3)
+  journalLines JournalLine[]
+
+  @@index([parentId])
+  @@index([type, isActive])
+  @@index([code])
+  @@check(level >= 1 AND level <= 4)
+}
+
+enum AccountType {
+  ASSET // สินทรัพย์ (1xxx)
+  LIABILITY // หนี้สิน (2xxx)
+  EQUITY // ทุน (3xxx)
+  REVENUE // รายได้ (4xxx)
+  EXPENSE // ค่าใช้จ่าย (5xxx)
+}
+
+// ============================================
+// บันทึกบัญชี / Journal Entry
+// ============================================
+model JournalEntry {
+  id              String         @id @default(uuid())
+  entryNo         String         @unique @db.VarChar(30) // เลขที่บันทึก
+  date            DateTime       @db.Date // วันที่
+  description     String?        @db.VarChar(500) // รายการ
+  reference       String?        @db.VarChar(100) // เอกสารอ้างอิง
+  documentType    String?        @db.VarChar(50) // ประเภทเอกสาร
+  documentId      String?        @db.Uuid // ID เอกสารต้นทาง
+  totalDebit      Int            @default(0) // รวมเดบิต (สตางค์)
+  totalCredit     Int            @default(0) // รวมเครดิต (สตางค์)
+  status          EntryStatus    @default(DRAFT)
+  isAdjustment    Boolean        @default(false) // รายการปรับปรุง
+  isReversing     Boolean        @default(false) // รายการย้อนกลับ
+  reversingId     String?        @db.Uuid // ID ของรายการที่ย้อน
+  createdById     String?        @db.Uuid // ผู้สร้าง
+  approvedById    String?        @db.Uuid // ผู้อนุมัติ
+  approvedAt      DateTime?      @db.Timestamptz(3) // วันที่อนุมัติ
+  idempotencyKey  String?        @unique @db.VarChar(64)
+  notes           String?        @db.Text // หมายเหตุ
+  isActive        Boolean        @default(true)
+  deletedAt       DateTime?      @db.Timestamptz(3)
+  deletedBy       String?        @db.Uuid
+  createdAt       DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime       @updatedAt @db.Timestamptz(3)
+  lines           JournalLine[]
+  invoices        Invoice[]              @relation("InvoiceJournal")
+  purchaseInvoices PurchaseInvoice[]      @relation("PurchaseInvoiceJournal")
+  receipts        Receipt[]              @relation("ReceiptJournal")
+  payments        Payment[]              @relation("PaymentJournal")
+  creditNotes     CreditNote[]           @relation("CreditNoteJournal")
+  debitNotes      DebitNote[]            @relation("DebitNoteJournal")
+  payrollRuns     PayrollRun[]           @relation("PayrollRunJournal")
+  cheques         Cheque[]               @relation("ChequeJournal")
+  pettyCashVouchers PettyCashVoucher[]   @relation("PettyCashVoucherJournal")
+  stockTakes      StockTake[]            @relation("StockTakeJournal")
+
+  @@index([createdById])
+  @@index([approvedById])
+  @@index([reversingId])
+  @@index([deletedAt])
+  @@index([date])
+  @@index([status])
+  @@index([documentType, documentId])
+  @@index([entryNo, date])
+  @@check(totalDebit >= 0)
+  @@check(totalCredit >= 0)
+}
+
+model JournalLine {
+  id          String         @id @default(uuid())
+  entryId     String         @db.Uuid
+  entry       JournalEntry   @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  lineNo      Int            // ลำดับ
+  accountId   String         @db.Uuid
+  account     ChartOfAccount @relation(fields: [accountId], references: [id])
+  description String?        @db.VarChar(500) // รายการ
+  debit       Int            @default(0) // เดบิต (สตางค์)
+  credit      Int            @default(0) // เครดิต (สตางค์)
+  reference   String?        @db.VarChar(100) // เอกสารอ้างอิง
+  createdAt   DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime       @updatedAt @db.Timestamptz(3)
+
+  @@index([entryId])
+  @@index([accountId])
+  @@index([createdAt])
+  @@check(debit >= 0)
+  @@check(credit >= 0)
+  @@check((debit = 0 OR credit = 0) AND (debit > 0 OR credit > 0))
+}
+
+enum EntryStatus {
+  DRAFT // ร่าง
+  POSTED // ลงบัญชีแล้ว
+  REVERSED // ย้อนกลับแล้ว
+}
+
+// ============================================
+// ลูกค้า / Customers
+// ============================================
+model Customer {
+  id            String       @id @default(uuid())
+  code          String       @unique @db.VarChar(20) // รหัสลูกค้า
+  name          String       @db.VarChar(255) // ชื่อลูกค้า
+  nameEn        String?      @db.VarChar(255) // ชื่อภาษาอังกฤษ
+  taxId         String?      @db.VarChar(13) // เลขประจำตัวผู้เสียภาษี
+  branchCode    String?      @db.VarChar(5) // รหัสสาขา
+  address       String?      @db.Text // ที่อยู่
+  subDistrict   String?      @db.VarChar(100) // แขวง/ตำบล
+  district      String?      @db.VarChar(100) // เขต/อำเภอ
+  province      String?      @db.VarChar(100) // จังหวัด
+  postalCode    String?      @db.VarChar(5) // รหัสไปรษณีย์
+  phone         String?      @db.VarChar(20) // โทรศัพท์
+  fax           String?      @db.VarChar(20) // โทรสาร
+  email         String?      @db.VarChar(255) // อีเมล
+  website       String?      @db.VarChar(255) // เว็บไซต์
+  contactName   String?      @db.VarChar(255) // ชื่อผู้ติดต่อ
+  contactPhone  String?      @db.VarChar(20) // โทรศัพท์ผู้ติดต่อ
+  creditLimit   Int          @default(0) // วงเงินเครดิต (สตางค์)
+  creditDays    Int          @default(30) // เครดิต (วัน)
+  isActive      Boolean      @default(true)
+  deletedAt     DateTime?    @db.Timestamptz(3)
+  deletedBy     String?      @db.Uuid
+  notes         String?      @db.Text // หมายเหตุ
+  externalRefId String?      @unique @db.VarChar(50) // สำหรับเชื่อมต่อระบบภายนอก (CRM/POS)
+  metadata      Json?        @db.JsonB
+  createdAt     DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime     @updatedAt @db.Timestamptz(3)
+  invoices      Invoice[]
+  receipts      Receipt[]
+  creditNotes   CreditNote[]
+
+  @@index([deletedAt])
+  @@index([name])
+  @@index([isActive])
+  @@index([code, name])
+  @@check(creditLimit >= 0)
+  @@check(creditDays >= 0)
+}
+
+// ============================================
+// ผู้ขาย / Vendors
+// ============================================
+model Vendor {
+  id               String            @id @default(uuid())
+  code             String            @unique @db.VarChar(20) // รหัสผู้ขาย
+  name             String            @db.VarChar(255) // ชื่อผู้ขาย
+  nameEn           String?           @db.VarChar(255) // ชื่อภาษาอังกฤษ
+  taxId            String?           @db.VarChar(13) // เลขประจำตัวผู้เสียภาษี
+  branchCode       String?           @db.VarChar(5) // รหัสสาขา
+  address          String?           @db.Text // ที่อยู่
+  subDistrict      String?           @db.VarChar(100) // แขวง/ตำบล
+  district         String?           @db.VarChar(100) // เขต/อำเภอ
+  province         String?           @db.VarChar(100) // จังหวัด
+  postalCode       String?           @db.VarChar(5) // รหัสไปรษณีย์
+  phone            String?           @db.VarChar(20) // โทรศัพท์
+  fax              String?           @db.VarChar(20) // โทรสาร
+  email            String?           @db.VarChar(255) // อีเมล
+  website          String?           @db.VarChar(255) // เว็บไซต์
+  contactName      String?           @db.VarChar(255) // ชื่อผู้ติดต่อ
+  contactPhone     String?           @db.VarChar(20) // โทรศัพท์ผู้ติดต่อ
+  bankName         String?           @db.VarChar(100) // ชื่อธนาคาร
+  bankAccount      String?           @db.VarChar(20) // เลขที่บัญชี
+  bankAccountName  String?           @db.VarChar(255) // ชื่อบัญชี
+  creditDays       Int               @default(30) // เครดิต (วัน)
+  isActive         Boolean           @default(true)
+  deletedAt        DateTime?         @db.Timestamptz(3)
+  deletedBy        String?           @db.Uuid
+  notes            String?           @db.Text // หมายเหตุ
+  externalRefId    String?           @unique @db.VarChar(50) // สำหรับเชื่อมต่อระบบภายนอก
+  metadata         Json?             @db.JsonB
+  createdAt        DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime          @updatedAt @db.Timestamptz(3)
+  purchaseInvoices PurchaseInvoice[]
+  payments         Payment[]
+  debitNotes       DebitNote[]
+
+  @@index([deletedAt])
+  @@index([name])
+  @@index([isActive])
+  @@index([code, name])
+  @@check(creditDays >= 0)
+}
+
+// ============================================
+// สินค้า/บริการ / Products & Services
+// ============================================
+model Product {
+  id                   String                @id @default(uuid())
+  code                 String                @unique @db.VarChar(50) // รหัสสินค้า
+  name                 String                @db.VarChar(255) // ชื่อสินค้า
+  nameEn               String?               @db.VarChar(255) // ชื่อภาษาอังกฤษ
+  description          String?               @db.Text // รายละเอียด
+  category             String?               @db.VarChar(100) // หมวดหมู่
+  unit                 String                @default("ชิ้น") @db.VarChar(20) // หน่วย
+  type                 ProductType           @default(PRODUCT) // ประเภท
+  salePrice            Int                   @default(0) // ราคาขาย (สตางค์)
+  costPrice            Int                   @default(0) // ราคาทุน (สตางค์)
+  vatRate              Float                 @default(7) @db.Real // อัตรา VAT (%)
+  vatType              VatType               @default(EXCLUSIVE) // ประเภท VAT
+  isInventory          Boolean               @default(false) // ติดตามสต็อก
+  quantity             Float                 @default(0) // จำนวนคงเหลือ (หน่วย)
+  minQuantity          Float                 @default(0) // จำนวนต่ำสุด (หน่วย)
+  incomeType           String?               @db.VarChar(50) // ประเภทรายได้ (สำหรับหัก ณ ที่จ่าย 50 ทวิ)
+  costingMethod        CostingMethod         @default(WEIGHTED_AVERAGE)
+  isActive             Boolean               @default(true)
+  deletedAt            DateTime?             @db.Timestamptz(3)
+  deletedBy            String?               @db.Uuid
+  notes                String?               @db.Text // หมายเหตุ
+  metadata             Json?                 @db.JsonB
+  createdAt            DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime              @updatedAt @db.Timestamptz(3)
+  invoiceLines         InvoiceLine[]
+  purchaseLines        PurchaseInvoiceLine[]
+  stockBalances        StockBalance[]
+  stockMovements       StockMovement[]
+  stockTransferLines   StockTransferLine[]
+  stockTakeLines       StockTakeLine[]
+  productCostHistories ProductCostHistory[]
+
+  @@index([deletedAt])
+  @@index([isActive, isInventory])
+  @@index([category])
+  @@index([code, name])
+  @@fulltext([name, code])
+  @@check(salePrice >= 0)
+  @@check(costPrice >= 0)
+  @@check(vatRate >= 0 AND vatRate <= 100)
+  @@check(quantity >= 0)
+  @@check(minQuantity >= 0)
+}
+
+enum CostingMethod {
+  FIFO
+  WEIGHTED_AVERAGE
+}
+
+enum ProductType {
+  PRODUCT // สินค้า
+  SERVICE // บริการ
+}
+
+enum VatType {
+  EXCLUSIVE // ยังไม่รวม VAT
+  INCLUSIVE // รวม VAT แล้ว
+  NONE // ไม่มี VAT
+}
+
+// ============================================
+// ใบกำกับภาษี / Tax Invoice
+// ============================================
+model Invoice {
+  id                String        @id @default(uuid())
+  invoiceNo         String        @db.VarChar(30) // เลขที่ใบกำกับภาษี
+  fiscalYear        Int           // ปีบัญชี
+  invoiceDate       DateTime      @db.Date // วันที่ออกใบกำกับภาษี
+  dueDate           DateTime?     @db.Date // วันครบกำหนด
+  customerId        String        @db.Uuid
+  customer          Customer      @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  type              InvoiceType   @default(TAX_INVOICE)
+  reference         String?       @db.VarChar(100) // เอกสารอ้างอิง
+  poNumber          String?       @db.VarChar(50) // เลขที่ใบสั่งซื้อ
+  subtotal          Int           @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate           Float         @default(7) @db.Real // อัตรา VAT (%)
+  vatAmount         Int           @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount       Int           @default(0) // ยอดรวม (สตางค์)
+  discountAmount    Int           @default(0) // ส่วนลด (สตางค์)
+  discountPercent   Float         @default(0) @db.Real // ส่วนลด (%)
+  withholdingRate   Float         @default(0) @db.Real // อัตราภาษีหัก ณ ที่จ่าย (%)
+  withholdingAmount Int           @default(0) // ภาษีหัก ณ ที่จ่าย (สตางค์)
+  netAmount         Int           @default(0) // ยอดสุทธิ (สตางค์)
+  paidAmount        Int           @default(0) // ยอดชำระแล้ว (สตางค์)
+  status            InvoiceStatus @default(DRAFT)
+  notes             String?       @db.Text // หมายเหตุ
+  internalNotes     String?       @db.Text // หมายเหตุภายใน
+  terms             String?       @db.VarChar(500) // เงื่อนไข
+  sourceChannel     String?       @db.VarChar(50) // ช่องทางที่มา (เช่น POS, WEB, API)
+  metadata          Json?         @db.JsonB
+  createdById       String?       @db.Uuid
+  isActive          Boolean       @default(true)
+  deletedAt         DateTime?     @db.Timestamptz(3)
+  deletedBy         String?       @db.Uuid
+  createdAt         DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime      @updatedAt @db.Timestamptz(3)
+  lines             InvoiceLine[]
+  receiptAllocations ReceiptAllocation[]
+  journalEntryId    String?       @db.Uuid // ID บันทึกบัญชี
+  journalEntry      JournalEntry? @relation("InvoiceJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+  creditNotes       CreditNote[]
+
+  @@unique([invoiceNo, fiscalYear])
+  @@index([customerId])
+  @@index([journalEntryId])
+  @@index([createdById])
+  @@index([deletedAt])
+  @@index([invoiceDate])
+  @@index([status])
+  @@index([fiscalYear])
+  @@index([invoiceNo, invoiceDate])
+  @@check(subtotal >= 0)
+  @@check(vatAmount >= 0)
+  @@check(totalAmount >= 0)
+  @@check(discountAmount >= 0)
+  @@check(discountPercent >= 0 AND discountPercent <= 100)
+  @@check(withholdingAmount >= 0)
+  @@check(paidAmount >= 0)
+  @@check(netAmount >= 0)
+}
+
+model InvoiceLine {
+  id          String   @id @default(uuid())
+  invoiceId   String   @db.Uuid
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  lineNo      Int      // ลำดับ
+  productId   String?  @db.Uuid
+  product     Product? @relation(fields: [productId], references: [id])
+  description String   @db.VarChar(500) // รายการ
+  quantity    Float    @default(1) // จำนวน (หน่วย)
+  unit        String   @default("ชิ้น") @db.VarChar(20) // หน่วย
+  unitPrice   Int      @default(0) // ราคาต่อหน่วย (สตางค์)
+  discount    Int      @default(0) // ส่วนลด (สตางค์)
+  amount      Int      @default(0) // จำนวนเงิน (สตางค์)
+  vatRate     Float    @default(7) @db.Real // อัตรา VAT (%)
+  vatAmount   Int      @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  notes       String?  @db.Text // หมายเหตุ
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([invoiceId])
+  @@index([productId])
+  @@check(quantity >= 0)
+  @@check(unitPrice >= 0)
+  @@check(discount >= 0)
+  @@check(amount >= 0)
+  @@check(vatAmount >= 0)
+}
+
+enum InvoiceType {
+  TAX_INVOICE // ใบกำกับภาษี
+  RECEIPT // ใบเสร็จรับเงิน
+  DELIVERY_NOTE // ใบส่งของ
+  CREDIT_NOTE // ใบลดหนี้
+  DEBIT_NOTE // ใบเพิ่มหนี้
+}
+
+enum InvoiceStatus {
+  DRAFT // ร่าง
+  ISSUED // ออกแล้ว
+  PARTIAL // รับชำระแล้วบางส่วน
+  PAID // รับชำระเต็มจำนวน
+  CANCELLED // ยกเลิก
+}
+
+// ============================================
+// ใบเสร็จรับเงิน / Receipt
+// ============================================
+model Receipt {
+  id             String              @id @default(uuid())
+  receiptNo      String              @unique @db.VarChar(30) // เลขที่ใบเสร็จ
+  receiptDate    DateTime            @db.Date // วันที่รับเงิน
+  customerId     String              @db.Uuid
+  customer       Customer            @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  paymentMethod  PaymentMethod       @default(CASH)
+  bankAccountId  String?             @db.Uuid // ID บัญชีธนาคาร
+  bankAccount    BankAccount?        @relation(fields: [bankAccountId], references: [id])
+  chequeNo       String?             @db.VarChar(30) // เลขที่เช็ค
+  chequeDate     DateTime?           @db.Date // วันที่เช็ค
+  amount         Int                 @default(0) // จำนวนเงินรับโดยสิ้นเชิง (สตางค์)
+  whtAmount      Int                 @default(0) // ภาษีหัก ณ ที่จ่ายรวม (สตางค์)
+  unallocated    Int                 @default(0) // ยอดที่ยังไม่ได้จัดจ่าย (สตางค์)
+  notes          String?             @db.Text // หมายเหตุ
+  status         ReceiptStatus       @default(DRAFT)
+  journalEntryId String?             @db.Uuid // ID บันทึกบัญชี
+  idempotencyKey String?             @unique @db.VarChar(64)
+  isActive       Boolean             @default(true)
+  deletedAt      DateTime?           @db.Timestamptz(3)
+  deletedBy      String?             @db.Uuid
+  journalEntry   JournalEntry?       @relation("ReceiptJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+  allocations    ReceiptAllocation[]
+  createdAt      DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime            @updatedAt @db.Timestamptz(3)
+
+  @@index([customerId])
+  @@index([bankAccountId])
+  @@index([journalEntryId])
+  @@index([deletedAt])
+  @@index([receiptDate])
+  @@index([status])
+  @@index([receiptNo])
+  @@check(amount >= 0)
+  @@check(whtAmount >= 0)
+  @@check(unallocated >= 0)
+}
+
+model ReceiptAllocation {
+  id          String    @id @default(uuid())
+  receiptId   String    @db.Uuid
+  invoiceId   String    @db.Uuid
+  amount      Int       // จำนวนเงินที่จ่าย (สตางค์)
+  whtRate     Float     @default(0) @db.Real // อัตราหัก ณ ที่จ่าย (%)
+  whtAmount   Int       @default(0) // ภาษีหัก ณ ที่จ่าย (สตางค์)
+  receipt     Receipt   @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  invoice     Invoice   @relation(fields: [invoiceId], references: [id])
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@unique([receiptId, invoiceId])
+  @@index([receiptId])
+  @@index([invoiceId])
+  @@check(amount >= 0)
+  @@check(whtAmount >= 0)
+}
+
+enum PaymentMethod {
+  CASH // เงินสด
+  CHEQUE // เช็ค
+  TRANSFER // โอนเงิน
+  CREDIT // บัตรเครดิต
+  OTHER // อื่นๆ
+}
+
+enum ReceiptStatus {
+  DRAFT // ร่าง
+  POSTED // ลงบัญชีแล้ว
+  CANCELLED // ยกเลิก
+}
+
+// ============================================
+// ใบลดหนี้ / Credit Note
+// ============================================
+model CreditNote {
+  id             String           @id @default(uuid())
+  creditNoteNo   String           @unique @db.VarChar(30) // เลขที่ใบลดหนี้
+  creditNoteDate DateTime         @db.Date // วันที่ออก
+  customerId     String           @db.Uuid
+  customer       Customer         @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  invoiceId      String?          @db.Uuid // อ้างอิงใบกำกับภาษี
+  invoice        Invoice?         @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  reason         String?          @db.VarChar(500) // เหตุผล
+  subtotal       Int              @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate        Float            @default(7) @db.Real // อัตรา VAT (%)
+  vatAmount      Int              @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount    Int              @default(0) // ยอดรวม (สตางค์)
+  status         CreditNoteStatus @default(ISSUED)
+  notes          String?          @db.Text // หมายเหตุ
+  isActive       Boolean          @default(true)
+  deletedAt      DateTime?        @db.Timestamptz(3)
+  deletedBy      String?          @db.Uuid
+  createdAt      DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime         @updatedAt @db.Timestamptz(3)
+  journalEntryId String?          @db.Uuid // ID บันทึกบัญชี
+  journalEntry   JournalEntry?    @relation("CreditNoteJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+
+  @@index([customerId])
+  @@index([invoiceId])
+  @@index([journalEntryId])
+  @@index([deletedAt])
+  @@index([creditNoteDate])
+  @@check(subtotal >= 0)
+  @@check(vatAmount >= 0)
+  @@check(totalAmount >= 0)
+}
+
+enum CreditNoteStatus {
+  ISSUED // ออกแล้ว
+  CANCELLED // ยกเลิก
+}
+
+// ============================================
+// ใบเพิ่มหนี้ / Debit Note
+// ============================================
+model DebitNote {
+  id             String          @id @default(uuid())
+  debitNoteNo    String          @unique @db.VarChar(30) // เลขที่ใบเพิ่มหนี้
+  debitNoteDate  DateTime        @db.Date // วันที่ออก
+  vendorId       String          @db.Uuid
+  vendor         Vendor          @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  invoiceId      String?         @db.Uuid // อ้างอิงใบซื้อ
+  purchaseInvoice PurchaseInvoice? @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  reason         String?         @db.VarChar(500) // เหตุผล
+  subtotal       Int             @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate        Float           @default(7) @db.Real // อัตรา VAT (%)
+  vatAmount      Int             @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount    Int             @default(0) // ยอดรวม (สตางค์)
+  status         DebitNoteStatus @default(ISSUED)
+  notes          String?         @db.Text // หมายเหตุ
+  isActive       Boolean         @default(true)
+  deletedAt      DateTime?       @db.Timestamptz(3)
+  deletedBy      String?         @db.Uuid
+  createdAt      DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime        @updatedAt @db.Timestamptz(3)
+  journalEntryId String?         @db.Uuid // ID บันทึกบัญชี
+  journalEntry   JournalEntry?   @relation("DebitNoteJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+
+  @@index([vendorId])
+  @@index([invoiceId])
+  @@index([journalEntryId])
+  @@index([deletedAt])
+  @@index([debitNoteDate])
+  @@check(subtotal >= 0)
+  @@check(vatAmount >= 0)
+  @@check(totalAmount >= 0)
+}
+
+enum DebitNoteStatus {
+  ISSUED // ออกแล้ว
+  CANCELLED // ยกเลิก
+}
+
+// ============================================
+// ใบซื้อ / Purchase Invoice
+// ============================================
+model PurchaseInvoice {
+  id                String                @id @default(uuid())
+  invoiceNo         String                @unique @db.VarChar(30) // เลขที่ใบซื้อ
+  vendorInvoiceNo   String?               @db.VarChar(30) // เลขที่ใบกำกับภาษีของผู้ขาย
+  invoiceDate       DateTime              @db.Date // วันที่ใบกำกับภาษี
+  dueDate           DateTime?             @db.Date // วันครบกำหนด
+  vendorId          String                @db.Uuid
+  vendor            Vendor                @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  type              InvoiceType           @default(TAX_INVOICE)
+  reference         String?               @db.VarChar(100) // เอกสารอ้างอิง
+  poNumber          String?               @db.VarChar(50) // เลขที่ใบสั่งซื้อ
+  subtotal          Int                   @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate           Float                 @default(7) @db.Real // อัตรา VAT (%)
+  vatAmount         Int                   @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount       Int                   @default(0) // ยอดรวม (สตางค์)
+  discountAmount    Int                   @default(0) // ส่วนลด (สตางค์)
+  withholdingRate   Float                 @default(0) @db.Real // อัตราภาษีหัก ณ ที่จ่าย (%)
+  withholdingAmount Int                   @default(0) // ภาษีหัก ณ ที่จ่าย (สตางค์)
+  netAmount         Int                   @default(0) // ยอดสุทธิ (สตางค์)
+  paidAmount        Int                   @default(0) // ยอดชำระแล้ว (สตางค์)
+  status            InvoiceStatus         @default(DRAFT)
+  notes             String?               @db.Text // หมายเหตุ
+  internalNotes     String?               @db.Text // หมายเหตุภายใน
+  sourceChannel     String?               @db.VarChar(50) // ช่องทางที่มา (เช่น POS, WEB, API)
+  metadata          Json?                 @db.JsonB
+  createdById       String?               @db.Uuid
+  isActive          Boolean               @default(true)
+  deletedAt         DateTime?             @db.Timestamptz(3)
+  deletedBy         String?               @db.Uuid
+  createdAt         DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime              @updatedAt @db.Timestamptz(3)
+  lines             PurchaseInvoiceLine[]
+  paymentAllocations PaymentAllocation[]  @relation("PaymentAllocations")
+  journalEntryId    String?               @db.Uuid // ID บันทึกบัญชี
+  journalEntry      JournalEntry?         @relation("PurchaseInvoiceJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+  debitNotes        DebitNote[]
+
+  @@index([vendorId])
+  @@index([journalEntryId])
+  @@index([createdById])
+  @@index([deletedAt])
+  @@index([invoiceDate])
+  @@index([status])
+  @@index([invoiceNo, invoiceDate])
+  @@check(subtotal >= 0)
+  @@check(vatAmount >= 0)
+  @@check(totalAmount >= 0)
+  @@check(discountAmount >= 0)
+  @@check(withholdingAmount >= 0)
+  @@check(paidAmount >= 0)
+  @@check(netAmount >= 0)
+}
+
+model PurchaseInvoiceLine {
+  id          String          @id @default(uuid())
+  purchaseId  String          @db.Uuid
+  purchase    PurchaseInvoice @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  lineNo      Int             // ลำดับ
+  productId   String?         @db.Uuid
+  product     Product?        @relation(fields: [productId], references: [id])
+  description String          @db.VarChar(500) // รายการ
+  quantity    Float           @default(1) // จำนวน (หน่วย)
+  unit        String          @default("ชิ้น") @db.VarChar(20) // หน่วย
+  unitPrice   Int             @default(0) // ราคาต่อหน่วย (สตางค์)
+  discount    Int             @default(0) // ส่วนลด (สตางค์)
+  amount      Int             @default(0) // จำนวนเงิน (สตางค์)
+  vatRate     Float           @default(7) @db.Real // อัตรา VAT (%)
+  vatAmount   Int             @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  notes       String?         @db.Text // หมายเหตุ
+  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@index([purchaseId])
+  @@index([productId])
+  @@check(quantity >= 0)
+  @@check(unitPrice >= 0)
+  @@check(discount >= 0)
+  @@check(amount >= 0)
+  @@check(vatAmount >= 0)
+}
+
+// ============================================
+// ใบจ่ายเงิน / Payment (AP Payments)
+// ============================================
+model Payment {
+  id             String              @id @default(uuid())
+  paymentNo      String              @unique @db.VarChar(30) // เลขที่ใบจ่ายเงิน
+  paymentDate    DateTime            @db.Date // วันที่จ่ายเงิน
+  vendorId       String              @db.Uuid
+  vendor         Vendor              @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  paymentMethod  PaymentMethod       @default(CASH)
+  bankAccountId  String?             @db.Uuid
+  bankAccount    BankAccount?        @relation("PaymentBankAccount", fields: [bankAccountId], references: [id])
+  chequeNo       String?             @db.VarChar(30) // เลขที่เช็ค
+  chequeDate     DateTime?           @db.Date // วันที่เช็ค
+  amount         Int                 @default(0) // จำนวนเงินรวม (สตางค์)
+  whtAmount      Int                 @default(0) // ภาษีหัก ณ ที่จ่ายรวม (สตางค์)
+  unallocated    Int                 @default(0) // ยอดคงเหลือ (สตางค์)
+  notes          String?             @db.Text // หมายเหตุ
+  status         PaymentStatus       @default(DRAFT)
+  createdById    String?             @db.Uuid
+  idempotencyKey String?             @unique @db.VarChar(64)
+  isActive       Boolean             @default(true)
+  deletedAt      DateTime?           @db.Timestamptz(3)
+  deletedBy      String?             @db.Uuid
+  createdAt      DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime            @updatedAt @db.Timestamptz(3)
+  journalEntryId String?             @db.Uuid // ID บันทึกบัญชี
+  journalEntry   JournalEntry?       @relation("PaymentJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+  allocations    PaymentAllocation[]
+  cheques        Cheque[]            @relation("PaymentCheque")
+
+  @@index([vendorId])
+  @@index([bankAccountId])
+  @@index([journalEntryId])
+  @@index([deletedAt])
+  @@index([paymentDate])
+  @@index([status])
+  @@check(amount >= 0)
+  @@check(whtAmount >= 0)
+  @@check(unallocated >= 0)
+}
+
+model PaymentAllocation {
+  id          String          @id @default(uuid())
+  paymentId   String          @db.Uuid
+  payment     Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  invoiceId   String          @db.Uuid
+  invoice     PurchaseInvoice @relation("PaymentAllocations", fields: [invoiceId], references: [id], onDelete: Restrict)
+  amount      Int             // จำนวนเงินที่จ่าย (สตางค์)
+  whtRate     Float           @default(0) @db.Real // อัตราหัก ณ ที่จ่าย (%)
+  whtAmount   Int             @default(0) // ภาษีหัก ณ ที่จ่าย (สตางค์)
+  notes       String?         @db.Text
+  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+
+  @@unique([paymentId, invoiceId])
+  @@index([paymentId])
+  @@index([invoiceId])
+  @@check(amount >= 0)
+  @@check(whtAmount >= 0)
+}
+
+enum PaymentStatus {
+  DRAFT // ร่าง
+  POSTED // ลงบัญชีแล้ว
+  CANCELLED // ยกเลิก
+}
+
+
+// ============================================
+// ภาษีมูลค่าเพิ่ม / VAT Records
+// ============================================
+model VatRecord {
+  id            String          @id @default(uuid())
+  type          VatRecordType // ประเภท
+  documentNo    String          @db.VarChar(30) // เลขที่เอกสาร
+  documentDate  DateTime        @db.Date // วันที่
+  documentType  String?         @db.VarChar(50) // ประเภทเอกสาร
+  referenceId   String?         @db.Uuid // ID เอกสารอ้างอิง
+  customerId    String?         @db.Uuid // ID ลูกค้า
+  customerName  String?         @db.VarChar(255) // ชื่อลูกค้า
+  customerTaxId String?         @db.VarChar(13) // เลขประจำตัวผู้เสียภาษีลูกค้า
+  vendorId      String?         @db.Uuid // ID ผู้ขาย
+  vendorName    String?         @db.VarChar(255) // ชื่อผู้ขาย
+  vendorTaxId   String?         @db.VarChar(13) // เลขประจำตัวผู้เสียภาษีผู้ขาย
+  description   String?         @db.VarChar(500) // รายการ
+  subtotal      Int             @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate       Float           @default(7) @db.Real // อัตรา VAT (%)
+  vatAmount     Int             @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount   Int             @default(0) // ยอดรวม (สตางค์)
+  taxMonth      Int             // เดือนที่ยื่นภาษี
+  taxYear       Int             // ปีที่ยื่นภาษี
+  reportStatus  VatReportStatus @default(PENDING)
+  createdAt     DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@unique([type, documentNo, taxYear, taxMonth])
+  @@index([type, taxMonth, taxYear])
+  @@index([documentDate])
+  @@index([customerTaxId])
+  @@index([vendorTaxId])
+  @@check(taxMonth >= 1 AND taxMonth <= 12)
+  @@check(taxYear >= 2000 AND taxYear <= 2100)
+  @@check(subtotal >= 0)
+  @@check(vatAmount >= 0)
+  @@check(totalAmount >= 0)
+}
+
+enum VatRecordType {
+  INPUT // ภาษีซื้อ
+  OUTPUT // ภาษีขาย
+}
+
+enum VatReportStatus {
+  PENDING // รอรายงาน
+  REPORTED // รายงานแล้ว
+}
+
+// ============================================
+// ภาษีหัก ณ ที่จ่าย / Withholding Tax
+// ============================================
+model WithholdingTax {
+  id           String          @id @default(uuid())
+  type         WhtType // ประเภท
+  documentNo   String          @db.VarChar(30) // เลขที่หนังสือรับรอง
+  documentDate DateTime        @db.Date // วันที่
+  documentType String?         @db.VarChar(50) // ประเภทเอกสาร
+  referenceId  String?         @db.Uuid // ID เอกสารอ้างอิง
+  payeeId      String?         @db.Uuid // ID ผู้ถูกหักภาษี
+  payeeName    String          @db.VarChar(255) // ชื่อผู้ถูกหักภาษี
+  payeeTaxId   String?         @db.VarChar(13) // เลขประจำตัวผู้เสียภาษี
+  payeeAddress String?         @db.Text // ที่อยู่ผู้ถูกหักภาษี
+  description  String?         @db.VarChar(500) // รายการ
+  incomeType   String?         @db.VarChar(50) // ประเภทเงินได้
+  incomeAmount Int             @default(0) // จำนวนเงินที่จ่าย (สตางค์)
+  whtRate      Float           @default(3) @db.Real // อัตราภาษีหัก ณ ที่จ่าย (%)
+  whtAmount    Int             @default(0) // ภาษีที่หัก (สตางค์)
+  taxMonth     Int             // เดือนที่ยื่นภาษี
+  taxYear      Int             // ปีที่ยื่นภาษี
+  reportStatus WhtReportStatus @default(PENDING)
+  notes        String?         @db.Text // หมายเหตุ
+  createdAt    DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@unique([type, documentNo, taxYear, taxMonth])
+  @@index([type, taxMonth, taxYear])
+  @@index([documentDate])
+  @@index([payeeTaxId])
+  @@check(taxMonth >= 1 AND taxMonth <= 12)
+  @@check(taxYear >= 2000 AND taxYear <= 2100)
+  @@check(incomeAmount >= 0)
+  @@check(whtAmount >= 0)
+  @@check(whtRate >= 0 AND whtRate <= 100)
+}
+
+enum WhtType {
+  PND3 // ภงด.3 (เงินเดือน/ค่าจ้าง)
+  PND53 // ภงด.53 (ค่าบริการ/ค่าเช่า)
+}
+
+enum WhtReportStatus {
+  PENDING // รอรายงาน
+  REPORTED // รายงานแล้ว
+}
+
+// ============================================
+// งบการเงิน / Financial Reports
+// ============================================
+model FinancialReport {
+  id        String     @id @default(uuid())
+  type      ReportType // ประเภทรายงาน
+  name      String     @db.VarChar(255) // ชื่อรายงาน
+  startDate DateTime   @db.Date // วันที่เริ่ม
+  endDate   DateTime   @db.Date // วันที่สิ้นสุด
+  data      String     @db.Text // ข้อมูล JSON
+  createdAt DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime   @updatedAt @db.Timestamptz(3)
+
+  @@index([type, startDate, endDate])
+  @@index([createdAt])
+}
+
+enum ReportType {
+  TRIAL_BALANCE // งบทดลอง
+  BALANCE_SHEET // งบดุล
+  INCOME_STATEMENT // งบกำไรขาดทุน
+  GENERAL_LEDGER // สมุดบัญชีแยกประเภท
+  AGING_AR // รายงานลูกหนี้ตามอายุหนี้
+  AGING_AP // รายงานเจ้าหนี้ตามอายุหนี้
+  VAT_REPORT // รายงานภาษีมูลค่าเพิ่ม
+  WHT_REPORT // รายงานภาษีหัก ณ ที่จ่าย
+}
+
+// ============================================
+// ผู้ใช้งาน / Users
+// ============================================
+model User {
+  id             String          @id @default(uuid())
+  email          String          @unique @db.VarChar(255)
+  password       String          @db.VarChar(255) // รหัสผ่าน (hashed)
+  name           String?         @db.VarChar(255)
+  role           UserRole        @default(USER)
+  isActive       Boolean         @default(true)
+  lastLoginAt    DateTime?       @db.Timestamptz(3)
+  createdAt      DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime        @updatedAt @db.Timestamptz(3)
+  pettyCashFunds PettyCashFund[]
+  dataImports    DataImport[]    @relation("DataImportUser")
+  activityLogs   ActivityLog[]
+
+  @@index([isActive])
+  @@index([role])
+}
+
+enum UserRole {
+  ADMIN // ผู้ดูแลระบบ
+  ACCOUNTANT // นักบัญชี
+  USER // ผู้ใช้ทั่วไป
+  VIEWER // ผู้ดูเท่านั้น
+}
+
+// ============================================
+// เลขที่เอกสาร / Document Numbering
+// ============================================
+model DocumentNumber {
+  id           String   @id @default(uuid())
+  type         String   @db.VarChar(50) // ประเภทเอกสาร
+  prefix       String   @db.VarChar(20) // คำนำหน้า
+  currentNo    Int      @default(0) // เลขที่ปัจจุบัน
+  format       String   @default("{prefix}{yyyy}{mm}-{0000}") @db.VarChar(100) // รูปแบบ
+  resetMonthly Boolean  @default(true) // เริ่มใหม่ทุกเดือน
+  resetYearly  Boolean  @default(false) // เริ่มใหม่ทุกปี
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+
+  @@unique([type, prefix])
+  @@check(currentNo >= 0)
+}
+
+// ============================================
+// การจับคู่รายการ / Reconciliation
+// ============================================
+model Reconciliation {
+  id          String               @id @default(uuid())
+  type        ReconciliationType // ประเภท
+  date        DateTime             @db.Date // วันที่
+  reference   String?              @db.VarChar(100) // เอกสารอ้างอิง
+  debitId     String?              @db.Uuid // ID รายการเดบิต
+  debitType   String?              @db.VarChar(50) // ประเภทรายการเดบิต
+  creditId    String?              @db.Uuid // ID รายการเครดิต
+  creditType  String?              @db.VarChar(50) // ประเภทรายการเครดิต
+  amount      Int                  @default(0) // จำนวนเงิน (สตางค์)
+  status      ReconciliationStatus @default(PENDING)
+  matchedAt   DateTime?            @db.Timestamptz(3) // วันที่จับคู่
+  matchedById String?              @db.Uuid // ผู้จับคู่
+  notes       String?              @db.Text // หมายเหตุ
+  createdAt   DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime             @updatedAt @db.Timestamptz(3)
+
+  @@index([type, status])
+  @@index([date])
+  @@index([matchedById])
+  @@check(amount >= 0)
+}
+
+enum ReconciliationType {
+  BANK // กระทบยอดธนาคาร
+  AR_PAYMENT // จับคู่รับชำระ
+  AP_PAYMENT // จับคู่จ่ายชำระ
+}
+
+enum ReconciliationStatus {
+  PENDING // รอจับคู่
+  MATCHED // จับคู่แล้ว
+  UNMATCHED // ไม่ตรงกัน
+}
+
+// ============================================
+// การเชื่อมต่อระบบภายนอก (Headless API Access)
+// ============================================
+model ApiToken {
+  id         String    @id @default(uuid())
+  name       String    @db.VarChar(100) // e.g., "POS-BKK-01" or "HR-System"
+  tokenHash  String    @unique @db.VarChar(255)
+  scopes     String    @db.Text // e.g., "invoice:write, stock:read"
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+  lastUsedAt DateTime? @db.Timestamptz(3)
+  isActive   Boolean   @default(true)
+
+  @@index([isActive])
+}
+
+// ============================================
+// คลังสินค้าและสินค้าคงคลัง (Inventory & Stock)
+// ============================================
+model InventoryConfig {
+  id                    String   @id @default("default") // Singleton
+  stockMovementTrigger  String   @default("ON_ISSUE") @db.VarChar(20) // "ON_ISSUE" | "ON_CREATE"
+  enableMultiCurrency   Boolean  @default(false)
+  defaultCostingMethod  String   @default("WEIGHTED_AVERAGE") @db.VarChar(20) // "FIFO" | "WEIGHTED_AVERAGE"
+  defaultWarehouseId    String?  @db.Uuid
+  autoCreateCOGSJournal Boolean  @default(true)
+  updatedAt             DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model Warehouse {
+  id             String          @id @default(uuid())
+  code           String          @unique @db.VarChar(20) // รหัสคลัง
+  name           String          @db.VarChar(255) // ชื่อคลัง
+  type           WarehouseType   @default(MAIN)
+  location       String?         @db.Text // ที่ตั้ง
+  isActive       Boolean         @default(true)
+  notes          String?         @db.Text
+  metadata       Json?           @db.JsonB
+  createdAt      DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime        @updatedAt @db.Timestamptz(3)
+  zones          WarehouseZone[]
+  balances       StockBalance[]
+  stockMovements StockMovement[]
+  stockTakes     StockTake[]
+
+  @@index([isActive])
+}
+
+model WarehouseZone {
+  id          String    @id @default(uuid())
+  warehouseId String    @db.Uuid
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  code        String    @db.VarChar(10) // รหัสโซน e.g., A1, B2
+  name        String    @db.VarChar(100) // ชื่อโซน
+  description String?   @db.Text
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@unique([warehouseId, code])
+}
+
+model StockBalance {
+  id          String    @id @default(uuid())
+  productId   String    @db.Uuid
+  product     Product   @relation(fields: [productId], references: [id])
+  warehouseId String    @db.Uuid
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  quantity    Float     @default(0) // จำนวนคงเหลือ (หน่วย)
+  unitCost    Int       @default(0) // ต้นทุนต่อหน่วย (สตางค์)
+  totalCost   Int       @default(0) // ต้นทุนรวม (สตางค์)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@unique([productId, warehouseId])
+  @@index([warehouseId])
+  @@index([productId])
+  @@check(quantity >= 0)
+  @@check(unitCost >= 0)
+  @@check(totalCost >= 0)
+}
+
+model StockMovement {
+  id            String       @id @default(uuid())
+  productId     String       @db.Uuid
+  product       Product      @relation(fields: [productId], references: [id])
+  warehouseId   String       @db.Uuid
+  warehouse     Warehouse    @relation(fields: [warehouseId], references: [id])
+  type          MovementType // ประเภทการเคลื่อนไหว
+  quantity      Float        // จำนวน (บวก/ลบ) (หน่วย)
+  unitCost      Int          // ต้นทุนต่อหน่วย (สตางค์)
+  totalCost     Int          // ต้นทุนรวม (สตางค์)
+  date          DateTime     @db.Date
+  referenceId   String?      @db.Uuid // อ้างอิงเอกสาร (Invoice ID, Purchase ID, Transfer ID)
+  referenceNo   String?      @db.VarChar(50) // เลขที่เอกสารอ้างอิง
+  sourceChannel String?      @db.VarChar(50) // ช่องทางที่มา
+  notes         String?      @db.Text
+  createdById   String?      @db.Uuid
+  createdAt     DateTime     @default(now()) @db.Timestamptz(3)
+  // Multi-currency support
+  currency      String?      @default("THB") @db.VarChar(3)
+  exchangeRate  Float?       @default(1.0) @db.Real
+  foreignCost   Int?
+
+  @@index([productId])
+  @@index([warehouseId])
+  @@index([referenceId])
+  @@index([date])
+  @@index([type])
+  @@check(unitCost >= 0)
+  @@check(totalCost >= 0)
+  @@check(exchangeRate > 0)
+}
+
+model StockTransfer {
+  id              String              @id @default(uuid())
+  transferNo      String              @unique @db.VarChar(30)
+  date            DateTime            @db.Date
+  fromWarehouseId String              @db.Uuid
+  toWarehouseId   String              @db.Uuid
+  status          TransferStatus      @default(DRAFT)
+  requestedById   String?             @db.Uuid
+  approvedById    String?             @db.Uuid
+  notes           String?             @db.Text
+  metadata        Json?               @db.JsonB
+  createdAt       DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime            @updatedAt @db.Timestamptz(3)
+  lines           StockTransferLine[]
+
+  @@index([fromWarehouseId])
+  @@index([toWarehouseId])
+  @@index([status])
+  @@index([date])
+}
+
+model StockTransferLine {
+  id         String        @id @default(uuid())
+  transferId String        @db.Uuid
+  transfer   StockTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  productId  String        @db.Uuid
+  product    Product       @relation(fields: [productId], references: [id])
+  quantity   Float         // จำนวน (หน่วย)
+  notes      String?       @db.Text
+
+  @@index([transferId])
+  @@index([productId])
+  @@check(quantity >= 0)
+}
+
+model StockTake {
+  id              String           @id @default(uuid())
+  stockTakeNumber String           @unique @db.VarChar(30)
+  warehouseId     String           @db.Uuid
+  warehouse       Warehouse        @relation(fields: [warehouseId], references: [id])
+  status          StockTakeStatus  @default(DRAFT)
+  takeDate        DateTime         @db.Date
+  createdBy       String           @db.Uuid
+  createdByName   String?          @db.VarChar(255)
+  approvedBy      String?          @db.Uuid
+  approvedByName  String?          @db.VarChar(255)
+  approvedAt      DateTime?        @db.Timestamptz(3)
+  lines           StockTakeLine[]
+  journalEntryId  String?          @unique @db.Uuid
+  journalEntry    JournalEntry?    @relation("StockTakeJournal", fields: [journalEntryId], references: [id])
+  notes           String?          @db.Text
+  createdAt       DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @db.Timestamptz(3)
+
+  @@index([warehouseId])
+  @@index([status])
+  @@index([takeDate])
+}
+
+model StockTakeLine {
+  id            String    @id @default(uuid())
+  stockTakeId   String    @db.Uuid
+  stockTake     StockTake @relation(fields: [stockTakeId], references: [id], onDelete: Cascade)
+  productId     String    @db.Uuid
+  product       Product   @relation(fields: [productId], references: [id])
+  expectedQty   Float     // จำนวนคาดหมาย (หน่วย)
+  actualQty     Float     // จำนวนตรวจนับจริง (หน่วย)
+  varianceQty   Float     // ผลต่างจำนวน (หน่วย)
+  varianceValue Int       // ผลต่างมูลค่า (สตางค์)
+  costPerUnit   Int       // ต้นทุนต่อหน่วย (สตางค์)
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@index([stockTakeId])
+  @@index([productId])
+  @@check(costPerUnit >= 0)
+}
+
+model ProductCostHistory {
+  id          String   @id @default(uuid())
+  productId   String   @db.Uuid
+  product     Product  @relation(fields: [productId], references: [id])
+  date        DateTime @db.Date
+  oldUnitCost Int      // ต้นทุนเดิม (สตางค์)
+  newUnitCost Int      // ต้นทุนใหม่ (สตางค์)
+  reason      String?  @db.VarChar(255)
+  referenceId String?  @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([productId])
+  @@index([date])
+  @@check(oldUnitCost >= 0)
+  @@check(newUnitCost >= 0)
+}
+
+enum WarehouseType {
+  MAIN
+  BRANCH
+  VAN
+}
+
+enum MovementType {
+  RECEIVE
+  ISSUE
+  TRANSFER_IN
+  TRANSFER_OUT
+  ADJUST
+  RETURN
+  INITIAL
+}
+
+enum TransferStatus {
+  DRAFT
+  REQUESTED
+  APPROVED
+  IN_TRANSIT
+  COMPLETED
+  CANCELLED
+}
+
+enum StockTakeStatus {
+  DRAFT
+  IN_PROGRESS
+  PENDING_APPROVAL
+  APPROVED
+  POSTED
+  CANCELLED
+}
+
+// ============================================
+// ทะเบียนทรัพย์สิน และ ค่าเสื่อมราคา (Fixed Assets)
+// ============================================
+model Asset {
+  id                  String                 @id @default(uuid())
+  code                String                 @unique @db.VarChar(30)
+  name                String                 @db.VarChar(255)
+  purchaseDate        DateTime               @db.Date
+  purchaseCost        Int                    // มูลค่าซื้อ (สตางค์)
+  salvageValue        Int                    @default(100) // ค่าซาก 1 บาท (สตางค์)
+  usefulLifeYears     Int
+  depreciationRate    Float                  @db.Real
+  glAccountId         String                 @db.Uuid // บัญชีสินทรัพย์
+  accumDepAccountId   String                 @db.Uuid // บัญชีค่าเสื่อมราคาสะสม
+  depExpenseAccountId String                 @db.Uuid // บัญชีค่าเสื่อมราคา
+  isActive            Boolean                @default(true)
+  deletedAt           DateTime?              @db.Timestamptz(3)
+  deletedBy           String?                @db.Uuid
+  metadata            Json?                  @db.JsonB
+  createdAt           DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime               @updatedAt @db.Timestamptz(3)
+  schedules           DepreciationSchedule[]
+
+  @@index([glAccountId])
+  @@index([accumDepAccountId])
+  @@index([depExpenseAccountId])
+  @@index([deletedAt])
+  @@check(purchaseCost >= 0)
+  @@check(salvageValue >= 0)
+  @@check(usefulLifeYears > 0)
+  @@check(depreciationRate >= 0 AND depreciationRate <= 100)
+}
+
+model DepreciationSchedule {
+  id             String   @id @default(uuid())
+  assetId        String   @db.Uuid
+  asset          Asset    @relation(fields: [assetId], references: [id])
+  date           DateTime @db.Date // สิ้นเดือน
+  amount         Int      // ค่าเสื่อมราคาประจำงวด (สตางค์)
+  accumulated    Int      // ค่าเสื่อมราคาสะสม (สตางค์)
+  netBookValue   Int      // มูลค่าตามบัญชี (สตางค์)
+  journalEntryId String?  @db.Uuid // เลขที่บันทึกบัญชีที่ Post ไป GL
+  posted         Boolean  @default(false)
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([assetId])
+  @@index([date])
+  @@index([posted])
+  @@check(amount >= 0)
+  @@check(accumulated >= 0)
+  @@check(netBookValue >= 0)
+}
+
+// ============================================
+// ทะเบียนคุมเช็ค และ ธนาคาร (Banking & Cheques)
+// ============================================
+model BankAccount {
+  id              String               @id @default(uuid())
+  code            String               @unique @db.VarChar(20)
+  bankName        String               @db.VarChar(100)
+  branchName      String               @db.VarChar(100)
+  accountNumber   String               @db.VarChar(20)
+  accountName     String               @db.VarChar(255)
+  glAccountId     String               @db.Uuid
+  isActive        Boolean              @default(true)
+  metadata        Json?                @db.JsonB
+  createdAt       DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime             @updatedAt @db.Timestamptz(3)
+  cheques         Cheque[]
+  receipts        Receipt[]
+  payments        Payment[]            @relation("PaymentBankAccount")
+  reconciliations BankReconciliation[]
+
+  @@index([glAccountId])
+  @@index([isActive])
+}
+
+model Cheque {
+  id               String              @id @default(uuid())
+  chequeNo         String              @unique @db.VarChar(30)
+  type             ChequeType // RECEIVE, PAY
+  bankAccountId    String              @db.Uuid
+  bankAccount      BankAccount         @relation(fields: [bankAccountId], references: [id])
+  dueDate          DateTime            @db.Date
+  amount           Int                 // จำนวนเงิน (สตางค์)
+  payeeName        String?             @db.VarChar(255)
+  status           ChequeStatus // ON_HAND, DEPOSITED, CLEARED, BOUNCED, CANCELLED
+  documentRef      String?             @db.VarChar(50) // Links to Receipt / Payment
+  clearedDate      DateTime?           @db.Date
+  journalEntryId   String?             @db.Uuid // ID บันทึกบัญชีเมื่อเช็คผ่าน
+  journalEntry     JournalEntry?       @relation("ChequeJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+  isReconciled     Boolean             @default(false)
+  reconciliationId String?             @db.Uuid
+  reconciliation   BankReconciliation? @relation(fields: [reconciliationId], references: [id])
+  paymentId        String?             @db.Uuid
+  payment          Payment?            @relation("PaymentCheque", fields: [paymentId], references: [id])
+  createdAt        DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime            @updatedAt @db.Timestamptz(3)
+
+  @@index([bankAccountId])
+  @@index([paymentId])
+  @@index([journalEntryId])
+  @@index([dueDate])
+  @@index([status])
+  @@check(amount >= 0)
+}
+
+enum ChequeType {
+  RECEIVE
+  PAY
+}
+
+enum ChequeStatus {
+  ON_HAND
+  DEPOSITED
+  CLEARED
+  BOUNCED
+  CANCELLED
+}
+
+// Bank Reconciliation
+model BankReconciliation {
+  id               String               @id @default(uuid())
+  bankAccountId    String               @db.Uuid
+  bankAccount      BankAccount          @relation(fields: [bankAccountId], references: [id])
+  statementDate    DateTime             @db.Date // วันที่รายการเดินบัญชี
+  statementBalance Int                  @default(0) // ยอดเงินตามรายการเดินบัญชี (สตางค์)
+  bookBalance      Int                  @default(0) // ยอดเงินตามสมุดบัญชี (สตางค์)
+  difference       Int                  @default(0) // ผลต่าง statement - book (สตางค์)
+  status           ReconciliationStatus @default(PENDING)
+  reconciledAt     DateTime?            @db.Timestamptz(3)
+  reconciledById   String?              @db.Uuid
+  notes            String?              @db.Text
+  createdAt        DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime             @updatedAt @db.Timestamptz(3)
+  cheques          Cheque[]
+
+  @@index([bankAccountId])
+  @@index([statementDate])
+  @@index([status])
+  @@check(statementBalance >= 0)
+  @@check(bookBalance >= 0)
+}
+
+// ============================================
+// เงินสดย่อย (Petty Cash)
+// ============================================
+model PettyCashFund {
+  id             String             @id @default(uuid())
+  code           String             @unique @db.VarChar(20)
+  name           String             @db.VarChar(255)
+  custodianId    String             @db.Uuid
+  custodian      User               @relation(fields: [custodianId], references: [id])
+  glAccountId    String             @db.Uuid
+  maxAmount      Int                // วงเงินสูงสุด (สตางค์)
+  currentBalance Int                // ยอดคงเหลือปัจจุบัน (สตางค์)
+  isActive       Boolean            @default(true)
+  metadata       Json?              @db.JsonB
+  createdAt      DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime           @updatedAt @db.Timestamptz(3)
+  vouchers       PettyCashVoucher[]
+
+  @@index([custodianId])
+  @@index([glAccountId])
+  @@check(maxAmount >= 0)
+  @@check(currentBalance >= 0)
+}
+
+model PettyCashVoucher {
+  id                 String        @id @default(uuid())
+  voucherNo          String        @unique @db.VarChar(30)
+  fundId             String        @db.Uuid
+  fund               PettyCashFund @relation(fields: [fundId], references: [id])
+  date               DateTime      @db.Date
+  amount             Int           // จำนวนเงิน (สตางค์)
+  payee              String        @db.VarChar(255)
+  description        String        @db.VarChar(500)
+  glExpenseAccountId String        @db.Uuid
+  journalEntryId     String?       @db.Uuid
+  journalEntry       JournalEntry? @relation("PettyCashVoucherJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+  isReimbursed       Boolean       @default(false)
+  createdAt          DateTime      @default(now()) @db.Timestamptz(3)
+
+  @@index([fundId])
+  @@index([journalEntryId])
+  @@index([date])
+  @@check(amount >= 0)
+}
+
+// ============================================
+// ระบบเงินเดือน (Payroll)
+// ============================================
+model Employee {
+  id               String    @id @default(uuid())
+  employeeCode     String    @unique @db.VarChar(20)
+  externalRefId    String?   @unique @db.VarChar(50) // Link to future full-HR System
+  firstName        String    @db.VarChar(100)
+  lastName         String    @db.VarChar(100)
+  idCardNumber     String?   @db.VarChar(13)
+  hireDate         DateTime  @db.Date
+  baseSalary       Int       // เงินเดือนพื้นฐาน (สตางค์)
+  position         String?   @db.VarChar(100)
+  department       String?   @db.VarChar(100)
+  socialSecurityNo String?   @db.VarChar(13)
+  taxId            String?   @db.VarChar(13)
+  bankAccountNo    String?   @db.VarChar(20)
+  bankName         String?   @db.VarChar(100)
+  isActive         Boolean   @default(true)
+  deletedAt        DateTime? @db.Timestamptz(3)
+  deletedBy        String?   @db.Uuid
+  metadata         Json?     @db.JsonB
+  createdAt        DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @db.Timestamptz(3)
+  payrolls         Payroll[]
+
+  @@index([deletedAt])
+  @@index([isActive])
+  @@index([department])
+  @@check(baseSalary >= 0)
+}
+
+model PayrollRun {
+  id              String        @id @default(uuid())
+  runNo           String        @unique @db.VarChar(30) // PR202603-001
+  periodMonth     Int
+  periodYear      Int
+  paymentDate     DateTime      @db.Date
+  totalBaseSalary Int           // รวมเงินเดือนพื้นฐาน (สตางค์)
+  totalAdditions  Int           // รวมรายได้อื่น (สตางค์)
+  totalDeductions Int           // รวมรายหัก (สตางค์)
+  totalSsc        Int           // รวมประกันสังคม (สตางค์)
+  totalTax        Int           // รวมภาษี (สตางค์)
+  totalNetPay     Int           // รวมจ่ายสุทธิ (สตางค์)
+  status          PayrollStatus // DRAFT, APPROVED, PAID
+  journalEntryId  String?       @db.Uuid // Linked to GL Posting
+  journalEntry    JournalEntry? @relation("PayrollRunJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+  createdAt       DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime      @updatedAt @db.Timestamptz(3)
+  payrolls        Payroll[]
+
+  @@index([journalEntryId])
+  @@index([periodMonth, periodYear])
+  @@index([status])
+  @@check(periodMonth >= 1 AND periodMonth <= 12)
+  @@check(periodYear >= 2000 AND periodYear <= 2100)
+  @@check(totalBaseSalary >= 0)
+  @@check(totalAdditions >= 0)
+  @@check(totalDeductions >= 0)
+  @@check(totalSsc >= 0)
+  @@check(totalTax >= 0)
+  @@check(totalNetPay >= 0)
+}
+
+model Payroll {
+  id             String     @id @default(uuid())
+  payrollRunId   String     @db.Uuid
+  payrollRun     PayrollRun @relation(fields: [payrollRunId], references: [id])
+  employeeId     String     @db.Uuid
+  employee       Employee   @relation(fields: [employeeId], references: [id])
+  baseSalary     Int        // เงินเดือนพื้นฐาน (สตางค์)
+  additions      Int        // OT, Bonus (สตางค์)
+  deductions     Int        // Leave without pay (สตางค์)
+  socialSecurity Int        // ประกันสังคม (สตางค์)
+  withholdingTax Int        // ภาษี ภงด.1 (สตางค์)
+  netPay         Int        // จ่ายสุทธิ (สตางค์)
+  payslipUrl     String?    @db.VarChar(500)
+  createdAt      DateTime   @default(now()) @db.Timestamptz(3)
+
+  @@index([payrollRunId])
+  @@index([employeeId])
+  @@check(baseSalary >= 0)
+  @@check(additions >= 0)
+  @@check(deductions >= 0)
+  @@check(socialSecurity >= 0)
+  @@check(withholdingTax >= 0)
+  @@check(netPay >= 0)
+}
+
+enum PayrollStatus {
+  DRAFT
+  APPROVED
+  PAID
+}
+
+// ============================================
+// ประวัติการนำเข้าข้อมูล (Data Import History)
+// ============================================
+model DataImport {
+  id              String       @id @default(uuid())
+  dataType        String       @db.VarChar(50) // customers, vendors, products, accounts
+  fileName        String       @db.VarChar(255)
+  fileType        String       @db.VarChar(10) // csv, json
+  totalRecords    Int
+  createdCount    Int
+  updatedCount    Int
+  errorCount      Int
+  status          ImportStatus @default(COMPLETED)
+  errorMessage    String?      @db.Text
+  importedById    String?      @db.Uuid
+  importedBy      User?        @relation("DataImportUser", fields: [importedById], references: [id])
+  errorDetails    Json?        @db.JsonB // Detailed error information
+  createdAt       DateTime     @default(now()) @db.Timestamptz(3)
+
+  @@index([dataType])
+  @@index([status])
+  @@index([importedById])
+  @@index([createdAt])
+  @@check(totalRecords >= 0)
+  @@check(createdCount >= 0)
+  @@check(updatedCount >= 0)
+  @@check(errorCount >= 0)
+}
+
+enum ImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ============================================
+// บันทึกกิจกรรม (Activity Log)
+// ============================================
+model ActivityLog {
+  id           String   @id @default(uuid())
+  userId       String   @db.Uuid
+  user         User     @relation(fields: [userId], references: [id])
+  action       String   @db.VarChar(50) // LOGIN, LOGOUT, CREATE, UPDATE, DELETE, POST, VIEW, EXPORT, etc.
+  module       String   @db.VarChar(50) // invoices, payments, inventory, banking, assets, payroll, petty-cash, etc.
+  recordId     String?  @db.Uuid // ID of affected record
+  details      Json?    @db.JsonB // Additional context (JSON data)
+  ipAddress    String?  @db.VarChar(45) // IPv6 compatible
+  status       String   @db.VarChar(20) // success, failed
+  errorMessage String?  @db.Text
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([userId])
+  @@index([action])
+  @@index([module])
+  @@index([createdAt])
+  @@index([status])
+  @@index([module, createdAt])
+  @@index([recordId])
+}
+
+// ============================================
+// รายงานอัตโนมัติตามกำหนดเวลา (Scheduled Reports)
+// ============================================
+model ScheduledReport {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(255)
+  reportType  String   @db.VarChar(50)
+  schedule    String   @db.VarChar(20) // daily, weekly, monthly, quarterly, custom
+  dayOfWeek   Int?     // 0-6 for weekly (Sunday=0)
+  dayOfMonth  Int?     // 1-31 for monthly
+  monthOfYear Int?     // 1-12 for quarterly
+  time        String   @db.VarChar(5) // HH:MM format
+  enabled     Boolean  @default(true)
+  parameters  Json     @db.JsonB // Report parameters as JSON (filters, date ranges, etc.)
+  recipients  String   @db.Text // Comma-separated emails
+  outputFormat String  @default("PDF") @db.VarChar(10) // PDF, EXCEL
+  emailSubject String? @db.VarChar(255)
+  emailBody    String? @db.Text
+  createdBy    String   @db.Uuid
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+  runs         ScheduledReportRun[]
+
+  @@index([enabled])
+  @@index([schedule])
+  @@check(dayOfWeek == null OR (dayOfWeek >= 0 AND dayOfWeek <= 6))
+  @@check(dayOfMonth == null OR (dayOfMonth >= 1 AND dayOfMonth <= 31))
+  @@check(monthOfYear == null OR (monthOfYear >= 1 AND monthOfYear <= 12))
+}
+
+model ScheduledReportRun {
+  id               String          @id @default(uuid())
+  scheduledReportId String         @db.Uuid
+  scheduledReport  ScheduledReport @relation(fields: [scheduledReportId], references: [id], onDelete: Cascade)
+  status           String          @db.VarChar(20) // success, failed
+  runAt            DateTime        @db.Timestamptz(3)
+  errorMessage     String?         @db.Text
+  fileUrl          String?         @db.VarChar(500)
+  fileSize         Int?            // File size in bytes
+  generatedRecords Int?            // Number of records generated
+  createdAt        DateTime        @default(now()) @db.Timestamptz(3)
+
+  @@index([scheduledReportId])
+  @@index([status])
+  @@index([runAt])
+  @@check(fileSize == null OR fileSize >= 0)
+  @@check(generatedRecords == null OR generatedRecords >= 0)
+}

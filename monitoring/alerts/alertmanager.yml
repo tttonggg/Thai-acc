@@ -1,0 +1,105 @@
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@thai-erp.example.com'
+  smtp_auth_username: 'alerts@thai-erp.example.com'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  
+  # Resolve timeout
+  resolve_timeout: 5m
+
+# Templates
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Routing tree
+route:
+  # Default receiver
+  receiver: 'default'
+  
+  # Group alerts by these labels
+  group_by: ['alertname', 'severity', 'team']
+  
+  # Wait before sending first notification
+  group_wait: 30s
+  
+  # Wait before sending batch of new alerts
+  group_interval: 5m
+  
+  # Wait before resending resolved alerts
+  repeat_interval: 4h
+  
+  # Routes
+  routes:
+    # Critical alerts go to PagerDuty immediately
+    - match:
+        severity: critical
+      receiver: 'pagerduty-critical'
+      continue: true
+      group_wait: 0s
+    
+    # Platform team alerts
+    - match:
+        team: platform
+      receiver: 'platform-team'
+      group_by: ['alertname', 'severity']
+      
+    # Business team alerts
+    - match:
+        team: business
+      receiver: 'business-team'
+      group_by: ['alertname']
+      group_interval: 1h
+      repeat_interval: 24h
+
+# Receivers
+receivers:
+  - name: 'default'
+    slack_configs:
+      - channel: '#alerts'
+        send_resolved: true
+        title: '{{ template "slack.default.title" . }}'
+        text: '{{ template "slack.default.text" . }}'
+
+  - name: 'platform-team'
+    slack_configs:
+      - channel: '#platform-alerts'
+        send_resolved: true
+        title: '{{ template "slack.platform.title" . }}'
+        text: '{{ template "slack.platform.text" . }}'
+    email_configs:
+      - to: 'platform-team@thai-erp.example.com'
+        send_resolved: true
+        headers:
+          Subject: '[Thai ERP Alert] {{ .GroupLabels.alertname }}'
+
+  - name: 'business-team'
+    slack_configs:
+      - channel: '#business-alerts'
+        send_resolved: true
+        title: '{{ template "slack.business.title" . }}'
+        text: '{{ template "slack.business.text" . }}'
+    email_configs:
+      - to: 'business-team@thai-erp.example.com'
+        send_resolved: true
+        headers:
+          Subject: '[Thai ERP Business Alert] {{ .GroupLabels.alertname }}'
+
+  - name: 'pagerduty-critical'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'
+        severity: critical
+        description: '{{ .GroupLabels.alertname }}'
+        details:
+          firing: '{{ template "pagerduty.default.description" . }}'
+          resolved: '{{ template "pagerduty.default.instances" . }}'
+
+# Inhibition rules
+inhibit_rules:
+  # Mute warning alerts if critical is firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']

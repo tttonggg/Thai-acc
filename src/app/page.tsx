@@ -32,6 +32,7 @@ import { DataExportPage } from '@/components/admin/data-export-page'
 import { BackupRestorePage } from '@/components/admin/backup-restore-page'
 import { DataImportPage } from '@/components/admin/data-import-page'
 import { ActivityLogPage } from '@/components/admin/activity-log-page'
+import { WebhookManagement, ApiAnalytics } from '@/components/admin'
 import {
   Loader2,
   LayoutDashboard,
@@ -58,6 +59,8 @@ import {
   Upload,
   Database,
   Activity,
+  Webhook,
+  BarChart,
 } from 'lucide-react'
 
 export type Module =
@@ -86,6 +89,8 @@ export type Module =
   | 'backup-restore'
   | 'data-import'
   | 'activity-log'
+  | 'webhooks'
+  | 'api-analytics'
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -193,6 +198,18 @@ export default function Home() {
             <ActivityLogPage />
           </PermissionGuard>
         )
+      case 'webhooks':
+        return (
+          <PermissionGuard permission="SETTINGS_VIEW">
+            <WebhookManagement />
+          </PermissionGuard>
+        )
+      case 'api-analytics':
+        return (
+          <PermissionGuard permission="SETTINGS_VIEW">
+            <ApiAnalytics />
+          </PermissionGuard>
+        )
       default:
         return <Dashboard />
     }
@@ -226,6 +243,8 @@ export default function Home() {
       { id: 'data-import' as Module, label: 'นำเข้าข้อมูล', icon: Upload, adminOnly: true },
       { id: 'backup-restore' as Module, label: 'สำรองข้อมูล', icon: Database, adminOnly: true },
       { id: 'activity-log' as Module, label: 'บันทึกกิจกรรม', icon: Activity, adminOnly: true },
+      { id: 'webhooks' as Module, label: 'Webhooks', icon: Webhook, adminOnly: true },
+      { id: 'api-analytics' as Module, label: 'API Analytics', icon: BarChart, adminOnly: true },
     ]
 
     if (userRole === 'ADMIN') {

@@ -1,0 +1,502 @@
+# ============================================
+# Thai Accounting ERP - Production Docker Compose
+# For production deployments with full stack
+# ============================================
+
+version: '3.8'
+
+services:
+  # ============================================
+  # Next.js Application (Blue-Green Ready)
+  # ============================================
+  app-blue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: thai-erp-app-blue
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=thai-erp-uploads
+      - SENTRY_DSN=${SENTRY_DSN}
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - thai-erp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  app-green:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: thai-erp-app-green
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=thai-erp-uploads
+      - SENTRY_DSN=${SENTRY_DSN}
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - thai-erp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      replicas: 0  # Initially scaled down for blue-green
+    profiles:
+      - blue-green
+
+  # ============================================
+  # NGINX Load Balancer with Blue-Green Support
+  # ============================================
+  nginx:
+    image: nginx:alpine
+    container_name: thai-erp-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infrastructure/nginx/ssl:/etc/nginx/ssl:ro
+      - ./infrastructure/nginx/includes:/etc/nginx/includes:ro
+    depends_on:
+      - app-blue
+    networks:
+      - thai-erp-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # PostgreSQL Database (Primary)
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: thai-erp-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER:-thai_erp}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME:-thai_erp}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+      - ./backups:/backups
+    networks:
+      - thai-erp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-thai_erp}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+  # ============================================
+  # PostgreSQL Read Replica (Optional)
+  # ============================================
+  postgres-replica:
+    image: postgres:16-alpine
+    container_name: thai-erp-postgres-replica
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER:-thai_erp}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME:-thai_erp}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
+    networks:
+      - thai-erp-network
+    depends_on:
+      - postgres
+    profiles:
+      - ha
+
+  # ============================================
+  # Redis Cache & Session Store
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: thai-erp-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - thai-erp-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Redis Sentinel for HA
+  # ============================================
+  redis-sentinel:
+    image: redis:7-alpine
+    container_name: thai-erp-redis-sentinel
+    restart: unless-stopped
+    command: >
+      sh -c "echo 'sentinel monitor mymaster redis 6379 2' > /etc/sentinel.conf &&
+             echo 'sentinel down-after-milliseconds mymaster 5000' >> /etc/sentinel.conf &&
+             echo 'sentinel failover-timeout mymaster 60000' >> /etc/sentinel.conf &&
+             redis-sentinel /etc/sentinel.conf"
+    ports:
+      - "26379:26379"
+    networks:
+      - thai-erp-network
+    depends_on:
+      - redis
+    profiles:
+      - ha
+
+  # ============================================
+  # MinIO Object Storage (S3 compatible)
+  # ============================================
+  minio:
+    image: minio/minio:latest
+    container_name: thai-erp-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - thai-erp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # ============================================
+  # MinIO Bucket Setup
+  # ============================================
+  minio-setup:
+    image: minio/minio:latest
+    container_name: thai-erp-minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc mb myminio/thai-erp-uploads || true;
+      /usr/bin/mc mb myminio/thai-erp-backups || true;
+      /usr/bin/mc policy set private myminio/thai-erp-uploads;
+      /usr/bin/mc policy set private myminio/thai-erp-backups;
+      /usr/bin/mc ilm add --expiry-days 90 myminio/thai-erp-uploads/temp/ || true;
+      exit 0;
+      "
+    networks:
+      - thai-erp-network
+    profiles:
+      - setup
+
+  # ============================================
+  # Prometheus (Metrics Collection)
+  # ============================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: thai-erp-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alerts:/etc/prometheus/alerts:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - thai-erp-network
+
+  # ============================================
+  # Grafana (Metrics Visualization)
+  # ============================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: thai-erp-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - thai-erp-network
+
+  # ============================================
+  # Alertmanager
+  # ============================================
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: thai-erp-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./monitoring/alerts/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    networks:
+      - thai-erp-network
+
+  # ============================================
+  # Loki (Log Aggregation)
+  # ============================================
+  loki:
+    image: grafana/loki:latest
+    container_name: thai-erp-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - thai-erp-network
+
+  # ============================================
+  # Promtail (Log Collection)
+  # ============================================
+  promtail:
+    image: grafana/promtail:latest
+    container_name: thai-erp-promtail
+    restart: unless-stopped
+    volumes:
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - thai-erp-network
+    depends_on:
+      - loki
+
+  # ============================================
+  # Node Exporter (System Metrics)
+  # ============================================
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: thai-erp-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - thai-erp-network
+
+  # ============================================
+  # PostgreSQL Exporter
+  # ============================================
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: thai-erp-postgres-exporter
+    restart: unless-stopped
+    ports:
+      - "9187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${DB_USER:-thai_erp}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-thai_erp}?sslmode=disable
+    networks:
+      - thai-erp-network
+    depends_on:
+      - postgres
+
+  # ============================================
+  # Redis Exporter
+  # ============================================
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: thai-erp-redis-exporter
+    restart: unless-stopped
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    networks:
+      - thai-erp-network
+    depends_on:
+      - redis
+
+  # ============================================
+  # Jaeger (Distributed Tracing)
+  # ============================================
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: thai-erp-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - thai-erp-network
+
+  # ============================================
+  # Backup Service
+  # ============================================
+  backup:
+    image: offen/docker-volume-backup:latest
+    container_name: thai-erp-backup
+    restart: unless-stopped
+    environment:
+      - BACKUP_CRON_EXPRESSION=0 2 * * *
+      - BACKUP_RETENTION_DAYS=30
+      - BACKUP_FILENAME=backup-%Y-%m-%dT%H-%M-%S.tar.gz
+      - BACKUP_ARCHIVE=/archive
+      - BACKUP_STOP_CONTAINER_LABEL=thai-erp.stop-during-backup
+      - AWS_S3_BUCKET_NAME=${BACKUP_S3_BUCKET}
+      - AWS_ACCESS_KEY_ID=${BACKUP_AWS_ACCESS_KEY}
+      - AWS_SECRET_ACCESS_KEY=${BACKUP_AWS_SECRET_KEY}
+      - AWS_DEFAULT_REGION=${AWS_REGION:-ap-southeast-1}
+    volumes:
+      - postgres_data:/backup/postgres:ro
+      - minio_data:/backup/minio:ro
+      - ./backups:/archive
+    networks:
+      - thai-erp-network
+    profiles:
+      - backup
+
+# ============================================
+# Volumes
+# ============================================
+volumes:
+  postgres_data:
+    driver: local
+  postgres_replica_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  alertmanager_data:
+    driver: local
+  loki_data:
+    driver: local
+
+# ============================================
+# Networks
+# ============================================
+networks:
+  thai-erp-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -23,6 +23,11 @@ import {
   Database,
   Download,
   Activity,
+  Calendar,
+  DollarSign,
+  FileCheck,
+  PiggyBank,
+  Building,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Module } from '@/app/page'
@@ -93,6 +98,12 @@ const defaultMenuItems: MenuItem[] = [
   { id: 'payroll' as Module, label: 'เงินเดือน', icon: Users },
   { id: 'petty-cash' as Module, label: 'เงินสดย่อย', icon: Wallet },
   { id: 'reports' as Module, label: 'รายงาน', icon: BarChart3 },
+  // Phase B: Accounting Excellence
+  { id: 'accounting-periods' as Module, label: 'งวดบัญชี', icon: Calendar },
+  { id: 'currencies' as Module, label: 'สกุลเงิน', icon: DollarSign },
+  { id: 'tax-forms' as Module, label: 'แบบฟอร์มภาษี', icon: FileCheck },
+  { id: 'budgets' as Module, label: 'งบประมาณ', icon: PiggyBank },
+  { id: 'entities' as Module, label: 'บริษัทในเครือ', icon: Building },
   { id: 'settings' as Module, label: 'ตั้งค่า', icon: Settings, adminOnly: true },
   { id: 'users' as Module, label: 'จัดการผู้ใช้', icon: UserCog, adminOnly: true },
 ]

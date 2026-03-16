@@ -1,0 +1,44 @@
+# ============================================
+# TLS Certificates (Cert-Manager)
+# ============================================
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: thai-erp-tls
+  namespace: thai-erp
+spec:
+  secretName: thai-erp-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - thai-erp.example.com
+    - www.thai-erp.example.com
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: thai-erp-staging-tls
+  namespace: thai-erp-staging
+spec:
+  secretName: thai-erp-staging-tls
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  dnsNames:
+    - staging.thai-erp.example.com
+---
+# Self-signed certificate for internal use
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: thai-erp-internal-tls
+  namespace: thai-erp
+spec:
+  secretName: thai-erp-internal-tls
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - thai-erp-internal
+    - thai-erp-internal.thai-erp.svc.cluster.local

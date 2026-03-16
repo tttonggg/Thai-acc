@@ -1,13 +1,53 @@
-Dockerfile
-.dockerignore
-node_modules
-npm-debug.log
-README.md
-.next
-.git
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-test
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Testing
+coverage/
+playwright-report/
+test-results/
 *.log
-local-*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+docs/
+
+# Infrastructure (not needed in container)
+infrastructure/
+terraform/
+
+# CI/CD
+.github/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Uploads (will use S3/MinIO)
+upload/
+download/

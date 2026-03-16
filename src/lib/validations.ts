@@ -297,3 +297,65 @@ export const paymentSchema = z.object({
   allocations: z.array(paymentAllocationSchema).min(1, "ต้องมีการจัดจ่ายอย่างน้อย 1 รายการ"),
   status: z.enum(["DRAFT", "POSTED"]).default("DRAFT"),
 })
+
+// Phase B Validations
+
+// B1. Accounting Period validations
+export const accountingPeriodSchema = z.object({
+  action: z.enum(["init-year", "close", "reopen", "lock", "reconcile"]),
+  year: z.number(),
+  month: z.number().min(1).max(12).optional(),
+})
+
+// B2. Currency validations
+export const currencySchema = z.object({
+  code: z.string().length(3),
+  name: z.string(),
+  nameTh: z.string().optional(),
+  symbol: z.string(),
+  isBase: z.boolean().default(false),
+  decimalPlaces: z.number().int().min(0).max(4).default(2),
+})
+
+export const exchangeRateSchema = z.object({
+  fromCurrency: z.string().length(3),
+  toCurrency: z.string().length(3),
+  rate: z.number().positive(),
+  date: z.string().or(z.date()).optional(),
+  source: z.enum(["MANUAL", "API", "SYSTEM"]).default("MANUAL"),
+})
+
+// B3. Tax Form validations
+export const taxFormSchema = z.object({
+  formType: z.enum(["PND3", "PND53", "PP30"]),
+  month: z.number().int().min(1).max(12),
+  year: z.number().int().min(2000),
+})
+
+// B4. Budget validations
+export const budgetSchema = z.object({
+  year: z.number(),
+  accountId: z.string(),
+  amount: z.number().min(0),
+  alertAt: z.number().min(0).max(100).default(80),
+  notes: z.string().optional(),
+})
+
+// B5. Entity validations
+export const entitySchema = z.object({
+  code: z.string().min(1),
+  name: z.string().min(1),
+  nameEn: z.string().optional(),
+  taxId: z.string().optional(),
+  isPrimary: z.boolean().default(false),
+})
+
+export const interCompanyTransactionSchema = z.object({
+  fromEntityId: z.string(),
+  toEntityId: z.string(),
+  documentType: z.string(),
+  documentId: z.string(),
+  documentNo: z.string(),
+  amount: z.number().positive(),
+  description: z.string().optional(),
+})

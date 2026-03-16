@@ -1,0 +1,914 @@
+{
+  "info": {
+    "_postman_id": "thai-accounting-erp-api-v1",
+    "name": "Thai Accounting ERP API",
+    "description": "Complete API collection for Thai Accounting ERP System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "description": "Authentication endpoints for user login and session management",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@thaiaccounting.com\",\n  \"password\": \"admin123\",\n  \"redirect\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/callback/credentials",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "callback", "credentials"]
+            },
+            "description": "Authenticate user and get session token"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@thaiaccounting.com\",\n  \"password\": \"admin123\",\n  \"redirect\": false\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Set-Cookie",
+                  "value": "next-auth.session-token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; Path=/; HttpOnly"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"user\": {\n    \"id\": \"user_001\",\n    \"email\": \"admin@thaiaccounting.com\",\n    \"name\": \"Administrator\",\n    \"role\": \"ADMIN\"\n  },\n  \"sessionToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Session",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/session",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "session"]
+            },
+            "description": "Get current session information"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "signout"]
+            },
+            "description": "Sign out and invalidate session"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Accounts",
+      "description": "Chart of accounts management endpoints",
+      "item": [
+        {
+          "name": "List Accounts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts?page=1&limit=20&type=ASSET",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "type",
+                  "value": "ASSET",
+                  "description": "Filter by type: ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by name or code",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"1102\",\n  \"name\": \"ลูกหนี้การค้า - ลูกค้ารายย่อย\",\n  \"nameEn\": \"Accounts Receivable - Retail\",\n  \"type\": \"ASSET\",\n  \"parentId\": \"acc_001\",\n  \"isDetail\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts"]
+            }
+          }
+        },
+        {
+          "name": "Get Account",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "acc_001",
+                  "description": "Account ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ลูกหนี้การค้า - อัปเดต\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "acc_001"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "acc_001"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📄 Invoices",
+      "description": "Sales invoice management endpoints",
+      "item": [
+        {
+          "name": "List Invoices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices?page=1&limit=20&status=DRAFT",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "DRAFT",
+                  "description": "DRAFT, ISSUED, PARTIAL, PAID, CANCELLED"
+                },
+                {
+                  "key": "customerId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "startDate",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"cust_001\",\n  \"invoiceDate\": \"2024-03-15\",\n  \"dueDate\": \"2024-04-15\",\n  \"reference\": \"PO-12345\",\n  \"notes\": \"หมายเหตุ\",\n  \"lines\": [\n    {\n      \"productId\": \"prod_001\",\n      \"description\": \"สินค้า A\",\n      \"quantity\": 10,\n      \"unitPrice\": 1000,\n      \"discountPercent\": 5,\n      \"vatRate\": 7\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices"]
+            }
+          }
+        },
+        {
+          "name": "Get Invoice",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "inv_001"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Invoice",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"อัปเดตหมายเหตุ\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "inv_001"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Invoice",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "inv_001"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Issue Invoice",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id/issue",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id", "issue"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "inv_001"
+                }
+              ]
+            },
+            "description": "Issue invoice and create journal entries"
+          }
+        },
+        {
+          "name": "Void Invoice",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/:id/void",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", ":id", "void"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "inv_001"
+                }
+              ]
+            },
+            "description": "Void invoice and create reversing entries"
+          }
+        }
+      ]
+    },
+    {
+      "name": "💰 Receipts",
+      "description": "Receipt management endpoints",
+      "item": [
+        {
+          "name": "List Receipts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/receipts?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "receipts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Receipt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"cust_001\",\n  \"receiptDate\": \"2024-03-15\",\n  \"paymentMethod\": \"BANK_TRANSFER\",\n  \"bankAccountId\": \"bank_001\",\n  \"reference\": \"REF-123\",\n  \"amount\": 53500,\n  \"whtAmount\": 0,\n  \"allocations\": [\n    {\n      \"invoiceId\": \"inv_001\",\n      \"amount\": 53500,\n      \"whtAmount\": 0\n    }\n  ],\n  \"notes\": \"รับชำระค่าบริการ\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/receipts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "receipts"]
+            }
+          }
+        },
+        {
+          "name": "Post Receipt",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/receipts/:id/post",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "receipts", ":id", "post"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "rec_001"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 Payments",
+      "description": "Payment management endpoints",
+      "item": [
+        {
+          "name": "List Payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendorId\": \"vend_001\",\n  \"paymentDate\": \"2024-03-15\",\n  \"paymentMethod\": \"BANK_TRANSFER\",\n  \"bankAccountId\": \"bank_001\",\n  \"amount\": 50000,\n  \"allocations\": [\n    {\n      \"invoiceId\": \"pur_001\",\n      \"amount\": 50000\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📒 Journal Entries",
+      "description": "Journal entry management endpoints",
+      "item": [
+        {
+          "name": "List Journal Entries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/journal?page=1&limit=20&status=POSTED",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "journal"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "POSTED",
+                  "description": "DRAFT, POSTED, REVERSED"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Journal Entry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2024-03-15\",\n  \"description\": \"ปรับปรุงบัญชี\",\n  \"reference\": \"ADJ-001\",\n  \"lines\": [\n    {\n      \"accountId\": \"acc_001\",\n      \"description\": \"โอนเงิน\",\n      \"debit\": 10000,\n      \"credit\": 0\n    },\n    {\n      \"accountId\": \"acc_002\",\n      \"description\": \"โอนเงิน\",\n      \"debit\": 0,\n      \"credit\": 10000\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/journal",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "journal"]
+            }
+          }
+        },
+        {
+          "name": "Post Journal Entry",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/journal/:id/post",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "journal", ":id", "post"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "je_001"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 Customers",
+      "description": "Customer management endpoints",
+      "item": [
+        {
+          "name": "List Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CUST-001\",\n  \"name\": \"บริษัท ตัวอย่าง จำกัด\",\n  \"nameEn\": \"Example Company Ltd.\",\n  \"taxId\": \"1234567890123\",\n  \"branchCode\": \"00000\",\n  \"address\": \"123 ถนนสุขุมวิท\",\n  \"subDistrict\": \"คลองเตย\",\n  \"district\": \"คลองเตย\",\n  \"province\": \"กรุงเทพมหานคร\",\n  \"postalCode\": \"10110\",\n  \"phone\": \"02-123-4567\",\n  \"email\": \"contact@example.com\",\n  \"creditLimit\": 100000,\n  \"creditDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏢 Vendors",
+      "description": "Vendor management endpoints",
+      "item": [
+        {
+          "name": "List Vendors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "vendors"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Vendor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"VEND-001\",\n  \"name\": \"บริษัท ผู้ขาย จำกัด\",\n  \"taxId\": \"9876543210987\",\n  \"address\": \"456 ถนนพหลโยธิน\",\n  \"phone\": \"02-987-6543\",\n  \"email\": \"vendor@example.com\",\n  \"bankName\": \"ธนาคารกสิกรไทย\",\n  \"bankAccount\": \"123-4-56789-0\",\n  \"bankAccountName\": \"บริษัท ผู้ขาย จำกัด\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "vendors"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 Products",
+      "description": "Product management endpoints",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"PROD-001\",\n  \"name\": \"สินค้าตัวอย่าง\",\n  \"description\": \"รายละเอียดสินค้า\",\n  \"unit\": \"ชิ้น\",\n  \"salePrice\": 100000,\n  \"cost\": 80000,\n  \"vatRate\": 7,\n  \"isInventory\": true,\n  \"quantity\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📈 Reports",
+      "description": "Financial reports endpoints",
+      "item": [
+        {
+          "name": "General Ledger Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/general-ledger?startDate=2024-01-01&endDate=2024-03-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "general-ledger"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-03-31"
+                },
+                {
+                  "key": "accountId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Balance Sheet",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/balance-sheet?asOf=2024-03-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "balance-sheet"],
+              "query": [
+                {
+                  "key": "asOf",
+                  "value": "2024-03-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Income Statement",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/income-statement?startDate=2024-01-01&endDate=2024-03-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "income-statement"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-03-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Trial Balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/trial-balance?asOf=2024-03-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "trial-balance"],
+              "query": [
+                {
+                  "key": "asOf",
+                  "value": "2024-03-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "VAT Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/vat?month=3&year=2024&type=OUTPUT",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "vat"],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "3"
+                },
+                {
+                  "key": "year",
+                  "value": "2024"
+                },
+                {
+                  "key": "type",
+                  "value": "OUTPUT",
+                  "description": "OUTPUT (ภาษีขาย) or INPUT (ภาษีซื้อ)"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚙️ Settings",
+      "description": "System settings endpoints",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "settings"]
+            }
+          }
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"บริษัท ตัวอย่าง จำกัด\",\n  \"taxId\": \"1234567890123\",\n  \"vatRate\": 7,\n  \"address\": \"123 ถนนสุขุมวิท กรุงเทพฯ 10110\",\n  \"phone\": \"02-123-4567\",\n  \"email\": \"info@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "settings"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string",
+      "description": "Base URL for API requests"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{sessionToken}}",
+        "type": "string"
+      }
+    ]
+  }
+}

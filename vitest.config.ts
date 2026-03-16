@@ -9,7 +9,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     include: ['**/*.{test,spec}.{js,jsx,ts,tsx}'],
-    exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
+    exclude: ['node_modules', 'dist', '.idea', '.git', '.cache', '.next'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
@@ -19,8 +19,19 @@ export default defineConfig({
         'src/**/*.d.ts',
         'src/test/**/*',
         'src/**/__mocks__/**',
+        'src/components/ui/**/*',
       ],
+      thresholds: {
+        lines: 90,
+        functions: 90,
+        branches: 85,
+        statements: 90,
+      },
     },
+    // Test timeout for integration tests
+    testTimeout: 30000,
+    // Retry flaky tests
+    retry: 2,
   },
   resolve: {
     alias: {

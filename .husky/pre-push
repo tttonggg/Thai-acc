@@ -1,0 +1,33 @@
+#!/bin/sh
+# ============================================
+# Pre-push Hook
+# Runs comprehensive checks before pushing
+# ============================================
+
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 Running pre-push checks..."
+
+# Run linting
+echo "📝 Running ESLint..."
+npm run lint || exit 1
+
+# Run type checking
+echo "🔍 Running TypeScript type check..."
+npm run type-check || exit 1
+
+# Run unit tests
+echo "🧪 Running unit tests..."
+npm run test:unit || exit 1
+
+# Run secret detection
+echo "🔐 Running secret detection..."
+if command -v gitleaks &> /dev/null; then
+    gitleaks detect --verbose --config .gitleaks.toml || exit 1
+fi
+
+# Build check
+echo "🔨 Checking build..."
+npm run build || exit 1
+
+echo "✅ All pre-push checks passed!"

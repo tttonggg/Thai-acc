@@ -1,0 +1,32 @@
+# ============================================
+# Example Terraform Variables
+# Copy to terraform.tfvars and customize
+# ============================================
+
+aws_region  = "ap-southeast-1"
+environment = "production"
+domain_name = "thai-erp.example.com"
+
+# VPC
+vpc_cidr = "10.0.0.0/16"
+
+# EKS
+eks_cluster_version     = "1.28"
+eks_desired_capacity    = 3
+eks_min_size            = 2
+eks_max_size            = 10
+eks_node_instance_types = ["t3.medium", "t3.large"]
+
+# RDS
+rds_instance_class    = "db.t3.medium"
+rds_allocated_storage = 100
+
+# Features
+enable_monitoring = true
+enable_waf        = true
+
+# Access Control
+allowed_cidr_blocks = ["0.0.0.0/0"]
+
+# SSH Key (for EKS nodes)
+ssh_key_name = "thai-erp-eks-key"
