@@ -53,7 +53,10 @@ export const useAuthStore = create<AuthState>()(
 )
 
 // Permission helpers
-export const hasPermission = (userRole: UserRole, requiredRoles: UserRole[]): boolean => {
+export const hasPermission = (userRole: UserRole, requiredRoles?: UserRole[]): boolean => {
+  if (!requiredRoles || !Array.isArray(requiredRoles)) {
+    return false
+  }
   return requiredRoles.includes(userRole)
 }
 
@@ -117,7 +120,55 @@ export const PERMISSIONS = {
   // Reports
   REPORTS_VIEW: ['ADMIN', 'ACCOUNTANT', 'USER', 'VIEWER'] as UserRole[],
   REPORTS_EXPORT: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
-  
+
+  // Inventory
+  INVENTORY_VIEW: ['ADMIN', 'ACCOUNTANT', 'USER', 'VIEWER'] as UserRole[],
+  INVENTORY_CREATE: ['ADMIN', 'ACCOUNTANT', 'USER'] as UserRole[],
+  INVENTORY_EDIT: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+  INVENTORY_DELETE: ['ADMIN'] as UserRole[],
+
+  // Banking
+  BANKING_VIEW: ['ADMIN', 'ACCOUNTANT', 'USER', 'VIEWER'] as UserRole[],
+  BANKING_CREATE: ['ADMIN', 'ACCOUNTANT', 'USER'] as UserRole[],
+  BANKING_EDIT: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+  BANKING_DELETE: ['ADMIN'] as UserRole[],
+
+  // Assets
+  ASSETS_VIEW: ['ADMIN', 'ACCOUNTANT', 'USER', 'VIEWER'] as UserRole[],
+  ASSETS_CREATE: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+  ASSETS_EDIT: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+  ASSETS_DELETE: ['ADMIN'] as UserRole[],
+
+  // Payroll
+  PAYROLL_VIEW: ['ADMIN', 'ACCOUNTANT', 'USER', 'VIEWER'] as UserRole[],
+  PAYROLL_CREATE: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+  PAYRUN_CREATE: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+  PAYROLL_EDIT: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+  PAYROLL_DELETE: ['ADMIN'] as UserRole[],
+
+  // Petty Cash
+  PETTY_CASH_VIEW: ['ADMIN', 'ACCOUNTANT', 'USER', 'VIEWER'] as UserRole[],
+  PETTY_CASH_CREATE: ['ADMIN', 'ACCOUNTANT', 'USER'] as UserRole[],
+  PETTY_CASH_EDIT: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+  PETTY_CASH_DELETE: ['ADMIN'] as UserRole[],
+
+  // Payments & Receipts
+  PAYMENTS_VIEW: ['ADMIN', 'ACCOUNTANT', 'USER', 'VIEWER'] as UserRole[],
+  PAYMENTS_CREATE: ['ADMIN', 'ACCOUNTANT', 'USER'] as UserRole[],
+  PAYMENTS_EDIT: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+  PAYMENTS_DELETE: ['ADMIN'] as UserRole[],
+
+  RECEIPTS_VIEW: ['ADMIN', 'ACCOUNTANT', 'USER', 'VIEWER'] as UserRole[],
+  RECEIPTS_CREATE: ['ADMIN', 'ACCOUNTANT', 'USER'] as UserRole[],
+  RECEIPTS_EDIT: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+  RECEIPTS_DELETE: ['ADMIN'] as UserRole[],
+
+  // Credit Notes & Debit Notes
+  CREDIT_NOTES_VIEW: ['ADMIN', 'ACCOUNTANT', 'USER', 'VIEWER'] as UserRole[],
+  CREDIT_NOTES_CREATE: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+  DEBIT_NOTES_VIEW: ['ADMIN', 'ACCOUNTANT', 'USER', 'VIEWER'] as UserRole[],
+  DEBIT_NOTES_CREATE: ['ADMIN', 'ACCOUNTANT'] as UserRole[],
+
   // Settings & User Management - Admin only
   SETTINGS_VIEW: ['ADMIN'] as UserRole[],
   SETTINGS_EDIT: ['ADMIN'] as UserRole[],
@@ -126,6 +177,13 @@ export const PERMISSIONS = {
 
 export type PermissionKey = keyof typeof PERMISSIONS
 
-export const checkPermission = (userRole: UserRole, permission: PermissionKey): boolean => {
-  return hasPermission(userRole, PERMISSIONS[permission])
+export const checkPermission = (userRole: UserRole | undefined, permission: PermissionKey): boolean => {
+  if (!userRole) {
+    return false
+  }
+  const requiredRoles = PERMISSIONS[permission]
+  if (!requiredRoles || !Array.isArray(requiredRoles)) {
+    return false
+  }
+  return hasPermission(userRole, requiredRoles)
 }

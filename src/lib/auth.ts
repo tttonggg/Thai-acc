@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "./db"
 import bcrypt from "bcryptjs"
+import { logLogin, logFailedLogin } from "./activity-logger"
 
 declare module "next-auth" {
   interface Session {
@@ -47,12 +48,16 @@ export const authOptions: NextAuthOptions = {
         })
 
         if (!user || !user.isActive) {
+          // Log failed login attempt
+          await logFailedLogin(credentials.email)
           return null
         }
 
         const passwordMatch = await bcrypt.compare(credentials.password, user.password)
 
         if (!passwordMatch) {
+          // Log failed login attempt
+          await logFailedLogin(credentials.email, undefined, 'Invalid password')
           return null
         }
 
@@ -61,6 +66,9 @@ export const authOptions: NextAuthOptions = {
           where: { id: user.id },
           data: { lastLoginAt: new Date() }
         })
+
+        // Log successful login
+        await logLogin(user.id)
 
         return {
           id: user.id,

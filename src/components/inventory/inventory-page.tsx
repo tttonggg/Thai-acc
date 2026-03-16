@@ -9,7 +9,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Package, Warehouse, ArrowLeftRight, TrendingDown, TrendingUp,
-  Plus, RefreshCw, Search, ChevronDown, Filter, ArrowRight
+  Plus, RefreshCw, Search, ChevronDown, Filter, ArrowRight,
+  Edit, Trash2, MoreHorizontal, Settings
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,6 +28,10 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
+import { WarehouseEditDialog } from './warehouse-edit-dialog'
+import { StockAdjustmentDialog } from './stock-adjustment-dialog'
+import { StockMovementEditDialog } from './stock-movement-edit-dialog'
+import { StockTransferCompleteDialog } from './stock-transfer-complete-dialog'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -93,19 +98,33 @@ function StockBalanceTab() {
   const [balances, setBalances] = useState<StockBalance[]>([])
   const [loading, setLoading] = useState(true)
   const [summary, setSummary] = useState({ totalProducts: 0, totalQty: 0, totalValue: 0 })
+  const [warehouses, setWarehouses] = useState<WarehouseItem[]>([])
+  const [showAdjust, setShowAdjust] = useState(false)
+  const [selectedBalance, setSelectedBalance] = useState<StockBalance | null>(null)
 
   const fetch = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await (await window.fetch('/api/stock-balances')).json()
+      const [res, whRes] = await Promise.all([
+        window.fetch('/api/stock-balances').then(r => r.json()),
+        window.fetch('/api/warehouses').then(r => r.json()),
+      ])
       if (res.success) {
         setBalances(res.data.balances || [])
         setSummary(res.data.summary || {})
+      }
+      if (whRes.success) {
+        setWarehouses(whRes.data)
       }
     } finally { setLoading(false) }
   }, [])
 
   useEffect(() => { fetch() }, [fetch])
+
+  const handleAdjust = (balance: StockBalance) => {
+    setSelectedBalance(balance)
+    setShowAdjust(true)
+  }
 
   if (loading) return <Skeleton className="h-64 w-full rounded-xl" />
 
@@ -152,11 +171,12 @@ function StockBalanceTab() {
                 <TableHead className="text-right">จำนวน</TableHead>
                 <TableHead className="text-right">ต้นทุน/หน่วย (WAC)</TableHead>
                 <TableHead className="text-right">มูลค่ารวม</TableHead>
+                <TableHead className="text-right">ดำเนินการ</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {balances.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-gray-400 py-8">ยังไม่มีข้อมูลสินค้าคงเหลือ</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center text-gray-400 py-8">ยังไม่มีข้อมูลสินค้าคงเหลือ</TableCell></TableRow>
               ) : balances.map(b => (
                 <TableRow key={b.id}>
                   <TableCell className="font-mono text-sm">{b.product.code}</TableCell>
@@ -167,12 +187,30 @@ function StockBalanceTab() {
                   <TableCell className="text-right font-semibold">{fc(b.quantity)}</TableCell>
                   <TableCell className="text-right">฿{fc(b.unitCost)}</TableCell>
                   <TableCell className="text-right font-semibold text-purple-600">฿{fc(b.totalCost)}</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleAdjust(b)}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      <StockAdjustmentDialog
+        open={showAdjust}
+        onOpenChange={setShowAdjust}
+        balance={selectedBalance}
+        warehouses={warehouses}
+        onSuccess={fetch}
+      />
     </div>
   )
 }
@@ -184,6 +222,8 @@ function StockMovementsTab() {
   const [loading, setLoading] = useState(true)
   const [typeFilter, setTypeFilter] = useState('ALL')
   const [showAdd, setShowAdd] = useState(false)
+  const [showEdit, setShowEdit] = useState(false)
+  const [selectedMovement, setSelectedMovement] = useState<StockMovement | null>(null)
   const [warehouses, setWarehouses] = useState<WarehouseItem[]>([])
   const [products, setProducts] = useState<{ id: string; code: string; name: string }[]>([])
   const [formData, setFormData] = useState({ productId: '', warehouseId: '', type: 'RECEIVE', quantity: '', unitCost: '', notes: '' })
@@ -205,6 +245,22 @@ function StockMovementsTab() {
   }, [typeFilter])
 
   useEffect(() => { fetchAll() }, [fetchAll])
+
+  const handleViewMovement = async (movementId: string) => {
+    try {
+      const res = await window.fetch(`/api/stock-movements/${movementId}`).then(r => r.json())
+      if (res.success) {
+        setSelectedMovement(res.data)
+        setShowEdit(true)
+      }
+    } catch (error) {
+      toast({
+        title: 'ข้อผิดพลาด',
+        description: 'ไม่สามารถดึงข้อมูลการเคลื่อนไหวได้',
+        variant: 'destructive'
+      })
+    }
+  }
 
   const handleSubmit = async () => {
     const res = await window.fetch('/api/stock-movements', {
@@ -308,11 +364,12 @@ function StockMovementsTab() {
                 <TableHead className="text-right">ต้นทุน/หน่วย</TableHead>
                 <TableHead className="text-right">รวม</TableHead>
                 <TableHead>อ้างอิง</TableHead>
+                <TableHead className="text-right">ดำเนินการ</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {movements.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center text-gray-400 py-8">ยังไม่มีการเคลื่อนไหว</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center text-gray-400 py-8">ยังไม่มีการเคลื่อนไหว</TableCell></TableRow>
               ) : movements.map(m => {
                 const mt = MOVEMENT_TYPES[m.type] || { label: m.type, color: 'bg-gray-100 text-gray-700', icon: Package }
                 const isOut = ['ISSUE', 'TRANSFER_OUT'].includes(m.type)
@@ -330,6 +387,16 @@ function StockMovementsTab() {
                     <TableCell className="text-right text-sm">฿{fc(m.unitCost)}</TableCell>
                     <TableCell className="text-right font-semibold">฿{fc(m.totalCost)}</TableCell>
                     <TableCell className="text-xs text-gray-400">{m.referenceNo || m.notes || '—'}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleViewMovement(m.id)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 )
               })}
@@ -337,6 +404,13 @@ function StockMovementsTab() {
           </Table>
         </CardContent>
       </Card>
+
+      <StockMovementEditDialog
+        open={showEdit}
+        onOpenChange={setShowEdit}
+        movement={selectedMovement}
+        onSuccess={fetchAll}
+      />
     </div>
   )
 }
@@ -346,8 +420,8 @@ function StockMovementsTab() {
 function WarehousesTab() {
   const [warehouses, setWarehouses] = useState<WarehouseItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [showAdd, setShowAdd] = useState(false)
-  const [form, setForm] = useState({ code: '', name: '', type: 'GENERAL', location: '', notes: '' })
+  const [showEdit, setShowEdit] = useState(false)
+  const [selectedWarehouse, setSelectedWarehouse] = useState<WarehouseItem | null>(null)
   const { toast } = useToast()
 
   const fetch = useCallback(async () => {
@@ -360,19 +434,40 @@ function WarehousesTab() {
 
   useEffect(() => { fetch() }, [fetch])
 
-  const handleSubmit = async () => {
-    const res = await window.fetch('/api/warehouses', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    }).then(r => r.json())
-    if (res.success) {
-      toast({ title: 'สร้างคลังสำเร็จ', description: `คลัง ${form.name} สร้างแล้ว` })
-      setShowAdd(false)
-      setForm({ code: '', name: '', type: 'GENERAL', location: '', notes: '' })
-      fetch()
-    } else {
-      toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+  const handleEdit = (warehouse: WarehouseItem) => {
+    setSelectedWarehouse(warehouse)
+    setShowEdit(true)
+  }
+
+  const handleDelete = async (warehouse: WarehouseItem) => {
+    if (!confirm(`ยืนยันที่จะลบคลัง "${warehouse.name}"?\n\nการดำเนินการนี้ไม่สามารถย้อนกลับได้`)) {
+      return
+    }
+
+    try {
+      const res = await window.fetch(`/api/warehouses/${warehouse.id}`, {
+        method: 'DELETE',
+      }).then(r => r.json())
+
+      if (res.success) {
+        toast({
+          title: 'ลบคลังสำเร็จ',
+          description: `คลัง ${warehouse.name} ถูกลบเรียบร้อยแล้ว`
+        })
+        fetch()
+      } else {
+        toast({
+          title: 'ไม่สามารถลบได้',
+          description: res.error,
+          variant: 'destructive'
+        })
+      }
+    } catch (error) {
+      toast({
+        title: 'ข้อผิดพลาด',
+        description: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+        variant: 'destructive'
+      })
     }
   }
 
@@ -381,51 +476,49 @@ function WarehousesTab() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Dialog open={showAdd} onOpenChange={setShowAdd}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="h-4 w-4 mr-1" />เพิ่มคลังใหม่
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>สร้างคลังสินค้าใหม่</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>รหัสคลัง *</Label><Input value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))} /></div>
-                <div><Label>ชื่อคลัง *</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} /></div>
-              </div>
-              <div>
-                <Label>ประเภท</Label>
-                <Select value={form.type} onValueChange={v => setForm(p => ({ ...p, type: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="GENERAL">ทั่วไป</SelectItem>
-                    <SelectItem value="MAIN">คลังหลัก</SelectItem>
-                    <SelectItem value="TRANSIT">คลังพักสินค้า</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div><Label>ที่ตั้ง</Label><Input value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} /></div>
-              <div><Label>หมายเหตุ</Label><Input value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} /></div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAdd(false)}>ยกเลิก</Button>
-              <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">บันทึก</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button
+          size="sm"
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={() => {
+            setSelectedWarehouse(null)
+            setShowEdit(true)
+          }}
+        >
+          <Plus className="h-4 w-4 mr-1" />เพิ่มคลังใหม่
+        </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {warehouses.map(w => (
           <Card key={w.id} className={`border ${!w.isActive ? 'opacity-50' : ''}`}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <div>
+                <div className="flex-1">
                   <p className="font-mono text-sm text-gray-400">{w.code}</p>
                   <p className="font-semibold text-gray-800">{w.name}</p>
                   {w.location && <p className="text-xs text-gray-500 mt-1">📍 {w.location}</p>}
+                  <div className="flex gap-1 mt-2">
+                    <Badge variant="outline" className="text-xs">{w.type}</Badge>
+                    {!w.isActive && <Badge variant="secondary" className="text-xs">ไม่ใช้งาน</Badge>}
+                  </div>
                 </div>
-                <Badge variant="outline" className="text-xs">{w.type}</Badge>
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleEdit(w)}
+                    className="text-blue-600 hover:text-blue-700"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleDelete(w)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -437,6 +530,13 @@ function WarehousesTab() {
           </div>
         )}
       </div>
+
+      <WarehouseEditDialog
+        open={showEdit}
+        onOpenChange={setShowEdit}
+        warehouse={selectedWarehouse}
+        onSuccess={fetch}
+      />
     </div>
   )
 }
@@ -447,6 +547,8 @@ function StockTransfersTab() {
   const [transfers, setTransfers] = useState<StockTransfer[]>([])
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
+  const [showComplete, setShowComplete] = useState(false)
+  const [selectedTransfer, setSelectedTransfer] = useState<StockTransfer | null>(null)
   const [warehouses, setWarehouses] = useState<WarehouseItem[]>([])
   const [products, setProducts] = useState<{ id: string; code: string; name: string }[]>([])
   const [formData, setFormData] = useState({
@@ -474,6 +576,11 @@ function StockTransfersTab() {
   }, [])
 
   useEffect(() => { fetchAll() }, [fetchAll])
+
+  const handleCompleteTransfer = (transfer: StockTransfer) => {
+    setSelectedTransfer(transfer)
+    setShowComplete(true)
+  }
 
   const handleSubmit = async () => {
     if (formData.fromWarehouseId === formData.toWarehouseId) {
@@ -586,11 +693,12 @@ function StockTransfersTab() {
                 <TableHead>ไปยังคลัง</TableHead>
                 <TableHead className="text-right">จำนวน</TableHead>
                 <TableHead>สถานะ</TableHead>
+                <TableHead className="text-right">ดำเนินการ</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {transfers.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center text-gray-400 py-8">ยังไม่มีการโอนสินค้า</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center text-gray-400 py-8">ยังไม่มีการโอนสินค้า</TableCell></TableRow>
               ) : transfers.map(t => (
                 <TableRow key={t.transferNo}>
                   <TableCell className="font-mono text-sm font-semibold">{t.transferNo}</TableCell>
@@ -611,12 +719,29 @@ function StockTransfersTab() {
                       {t.status === 'COMPLETED' ? 'สำเร็จ' : 'ระหว่างดำเนินการ'}
                     </Badge>
                   </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleCompleteTransfer(t)}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      {t.status === 'COMPLETED' ? <MoreHorizontal className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      <StockTransferCompleteDialog
+        open={showComplete}
+        onOpenChange={setShowComplete}
+        transfer={selectedTransfer}
+        onSuccess={fetchAll}
+      />
     </div>
   )
 }

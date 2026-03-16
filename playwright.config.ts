@@ -1,37 +1,157 @@
-import { defineConfig, devices } from '@playwright/test'
+import { defineConfig, devices } from '@playwright/test';
 
+/**
+ * Playwright E2E Test Configuration
+ *
+ * Features:
+ * - Multiple browser testing (Chromium, Firefox, WebKit)
+ * - Screenshot capture on failure
+ * - Video recording for failed tests
+ * - Trace capture on first retry
+ * - Detailed HTML reports
+ * - Automatic dev server startup
+ * - Rate limiting bypass for tests
+ */
 export default defineConfig({
+  // Test directory
   testDir: './e2e',
-  timeout: 60000,
+
+  // Test timeout (60 seconds per test)
+  timeout: 60 * 1000,
+
+  // Expect timeout
   expect: {
-    timeout: 10000
+    timeout: 10 * 1000
   },
+
+  // Run tests in parallel (faster execution)
   fullyParallel: true,
+
+  // Fail on test.only in CI
   forbidOnly: !!process.env.CI,
+
+  // Retry configuration
   retries: process.env.CI ? 2 : 0,
+
+  // Worker configuration (limit to 1 in CI for stability)
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+
+  // Reporter configuration
+  reporter: [
+    ['html', {
+      outputFolder: 'playwright-report',
+      open: 'never',
+      host: 'localhost',
+      port: 9323
+    }],
+    ['json', { outputFile: 'test-results/results.json' }],
+    ['junit', { outputFile: 'test-results/results.xml' }],
+    ['list']
+  ],
+
+  // Global setup and teardown
+  globalSetup: require.resolve('./tests/global-setup'),
+  globalTeardown: require.resolve('./tests/global-teardown'),
+
+  // Output directory for test artifacts
+  outputDir: 'test-results',
+
+  // Test configuration
   use: {
+    // Base URL for tests
     baseURL: 'http://localhost:3000',
+
+    // Trace configuration (capture on first retry)
     trace: 'on-first-retry',
+
+    // Screenshot configuration (only on failure)
+    screenshot: 'only-on-failure',
+
+    // Video configuration (only on failure)
+    video: 'retain-on-failure',
+
+    // Action timeout
+    actionTimeout: 10 * 1000,
+
+    // Navigation timeout
+    navigationTimeout: 30 * 1000,
+
+    // Collect trace on failure
+    launchOptions: {
+      slowMo: process.env.SLOW_MO ? Number(process.env.SLOW_MO) : 0,
+    },
+
+    // Extra HTTP headers (bypass rate limiting)
+    extraHTTPHeaders: {
+      'x-playwright-test': 'true'
+    },
+
+    // Ignore HTTPS errors
+    ignoreHTTPSErrors: true,
+
+    // Locale settings
+    locale: 'th-TH',
+    timezoneId: 'Asia/Bangkok',
   },
+
+  // Test projects
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+        contextOptions: {
+          permissions: ['clipboard-read', 'clipboard-write']
+        }
+      },
     },
+
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1920, height: 1080 },
+      },
     },
+
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: {
+        ...devices['Desktop Safari'],
+        viewport: { width: 1920, height: 1080 },
+      },
+    },
+
+    // Mobile testing
+    {
+      name: 'Mobile Chrome',
+      use: {
+        ...devices['Pixel 5'],
+      },
+    },
+    {
+      name: 'Mobile Safari',
+      use: {
+        ...devices['iPhone 12'],
+      },
     },
   ],
+
+  // Dev server configuration
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
-})
+
+  // Metadata
+  metadata: {
+    project: 'Thai Accounting ERP',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development'
+  }
+});

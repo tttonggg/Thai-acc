@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { Landmark, CreditCard, Plus, RefreshCw, CheckCircle, Clock, AlertCircle, XCircle, Scale } from 'lucide-react'
+import { Landmark, CreditCard, Plus, RefreshCw, CheckCircle, Clock, AlertCircle, XCircle, Scale, Pencil, Trash2, ArrowRight, X } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,11 +12,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/hooks/use-toast'
+import { BankAccountEditDialog } from './bank-account-edit-dialog'
+import { ChequeEditDialog } from './cheque-edit-dialog'
 
 const fc = (n: number) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(n)
 const fd = (d: string) => new Date(d).toLocaleDateString('th-TH', { dateStyle: 'medium' })
 
-interface BankAccount { id: string; code: string; bankName: string; branchName: string; accountNumber: string; accountName: string; glAccountId: string }
+interface BankAccount { id: string; code: string; bankName: string; branchName: string; accountNumber: string; accountName: string; glAccountId: string; isActive: boolean }
 interface Cheque { id: string; chequeNo: string; type: 'RECEIVE' | 'PAY'; bankAccount: { bankName: string }; amount: number; dueDate: string; payeeName: string | null; status: string; isReconciled: boolean }
 interface ReconciliationItem { id: string; type: string }
 
@@ -31,8 +33,10 @@ const CHEQUE_STATUS: Record<string, { label: string; color: string }> = {
 function BankAccountsTab() {
   const [accounts, setAccounts] = useState<BankAccount[]>([])
   const [loading, setLoading] = useState(true)
-  const [showAdd, setShowAdd] = useState(false)
-  const [form, setForm] = useState({ code: '', bankName: '', branchName: '', accountNumber: '', accountName: '', glAccountId: '' })
+  const [showEdit, setShowEdit] = useState(false)
+  const [selectedAccount, setSelectedAccount] = useState<BankAccount | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [accountToDelete, setAccountToDelete] = useState<BankAccount | null>(null)
   const { toast } = useToast()
 
   const fetchAll = useCallback(async () => {
@@ -43,51 +47,63 @@ function BankAccountsTab() {
   }, [])
   useEffect(() => { fetchAll() }, [fetchAll])
 
-  const handleSubmit = async () => {
-    const res = await window.fetch('/api/bank-accounts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) }).then(r => r.json())
-    if (res.success) { toast({ title: 'บันทึกสำเร็จ' }); setShowAdd(false); fetchAll() }
-    else toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+  const handleEdit = (account: BankAccount) => {
+    setSelectedAccount(account)
+    setShowEdit(true)
+  }
+
+  const handleAdd = () => {
+    setSelectedAccount(null)
+    setShowEdit(true)
+  }
+
+  const handleDelete = async () => {
+    if (!accountToDelete) return
+
+    const res = await window.fetch(`/api/bank-accounts/${accountToDelete.id}`, { method: 'DELETE' }).then(r => r.json())
+    if (res.success) {
+      toast({ title: 'ลบบัญชีธนาคารสำเร็จ' })
+      setShowDeleteDialog(false)
+      setAccountToDelete(null)
+      fetchAll()
+    } else {
+      toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+    }
+  }
+
+  const confirmDelete = (account: BankAccount) => {
+    setAccountToDelete(account)
+    setShowDeleteDialog(true)
   }
 
   if (loading) return <Skeleton className="h-64 rounded-xl" />
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Dialog open={showAdd} onOpenChange={setShowAdd}>
-          <DialogTrigger asChild><Button size="sm" className="bg-blue-600 hover:bg-blue-700"><Plus className="h-4 w-4 mr-1" />เพิ่มบัญชีธนาคาร</Button></DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>เพิ่มบัญชีธนาคาร</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>รหัส *</Label><Input value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))} placeholder="BANK-001" /></div>
-                <div><Label>ธนาคาร *</Label><Input value={form.bankName} onChange={e => setForm(p => ({ ...p, bankName: e.target.value }))} placeholder="ธ.กสิกรไทย" /></div>
-              </div>
-              <div><Label>สาขา</Label><Input value={form.branchName} onChange={e => setForm(p => ({ ...p, branchName: e.target.value }))} /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>เลขที่บัญชี *</Label><Input value={form.accountNumber} onChange={e => setForm(p => ({ ...p, accountNumber: e.target.value }))} /></div>
-                <div><Label>ชื่อบัญชี</Label><Input value={form.accountName} onChange={e => setForm(p => ({ ...p, accountName: e.target.value }))} /></div>
-              </div>
-              <div><Label>GL Account ID *</Label><Input value={form.glAccountId} onChange={e => setForm(p => ({ ...p, glAccountId: e.target.value }))} placeholder="ID ของบัญชีแยกประเภท" /></div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAdd(false)}>ยกเลิก</Button>
-              <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">บันทึก</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleAdd}>
+          <Plus className="h-4 w-4 mr-1" />เพิ่มบัญชีธนาคาร
+        </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {accounts.map(a => (
-          <Card key={a.id} className="bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+          <Card key={a.id} className={`${a.isActive ? 'bg-gradient-to-br from-blue-600 to-blue-800' : 'bg-gray-300'} text-white relative`}>
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-blue-200 text-xs uppercase tracking-wide">{a.bankName}</p>
+                <div className="flex-1">
+                  <p className={`${a.isActive ? 'text-blue-200' : 'text-gray-500'} text-xs uppercase tracking-wide`}>{a.bankName}</p>
                   <p className="text-xl font-bold mt-1 font-mono">{a.accountNumber}</p>
-                  <p className="text-blue-100 text-sm mt-1">{a.accountName}</p>
-                  {a.branchName && <p className="text-blue-300 text-xs mt-1">สาขา {a.branchName}</p>}
+                  <p className={`${a.isActive ? 'text-blue-100' : 'text-gray-600'} text-sm mt-1`}>{a.accountName || '—'}</p>
+                  {a.branchName && <p className={`${a.isActive ? 'text-blue-300' : 'text-gray-500'} text-xs mt-1`}>สาขา {a.branchName}</p>}
+                  {!a.isActive && <Badge variant="secondary" className="mt-2">ระงับการใช้งาน</Badge>}
                 </div>
-                <Landmark className="h-8 w-8 text-blue-300" />
+                <div className="flex gap-2">
+                  <Button size="sm" variant="ghost" className="text-white hover:bg-white/20" onClick={() => handleEdit(a)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" className="text-white hover:bg-red-500/50" onClick={() => confirmDelete(a)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -96,6 +112,30 @@ function BankAccountsTab() {
           <div className="col-span-2 text-center py-12 text-gray-400"><Landmark className="h-12 w-12 mx-auto mb-3 opacity-30" /><p>ยังไม่มีบัญชีธนาคาร</p></div>
         )}
       </div>
+
+      {/* Edit Dialog */}
+      <BankAccountEditDialog
+        open={showEdit}
+        onClose={() => setShowEdit(false)}
+        onSuccess={fetchAll}
+        account={selectedAccount}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>ยืนยันการลบบัญชีธนาคาร</DialogTitle>
+          </DialogHeader>
+          <p className="py-4">
+            คุณต้องการลบบัญชีธนาคาร <strong>{accountToDelete?.bankName} - {accountToDelete?.accountNumber}</strong> ใช่หรือไม่?
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>ยกเลิก</Button>
+            <Button variant="destructive" onClick={handleDelete}>ลบ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -104,8 +144,10 @@ function ChequeRegisterTab() {
   const [cheques, setCheques] = useState<Cheque[]>([])
   const [accounts, setAccounts] = useState<BankAccount[]>([])
   const [loading, setLoading] = useState(true)
-  const [showAdd, setShowAdd] = useState(false)
-  const [form, setForm] = useState({ chequeNo: '', type: 'RECEIVE', bankAccountId: '', amount: '', dueDate: '', payeeName: '' })
+  const [showEdit, setShowEdit] = useState(false)
+  const [selectedCheque, setSelectedCheque] = useState<Cheque | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [chequeToDelete, setChequeToDelete] = useState<Cheque | null>(null)
   const { toast } = useToast()
 
   const fetchAll = useCallback(async () => {
@@ -117,57 +159,67 @@ function ChequeRegisterTab() {
   }, [])
   useEffect(() => { fetchAll() }, [fetchAll])
 
-  const handleSubmit = async () => {
-    const res = await window.fetch('/api/cheques', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, amount: parseFloat(form.amount) }) }).then(r => r.json())
-    if (res.success) { toast({ title: 'บันทึกสำเร็จ' }); setShowAdd(false); fetchAll() }
-    else toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+  const handleEdit = (cheque: Cheque) => {
+    setSelectedCheque(cheque)
+    setShowEdit(true)
+  }
+
+  const handleAdd = () => {
+    setSelectedCheque(null)
+    setShowEdit(true)
+  }
+
+  const handleDelete = async () => {
+    if (!chequeToDelete) return
+
+    const res = await window.fetch(`/api/cheques/${chequeToDelete.id}`, { method: 'DELETE' }).then(r => r.json())
+    if (res.success) {
+      toast({ title: 'ลบเช็คสำเร็จ' })
+      setShowDeleteDialog(false)
+      setChequeToDelete(null)
+      fetchAll()
+    } else {
+      toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+    }
+  }
+
+  const confirmDelete = (cheque: Cheque) => {
+    setChequeToDelete(cheque)
+    setShowDeleteDialog(true)
+  }
+
+  const updateStatus = async (cheque: Cheque, newStatus: string) => {
+    const res = await window.fetch(`/api/cheques/${cheque.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus, clearedDate: new Date().toISOString() })
+    }).then(r => r.json())
+
+    if (res.success) {
+      toast({ title: 'อัปเดตสถานะเช็คสำเร็จ' })
+      fetchAll()
+    } else {
+      toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+    }
   }
 
   if (loading) return <Skeleton className="h-64 rounded-xl" />
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Dialog open={showAdd} onOpenChange={setShowAdd}>
-          <DialogTrigger asChild><Button size="sm" className="bg-blue-600 hover:bg-blue-700"><Plus className="h-4 w-4 mr-1" />เพิ่มเช็ค</Button></DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>บันทึกเช็ค</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>เลขที่เช็ค *</Label><Input value={form.chequeNo} onChange={e => setForm(p => ({ ...p, chequeNo: e.target.value }))} /></div>
-                <div><Label>ประเภท</Label>
-                  <Select value={form.type} onValueChange={v => setForm(p => ({ ...p, type: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent><SelectItem value="RECEIVE">เช็ครับ</SelectItem><SelectItem value="PAY">เช็คจ่าย</SelectItem></SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div><Label>บัญชีธนาคาร *</Label>
-                <Select value={form.bankAccountId} onValueChange={v => setForm(p => ({ ...p, bankAccountId: v }))}>
-                  <SelectTrigger><SelectValue placeholder="เลือกบัญชี" /></SelectTrigger>
-                  <SelectContent>{accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.bankName} {a.accountNumber}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>จำนวน *</Label><Input type="number" value={form.amount} onChange={e => setForm(p => ({ ...p, amount: e.target.value }))} /></div>
-                <div><Label>วันครบกำหนด *</Label><Input type="date" value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} /></div>
-              </div>
-              <div><Label>ผู้รับ/จ่าย</Label><Input value={form.payeeName} onChange={e => setForm(p => ({ ...p, payeeName: e.target.value }))} /></div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAdd(false)}>ยกเลิก</Button>
-              <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">บันทึก</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleAdd}>
+          <Plus className="h-4 w-4 mr-1" />เพิ่มเช็ค
+        </Button>
       </div>
       <Card>
         <CardContent className="p-0">
           <Table>
-            <TableHeader><TableRow><TableHead>เลขที่</TableHead><TableHead>ประเภท</TableHead><TableHead>ธนาคาร</TableHead><TableHead>ผู้รับ/จ่าย</TableHead><TableHead>ครบกำหนด</TableHead><TableHead className="text-right">จำนวน</TableHead><TableHead className="text-center">สถานะ</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>เลขที่</TableHead><TableHead>ประเภท</TableHead><TableHead>ธนาคาร</TableHead><TableHead>ผู้รับ/จ่าย</TableHead><TableHead>ครบกำหนด</TableHead><TableHead className="text-right">จำนวน</TableHead><TableHead className="text-center">สถานะ</TableHead><TableHead className="text-center">จัดการ</TableHead></TableRow></TableHeader>
             <TableBody>
-              {cheques.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center py-8 text-gray-400">ยังไม่มีรายการเช็ค</TableCell></TableRow>
+              {cheques.length === 0 ? <TableRow><TableCell colSpan={8} className="text-center py-8 text-gray-400">ยังไม่มีรายการเช็ค</TableCell></TableRow>
                 : cheques.map(c => {
                   const st = CHEQUE_STATUS[c.status] || { label: c.status, color: 'bg-gray-100 text-gray-600' }
+                  const canEdit = c.status === 'ON_HAND'
                   return (
                     <TableRow key={c.id}>
                       <TableCell className="font-mono text-sm">{c.chequeNo}</TableCell>
@@ -177,6 +229,35 @@ function ChequeRegisterTab() {
                       <TableCell className="text-sm">{fd(c.dueDate)}</TableCell>
                       <TableCell className="text-right font-semibold">฿{fc(c.amount)}</TableCell>
                       <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${st.color}`}>{st.label}</span></TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-1">
+                          {canEdit && (
+                            <>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => handleEdit(c)}>
+                                <Pencil className="h-3 w-3" />
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600 hover:text-red-700" onClick={() => confirmDelete(c)}>
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </>
+                          )}
+                          {c.status === 'ON_HAND' && (
+                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-yellow-600 hover:text-yellow-700" onClick={() => updateStatus(c, 'DEPOSITED')} title="นำฝาก">
+                              <ArrowRight className="h-3 w-3" />
+                            </Button>
+                          )}
+                          {c.status === 'DEPOSITED' && (
+                            <>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-green-600 hover:text-green-700" onClick={() => updateStatus(c, 'CLEARED')} title="ผ่าน">
+                                <CheckCircle className="h-3 w-3" />
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600 hover:text-red-700" onClick={() => updateStatus(c, 'BOUNCED')} title="เด้ง">
+                                <XCircle className="h-3 w-3" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
                     </TableRow>
                   )
                 })}
@@ -184,6 +265,31 @@ function ChequeRegisterTab() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <ChequeEditDialog
+        open={showEdit}
+        onClose={() => setShowEdit(false)}
+        onSuccess={fetchAll}
+        cheque={selectedCheque}
+        bankAccounts={accounts}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>ยืนยันการลบเช็ค</DialogTitle>
+          </DialogHeader>
+          <p className="py-4">
+            คุณต้องการลบเช็คเลขที่ <strong>{chequeToDelete?.chequeNo}</strong> ใช่หรือไม่?
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>ยกเลิก</Button>
+            <Button variant="destructive" onClick={handleDelete}>ลบ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

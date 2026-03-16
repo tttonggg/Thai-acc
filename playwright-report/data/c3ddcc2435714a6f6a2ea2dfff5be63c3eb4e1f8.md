@@ -1,0 +1,152 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic:
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - img
+          - generic:
+            - heading [level=1]: Thai ERP
+            - paragraph: โปรแกรมบัญชีมาตรฐานไทย
+      - navigation:
+        - button:
+          - generic: Dashboard
+        - button:
+          - generic: ผังบัญชี
+        - button:
+          - generic: บันทึกบัญชี
+        - button:
+          - generic: ใบกำกับภาษี
+        - button:
+          - generic: ภาษีมูลค่าเพิ่ม
+        - button:
+          - generic: ภาษีหัก ณ ที่จ่าย
+        - button:
+          - generic: ลูกหนี้ (AR)
+        - button:
+          - generic: เจ้าหนี้ (AP)
+        - button:
+          - generic: ใบจ่ายเงิน
+        - button:
+          - generic: ใบลดหนี้ (CN)
+        - button:
+          - generic: ใบเพิ่มหนี้ (DN)
+        - button:
+          - generic: สต็อกสินค้า
+        - button:
+          - generic: สินค้าและบริการ
+        - button:
+          - generic: ธนาคาร
+        - button:
+          - generic: ทรัพย์สินถาวร
+        - button:
+          - generic: เงินเดือน
+        - button:
+          - generic: เงินสดย่อย
+        - button:
+          - generic: รายงาน
+      - generic:
+        - button:
+          - generic:
+            - generic: น
+          - generic:
+            - paragraph: นักบัญชี ทดสอบ
+            - paragraph: นักบัญชี
+      - generic:
+        - paragraph: Thai Accounting ERP v1.0
+        - paragraph: มาตรฐานบัญชีไทย (TFRS)
+    - generic:
+      - banner:
+        - generic:
+          - generic:
+            - button:
+              - img
+            - generic:
+              - heading [level=2]: ระบบบัญชีมาตรฐานไทย
+              - paragraph: วันศุกร์ที่ 13 มีนาคม 2569
+          - generic:
+            - button:
+              - img
+            - generic:
+              - button:
+                - generic:
+                  - generic: น
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - heading [level=1]: คลังสินค้า (Inventory)
+              - paragraph: ระบบจัดการสินค้าคงคลัง — ต้นทุนแบบ WAC ตาม TAS 2
+          - generic:
+            - navigation:
+              - button:
+                - img
+                - text: ยอดคงเหลือ
+              - button:
+                - img
+                - text: การเคลื่อนไหว
+              - button:
+                - img
+                - text: คลังสินค้า
+              - button:
+                - img
+                - text: โอนสต็อก
+          - generic:
+            - generic:
+              - button:
+                - img
+                - text: เพิ่มคลังใหม่
+            - generic:
+              - generic:
+                - img
+                - paragraph: ยังไม่มีคลังสินค้า กด "เพิ่มคลังใหม่" เพื่อเริ่มต้น
+  - list
+  - generic [ref=e5] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e6]:
+      - img [ref=e7]
+    - generic [ref=e10]:
+      - button "Open issues overlay" [ref=e11]:
+        - generic [ref=e12]:
+          - generic [ref=e13]: "33"
+          - generic [ref=e14]: "34"
+        - generic [ref=e15]:
+          - text: Issue
+          - generic [ref=e16]: s
+      - button "Collapse issues badge" [ref=e17]:
+        - img [ref=e18]
+  - alert
+  - dialog "สร้างคลังสินค้าใหม่" [ref=e21]:
+    - heading "สร้างคลังสินค้าใหม่" [level=2] [ref=e23]
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e27]: รหัสคลัง *
+          - textbox "รหัสคลัง *" [active] [ref=e28]:
+            - /placeholder: เช่น WH01
+        - generic [ref=e29]:
+          - generic [ref=e30]: ชื่อคลัง *
+          - textbox "ชื่อคลัง *" [ref=e31]:
+            - /placeholder: เช่น คลังหลัก
+      - generic [ref=e32]:
+        - generic [ref=e33]: ประเภทคลัง
+        - combobox "ประเภทคลัง" [ref=e34]:
+          - generic: คลังหลัก (Main)
+          - img
+      - generic [ref=e35]:
+        - generic [ref=e36]: ที่ตั้ง
+        - textbox "ที่ตั้ง" [ref=e37]:
+          - /placeholder: เช่น ชั้น 1 อาคาร A
+      - generic [ref=e38]:
+        - generic [ref=e39]: หมายเหตุ
+        - textbox "หมายเหตุ" [ref=e40]:
+          - /placeholder: หมายเหตุเพิ่มเติม
+    - generic [ref=e41]:
+      - button "ยกเลิก" [ref=e42]
+      - button "สร้างคลัง" [ref=e43]
+    - button "Close" [ref=e44]:
+      - img
+      - generic [ref=e45]: Close
+```

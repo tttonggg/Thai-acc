@@ -1,0 +1,6 @@
+code,name,nameEn,description,category,unit,type,salePrice,costPrice,vatRate,vatType,isInventory,quantity,minQuantity,incomeType,costingMethod,isActive,notes
+P001,สินค้า A,Product A,สินค้าประเภท A,หมวด A,ชิ้น,PRODUCT,150,100,7,EXCLUSIVE,true,50,10,,WEIGHTED_AVERAGE,true,
+P002,สินค้า B,Product B,สินค้าประเภท B,หมวด B,ชิ้น,PRODUCT,200,150,7,EXCLUSIVE,true,30,5,,WEIGHTED_AVERAGE,true,
+P003,บริการติดตั้ง,Installation Service,บริการติดตั้งสินค้า,บริการ,ครั้ง,SERVICE,500,0,7,EXCLUSIVE,false,0,0,service,WEIGHTED_AVERAGE,true,
+P004,สินค้า C,Product C,สินค้าประเภท C,หมวด A,กล่อง,PRODUCT,300,200,7,EXCLUSIVE,true,100,20,,WEIGHTED_AVERAGE,true,
+P005,บริการซ่อมบำรุง,Maintenance Service,บริการซ่อมบำรุง,บริการ,ครั้ง,SERVICE,1000,0,7,EXCLUSIVE,false,0,0,service,WEIGHTED_AVERAGE,true,

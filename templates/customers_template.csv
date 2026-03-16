@@ -1,0 +1,4 @@
+code,name,nameEn,taxId,branchCode,address,subDistrict,district,province,postalCode,phone,fax,email,website,contactName,contactPhone,creditLimit,creditDays,isActive,notes
+C001,บริษัท ก. จำกัด,G Co Ltd,1234567890123,00000,"123 ถนนสุขุมวิท","วัฒนา","วัฒนา","กรุงเทพมหานคร",10110,02-123-4567,02-123-4568,sales@companyg.com,www.companyg.com,สมชาย,081-234-5678,100000,30,true,
+C002,บริษัท ข. จำกัด,K Co Ltd,9876543210987,00000,"456 ถนนพหลโยธิน","ลาดยาว","ลาดยาว","กรุงเทพมหานคร",10210,02-234-5678,02-234-5679,sales@companyk.com,www.companyk.com,วิภา,082-345-6789,50000,45,true,
+C003,ห้างหุ้นส่วนจำกัด ค. ทั่วไป,K General,1112223334444,,,789 ถนนเยาวราช","สัมพันธวงศ์","สัมพันธวงศ์","กรุงเทพมหานคร",10100,02-345-6789,,,kgeneral@example.com,,มานี,083-456-7890,75000,60,true,

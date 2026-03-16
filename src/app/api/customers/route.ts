@@ -32,11 +32,15 @@ export async function GET(request: NextRequest) {
     await requireAuth()
 
     const searchParams = request.nextUrl.searchParams
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = Math.min(100, parseInt(searchParams.get('limit') || '20'))
     const search = searchParams.get('search')
     const isActive = searchParams.get('isActive')
-    
+
+    const skip = (page - 1) * limit
+
     const where: any = {}
-    
+
     if (search) {
       where.OR = [
         { code: { contains: search } },
@@ -45,22 +49,36 @@ export async function GET(request: NextRequest) {
         { phone: { contains: search } },
       ]
     }
-    
+
     if (isActive !== null && isActive !== undefined) {
       where.isActive = isActive === 'true'
     }
-    
-    const customers = await prisma.customer.findMany({
-      where,
-      include: {
-        _count: {
-          select: { invoices: true },
+
+    const [customers, total] = await Promise.all([
+      prisma.customer.findMany({
+        where,
+        include: {
+          _count: {
+            select: { invoices: true },
+          },
         },
+        orderBy: { code: 'asc' },
+        skip,
+        take: limit,
+      }),
+      prisma.customer.count({ where }),
+    ])
+
+    return NextResponse.json({
+      success: true,
+      data: customers,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: { code: 'asc' },
     })
-    
-    return NextResponse.json({ success: true, data: customers })
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },

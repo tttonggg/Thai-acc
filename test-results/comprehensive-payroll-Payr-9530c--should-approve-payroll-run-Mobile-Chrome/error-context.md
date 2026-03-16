@@ -1,0 +1,130 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e9]:
+          - heading "Thai ERP" [level=1] [ref=e10]
+          - paragraph [ref=e11]: โปรแกรมบัญชีมาตรฐานไทย
+      - navigation [ref=e12]:
+        - button "Dashboard" [ref=e13]:
+          - generic [ref=e14]: Dashboard
+        - button "ผังบัญชี" [ref=e15]:
+          - generic [ref=e16]: ผังบัญชี
+        - button "บันทึกบัญชี" [ref=e17]:
+          - generic [ref=e18]: บันทึกบัญชี
+        - button "ใบกำกับภาษี" [ref=e19]:
+          - generic [ref=e20]: ใบกำกับภาษี
+        - button "ภาษีมูลค่าเพิ่ม" [ref=e21]:
+          - generic [ref=e22]: ภาษีมูลค่าเพิ่ม
+        - button "ภาษีหัก ณ ที่จ่าย" [ref=e23]:
+          - generic [ref=e24]: ภาษีหัก ณ ที่จ่าย
+        - button "ลูกหนี้ (AR)" [ref=e25]:
+          - generic [ref=e26]: ลูกหนี้ (AR)
+        - button "เจ้าหนี้ (AP)" [ref=e27]:
+          - generic [ref=e28]: เจ้าหนี้ (AP)
+        - button "ใบจ่ายเงิน" [ref=e29]:
+          - generic [ref=e30]: ใบจ่ายเงิน
+        - button "ใบลดหนี้ (CN)" [ref=e31]:
+          - generic [ref=e32]: ใบลดหนี้ (CN)
+        - button "ใบเพิ่มหนี้ (DN)" [ref=e33]:
+          - generic [ref=e34]: ใบเพิ่มหนี้ (DN)
+        - button "สต็อกสินค้า" [ref=e35]:
+          - generic [ref=e36]: สต็อกสินค้า
+        - button "สินค้าและบริการ" [ref=e37]:
+          - generic [ref=e38]: สินค้าและบริการ
+        - button "ธนาคาร" [ref=e39]:
+          - generic [ref=e40]: ธนาคาร
+        - button "ทรัพย์สินถาวร" [ref=e41]:
+          - generic [ref=e42]: ทรัพย์สินถาวร
+        - button "เงินเดือน" [active] [ref=e43]:
+          - generic [ref=e44]: เงินเดือน
+        - button "เงินสดย่อย" [ref=e45]:
+          - generic [ref=e46]: เงินสดย่อย
+        - button "รายงาน" [ref=e47]:
+          - generic [ref=e48]: รายงาน
+      - button "น นักบัญชี ทดสอบ นักบัญชี" [ref=e50]:
+        - generic [ref=e52]: น
+        - generic [ref=e53]:
+          - paragraph [ref=e54]: นักบัญชี ทดสอบ
+          - paragraph [ref=e55]: นักบัญชี
+      - generic [ref=e56]:
+        - paragraph [ref=e57]: Thai Accounting ERP v1.0
+        - paragraph [ref=e58]: มาตรฐานบัญชีไทย (TFRS)
+    - generic [ref=e59]:
+      - banner [ref=e60]:
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - button [ref=e63]:
+              - img
+            - generic [ref=e64]:
+              - heading "ระบบบัญชีมาตรฐานไทย" [level=2] [ref=e65]
+              - paragraph [ref=e66]: วันศุกร์ที่ 13 มีนาคม 2569
+          - generic [ref=e67]:
+            - button [ref=e68]:
+              - img
+            - button "น" [ref=e71]:
+              - generic [ref=e73]: น
+      - main [ref=e74]:
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - heading "เงินเดือน & บุคคล" [level=1] [ref=e77]
+            - paragraph [ref=e78]: คำนวณเงินเดือน SSC (5%, สูงสุด ฿750) และ PND1 อัตราก้าวหน้า 2567 อัตโนมัติ
+          - navigation [ref=e80]:
+            - button "พนักงาน" [ref=e81]:
+              - img [ref=e82]
+              - text: พนักงาน
+            - button "รอบเงินเดือน" [ref=e87]:
+              - img [ref=e88]
+              - text: รอบเงินเดือน
+          - generic [ref=e90]:
+            - generic [ref=e91]:
+              - generic [ref=e93]:
+                - paragraph: พนักงานที่ใช้งาน
+                - paragraph: 0 คน
+              - generic [ref=e95]:
+                - paragraph: ฐานเงินเดือนรวม/เดือน
+                - paragraph: ฿0
+              - generic [ref=e97]:
+                - paragraph: ประกันสังคมพนักงาน/เดือน
+                - paragraph: ฿0
+            - generic [ref=e98]:
+              - textbox "ค้นหาพนักงาน..." [ref=e99]
+              - button "เพิ่มพนักงาน" [ref=e100]:
+                - img
+                - text: เพิ่มพนักงาน
+            - table [ref=e104]:
+              - rowgroup [ref=e105]:
+                - row "รหัส ชื่อ-นามสกุล ตำแหน่ง / แผนก เงินเดือน SSC (5%) สถานะ จัดการ" [ref=e106]:
+                  - columnheader "รหัส" [ref=e107]
+                  - columnheader "ชื่อ-นามสกุล" [ref=e108]
+                  - columnheader "ตำแหน่ง / แผนก" [ref=e109]
+                  - columnheader "เงินเดือน" [ref=e110]
+                  - columnheader "SSC (5%)" [ref=e111]
+                  - columnheader "สถานะ" [ref=e112]
+                  - columnheader "จัดการ" [ref=e113]
+              - rowgroup [ref=e114]:
+                - row "ยังไม่มีพนักงาน" [ref=e115]:
+                  - cell "ยังไม่มีพนักงาน" [ref=e116]:
+                    - img [ref=e117]
+                    - text: ยังไม่มีพนักงาน
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e126] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e127]:
+      - img [ref=e128]
+    - generic [ref=e131]:
+      - button "Open issues overlay" [ref=e132]:
+        - generic [ref=e133]:
+          - generic [ref=e134]: "33"
+          - generic [ref=e135]: "34"
+        - generic [ref=e136]:
+          - text: Issue
+          - generic [ref=e137]: s
+      - button "Collapse issues badge" [ref=e138]:
+        - img [ref=e139]
+  - alert [ref=e141]
+```

@@ -379,7 +379,9 @@ export function JournalEntry() {
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="" disabled>ไม่พบข้อมูลบัญชี</SelectItem>
+                          <div className="p-2 text-sm text-gray-500 text-center">
+                            ไม่พบข้อมูลบัญชี
+                          </div>
                         )}
                       </SelectContent>
                     </Select>

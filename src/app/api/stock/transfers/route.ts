@@ -164,6 +164,7 @@ export async function POST(request: NextRequest) {
     const unitCost = sourceBalance.unitCost
 
     // Create TRANSFER_OUT movement (reduces source stock)
+    // Store destination warehouse in metadata for completion
     const outResult = await recordStockMovement({
       productId,
       warehouseId: fromWarehouseId,
@@ -174,29 +175,21 @@ export async function POST(request: NextRequest) {
       referenceNo: transferNo,
       notes: notes ? `${notes} (โอนออก)` : 'โอนสินค้าออก',
       sourceChannel: 'WEB',
+      metadata: {
+        toWarehouseId,
+      }
     })
 
-    // Create TRANSFER_IN movement (increases destination stock)
-    const inResult = await recordStockMovement({
-      productId,
-      warehouseId: toWarehouseId,
-      type: 'TRANSFER_IN',
-      quantity,
-      unitCost,
-      referenceId: transferNo,
-      referenceNo: transferNo,
-      notes: notes ? `${notes} (โอนเข้า)` : 'โอนสินค้าเข้า',
-      sourceChannel: 'WEB',
-    })
+    // Note: TRANSFER_IN will be created when the transfer is completed via PUT /api/stock/transfers/[id]
 
     return NextResponse.json({
       success: true,
       data: {
         transferNo,
         outMovement: outResult.movement,
-        inMovement: inResult.movement,
         fromBalance: outResult.balance,
-        toBalance: inResult.balance,
+        status: 'IN_TRANSIT',
+        message: 'สร้างการโอนสินค้าและรอการยืนยันการรับที่คลังปลายทาง'
       }
     }, { status: 201 })
 

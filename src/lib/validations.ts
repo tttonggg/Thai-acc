@@ -211,6 +211,49 @@ export const companySchema = z.object({
   fiscalYearStart: z.number().int().min(1).max(12).default(1),
 })
 
+// Credit Note Line validations
+export const creditNoteLineSchema = z.object({
+  productId: z.string().optional().nullable(),
+  description: z.string().min(1, "กรุณากรอกรายการ"),
+  quantity: z.number().positive("จำนวนต้องมากกว่า 0"),
+  unit: z.string().default("ชิ้น"),
+  unitPrice: z.number().min(0, "ราคาต้องไม่ติดลบ"),
+  discount: z.number().min(0).default(0),
+  vatRate: z.number().min(0).max(100).default(7),
+  returnStock: z.boolean().default(false),
+})
+
+// Credit Note validations
+export const creditNoteSchema = z.object({
+  creditNoteDate: z.string().or(z.date()),
+  customerId: z.string().min(1, "กรุณาเลือกลูกค้า"),
+  invoiceId: z.string().optional().nullable(),
+  reason: z.enum(["RETURN", "DISCOUNT", "ALLOWANCE", "CANCELLATION"]).default("RETURN"),
+  notes: z.string().optional(),
+  lines: z.array(creditNoteLineSchema).min(1, "ต้องมีอย่างน้อย 1 รายการ"),
+})
+
+// Debit Note Line validations
+export const debitNoteLineSchema = z.object({
+  productId: z.string().optional().nullable(),
+  description: z.string().min(1, "กรุณากรอกรายการ"),
+  quantity: z.number().positive("จำนวนต้องมากกว่า 0"),
+  unit: z.string().default("ชิ้น"),
+  unitPrice: z.number().min(0, "ราคาต้องไม่ติดลบ"),
+  discount: z.number().min(0).default(0),
+  vatRate: z.number().min(0).max(100).default(7),
+})
+
+// Debit Note validations
+export const debitNoteSchema = z.object({
+  debitNoteDate: z.string().or(z.date()),
+  vendorId: z.string().min(1, "กรุณาเลือกผู้ขาย"),
+  purchaseInvoiceId: z.string().optional().nullable(),
+  reason: z.enum(["ADDITIONAL_CHARGES", "RETURNED_GOODS", "PRICE_ADJUSTMENT"]).default("ADDITIONAL_CHARGES"),
+  notes: z.string().optional(),
+  lines: z.array(debitNoteLineSchema).min(1, "ต้องมีอย่างน้อย 1 รายการ"),
+})
+
 // Types for API responses
 export type UserInput = z.infer<typeof userSchema>
 export type LoginInput = z.infer<typeof loginSchema>
@@ -224,5 +267,33 @@ export type InvoiceInput = z.infer<typeof invoiceSchema>
 export type InvoiceLineInput = z.infer<typeof invoiceLineSchema>
 export type PurchaseInvoiceInput = z.infer<typeof purchaseInvoiceSchema>
 export type PurchaseLineInput = z.infer<typeof purchaseLineSchema>
+export type CreditNoteInput = z.infer<typeof creditNoteSchema>
+export type CreditNoteLineInput = z.infer<typeof creditNoteLineSchema>
+export type DebitNoteInput = z.infer<typeof debitNoteSchema>
+export type DebitNoteLineInput = z.infer<typeof debitNoteLineSchema>
 export type WhtInput = z.infer<typeof whtSchema>
 export type CompanyInput = z.infer<typeof companySchema>
+
+// Payment Allocation validations
+export const paymentAllocationSchema = z.object({
+  invoiceId: z.string().min(1, "กรุณาเลือกใบซื้อ"),
+  amount: z.number().min(0, "จำนวนเงินต้องไม่น้อยกว่า 0"),
+  whtRate: z.number().min(0).max(100).default(0),
+  whtAmount: z.number().min(0).default(0),
+  notes: z.string().optional(),
+})
+
+// Payment validations
+export const paymentSchema = z.object({
+  vendorId: z.string().min(1, "กรุณาเลือกผู้ขาย"),
+  paymentDate: z.string().or(z.date()),
+  paymentMethod: z.enum(["CASH", "TRANSFER", "CHEQUE", "CREDIT", "OTHER"]),
+  bankAccountId: z.string().optional(),
+  chequeNo: z.string().optional(),
+  chequeDate: z.string().or(z.date()).optional(),
+  amount: z.number().min(0, "จำนวนเงินต้องไม่น้อยกว่า 0"),
+  unallocated: z.number().min(0).default(0),
+  notes: z.string().optional(),
+  allocations: z.array(paymentAllocationSchema).min(1, "ต้องมีการจัดจ่ายอย่างน้อย 1 รายการ"),
+  status: z.enum(["DRAFT", "POSTED"]).default("DRAFT"),
+})

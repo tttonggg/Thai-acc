@@ -19,6 +19,10 @@ import {
   Building2,
   Hammer,
   Wallet,
+  CreditCard,
+  Database,
+  Download,
+  Activity,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Module } from '@/app/page'
@@ -60,6 +64,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; className?: s
   Receipt: Landmark,
   Users: Users,
   Truck: Truck,
+  Payment: CreditCard,
   Package: Package,
   Building2: Building2,
   Hammer: Hammer,
@@ -67,6 +72,9 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; className?: s
   BarChart3: BarChart3,
   Settings: Settings,
   UserCog: UserCog,
+  Download: Download,
+  Database: Database,
+  Activity: Activity,
 }
 
 const defaultMenuItems: MenuItem[] = [
@@ -78,6 +86,7 @@ const defaultMenuItems: MenuItem[] = [
   { id: 'wht' as Module, label: 'ภาษีหัก ณ ที่จ่าย', icon: Landmark },
   { id: 'customers' as Module, label: 'ลูกหนี้', icon: Users },
   { id: 'vendors' as Module, label: 'เจ้าหนี้', icon: Truck },
+  { id: 'payments' as Module, label: 'ใบจ่ายเงิน', icon: CreditCard },
   { id: 'inventory' as Module, label: 'สต็อกสินค้า', icon: Package },
   { id: 'banking' as Module, label: 'ธนาคาร', icon: Building2 },
   { id: 'assets' as Module, label: 'ทรัพย์สิน', icon: Hammer },

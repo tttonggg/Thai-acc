@@ -1,18 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  ChevronRight, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  ChevronRight,
   ChevronDown,
   Folder,
   FolderOpen,
   Upload,
   Download,
-  Loader2
+  Loader2,
+  AlertCircle,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -43,6 +44,18 @@ import {
 } from '@/components/ui/table'
 import { Label } from '@/components/ui/label'
 import { FileUpload } from '@/components/ui/file-upload'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { AccountEditDialog } from './account-edit-dialog'
+import { useToast } from '@/hooks/use-toast'
 
 const accountTypeColors = {
   ASSET: 'bg-blue-100 text-blue-800',
@@ -64,13 +77,17 @@ interface Account {
   id: string
   code: string
   name: string
+  nameEn?: string | null
   type: string
   level: number
   parentId: string | null
   isDetail: boolean
+  isActive: boolean
+  notes?: string | null
 }
 
 export function ChartOfAccounts() {
+  const { toast } = useToast()
   const [accounts, setAccounts] = useState<Account[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedIds, setExpandedIds] = useState<string[]>(['1', '2', '3', '4', '5'])
@@ -79,6 +96,17 @@ export function ChartOfAccounts() {
   const [loading, setLoading] = useState(true)
   const [importing, setImporting] = useState(false)
   const [importFile, setImportFile] = useState<File | null>(null)
+
+  // Edit dialog state
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null)
+  const [parentAccountForNew, setParentAccountForNew] = useState<Account | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+
+  // Delete dialog state
+  const [accountToDelete, setAccountToDelete] = useState<Account | null>(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const [newAccount, setNewAccount] = useState({
     code: '',
     name: '',
@@ -134,20 +162,76 @@ export function ChartOfAccounts() {
     }
   }
 
-  const handleDeleteAccount = async (id: string) => {
-    if (!confirm('คุณต้องการลบบัญชีนี้หรือไม่?')) return
-    
-    try {
-      const response = await fetch(`/api/accounts/${id}`, {
-        method: 'DELETE'
+  const handleDeleteAccount = async (account: Account) => {
+    // Check if account has children
+    const children = getChildAccounts(account.id)
+    if (children.length > 0) {
+      toast({
+        title: 'ไม่สามารถลบบัญชีได้',
+        description: 'ไม่สามารถลบบัญชีที่มีบัญชีย่อยได้ กรุณาลบบัญชีย่อยก่อน',
+        variant: 'destructive',
       })
-      
+      return
+    }
+
+    setAccountToDelete(account)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteAccount = async () => {
+    if (!accountToDelete) return
+
+    setIsDeleting(true)
+
+    try {
+      const response = await fetch(`/api/accounts/${accountToDelete.id}`, {
+        method: 'DELETE',
+      })
+
       if (response.ok) {
+        toast({
+          title: 'ลบบัญชีสำเร็จ',
+          description: `ลบบัญชี ${accountToDelete.code} - ${accountToDelete.name} เรียบร้อยแล้ว`,
+        })
         await fetchAccounts()
+        setIsDeleteDialogOpen(false)
+      } else {
+        const error = await response.json()
+        toast({
+          title: 'ไม่สามารถลบบัญชีได้',
+          description: error.error || 'เกิดข้อผิดพลาดในการลบบัญชี',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Failed to delete account:', error)
+      toast({
+        title: 'เกิดข้อผิดพลาด',
+        description: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsDeleting(false)
+      setAccountToDelete(null)
     }
+  }
+
+  const handleEditAccount = (account: Account) => {
+    setEditingAccount(account)
+    setParentAccountForNew(null)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleAddChildAccount = (parentAccount: Account) => {
+    setParentAccountForNew(parentAccount)
+    setEditingAccount(null)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleEditDialogClose = () => {
+    setIsEditDialogOpen(false)
+    setEditingAccount(null)
+    setParentAccountForNew(null)
   }
 
   const handleExport = async () => {
@@ -230,7 +314,8 @@ export function ChartOfAccounts() {
   }
 
   const getChildAccounts = (parentId: string): Account[] => {
-    return accounts.filter(a => a.parentId === parentId)
+    if (!accounts || !Array.isArray(accounts)) return []
+    return accounts.filter(a => a && a.parentId === parentId)
   }
 
   const renderAccountRow = (account: Account, depth: number = 0) => {
@@ -288,19 +373,32 @@ export function ChartOfAccounts() {
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => handleEditAccount(account)}
+              title="แก้ไข"
+            >
               <Edit className="h-4 w-4 text-blue-600" />
             </Button>
             {!account.isDetail && (
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => handleAddChildAccount(account)}
+                title="เพิ่มบัญชีย่อย"
+              >
                 <Plus className="h-4 w-4 text-green-600" />
               </Button>
             )}
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="h-8 w-8"
-              onClick={() => handleDeleteAccount(account.id)}
+              onClick={() => handleDeleteAccount(account)}
+              title="ลบ"
             >
               <Trash2 className="h-4 w-4 text-red-600" />
             </Button>
@@ -311,12 +409,16 @@ export function ChartOfAccounts() {
   }
 
   const renderAccountTree = (parentId: string | null = null, depth: number = 0) => {
-    const filteredAccounts = accounts.filter(a => a.parentId === parentId)
-    
+    if (!accounts || !Array.isArray(accounts)) return null
+
+    const filteredAccounts = accounts.filter(a => a && a.parentId === parentId)
+
     return filteredAccounts.map(account => {
+      if (!account) return null
+
       const isExpanded = expandedIds.includes(account.id)
       const children = getChildAccounts(account.id)
-      
+
       return (
         <div key={account.id}>
           {renderAccountRow(account, depth)}
@@ -468,6 +570,47 @@ export function ChartOfAccounts() {
               </div>
             </DialogContent>
           </Dialog>
+
+          {/* Edit/Add Account Dialog */}
+          <AccountEditDialog
+            account={editingAccount}
+            parentAccount={parentAccountForNew}
+            open={isEditDialogOpen}
+            onOpenChange={handleEditDialogClose}
+            onSuccess={fetchAccounts}
+          />
+
+          {/* Delete Confirmation Dialog */}
+          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>ยืนยันการลบบัญชี</AlertDialogTitle>
+                <AlertDialogDescription>
+                  คุณต้องการลบบัญชี{' '}
+                  <span className="font-semibold">
+                    {accountToDelete?.code} - {accountToDelete?.name}
+                  </span>{' '}
+                  หรือไม่?
+                  <br />
+                  <br />
+                  <span className="text-red-600 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                  </span>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>ยกเลิก</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={confirmDeleteAccount}
+                  disabled={isDeleting}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {isDeleting ? 'กำลังลบ...' : 'ลบ'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 

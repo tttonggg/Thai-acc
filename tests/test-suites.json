@@ -1,0 +1,120 @@
+{
+  "suites": [
+    {
+      "name": "Chart of Accounts",
+      "file": "e2e/comprehensive/accounts.spec.ts",
+      "priority": "high",
+      "timeout": 300000,
+      "modules": ["accounts"]
+    },
+    {
+      "name": "Customers",
+      "file": "e2e/comprehensive/customers.spec.ts",
+      "priority": "high",
+      "timeout": 300000,
+      "modules": ["customers"]
+    },
+    {
+      "name": "Vendors",
+      "file": "e2e/comprehensive/vendors.spec.ts",
+      "priority": "high",
+      "timeout": 300000,
+      "modules": ["vendors"]
+    },
+    {
+      "name": "Products",
+      "file": "e2e/comprehensive/products.spec.ts",
+      "priority": "high",
+      "timeout": 300000,
+      "modules": ["products"]
+    },
+    {
+      "name": "Invoices",
+      "file": "e2e/comprehensive/invoices.spec.ts",
+      "priority": "high",
+      "timeout": 300000,
+      "modules": ["invoices"]
+    },
+    {
+      "name": "Purchase Invoices",
+      "file": "e2e/comprehensive/purchases.spec.ts",
+      "priority": "high",
+      "timeout": 300000,
+      "modules": ["purchases"]
+    },
+    {
+      "name": "Receipts",
+      "file": "e2e/comprehensive/receipts.spec.ts",
+      "priority": "high",
+      "timeout": 300000,
+      "modules": ["receipts"]
+    },
+    {
+      "name": "Payments",
+      "file": "e2e/comprehensive/payments.spec.ts",
+      "priority": "high",
+      "timeout": 300000,
+      "modules": ["payments"]
+    },
+    {
+      "name": "Assets",
+      "file": "e2e/comprehensive/assets.spec.ts",
+      "priority": "medium",
+      "timeout": 300000,
+      "modules": ["assets"]
+    },
+    {
+      "name": "Banking",
+      "file": "e2e/comprehensive/banking.spec.ts",
+      "priority": "medium",
+      "timeout": 300000,
+      "modules": ["banking"]
+    },
+    {
+      "name": "Payroll",
+      "file": "e2e/comprehensive/payroll.spec.ts",
+      "priority": "medium",
+      "timeout": 300000,
+      "modules": ["payroll"]
+    },
+    {
+      "name": "Petty Cash",
+      "file": "e2e/comprehensive/petty-cash.spec.ts",
+      "priority": "medium",
+      "timeout": 300000,
+      "modules": ["petty-cash"]
+    },
+    {
+      "name": "Inventory",
+      "file": "e2e/comprehensive/inventory.spec.ts",
+      "priority": "medium",
+      "timeout": 300000,
+      "modules": ["inventory"]
+    },
+    {
+      "name": "Credit Notes",
+      "file": "e2e/comprehensive/credit-notes.spec.ts",
+      "priority": "medium",
+      "timeout": 300000,
+      "modules": ["credit-notes"]
+    },
+    {
+      "name": "Debit Notes",
+      "file": "e2e/comprehensive/debit-notes.spec.ts",
+      "priority": "medium",
+      "timeout": 300000,
+      "modules": ["debit-notes"]
+    }
+  ],
+  "database": {
+    "verifyAfterEachTest": true,
+    "cleanupAfterEachSuite": false,
+    "seedTestData": false
+  },
+  "reporting": {
+    "format": "html",
+    "includeScreenshots": true,
+    "includeDatabaseVerification": true,
+    "outputDir": "test-results"
+  }
+}

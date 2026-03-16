@@ -106,8 +106,12 @@ export function InvoiceList() {
         const res = await fetch('/api/invoices')
         if (!res.ok) throw new Error('Fetch failed')
         const result = await res.json()
-        // API returns { success: true, data: [...] }
-        setInvoices(result.data || result)
+        // API returns { success: true, data: [...], pagination: {...} }
+        const invoicesData = result.data || []
+        if (!Array.isArray(invoicesData)) {
+          throw new Error('Invalid invoices data format')
+        }
+        setInvoices(invoicesData)
       } catch (err) {
         const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล'
         setError(message)
@@ -123,7 +127,7 @@ export function InvoiceList() {
     fetchInvoices()
   }, [refreshKey, toast])
 
-  const filteredInvoices = invoices.filter(invoice => {
+  const filteredInvoices = (invoices || []).filter(invoice => {
     // Safety check - ensure invoice is an object and has required properties
     if (!invoice || typeof invoice !== 'object') return false
 

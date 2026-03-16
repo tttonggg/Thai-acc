@@ -12,14 +12,20 @@ interface PermissionGuardProps {
 export function PermissionGuard({ permission, children, fallback }: PermissionGuardProps) {
   const { data: session } = useSession()
   const user = useAuthStore((state) => state.user)
-  
+
   // Use session user role if available, otherwise use store
   const userRole = (session?.user?.role || user?.role) as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER' | undefined
-  
-  if (!userRole || !checkPermission(userRole, permission)) {
+
+  // Check if user is authenticated
+  if (!userRole) {
     return fallback ? <>{fallback}</> : null
   }
-  
+
+  // Check permission
+  if (!checkPermission(userRole, permission)) {
+    return fallback ? <>{fallback}</> : null
+  }
+
   return <>{children}</>
 }
 

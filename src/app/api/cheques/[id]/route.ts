@@ -41,7 +41,7 @@ export async function PATCH(
   try {
     await requireAuth()
     const body = await request.json()
-    const { status, clearedDate, bounceReason } = body
+    const { status, clearedDate, bounceReason, chequeNo, type, bankAccountId, amount, dueDate, payeeName } = body
 
     // Verify cheque exists
     const cheque = await prisma.cheque.findUnique({
@@ -56,48 +56,57 @@ export async function PATCH(
       )
     }
 
-    // Handle different status updates
-    if (status === 'CLEARED') {
-      // Clear cheque with GL journal entry
-      const date = clearedDate ? new Date(clearedDate) : new Date()
-      const journalEntry = await clearCheque(params.id, date)
+    // If status update is requested (with GL posting)
+    if (status && (status === 'CLEARED' || status === 'BOUNCED')) {
+      if (status === 'CLEARED') {
+        // Clear cheque with GL journal entry
+        const date = clearedDate ? new Date(clearedDate) : new Date()
+        const journalEntry = await clearCheque(params.id, date)
 
-      return NextResponse.json({
-        success: true,
-        data: {
-          cheque: await prisma.cheque.findUnique({
-            where: { id: params.id },
-            include: { bankAccount: true }
-          }),
-          journalEntry
-        }
-      })
-    }
-
-    if (status === 'BOUNCED') {
-      // Bounce cheque with reversing GL entry
-      const date = clearedDate ? new Date(clearedDate) : new Date()
-      const journalEntry = await bounceCheque(params.id, date, bounceReason)
-
-      return NextResponse.json({
-        success: true,
-        data: {
-          cheque: await prisma.cheque.findUnique({
-            where: { id: params.id },
-            include: { bankAccount: true }
-          }),
-          journalEntry
-        }
-      })
-    }
-
-    // Handle simple status updates without GL entries
-    const updateData: any = { status }
-
-    if (status === 'DEPOSITED' || status === 'CLEARED' || status === 'BOUNCED') {
-      if (clearedDate) {
-        updateData.clearedDate = new Date(clearedDate)
+        return NextResponse.json({
+          success: true,
+          data: {
+            cheque: await prisma.cheque.findUnique({
+              where: { id: params.id },
+              include: { bankAccount: true }
+            }),
+            journalEntry
+          }
+        })
       }
+
+      if (status === 'BOUNCED') {
+        // Bounce cheque with reversing GL entry
+        const date = clearedDate ? new Date(clearedDate) : new Date()
+        const journalEntry = await bounceCheque(params.id, date, bounceReason)
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            cheque: await prisma.cheque.findUnique({
+              where: { id: params.id },
+              include: { bankAccount: true }
+            }),
+            journalEntry
+          }
+        })
+      }
+    }
+
+    // Handle field updates or simple status changes
+    const updateData: any = {}
+
+    if (chequeNo !== undefined) updateData.chequeNo = chequeNo
+    if (type !== undefined) updateData.type = type
+    if (bankAccountId !== undefined) updateData.bankAccountId = bankAccountId
+    if (amount !== undefined) updateData.amount = parseFloat(amount)
+    if (dueDate !== undefined) updateData.dueDate = new Date(dueDate)
+    if (payeeName !== undefined) updateData.payeeName = payeeName
+    if (status !== undefined) updateData.status = status
+
+    // Set cleared date if status changes to DEPOSITED, CLEARED, or BOUNCED
+    if (status && ['DEPOSITED', 'CLEARED', 'BOUNCED'].includes(status)) {
+      updateData.clearedDate = clearedDate ? new Date(clearedDate) : new Date()
     }
 
     const updatedCheque = await prisma.cheque.update({

@@ -7,12 +7,12 @@ This file provides essential guidance for AI coding agents working on the **Thai
 This is a comprehensive accounting application designed for Thai SME businesses, complying with Thai Financial Reporting Standards (TFRS). The system supports Thai tax requirements including VAT (ภาษีมูลค่าเพิ่ม) at 7%, Withholding Tax (ภาษีหัก ณ ที่จ่าย) PND3/PND53, and Social Security calculations.
 
 **Implementation Status**: ✅ **100% COMPLETE** - All 6 expansion modules fully implemented and integrated:
-- WHT Automation & 50 Tawi
-- Inventory & Stock Management
-- Fixed Assets & Depreciation
-- Banking & Cheque Management
-- Petty Cash Management
-- Payroll & Compensation
+- WHT Automation & 50 Tawi (ภาษีหัก ณ ที่จ่าย)
+- Inventory & Stock Management (คลังสินค้า)
+- Fixed Assets & Depreciation (ทะเบียนทรัพย์สิน)
+- Banking & Cheque Management (ธนาคารและเช็ค)
+- Petty Cash Management (เงินสดย่อย)
+- Payroll & Compensation (เงินเดือน)
 
 ## Technology Stack
 
@@ -28,18 +28,21 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 | Data Fetching | TanStack Query | 5.x |
 | Forms | React Hook Form + Zod | 7.x / 4.x |
 | Icons | Lucide React | 0.525.0 |
+| Testing | Vitest + Playwright | 4.x / 1.x |
+| PDF Generation | jsPDF + pdfkit | 4.x / 0.17.x |
+| Excel Export | xlsx | 0.18.x |
 | Runtime | Bun (preferred) or Node.js | - |
 
 ## Project Structure
 
 ```
 ├── prisma/                    # Database schema and seed files
-│   ├── schema.prisma          # Prisma schema (40+ models)
+│   ├── schema.prisma          # Prisma schema (50+ models, 1250+ lines)
 │   ├── seed.ts                # Initial data seeding
 │   └── dev.db                 # SQLite database
 ├── src/
 │   ├── app/                   # Next.js App Router
-│   │   ├── api/              # REST API routes (80+ endpoints)
+│   │   ├── api/              # REST API routes (90+ endpoints)
 │   │   │   ├── accounts/     # Chart of accounts APIs
 │   │   │   ├── invoices/     # Invoice management APIs
 │   │   │   ├── journal/      # Journal entry APIs
@@ -47,9 +50,11 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 │   │   │   ├── payroll/      # Payroll APIs
 │   │   │   ├── inventory/    # Stock management APIs
 │   │   │   ├── banking/      # Bank & cheque APIs
+│   │   │   ├── petty-cash/   # Petty cash APIs
+│   │   │   ├── wht/          # Withholding tax APIs
 │   │   │   └── reports/      # Financial report APIs
 │   │   ├── layout.tsx        # Root layout with providers
-│   │   ├── page.tsx          # Dashboard/home page
+│   │   ├── page.tsx          # Dashboard/home page (SPA architecture)
 │   │   └── globals.css       # Global styles
 │   ├── components/           # React components
 │   │   ├── ui/              # shadcn/ui components (DO NOT MODIFY)
@@ -63,6 +68,17 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 │   │   ├── payroll/         # Employee & payroll
 │   │   ├── petty-cash/      # Petty cash management
 │   │   ├── wht/             # Withholding tax reports
+│   │   ├── ar/              # Accounts Receivable (customers)
+│   │   ├── ap/              # Accounts Payable (vendors)
+│   │   ├── receipts/        # Receipts (ใบเสร็จรับเงิน)
+│   │   ├── payments/        # Payments (ใบจ่ายเงิน)
+│   │   ├── credit-notes/    # Credit notes (ใบลดหนี้)
+│   │   ├── debit-notes/     # Debit notes (ใบเพิ่มหนี้)
+│   │   ├── products/        # Product management
+│   │   ├── vat/             # VAT reports
+│   │   ├── reports/         # Financial reports
+│   │   ├── settings/        # System settings
+│   │   ├── admin/           # Admin functions
 │   │   └── auth/            # Authentication components
 │   ├── lib/                  # Utilities and service layer
 │   │   ├── db.ts            # Prisma client singleton
@@ -76,15 +92,25 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 │   │   ├── wht-service.ts        # Withholding tax automation
 │   │   ├── petty-cash-service.ts # Petty cash logic
 │   │   ├── cheque-service.ts     # Cheque management
+│   │   ├── stock-take-service.ts # Stock taking logic
 │   │   ├── pdf-generator.ts      # PDF generation (50 Tawi)
-│   │   └── excel-export.ts       # Excel export functionality
+│   │   ├── excel-export.ts       # Excel export functionality
+│   │   ├── activity-logger.ts    # Audit logging
+│   │   └── rate-limit.ts         # API rate limiting
 │   ├── stores/              # Zustand state management
 │   │   └── auth-store.ts    # Authentication state
 │   ├── hooks/               # Custom React hooks
+│   │   ├── use-toast.ts     # Toast notifications
+│   │   ├── use-mobile.ts    # Mobile detection
+│   │   └── use-delete-confirm.ts # Delete confirmation
 │   ├── test/                # Test utilities and setup
+│   │   ├── setup.ts         # Vitest setup
+│   │   └── utils/           # Test utilities
 │   └── middleware.ts        # Rate limiting & auth middleware
 ├── e2e/                     # Playwright E2E tests (18 test files)
 ├── tests/                   # Additional test files
+│   ├── global-setup.ts      # Global test setup
+│   └── global-teardown.ts   # Global test teardown
 ├── public/                  # Static assets
 └── docs/                    # Documentation
 ```
@@ -119,6 +145,9 @@ bun run test:run         # Run tests once
 bun run test:coverage    # Run with coverage report
 bun run test:e2e         # Run Playwright E2E tests
 bun run test:e2e:ui      # Run E2E tests with UI mode
+bun run test:quick       # Quick test run
+bun run test:full        # Full test suite
+bun run test:master      # Master test runner
 ```
 
 **Important**: Always run `bun run db:generate` after modifying `prisma/schema.prisma`.
@@ -277,6 +306,13 @@ Automatic sequential numbering with configurable formats:
 // Example: INV-202603-0001
 ```
 
+### 7. SPA Architecture
+The application uses a Single Page Application architecture:
+- Main entry point: `src/app/page.tsx`
+- Module switching via state management
+- All modules rendered in the same page with conditional display
+- Sidebar navigation controls active module state
+
 ## Thai-Specific Features
 
 ### Localization Functions (`src/lib/thai-accounting.ts`)
@@ -309,6 +345,13 @@ PND53_RATES = {
 SSC_RATE = 5% (max ฿750/month for employee)
 ```
 
+### Thai Language Support
+- UI language: Thai (primary)
+- Error messages: Thai
+- Date format: DD/MM/YYYY (Buddhist year +543)
+- Number format: Thai locale with comma separators
+- Currency: Thai Baht (฿)
+
 ## Security Considerations
 
 ### Authentication
@@ -320,9 +363,10 @@ SSC_RATE = 5% (max ฿750/month for employee)
 - Authentication endpoints: Strict limiting
 - API routes: Moderate limiting
 - Test bypass: `x-playwright-test: true` header
+- Middleware: `src/middleware.ts`
 
 ### Input Validation
-- All API inputs use Zod schemas
+- All API inputs use Zod schemas (`src/lib/validations.ts`)
 - File upload restrictions (size, type)
 - SQL injection prevention via Prisma
 
@@ -349,7 +393,7 @@ SSC_RATE = 5% (max ฿750/month for employee)
 4. Create service layer in `src/lib/[module]-service.ts`
 5. Create API routes in `src/app/api/[module]/route.ts`
 6. Build UI components in `src/components/[module]/`
-7. Add navigation item to sidebar in `src/app/page.tsx`
+7. Add module to sidebar navigation in `src/app/page.tsx`
 8. Implement GL posting in service layer
 9. Add E2E tests in `e2e/`
 
@@ -368,7 +412,7 @@ bun run db:migrate
 
 ### Adding New API Endpoints
 1. Create route file in `src/app/api/[resource]/route.ts`
-2. Add Zod validation schema
+2. Add Zod validation schema in `src/lib/validations.ts`
 3. Implement CRUD operations
 4. Add to service layer if complex logic needed
 5. Follow existing response format: `{ success: boolean, data/error }`
@@ -433,9 +477,18 @@ bun run build
 ## Related Documentation
 
 - `CLAUDE.md` - Detailed project guidance for Claude Code
-- `README.md` - General project overview
+- `README.md` - General project overview (scaffold template)
 - `ROADMAP.md` - Development roadmap
-- Various `*-IMPLEMENTATION.md` files - Module-specific documentation
+- Various `*-IMPLEMENTATION.md` files - Module-specific documentation:
+  - `CREDIT-DEBIT-NOTES-IMPLEMENTATION.md`
+  - `BANK_RECONCILIATION_IMPLEMENTATION.md`
+  - `CHEQUE_CLEARING_IMPLEMENTATION.md`
+  - `PETTY-CASH-IMPLEMENTATION.md`
+  - `PAYROLL_JOURNAL_IMPLEMENTATION.md`
+  - `PDF-GENERATOR-IMPLEMENTATION.md`
+  - `EXCEL-EXPORT-IMPLEMENTATION.md`
+  - `BACKUP-RESTORE-FEATURE.md`
+  - `SECURITY-IMPLEMENTATION-SUMMARY.md`
 
 ---
 

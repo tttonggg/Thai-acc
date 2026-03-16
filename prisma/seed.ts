@@ -1081,6 +1081,48 @@ async function main() {
   console.log('✅ Journal Entries created:', createdJournalEntries.length, 'entries')
 
   // ============================================
+  // Initialize Document Number Formats
+  // ============================================
+  const documentTypes = [
+    { type: 'invoice', prefix: 'INV', format: '{prefix}-{yyyy}-{mm}-{0000}', resetMonthly: true, resetYearly: false },
+    { type: 'receipt', prefix: 'RCP', format: '{prefix}-{yyyy}-{mm}-{0000}', resetMonthly: true, resetYearly: false },
+    { type: 'payment', prefix: 'PAY', format: '{prefix}-{yyyy}-{mm}-{0000}', resetMonthly: true, resetYearly: false },
+    { type: 'journal', prefix: 'JE', format: '{prefix}-{yyyy}-{mm}-{0000}', resetMonthly: true, resetYearly: false },
+    { type: 'credit_note', prefix: 'CN', format: '{prefix}-{yyyy}-{mm}-{0000}', resetMonthly: true, resetYearly: false },
+    { type: 'debit_note', prefix: 'DN', format: '{prefix}-{yyyy}-{mm}-{0000}', resetMonthly: true, resetYearly: false },
+    { type: 'purchase', prefix: 'PO', format: '{prefix}-{yyyy}-{mm}-{0000}', resetMonthly: true, resetYearly: false },
+    { type: 'payroll', prefix: 'PAYROLL', format: '{prefix}-{yyyy}-{mm}-{000}', resetMonthly: true, resetYearly: false },
+    { type: 'petty_cash', prefix: 'PCV', format: '{prefix}-{yyyy}-{mm}-{000}', resetMonthly: true, resetYearly: false },
+  ]
+
+  for (const docType of documentTypes) {
+    await prisma.documentNumber.upsert({
+      where: { type: docType.type },
+      update: {},
+      create: docType,
+    })
+  }
+  console.log('✅ Document number formats initialized')
+
+  // ============================================
+  // Initialize System Settings
+  // ============================================
+  await prisma.systemSettings.upsert({
+    where: { companyId: company.id },
+    update: {},
+    create: {
+      companyId: company.id,
+      vatRate: 7,
+      whtPnd53Service: 3,
+      whtPnd53Rent: 5,
+      whtPnd53Prof: 3,
+      whtPnd53Contract: 1,
+      whtPnd53Advert: 2,
+    },
+  })
+  console.log('✅ System settings initialized')
+
+  // ============================================
   // Link Journal Entries to Invoices (for non-DRAFT invoices)
   // ============================================
   let journalIndex = 0

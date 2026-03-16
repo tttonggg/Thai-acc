@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { Building2, Calendar, Plus, TrendingDown } from 'lucide-react'
+import { Building2, Calendar, Plus, TrendingDown, Edit, Trash2, Eye, Power } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
+import { AssetEditDialog } from './asset-edit-dialog'
+import { DepreciationScheduleViewer } from './depreciation-schedule-viewer'
 
 const fc = (n: number) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(n)
 const fd = (d: string) => new Date(d).toLocaleDateString('th-TH', { dateStyle: 'short' })
@@ -27,10 +29,19 @@ interface DepSchedule {
   id: string; date: string; amount: number; accumulated: number; netBookValue: number; posted: boolean
 }
 
+interface AssetWithSchedules extends Asset {
+  schedules?: DepSchedule[]
+}
+
 function AssetListTab() {
   const [assets, setAssets] = useState<Asset[]>([])
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
+  const [showEdit, setShowEdit] = useState(false)
+  const [selectedAsset, setSelectedAsset] = useState<AssetWithSchedules | null>(null)
+  const [showSchedule, setShowSchedule] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null)
   const [form, setForm] = useState({
     code: '', name: '', purchaseDate: '', purchaseCost: '', salvageValue: '1',
     usefulLifeYears: '5', glAccountId: '', accumDepAccountId: '', depExpenseAccountId: ''
@@ -55,6 +66,90 @@ function AssetListTab() {
       setForm({ code: '', name: '', purchaseDate: '', purchaseCost: '', salvageValue: '1', usefulLifeYears: '5', glAccountId: '', accumDepAccountId: '', depExpenseAccountId: '' })
       fetch()
     } else toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+  }
+
+  const handleEditAsset = async (asset: Asset) => {
+    // Fetch full asset details with schedules
+    try {
+      const res = await window.fetch(`/api/assets/${asset.id}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success) {
+          setSelectedAsset(data.data)
+          setShowEdit(true)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching asset details:', error)
+      toast({ title: 'ข้อผิดพลาด', description: 'ไม่สามารถดึงข้อมูลสินทรัพย์ได้', variant: 'destructive' })
+    }
+  }
+
+  const handleDeleteAsset = (asset: Asset) => {
+    setAssetToDelete(asset)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDeleteAsset = async () => {
+    if (!assetToDelete) return
+
+    try {
+      const res = await window.fetch(`/api/assets/${assetToDelete.id}`, {
+        method: 'DELETE'
+      }).then(r => r.json())
+
+      if (res.success) {
+        toast({ title: 'ลบสำเร็จ', description: `ลบสินทรัพย์ ${assetToDelete.name} เรียบร้อยแล้ว` })
+        setShowDeleteConfirm(false)
+        setAssetToDelete(null)
+        fetch()
+      } else {
+        toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+      }
+    } catch (error) {
+      console.error('Error deleting asset:', error)
+      toast({ title: 'ข้อผิดพลาด', description: 'ไม่สามารถลบสินทรัพย์ได้', variant: 'destructive' })
+    }
+  }
+
+  const handleToggleStatus = async (asset: Asset) => {
+    try {
+      const res = await window.fetch(`/api/assets/${asset.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !asset.isActive })
+      }).then(r => r.json())
+
+      if (res.success) {
+        toast({
+          title: 'บันทึกสำเร็จ',
+          description: `สินทรัพย์ ${asset.name} ถูก${asset.isActive ? 'ปลดระวาง' : 'เปิดใช้งาน'}แล้ว`
+        })
+        fetch()
+      } else {
+        toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+      }
+    } catch (error) {
+      console.error('Error toggling asset status:', error)
+      toast({ title: 'ข้อผิดพลาด', description: 'ไม่สามารถเปลี่ยนสถานะได้', variant: 'destructive' })
+    }
+  }
+
+  const handleViewSchedule = async (asset: Asset) => {
+    // Fetch full asset details with schedules
+    try {
+      const res = await window.fetch(`/api/assets/${asset.id}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success) {
+          setSelectedAsset(data.data)
+          setShowSchedule(true)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching asset schedule:', error)
+      toast({ title: 'ข้อผิดพลาด', description: 'ไม่สามารถดึงตารางค่าเสื่อมราคาได้', variant: 'destructive' })
+    }
   }
 
   if (loading) return <Skeleton className="h-64 rounded-xl" />
@@ -106,10 +201,10 @@ function AssetListTab() {
       <Card>
         <CardContent className="p-0">
           <Table>
-            <TableHeader><TableRow><TableHead>รหัส</TableHead><TableHead>ชื่อสินทรัพย์</TableHead><TableHead>วันที่ซื้อ</TableHead><TableHead className="text-right">ราคาทุน</TableHead><TableHead className="text-right">NBV</TableHead><TableHead className="text-center">อายุ (ปี)</TableHead><TableHead className="text-center">สถานะ</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>รหัส</TableHead><TableHead>ชื่อสินทรัพย์</TableHead><TableHead>วันที่ซื้อ</TableHead><TableHead className="text-right">ราคาทุน</TableHead><TableHead className="text-right">NBV</TableHead><TableHead className="text-center">อายุ (ปี)</TableHead><TableHead className="text-center">สถานะ</TableHead><TableHead className="text-center">จัดการ</TableHead></TableRow></TableHeader>
             <TableBody>
               {assets.length === 0
-                ? <TableRow><TableCell colSpan={7} className="text-center py-8 text-gray-400">ยังไม่มีสินทรัพย์ถาวร</TableCell></TableRow>
+                ? <TableRow><TableCell colSpan={8} className="text-center py-8 text-gray-400">ยังไม่มีสินทรัพย์ถาวร</TableCell></TableRow>
                 : assets.map(a => (
                   <TableRow key={a.id}>
                     <TableCell className="font-mono text-sm">{a.code}</TableCell>
@@ -118,13 +213,103 @@ function AssetListTab() {
                     <TableCell className="text-right">฿{fc(a.purchaseCost)}</TableCell>
                     <TableCell className="text-right font-semibold text-green-600">฿{fc(a.netBookValue ?? a.purchaseCost)}</TableCell>
                     <TableCell className="text-center">{a.usefulLifeYears}</TableCell>
-                    <TableCell className="text-center"><Badge variant={a.isActive ? 'default' : 'secondary'} className="text-xs">{a.isActive ? 'ใช้งาน' : 'ปลดระวาง'}</Badge></TableCell>
+                    <TableCell className="text-center">
+                      <button
+                        onClick={() => handleToggleStatus(a)}
+                        className="hover:opacity-80 transition-opacity"
+                      >
+                        <Badge variant={a.isActive ? 'default' : 'secondary'} className="text-xs cursor-pointer">
+                          {a.isActive ? 'ใช้งาน' : 'ปลดระวาง'}
+                        </Badge>
+                      </button>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0"
+                          onClick={() => handleViewSchedule(a)}
+                          title="ดูตารางค่าเสื่อมราคา"
+                        >
+                          <Eye className="h-4 w-4 text-blue-600" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0"
+                          onClick={() => handleEditAsset(a)}
+                          title="แก้ไข"
+                        >
+                          <Edit className="h-4 w-4 text-amber-600" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0"
+                          onClick={() => handleDeleteAsset(a)}
+                          title="ลบ"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <AssetEditDialog
+        asset={selectedAsset}
+        open={showEdit}
+        onOpenChange={setShowEdit}
+        onSuccess={fetch}
+        mode="edit"
+      />
+
+      {/* Create Dialog */}
+      <AssetEditDialog
+        asset={null}
+        open={showAdd}
+        onOpenChange={setShowAdd}
+        onSuccess={fetch}
+        mode="create"
+      />
+
+      {/* Depreciation Schedule Viewer */}
+      <DepreciationScheduleViewer
+        asset={selectedAsset}
+        open={showSchedule}
+        onOpenChange={setShowSchedule}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>ยืนยันการลบสินทรัพย์</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-700">
+              คุณต้องการลบสินทรัพย์ <strong>{assetToDelete?.name}</strong> ({assetToDelete?.code}) ?
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              การดำเนินการนี้ไม่สามารถย้อนกลับได้
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+              ยกเลิก
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteAsset}>
+              ลบสินทรัพย์
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -15,14 +15,27 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
+
     // Check if account has children
     const children = await prisma.chartOfAccount.findFirst({
       where: { parentId: id }
     })
 
     if (children) {
-      return NextResponse.json({ 
-        error: 'Cannot delete account with children' 
+      return NextResponse.json({
+        error: 'ไม่สามารถลบบัญชีที่มีบัญชีย่อยได้ กรุณาลบบัญชีย่อยก่อน'
+      }, { status: 400 })
+    }
+
+    // Check if account is used in journal entries
+    const journalLines = await prisma.journalLine.findFirst({
+      where: { accountId: id }
+    })
+
+    if (journalLines) {
+      return NextResponse.json({
+        error: 'ไม่สามารถลบบัญชีที่มีรายการบันทึกบัญชีได้'
       }, { status: 400 })
     }
 
@@ -34,8 +47,8 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Failed to delete account' 
+    return NextResponse.json({
+      error: 'Failed to delete account'
     }, { status: 500 })
   }
 }
@@ -50,21 +63,36 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const data = await request.json()
 
     const account = await prisma.chartOfAccount.update({
       where: { id: id },
       data: {
         name: data.name,
+        nameEn: data.nameEn || null,
         type: data.type,
-        isDetail: data.isDetail
+        isDetail: data.isDetail,
+        isActive: data.isActive,
+        notes: data.notes || null,
       }
     })
 
-    return NextResponse.json(account)
+    return NextResponse.json({
+      id: account.id,
+      code: account.code,
+      name: account.name,
+      nameEn: account.nameEn,
+      type: account.type,
+      level: account.level,
+      parentId: account.parentId,
+      isDetail: account.isDetail,
+      isActive: account.isActive,
+      notes: account.notes,
+    })
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Failed to update account' 
+    return NextResponse.json({
+      error: 'Failed to update account'
     }, { status: 500 })
   }
 }

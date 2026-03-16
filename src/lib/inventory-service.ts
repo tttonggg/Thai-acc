@@ -15,9 +15,10 @@ export async function recordStockMovement(params: {
   referenceNo?: string
   notes?: string
   sourceChannel?: string
+  metadata?: any
 }) {
   return await prisma.$transaction(async (tx) => {
-    const { productId, warehouseId, type, quantity, unitCost } = params
+    const { productId, warehouseId, type, quantity, unitCost, metadata } = params
 
     const existingBalance = await tx.stockBalance.findUnique({
       where: { productId_warehouseId: { productId, warehouseId } },
@@ -79,6 +80,7 @@ export async function recordStockMovement(params: {
         referenceNo: params.referenceNo,
         notes: params.notes,
         sourceChannel: params.sourceChannel,
+        metadata: metadata || undefined,
       }
     })
 

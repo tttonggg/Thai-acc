@@ -23,14 +23,19 @@ export async function GET(
             }
           }
         },
-        receipts: {
-          select: {
-            id: true,
-            receiptNo: true,
-            receiptDate: true,
-            amount: true,
+        receiptAllocations: {
+          include: {
+            receipt: {
+              select: {
+                id: true,
+                receiptNo: true,
+                receiptDate: true,
+                amount: true,
+              }
+            }
           }
-        }
+        },
+        journalEntry: true,
       }
     })
     

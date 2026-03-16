@@ -11,7 +11,9 @@ import {
   Download,
   Image as ImageIcon,
   CheckCircle,
-  Loader2
+  Loader2,
+  RefreshCw,
+  RotateCcw
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -26,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import { FileUpload } from '@/components/ui/file-upload'
 import { useToast } from '@/hooks/use-toast'
 
@@ -46,6 +49,36 @@ interface CompanyInfo {
   logo?: string
 }
 
+interface TaxRates {
+  vatRate: number
+  whtPnd53Service: number
+  whtPnd53Rent: number
+  whtPnd53Prof: number
+  whtPnd53Contract: number
+  whtPnd53Advert: number
+}
+
+interface DocumentNumberFormat {
+  type: string
+  prefix: string
+  format: string
+  resetMonthly: boolean
+  resetYearly: boolean
+  currentNo: number
+}
+
+const DOCUMENT_TYPES = [
+  { type: 'invoice', label: 'ใบกำกับภาษี', defaultPrefix: 'INV' },
+  { type: 'receipt', label: 'ใบเสร็จรับเงิน', defaultPrefix: 'RCP' },
+  { type: 'payment', label: 'ใบจ่ายเงิน', defaultPrefix: 'PAY' },
+  { type: 'journal', label: 'บันทึกบัญชี', defaultPrefix: 'JE' },
+  { type: 'credit_note', label: 'ใบลดหนี้', defaultPrefix: 'CN' },
+  { type: 'debit_note', label: 'ใบเพิ่มหนี้', defaultPrefix: 'DN' },
+  { type: 'purchase', label: 'ใบซื้อ', defaultPrefix: 'PO' },
+  { type: 'payroll', label: 'เงินเดือน', defaultPrefix: 'PAYROLL' },
+  { type: 'petty_cash', label: 'เงินสดย่อย', defaultPrefix: 'PCV' },
+]
+
 export function Settings() {
   const { toast } = useToast()
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
@@ -64,6 +97,15 @@ export function Settings() {
     website: '',
     logo: ''
   })
+  const [taxRates, setTaxRates] = useState<TaxRates>({
+    vatRate: 7,
+    whtPnd53Service: 3,
+    whtPnd53Rent: 5,
+    whtPnd53Prof: 3,
+    whtPnd53Contract: 1,
+    whtPnd53Advert: 2,
+  })
+  const [documentNumbers, setDocumentNumbers] = useState<DocumentNumberFormat[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [logoFile, setLogoFile] = useState<File | null>(null)
@@ -72,40 +114,67 @@ export function Settings() {
   const [importing, setImporting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Fetch company info on mount
+  // Fetch settings on mount
   useEffect(() => {
-    fetchCompanyInfo()
+    fetchSettings()
   }, [])
 
-  const fetchCompanyInfo = async () => {
+  const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/company')
+      const response = await fetch('/api/settings')
       if (response.ok) {
-        const data = await response.json()
-        if (data) {
-          setCompanyInfo({
-            name: data.name || '',
-            nameEn: data.nameEn || '',
-            taxId: data.taxId || '',
-            branchCode: data.branchCode || '00000',
-            address: data.address || '',
-            subDistrict: data.subDistrict || '',
-            district: data.district || '',
-            province: data.province || '',
-            postalCode: data.postalCode || '',
-            phone: data.phone || '',
-            fax: data.fax || '',
-            email: data.email || '',
-            website: data.website || '',
-            logo: data.logo || ''
-          })
+        const result = await response.json()
+        if (result.success && result.data) {
+          const { company, taxRates: tax, documentNumbers: docs } = result.data
+
+          if (company) {
+            setCompanyInfo({
+              name: company.name || '',
+              nameEn: company.nameEn || '',
+              taxId: company.taxId || '',
+              branchCode: company.branchCode || '00000',
+              address: company.address || '',
+              subDistrict: company.subDistrict || '',
+              district: company.district || '',
+              province: company.province || '',
+              postalCode: company.postalCode || '',
+              phone: company.phone || '',
+              fax: company.fax || '',
+              email: company.email || '',
+              website: company.website || '',
+              logo: company.logo || ''
+            })
+          }
+
+          if (tax) {
+            setTaxRates(tax)
+          }
+
+          if (docs && docs.length > 0) {
+            setDocumentNumbers(docs)
+          } else {
+            // Initialize with defaults
+            initializeDocumentNumbers()
+          }
         }
       }
     } catch (error) {
-      console.error('Failed to fetch company info:', error)
+      console.error('Failed to fetch settings:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const initializeDocumentNumbers = () => {
+    const defaults = DOCUMENT_TYPES.map(doc => ({
+      type: doc.type,
+      prefix: doc.defaultPrefix,
+      format: '{prefix}-{yyyy}-{mm}-{0000}',
+      resetMonthly: true,
+      resetYearly: false,
+      currentNo: 0,
+    }))
+    setDocumentNumbers(defaults)
   }
 
   const handleSaveCompanyInfo = async () => {
@@ -116,7 +185,7 @@ export function Settings() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(companyInfo)
       })
-      
+
       if (response.ok) {
         toast({
           title: "บันทึกสำเร็จ",
@@ -137,11 +206,83 @@ export function Settings() {
     }
   }
 
+  const handleSaveTaxRates = async () => {
+    setSaving(true)
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ taxRates })
+      })
+
+      if (response.ok) {
+        toast({
+          title: "บันทึกสำเร็จ",
+          description: "อัตราภาษีถูกบันทึกเรียบร้อยแล้ว",
+        })
+      } else {
+        throw new Error('Failed to save')
+      }
+    } catch (error) {
+      console.error('Failed to save tax rates:', error)
+      toast({
+        title: "บันทึกไม่สำเร็จ",
+        description: "ไม่สามารถบันทึกอัตราภาษีได้ กรุณาลองใหม่",
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleSaveDocumentNumbers = async () => {
+    setSaving(true)
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentNumbers })
+      })
+
+      if (response.ok) {
+        toast({
+          title: "บันทึกสำเร็จ",
+          description: "รูปแบบเลขที่เอกสารถูกบันทึกเรียบร้อยแล้ว",
+        })
+      } else {
+        throw new Error('Failed to save')
+      }
+    } catch (error) {
+      console.error('Failed to save document numbers:', error)
+      toast({
+        title: "บันทึกไม่สำเร็จ",
+        description: "ไม่สามารถบันทึกรูปแบบเลขที่เอกสารได้ กรุณาลองใหม่",
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleResetDefaults = async () => {
+    initializeDocumentNumbers()
+    toast({
+      title: "รีเซ็ตค่าเริ่มต้น",
+      description: "รูปแบบเลขที่เอกสารถูกรีเซ็ตเรียบร้อยแล้ว",
+    })
+  }
+
+  const updateDocumentNumber = (index: number, field: keyof DocumentNumberFormat, value: any) => {
+    const updated = [...documentNumbers]
+    updated[index] = { ...updated[index], [field]: value }
+    setDocumentNumbers(updated)
+  }
+
   const handleLogoSelect = (files: File[]) => {
     if (files.length > 0) {
       const file = files[0]
       setLogoFile(file)
-      
+
       // Create preview
       const reader = new FileReader()
       reader.onload = (e) => {
@@ -153,17 +294,17 @@ export function Settings() {
 
   const handleLogoUpload = async () => {
     if (!logoFile) return
-    
+
     const formData = new FormData()
     formData.append('file', logoFile)
     formData.append('type', 'logo')
-    
+
     try {
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData
       })
-      
+
       if (response.ok) {
         const data = await response.json()
         setCompanyInfo(prev => ({ ...prev, logo: data.url }))
@@ -208,18 +349,18 @@ export function Settings() {
 
   const handleImportData = async () => {
     if (!importFile) return
-    
+
     setImporting(true)
     try {
       const fileContent = await importFile.text()
       const data = JSON.parse(fileContent)
-      
+
       const response = await fetch('/api/backup/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       })
-      
+
       if (response.ok) {
         const data = await response.json()
         toast({
@@ -227,7 +368,7 @@ export function Settings() {
           description: `นำเข้าข้อมูลสำเร็จ: ${data.imported?.accounts || 0} บัญชี, ${data.imported?.customers || 0} ลูกค้า, ${data.imported?.vendors || 0} เจ้าหนี้`,
         })
         setImportFile(null)
-        fetchCompanyInfo()
+        fetchSettings()
       } else {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Import failed')
@@ -276,9 +417,9 @@ export function Settings() {
             <FileText className="h-4 w-4 mr-2" />
             เอกสาร
           </TabsTrigger>
-          <TabsTrigger value="users">
-            <Users className="h-4 w-4 mr-2" />
-            ผู้ใช้งาน
+          <TabsTrigger value="taxes">
+            <FileText className="h-4 w-4 mr-2" />
+            ภาษี
           </TabsTrigger>
           <TabsTrigger value="backup">
             <Database className="h-4 w-4 mr-2" />
@@ -296,84 +437,84 @@ export function Settings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label>ชื่อบริษัท (ไทย)</Label>
-                  <Input 
+                  <Input
                     value={companyInfo.name}
                     onChange={(e) => setCompanyInfo({...companyInfo, name: e.target.value})}
                   />
                 </div>
                 <div>
                   <Label>ชื่อบริษัท (อังกฤษ)</Label>
-                  <Input 
+                  <Input
                     value={companyInfo.nameEn}
                     onChange={(e) => setCompanyInfo({...companyInfo, nameEn: e.target.value})}
                   />
                 </div>
                 <div>
                   <Label>เลขประจำตัวผู้เสียภาษี</Label>
-                  <Input 
+                  <Input
                     value={companyInfo.taxId}
                     onChange={(e) => setCompanyInfo({...companyInfo, taxId: e.target.value})}
                   />
                 </div>
                 <div>
                   <Label>รหัสสาขา</Label>
-                  <Input 
+                  <Input
                     value={companyInfo.branchCode}
                     onChange={(e) => setCompanyInfo({...companyInfo, branchCode: e.target.value})}
                   />
                 </div>
                 <div className="md:col-span-2">
                   <Label>ที่อยู่</Label>
-                  <Textarea 
+                  <Textarea
                     value={companyInfo.address}
                     onChange={(e) => setCompanyInfo({...companyInfo, address: e.target.value})}
                   />
                 </div>
                 <div>
                   <Label>แขวง/ตำบล</Label>
-                  <Input 
+                  <Input
                     value={companyInfo.subDistrict}
                     onChange={(e) => setCompanyInfo({...companyInfo, subDistrict: e.target.value})}
                   />
                 </div>
                 <div>
                   <Label>เขต/อำเภอ</Label>
-                  <Input 
+                  <Input
                     value={companyInfo.district}
                     onChange={(e) => setCompanyInfo({...companyInfo, district: e.target.value})}
                   />
                 </div>
                 <div>
                   <Label>จังหวัด</Label>
-                  <Input 
+                  <Input
                     value={companyInfo.province}
                     onChange={(e) => setCompanyInfo({...companyInfo, province: e.target.value})}
                   />
                 </div>
                 <div>
                   <Label>รหัสไปรษณีย์</Label>
-                  <Input 
+                  <Input
                     value={companyInfo.postalCode}
                     onChange={(e) => setCompanyInfo({...companyInfo, postalCode: e.target.value})}
                   />
                 </div>
                 <div>
                   <Label>โทรศัพท์</Label>
-                  <Input 
+                  <Input
                     value={companyInfo.phone}
                     onChange={(e) => setCompanyInfo({...companyInfo, phone: e.target.value})}
                   />
                 </div>
                 <div>
                   <Label>โทรสาร</Label>
-                  <Input 
+                  <Input
                     value={companyInfo.fax}
                     onChange={(e) => setCompanyInfo({...companyInfo, fax: e.target.value})}
                   />
                 </div>
                 <div>
                   <Label>อีเมล</Label>
-                  <Input 
+                  <Input
                     type="email"
                     value={companyInfo.email}
                     onChange={(e) => setCompanyInfo({...companyInfo, email: e.target.value})}
@@ -381,14 +522,14 @@ export function Settings() {
                 </div>
                 <div>
                   <Label>เว็บไซต์</Label>
-                  <Input 
+                  <Input
                     value={companyInfo.website}
                     onChange={(e) => setCompanyInfo({...companyInfo, website: e.target.value})}
                   />
                 </div>
               </div>
               <div className="flex justify-end mt-6">
-                <Button 
+                <Button
                   className="bg-blue-600 hover:bg-blue-700"
                   onClick={handleSaveCompanyInfo}
                   disabled={saving}
@@ -434,7 +575,7 @@ export function Settings() {
                     description="คลิกเพื่อเลือกไฟล์รูปภาพ"
                   />
                   {logoFile && (
-                    <Button 
+                    <Button
                       onClick={handleLogoUpload}
                       className="bg-green-600 hover:bg-green-700"
                     >
@@ -454,81 +595,217 @@ export function Settings() {
         <TabsContent value="documents" className="space-y-4 mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>ตั้งค่าเลขที่เอกสาร</CardTitle>
-              <CardDescription>กำหนดรูปแบบเลขที่เอกสารอัตโนมัติ</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>ตั้งค่าเลขที่เอกสาร</CardTitle>
+                  <CardDescription>กำหนดรูปแบบเลขที่เอกสารอัตโนมัติ</CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetDefaults}
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  รีเซ็ตค่าเริ่มต้น
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                  <div>
-                    <Label>ประเภทเอกสาร</Label>
-                    <Select defaultValue="invoice">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="invoice">ใบกำกับภาษี</SelectItem>
-                        <SelectItem value="receipt">ใบเสร็จรับเงิน</SelectItem>
-                        <SelectItem value="journal">บันทึกบัญชี</SelectItem>
-                        <SelectItem value="payment">ใบจ่ายเงิน</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>คำนำหน้า</Label>
-                    <Input defaultValue="INV" />
-                  </div>
-                  <div>
-                    <Label>รูปแบบ</Label>
-                    <Input defaultValue="INV-{yyyy}-{mm}-{0000}" />
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">ตัวอย่าง: <span className="font-mono">INV-2024-01-0001</span></p>
-                </div>
+                {documentNumbers.map((doc, index) => {
+                  const docType = DOCUMENT_TYPES.find(d => d.type === doc.type)
+                  if (!docType) return null
+
+                  return (
+                    <div key={doc.type} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium">{docType.label}</h3>
+                        <span className="text-sm text-gray-500">เลขที่ถัดไป: {doc.currentNo + 1}</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                          <Label>คำนำหน้า</Label>
+                          <Input
+                            value={doc.prefix}
+                            onChange={(e) => updateDocumentNumber(index, 'prefix', e.target.value)}
+                            placeholder="INV"
+                          />
+                        </div>
+                        <div>
+                          <Label>รูปแบบ</Label>
+                          <Input
+                            value={doc.format}
+                            onChange={(e) => updateDocumentNumber(index, 'format', e.target.value)}
+                            placeholder="{prefix}-{yyyy}-{mm}-{0000}"
+                          />
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              checked={doc.resetMonthly}
+                              onCheckedChange={(checked) => updateDocumentNumber(index, 'resetMonthly', checked)}
+                            />
+                            <Label className="text-sm">รีเซ็ตรายเดือน</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              checked={doc.resetYearly}
+                              onCheckedChange={(checked) => updateDocumentNumber(index, 'resetYearly', checked)}
+                            />
+                            <Label className="text-sm">รีเซ็ตรายปี</Label>
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 p-2 rounded text-sm">
+                          <span className="text-gray-600">ตัวอย่าง: </span>
+                          <span className="font-mono">
+                            {doc.format
+                              .replace('{prefix}', doc.prefix)
+                              .replace('{yyyy}', new Date().getFullYear().toString())
+                              .replace('{yy}', (new Date().getFullYear() % 100).toString())
+                              .replace('{mm}', (new Date().getMonth() + 1).toString().padStart(2, '0'))
+                              .replace('{0000}', '0001')
+                              .replace('{000}', '001')
+                              .replace('{00}', '01')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="flex justify-end mt-6">
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={handleSaveDocumentNumbers}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      กำลังบันทึก...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      บันทึกรูปแบบเอกสาร
+                    </>
+                  )}
+                </Button>
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
 
+        <TabsContent value="taxes" className="space-y-4 mt-6">
           <Card>
             <CardHeader>
               <CardTitle>อัตราภาษี</CardTitle>
               <CardDescription>กำหนดอัตราภาษีเริ่มต้น</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>อัตราภาษีมูลค่าเพิ่ม (%)</Label>
-                  <Input type="number" defaultValue="7" />
+              <div className="space-y-6">
+                <div className="border-b pb-6">
+                  <h3 className="font-semibold mb-4">ภาษีมูลค่าเพิ่ม (VAT)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>อัตราภาษีมูลค่าเพิ่ม (%)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={taxRates.vatRate}
+                        onChange={(e) => setTaxRates({...taxRates, vatRate: parseFloat(e.target.value) || 0})}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">อัตรามาตรฐาน: 7%</p>
+                    </div>
+                  </div>
                 </div>
+
                 <div>
-                  <Label>อัตราภาษีหัก ณ ที่จ่าย - ค่าบริการ (%)</Label>
-                  <Input type="number" defaultValue="3" />
-                </div>
-                <div>
-                  <Label>อัตราภาษีหัก ณ ที่จ่าย - ค่าเช่า (%)</Label>
-                  <Input type="number" defaultValue="5" />
-                </div>
-                <div>
-                  <Label>อัตราภาษีหัก ณ ที่จ่าย - เงินเดือน (%)</Label>
-                  <Input type="number" defaultValue="3" />
+                  <h3 className="font-semibold mb-4">ภาษีหัก ณ ที่จ่าย (ภงด.53)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>ค่าบริการ (%)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={taxRates.whtPnd53Service}
+                        onChange={(e) => setTaxRates({...taxRates, whtPnd53Service: parseFloat(e.target.value) || 0})}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">อัตรามาตรฐาน: 3%</p>
+                    </div>
+                    <div>
+                      <Label>ค่าเช่า (%)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={taxRates.whtPnd53Rent}
+                        onChange={(e) => setTaxRates({...taxRates, whtPnd53Rent: parseFloat(e.target.value) || 0})}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">อัตรามาตรฐาน: 5%</p>
+                    </div>
+                    <div>
+                      <Label>ค่าบริการวิชาชีพ (%)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={taxRates.whtPnd53Prof}
+                        onChange={(e) => setTaxRates({...taxRates, whtPnd53Prof: parseFloat(e.target.value) || 0})}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">อัตรามาตรฐาน: 3%</p>
+                    </div>
+                    <div>
+                      <Label>ค่าจ้างทำของ (%)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={taxRates.whtPnd53Contract}
+                        onChange={(e) => setTaxRates({...taxRates, whtPnd53Contract: parseFloat(e.target.value) || 0})}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">อัตรามาตรฐาน: 1%</p>
+                    </div>
+                    <div>
+                      <Label>ค่าโฆษณา (%)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        value={taxRates.whtPnd53Advert}
+                        onChange={(e) => setTaxRates({...taxRates, whtPnd53Advert: parseFloat(e.target.value) || 0})}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">อัตรามาตรฐาน: 2%</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="users" className="space-y-4 mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>จัดการผู้ใช้งาน</CardTitle>
-              <CardDescription>เพิ่ม/แก้ไข/ลบผู้ใช้งานระบบ</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>จัดการผู้ใช้งานระบบ</p>
-                <p className="text-sm mt-2">ไปที่เมนู "จัดการผู้ใช้" เพื่อจัดการผู้ใช้งาน</p>
+              <div className="flex justify-end mt-6">
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={handleSaveTaxRates}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      กำลังบันทึก...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      บันทึกอัตราภาษี
+                    </>
+                  )}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -549,7 +826,7 @@ export function Settings() {
                     <p className="font-medium">ส่งออกข้อมูล</p>
                     <p className="text-sm text-gray-500">ดาวน์โหลดข้อมูลทั้งหมดเป็นไฟล์ JSON</p>
                   </div>
-                  <Button 
+                  <Button
                     className="bg-blue-600 hover:bg-blue-700"
                     onClick={handleExportData}
                   >
@@ -567,7 +844,7 @@ export function Settings() {
                       <p className="text-sm text-gray-500">อัปโหลดไฟล์สำรองเพื่อกู้คืนข้อมูล</p>
                     </div>
                   </div>
-                  
+
                   <FileUpload
                     accept=".json"
                     maxSize={10}
@@ -576,9 +853,9 @@ export function Settings() {
                     description="ไฟล์ JSON ที่ส่งออกจากระบบ"
                     uploadedFileName={importFile?.name}
                   />
-                  
+
                   {importFile && (
-                    <Button 
+                    <Button
                       className="bg-green-600 hover:bg-green-700"
                       onClick={handleImportData}
                       disabled={importing}

@@ -70,7 +70,8 @@ export async function GET(request: Request) {
     ])
     
     return apiResponse({
-      purchases,
+      success: true,
+      data: purchases,
       pagination: {
         page,
         limit,

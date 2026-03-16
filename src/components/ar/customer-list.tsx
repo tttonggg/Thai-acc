@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { 
-  Plus, 
-  Search, 
-  Edit, 
+import {
+  Plus,
+  Search,
+  Edit,
   Trash2,
   Phone,
   Mail,
@@ -44,6 +44,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
+import { CustomerEditDialog } from './customer-edit-dialog'
 
 interface Customer {
   id: string
@@ -83,6 +84,12 @@ export function CustomerList() {
     open: false,
     id: '',
     name: ''
+  })
+
+  // Edit dialog state
+  const [editDialog, setEditDialog] = useState<{ open: boolean; customer: Customer | null }>({
+    open: false,
+    customer: null
   })
 
   useEffect(() => {
@@ -255,6 +262,15 @@ export function CustomerList() {
       open: true,
       id: customer.id,
       name: customer.name || 'ไม่ระบุชื่อ'
+    })
+  }
+
+  // Open edit dialog
+  const openEditDialog = (customer: Customer) => {
+    if (!customer?.id) return
+    setEditDialog({
+      open: true,
+      customer: customer
     })
   }
 
@@ -660,12 +676,17 @@ export function CustomerList() {
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => openEditDialog(customer)}
+                          >
                             <Edit className="h-4 w-4 text-blue-600" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8"
                             onClick={() => openDeleteDialog(customer)}
                           >
@@ -681,6 +702,14 @@ export function CustomerList() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <CustomerEditDialog
+        customer={editDialog.customer}
+        open={editDialog.open}
+        onOpenChange={(open) => setEditDialog({ open, customer: null })}
+        onSuccess={() => setRefreshKey(prev => prev + 1)}
+      />
     </div>
   )
 }

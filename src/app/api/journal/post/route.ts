@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { z } from 'zod'
-import { requireAuth } from '@/lib/api-auth'
+import { requireAuth, getClientIp } from '@/lib/api-auth'
+import { logPost } from '@/lib/activity-logger'
 
 /**
  * Validation schema for journal entry lines
@@ -76,6 +77,7 @@ export async function POST(request: NextRequest) {
   try {
     // Require authentication
     const user = await requireAuth()
+    const ipAddress = getClientIp(request)
 
     // Parse and validate request body
     const body = await request.json()
@@ -194,6 +196,14 @@ export async function POST(request: NextRequest) {
         },
       },
     })
+
+    // Log journal posting
+    await logPost(user.id, 'journal', journalEntry.id, {
+      entryNo: journalEntry.entryNo,
+      totalDebit: journalEntry.totalDebit,
+      totalCredit: journalEntry.totalCredit,
+      documentType: journalEntry.documentType,
+    }, ipAddress)
 
     return NextResponse.json({
       success: true,

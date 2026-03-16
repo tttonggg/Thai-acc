@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { z } from 'zod'
 import { requireAuth } from '@/lib/api-auth'
+import { logCreate } from '@/lib/activity-logger'
+import { getClientIp } from '@/lib/api-auth'
 
 // Validation schema
 const invoiceLineSchema = z.object({
@@ -73,8 +75,9 @@ export async function GET(request: NextRequest) {
     await requireAuth()
 
     const searchParams = request.nextUrl.searchParams
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
+    // ✅ FIXED: Add max limit of 100 items per page to prevent performance issues
+    const limit = Math.min(100, parseInt(searchParams.get('limit') || '50'))
     const status = searchParams.get('status')
     const type = searchParams.get('type')
     const customerId = searchParams.get('customerId')
@@ -139,7 +142,8 @@ export async function GET(request: NextRequest) {
 // POST - Create invoice (requires authentication)
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth()
+    const user = await requireAuth()
+    const ipAddress = getClientIp(request)
 
     const body = await request.json()
     const validatedData = invoiceSchema.parse(body)
@@ -220,7 +224,15 @@ export async function POST(request: NextRequest) {
         lines: true,
       },
     })
-    
+
+    // Log invoice creation
+    await logCreate(user.id, 'invoices', invoice.id, {
+      invoiceNo: invoice.invoiceNo,
+      customerId: invoice.customerId,
+      totalAmount: invoice.totalAmount,
+      type: invoice.type,
+    }, ipAddress)
+
     return NextResponse.json({ success: true, data: invoice })
   } catch (error: any) {
     if (error.name === 'ZodError') {

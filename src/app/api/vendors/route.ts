@@ -6,17 +6,21 @@ import { vendorSchema } from "@/lib/validations"
 export async function GET(request: Request) {
   try {
     await requireAuth()
-    
+
     const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get("page") || "1")
+    const limit = Math.min(100, parseInt(searchParams.get("limit") || "20"))
     const isActive = searchParams.get("isActive")
     const search = searchParams.get("search")
-    
+
+    const skip = (page - 1) * limit
+
     const where: any = {}
-    
+
     if (isActive !== null) {
       where.isActive = isActive === "true"
     }
-    
+
     if (search) {
       where.OR = [
         { code: { contains: search } },
@@ -24,18 +28,31 @@ export async function GET(request: Request) {
         { taxId: { contains: search } },
       ]
     }
-    
-    const vendors = await db.vendor.findMany({
-      where,
-      orderBy: { code: "asc" },
-      include: {
-        _count: {
-          select: { purchaseInvoices: true }
+
+    const [vendors, total] = await Promise.all([
+      db.vendor.findMany({
+        where,
+        orderBy: { code: "asc" },
+        skip,
+        take: limit,
+        include: {
+          _count: {
+            select: { purchaseInvoices: true }
+          }
         }
+      }),
+      db.vendor.count({ where }),
+    ])
+
+    return apiResponse({
+      data: vendors,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       }
     })
-    
-    return apiResponse(vendors)
   } catch (error) {
     if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
       return unauthorizedError()

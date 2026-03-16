@@ -38,6 +38,153 @@ export async function GET(
 }
 
 /**
+ * PUT /api/petty-cash/vouchers/[id]
+ * Update petty cash voucher (only if not yet approved)
+ */
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await requireAuth()
+    const { id } = await params
+    const body = await request.json()
+    const { fundId, payee, description, amount, glExpenseAccountId, date } = body
+
+    // Fetch voucher first
+    const existingVoucher = await prisma.pettyCashVoucher.findUnique({
+      where: { id },
+      include: { fund: true }
+    })
+
+    if (!existingVoucher) {
+      return NextResponse.json(
+        { success: false, error: 'ไม่พบใบเบิกเงินสดย่อย' },
+        { status: 404 }
+      )
+    }
+
+    // Check if already approved (has journal entry)
+    if (existingVoucher.journalEntryId) {
+      return NextResponse.json(
+        { success: false, error: 'ไม่สามารถแก้ไขใบเบิกที่ได้รับการอนุมัติแล้ว' },
+        { status: 400 }
+      )
+    }
+
+    // Validate required fields
+    if (!fundId || !payee || !description || !amount || !glExpenseAccountId) {
+      return NextResponse.json(
+        { success: false, error: 'ข้อมูลใบสำคัญไม่ครบถ้วน' },
+        { status: 400 }
+      )
+    }
+
+    // If fund changed, validate new fund has enough balance
+    let newFund = existingVoucher.fund
+    if (fundId !== existingVoucher.fundId) {
+      newFund = await prisma.pettyCashFund.findUnique({ where: { id: fundId } })
+      if (!newFund) {
+        return NextResponse.json(
+          { success: false, error: 'ไม่พบกองทุนเงินสดย่อย' },
+          { status: 404 }
+        )
+      }
+    }
+
+    const voucherAmount = parseFloat(amount)
+    const oldAmount = existingVoucher.amount
+
+    // Calculate balance impact
+    // If changing funds, we need to restore old amount to old fund and check new fund
+    // If same fund, we need to check if new amount - old amount is available
+    let balanceChange = 0
+
+    if (fundId !== existingVoucher.fundId) {
+      // Different fund: restore old amount to old fund, check new fund
+      const newFundAvailableBalance = newFund.currentBalance + (fundId !== existingVoucher.fundId ? oldAmount : 0)
+
+      if (newFundAvailableBalance < voucherAmount) {
+        return NextResponse.json({
+          success: false,
+          error: `เงินสดย่อยไม่เพียงพอ (คงเหลือ ฿${newFundAvailableBalance.toLocaleString()})`
+        }, { status: 400 })
+      }
+
+      // Restore old fund balance
+      await prisma.pettyCashFund.update({
+        where: { id: existingVoucher.fundId },
+        data: { currentBalance: { increment: oldAmount } }
+      })
+
+      // Update voucher
+      const updatedVoucher = await prisma.pettyCashVoucher.update({
+        where: { id },
+        data: {
+          fundId,
+          payee,
+          description,
+          amount: voucherAmount,
+          glExpenseAccountId,
+          date: date ? new Date(date) : existingVoucher.date,
+        }
+      })
+
+      // Deduct from new fund
+      await prisma.pettyCashFund.update({
+        where: { id: fundId },
+        data: { currentBalance: { decrement: voucherAmount } }
+      })
+
+      return NextResponse.json({
+        success: true,
+        data: updatedVoucher,
+        message: 'อัปเดตใบเบิกเงินสดย่อยสำเร็จ'
+      })
+    } else {
+      // Same fund: check if we have enough for the difference
+      balanceChange = voucherAmount - oldAmount
+
+      if (balanceChange > 0 && existingVoucher.fund.currentBalance < balanceChange) {
+        return NextResponse.json({
+          success: false,
+          error: `เงินสดย่อยไม่เพียงพอสำหรับวงเงินที่เพิ่มขึ้น (คงเหลือ ฿${existingVoucher.fund.currentBalance.toLocaleString()})`
+        }, { status: 400 })
+      }
+
+      // Update voucher and adjust fund balance in transaction
+      const [updatedVoucher] = await prisma.$transaction([
+        prisma.pettyCashVoucher.update({
+          where: { id },
+          data: {
+            payee,
+            description,
+            amount: voucherAmount,
+            glExpenseAccountId,
+            date: date ? new Date(date) : existingVoucher.date,
+          }
+        }),
+        prisma.pettyCashFund.update({
+          where: { id: fundId },
+          data: { currentBalance: { decrement: balanceChange } }
+        })
+      ])
+
+      return NextResponse.json({
+        success: true,
+        data: updatedVoucher,
+        message: 'อัปเดตใบเบิกเงินสดย่อยสำเร็จ'
+      })
+    }
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการอัปเดตใบเบิกเงินสดย่อย' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
  * DELETE /api/petty-cash/vouchers/[id]
  * Delete a petty cash voucher (only if not yet approved/posted)
  */

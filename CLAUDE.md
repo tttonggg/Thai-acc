@@ -29,16 +29,217 @@ bun run db:reset     # Reset database (WARNING: destroys all data)
 npx prisma db seed   # Seed database with initial Thai chart of accounts (181 accounts)
 bun run seed         # Alternative seeding via ts-node
 bun run seed:fresh   # Reset database then seed (WARNING: destroys all data)
-
-# Testing
-bun run test           # Run Vitest tests in watch mode
-bun run test:run       # Run tests once
-bun run test:coverage  # Run tests with coverage report
-bun run test:e2e       # Run Playwright E2E tests
-bun run test:e2e:ui    # Run E2E tests with UI mode
 ```
 
 **Important**: Always run `bun run db:generate` after modifying `prisma/schema.prisma`.
+
+## Testing Commands
+
+### Quick Testing (2-3 minutes)
+
+```bash
+# Run smoke tests - critical paths only
+bun run test:quick
+# OR
+./scripts/test-quick.sh
+```
+
+### Full Testing (15-20 minutes)
+
+```bash
+# Run complete E2E test suite
+bun run test:full
+# OR
+./scripts/test-full.sh
+
+# Run with Playwright directly
+bun run test:e2e
+
+# Run with UI mode (interactive)
+bun run test:e2e:ui
+```
+
+### Module-Specific Testing
+
+```bash
+# Test specific module
+./scripts/test-module.sh inventory
+./scripts/test-module.sh "@smoke"
+./scripts/test-module.sh "@critical and @compliance"
+
+# Run tests by tag
+npx playwright test --grep "@smoke"
+npx playwright test --grep "@critical and not @pdf"
+```
+
+### Database Verification
+
+```bash
+# Verify database integrity after tests
+bun run test:verify-db
+# OR
+./scripts/verify-database.sh
+```
+
+**Checks performed**:
+- Record counts for all tables
+- Journal entry debit/credit balance
+- Orphaned records (customers, invoices, receipts, payments without company/journal entry)
+- Foreign key violations
+
+### Unit Testing
+
+```bash
+# Run Vitest unit tests
+bun run test
+
+# Run once (watch mode disabled)
+bun run test:run
+
+# Run with coverage report
+bun run test:coverage
+```
+
+## Production Scripts
+
+The `/scripts/` directory contains utility scripts for production deployment and monitoring:
+
+### Server Management
+
+```bash
+# Start production server
+./scripts/start-production.sh
+
+# Stop production server
+./scripts/stop-production.sh
+
+# Restart production server
+./scripts/restart-production.sh
+```
+
+### Health Monitoring
+
+```bash
+# Check production server health
+./scripts/health-check.sh
+```
+
+**Health checks include**:
+- Server process running
+- Port accessibility (localhost:3000)
+- Database file existence and readability
+- Authentication endpoint responsiveness
+- Log analysis for recent errors
+- Disk space usage
+
+### Deployment Verification
+
+```bash
+# Verify deployment after build
+./scripts/verify-deployment.sh
+```
+
+## Testing Architecture
+
+### Test Tags
+
+Tests are organized by tags for selective execution:
+
+- `@smoke` - Critical path tests (authentication, navigation, core features)
+- `@critical` - Critical priority tests
+- `@high` - High priority tests
+- `@medium` - Medium priority tests
+- `@low` - Low priority tests
+- `@compliance` - Tax compliance tests (VAT, WHT, PND1)
+- `@expansion` - Expansion module tests (Inventory, Assets, Banking, etc.)
+- `@pdf` - PDF generation tests (50 Tawi, invoices, receipts)
+- `@auth` - Authentication and authorization tests
+- `@database` - Database verification tests
+
+### Test Structure
+
+```
+tests/
+├── master-test-runner.ts        # Main test orchestration
+├── test-suites.json             # Test suite configuration
+├── reporters/
+│   ├── database-reporter.ts     # Database state tracking
+│   └── template.html            # HTML report template
+└── README.md                    # Comprehensive test documentation
+```
+
+### Test Modules Coverage
+
+The test suite covers all 16 modules:
+
+1. **Authentication & Navigation** - Login/logout, session management, all 16 sidebar items
+2. **Chart of Accounts** - Account CRUD, hierarchical structure, 181 Thai standard accounts
+3. **Journal Entries** - Double-entry bookkeeping, auto-balancing, GL posting
+4. **Customers & AR** - Customer management, sales invoices, receipts, aging
+5. **Vendors & AP** - Vendor management, purchase invoices, payments, aging
+6. **VAT Management** - 7% VAT calculation, input/output tracking, Thai Revenue Dept compliance
+7. **Withholding Tax** - PND3/PND53, 50 Tawi PDF generation
+8. **Inventory** - Stock tracking, multi-warehouse, WAC costing, COGS
+9. **Fixed Assets** - Asset registration, TAS 16 depreciation, net book value
+10. **Banking** - Bank accounts, cheque lifecycle, reconciliation
+11. **Petty Cash** - Fund management, voucher system, reimbursements
+12. **Payroll** - Employee management, SSC/PND1 calculations, payroll runs
+13. **Financial Reports** - Trial Balance, Balance Sheet, P&L
+14. **Settings & Administration** - Company settings, user management, roles
+15. **UI-DB Alignment** - Data consistency verification
+16. **Full Coverage** - All modules with error monitoring and screenshots
+
+### Rate Limiting Bypass for Tests
+
+Tests use `x-playwright-test: true` header to bypass API rate limiting. This is configured in `src/middleware.ts`.
+
+## Database Management
+
+### Backup Strategy
+
+```bash
+# Create timestamped backup
+cp prisma/dev.db backups/dev-$(date +%Y%m%d_%H%M%S).db
+
+# List backups
+ls -lh backups/
+```
+
+### Migration Best Practices
+
+1. **Always backup before migrations**
+   ```bash
+   cp prisma/dev.db backups/dev-pre-migration.db
+   ```
+
+2. **Test migrations in development first**
+   ```bash
+   bun run db:push  # For schema changes without migration file
+   bun run db:migrate  # For formal migration with file
+   ```
+
+3. **Generate Prisma client after schema changes**
+   ```bash
+   bun run db:generate
+   ```
+
+4. **Verify data integrity after migration**
+   ```bash
+   ./scripts/verify-database.sh
+   ```
+
+### Database Verification
+
+Run database verification to ensure integrity:
+
+```bash
+./scripts/verify-database.sh
+```
+
+This script checks:
+- All table record counts
+- Journal entry balance (debits must equal credits)
+- Orphaned records (documents without journal entries, customers without company)
 
 ## Recent Fixes & Improvements
 
@@ -49,8 +250,6 @@ bun run test:e2e:ui    # Run E2E tests with UI mode
 **Fix**: Updated `src/app/page.tsx` `getMenuItems()` function to include all 16 navigation items.
 
 **Status**: ✅ All 16 navigation items now accessible and verified via E2E tests
-
-**Evidence**: See `test-results/SIDEBAR-NAVIGATION-FIX-REPORT.md`
 
 **Navigation Items** (16 total):
 1. Dashboard (ภาพรวม)
@@ -69,22 +268,6 @@ bun run test:e2e:ui    # Run E2E tests with UI mode
 14. Reports (รายงาน)
 15. Settings (ตั้งค่า) - Admin only
 16. User Management (จัดการผู้ใช้) - Admin only
-
-### Rate Limiting Bypass for Tests (2025-03-12)
-
-**Issue**: API rate limiting prevented automated E2E tests from running
-
-**Fix**: Modified `src/middleware.ts` to bypass rate limiting for requests with `x-playwright-test: true` header
-
-**Files Modified**:
-- `src/middleware.ts` - Added test bypass logic
-- `e2e/login-fixed.spec.ts` - Uses bypass header
-- `e2e/02-master-data-api.spec.ts` - Uses bypass header
-- `e2e/03-accounting-transactions-api.spec.ts` - Uses bypass header
-- `e2e/04-sidebar-navigation.spec.ts` - Uses bypass header
-- `e2e/05-sidebar-quick-check.spec.ts` - Uses bypass header
-
-**Note on Seeding**: The seed script creates 181 Thai standard chart of accounts and test users. It does NOT destroy existing data by default (see `prisma/seed.ts` line 24 - cleanup is commented out). Use `bun run seed:fresh` or `bun run db:reset` to start completely fresh.
 
 ### Production Deployment CRITICAL NOTES
 
@@ -305,6 +488,8 @@ NEXTAUTH_SECRET=your-secret-key-change-this
 4. Build UI components in `src/components/[module]/`
 5. Add navigation item to sidebar (filter by role)
 6. Implement journal entry generation on document post
+7. Add E2E tests in `e2e/` directory
+8. Update test suite configuration in `tests/test-suites.json`
 
 ### Modifying Chart of Accounts
 
@@ -320,6 +505,64 @@ NEXTAUTH_SECRET=your-secret-key-change-this
 3. Update forms to include new rate options
 4. Run `bun run db:generate` and `bun run db:migrate`
 
+## Development Workflows
+
+### Typical Development Workflow
+
+1. **Start Development**
+   ```bash
+   bun run dev &  # Start dev server
+   ./scripts/test-quick.sh  # Run smoke tests
+   ```
+
+2. **Before Committing**
+   ```bash
+   bun run lint  # Check for linting errors
+   ./scripts/test-module.sh <module-name>  # Test your module
+   ./scripts/verify-database.sh  # Verify database integrity
+   ```
+
+3. **Production Deployment**
+   ```bash
+   bun run build
+   # Update DATABASE_URL in .next/standalone/.env to absolute path
+   ./scripts/verify-deployment.sh
+   ./scripts/start-production.sh
+   ./scripts/health-check.sh
+   ```
+
+### Troubleshooting
+
+#### Login Issues
+
+If you see "อีเมลหรือรหัสผ่านไม่ถูกต้อง" (Email or password incorrect):
+
+1. **Check DATABASE_URL** - Must be absolute path in `.next/standalone/.env`
+2. **Verify database exists** - Check `ls -lh .next/standalone/dev.db` (should be ~732KB)
+3. **Test authentication directly**:
+   ```bash
+   cd .next/standalone
+   node test-nextauth-flow.js
+   node test-all-users.js
+   ```
+4. **Check Prisma connection**:
+   ```bash
+   node -e "const { PrismaClient } = require('@prisma/client'); const p = new PrismaClient(); p.user.findMany().then(u => console.log('Users:', u.length)).finally(() => p.\$disconnect());"
+   ```
+
+#### Test Failures
+
+- **Dev server not running**: Tests will auto-start server if needed
+- **Database issues**: Run `./scripts/verify-database.sh` to check integrity
+- **Timeout errors**: Increase timeout in `playwright.config.ts`
+- **Rate limiting**: Ensure `x-playwright-test: true` header is set in `src/middleware.ts`
+
+#### Build Errors
+
+- **Module not found**: Run `bun run db:generate` after schema changes
+- **Type errors**: Run `bun run lint` to check for issues
+- **Database path errors**: Ensure DATABASE_URL uses absolute path in production
+
 ## Important Notes
 
 - **Database**: SQLite for development. Production should use PostgreSQL.
@@ -329,6 +572,8 @@ NEXTAUTH_SECRET=your-secret-key-change-this
 - **Thai Language**: UI labels support Thai/English dual language
 - **Date Handling**: Always use Thai date format for user-facing dates
 - **Currency**: Always format as THB (฿) with 2 decimal places
+- **Testing**: E2E tests verify all functionality, run before committing
+- **Database Verification**: Always verify database integrity after schema changes
 
 ## Production Deployment
 
@@ -349,27 +594,64 @@ bun run build
 cd .next/standalone
 NODE_ENV=production bun server.js
 
-# Or with Docker (example)
-docker build -t thai-accounting .
-docker run -p 3000:3000 -v $(pwd)/db:/app/db thai-accounting
+# Or use production scripts
+./scripts/start-production.sh
+./scripts/health-check.sh
 ```
 
-### Troubleshooting Login Issues
+### Production Deployment Checklist
 
-If you see "อีเมลหรือรหัสผ่านไม่ถูกต้อง" (Email or password incorrect):
+#### Pre-Deployment Preparation
 
-1. **Check DATABASE_URL** - Must be absolute path in `.next/standalone/.env`
-2. **Verify database exists** - Check `ls -lh .next/standalone/dev.db` (should be ~732KB)
-3. **Test authentication directly**:
-   ```bash
-   cd .next/standalone
-   node test-nextauth-flow.js
-   node test-all-users.js
-   ```
-4. **Check Prisma connection**:
-   ```bash
-   node -e "const { PrismaClient } = require('@prisma/client'); const p = new PrismaClient(); p.user.findMany().then(u => console.log('Users:', u.length)).finally(() => p.\$disconnect());"
-   ```
+- [ ] **Database Setup**
+  - [ ] Run `bun run db:generate` to generate Prisma client
+  - [ ] Run `bun run db:push` or `bun run db:migrate` to create schema
+  - [ ] Run `npx prisma db seed` to seed Thai chart of accounts (181 accounts)
+  - [ ] Create admin user account
+  - [ ] Configure PostgreSQL for production (recommended) or use SQLite
+  - [ ] Create database backup strategy
+
+- [ ] **Environment Configuration**
+  - [ ] Set `DATABASE_URL` to production database (use absolute path for SQLite)
+  - [ ] Set `NEXTAUTH_URL` to production domain
+  - [ ] Set `NEXTAUTH_SECRET` to strong random value
+  - [ ] Set `NODE_ENV=production`
+
+- [ ] **Build & Test**
+  - [ ] Run `bun run build` to create production build
+  - [ ] Update `.next/standalone/.env` with absolute DATABASE_URL
+  - [ ] Run `./scripts/verify-database.sh` to check integrity
+  - [ ] Run `bun run test:quick` to verify critical functionality
+  - [ ] Test production build locally: `bun run start`
+  - [ ] Run `./scripts/health-check.sh` to verify deployment
+
+#### Production Deployment
+
+- [ ] **Server Setup**
+  - [ ] Install Bun runtime
+  - [ ] Copy `.next/standalone/` directory to server
+  - [ ] Set proper file permissions
+  - [ ] Configure process manager (PM2, systemd, etc.)
+  - [ ] Set up SSL/HTTPS
+
+- [ ] **Security**
+  - [ ] Enable HTTPS with SSL certificate
+  - [ ] Configure firewall rules
+  - [ ] Set up database backups
+  - [ ] Configure error tracking (Sentry recommended)
+  - [ ] Set up monitoring/logging
+  - [ ] Review and harden system security
+
+- [ ] **Post-Deployment Verification**
+  - [ ] Run `./scripts/health-check.sh` to verify system health
+  - [ ] Test user authentication
+  - [ ] Verify all modules load correctly
+  - [ ] Test document creation (invoices, receipts, payments)
+  - [ ] Validate GL entries are posted correctly
+  - [ ] Check Thai date formatting displays correctly
+  - [ ] Test role-based access control
+  - [ ] Verify PDF downloads work (50 Tawi, invoices)
+  - [ ] Run database verification: `./scripts/verify-database.sh`
 
 ---
 
@@ -381,16 +663,16 @@ All 6 expansion modules have been successfully implemented and integrated into t
 
 **Overall: 100% COMPLETE** ✅
 
-| Module | Schema | API | UI | Logic | Navigation | Status |
-|--------|--------|-----|-----|-------|------------|--------|
-| **WHT Automation** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** 🚀 |
-| **Inventory** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** ✅ |
-| **Fixed Assets** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** ✅ |
-| **Banking** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** ✅ |
-| **Petty Cash** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** ✅ |
-| **Payroll** | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** ✅ |
+| Module | Schema | API | UI | Logic | Navigation | Tests | Status |
+|--------|--------|-----|-----|-------|------------|-------|--------|
+| **WHT Automation** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** 🚀 |
+| **Inventory** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** ✅ |
+| **Fixed Assets** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** ✅ |
+| **Banking** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** ✅ |
+| **Petty Cash** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** ✅ |
+| **Payroll** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | **100%** ✅ |
 
-All modules are production-ready with full navigation integration, GL posting automation, and Thai tax compliance.
+All modules are production-ready with full navigation integration, GL posting automation, Thai tax compliance, and comprehensive E2E test coverage.
 
 ### 1. WHT Automation & 50 Tawi (100% Complete) 🚀
 
@@ -405,6 +687,7 @@ All modules are production-ready with full navigation integration, GL posting au
 - PND3/PND53 automatic determination
 - Auto WHT generation from payments/receipts
 - PDF download for each certificate
+- E2E test coverage for WHT scenarios
 
 **Status**: Complete and ready for use!
 
@@ -424,6 +707,7 @@ All modules are production-ready with full navigation integration, GL posting au
   - Warehouses tab with management
   - Thai language support
 - **Navigation integration** - Accessible via sidebar
+- E2E test coverage for inventory operations
 
 **Features:**
 - Real-time stock tracking with multi-warehouse support
@@ -448,6 +732,7 @@ All modules are production-ready with full navigation integration, GL posting au
 - Chart of accounts for assets (121x series)
 - Automated GL posting (debits expense, credits accumulated depreciation)
 - **Navigation integration** - Accessible via sidebar
+- E2E test coverage for asset lifecycle
 
 **Features:**
 - Asset lifecycle management with depreciation schedules
@@ -471,6 +756,7 @@ All modules are production-ready with full navigation integration, GL posting au
 - **GL posting** for cheque clearing
 - Thai date formatting
 - **Navigation integration** - Accessible via sidebar
+- E2E test coverage for banking operations
 
 **Features:**
 - Bank account management with balance tracking
@@ -496,6 +782,7 @@ All modules are production-ready with full navigation integration, GL posting au
 - Petty cash account (1113) in chart of accounts
 - Thai language support
 - **Navigation integration** - Accessible via sidebar
+- E2E test coverage for petty cash operations
 
 **Features:**
 - Fund management with balance tracking
@@ -525,6 +812,7 @@ All modules are production-ready with full navigation integration, GL posting au
 - Automatic payroll numbering (PAY-YYYY-MM-###)
 - Thai language support
 - **Navigation integration** - Accessible via sidebar
+- E2E test coverage for payroll processing
 
 **Features:**
 - Employee directory with comprehensive Thai fields
@@ -533,78 +821,6 @@ All modules are production-ready with full navigation integration, GL posting au
 - PND1 progressive tax withholding (2024 rates)
 - Automatic journal entries for salary, liabilities, and taxes
 - Status tracking (Draft, Approved, Paid)
-
----
-
-## 🚀 Production Deployment Checklist
-
-### Pre-Deployment Preparation
-
-- [ ] **Database Setup**
-  - [ ] Run `bun run db:generate` to generate Prisma client
-  - [ ] Run `bun run db:push` or `bun run db:migrate` to create schema
-  - [ ] Run `npx prisma db seed` to seed Thai chart of accounts (181 accounts)
-  - [ ] Create admin user account
-  - [ ] Configure PostgreSQL for production (recommended) or use SQLite
-
-- [ ] **Environment Configuration**
-  - [ ] Set `DATABASE_URL` to production database
-  - [ ] Set `NEXTAUTH_URL` to production domain
-  - [ ] Set `NEXTAUTH_SECRET` to strong random value
-  - [ ] Set `NODE_ENV=production`
-
-- [ ] **Build & Test**
-  - [ ] Run `bun run build` to create production build
-  - [ ] Test production build locally: `bun run start`
-  - [ ] Verify all modules accessible through navigation
-  - [ ] Test document creation workflows
-  - [ ] Validate GL posting accuracy
-  - [ ] Check PDF generation (50 Tawi, invoices)
-
-### Production Deployment
-
-- [ ] **Server Setup**
-  - [ ] Install Bun runtime
-  - [ ] Copy `.next/standalone/` directory to server
-  - [ ] Set proper file permissions
-  - [ ] Configure process manager (PM2, systemd, etc.)
-
-- [ ] **Security**
-  - [ ] Enable HTTPS with SSL certificate
-  - [ ] Configure firewall rules
-  - [ ] Set up database backups
-  - [ ] Configure error tracking (Sentry recommended)
-  - [ ] Set up monitoring/logging
-
-- [ ] **Post-Deployment Verification**
-  - [ ] Test user authentication
-  - [ ] Verify all modules load correctly
-  - [ ] Test document creation (invoices, receipts, payments)
-  - [ ] Validate GL entries are posted correctly
-  - [ ] Check Thai date formatting displays correctly
-  - [ ] Test role-based access control
-  - [ ] Verify PDF downloads work
-
-### User Training
-
-- [ ] **Administrator Training**
-  - [ ] Chart of accounts management
-  - [ ] User role management
-  - [ ] Company settings configuration
-  - [ ] Report generation and interpretation
-
-- [ ] **Accountant Training**
-  - [ ] Journal entry creation
-  - [ ] Document posting workflows
-  - [ ] Bank reconciliation
-  - [ ] Financial report generation
-
-- [ ] **Module-Specific Training**
-  - [ ] Inventory: Stock management, warehouses, transfers
-  - [ ] Banking: Cheque management, reconciliation
-  - [ ] Assets: Asset registration, depreciation schedules
-  - [ ] Payroll: Employee setup, payroll runs, tax calculations
-  - [ ] Petty Cash: Fund management, voucher creation
 
 ---
 
@@ -644,7 +860,13 @@ All modules are production-ready with full navigation integration, GL posting au
 - ✅ WHT reports with 50 Tawi PDF generation
 - ✅ Aging reports (AR/AP)
 
+**Testing & Quality Assurance:**
+- ✅ Comprehensive E2E test suite (all 16 modules)
+- ✅ Database verification scripts
+- ✅ Health monitoring for production
+- ✅ Test tag system for selective execution
+- ✅ Automated screenshot capture on failures
+
 ---
 
 **System Status**: ✅ **PRODUCTION READY** - All modules implemented and integrated (100% Complete)
-

@@ -13,17 +13,52 @@ import { VatReport } from '@/components/vat/vat-report'
 import { WhtWithTabs } from '@/components/wht/wht-with-tabs'
 import { CustomerList } from '@/components/ar/customer-list'
 import { VendorList } from '@/components/ap/vendor-list'
+import { PaymentList } from '@/components/payments/payment-list'
+import { CreditNoteList } from '@/components/credit-notes/credit-note-list'
+import { DebitNoteList } from '@/components/debit-notes/debit-note-list'
 import { InventoryPage } from '@/components/inventory/inventory-page'
 import { BankingPage } from '@/components/banking/banking-page'
 import { AssetsPage } from '@/components/assets/assets-page'
 import { PayrollPage } from '@/components/payroll/payroll-page'
 import { PettyCashPage } from '@/components/petty-cash/petty-cash-page'
+import { ProductsPage } from '@/components/products/products-page'
+import { StockTakePage } from '@/components/stock-takes/stock-take-page'
 import { Reports } from '@/components/reports/reports'
 import { Settings } from '@/components/settings/settings'
 import { LoginPage } from '@/components/auth/login-page'
 import { UserManagement } from '@/components/auth/user-management'
 import { PermissionGuard } from '@/components/auth/permission-guard'
-import { Loader2 } from 'lucide-react'
+import { DataExportPage } from '@/components/admin/data-export-page'
+import { BackupRestorePage } from '@/components/admin/backup-restore-page'
+import { DataImportPage } from '@/components/admin/data-import-page'
+import { ActivityLogPage } from '@/components/admin/activity-log-page'
+import {
+  Loader2,
+  LayoutDashboard,
+  BookOpen,
+  PenTool,
+  FileText,
+  Percent,
+  Receipt,
+  Users,
+  Truck,
+  CreditCard,
+  FileMinus,
+  FilePlus,
+  Package,
+  ShoppingBag,
+  FileCheck,
+  Building2,
+  Hammer,
+  Wallet,
+  BarChart3,
+  Settings as SettingsIcon,
+  UserCog,
+  Download,
+  Upload,
+  Database,
+  Activity,
+} from 'lucide-react'
 
 export type Module =
   | 'dashboard'
@@ -34,7 +69,12 @@ export type Module =
   | 'wht'
   | 'customers'
   | 'vendors'
+  | 'payments'
+  | 'credit-notes'
+  | 'debit-notes'
   | 'inventory'
+  | 'products'
+  | 'stock-takes'
   | 'banking'
   | 'assets'
   | 'payroll'
@@ -42,6 +82,10 @@ export type Module =
   | 'reports'
   | 'settings'
   | 'users'
+  | 'data-export'
+  | 'backup-restore'
+  | 'data-import'
+  | 'activity-log'
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -87,8 +131,22 @@ export default function Home() {
         return <CustomerList />
       case 'vendors':
         return <VendorList />
+      case 'payments':
+        return <PaymentList />
+      case 'credit-notes':
+        return <CreditNoteList />
+      case 'debit-notes':
+        return <DebitNoteList />
       case 'inventory':
         return <InventoryPage />
+      case 'products':
+        return <ProductsPage />
+      case 'stock-takes':
+        return (
+          <PermissionGuard permission="INVENTORY_VIEW">
+            <StockTakePage />
+          </PermissionGuard>
+        )
       case 'banking':
         return <BankingPage />
       case 'assets':
@@ -111,6 +169,30 @@ export default function Home() {
             <UserManagement />
           </PermissionGuard>
         )
+      case 'data-export':
+        return (
+          <PermissionGuard permission="SETTINGS_VIEW">
+            <DataExportPage />
+          </PermissionGuard>
+        )
+      case 'data-import':
+        return (
+          <PermissionGuard permission="SETTINGS_VIEW">
+            <DataImportPage />
+          </PermissionGuard>
+        )
+      case 'backup-restore':
+        return (
+          <PermissionGuard permission="SETTINGS_VIEW">
+            <BackupRestorePage />
+          </PermissionGuard>
+        )
+      case 'activity-log':
+        return (
+          <PermissionGuard permission="SETTINGS_VIEW">
+            <ActivityLogPage />
+          </PermissionGuard>
+        )
       default:
         return <Dashboard />
     }
@@ -119,22 +201,31 @@ export default function Home() {
   // Filter menu items based on role
   const getMenuItems = () => {
     const allItems = [
-      { id: 'dashboard' as Module, label: 'Dashboard', icon: 'LayoutDashboard' },
-      { id: 'accounts' as Module, label: 'ผังบัญชี', icon: 'BookOpen' },
-      { id: 'journal' as Module, label: 'บันทึกบัญชี', icon: 'PenTool' },
-      { id: 'invoices' as Module, label: 'ใบกำกับภาษี', icon: 'FileText' },
-      { id: 'vat' as Module, label: 'ภาษีมูลค่าเพิ่ม', icon: 'Percent' },
-      { id: 'wht' as Module, label: 'ภาษีหัก ณ ที่จ่าย', icon: 'Receipt' },
-      { id: 'customers' as Module, label: 'ลูกหนี้ (AR)', icon: 'Users' },
-      { id: 'vendors' as Module, label: 'เจ้าหนี้ (AP)', icon: 'Truck' },
-      { id: 'inventory' as Module, label: 'สต็อกสินค้า', icon: 'Package' },
-      { id: 'banking' as Module, label: 'ธนาคาร', icon: 'Building2' },
-      { id: 'assets' as Module, label: 'ทรัพย์สินถาวร', icon: 'Hammer' },
-      { id: 'payroll' as Module, label: 'เงินเดือน', icon: 'Users' },
-      { id: 'petty-cash' as Module, label: 'เงินสดย่อย', icon: 'Wallet' },
-      { id: 'reports' as Module, label: 'รายงาน', icon: 'BarChart3' },
-      { id: 'settings' as Module, label: 'ตั้งค่า', icon: 'Settings', adminOnly: true },
-      { id: 'users' as Module, label: 'จัดการผู้ใช้', icon: 'UserCog', adminOnly: true },
+      { id: 'dashboard' as Module, label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'accounts' as Module, label: 'ผังบัญชี', icon: BookOpen },
+      { id: 'journal' as Module, label: 'บันทึกบัญชี', icon: PenTool },
+      { id: 'invoices' as Module, label: 'ใบกำกับภาษี', icon: FileText },
+      { id: 'vat' as Module, label: 'ภาษีมูลค่าเพิ่ม', icon: Percent },
+      { id: 'wht' as Module, label: 'ภาษีหัก ณ ที่จ่าย', icon: Receipt },
+      { id: 'customers' as Module, label: 'ลูกหนี้ (AR)', icon: Users },
+      { id: 'vendors' as Module, label: 'เจ้าหนี้ (AP)', icon: Truck },
+      { id: 'payments' as Module, label: 'ใบจ่ายเงิน', icon: CreditCard },
+      { id: 'credit-notes' as Module, label: 'ใบลดหนี้ (CN)', icon: FileMinus },
+      { id: 'debit-notes' as Module, label: 'ใบเพิ่มหนี้ (DN)', icon: FilePlus },
+      { id: 'inventory' as Module, label: 'สต็อกสินค้า', icon: Package },
+      { id: 'products' as Module, label: 'สินค้าและบริการ', icon: ShoppingBag },
+      { id: 'stock-takes' as Module, label: 'การตรวจนับสต็อก', icon: FileCheck },
+      { id: 'banking' as Module, label: 'ธนาคาร', icon: Building2 },
+      { id: 'assets' as Module, label: 'ทรัพย์สินถาวร', icon: Hammer },
+      { id: 'payroll' as Module, label: 'เงินเดือน', icon: Users },
+      { id: 'petty-cash' as Module, label: 'เงินสดย่อย', icon: Wallet },
+      { id: 'reports' as Module, label: 'รายงาน', icon: BarChart3 },
+      { id: 'settings' as Module, label: 'ตั้งค่า', icon: SettingsIcon, adminOnly: true },
+      { id: 'users' as Module, label: 'จัดการผู้ใช้', icon: UserCog, adminOnly: true },
+      { id: 'data-export' as Module, label: 'ส่งออกข้อมูล', icon: Download, adminOnly: true },
+      { id: 'data-import' as Module, label: 'นำเข้าข้อมูล', icon: Upload, adminOnly: true },
+      { id: 'backup-restore' as Module, label: 'สำรองข้อมูล', icon: Database, adminOnly: true },
+      { id: 'activity-log' as Module, label: 'บันทึกกิจกรรม', icon: Activity, adminOnly: true },
     ]
 
     if (userRole === 'ADMIN') {

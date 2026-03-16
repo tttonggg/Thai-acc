@@ -1,0 +1,4 @@
+code,name,nameEn,taxId,branchCode,address,subDistrict,district,province,postalCode,phone,fax,email,website,contactName,contactPhone,bankName,bankAccount,bankAccountName,creditDays,isActive,notes
+V001,บริษัท ซ. จำกัด,S Supplier,1234567890123,00000,"321 ถนนพระราม 2","แสมดำ","แสมดำ","กรุงเทพมหานคร",10150,02-456-7890,02-456-7891,purchase@companys.com,www.companys.com,สมศักดิ์,084-567-8901,กรุงไทย,123-4-56789-0,บจก. ซ. จำกัด,30,true,
+V002,บริษัท อ. จำกัด,A Supplier,9876543210987,00000,"654 ถนนเพชรเกษม","บางแค","บางแค","กรุงเทพมหานคร",10160,02-567-8901,02-567-8902,purchase@companya.com,www.companya.com,สมาน,085-678-9012,กสิกรไทย,987-6-54321-0,บจก. อ. จำกัด,45,true,
+V003,ห้างหุ้นส่วนจำกัด จ. จำหน่าย,J Trader,1112223334444,,,987 ถนนจักรพรรดิพงษ์","ป้อมปราบศัตรูพ่าย","ป้อมปราบศัตรูพ่าย","กรุงเทพมหานคร",10200,02-678-9012,,,jtrader@example.com,,สมหมาย,086-789-0123,ไทยพาณิชย์,456-7-89012-3,หจก. จ. จำหน่าย,60,true,

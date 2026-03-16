@@ -1,0 +1,113 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - img [ref=e7]
+          - generic [ref=e9]:
+            - heading "Thai ERP" [level=1] [ref=e10]
+            - paragraph [ref=e11]: โปรแกรมบัญชีมาตรฐานไทย
+        - button [ref=e12]:
+          - img [ref=e13]
+      - navigation [ref=e15]:
+        - button "Dashboard" [ref=e16]:
+          - generic [ref=e17]: Dashboard
+        - button "ผังบัญชี" [ref=e18]:
+          - generic [ref=e19]: ผังบัญชี
+        - button "บันทึกบัญชี" [ref=e20]:
+          - generic [ref=e21]: บันทึกบัญชี
+        - button "ใบกำกับภาษี" [ref=e22]:
+          - generic [ref=e23]: ใบกำกับภาษี
+        - button "ภาษีมูลค่าเพิ่ม" [ref=e24]:
+          - generic [ref=e25]: ภาษีมูลค่าเพิ่ม
+        - button "ภาษีหัก ณ ที่จ่าย" [ref=e26]:
+          - generic [ref=e27]: ภาษีหัก ณ ที่จ่าย
+        - button "ลูกหนี้ (AR)" [ref=e28]:
+          - generic [ref=e29]: ลูกหนี้ (AR)
+        - button "เจ้าหนี้ (AP)" [ref=e30]:
+          - generic [ref=e31]: เจ้าหนี้ (AP)
+        - button "ใบจ่ายเงิน" [ref=e32]:
+          - generic [ref=e33]: ใบจ่ายเงิน
+        - button "ใบลดหนี้ (CN)" [ref=e34]:
+          - generic [ref=e35]: ใบลดหนี้ (CN)
+        - button "ใบเพิ่มหนี้ (DN)" [ref=e36]:
+          - generic [ref=e37]: ใบเพิ่มหนี้ (DN)
+        - button "สต็อกสินค้า" [ref=e38]:
+          - generic [ref=e39]: สต็อกสินค้า
+        - button "สินค้าและบริการ" [ref=e40]:
+          - generic [ref=e41]: สินค้าและบริการ
+        - button "ธนาคาร" [ref=e42]:
+          - generic [ref=e43]: ธนาคาร
+        - button "ทรัพย์สินถาวร" [ref=e44]:
+          - generic [ref=e45]: ทรัพย์สินถาวร
+        - button "เงินเดือน" [ref=e46]:
+          - generic [ref=e47]: เงินเดือน
+        - button "เงินสดย่อย" [active] [ref=e48]:
+          - generic [ref=e49]: เงินสดย่อย
+        - button "รายงาน" [ref=e50]:
+          - generic [ref=e51]: รายงาน
+      - button "น นักบัญชี ทดสอบ นักบัญชี" [ref=e53]:
+        - generic [ref=e55]: น
+        - generic [ref=e56]:
+          - paragraph [ref=e57]: นักบัญชี ทดสอบ
+          - paragraph [ref=e58]: นักบัญชี
+      - generic [ref=e59]:
+        - paragraph [ref=e60]: Thai Accounting ERP v1.0
+        - paragraph [ref=e61]: มาตรฐานบัญชีไทย (TFRS)
+    - generic [ref=e62]:
+      - banner [ref=e63]:
+        - generic [ref=e64]:
+          - generic [ref=e66]:
+            - heading "ระบบบัญชีมาตรฐานไทย" [level=2] [ref=e67]
+            - paragraph [ref=e68]: วันศุกร์ที่ 13 มีนาคม 2569
+          - generic [ref=e70]:
+            - img [ref=e71]
+            - textbox "ค้นหา..." [ref=e74]
+          - generic [ref=e75]:
+            - button [ref=e76]:
+              - img
+            - button "น นักบัญชี ทดสอบ นักบัญชี" [ref=e79]:
+              - generic [ref=e81]: น
+              - generic [ref=e82]:
+                - paragraph [ref=e83]: นักบัญชี ทดสอบ
+                - paragraph [ref=e84]: นักบัญชี
+      - main [ref=e85]:
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - heading "เงินสดย่อย (Petty Cash)" [level=1] [ref=e88]
+            - paragraph [ref=e89]: บริหารกองทุนเงินสดย่อยและใบสำคัญ พร้อมติดตามยอดคงเหลือแบบ Real-time
+          - navigation [ref=e91]:
+            - button "กองทุน" [ref=e92]:
+              - img [ref=e93]
+              - text: กองทุน
+            - button "ใบสำคัญ" [ref=e96]:
+              - img [ref=e97]
+              - text: ใบสำคัญ
+          - generic [ref=e100]:
+            - button "สร้างกองทุน" [ref=e102]:
+              - img
+              - text: สร้างกองทุน
+            - generic [ref=e104]:
+              - img [ref=e105]
+              - paragraph [ref=e108]: ยังไม่มีกองทุนเงินสดย่อย
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e113] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e114]:
+      - img [ref=e115]
+    - generic [ref=e118]:
+      - button "Open issues overlay" [ref=e119]:
+        - generic [ref=e120]:
+          - generic [ref=e121]: "33"
+          - generic [ref=e122]: "34"
+        - generic [ref=e123]:
+          - text: Issue
+          - generic [ref=e124]: s
+      - button "Collapse issues badge" [ref=e125]:
+        - img [ref=e126]
+  - alert [ref=e128]
+  - generic [ref=e129]: 0K
+```

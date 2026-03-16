@@ -1,0 +1,141 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - img [ref=e7]
+          - generic [ref=e9]:
+            - heading "Thai ERP" [level=1] [ref=e10]
+            - paragraph [ref=e11]: โปรแกรมบัญชีมาตรฐานไทย
+        - button [ref=e12]:
+          - img [ref=e13]
+      - navigation [ref=e15]:
+        - button "Dashboard" [ref=e16]:
+          - generic [ref=e17]: Dashboard
+        - button "ผังบัญชี" [ref=e18]:
+          - generic [ref=e19]: ผังบัญชี
+        - button "บันทึกบัญชี" [ref=e20]:
+          - generic [ref=e21]: บันทึกบัญชี
+        - button "ใบกำกับภาษี" [ref=e22]:
+          - generic [ref=e23]: ใบกำกับภาษี
+        - button "ภาษีมูลค่าเพิ่ม" [ref=e24]:
+          - generic [ref=e25]: ภาษีมูลค่าเพิ่ม
+        - button "ภาษีหัก ณ ที่จ่าย" [ref=e26]:
+          - generic [ref=e27]: ภาษีหัก ณ ที่จ่าย
+        - button "ลูกหนี้ (AR)" [ref=e28]:
+          - generic [ref=e29]: ลูกหนี้ (AR)
+        - button "เจ้าหนี้ (AP)" [ref=e30]:
+          - generic [ref=e31]: เจ้าหนี้ (AP)
+        - button "ใบจ่ายเงิน" [ref=e32]:
+          - generic [ref=e33]: ใบจ่ายเงิน
+        - button "ใบลดหนี้ (CN)" [ref=e34]:
+          - generic [ref=e35]: ใบลดหนี้ (CN)
+        - button "ใบเพิ่มหนี้ (DN)" [ref=e36]:
+          - generic [ref=e37]: ใบเพิ่มหนี้ (DN)
+        - button "สต็อกสินค้า" [active] [ref=e38]:
+          - generic [ref=e39]: สต็อกสินค้า
+        - button "สินค้าและบริการ" [ref=e40]:
+          - generic [ref=e41]: สินค้าและบริการ
+        - button "ธนาคาร" [ref=e42]:
+          - generic [ref=e43]: ธนาคาร
+        - button "ทรัพย์สินถาวร" [ref=e44]:
+          - generic [ref=e45]: ทรัพย์สินถาวร
+        - button "เงินเดือน" [ref=e46]:
+          - generic [ref=e47]: เงินเดือน
+        - button "เงินสดย่อย" [ref=e48]:
+          - generic [ref=e49]: เงินสดย่อย
+        - button "รายงาน" [ref=e50]:
+          - generic [ref=e51]: รายงาน
+      - button "น นักบัญชี ทดสอบ นักบัญชี" [ref=e53]:
+        - generic [ref=e55]: น
+        - generic [ref=e56]:
+          - paragraph [ref=e57]: นักบัญชี ทดสอบ
+          - paragraph [ref=e58]: นักบัญชี
+      - generic [ref=e59]:
+        - paragraph [ref=e60]: Thai Accounting ERP v1.0
+        - paragraph [ref=e61]: มาตรฐานบัญชีไทย (TFRS)
+    - generic [ref=e62]:
+      - banner [ref=e63]:
+        - generic [ref=e64]:
+          - generic [ref=e66]:
+            - heading "ระบบบัญชีมาตรฐานไทย" [level=2] [ref=e67]
+            - paragraph [ref=e68]: วันศุกร์ที่ 13 มีนาคม 2569
+          - generic [ref=e70]:
+            - img [ref=e71]
+            - textbox "ค้นหา..." [ref=e74]
+          - generic [ref=e75]:
+            - button [ref=e76]:
+              - img
+            - button "น นักบัญชี ทดสอบ นักบัญชี" [ref=e79]:
+              - generic [ref=e81]: น
+              - generic [ref=e82]:
+                - paragraph [ref=e83]: นักบัญชี ทดสอบ
+                - paragraph [ref=e84]: นักบัญชี
+      - main [ref=e85]:
+        - generic [ref=e86]:
+          - generic [ref=e88]:
+            - heading "คลังสินค้า (Inventory)" [level=1] [ref=e89]
+            - paragraph [ref=e90]: ระบบจัดการสินค้าคงคลัง — ต้นทุนแบบ WAC ตาม TAS 2
+          - navigation [ref=e92]:
+            - button "ยอดคงเหลือ" [ref=e93]:
+              - img [ref=e94]
+              - text: ยอดคงเหลือ
+            - button "การเคลื่อนไหว" [ref=e98]:
+              - img [ref=e99]
+              - text: การเคลื่อนไหว
+            - button "คลังสินค้า" [ref=e102]:
+              - img [ref=e103]
+              - text: คลังสินค้า
+            - button "โอนสต็อก" [ref=e106]:
+              - img [ref=e107]
+              - text: โอนสต็อก
+          - generic [ref=e110]:
+            - generic [ref=e111]:
+              - generic [ref=e113]:
+                - paragraph [ref=e114]: รายการสินค้า
+                - paragraph [ref=e115]: "0"
+              - generic [ref=e117]:
+                - paragraph [ref=e118]: จำนวนรวม
+                - paragraph [ref=e119]: "0.00"
+              - generic [ref=e121]:
+                - paragraph [ref=e122]: มูลค่าสินค้าคงเหลือ (WAC)
+                - paragraph [ref=e123]: ฿0.00
+            - generic [ref=e124]:
+              - generic [ref=e126]:
+                - img [ref=e127]
+                - text: ยอดคงเหลือสินค้า
+                - button [ref=e131]:
+                  - img
+              - table [ref=e134]:
+                - rowgroup [ref=e135]:
+                  - row "รหัส ชื่อสินค้า คลัง จำนวน ต้นทุน/หน่วย (WAC) มูลค่ารวม ดำเนินการ" [ref=e136]:
+                    - columnheader "รหัส" [ref=e137]
+                    - columnheader "ชื่อสินค้า" [ref=e138]
+                    - columnheader "คลัง" [ref=e139]
+                    - columnheader "จำนวน" [ref=e140]
+                    - columnheader "ต้นทุน/หน่วย (WAC)" [ref=e141]
+                    - columnheader "มูลค่ารวม" [ref=e142]
+                    - columnheader "ดำเนินการ" [ref=e143]
+                - rowgroup [ref=e144]:
+                  - row "ยังไม่มีข้อมูลสินค้าคงเหลือ" [ref=e145]:
+                    - cell "ยังไม่มีข้อมูลสินค้าคงเหลือ" [ref=e146]
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e151] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e152]:
+      - img [ref=e153]
+    - generic [ref=e156]:
+      - button "Open issues overlay" [ref=e157]:
+        - generic [ref=e158]:
+          - generic [ref=e159]: "33"
+          - generic [ref=e160]: "34"
+        - generic [ref=e161]:
+          - text: Issue
+          - generic [ref=e162]: s
+      - button "Collapse issues badge" [ref=e163]:
+        - img [ref=e164]
+  - alert [ref=e166]: Thai ERP
+```

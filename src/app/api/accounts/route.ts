@@ -22,10 +22,13 @@ export async function GET() {
       id: a.id,
       code: a.code,
       name: a.name,
+      nameEn: a.nameEn,
       type: a.type,
       level: a.level,
       parentId: a.parentId,
-      isDetail: a.isDetail
+      isDetail: a.isDetail,
+      isActive: a.isActive,
+      notes: a.notes,
     }))
 
     return NextResponse.json(transformedAccounts)
@@ -60,11 +63,13 @@ export async function POST(request: NextRequest) {
       data: {
         code: data.code,
         name: data.name,
+        nameEn: data.nameEn || null,
         type: data.type,
         level: data.level || data.code.length,
         parentId: data.parentId || null,
         isDetail: data.isDetail ?? true,
-        isActive: true
+        isActive: data.isActive ?? true,
+        notes: data.notes || null,
       }
     })
 
@@ -72,10 +77,13 @@ export async function POST(request: NextRequest) {
       id: account.id,
       code: account.code,
       name: account.name,
+      nameEn: account.nameEn,
       type: account.type,
       level: account.level,
       parentId: account.parentId,
-      isDetail: account.isDetail
+      isDetail: account.isDetail,
+      isActive: account.isActive,
+      notes: account.notes,
     })
   } catch (error) {
     return NextResponse.json({ 

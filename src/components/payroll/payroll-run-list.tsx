@@ -7,7 +7,7 @@
 // ============================================
 
 import { useState, useEffect, useCallback } from 'react'
-import { DollarSign, Play, Check, Plus, Download, FileText } from 'lucide-react'
+import { DollarSign, Play, Check, Plus, Download, FileText, Eye } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -17,14 +17,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
+import { PayrollRunStatusDialog } from './payroll-status-dialog'
 
 const fc = (n: number) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(n)
 
 interface PayrollRun {
   id: string; runNo: string; periodMonth: number; periodYear: number
-  paymentDate: string; totalBaseSalary: number; totalSsc: number
-  totalTax: number; totalNetPay: number; status: 'DRAFT' | 'APPROVED' | 'PAID'
+  paymentDate: string; totalBaseSalary: number; totalAdditions: number
+  totalDeductions: number; totalSsc: number; totalTax: number
+  totalNetPay: number; status: 'DRAFT' | 'APPROVED' | 'PAID'
   payrolls: { id: string }[]
+  journalEntryId?: string | null
 }
 
 interface PayrollDetail {
@@ -57,7 +60,9 @@ export function PayrollRunList() {
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
+  const [showStatus, setShowStatus] = useState(false)
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null)
+  const [selectedRun, setSelectedRun] = useState<PayrollRun | null>(null)
   const [payrollDetails, setPayrollDetails] = useState<PayrollDetail[]>([])
   const [downloadingPayslip, setDownloadingPayslip] = useState<string | null>(null)
   const [form, setForm] = useState({ periodMonth: String(new Date().getMonth() + 1), periodYear: String(new Date().getFullYear()), paymentDate: '' })
@@ -100,6 +105,11 @@ export function PayrollRunList() {
     } catch (error) {
       toast({ title: 'ข้อผิดพลาด', description: 'ไม่สามารถดึงข้อมูลได้', variant: 'destructive' })
     }
+  }
+
+  const handleManageStatus = (run: PayrollRun) => {
+    setSelectedRun(run)
+    setShowStatus(true)
   }
 
   const handleDownloadPayslip = async (payrollId: string, employeeName: string) => {
@@ -202,7 +212,7 @@ export function PayrollRunList() {
                 <TableHead className="text-right">ภาษี PND1</TableHead>
                 <TableHead className="text-right">เงินได้สุทธิ</TableHead>
                 <TableHead className="text-center">สถานะ</TableHead>
-                <TableHead className="text-center">รายละเอียด</TableHead>
+                <TableHead className="text-center">จัดการ</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -223,14 +233,26 @@ export function PayrollRunList() {
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${st.color}`}>{st.label}</span>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleViewDetails(r.id)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <FileText className="h-4 w-4" />
-                      </Button>
+                      <div className="flex justify-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleViewDetails(r.id)}
+                          className="h-8 w-8 p-0"
+                          title="ดูรายละเอียดพนักงาน"
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleManageStatus(r)}
+                          className="h-8 w-8 p-0"
+                          title="จัดการสถานะ"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )
@@ -315,6 +337,14 @@ export function PayrollRunList() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Payroll Status Management Dialog */}
+      <PayrollRunStatusDialog
+        open={showStatus}
+        onClose={() => setShowStatus(false)}
+        onSuccess={fetchAll}
+        payrollRun={selectedRun}
+      />
     </div>
   )
 }

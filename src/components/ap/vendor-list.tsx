@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { 
-  Plus, 
-  Search, 
-  Edit, 
+import {
+  Plus,
+  Search,
+  Edit,
   Trash2,
   Phone,
   Mail,
@@ -32,8 +32,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
+import { VendorEditDialog } from './vendor-edit-dialog'
 
 interface Vendor {
   id: string
@@ -75,6 +86,12 @@ export function VendorList() {
     name: ''
   })
 
+  // Edit dialog state
+  const [editDialog, setEditDialog] = useState<{ open: boolean; vendor: Vendor | null }>({
+    open: false,
+    vendor: null
+  })
+
   useEffect(() => {
     const fetchVendors = async () => {
       setLoading(true)
@@ -82,8 +99,8 @@ export function VendorList() {
       try {
         const res = await fetch('/api/vendors')
         if (!res.ok) throw new Error('Fetch failed')
-        const data = await res.json()
-        setVendors(data)
+        const json = await res.json()
+        setVendors(json.data || json)
       } catch (err) {
         const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล'
         setError(message)
@@ -99,7 +116,7 @@ export function VendorList() {
     fetchVendors()
   }, [toast, refreshKey])
 
-  const filteredVendors = vendors.filter(vendor => {
+  const filteredVendors = (vendors || []).filter(vendor => {
     // Safety check - ensure vendor is an object and has required properties
     if (!vendor || typeof vendor !== 'object') return false
 
@@ -199,6 +216,8 @@ export function VendorList() {
 
   // Handle delete vendor
   const handleDeleteVendor = async () => {
+    if (!deleteDialog?.id) return
+
     try {
       const res = await fetch(`/api/vendors/${deleteDialog.id}`, {
         method: 'DELETE'
@@ -224,6 +243,25 @@ export function VendorList() {
         variant: "destructive"
       })
     }
+  }
+
+  // Open delete dialog
+  const openDeleteDialog = (vendor: Vendor) => {
+    if (!vendor?.id) return
+    setDeleteDialog({
+      open: true,
+      id: vendor.id,
+      name: vendor.name || 'ไม่ระบุชื่อ'
+    })
+  }
+
+  // Open edit dialog
+  const openEditDialog = (vendor: Vendor) => {
+    if (!vendor?.id) return
+    setEditDialog({
+      open: true,
+      vendor: vendor
+    })
   }
 
   // Reset form when dialog opens
@@ -282,7 +320,7 @@ export function VendorList() {
   }
 
   // Empty UI
-  if (vendors.length === 0) {
+  if (!vendors || vendors.length === 0) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -308,6 +346,26 @@ export function VendorList() {
 
   return (
     <div className="space-y-6">
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ยืนยันการลบ</AlertDialogTitle>
+            <AlertDialogDescription>
+              คุณต้องการลบผู้ขาย &quot;{deleteDialog.name || 'ไม่ระบุชื่อ'}&quot; ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteDialog({ open: false, id: '', name: '' })}>
+              ยกเลิก
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteVendor} className="bg-red-600 hover:bg-red-700">
+              ลบ
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -417,7 +475,7 @@ export function VendorList() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">จำนวนผู้ขาย</p>
-            <p className="text-2xl font-bold text-gray-800">{vendors.length}</p>
+            <p className="text-2xl font-bold text-gray-800">{vendors?.length || 0}</p>
           </CardContent>
         </Card>
         <Card>
@@ -429,7 +487,7 @@ export function VendorList() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">ผู้ขายที่ใช้งาน</p>
-            <p className="text-2xl font-bold text-green-600">{vendors.filter(v => v.status === 'active').length}</p>
+            <p className="text-2xl font-bold text-green-600">{(vendors || []).filter(v => v?.status === 'active').length}</p>
           </CardContent>
         </Card>
       </div>
@@ -492,10 +550,20 @@ export function VendorList() {
                   </TableCell>
                   <TableCell>
                     <div className="flex justify-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => openEditDialog(vendor)}
+                      >
                         <Edit className="h-4 w-4 text-blue-600" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => openDeleteDialog(vendor)}
+                      >
                         <Trash2 className="h-4 w-4 text-red-600" />
                       </Button>
                     </div>
@@ -506,6 +574,14 @@ export function VendorList() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <VendorEditDialog
+        vendor={editDialog.vendor}
+        open={editDialog.open}
+        onOpenChange={(open) => setEditDialog({ open, vendor: null })}
+        onSuccess={() => setRefreshKey(prev => prev + 1)}
+      />
     </div>
   )
 }

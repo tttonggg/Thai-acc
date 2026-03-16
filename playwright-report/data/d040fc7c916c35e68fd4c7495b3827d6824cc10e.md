@@ -1,0 +1,109 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e9]:
+          - heading "Thai ERP" [level=1] [ref=e10]
+          - paragraph [ref=e11]: โปรแกรมบัญชีมาตรฐานไทย
+      - navigation [ref=e12]:
+        - button "Dashboard" [ref=e13]:
+          - generic [ref=e14]: Dashboard
+        - button "ผังบัญชี" [ref=e15]:
+          - generic [ref=e16]: ผังบัญชี
+        - button "บันทึกบัญชี" [ref=e17]:
+          - generic [ref=e18]: บันทึกบัญชี
+        - button "ใบกำกับภาษี" [ref=e19]:
+          - generic [ref=e20]: ใบกำกับภาษี
+        - button "ภาษีมูลค่าเพิ่ม" [ref=e21]:
+          - generic [ref=e22]: ภาษีมูลค่าเพิ่ม
+        - button "ภาษีหัก ณ ที่จ่าย" [ref=e23]:
+          - generic [ref=e24]: ภาษีหัก ณ ที่จ่าย
+        - button "ลูกหนี้ (AR)" [ref=e25]:
+          - generic [ref=e26]: ลูกหนี้ (AR)
+        - button "เจ้าหนี้ (AP)" [ref=e27]:
+          - generic [ref=e28]: เจ้าหนี้ (AP)
+        - button "ใบจ่ายเงิน" [ref=e29]:
+          - generic [ref=e30]: ใบจ่ายเงิน
+        - button "ใบลดหนี้ (CN)" [ref=e31]:
+          - generic [ref=e32]: ใบลดหนี้ (CN)
+        - button "ใบเพิ่มหนี้ (DN)" [ref=e33]:
+          - generic [ref=e34]: ใบเพิ่มหนี้ (DN)
+        - button "สต็อกสินค้า" [ref=e35]:
+          - generic [ref=e36]: สต็อกสินค้า
+        - button "สินค้าและบริการ" [ref=e37]:
+          - generic [ref=e38]: สินค้าและบริการ
+        - button "ธนาคาร" [active] [ref=e39]:
+          - generic [ref=e40]: ธนาคาร
+        - button "ทรัพย์สินถาวร" [ref=e41]:
+          - generic [ref=e42]: ทรัพย์สินถาวร
+        - button "เงินเดือน" [ref=e43]:
+          - generic [ref=e44]: เงินเดือน
+        - button "เงินสดย่อย" [ref=e45]:
+          - generic [ref=e46]: เงินสดย่อย
+        - button "รายงาน" [ref=e47]:
+          - generic [ref=e48]: รายงาน
+      - button "น นักบัญชี ทดสอบ นักบัญชี" [ref=e50]:
+        - generic [ref=e52]: น
+        - generic [ref=e53]:
+          - paragraph [ref=e54]: นักบัญชี ทดสอบ
+          - paragraph [ref=e55]: นักบัญชี
+      - generic [ref=e56]:
+        - paragraph [ref=e57]: Thai Accounting ERP v1.0
+        - paragraph [ref=e58]: มาตรฐานบัญชีไทย (TFRS)
+    - generic [ref=e59]:
+      - banner [ref=e60]:
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - button [ref=e63]:
+              - img
+            - generic [ref=e64]:
+              - heading "ระบบบัญชีมาตรฐานไทย" [level=2] [ref=e65]
+              - paragraph [ref=e66]: วันศุกร์ที่ 13 มีนาคม 2569
+          - generic [ref=e67]:
+            - button [ref=e68]:
+              - img
+            - button "น" [ref=e71]:
+              - generic [ref=e73]: น
+      - main [ref=e74]:
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - heading "บัญชีธนาคาร & เช็ค" [level=1] [ref=e77]
+            - paragraph [ref=e78]: จัดการบัญชีธนาคาร เช็ครับ-จ่าย และกระทบยอด
+          - navigation [ref=e80]:
+            - button "บัญชีธนาคาร" [ref=e81]:
+              - img [ref=e82]
+              - text: บัญชีธนาคาร
+            - button "ทะเบียนเช็ค" [ref=e84]:
+              - img [ref=e85]
+              - text: ทะเบียนเช็ค
+            - button "กระทบยอด" [ref=e87]:
+              - img [ref=e88]
+              - text: กระทบยอด
+          - generic [ref=e92]:
+            - button "เพิ่มบัญชีธนาคาร" [ref=e94]:
+              - img
+              - text: เพิ่มบัญชีธนาคาร
+            - generic [ref=e96]:
+              - img [ref=e97]
+              - paragraph [ref=e99]: ยังไม่มีบัญชีธนาคาร
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e104] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e105]:
+      - img [ref=e106]
+    - generic [ref=e109]:
+      - button "Open issues overlay" [ref=e110]:
+        - generic [ref=e111]:
+          - generic [ref=e112]: "33"
+          - generic [ref=e113]: "34"
+        - generic [ref=e114]:
+          - text: Issue
+          - generic [ref=e115]: s
+      - button "Collapse issues badge" [ref=e116]:
+        - img [ref=e117]
+  - alert [ref=e119]: Thai ERP
+```
