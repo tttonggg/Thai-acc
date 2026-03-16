@@ -314,7 +314,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                       name="vendorId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>ผู้ขาย</FormLabel>
+                          <FormLabel htmlFor="vendorId">ผู้ขาย</FormLabel>
                           <Select
                             onValueChange={(value) => {
                               field.onChange(value)
@@ -323,7 +323,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger id="vendorId" aria-label="เลือกผู้ขาย">
                                 <SelectValue placeholder="เลือกผู้ขาย" />
                               </SelectTrigger>
                             </FormControl>
@@ -345,9 +345,9 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                       name="paymentDate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>วันที่จ่ายเงิน</FormLabel>
+                          <FormLabel htmlFor="paymentDate">วันที่จ่ายเงิน</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <Input id="paymentDate" type="date" {...field} aria-label="เลือกวันที่จ่ายเงิน" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -361,10 +361,10 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                       name="paymentMethod"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>วิธีจ่าย</FormLabel>
+                          <FormLabel htmlFor="paymentMethod">วิธีจ่าย</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger id="paymentMethod" aria-label="เลือกวิธีจ่ายเงิน">
                                 <SelectValue />
                               </SelectTrigger>
                             </FormControl>
@@ -387,10 +387,10 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                         name="bankAccountId"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>บัญชีธนาคาร</FormLabel>
+                            <FormLabel htmlFor="bankAccountId">บัญชีธนาคาร</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
-                                <SelectTrigger>
+                                <SelectTrigger id="bankAccountId" aria-label="เลือกบัญชีธนาคาร">
                                   <SelectValue placeholder="เลือกบัญชี" />
                                 </SelectTrigger>
                               </FormControl>
@@ -416,9 +416,9 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                         name="chequeNo"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>เลขที่เช็ค</FormLabel>
+                            <FormLabel htmlFor="chequeNo">เลขที่เช็ค</FormLabel>
                             <FormControl>
-                              <Input {...field} />
+                              <Input id="chequeNo" {...field} aria-label="เลขที่เช็ค" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -430,9 +430,9 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                         name="chequeDate"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>วันที่เช็ค</FormLabel>
+                            <FormLabel htmlFor="chequeDate">วันที่เช็ค</FormLabel>
                             <FormControl>
-                              <Input type="date" {...field} />
+                              <Input id="chequeDate" type="date" {...field} aria-label="เลือกวันที่เช็ค" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -446,13 +446,15 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                     name="amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>จำนวนเงินรวม</FormLabel>
+                        <FormLabel htmlFor="amount">จำนวนเงินรวม</FormLabel>
                         <FormControl>
                           <Input
+                            id="amount"
                             type="number"
                             step="0.01"
                             {...field}
                             onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            aria-label="จำนวนเงินรวม"
                           />
                         </FormControl>
                         <FormMessage />
@@ -464,7 +466,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                     <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
                       <AlertCircle className="h-4 w-4 text-blue-600" />
                       <span className="text-sm text-blue-800">
-AP Balance: ฿{apBalance.toLocaleString()}                      </span>
+ยอดค้างจ่าย: ฿{apBalance.toLocaleString()}                      </span>
                     </div>
                   )}
                 </CardContent>
@@ -483,7 +485,7 @@ AP Balance: ฿{apBalance.toLocaleString()}                      </span>
                         onClick={handleAutoAllocate}
                         disabled={amount <= 0 || unpaidInvoices.length === 0}
                       >
-                        Auto Allocate
+                        จัดสรรอัตโนมัติ
                       </Button>
                     </div>
                   </CardHeader>
@@ -508,8 +510,9 @@ AP Balance: ฿{apBalance.toLocaleString()}                      </span>
 
                             <div className="grid grid-cols-3 gap-2">
                               <div>
-                                <label className="text-xs text-gray-500">จัดจ่าย</label>
+                                <label htmlFor={`allocate-${invoice.id}`} className="text-xs text-gray-500">จัดจ่าย</label>
                                 <Input
+                                  id={`allocate-${invoice.id}`}
                                   type="number"
                                   step="0.01"
                                   placeholder="0.00"
@@ -530,11 +533,12 @@ AP Balance: ฿{apBalance.toLocaleString()}                      </span>
                                       form.setValue('allocations', newAllocations)
                                     }
                                   }}
+                                  aria-label={`จำนวนเงินจัดจ่ายสำหรับ ${invoice.invoiceNo}`}
                                 />
                               </div>
 
                               <div>
-                                <label className="text-xs text-gray-500">WHT %</label>
+                                <label htmlFor={`whtRate-${invoice.id}`} className="text-xs text-gray-500">WHT %</label>
                                 <Select
                                   value={allocations.find(a => a.invoiceId === invoice.id)?.whtRate?.toString() || '0'}
                                   onValueChange={(value) => {
@@ -553,8 +557,9 @@ AP Balance: ฿{apBalance.toLocaleString()}                      </span>
                                       form.setValue('allocations', newAllocations)
                                     }
                                   }}
+                                  aria-label="เลือกอัตราหัก ณ ที่จ่าย"
                                 >
-                                  <SelectTrigger>
+                                  <SelectTrigger id={`whtRate-${invoice.id}`}>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -568,13 +573,15 @@ AP Balance: ฿{apBalance.toLocaleString()}                      </span>
                               </div>
 
                               <div>
-                                <label className="text-xs text-gray-500">WHT จำนวน</label>
+                                <label htmlFor={`whtAmount-${invoice.id}`} className="text-xs text-gray-500">WHT จำนวน</label>
                                 <Input
+                                  id={`whtAmount-${invoice.id}`}
                                   type="text"
                                   readOnly
                                   value={
                                     allocations.find(a => a.invoiceId === invoice.id)?.whtAmount?.toLocaleString() || '0.00'
                                   }
+                                  aria-label="จำนวนภาษีหัก ณ ที่จ่าย"
                                 />
                               </div>
                             </div>
@@ -621,11 +628,11 @@ AP Balance: ฿{apBalance.toLocaleString()}                      </span>
 
               {/* Actions */}
               <div className="flex justify-end gap-3">
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button type="button" variant="outline" onClick={onClose} disabled={submitting} aria-busy={submitting}>
                   ยกเลิก
                 </Button>
-                <Button type="submit" disabled={submitting || allocations.length === 0}>
-                  {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                <Button type="submit" disabled={submitting || allocations.length === 0} aria-busy={submitting}>
+                  {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />}
                   บันทึก
                 </Button>
               </div>

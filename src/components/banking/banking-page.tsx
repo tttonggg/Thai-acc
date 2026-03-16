@@ -76,7 +76,24 @@ function BankAccountsTab() {
     setShowDeleteDialog(true)
   }
 
-  if (loading) return <Skeleton className="h-64 rounded-xl" />
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <Skeleton className="h-10 w-40" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1, 2].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <Skeleton className="h-24 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -203,7 +220,21 @@ function ChequeRegisterTab() {
     }
   }
 
-  if (loading) return <Skeleton className="h-64 rounded-xl" />
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <Card>
+          <CardContent className="p-4">
+            <Skeleton className="h-12 w-full mb-4" />
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
   return (
     <div className="space-y-4">
       <div className="flex justify-end">

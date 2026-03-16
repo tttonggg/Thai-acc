@@ -153,7 +153,29 @@ export function PayrollRunList() {
     }
   }
 
-  if (loading) return <Skeleton className="h-64 rounded-xl" />
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4">
+                <Skeleton className="h-16 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="flex justify-end">
+          <Skeleton className="h-10 w-40" />
+        </div>
+        <Card>
+          <CardContent className="p-0">
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   const latestRun = runs[0]
   const totalPaid = runs.filter(r => r.status === 'PAID').reduce((s, r) => s + r.totalNetPay, 0)

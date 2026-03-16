@@ -273,23 +273,25 @@ export function JournalEntry() {
           <p className="text-gray-500 mt-1">บันทึกรายการบัญชีรายวัน</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline">
-            <Calculator className="h-4 w-4 mr-2" />
+          <Button variant="outline" aria-label="คำนวณ">
+            <Calculator className="h-4 w-4 mr-2" aria-hidden="true" />
             คำนวณ
           </Button>
           <Button
             className="bg-blue-600 hover:bg-blue-700"
             onClick={handleSave}
             disabled={!isBalanced || isSaving}
+            aria-busy={isSaving}
+            aria-label="บันทึกรายการบัญชี"
           >
             {isSaving ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
                 กำลังบันทึก...
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-4 w-4 mr-2" aria-hidden="true" />
                 บันทึก
               </>
             )}
@@ -306,7 +308,7 @@ export function JournalEntry() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="entryNo">เลขที่บันทึก</Label>
-              <Input id="entryNo" value="JV-2024-0001" readOnly className="bg-gray-50" />
+              <Input id="entryNo" value="JV-2024-0001" readOnly className="bg-gray-50" aria-label="เลขที่บันทึก" />
             </div>
             <div>
               <Label htmlFor="date">วันที่</Label>
@@ -315,6 +317,7 @@ export function JournalEntry() {
                 type="date" 
                 value={journalDate}
                 onChange={(e) => setJournalDate(e.target.value)}
+                aria-label="เลือกวันที่"
               />
             </div>
             <div>
@@ -324,6 +327,7 @@ export function JournalEntry() {
                 placeholder="เช่น ใบกำกับภาษีเลขที่..."
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
+                aria-label="เอกสารอ้างอิง"
               />
             </div>
             <div className="md:col-span-4">
@@ -333,6 +337,7 @@ export function JournalEntry() {
                 placeholder="อธิบายรายการบัญชี..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                aria-label="รายการ"
               />
             </div>
           </div>
@@ -343,8 +348,8 @@ export function JournalEntry() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">รายการบัญชี</CardTitle>
-          <Button variant="outline" size="sm" onClick={addLine}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={addLine} aria-label="เพิ่มรายการบัญชี">
+            <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
             เพิ่มรายการ
           </Button>
         </CardHeader>
@@ -352,23 +357,24 @@ export function JournalEntry() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">บัญชี</TableHead>
-                <TableHead>รายการ</TableHead>
-                <TableHead className="w-[150px] text-right">เดบิต</TableHead>
-                <TableHead className="w-[150px] text-right">เครดิต</TableHead>
-                <TableHead className="w-[80px]"></TableHead>
+                <TableHead className="w-[200px]" scope="col">บัญชี</TableHead>
+                <TableHead scope="col">รายการ</TableHead>
+                <TableHead className="w-[150px] text-right" scope="col">เดบิต</TableHead>
+                <TableHead className="w-[150px] text-right" scope="col">เครดิต</TableHead>
+                <TableHead className="w-[80px]" scope="col" aria-label="การจัดการ"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {lines.map((line) => (
-                <TableRow key={line.id}>
+              {lines.map((line, index) => (
+                <TableRow key={line.id} aria-label={`รายการที่ ${index + 1}`}>
                   <TableCell>
                     <Select
                       value={line.accountId}
                       onValueChange={(v) => updateLine(line.id, 'accountId', v)}
                       disabled={isLoadingAccounts}
+                      aria-label="เลือกบัญชี"
                     >
-                      <SelectTrigger>
+                      <SelectTrigger id={`account-${line.id}`}>
                         <SelectValue placeholder={isLoadingAccounts ? "กำลังโหลด..." : "เลือกบัญชี"} />
                       </SelectTrigger>
                       <SelectContent>
@@ -391,6 +397,8 @@ export function JournalEntry() {
                       value={line.description}
                       onChange={(e) => updateLine(line.id, 'description', e.target.value)}
                       placeholder="รายการ..."
+                      id={`description-${line.id}`}
+                      aria-label="รายการ"
                     />
                   </TableCell>
                   <TableCell>
@@ -400,6 +408,8 @@ export function JournalEntry() {
                       value={line.debit || ''}
                       onChange={(e) => updateLine(line.id, 'debit', parseFloat(e.target.value) || 0)}
                       placeholder="0.00"
+                      id={`debit-${line.id}`}
+                      aria-label="จำนวนเดบิต"
                     />
                   </TableCell>
                   <TableCell>
@@ -409,6 +419,8 @@ export function JournalEntry() {
                       value={line.credit || ''}
                       onChange={(e) => updateLine(line.id, 'credit', parseFloat(e.target.value) || 0)}
                       placeholder="0.00"
+                      id={`credit-${line.id}`}
+                      aria-label="จำนวนเครดิต"
                     />
                   </TableCell>
                   <TableCell>
@@ -417,8 +429,9 @@ export function JournalEntry() {
                       size="icon"
                       onClick={() => removeLine(line.id)}
                       disabled={lines.length <= 2}
+                      aria-label="ลบรายการ"
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <Trash2 className="h-4 w-4 text-red-500" aria-hidden="true" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -447,15 +460,15 @@ export function JournalEntry() {
               </div>
               <div>
                 {isBalanced && (totalDebit > 0 || totalCredit > 0) ? (
-                  <Badge className="bg-green-100 text-green-800 border-2 border-green-300">
+                  <Badge className="bg-green-100 text-green-800 border-2 border-green-300" role="status" aria-label="สมดุล">
                     สมดุล ✓
                   </Badge>
                 ) : totalDebit > 0 || totalCredit > 0 ? (
-                  <Badge className="bg-red-100 text-red-800 border-2 border-red-300">
+                  <Badge className="bg-red-100 text-red-800 border-2 border-red-300" role="alert" aria-label="ไม่สมดุล">
                     ไม่สมดุล
                   </Badge>
                 ) : (
-                  <Badge className="bg-gray-100 text-gray-600 border-2 border-gray-300">
+                  <Badge className="bg-gray-100 text-gray-600 border-2 border-gray-300" role="status" aria-label="รอข้อมูล">
                     รอข้อมูล
                   </Badge>
                 )}
@@ -472,8 +485,8 @@ export function JournalEntry() {
         </CardHeader>
         <CardContent>
           {isLoadingEntries ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            <div className="flex items-center justify-center py-8" role="status" aria-live="polite">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-400" aria-hidden="true" />
               <span className="ml-2 text-gray-500">กำลังโหลด...</span>
             </div>
           ) : recentEntries.length === 0 ? (
@@ -484,13 +497,13 @@ export function JournalEntry() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>เลขที่</TableHead>
-                  <TableHead>วันที่</TableHead>
-                  <TableHead>รายการ</TableHead>
-                  <TableHead className="text-right">เดบิต</TableHead>
-                  <TableHead className="text-right">เครดิต</TableHead>
-                  <TableHead>สถานะ</TableHead>
-                  <TableHead className="text-center">จัดการ</TableHead>
+                  <TableHead scope="col">เลขที่</TableHead>
+                  <TableHead scope="col">วันที่</TableHead>
+                  <TableHead scope="col">รายการ</TableHead>
+                  <TableHead className="text-right" scope="col">เดบิต</TableHead>
+                  <TableHead className="text-right" scope="col">เครดิต</TableHead>
+                  <TableHead scope="col">สถานะ</TableHead>
+                  <TableHead className="text-center" scope="col" aria-label="การจัดการ"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -520,8 +533,8 @@ export function JournalEntry() {
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Edit className="h-4 w-4 text-blue-600" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="แก้ไขรายการ">
+                          <Edit className="h-4 w-4 text-blue-600" aria-hidden="true" />
                         </Button>
                       </div>
                     </TableCell>

@@ -96,7 +96,24 @@ function FundsTab({ onFundsLoaded }: { onFundsLoaded: (funds: Fund[]) => void })
     fetchAll()
   }
 
-  if (loading) return <Skeleton className="h-64 rounded-xl" />
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-5">
+                <Skeleton className="h-32 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
@@ -339,7 +356,22 @@ function VouchersTab({ funds }: { funds: Fund[] }) {
     return voucher.journalEntryId && !voucher.isReimbursed
   }
 
-  if (loading) return <Skeleton className="h-64 rounded-xl" />
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <Card>
+          <CardContent className="p-4">
+            <Skeleton className="h-12 w-full mb-4" />
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   const totalUnreimbursed = vouchers.filter(v => !v.isReimbursed).reduce((s, v) => s + v.amount, 0)
 

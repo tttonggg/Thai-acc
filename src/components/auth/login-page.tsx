@@ -148,7 +148,7 @@ export function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-gray-500 text-sm mt-6">
-          © 2024 Thai Accounting ERP. All rights reserved.
+          © 2024 โปรแกรมบัญชีมาตรฐานไทย สงวนลิขสิทธิ์
         </p>
       </div>
     </div>

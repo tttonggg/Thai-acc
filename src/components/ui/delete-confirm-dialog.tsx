@@ -40,21 +40,24 @@ export function DeleteConfirmDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description">
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{message}</AlertDialogDescription>
+          <AlertDialogTitle id="delete-dialog-title">{title}</AlertDialogTitle>
+          <AlertDialogDescription id="delete-dialog-description">{message}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading} aria-label="ยกเลิกการลบ">
+            {cancelLabel}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={loading}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            aria-label={loading ? 'กำลังลบ' : 'ยืนยันการลบ'}
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                 กำลังลบ...
               </>
             ) : (

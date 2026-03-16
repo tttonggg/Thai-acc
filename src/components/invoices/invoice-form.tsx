@@ -433,6 +433,9 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                       })
                     }
                   }}
+                  aria-label="เลือกลูกค้า"
+                  aria-invalid={errors.customerId ? 'true' : 'false'}
+                  aria-describedby={errors.customerId ? 'customerId-error' : undefined}
                 >
                   <SelectTrigger
                     id="customerId"
@@ -450,7 +453,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                   </SelectContent>
                 </Select>
                 {errors.customerId && (
-                  <p className="text-sm text-destructive mt-1">{errors.customerId}</p>
+                  <p id="customerId-error" className="text-sm text-destructive mt-1" role="alert">{errors.customerId}</p>
                 )}
               </div>
 
@@ -462,6 +465,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                   value={formData.invoiceDate}
                   onChange={(e) => setFormData(prev => ({ ...prev, invoiceDate: e.target.value }))}
                   max={new Date().toISOString().split('T')[0]}
+                  aria-label="เลือกวันที่เอกสาร"
                 />
               </div>
             </div>
@@ -475,6 +479,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                   placeholder="เลขที่อ้างอิง (ถ้ามี)"
                   value={formData.reference}
                   onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))}
+                  aria-label="เลขที่อ้างอิง"
                 />
               </div>
               <div>
@@ -484,6 +489,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                   placeholder="เลขที่ Purchase Order (ถ้ามี)"
                   value={formData.poNumber}
                   onChange={(e) => setFormData(prev => ({ ...prev, poNumber: e.target.value }))}
+                  aria-label="เลขที่ Purchase Order"
                 />
               </div>
             </div>
@@ -516,8 +522,9 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                           <Select
                             value={line.productId || ''}
                             onValueChange={(value) => selectProduct(line.id, value)}
+                            aria-label="เลือกสินค้า"
                           >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full" id={`product-${line.id}`}>
                               <SelectValue placeholder="เลือกสินค้า" />
                             </SelectTrigger>
                             <SelectContent>
@@ -534,9 +541,13 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                           value={line.description}
                           onChange={(e) => updateLine(line.id, 'description', e.target.value)}
                           className={errors[`line_${line.id}_description`] ? 'border-destructive' : ''}
+                          id={`description-${line.id}`}
+                          aria-label="รายการสินค้าหรือบริการ"
+                          aria-invalid={errors[`line_${line.id}_description`] ? 'true' : 'false'}
+                          aria-describedby={errors[`line_${line.id}_description`] ? `description-error-${line.id}` : undefined}
                         />
                         {errors[`line_${line.id}_description`] && (
-                          <p className="text-xs text-destructive">{errors[`line_${line.id}_description`]}</p>
+                          <p id={`description-error-${line.id}`} className="text-xs text-destructive" role="alert">{errors[`line_${line.id}_description`]}</p>
                         )}
                       </div>
 
@@ -549,9 +560,13 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                           value={line.quantity}
                           onChange={(e) => updateLine(line.id, 'quantity', parseFloat(e.target.value) || 0)}
                           className={errors[`line_${line.id}_quantity`] ? 'border-destructive' : ''}
+                          id={`quantity-${line.id}`}
+                          aria-label="จำนวน"
+                          aria-invalid={errors[`line_${line.id}_quantity`] ? 'true' : 'false'}
+                          aria-describedby={errors[`line_${line.id}_quantity`] ? `quantity-error-${line.id}` : undefined}
                         />
                         {errors[`line_${line.id}_quantity`] && (
-                          <p className="text-xs text-destructive md:hidden mt-1">
+                          <p id={`quantity-error-${line.id}`} className="text-xs text-destructive md:hidden mt-1" role="alert">
                             {errors[`line_${line.id}_quantity`]}
                           </p>
                         )}
@@ -562,8 +577,9 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                         <Select
                           value={line.unit}
                           onValueChange={(value) => updateLine(line.id, 'unit', value)}
+                          aria-label="หน่วยนับ"
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full" id={`unit-${line.id}`}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -589,6 +605,9 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                           value={line.unitPrice}
                           onChange={(e) => updateLine(line.id, 'unitPrice', parseFloat(e.target.value) || 0)}
                           className={errors[`line_${line.id}_unitPrice`] ? 'border-destructive' : ''}
+                          id={`unitPrice-${line.id}`}
+                          aria-label="ราคาต่อหน่วย"
+                          aria-invalid={errors[`line_${line.id}_unitPrice`] ? 'true' : 'false'}
                         />
                       </div>
 
@@ -603,6 +622,8 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                           value={line.discount}
                           onChange={(e) => updateLine(line.id, 'discount', parseFloat(e.target.value) || 0)}
                           className="pr-6"
+                          id={`discount-${line.id}`}
+                          aria-label="ส่วนลด (%)"
                         />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
                       </div>
@@ -612,8 +633,9 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                         <Select
                           value={line.vatRate.toString()}
                           onValueChange={(value) => updateLine(line.id, 'vatRate', parseFloat(value))}
+                          aria-label="อัตรา VAT"
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full" id={`vatRate-${line.id}`}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -640,6 +662,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                           className="h-8 w-8 text-destructive hover:text-destructive"
                           onClick={() => removeLine(line.id)}
                           disabled={lines.length === 1}
+                          aria-label="ลบรายการ"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -654,8 +677,9 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                     size="sm"
                     onClick={addLine}
                     className="w-full"
+                    aria-label="เพิ่มรายการสินค้า"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
                     เพิ่มรายการ
                   </Button>
                 </div>
@@ -681,6 +705,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                         max="100"
                         value={formData.discountPercent}
                         onChange={(e) => setFormData(prev => ({ ...prev, discountPercent: parseFloat(e.target.value) || 0 }))}
+                        aria-label="ส่วนลดเปอร์เซ็นต์"
                       />
                     </div>
                     <div>
@@ -692,6 +717,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                         step="0.01"
                         value={formData.discountAmount}
                         onChange={(e) => setFormData(prev => ({ ...prev, discountAmount: parseFloat(e.target.value) || 0 }))}
+                        aria-label="ส่วนลดเป็นบาท"
                       />
                     </div>
                   </div>
@@ -741,6 +767,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                 <Select
                   value={formData.withholdingRate.toString()}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, withholdingRate: parseFloat(value) }))}
+                  aria-label="เลือกอัตราหัก ณ ที่จ่าย"
                 >
                   <SelectTrigger id="withholdingRate">
                     <SelectValue />
@@ -761,6 +788,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                   placeholder="หมายเหตุ (ถ้ามี)"
                   value={formData.notes}
                   onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  aria-label="หมายเหตุ"
                 />
               </div>
             </div>
@@ -772,6 +800,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                 variant="outline"
                 onClick={onClose}
                 disabled={loading}
+                aria-busy={loading}
               >
                 ยกเลิก
               </Button>
@@ -780,15 +809,16 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                 onClick={handleSubmit}
                 disabled={loading}
                 className="bg-blue-600 hover:bg-blue-700"
+                aria-busy={loading}
               >
                 {loading ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
                     กำลังบันทึก...
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-4 w-4 mr-2" aria-hidden="true" />
                     บันทึก
                   </>
                 )}

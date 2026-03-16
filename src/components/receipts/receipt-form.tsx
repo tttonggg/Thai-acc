@@ -444,20 +444,22 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                   name="receiptDate"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>วันที่รับเงิน</FormLabel>
+                      <FormLabel htmlFor="receiptDate">วันที่รับเงิน</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
                               variant="outline"
                               className="w-full pl-3 text-left font-normal"
+                              id="receiptDate"
+                              aria-label="เลือกวันที่รับเงิน"
                             >
                               {field.value ? (
                                 new Date(field.value).toLocaleDateString('th-TH')
                               ) : (
                                 <span>เลือกวันที่</span>
                               )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" aria-hidden="true" />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
@@ -481,10 +483,10 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                   name="customerId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>ลูกค้า</FormLabel>
+                      <FormLabel htmlFor="customerId">ลูกค้า</FormLabel>
                       <Select onValueChange={handleCustomerChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger id="customerId" aria-label="เลือกลูกค้า">
                             <SelectValue placeholder="เลือกลูกค้า" />
                           </SelectTrigger>
                         </FormControl>
@@ -508,10 +510,10 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                   name="paymentMethod"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>วิธีการชำระเงิน</FormLabel>
+                      <FormLabel htmlFor="paymentMethod">วิธีการชำระเงิน</FormLabel>
                       <Select onValueChange={handlePaymentMethodChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger id="paymentMethod" aria-label="เลือกวิธีการชำระเงิน">
                             <SelectValue />
                           </SelectTrigger>
                         </FormControl>
@@ -660,8 +662,9 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                   size="sm"
                   onClick={autoAllocate}
                   disabled={amount <= 0 || unpaidInvoices.length === 0}
+                  aria-label="จัดจ่ายอัตโนมัติ"
                 >
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  <CheckCircle2 className="h-4 w-4 mr-2" aria-hidden="true" />
                   จัดจ่ายอัตโนมัติ
                 </Button>
               </CardHeader>
@@ -681,7 +684,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                         <TableHead className="text-right">จัดจ่าย</TableHead>
                         <TableHead className="text-right">หัก ณ ที่จ่าย (%)</TableHead>
                         <TableHead className="text-right">ภาษีหัก ณ ที่จ่าย</TableHead>
-                        <TableHead></TableHead>
+                        <TableHead aria-label="การจัดการ"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -703,6 +706,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                                     parseFloat(e.target.value) || 0
                                   )}
                                   className="w-24 text-right"
+                                  aria-label={`จำนวนเงินจัดจ่ายสำหรับ ${invoice.invoiceNo}`}
                                 />
                               ) : (
                                 <Button
@@ -711,8 +715,9 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                                   size="sm"
                                   onClick={() => addAllocation(invoice)}
                                   disabled={unallocated <= 0}
+                                  aria-label={`เพิ่มการจัดจ่ายสำหรับ ${invoice.invoiceNo}`}
                                 >
-                                  <Plus className="h-3 w-3" />
+                                  <Plus className="h-3 w-3" aria-hidden="true" />
                                 </Button>
                               )}
                             </TableCell>
@@ -724,8 +729,9 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                                     allocations.indexOf(allocation),
                                     parseFloat(val)
                                   )}
+                                  aria-label="อัตราหัก ณ ที่จ่าย"
                                 >
-                                  <SelectTrigger className="w-20">
+                                  <SelectTrigger className="w-20" aria-label="เลือกอัตรา WHT">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -750,8 +756,9 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                                   size="icon"
                                   className="h-8 w-8"
                                   onClick={() => removeAllocation(allocations.indexOf(allocation))}
+                                  aria-label={`ลบการจัดจ่าย ${invoice.invoiceNo}`}
                                 >
-                                  <Trash2 className="h-4 w-4 text-red-600" />
+                                  <Trash2 className="h-4 w-4 text-red-600" aria-hidden="true" />
                                 </Button>
                               )}
                             </TableCell>
@@ -805,15 +812,15 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
 
           {/* Actions */}
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={loading} aria-busy={loading}>
               ยกเลิก
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} aria-busy={loading}>
               {loading ? (
                 <>กำลังบันทึก...</>
               ) : (
                 <>
-                  <Save className="h-4 w-4 mr-2" />
+                  <Save className="h-4 w-4 mr-2" aria-hidden="true" />
                   บันทึก
                 </>
               )}

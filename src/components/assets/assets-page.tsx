@@ -152,7 +152,29 @@ function AssetListTab() {
     }
   }
 
-  if (loading) return <Skeleton className="h-64 rounded-xl" />
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4">
+                <Skeleton className="h-16 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="flex justify-end">
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <Card>
+          <CardContent className="p-0">
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   const totalCost = assets.reduce((s, a) => s + a.purchaseCost, 0)
   const totalNBV = assets.reduce((s, a) => s + (a.netBookValue ?? a.purchaseCost), 0)

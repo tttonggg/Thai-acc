@@ -56,9 +56,9 @@ export function FormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={maxWidthClasses[maxWidth]}>
+      <DialogContent className={maxWidthClasses[maxWidth]} aria-labelledby="form-dialog-title">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle id="form-dialog-title">{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
@@ -72,13 +72,18 @@ export function FormDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={loading}
+                aria-label="ยกเลิก"
               >
                 {cancelLabel}
               </Button>
-              <Button type="submit" disabled={loading || disableSubmit}>
+              <Button 
+                type="submit" 
+                disabled={loading || disableSubmit}
+                aria-label={loading ? 'กำลังบันทึก' : submitLabel}
+              >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                     กำลังบันทึก...
                   </>
                 ) : (

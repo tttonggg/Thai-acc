@@ -1,5 +1,17 @@
 'use client'
 import { useState, useEffect } from 'react'
+
+// Helper function to translate cheque status
+function getStatusLabel(status: string): string {
+  const statusMap: Record<string, string> = {
+    'ON_HAND': 'อยู่ในมือ',
+    'DEPOSITED': 'นำฝากแล้ว',
+    'CLEARED': 'เคลียร์แล้ว',
+    'BOUNCED': 'เช็คเด้ง',
+    'CANCELLED': 'ยกเลิก',
+  }
+  return statusMap[status] || status
+}
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -198,7 +210,7 @@ export function ChequeEditDialog({
           {cheque && cheque.status !== 'ON_HAND' && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <p className="text-sm text-yellow-800">
-                ⚠️ เช็คนี้ถูกประมวลผลแล้ว ({cheque.status}) การแก้ไขอาจส่งผลต่อบันทึกบัญชี
+                ⚠️ เช็คนี้ถูกประมวลผลแล้ว ({getStatusLabel(cheque.status)}) การแก้ไขอาจส่งผลต่อบันทึกบัญชี
               </p>
             </div>
           )}

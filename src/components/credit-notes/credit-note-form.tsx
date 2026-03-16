@@ -324,12 +324,15 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>ลูกค้า *</Label>
+                  <Label htmlFor="customerId">ลูกค้า *</Label>
                   <Select
                     value={form.watch('customerId')}
                     onValueChange={(value) => form.setValue('customerId', value)}
+                    aria-label="เลือกลูกค้า"
+                    aria-invalid={form.formState.errors.customerId ? 'true' : 'false'}
+                    aria-describedby={form.formState.errors.customerId ? 'customerId-error' : undefined}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="customerId">
                       <SelectValue placeholder="เลือกลูกค้า" />
                     </SelectTrigger>
                     <SelectContent>
@@ -341,16 +344,21 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                     </SelectContent>
                   </Select>
                   {form.formState.errors.customerId && (
-                    <p className="text-sm text-red-500">{form.formState.errors.customerId.message}</p>
+                    <p id="customerId-error" className="text-sm text-red-500" role="alert">{form.formState.errors.customerId.message}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label>วันที่ออกใบลดหนี้ *</Label>
+                  <Label htmlFor="creditNoteDate">วันที่ออกใบลดหนี้ *</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start text-left font-normal"
+                        id="creditNoteDate"
+                        aria-label="เลือกวันที่ออกใบลดหนี้"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
                         {form.watch('creditNoteDate') ? (
                           new Date(form.watch('creditNoteDate')).toLocaleDateString('th-TH')
                         ) : (
@@ -368,19 +376,20 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                     </PopoverContent>
                   </Popover>
                   {form.formState.errors.creditNoteDate && (
-                    <p className="text-sm text-red-500">{form.formState.errors.creditNoteDate.message}</p>
+                    <p id="creditNoteDate-error" className="text-sm text-red-500" role="alert">{form.formState.errors.creditNoteDate.message}</p>
                   )}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>อ้างอิงใบกำกับภาษี (ถ้ามี)</Label>
+                  <Label htmlFor="invoiceId">อ้างอิงใบกำกับภาษี (ถ้ามี)</Label>
                   <Select
                     value={form.watch('invoiceId') || ''}
                     onValueChange={(value) => form.setValue('invoiceId', value || null)}
+                    aria-label="เลือกใบกำกับภาษีอ้างอิง"
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="invoiceId">
                       <SelectValue placeholder="เลือกใบกำกับภาษี" />
                     </SelectTrigger>
                     <SelectContent>
@@ -394,12 +403,15 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                 </div>
 
                 <div className="space-y-2">
-                  <Label>เหตุผล *</Label>
+                  <Label htmlFor="reason">เหตุผล *</Label>
                   <Select
                     value={form.watch('reason')}
                     onValueChange={(value) => form.setValue('reason', value as any)}
+                    aria-label="เลือกเหตุผล"
+                    aria-invalid={form.formState.errors.reason ? 'true' : 'false'}
+                    aria-describedby={form.formState.errors.reason ? 'reason-error' : undefined}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="reason">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -410,17 +422,19 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                     </SelectContent>
                   </Select>
                   {form.formState.errors.reason && (
-                    <p className="text-sm text-red-500">{form.formState.errors.reason.message}</p>
+                    <p id="reason-error" className="text-sm text-red-500" role="alert">{form.formState.errors.reason.message}</p>
                   )}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>หมายเหตุ</Label>
+                <Label htmlFor="notes">หมายเหตุ</Label>
                 <Textarea
+                  id="notes"
                   placeholder="ระบุหมายเหตุ (ถ้ามี)"
                   value={form.watch('notes') || ''}
                   onChange={(e) => form.setValue('notes', e.target.value)}
+                  aria-label="หมายเหตุ"
                 />
               </div>
             </CardContent>
@@ -435,31 +449,34 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
               {lines.map((line, index) => (
                 <div key={index} className="border rounded-lg p-4 space-y-3">
                   <div className="flex justify-between items-start">
-                    <h4 className="font-medium">รายการที่ {index + 1}</h4>
+                    <h4 className="font-medium" id={`line-heading-${index}`}>รายการที่ {index + 1}</h4>
                     {lines.length > 1 && (
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
                         onClick={() => removeLine(index)}
+                        aria-label={`ลบรายการที่ ${index + 1}`}
                       >
-                        <Trash2 className="h-4 w-4 text-red-600" />
+                        <Trash2 className="h-4 w-4 text-red-600" aria-hidden="true" />
                       </Button>
                     )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label>รายการ *</Label>
+                      <Label htmlFor={`description-${index}`}>รายการ *</Label>
                       <Input
+                        id={`description-${index}`}
                         value={line.description}
                         onChange={(e) => updateLine(index, 'description', e.target.value)}
                         placeholder="ระบุรายการ"
+                        aria-label={`รายการที่ ${index + 1}`}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label>สินค้า (ถ้ามี)</Label>
+                      <Label htmlFor={`product-${index}`}>สินค้า (ถ้ามี)</Label>
                       <Select
                         value={line.productId || ''}
                         onValueChange={(value) => {
@@ -470,8 +487,9 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                             updateLine(index, 'vatRate', product.vatRate)
                           }
                         }}
+                        aria-label="เลือกสินค้า"
                       >
-                        <SelectTrigger>
+                        <SelectTrigger id={`product-${index}`}>
                           <SelectValue placeholder="เลือกสินค้า" />
                         </SelectTrigger>
                         <SelectContent>
@@ -493,41 +511,49 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
 
                   <div className="grid grid-cols-4 gap-3">
                     <div className="space-y-2">
-                      <Label>จำนวน *</Label>
+                      <Label htmlFor={`quantity-${index}`}>จำนวน *</Label>
                       <Input
+                        id={`quantity-${index}`}
                         type="number"
                         step="0.01"
                         value={line.quantity}
                         onChange={(e) => updateLine(index, 'quantity', parseFloat(e.target.value) || 0)}
+                        aria-label="จำนวน"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label>ราคาต่อหน่วย *</Label>
+                      <Label htmlFor={`unitPrice-${index}`}>ราคาต่อหน่วย *</Label>
                       <Input
+                        id={`unitPrice-${index}`}
                         type="number"
                         step="0.01"
                         value={line.unitPrice}
                         onChange={(e) => updateLine(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                        aria-label="ราคาต่อหน่วย"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label>อัตรา VAT (%)</Label>
+                      <Label htmlFor={`vatRate-${index}`}>อัตรา VAT (%)</Label>
                       <Input
+                        id={`vatRate-${index}`}
                         type="number"
                         step="0.01"
                         value={line.vatRate}
-                    onChange={(e) => updateLine(index, 'vatRate', parseFloat(e.target.value) || 0)}
-                  />
+                        onChange={(e) => updateLine(index, 'vatRate', parseFloat(e.target.value) || 0)}
+                        aria-label="อัตรา VAT"
+                      />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>จำนวนเงิน</Label>
+                  <Label htmlFor={`amount-${index}`}>จำนวนเงิน</Label>
                   <Input
+                    id={`amount-${index}`}
                     type="text"
                     value={`฿${(line.quantity * line.unitPrice).toLocaleString()}`}
                     disabled
+                    aria-label="จำนวนเงิน"
                   />
                 </div>
               </div>
@@ -539,6 +565,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                   checked={line.returnStock || false}
                   onChange={(e) => updateLine(index, 'returnStock', e.target.checked)}
                   className="rounded"
+                  aria-label="คืนสินค้าเข้าสต็อก"
                 />
                 <Label htmlFor={`returnStock-${index}`} className="text-sm">
                   คืนสินค้าเข้าสต็อก
@@ -547,8 +574,8 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
             </div>
           ))}
 
-          <Button type="button" variant="outline" onClick={addLine} className="w-full">
-            <Plus className="h-4 w-4 mr-2" />
+          <Button type="button" variant="outline" onClick={addLine} className="w-full" aria-label="เพิ่มรายการ">
+            <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
             เพิ่มรายการ
           </Button>
         </CardContent>
@@ -577,17 +604,17 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
       </Card>
 
       <Alert>
-        <AlertDescription>
+        <AlertDescription role="status">
           การออกใบลดหนี้จะลดหนี้ลูกค้าและบันทึกบัญชีอัตโนมัติ
           {lines.some(l => l.returnStock) && ' และคืนสินค้าเข้าสต็อกตามที่ระบุ'}
         </AlertDescription>
       </Alert>
 
       <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={onClose}>
+        <Button type="button" variant="outline" onClick={onClose} disabled={loading} aria-busy={loading}>
           ยกเลิก
         </Button>
-        <Button type="submit" className="bg-red-600 hover:bg-red-700" disabled={loading}>
+        <Button type="submit" className="bg-red-600 hover:bg-red-700" disabled={loading} aria-busy={loading}>
           {loading ? 'กำลังบันทึก...' : 'ออกใบลดหนี้'}
         </Button>
       </div>
