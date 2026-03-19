@@ -5,13 +5,20 @@
 // Combines Employee List + Payroll Runs
 // ============================================
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Users, DollarSign } from 'lucide-react'
 import { EmployeeList } from './employee-list'
 import { PayrollRunList } from './payroll-run-list'
 
-export function PayrollPage() {
-  const [tab, setTab] = useState<'employees' | 'runs'>('employees')
+export function PayrollPage({ initialTab }: { initialTab?: 'employees' | 'runs' } = {}) {
+  const [tab, setTab] = useState<'employees' | 'runs'>(initialTab || 'employees')
+
+  // Update tab when initialTab prop changes (e.g., when navigating between /payroll and /employees)
+  useEffect(() => {
+    if (initialTab) {
+      setTab(initialTab)
+    }
+  }, [initialTab])
   const tabs = [
     { id: 'employees' as const, label: 'พนักงาน', icon: Users },
     { id: 'runs' as const, label: 'รอบเงินเดือน', icon: DollarSign },

@@ -11,11 +11,19 @@ import {
   Receipt,
   FileText,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Package,
+  Building,
+  Wallet,
+  CreditCard,
+  FileCheck,
+  ShoppingCart,
+  ChevronRight
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import {
   BarChart,
   Bar,
@@ -62,6 +70,16 @@ interface DashboardData {
   apAging: Array<{ name: string; value: number; color: string }>
   vatData: Array<{ month: string; vatOutput: number; vatInput: number }>
   quickActions?: QuickActions
+}
+
+// Module statistics interface
+interface ModuleStats {
+  total: number
+  draft?: number
+  pending?: number
+  sent?: number
+  approved?: number
+  overdue?: number
 }
 
 // Summary Card Component
@@ -142,6 +160,38 @@ function getColorClasses(color: string) {
         iconColor: 'text-blue-600',
         hover: 'hover:bg-blue-100'
       }
+    case 'purple':
+      return {
+        bg: 'bg-purple-50',
+        border: 'border-purple-200',
+        iconBg: 'bg-purple-100',
+        iconColor: 'text-purple-600',
+        hover: 'hover:bg-purple-100'
+      }
+    case 'green':
+      return {
+        bg: 'bg-green-50',
+        border: 'border-green-200',
+        iconBg: 'bg-green-100',
+        iconColor: 'text-green-600',
+        hover: 'hover:bg-green-100'
+      }
+    case 'indigo':
+      return {
+        bg: 'bg-indigo-50',
+        border: 'border-indigo-200',
+        iconBg: 'bg-indigo-100',
+        iconColor: 'text-indigo-600',
+        hover: 'hover:bg-indigo-100'
+      }
+    case 'orange':
+      return {
+        bg: 'bg-orange-50',
+        border: 'border-orange-200',
+        iconBg: 'bg-orange-100',
+        iconColor: 'text-orange-600',
+        hover: 'hover:bg-orange-100'
+      }
     default:
       return {
         bg: 'bg-gray-50',
@@ -153,23 +203,104 @@ function getColorClasses(color: string) {
   }
 }
 
+// Shortcut Card Component
+interface ShortcutCardProps {
+  title: string
+  description: string
+  icon: React.ReactNode
+  stats: ModuleStats
+  color: string
+  onClick: () => void
+  loading?: boolean
+}
+
+function ShortcutCard({ title, description, icon, stats, color, onClick, loading }: ShortcutCardProps) {
+  const colors = getColorClasses(color)
+
+  return (
+    <Card
+      className={`cursor-pointer transition-all hover:shadow-lg ${colors.hover} border-2 ${colors.border}`}
+      onClick={onClick}
+    >
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between mb-3">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colors.iconBg}`}>
+            {icon}
+          </div>
+          <ChevronRight className={`h-5 w-5 ${colors.iconColor} opacity-50`} />
+        </div>
+        <h3 className="font-semibold text-gray-800 mb-1">{title}</h3>
+        <p className="text-sm text-gray-500 mb-3">{description}</p>
+        {!loading && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="secondary" className="text-xs">
+              ทั้งหมด {stats.total}
+            </Badge>
+            {stats.draft !== undefined && stats.draft > 0 && (
+              <Badge variant="outline" className="text-xs border-yellow-300 text-yellow-700">
+                ร่าง {stats.draft}
+              </Badge>
+            )}
+            {stats.pending !== undefined && stats.pending > 0 && (
+              <Badge variant="outline" className="text-xs border-orange-300 text-orange-700">
+                รออนุมัติ {stats.pending}
+              </Badge>
+            )}
+            {stats.sent !== undefined && stats.sent > 0 && (
+              <Badge variant="outline" className="text-xs border-blue-300 text-blue-700">
+                ส่งแล้ว {stats.sent}
+              </Badge>
+            )}
+            {stats.approved !== undefined && stats.approved > 0 && (
+              <Badge variant="outline" className="text-xs border-green-300 text-green-700">
+                อนุมัติแล้ว {stats.approved}
+              </Badge>
+            )}
+            {stats.overdue !== undefined && stats.overdue > 0 && (
+              <Badge variant="destructive" className="text-xs">
+                เกินกำหนด {stats.overdue}
+              </Badge>
+            )}
+          </div>
+        )}
+        {loading && (
+          <div className="flex gap-2">
+            <Skeleton className="h-5 w-16" />
+            <Skeleton className="h-5 w-16" />
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 export function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [moduleStats, setModuleStats] = useState<Record<string, ModuleStats>>({})
+  const [statsLoading, setStatsLoading] = useState(true)
   const { toast } = useToast()
   const router = useRouter()
 
+  // Fetch dashboard data
   useEffect(() => {
     const fetchDashboard = async () => {
       setLoading(true)
       setError(null)
       try {
         const res = await fetch('/api/dashboard')
-        if (!res.ok) throw new Error('Fetch failed')
+        // Handle 401 - let the auth system handle redirect
+        if (res.status === 401) {
+          setLoading(false)
+          return // Auth error - next-auth will handle redirect
+        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`)
         const json = await res.json()
+        if (!json.success) throw new Error(json.error || 'Unknown error')
         setData(json.data)
       } catch (err) {
+        // Only show error if not auth related (401 handled above)
         const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล'
         setError(message)
         toast({
@@ -183,6 +314,126 @@ export function Dashboard() {
     }
     fetchDashboard()
   }, [toast])
+
+  // Fetch module statistics
+  useEffect(() => {
+    const fetchModuleStats = async () => {
+      setStatsLoading(true)
+      try {
+        // Fetch quotations
+        const quotRes = await fetch('/api/quotations?limit=1000')
+        if (quotRes.ok) {
+          const quotJson = await quotRes.json()
+          if (quotJson.success) {
+            const quotations = quotJson.data || []
+            const draft = quotations.filter((q: any) => q.status === 'DRAFT').length
+            const sent = quotations.filter((q: any) => q.status === 'SENT').length
+            const approved = quotations.filter((q: any) => q.status === 'APPROVED').length
+            setModuleStats(prev => ({
+              ...prev,
+              quotations: { total: quotations.length, draft, sent, approved }
+            }))
+          }
+        }
+
+        // Fetch invoices
+        const invRes = await fetch('/api/invoices?limit=1000')
+        if (invRes.ok) {
+          const invJson = await invRes.json()
+          if (invJson.success) {
+            const invoices = invJson.data || []
+            const draft = invoices.filter((i: any) => i.status === 'DRAFT').length
+            const overdue = invoices.filter((i: any) =>
+              i.dueDate && new Date(i.dueDate) < new Date() && i.status !== 'PAID'
+            ).length
+            setModuleStats(prev => ({
+              ...prev,
+              invoices: { total: invoices.length, draft, overdue }
+            }))
+          }
+        }
+
+        // Fetch receipts
+        const recRes = await fetch('/api/receipts?limit=1000')
+        if (recRes.ok) {
+          const recJson = await recRes.json()
+          if (recJson.success) {
+            const receipts = recJson.data || []
+            const draft = receipts.filter((r: any) => r.status === 'DRAFT').length
+            setModuleStats(prev => ({
+              ...prev,
+              receipts: { total: receipts.length, draft }
+            }))
+          }
+        }
+
+        // Fetch credit notes
+        const cnRes = await fetch('/api/credit-notes?limit=1000')
+        if (cnRes.ok) {
+          const cnJson = await cnRes.json()
+          if (cnJson.success) {
+            const creditNotes = cnJson.data || []
+            setModuleStats(prev => ({
+              ...prev,
+              creditNotes: { total: creditNotes.length }
+            }))
+          }
+        }
+
+        // Fetch debit notes
+        const dnRes = await fetch('/api/debit-notes?limit=1000')
+        if (dnRes.ok) {
+          const dnJson = await dnRes.json()
+          if (dnJson.success) {
+            const debitNotes = dnJson.data || []
+            setModuleStats(prev => ({
+              ...prev,
+              debitNotes: { total: debitNotes.length }
+            }))
+          }
+        }
+
+        // Fetch purchase orders
+        const poRes = await fetch('/api/purchase-orders?limit=1000')
+        if (poRes.ok) {
+          const poJson = await poRes.json()
+          if (poJson.success) {
+            const purchaseOrders = poJson.data || []
+            const draft = purchaseOrders.filter((p: any) => p.status === 'DRAFT').length
+            const pending = purchaseOrders.filter((p: any) => p.status === 'PENDING_APPROVAL').length
+            setModuleStats(prev => ({
+              ...prev,
+              purchaseOrders: { total: purchaseOrders.length, draft, pending }
+            }))
+          }
+        }
+
+        // Fetch payments
+        const payRes = await fetch('/api/payments?limit=1000')
+        if (payRes.ok) {
+          const payJson = await payRes.json()
+          if (payJson.success) {
+            const payments = payJson.data || []
+            setModuleStats(prev => ({
+              ...prev,
+              payments: { total: payments.length }
+            }))
+          }
+        }
+
+      } catch (err) {
+        console.error('Error fetching module stats:', err)
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+    fetchModuleStats()
+  }, [])
+
+  // Navigation handler
+  const navigateTo = (path: string) => {
+    router.push(path)
+  }
 
   // Loading UI
   if (loading) {
@@ -422,52 +673,153 @@ export function Dashboard() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">การดำเนินการด่วน</CardTitle>
-          <CardDescription>รายการที่ต้องดำเนินการ</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <Receipt className="h-5 w-5 text-yellow-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">ใบกำกับภาษีร่าง</p>
-                  <p className="text-sm text-gray-500">5 รายการรอออกใบกำกับภาษี</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                  <Users className="h-5 w-5 text-red-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">ลูกหนี้เกินกำหนด</p>
-                  <p className="text-sm text-gray-500">3 รายการเกิน 90 วัน</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">รอยื่นภาษี</p>
-                  <p className="text-sm text-gray-500">PP30 ประจำเดือนนี้</p>
-                </div>
-              </div>
-            </div>
+      {/* Module Shortcuts */}
+      <div className="space-y-6">
+        {/* Sales & Revenue */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">การขายและรายได้</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <ShortcutCard
+              title="ใบเสนอราคา"
+              description="สร้างและจัดการใบเสนอราคา"
+              icon={<FileText className="h-6 w-6 text-purple-600" />}
+              stats={moduleStats.quotations || { total: 0, draft: 0, sent: 0, approved: 0 }}
+              color="purple"
+              onClick={() => navigateTo('/quotations')}
+              loading={statsLoading}
+            />
+            <ShortcutCard
+              title="ใบกำกับภาษี"
+              description="ออกใบกำกับภาษีและใบเสร็จ"
+              icon={<Receipt className="h-6 w-6 text-blue-600" />}
+              stats={moduleStats.invoices || { total: 0, draft: 0, overdue: 0 }}
+              color="blue"
+              onClick={() => navigateTo('/invoices')}
+              loading={statsLoading}
+            />
+            <ShortcutCard
+              title="ใบเสร็จรับเงิน"
+              description="บันทึกการรับชำระเงิน"
+              icon={<DollarSign className="h-6 w-6 text-green-600" />}
+              stats={moduleStats.receipts || { total: 0, draft: 0 }}
+              color="green"
+              onClick={() => navigateTo('/receipts')}
+              loading={statsLoading}
+            />
+            <ShortcutCard
+              title="ใบลดหนี้"
+              description="ออกใบลดหนี้และคืนเงิน"
+              icon={<FileCheck className="h-6 w-6 text-orange-600" />}
+              stats={moduleStats.creditNotes || { total: 0 }}
+              color="orange"
+              onClick={() => navigateTo('/credit-notes')}
+              loading={statsLoading}
+            />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Purchases & Expenses */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">การซื้อและค่าใช้จ่าย</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <ShortcutCard
+              title="ใบสั่งซื้อ"
+              description="ขออนุมัติและสั่งซื้อสินค้า"
+              icon={<ShoppingCart className="h-6 w-6 text-indigo-600" />}
+              stats={moduleStats.purchaseOrders || { total: 0, draft: 0, pending: 0 }}
+              color="indigo"
+              onClick={() => navigateTo('/purchase-orders')}
+              loading={statsLoading}
+            />
+            <ShortcutCard
+              title="ใบจ่ายเงิน"
+              description="บันทึกการจ่ายชำระเงิน"
+              icon={<CreditCard className="h-6 w-6 text-red-600" />}
+              stats={moduleStats.payments || { total: 0 }}
+              color="red"
+              onClick={() => navigateTo('/payments')}
+              loading={statsLoading}
+            />
+            <ShortcutCard
+              title="ใบเพิ่มหนี้"
+              description="ออกใบเพิ่มหนี้และปรับปรุง"
+              icon={<FileCheck className="h-6 w-6 text-orange-600" />}
+              stats={moduleStats.debitNotes || { total: 0 }}
+              color="orange"
+              onClick={() => navigateTo('/debit-notes')}
+              loading={statsLoading}
+            />
+          </div>
+        </div>
+
+        {/* Inventory & Assets */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">สินค้าและทรัพย์สิน</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <ShortcutCard
+              title="สินค้าคงคลัง"
+              description="จัดการสต็อกและคลังสินค้า"
+              icon={<Package className="h-6 w-6 text-teal-600" />}
+              stats={{ total: 0 }}
+              color="green"
+              onClick={() => navigateTo('/inventory')}
+              loading={statsLoading}
+            />
+            <ShortcutCard
+              title="ทรัพย์สินถาวร"
+              description="บันทึกทรัพย์สินและค่าเสื่อม"
+              icon={<Building className="h-6 w-6 text-slate-600" />}
+              stats={{ total: 0 }}
+              color="blue"
+              onClick={() => navigateTo('/fixed-assets')}
+              loading={statsLoading}
+            />
+            <ShortcutCard
+              title="ธนาคาร"
+              description="บัญชีธนาคารและเช็ค"
+              icon={<Wallet className="h-6 w-6 text-blue-600" />}
+              stats={{ total: 0 }}
+              color="blue"
+              onClick={() => navigateTo('/banking')}
+              loading={statsLoading}
+            />
+          </div>
+        </div>
+
+        {/* HR & Finance */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">บุคคลและการเงิน</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <ShortcutCard
+              title="เงินสดย่อย"
+              description="กองทุนและเบิกจ่าย"
+              icon={<Wallet className="h-6 w-6 text-amber-600" />}
+              stats={{ total: 0 }}
+              color="yellow"
+              onClick={() => navigateTo('/petty-cash')}
+              loading={statsLoading}
+            />
+            <ShortcutCard
+              title="เงินเดือน"
+              description="คำนวณเงินเดือนและภาษี"
+              icon={<Users className="h-6 w-6 text-purple-600" />}
+              stats={{ total: 0 }}
+              color="purple"
+              onClick={() => navigateTo('/payroll')}
+              loading={statsLoading}
+            />
+            <ShortcutCard
+              title="หัก ณ ที่จ่าย"
+              description="ภงด.3 และ ภงด.53"
+              icon={<FileText className="h-6 w-6 text-red-600" />}
+              stats={{ total: 0 }}
+              color="red"
+              onClick={() => navigateTo('/wht')}
+              loading={statsLoading}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

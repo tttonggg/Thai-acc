@@ -72,20 +72,135 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
   }, [open, paymentId, toast])
 
   const handlePrint = () => {
-    window.print()
+    if (!payment) return
+    
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      toast({
+        title: 'ไม่สามารถเปิดหน้าต่างได้',
+        description: 'กรุณาอนุญาตให้เปิดหน้าต่างใหม่',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>ใบจ่ายเงิน - ${payment.paymentNo}</title>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: 'Sarabun', 'TH Sarabun New', sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+          .header h1 { margin: 0; font-size: 24px; }
+          .section { margin: 20px 0; }
+          .section h3 { border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+          table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f5f5f5; }
+          .text-right { text-align: right; }
+          .total { font-weight: bold; font-size: 18px; }
+          @media print { body { padding: 0; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>ใบจ่ายเงิน</h1>
+          <p>เลขที่: ${payment.paymentNo}</p>
+          <p>วันที่: ${new Date(payment.paymentDate).toLocaleDateString('th-TH')}</p>
+          <p>สถานะ: ${statusLabels[payment.status]}</p>
+        </div>
+        
+        <div class="section">
+          <h3>ข้อมูลผู้ขาย</h3>
+          <p><strong>ชื่อ:</strong> ${payment.vendor?.name || '-'}</p>
+          <p><strong>เลขประจำตัวผู้เสียภาษี:</strong> ${payment.vendor?.taxId || '-'}</p>
+        </div>
+
+        <div class="section">
+          <h3>รายละเอียดการจ่าย</h3>
+          <p><strong>วิธีการจ่าย:</strong> ${paymentMethodLabels[payment.paymentMethod]}</p>
+          ${payment.bankAccount ? `<p><strong>ธนาคาร:</strong> ${payment.bankAccount.bankName} (${payment.bankAccount.accountNumber})</p>` : ''}
+          ${payment.chequeNo ? `<p><strong>เลขที่เช็ค:</strong> ${payment.chequeNo}</p>` : ''}
+        </div>
+
+        ${payment.allocations && payment.allocations.length > 0 ? `
+        <div class="section">
+          <h3>การจัดจ่ายใบซื้อ</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>เลขที่ใบซื้อ</th>
+                <th class="text-right">จำนวนเงิน</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${payment.allocations.map((a: any) => `
+                <tr>
+                  <td>${a.invoice?.invoiceNo || '-'}</td>
+                  <td class="text-right">${a.amount.toLocaleString('th-TH')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        ` : ''}
+
+        <div class="section">
+          <p class="total">ยอดจ่ายรวม: ${payment.amount.toLocaleString('th-TH')} บาท</p>
+          ${payment.whtAmount > 0 ? `<p>ภาษีหัก ณ ที่จ่าย: ${payment.whtAmount.toLocaleString('th-TH')} บาท</p>` : ''}
+        </div>
+
+        <script>window.onload = () => { setTimeout(() => window.print(), 500); }</script>
+      </body>
+      </html>
+    `
+    
+    printWindow.document.write(html)
+    printWindow.document.close()
   }
 
   const handleDownload = async () => {
     setDownloading(true)
     try {
-      const res = await fetch(`/api/payments/${paymentId}/export/pdf`)
-      if (!res.ok) throw new Error('Download failed')
-
-      const blob = await res.blob()
+      // Client-side HTML download
+      if (!payment) return
+      
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>ใบจ่ายเงิน - ${payment.paymentNo}</title>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: 'Sarabun', 'TH Sarabun New', sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; }
+            .header h1 { margin: 0; }
+            .info { margin: 20px 0; }
+            .total { font-weight: bold; font-size: 18px; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>ใบจ่ายเงิน</h1>
+            <p>เลขที่: ${payment.paymentNo}</p>
+            <p>วันที่: ${new Date(payment.paymentDate).toLocaleDateString('th-TH')}</p>
+          </div>
+          <div class="info">
+            <p><strong>ผู้ขาย:</strong> ${payment.vendor?.name || '-'}</p>
+            <p><strong>วิธีการจ่าย:</strong> ${paymentMethodLabels[payment.paymentMethod]}</p>
+            <p class="total">จำนวนเงิน: ${payment.amount.toLocaleString('th-TH')} บาท</p>
+          </div>
+        </body>
+        </html>
+      `
+      
+      const blob = new Blob([html], { type: 'text/html' })
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${payment?.paymentNo || 'payment'}.pdf`
+      a.download = `${payment.paymentNo}.html`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
@@ -93,7 +208,7 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
 
       toast({
         title: 'ดาวน์โหลดสำเร็จ',
-        description: `ดาวน์โหลด ${payment?.paymentNo} เรียบร้อยแล้ว`
+        description: `ดาวน์โหลด ${payment.paymentNo} เรียบร้อยแล้ว`
       })
     } catch (error) {
       toast({

@@ -1,0 +1,3 @@
+{
+  "/api/accounting-periods/check/route": "app/api/accounting-periods/check/route.js"
+}

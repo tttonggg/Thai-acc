@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   FileText,
   Download,
@@ -8,7 +8,12 @@ import {
   BarChart3,
   PieChart,
   TrendingUp,
-  Loader2
+  Loader2,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  X
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,23 +24,195 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Calendar as CalendarComponent } from '@/components/ui/calendar'
+import { format, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, subMonths, subQuarters, subYears } from 'date-fns'
+import { th } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
 
+interface DateRange {
+  from: Date
+  to: Date
+  label: string
+}
+
 const reports = [
-  { id: 'trial_balance', name: 'งบทดลอง', icon: BarChart3, description: 'แสดงยอดเดบิตและเครดิตของแต่ละบัญชี' },
-  { id: 'balance_sheet', name: 'งบดุล', icon: PieChart, description: 'แสดงสินทรัพย์ หนี้สิน และทุน' },
-  { id: 'income_statement', name: 'งบกำไรขาดทุน', icon: TrendingUp, description: 'แสดงรายได้และค่าใช้จ่าย' },
-  { id: 'general_ledger', name: 'สมุดบัญชีแยกประเภท', icon: FileText, description: 'รายการบัญชีแยกตามบัญชี' },
-  { id: 'aging_ar', name: 'รายงานลูกหนี้ตามอายุหนี้', icon: PieChart, description: 'จำแนกลูกหนี้ตามอายุหนี้' },
-  { id: 'aging_ap', name: 'รายงานเจ้าหนี้ตามอายุหนี้', icon: PieChart, description: 'จำแนกเจ้าหนี้ตามอายุหนี้' },
-  { id: 'vat_report', name: 'รายงานภาษีมูลค่าเพิ่ม', icon: FileText, description: 'รายงานภาษีขาย-ภาษีซื้อ' },
-  { id: 'wht_report', name: 'รายงานภาษีหัก ณ ที่จ่าย', icon: FileText, description: 'รายงาน ภงด.3, ภงด.53' },
+  { id: 'trial_balance', name: 'งบทดลอง', icon: BarChart3, description: 'แสดงยอดเดบิตและเครดิตของแต่ละบัญชี', supportsDateRange: true },
+  { id: 'balance_sheet', name: 'งบดุล', icon: PieChart, description: 'แสดงสินทรัพย์ หนี้สิน และทุน', supportsDateRange: true },
+  { id: 'income_statement', name: 'งบกำไรขาดทุน', icon: TrendingUp, description: 'แสดงรายได้และค่าใช้จ่าย', supportsDateRange: true },
+  { id: 'general_ledger', name: 'สมุดบัญชีแยกประเภท', icon: FileText, description: 'รายการบัญชีแยกตามบัญชี', supportsDateRange: true },
+  { id: 'aging_ar', name: 'รายงานลูกหนี้ตามอายุหนี้', icon: PieChart, description: 'จำแนกลูกหนี้ตามอายุหนี้', supportsDateRange: false },
+  { id: 'aging_ap', name: 'รายงานเจ้าหนี้ตามอายุหนี้', icon: PieChart, description: 'จำแนกเจ้าหนี้ตามอายุหนี้', supportsDateRange: false },
+  { id: 'vat_report', name: 'รายงานภาษีมูลค่าเพิ่ม', icon: FileText, description: 'รายงานภาษีขาย-ภาษีซื้อ', supportsDateRange: true },
+  { id: 'wht_report', name: 'รายงานภาษีหัก ณ ที่จ่าย', icon: FileText, description: 'รายงาน ภงด.3, ภงด.53', supportsDateRange: true },
 ]
 
+// Thai Fiscal Year: Oct-Sep
+function getFiscalYearRange(date: Date): { start: Date; end: Date; label: string } {
+  const month = date.getMonth()
+  const year = date.getFullYear()
+  // Thai fiscal year: Oct (9) - Sep (8)
+  if (month >= 9) {
+    return {
+      start: new Date(year, 9, 1),
+      end: new Date(year + 1, 8, 30),
+      label: `ปีงบประมาณ ${year + 1}`
+    }
+  } else {
+    return {
+      start: new Date(year - 1, 9, 1),
+      end: new Date(year, 8, 30),
+      label: `ปีงบประมาณ ${year}`
+    }
+  }
+}
+
+function getHalfYearRange(date: Date): { start: Date; end: Date; label: string } {
+  const month = date.getMonth()
+  const year = date.getFullYear()
+  // H1: Jan-Jun, H2: Jul-Dec
+  if (month >= 6) {
+    return {
+      start: new Date(year, 6, 1),
+      end: new Date(year, 11, 31),
+      label: `ครึ่งปีหลัง ${year}`
+    }
+  } else {
+    return {
+      start: new Date(year, 0, 1),
+      end: new Date(year, 5, 30),
+      label: `ครึ่งปีแรก ${year}`
+    }
+  }
+}
+
+function getQuarterRange(date: Date): { start: Date; end: Date; label: string } {
+  const quarter = Math.floor(date.getMonth() / 3)
+  const year = date.getFullYear()
+  const startMonth = quarter * 3
+  return {
+    start: new Date(year, startMonth, 1),
+    end: new Date(year, startMonth + 3, 0),
+    label: `ไตรมาส ${quarter + 1}/${year}`
+  }
+}
+
 export function Reports() {
-  const [selectedPeriod, setSelectedPeriod] = useState('month')
+  const [selectedPeriod, setSelectedPeriod] = useState('current_month')
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+    label: 'เดือนนี้'
+  })
+  const [customDateOpen, setCustomDateOpen] = useState(false)
+  const [customFrom, setCustomFrom] = useState<Date>()
+  const [customTo, setCustomTo] = useState<Date>()
+  const [showFilters, setShowFilters] = useState(false)
   const [exportingReport, setExportingReport] = useState<string | null>(null)
   const { toast } = useToast()
+
+  // Update date range when period changes
+  useEffect(() => {
+    const now = new Date()
+    switch (selectedPeriod) {
+      case 'current_month':
+        setDateRange({
+          from: startOfMonth(now),
+          to: endOfMonth(now),
+          label: 'เดือนนี้'
+        })
+        break
+      case 'last_month':
+        const lastMonth = subMonths(now, 1)
+        setDateRange({
+          from: startOfMonth(lastMonth),
+          to: endOfMonth(lastMonth),
+          label: 'เดือนที่แล้ว'
+        })
+        break
+      case 'current_quarter':
+        const cq = getQuarterRange(now)
+        setDateRange({
+          from: cq.start,
+          to: cq.end,
+          label: cq.label
+        })
+        break
+      case 'last_quarter':
+        const lq = getQuarterRange(subQuarters(now, 1))
+        setDateRange({
+          from: lq.start,
+          to: lq.end,
+          label: lq.label
+        })
+        break
+      case 'current_half':
+        const ch = getHalfYearRange(now)
+        setDateRange({
+          from: ch.start,
+          to: ch.end,
+          label: ch.label
+        })
+        break
+      case 'last_half':
+        const lh = getHalfYearRange(subMonths(now, 6))
+        setDateRange({
+          from: lh.start,
+          to: lh.end,
+          label: lh.label
+        })
+        break
+      case 'current_fiscal':
+        const cf = getFiscalYearRange(now)
+        setDateRange({
+          from: cf.start,
+          to: cf.end,
+          label: cf.label
+        })
+        break
+      case 'last_fiscal':
+        const lf = getFiscalYearRange(subYears(now, 1))
+        setDateRange({
+          from: lf.start,
+          to: lf.end,
+          label: lf.label
+        })
+        break
+      case 'current_year':
+        setDateRange({
+          from: startOfYear(now),
+          to: endOfYear(now),
+          label: `ปี ${now.getFullYear()}`
+        })
+        break
+      case 'last_year':
+        const ly = subYears(now, 1)
+        setDateRange({
+          from: startOfYear(ly),
+          to: endOfYear(ly),
+          label: `ปี ${ly.getFullYear()}`
+        })
+        break
+      case 'ytd':
+        setDateRange({
+          from: startOfYear(now),
+          to: now,
+          label: 'ตั้งแต่ต้นปี'
+        })
+        break
+      case 'all':
+        setDateRange({
+          from: new Date(2020, 0, 1),
+          to: now,
+          label: 'ทั้งหมด'
+        })
+        break
+    }
+  }, [selectedPeriod])
 
   const handleExport = async (reportId: string, format: 'pdf' | 'excel') => {
     setExportingReport(reportId)
@@ -108,36 +285,260 @@ export function Reports() {
     }
   }
 
-  const handlePrint = (reportId: string) => {
-    const url = `/api/reports/${reportId}/export/pdf`
-    const win = window.open(url, '_blank')
-    if (win) {
-      win.onload = () => {
-        setTimeout(() => win.print(), 1000)
+  const handlePrint = async (reportId: string) => {
+    // Map report IDs to names and API endpoints for data fetching
+    const reportConfig: Record<string, { name: string; apiPath: string }> = {
+      'trial_balance': { name: 'งบทดลอง', apiPath: '/api/reports/trial-balance' },
+      'balance_sheet': { name: 'งบดุล', apiPath: '/api/reports/balance-sheet' },
+      'income_statement': { name: 'งบกำไรขาดทุน', apiPath: '/api/reports/income-statement' },
+      'general_ledger': { name: 'สมุดบัญชีแยกประเภท', apiPath: '/api/reports/general-ledger' },
+      'aging_ar': { name: 'รายงานลูกหนี้ตามอายุหนี้', apiPath: '/api/reports/aging-ar' },
+      'aging_ap': { name: 'รายงานเจ้าหนี้ตามอายุหนี้', apiPath: '/api/reports/aging-ap' },
+    }
+    
+    const config = reportConfig[reportId]
+    if (!config) {
+      toast({
+        title: 'ไม่สามารถพิมพ์ได้',
+        description: 'รายงานนี้ยังไม่รองรับการพิมพ์',
+        variant: 'destructive'
+      })
+      return
+    }
+    
+    try {
+      // Fetch report data
+      const res = await fetch(config.apiPath)
+      if (!res.ok) throw new Error('Failed to fetch report data')
+      
+      const data = await res.json()
+      
+      // Open print window
+      const printWindow = window.open('', '_blank')
+      if (!printWindow) {
+        toast({
+          title: 'ไม่สามารถเปิดหน้าต่างได้',
+          description: 'กรุณาอนุญาตให้เปิดหน้าต่างใหม่',
+          variant: 'destructive'
+        })
+        return
       }
+
+      // Generate HTML based on report type
+      let contentHtml = ''
+      
+      if (reportId === 'trial_balance') {
+        const accounts = data.accounts || []
+        const totalDebit = accounts.reduce((sum: number, a: any) => sum + (a.debit || 0), 0)
+        const totalCredit = accounts.reduce((sum: number, a: any) => sum + (a.credit || 0), 0)
+        
+        contentHtml = `
+          <table>
+            <thead>
+              <tr>
+                <th>รหัสบัญชี</th>
+                <th>ชื่อบัญชี</th>
+                <th class="text-right">เดบิต</th>
+                <th class="text-right">เครดิต</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${accounts.map((acc: any) => `
+                <tr>
+                  <td>${acc.code}</td>
+                  <td>${acc.name}</td>
+                  <td class="text-right">${(acc.debit || 0) > 0 ? acc.debit.toLocaleString('th-TH', {minimumFractionDigits: 2}) : ''}</td>
+                  <td class="text-right">${(acc.credit || 0) > 0 ? acc.credit.toLocaleString('th-TH', {minimumFractionDigits: 2}) : ''}</td>
+                </tr>
+              `).join('')}
+              <tr style="font-weight: bold; background: #f5f5f5;">
+                <td colspan="2">รวม</td>
+                <td class="text-right">${totalDebit.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                <td class="text-right">${totalCredit.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+              </tr>
+            </tbody>
+          </table>
+        `
+      } else if (reportId === 'balance_sheet') {
+        contentHtml = `
+          <h2>สินทรัพย์</h2>
+          <p>สินทรัพย์หมุนเวียน: ${(data.currentAssets || 0).toLocaleString('th-TH')} บาท</p>
+          <p>สินทรัพย์ไม่หมุนเวียน: ${(data.nonCurrentAssets || 0).toLocaleString('th-TH')} บาท</p>
+          <p style="font-weight: bold;">รวมสินทรัพย์: ${(data.totalAssets || 0).toLocaleString('th-TH')} บาท</p>
+          
+          <h2>หนี้สิน</h2>
+          <p>หนี้สินหมุนเวียน: ${(data.currentLiabilities || 0).toLocaleString('th-TH')} บาท</p>
+          <p>หนี้สินไม่หมุนเวียน: ${(data.nonCurrentLiabilities || 0).toLocaleString('th-TH')} บาท</p>
+          <p style="font-weight: bold;">รวมหนี้สิน: ${(data.totalLiabilities || 0).toLocaleString('th-TH')} บาท</p>
+          
+          <h2>ทุน</h2>
+          <p style="font-weight: bold;">รวมทุน: ${(data.totalEquity || 0).toLocaleString('th-TH')} บาท</p>
+        `
+      } else if (reportId === 'income_statement') {
+        contentHtml = `
+          <h2>รายได้</h2>
+          <p>รายได้จากการขาย: ${(data.revenue || 0).toLocaleString('th-TH')} บาท</p>
+          <p>รายได้อื่น: ${(data.otherIncome || 0).toLocaleString('th-TH')} บาท</p>
+          <p style="font-weight: bold;">รวมรายได้: ${(data.totalRevenue || 0).toLocaleString('th-TH')} บาท</p>
+          
+          <h2>ค่าใช้จ่าย</h2>
+          <p>ต้นทุนขาย: ${(data.costOfSales || 0).toLocaleString('th-TH')} บาท</p>
+          <p>ค่าใช้จ่ายในการขาย: ${(data.sellingExpenses || 0).toLocaleString('th-TH')} บาท</p>
+          <p>ค่าใช้จ่ายในการบริหาร: ${(data.adminExpenses || 0).toLocaleString('th-TH')} บาท</p>
+          <p style="font-weight: bold;">รวมค่าใช้จ่าย: ${(data.totalExpenses || 0).toLocaleString('th-TH')} บาท</p>
+          
+          <h2>ผลการดำเนินงาน</h2>
+          <p style="font-weight: bold; font-size: 18px;">กำไร(ขาดทุน)สุทธิ: ${(data.netIncome || 0).toLocaleString('th-TH')} บาท</p>
+        `
+      } else {
+        contentHtml = `<p>รายงานนี้แสดงในรูปแบบของหน้าเว็บเท่านั้น</p>`
+      }
+
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${config.name}</title>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: 'Sarabun', 'TH Sarabun New', sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; }
+            h1 { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
+            h2 { margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f5f5f5; }
+            .text-right { text-align: right; }
+            .summary { margin-top: 20px; padding: 15px; background: #f9f9f9; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <h1>${config.name}</h1>
+          <p style="text-align: center;">วันที่พิมพ์: ${new Date().toLocaleDateString('th-TH')}</p>
+          
+          ${contentHtml}
+
+          <script>window.onload = () => { setTimeout(() => window.print(), 500); }</script>
+        </body>
+        </html>
+      `
+      
+      printWindow.document.write(html)
+      printWindow.document.close()
+    } catch (error) {
+      toast({
+        title: 'พิมพ์ไม่สำเร็จ',
+        description: 'ไม่สามารถดึงข้อมูลรายงานได้',
+        variant: 'destructive'
+      })
+    }
+  }
+
+  const formatThaiDate = (date: Date) => {
+    return format(date, 'd MMM yyyy', { locale: th })
+  }
+
+  const applyCustomDate = () => {
+    if (customFrom && customTo) {
+      setDateRange({
+        from: customFrom,
+        to: customTo,
+        label: `${formatThaiDate(customFrom)} - ${formatThaiDate(customTo)}`
+      })
+      setCustomDateOpen(false)
     }
   }
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">รายงาน</h1>
           <p className="text-gray-500 mt-1">รายงานทางการเงินและบัญชี</p>
         </div>
+
+        {/* Period Selector */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+            <Calendar className="w-4 h-4 text-gray-500 ml-2" />
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-[180px] border-0 bg-transparent focus:ring-0">
+                <SelectValue placeholder="เลือกช่วงเวลา" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="current_month">เดือนนี้</SelectItem>
+                <SelectItem value="last_month">เดือนที่แล้ว</SelectItem>
+                <SelectItem value="current_quarter">ไตรมาสนี้</SelectItem>
+                <SelectItem value="last_quarter">ไตรมาสที่แล้ว</SelectItem>
+                <SelectItem value="current_half">ครึ่งปีนี้</SelectItem>
+                <SelectItem value="last_half">ครึ่งปีที่แล้ว</SelectItem>
+                <SelectItem value="current_year">ปีนี้</SelectItem>
+                <SelectItem value="last_year">ปีที่แล้ว</SelectItem>
+                <SelectItem value="ytd">ตั้งแต่ต้นปี</SelectItem>
+                <SelectItem value="current_fiscal">ปีงบประมาณนี้</SelectItem>
+                <SelectItem value="last_fiscal">ปีงบประมาณที่แล้ว</SelectItem>
+                <SelectItem value="all">ทั้งหมด</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Custom Date Range */}
+          <Popover open={customDateOpen} onOpenChange={setCustomDateOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Filter className="w-4 h-4" />
+                กำหนดเอง
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-4" align="end">
+              <div className="space-y-4">
+                <h4 className="font-medium">เลือกช่วงวันที่</h4>
+                <div className="flex gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500">จาก</label>
+                    <CalendarComponent
+                      mode="single"
+                      selected={customFrom}
+                      onSelect={setCustomFrom}
+                      className="rounded-md border"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">ถึง</label>
+                    <CalendarComponent
+                      mode="single"
+                      selected={customTo}
+                      onSelect={setCustomTo}
+                      className="rounded-md border"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setCustomDateOpen(false)}>
+                    ยกเลิก
+                  </Button>
+                  <Button size="sm" onClick={applyCustomDate} disabled={!customFrom || !customTo}>
+                    ใช้งาน
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      {/* Date Range Display */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="month">เดือนนี้</SelectItem>
-              <SelectItem value="quarter">ไตรมาสนี้</SelectItem>
-              <SelectItem value="year">ปีนี้</SelectItem>
-              <SelectItem value="custom">กำหนดเอง</SelectItem>
-            </SelectContent>
-          </Select>
+          <Calendar className="w-4 h-4 text-blue-600" />
+          <span className="font-medium text-blue-900">{dateRange.label}</span>
+          <span className="text-blue-700">
+            ({formatThaiDate(dateRange.from)} - {formatThaiDate(dateRange.to)})
+          </span>
+        </div>
+        <div className="text-sm text-blue-600">
+          ระยะเวลา: {Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24))} วัน
         </div>
       </div>
 

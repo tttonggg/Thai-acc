@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { signOut } from 'next-auth/react'
-import { Sidebar } from '@/components/layout/sidebar'
-import { Header } from '@/components/layout/header'
+import { KeeratiSidebar } from '@/components/layout/keerati-sidebar'
 import { Dashboard } from '@/components/dashboard/dashboard'
+import { EntityManagement } from '@/components/entities/entity-management'
+import { CurrencyManagement } from '@/components/currencies/currency-management'
 import { ChartOfAccounts } from '@/components/accounts/chart-of-accounts'
 import { JournalEntry } from '@/components/journal/journal-entry'
 import { InvoiceList } from '@/components/invoices/invoice-list'
+import { InvoiceDetailPage } from '@/components/invoices/invoice-detail-page'
 import { VatReport } from '@/components/vat/vat-report'
 import { WhtWithTabs } from '@/components/wht/wht-with-tabs'
 import { CustomerList } from '@/components/ar/customer-list'
@@ -23,7 +25,13 @@ import { PayrollPage } from '@/components/payroll/payroll-page'
 import { PettyCashPage } from '@/components/petty-cash/petty-cash-page'
 import { ProductsPage } from '@/components/products/products-page'
 import { StockTakePage } from '@/components/stock-takes/stock-take-page'
+import { PurchaseRequestList } from '@/components/purchase-requests/purchase-request-list'
+import { PurchaseOrderList } from '@/components/purchase-orders/purchase-order-list'
+import { PurchaseList } from '@/components/purchases/purchase-list'
+import { QuotationList } from '@/components/quotations/quotation-list'
 import { Reports } from '@/components/reports/reports'
+import { PeriodManagement } from '@/components/accounting-periods/period-management'
+import { BudgetManagement } from '@/components/budgets/budget-management'
 import { Settings } from '@/components/settings/settings'
 import { LoginPage } from '@/components/auth/login-page'
 import { UserManagement } from '@/components/auth/user-management'
@@ -68,19 +76,26 @@ export type Module =
   | 'accounts'
   | 'journal'
   | 'invoices'
+  | 'invoice-detail'
+  | 'quotations'
   | 'vat'
   | 'wht'
   | 'customers'
   | 'vendors'
+  | 'purchase-requests'
+  | 'purchase-orders'
+  | 'purchases'
   | 'payments'
   | 'credit-notes'
   | 'debit-notes'
   | 'inventory'
   | 'products'
+  | 'warehouses'
   | 'stock-takes'
   | 'banking'
   | 'assets'
   | 'payroll'
+  | 'employees'
   | 'petty-cash'
   | 'reports'
   | 'settings'
@@ -95,7 +110,120 @@ export type Module =
 export default function Home() {
   const { data: session, status } = useSession()
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null)
+
+  // Sync URL with activeModule using history API (doesn't trigger Next.js routing)
+  useEffect(() => {
+    if (status === 'authenticated') {
+      // Map module to URL path
+      const moduleToPath: Record<Module, string> = {
+        'dashboard': '/',
+        'accounts': '/accounts',
+        'journal': '/journal',
+        'invoices': '/invoices',
+        'quotations': '/quotations',
+        'vat': '/vat',
+        'wht': '/wht',
+        'customers': '/customers',
+        'vendors': '/vendors',
+        'purchase-requests': '/purchase-requests',
+        'purchase-orders': '/purchase-orders',
+        'purchases': '/purchases',
+        'payments': '/payments',
+        'credit-notes': '/credit-notes',
+        'debit-notes': '/debit-notes',
+        'inventory': '/inventory',
+        'products': '/products',
+        'warehouses': '/warehouses',
+        'stock-takes': '/stock-takes',
+        'banking': '/banking',
+        'assets': '/assets',
+        'payroll': '/payroll',
+        'employees': '/employees',
+        'petty-cash': '/petty-cash',
+        'reports': '/reports',
+        'settings': '/settings',
+        'users': '/users',
+        'data-export': '/data-export',
+        'data-import': '/data-import',
+        'backup-restore': '/backup-restore',
+        'activity-log': '/activity-log',
+        'webhooks': '/webhooks',
+        'api-analytics': '/api-analytics',
+      }
+
+      // Update URL when activeModule changes (using history API to avoid Next.js routing)
+      const targetPath = moduleToPath[activeModule]
+      if (targetPath && window.location.pathname !== targetPath) {
+        window.history.pushState({ path: targetPath }, '', targetPath)
+      }
+    }
+  }, [activeModule, status])
+
+  // Initialize activeModule from URL on mount and handle browser navigation
+  useEffect(() => {
+    if (status === 'authenticated') {
+      const pathToModule: Record<string, Module> = {
+        '/': 'dashboard',
+        '/accounts': 'accounts',
+        '/journal': 'journal',
+        '/invoices': 'invoices',
+        '/quotations': 'quotations',
+        '/vat': 'vat',
+        '/wht': 'wht',
+        '/customers': 'customers',
+        '/vendors': 'vendors',
+        '/purchase-requests': 'purchase-requests',
+        '/purchase-orders': 'purchase-orders',
+        '/purchases': 'purchases',
+        '/payments': 'payments',
+        '/credit-notes': 'credit-notes',
+        '/debit-notes': 'debit-notes',
+        '/inventory': 'inventory',
+        '/products': 'products',
+        '/warehouses': 'warehouses',
+        '/stock-takes': 'stock-takes',
+        '/banking': 'banking',
+        '/assets': 'assets',
+        '/payroll': 'payroll',
+        '/employees': 'employees',
+        '/petty-cash': 'petty-cash',
+        '/reports': 'reports',
+        '/settings': 'settings',
+        '/users': 'users',
+        '/data-export': 'data-export',
+        '/data-import': 'data-import',
+        '/backup-restore': 'backup-restore',
+        '/activity-log': 'activity-log',
+        '/webhooks': 'webhooks',
+        '/api-analytics': 'api-analytics',
+      }
+
+      const handlePopState = () => {
+        const pathname = window.location.pathname
+
+        // Check if it's an invoice detail URL
+        const invoiceDetailMatch = pathname.match(/^\/invoices\/([^\/]+)$/)
+        if (invoiceDetailMatch) {
+          const invoiceId = invoiceDetailMatch[1]
+          setActiveModule('invoice-detail')
+          setSelectedInvoiceId(invoiceId)
+          return
+        }
+
+        const moduleFromPath = pathToModule[pathname] || 'dashboard'
+        setActiveModule(moduleFromPath)
+        setSelectedInvoiceId(null)
+      }
+
+      // Set initial module from current URL
+      handlePopState()
+
+      // Listen for browser back/forward navigation
+      window.addEventListener('popstate', handlePopState)
+      return () => window.removeEventListener('popstate', handlePopState)
+    }
+  }, [status])
 
   // Loading state
   if (status === 'loading') {
@@ -127,6 +255,24 @@ export default function Home() {
         return <JournalEntry />
       case 'invoices':
         return <InvoiceList />
+      case 'invoice-detail':
+        return selectedInvoiceId ? (
+          <InvoiceDetailPage
+            invoiceId={selectedInvoiceId}
+            onBack={() => {
+              setActiveModule('invoices')
+              setSelectedInvoiceId(null)
+              window.history.pushState({ path: '/invoices' }, '', '/invoices')
+            }}
+            onEdit={(invoiceId) => {
+              // Open edit dialog
+              // This will be handled by the InvoiceList component
+              window.location.href = `/invoices?edit=${invoiceId}`
+            }}
+          />
+        ) : null
+      case 'quotations':
+        return <QuotationList />
       case 'vat':
         return <VatReport />
       case 'wht':
@@ -136,6 +282,12 @@ export default function Home() {
         return <CustomerList />
       case 'vendors':
         return <VendorList />
+      case 'purchase-requests':
+        return <PurchaseRequestList />
+      case 'purchase-orders':
+        return <PurchaseOrderList />
+      case 'purchases':
+        return <PurchaseList />
       case 'payments':
         return <PaymentList />
       case 'credit-notes':
@@ -143,9 +295,11 @@ export default function Home() {
       case 'debit-notes':
         return <DebitNoteList />
       case 'inventory':
-        return <InventoryPage />
+        return <InventoryPage key="inventory" />
       case 'products':
-        return <ProductsPage />
+        return <ProductsPage key="products" />
+      case 'warehouses':
+        return <InventoryPage key="warehouses" initialTab="warehouses" />
       case 'stock-takes':
         return (
           <PermissionGuard permission="INVENTORY_VIEW">
@@ -157,7 +311,9 @@ export default function Home() {
       case 'assets':
         return <AssetsPage />
       case 'payroll':
-        return <PayrollPage />
+        return <PayrollPage key="payroll" initialTab="runs" />
+      case 'employees':
+        return <PayrollPage key="employees" initialTab="employees" />
       case 'petty-cash':
         return <PettyCashPage />
       case 'reports':
@@ -210,6 +366,30 @@ export default function Home() {
             <ApiAnalytics />
           </PermissionGuard>
         )
+      case 'entities':
+        return (
+          <PermissionGuard permission="SETTINGS_VIEW">
+            <EntityManagement />
+          </PermissionGuard>
+        )
+      case 'currencies':
+        return (
+          <PermissionGuard permission="SETTINGS_VIEW">
+            <CurrencyManagement />
+          </PermissionGuard>
+        )
+      case 'accounting-periods':
+        return (
+          <PermissionGuard permission="SETTINGS_VIEW">
+            <PeriodManagement />
+          </PermissionGuard>
+        )
+      case 'budgets':
+        return (
+          <PermissionGuard permission="SETTINGS_VIEW">
+            <BudgetManagement />
+          </PermissionGuard>
+        )
       default:
         return <Dashboard />
     }
@@ -256,29 +436,17 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <Sidebar 
-        activeModule={activeModule} 
+      {/* Keerati Sidebar */}
+      <KeeratiSidebar 
+        activeModule={activeModule}
         setActiveModule={setActiveModule}
-        isOpen={sidebarOpen}
-        setIsOpen={setSidebarOpen}
-        menuItems={getMenuItems()}
         userRole={userRole}
         userName={session.user?.name || session.user?.email}
         onLogout={() => signOut({ callbackUrl: '/' })}
       />
       
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <Header 
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          userName={session.user?.name || session.user?.email}
-          userRole={userRole}
-          onLogout={() => signOut({ callbackUrl: '/' })}
-        />
-        
+      <div className="flex-1 flex flex-col overflow-hidden bg-[var(--background)]">
         {/* Content Area */}
         <main className="flex-1 overflow-auto p-6">
           {renderModule()}

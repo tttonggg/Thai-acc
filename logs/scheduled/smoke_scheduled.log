@@ -1,0 +1,218 @@
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260317_220001.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_090001.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_100000.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_110000.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_120001.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_130001.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_140001.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_150001.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 1s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_160001.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_190000.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Starting development server...[0m
+[0;34mℹ️  Waiting for server to be ready...[0m
+[0;32m✅ Server started (PID: 7285)[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_200000.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_210000.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_220000.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260318_230000.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260319_000000.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260319_090000.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260319_100000.md[0m
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Smoke Tests (Critical Path)[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing smoke test suite...[0m
+./scripts/test-automation.sh: line 241: bun: command not found
+[0;31m❌ Smoke tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Smoke tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/smoke_report_20260319_150000.md[0m

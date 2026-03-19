@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>พรีวิวใบกำกับภาษี - Invoice Preview</title>
+  <style>
+    /* Thai Fonts from Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Sarabun', 'TH Sarabun New', sans-serif;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #000;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+
+    .preview-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Customization Panel - Fixed on right */
+    .customization-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      width: 280px;
+      z-index: 1000;
+    }
+
+    .customization-panel h3 {
+      font-size: 16px;
+      margin-bottom: 15px;
+      color: #333;
+      border-bottom: 2px solid #1976d2;
+      padding-bottom: 8px;
+    }
+
+    .setting-group {
+      margin-bottom: 15px;
+    }
+
+    .setting-group label {
+      display: block;
+      font-size: 11px;
+      margin-bottom: 5px;
+      color: #555;
+      font-weight: 500;
+    }
+
+    .setting-group input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #ddd;
+      outline: none;
+    }
+
+    .setting-group select {
+      width: 100%;
+      padding: 6px;
+      font-size: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .setting-value {
+      float: right;
+      font-weight: bold;
+      color: #1976d2;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-top: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #1976d2;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1565c0;
+    }
+
+    .btn-secondary {
+      background: #757575;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #616161;
+    }
+
+    /* Invoice Paper */
+    .invoice-paper {
+      background: white;
+      padding: 15mm;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      min-height: 297mm;
+    }
+
+    .header {
+      margin-bottom: 15px;
+    }
+
+    .company-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .company-details {
+      font-size: 10px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .doc-title {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin: 20px 0;
+      padding: 12px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      border: 2px solid #ddd;
+    }
+
+    .two-columns {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    .column {
+      flex: 1;
+    }
+
+    .label {
+      font-size: 10px;
+      color: #666;
+      margin-bottom: 2px;
+    }
+
+    .value {
+      font-size: 11px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .customer-name {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    /* Table */
+    .items-table {
+      width: 100%;
+      margin: 20px 0;
+      border-collapse: collapse;
+      border: 2px solid #333;
+    }
+
+    .items-table th {
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: bold;
+      border-bottom: 2px solid #333;
+    }
+
+    .items-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #ddd;
+      font-size: 10px;
+    }
+
+    .items-table td.text-right {
+      text-align: right;
+    }
+
+    .items-table td.text-center {
+      text-align: center;
+    }
+
+    /* Summary */
+    .summary {
+      margin-left: auto;
+      width: 220px;
+      border: 2px solid #333;
+      border-radius: 6px;
+      padding: 12px;
+      background: #fafafa;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #ddd;
+      font-size: 11px;
+    }
+
+    .summary-row.total {
+      font-weight: bold;
+      font-size: 15px;
+      border-bottom: 2px solid #1976d2;
+      margin-top: 10px;
+      padding-top: 10px;
+    }
+
+    /* Terms */
+    .terms {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 6px;
+      border-left: 4px solid #1976d2;
+      font-size: 10px;
+    }
+
+    .terms-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #ddd;
+      font-size: 9px;
+      color: #666;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .customization-panel {
+        display: none !important;
+      }
+
+      .preview-container {
+        max-width: 100%;
+      }
+
+      .invoice-paper {
+        box-shadow: none;
+        padding: 0;
+      }
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      border-left: 4px solid #1976d2;
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    .info-box strong {
+      color: #1976d2;
+    }
+  </style>
+</head>
+<body>
+  <!-- Info Box -->
+  <div class="preview-container">
+    <div class="info-box" id="infoBox">
+      <strong>✨ วิธีใช้งาน / How to use:</strong><br>
+      1. ปรับแต่งเอกสารได้จากแผงด้านขวา (ปรับขนาดตัวอักษร, ระยะบรรทัด, สีตาราง)<br>
+      2. กด Ctrl+P (หรือ Cmd+P บน Mac) เพื่อพิมพ์หรือบันทึกเป็น PDF<br>
+      3. แผงด้านขวาจะไม่แสดงเมื่อพิมพ์
+    </div>
+
+    <!-- Invoice Paper -->
+    <div class="invoice-paper" id="invoice">
+      <!-- Header -->
+      <div class="header">
+        <div class="company-name">บริษัท ตัวอย่าง จำกัด (Example Company Ltd.)</div>
+        <div class="company-details">123 ถนนสุขุมวิท คลองตัน เขตคลองเตย กรุงเทพฯ 10110</div>
+        <div class="company-details">เลขประจำตัวผู้เสียภาษี: 0105551234567</div>
+        <div class="company-details">โทร: 02-123-4567 | อีเมล: contact@example.com</div>
+      </div>
+
+      <!-- Document Title -->
+      <div class="doc-title">
+        ใบกำกับภาษี / TAX INVOICE
+      </div>
+
+      <!-- Two Columns -->
+      <div class="two-columns">
+        <div class="column">
+          <div class="label">เลขที่ / Invoice No.</div>
+          <div class="value">INV-2026-0001</div>
+
+          <div class="label">วันที่ / Date</div>
+          <div class="value">18/03/2569</div>
+
+          <div class="label">ครบกำหนด / Due Date</div>
+          <div class="value">17/04/2569</div>
+
+          <div class="label">อ้างอิง / Reference</div>
+          <div class="value">PO-2026-001</div>
+        </div>
+
+        <div class="column">
+          <div class="label">ลูกค้า / Customer</div>
+          <div class="customer-name">บริษัท ลูกค้า จำกัด</div>
+
+          <div class="label">เลขประจำตัวผู้เสียภาษี</div>
+          <div class="value">0105557654321</div>
+
+          <div class="label">ที่อยู่ / Address</div>
+          <div class="value">456 ถนนสีลม ปทุมวัน กรุงเทพฯ 10330</div>
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th style="width: 6%">ลำดับ<br>No.</th>
+            <th style="width: 45%">รายการ<br>Description</th>
+            <th style="width: 10%">จำนวน<br>Qty</th>
+            <th style="width: 10%">หน่วย<br>Unit</th>
+            <th style="width: 12%">ราคา/หน่วย<br>Price</th>
+            <th style="width: 9%">ส่วนลด<br>Disc.</th>
+            <th style="width: 13%">จำนวนเงิน<br>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-center">1</td>
+            <td>บริการให้คำปรึกษาด้านระบบบัญชี (Consulting Service)</td>
+            <td class="text-center">1</td>
+            <td class="text-center">ครั้ง</td>
+            <td class="text-right">5,000.00</td>
+            <td class="text-right">-</td>
+            <td class="text-right">5,000.00</td>
+          </tr>
+          <tr>
+            <td class="text-center">2</td>
+            <td>การติดตั้งซอฟต์แวร์บัญชี (Software Installation)</td>
+            <td class="text-center">2</td>
+            <td class="text-center">เครื่อง</td>
+            <td class="text-right">2,500.00</td>
+            <td class="text-right">500.00</td>
+            <td class="text-right">4,500.00</td>
+          </tr>
+          <tr>
+            <td class="text-center">3</td>
+            <td>การอบรมการใช้งานระบบ (Training)</td>
+            <td class="text-center">5</td>
+            <td class="text-center">ชั่วโมง</td>
+            <td class="text-right">500.00</td>
+            <td class="text-right">-</td>
+            <td class="text-right">2,500.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Summary -->
+      <div class="summary">
+        <div class="summary-row">
+          <span>ยอดรวม / Subtotal</span>
+          <span>12,000.00</span>
+        </div>
+        <div class="summary-row">
+          <span>ส่วนลด / Discount</span>
+          <span>(500.00)</span>
+        </div>
+        <div class="summary-row">
+          <span>ภาษีมูลค่าเพิ่ม 7% / VAT 7%</span>
+          <span>805.00</span>
+        </div>
+        <div class="summary-row total">
+          <span>ยอดสุทธิ / Grand Total</span>
+          <span>฿12,305.00</span>
+        </div>
+      </div>
+
+      <!-- Terms -->
+      <div class="terms">
+        <div class="terms-title">เงื่อนไขและเงื่อนไขการชำระเงิน / Terms & Conditions:</div>
+        <div style="margin-top: 8px; line-height: 1.6;">
+          1. ชำระภายใน 30 วันนับจากวันที่รับใบกำกับภาษี / Payment due within 30 days<br>
+          2. กรุณาระบุเลขที่ใบกำกับภาษีในการติดต่อ / Please quote invoice number in all correspondence<br>
+          3. ช่องทางการโอนเงิน / Bank Transfer: ธนาคารกรุงไทย บัญชีออมทรัพย์ xxx-xxxxx-x ชื่อบัญชี บริษัท ตัวอย่าง จำกัด
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        เอกสารนี้เป็นการสร้างจากระบบคอมพิวเตอร์ / This is a computer-generated document<br>
+        วันที่ออกเอกสาร / Issue Date: 18/03/2569
+      </div>
+    </div>
+  </div>
+
+  <!-- Customization Panel -->
+  <div class="customization-panel">
+    <h3>🎨 ปรับแต่ง / Customize</h3>
+
+    <div class="setting-group">
+      <label>
+        ขนาดตัวอักษร / Font Size
+        <span class="setting-value" id="fontSizeDisplay">12px</span>
+      </label>
+      <input type="range" id="fontSize" min="9" max="16" value="12" step="1">
+    </div>
+
+    <div class="setting-group">
+      <label>
+        ระยะห่างบรรทัด / Line Height
+        <span class="setting-value" id="lineHeightDisplay">1.4</span>
+      </label>
+      <input type="range" id="lineHeight" min="1.2" max="2.0" value="1.4" step="0.1">
+    </div>
+
+    <div class="setting-group">
+      <label>สีหัวตาราง / Table Header Color</label>
+      <select id="tableHeaderColor">
+        <option value="#424242">เทา / Gray</option>
+        <option value="#1976d2">ฟ้า / Blue</option>
+        <option value="#388e3c">เขียว / Green</option>
+        <option value="#d32f2f">แดง / Red</option>
+        <option value="#7b1fa2">ม่วง / Purple</option>
+        <option value="#f57c00">ส้ม / Orange</option>
+      </select>
+    </div>
+
+    <div class="setting-group">
+      <label>สีขอบตาราง / Table Border</label>
+      <select id="tableBorderColor">
+        <option value="#333333">ดำ / Black</option>
+        <option value="#1976d2">ฟ้า / Blue</option>
+        <option value="#388e3c">เขียว / Green</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="window.print()">
+      🖨️ พิมพ์ / Print (Ctrl+P)
+    </button>
+
+    <button class="btn btn-secondary" onclick="resetSettings()">
+      🔄 รีเซ็ตค่า / Reset
+    </button>
+
+    <button class="btn btn-secondary" onclick="hideInfoBox()">
+      👁️ ซ่อนคำแนะนำ / Hide Tips
+    </button>
+  </div>
+
+  <script>
+    // Customization functions
+    const fontSizeInput = document.getElementById('fontSize');
+    const lineHeightInput = document.getElementById('lineHeight');
+    const tableHeaderColorInput = document.getElementById('tableHeaderColor');
+    const tableBorderColorInput = document.getElementById('tableBorderColor');
+
+    function updateFontSize(size) {
+      document.body.style.fontSize = size + 'px';
+      document.getElementById('fontSizeDisplay').textContent = size + 'px';
+    }
+
+    function updateLineHeight(height) {
+      document.body.style.lineHeight = height;
+      document.getElementById('lineHeightDisplay').textContent = height;
+    }
+
+    function updateTableHeaderColor(color) {
+      const headers = document.querySelectorAll('.items-table th');
+      headers.forEach(th => {
+        th.style.background = color;
+      });
+    }
+
+    function updateTableBorderColor(color) {
+      const table = document.querySelector('.items-table');
+      table.style.borderColor = color;
+
+      const headers = document.querySelectorAll('.items-table th');
+      headers.forEach(th => {
+        th.style.borderColor = color;
+      });
+
+      const cells = document.querySelectorAll('.items-table td');
+      cells.forEach(td => {
+        td.style.borderColor = '#ddd'; // Keep internal borders light
+      });
+    }
+
+    function resetSettings() {
+      fontSizeInput.value = 12;
+      lineHeightInput.value = 1.4;
+      tableHeaderColorInput.value = '#424242';
+      tableBorderColorInput.value = '#333333';
+
+      updateFontSize(12);
+      updateLineHeight(1.4);
+      updateTableHeaderColor('#424242');
+      updateTableBorderColor('#333333');
+    }
+
+    function hideInfoBox() {
+      const infoBox = document.getElementById('infoBox');
+      infoBox.style.display = 'none';
+    }
+
+    // Event listeners
+    fontSizeInput.addEventListener('input', (e) => updateFontSize(e.target.value));
+    lineHeightInput.addEventListener('input', (e) => updateLineHeight(e.target.value));
+    tableHeaderColorInput.addEventListener('change', (e) => updateTableHeaderColor(e.target.value));
+    tableBorderColorInput.addEventListener('change', (e) => updateTableBorderColor(e.target.value));
+
+    // Keyboard shortcut for print
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        window.print();
+      }
+    });
+  </script>
+</body>
+</html>

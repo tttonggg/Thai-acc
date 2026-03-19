@@ -413,19 +413,29 @@ export function ChartOfAccounts() {
 
     const filteredAccounts = accounts.filter(a => a && a.parentId === parentId)
 
-    return filteredAccounts.map(account => {
-      if (!account) return null
+    const rows: React.ReactNode[] = []
+
+    filteredAccounts.forEach(account => {
+      if (!account) return
 
       const isExpanded = expandedIds.includes(account.id)
       const children = getChildAccounts(account.id)
 
-      return (
-        <div key={account.id}>
+      rows.push(
+        <React.Fragment key={account.id}>
           {renderAccountRow(account, depth)}
-          {isExpanded && children.length > 0 && renderAccountTree(account.id, depth + 1)}
-        </div>
+        </React.Fragment>
       )
+
+      if (isExpanded && children.length > 0) {
+        const childRows = renderAccountTree(account.id, depth + 1)
+        if (childRows) {
+          rows.push(...(childRows as React.ReactNode[]))
+        }
+      }
     })
+
+    return rows
   }
 
   if (loading) {

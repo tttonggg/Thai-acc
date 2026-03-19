@@ -1,0 +1,1421 @@
+
+> nextjs_tailwind_shadcn_ts@0.2.0 dev
+> next dev -p 3000 2>&1 | tee dev.log
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.247:3000
+- Environments: .env
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 1542ms
+ GET /api/health 200 in 492ms (compile: 319ms, proxy.ts: 71ms, render: 102ms)
+ GET /api/purchase-requests 401 in 639ms (compile: 623ms, proxy.ts: 6ms, render: 11ms)
+ GET /api/purchase-orders 401 in 112ms (compile: 104ms, proxy.ts: 1588µs, render: 6ms)
+ GET / 200 in 2.4s (compile: 2.0s, proxy.ts: 5ms, render: 368ms)
+ GET / 200 in 24ms (compile: 1460µs, proxy.ts: 2ms, render: 20ms)
+ GET / 200 in 280ms (compile: 8ms, proxy.ts: 6ms, render: 266ms)
+ GET / 200 in 284ms (compile: 20ms, proxy.ts: 4ms, render: 261ms)
+ GET / 200 in 289ms (compile: 48ms, proxy.ts: 5ms, render: 236ms)
+ GET / 200 in 291ms (compile: 79ms, proxy.ts: 3ms, render: 209ms)
+ GET / 200 in 243ms (compile: 77ms, proxy.ts: 35ms, render: 131ms)
+ GET / 200 in 241ms (compile: 102ms, proxy.ts: 36ms, render: 103ms)
+ GET / 200 in 248ms (compile: 68ms, proxy.ts: 30ms, render: 150ms)
+ GET / 200 in 248ms (compile: 87ms, proxy.ts: 35ms, render: 127ms)
+ GET /api/auth/session 200 in 993ms (compile: 955ms, proxy.ts: 25ms, render: 13ms)
+ GET /api/auth/session 200 in 990ms (compile: 953ms, proxy.ts: 22ms, render: 16ms)
+ GET /api/auth/session 200 in 992ms (compile: 948ms, proxy.ts: 24ms, render: 20ms)
+ GET /api/auth/session 200 in 1003ms (compile: 941ms, proxy.ts: 29ms, render: 33ms)
+ GET /api/auth/providers 200 in 108ms (compile: 46ms, proxy.ts: 19ms, render: 44ms)
+ GET /api/auth/providers 200 in 100ms (compile: 55ms, proxy.ts: 16ms, render: 29ms)
+ GET /api/auth/providers 200 in 101ms (compile: 61ms, proxy.ts: 16ms, render: 24ms)
+ GET /api/auth/providers 200 in 109ms (compile: 62ms, proxy.ts: 17ms, render: 29ms)
+ GET /api/auth/csrf 200 in 72ms (compile: 32ms, proxy.ts: 11ms, render: 28ms)
+ GET /api/auth/csrf 200 in 84ms (compile: 39ms, proxy.ts: 10ms, render: 35ms)
+ GET /api/auth/csrf 200 in 104ms (compile: 48ms, proxy.ts: 4ms, render: 52ms)
+ GET /api/auth/csrf 200 in 107ms (compile: 51ms, proxy.ts: 5ms, render: 51ms)
+ GET /purchases 404 in 759ms (compile: 99ms, proxy.ts: 1995µs, render: 658ms)
+ GET /purchases 404 in 765ms (compile: 115ms, proxy.ts: 4ms, render: 647ms)
+ GET /purchases 404 in 770ms (compile: 130ms, proxy.ts: 3ms, render: 637ms)
+ GET /purchases 404 in 775ms (compile: 146ms, proxy.ts: 3ms, render: 626ms)
+[Slow Query] 116ms - UPDATE "public"."User" SET "lastLoginAt" = $1, "updatedAt" = $2 WHERE ("public"."User"."id" = $3 AND 1=1) RETURNING "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt"
+ POST /api/auth/callback/credentials 200 in 795ms (compile: 40ms, proxy.ts: 4ms, render: 751ms)
+ POST /api/auth/callback/credentials 200 in 798ms (compile: 36ms, proxy.ts: 4ms, render: 759ms)
+ POST /api/auth/callback/credentials 200 in 838ms (compile: 23ms, proxy.ts: 29ms, render: 786ms)
+ POST /api/auth/callback/credentials 200 in 815ms (compile: 25ms, proxy.ts: 6ms, render: 784ms)
+ GET /api/auth/session 200 in 92ms (compile: 58ms, proxy.ts: 10ms, render: 24ms)
+ GET /api/auth/session 200 in 94ms (compile: 58ms, proxy.ts: 9ms, render: 27ms)
+ GET /api/auth/session 200 in 112ms (compile: 62ms, proxy.ts: 5ms, render: 45ms)
+ GET /api/auth/session 200 in 153ms (compile: 61ms, proxy.ts: 7ms, render: 85ms)
+ GET /api/auth/session 200 in 222ms (compile: 94ms, proxy.ts: 63ms, render: 65ms)
+ GET /api/auth/session 200 in 226ms (compile: 97ms, proxy.ts: 62ms, render: 67ms)
+ GET /api/auth/session 200 in 209ms (compile: 111ms, proxy.ts: 19ms, render: 79ms)
+ GET /api/auth/session 200 in 341ms (compile: 150ms, proxy.ts: 21ms, render: 169ms)
+[Slow Query] 121ms - SELECT SUM("totalAmount") AS "_sum$totalAmount", SUM("paidAmount") AS "_sum$paidAmount" FROM (SELECT "public"."PurchaseInvoice"."totalAmount", "public"."PurchaseInvoice"."paidAmount" FROM "public"."PurchaseInvoice" WHERE "public"."PurchaseInvoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3) AS "sub"
+[Slow Query] 157ms - SELECT "public"."PurchaseInvoice"."id", "public"."PurchaseInvoice"."dueDate", "public"."PurchaseInvoice"."totalAmount", "public"."PurchaseInvoice"."paidAmount" FROM "public"."PurchaseInvoice" WHERE "public"."PurchaseInvoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3
+[Slow Query] 105ms - SELECT "public"."ChartOfAccount"."id", "public"."ChartOfAccount"."code", "public"."ChartOfAccount"."name", "public"."ChartOfAccount"."nameEn", "public"."ChartOfAccount"."type"::text, "public"."ChartOfAccount"."level", "public"."ChartOfAccount"."parentId", "public"."ChartOfAccount"."isDetail", "public"."ChartOfAccount"."isSystem", "public"."ChartOfAccount"."isActive", "public"."ChartOfAccount"."notes", "public"."ChartOfAccount"."createdAt", "public"."ChartOfAccount"."updatedAt" FROM "public"."ChartOfAccount" WHERE "public"."ChartOfAccount"."id" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) OFFSET $20
+ GET /api/dashboard 200 in 502ms (compile: 74ms, proxy.ts: 14ms, render: 414ms)
+ GET /api/dashboard 200 in 547ms (compile: 103ms, proxy.ts: 21ms, render: 422ms)
+ GET /api/dashboard 200 in 549ms (compile: 94ms, proxy.ts: 26ms, render: 428ms)
+ GET /api/dashboard 200 in 530ms (compile: 80ms, proxy.ts: 20ms, render: 429ms)
+ GET /api/auth/session 200 in 942ms (compile: 765ms, proxy.ts: 43ms, render: 134ms)
+ GET /api/auth/session 200 in 841ms (compile: 783ms, proxy.ts: 5ms, render: 53ms)
+ GET /api/auth/session 200 in 905ms (compile: 769ms, proxy.ts: 5ms, render: 131ms)
+ GET / 200 in 1511ms (compile: 151ms, proxy.ts: 65ms, render: 1296ms)
+ GET /api/auth/session 200 in 418ms (compile: 372ms, proxy.ts: 15ms, render: 30ms)
+ GET / 200 in 1520ms (compile: 165ms, proxy.ts: 102ms, render: 1253ms)
+ GET / 200 in 1452ms (compile: 207ms, proxy.ts: 38ms, render: 1208ms)
+ GET / 200 in 1321ms (compile: 533ms, proxy.ts: 5ms, render: 783ms)
+ GET / 200 in 1588ms (compile: 154ms, proxy.ts: 67ms, render: 1367ms)
+ GET / 200 in 1622ms (compile: 116ms, proxy.ts: 83ms, render: 1423ms)
+ GET / 200 in 1526ms (compile: 174ms, proxy.ts: 40ms, render: 1312ms)
+ GET / 200 in 1343ms (compile: 439ms, proxy.ts: 8ms, render: 896ms)
+ GET / 200 in 576ms (compile: 70ms, proxy.ts: 20ms, render: 486ms)
+ GET / 200 in 534ms (compile: 161ms, proxy.ts: 12ms, render: 362ms)
+ GET / 200 in 513ms (compile: 190ms, proxy.ts: 15ms, render: 308ms)
+ GET / 200 in 112ms (compile: 7ms, proxy.ts: 26ms, render: 78ms)
+ GET / 200 in 253ms (compile: 42ms, proxy.ts: 11ms, render: 200ms)
+ GET / 200 in 260ms (compile: 22ms, proxy.ts: 14ms, render: 224ms)
+ GET / 200 in 256ms (compile: 72ms, proxy.ts: 3ms, render: 181ms)
+ GET / 200 in 262ms (compile: 89ms, proxy.ts: 9ms, render: 163ms)
+ GET /api/auth/session 200 in 105ms (compile: 67ms, proxy.ts: 24ms, render: 14ms)
+ GET /api/auth/session 200 in 105ms (compile: 68ms, proxy.ts: 20ms, render: 17ms)
+ GET /api/auth/session 200 in 109ms (compile: 71ms, proxy.ts: 20ms, render: 18ms)
+ GET /api/auth/session 200 in 145ms (compile: 54ms, proxy.ts: 7ms, render: 84ms)
+ GET / 200 in 262ms (compile: 16ms, proxy.ts: 6ms, render: 241ms)
+ GET / 200 in 258ms (compile: 90ms, proxy.ts: 6ms, render: 162ms)
+ GET / 200 in 259ms (compile: 114ms, proxy.ts: 6ms, render: 139ms)
+ GET / 200 in 110ms (compile: 16ms, proxy.ts: 35ms, render: 59ms)
+ GET /api/auth/providers 200 in 40ms (compile: 9ms, proxy.ts: 8ms, render: 23ms)
+ GET /api/auth/providers 200 in 43ms (compile: 16ms, proxy.ts: 8ms, render: 19ms)
+ GET /api/auth/providers 200 in 41ms (compile: 19ms, proxy.ts: 5ms, render: 17ms)
+ GET /api/auth/csrf 200 in 62ms (compile: 32ms, proxy.ts: 11ms, render: 19ms)
+ GET /api/auth/csrf 200 in 79ms (compile: 32ms, proxy.ts: 16ms, render: 32ms)
+ GET /api/auth/csrf 200 in 79ms (compile: 30ms, proxy.ts: 10ms, render: 39ms)
+ GET /api/auth/providers 200 in 133ms (compile: 37ms, proxy.ts: 9ms, render: 88ms)
+ GET /api/auth/csrf 200 in 78ms (compile: 61ms, proxy.ts: 8ms, render: 9ms)
+ GET /purchases 404 in 699ms (compile: 29ms, proxy.ts: 24ms, render: 646ms)
+ GET /purchases 404 in 729ms (compile: 72ms, proxy.ts: 23ms, render: 634ms)
+ GET /purchases 404 in 747ms (compile: 102ms, proxy.ts: 7ms, render: 638ms)
+ POST /api/auth/callback/credentials 200 in 832ms (compile: 90ms, proxy.ts: 26ms, render: 716ms)
+ POST /api/auth/callback/credentials 200 in 835ms (compile: 72ms, proxy.ts: 50ms, render: 713ms)
+ POST /api/auth/callback/credentials 200 in 843ms (compile: 65ms, proxy.ts: 66ms, render: 711ms)
+ GET /purchases 404 in 736ms (compile: 328ms, proxy.ts: 1684µs, render: 406ms)
+ POST /api/auth/callback/credentials 200 in 810ms (compile: 59ms, proxy.ts: 309ms, render: 442ms)
+ GET /api/auth/session 200 in 259ms (compile: 219ms, proxy.ts: 15ms, render: 25ms)
+ GET /api/auth/session 200 in 263ms (compile: 218ms, proxy.ts: 13ms, render: 31ms)
+ GET /api/auth/session 200 in 270ms (compile: 219ms, proxy.ts: 14ms, render: 36ms)
+ GET /api/auth/session 200 in 313ms (compile: 103ms, proxy.ts: 58ms, render: 152ms)
+ GET /api/auth/session 200 in 383ms (compile: 250ms, proxy.ts: 51ms, render: 82ms)
+ GET /api/auth/session 200 in 379ms (compile: 258ms, proxy.ts: 38ms, render: 83ms)
+ GET /api/auth/session 200 in 373ms (compile: 259ms, proxy.ts: 17ms, render: 96ms)
+[Slow Query] 167ms - SELECT "public"."Invoice"."id", "public"."Invoice"."dueDate", "public"."Invoice"."totalAmount", "public"."Invoice"."paidAmount" FROM "public"."Invoice" WHERE "public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3
+[Slow Query] 108ms - SELECT SUM("public"."VatRecord"."vatAmount") AS "_sum$vatAmount", "public"."VatRecord"."taxMonth" FROM "public"."VatRecord" WHERE ("public"."VatRecord"."taxYear" = $1 AND "public"."VatRecord"."type" = CAST($2::text AS "public"."VatRecordType")) GROUP BY "public"."VatRecord"."taxMonth" OFFSET $3
+[Slow Query] 109ms - SELECT "public"."ChartOfAccount"."id", "public"."ChartOfAccount"."code", "public"."ChartOfAccount"."name", "public"."ChartOfAccount"."nameEn", "public"."ChartOfAccount"."type"::text, "public"."ChartOfAccount"."level", "public"."ChartOfAccount"."parentId", "public"."ChartOfAccount"."isDetail", "public"."ChartOfAccount"."isSystem", "public"."ChartOfAccount"."isActive", "public"."ChartOfAccount"."notes", "public"."ChartOfAccount"."createdAt", "public"."ChartOfAccount"."updatedAt" FROM "public"."ChartOfAccount" WHERE "public"."ChartOfAccount"."id" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) OFFSET $20
+[Slow Query] 168ms - SELECT SUM("totalAmount") AS "_sum$totalAmount", SUM("paidAmount") AS "_sum$paidAmount" FROM (SELECT "public"."Invoice"."totalAmount", "public"."Invoice"."paidAmount" FROM "public"."Invoice" WHERE "public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3) AS "sub"
+[Slow Query] 137ms - SELECT SUM("totalAmount") AS "_sum$totalAmount", SUM("paidAmount") AS "_sum$paidAmount" FROM (SELECT "public"."Invoice"."totalAmount", "public"."Invoice"."paidAmount" FROM "public"."Invoice" WHERE "public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3) AS "sub"
+[Slow Query] 105ms - SELECT SUM("whtAmount") AS "_sum$whtAmount" FROM (SELECT "public"."WithholdingTax"."whtAmount" FROM "public"."WithholdingTax" WHERE ("public"."WithholdingTax"."taxYear" = $1 AND "public"."WithholdingTax"."type" = CAST($2::text AS "public"."WhtType")) OFFSET $3) AS "sub"
+[Slow Query] 105ms - SELECT "public"."Invoice"."id", "public"."Invoice"."dueDate", "public"."Invoice"."totalAmount", "public"."Invoice"."paidAmount" FROM "public"."Invoice" WHERE "public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3
+[Slow Query] 107ms - SELECT SUM("whtAmount") AS "_sum$whtAmount" FROM (SELECT "public"."WithholdingTax"."whtAmount" FROM "public"."WithholdingTax" WHERE ("public"."WithholdingTax"."taxYear" = $1 AND "public"."WithholdingTax"."type" = CAST($2::text AS "public"."WhtType")) OFFSET $3) AS "sub"
+ GET /api/dashboard 200 in 498ms (compile: 133ms, proxy.ts: 17ms, render: 347ms)
+ GET /api/dashboard 200 in 529ms (compile: 115ms, proxy.ts: 17ms, render: 397ms)
+ GET /api/dashboard 200 in 600ms (compile: 119ms, proxy.ts: 16ms, render: 465ms)
+ GET /api/dashboard 200 in 685ms (compile: 128ms, proxy.ts: 13ms, render: 544ms)
+ GET /api/auth/session 200 in 851ms (compile: 261ms, proxy.ts: 27ms, render: 563ms)
+ GET /api/auth/session 200 in 1400ms (compile: 1180ms, proxy.ts: 103ms, render: 117ms)
+ GET /api/auth/session 200 in 781ms (compile: 685ms, proxy.ts: 24ms, render: 73ms)
+ GET /api/auth/session 200 in 614ms (compile: 517ms, proxy.ts: 61ms, render: 36ms)
+ GET /api/auth/session 200 in 581ms (compile: 511ms, proxy.ts: 14ms, render: 56ms)
+ GET / 200 in 2.5s (compile: 879ms, proxy.ts: 52ms, render: 1617ms)
+ GET / 200 in 2.6s (compile: 817ms, proxy.ts: 40ms, render: 1699ms)
+ GET / 200 in 2.4s (compile: 966ms, proxy.ts: 153ms, render: 1244ms)
+ GET / 200 in 1233ms (compile: 231ms, proxy.ts: 58ms, render: 944ms)
+ GET / 200 in 2.6s (compile: 713ms, proxy.ts: 41ms, render: 1869ms)
+ GET / 200 in 2.6s (compile: 836ms, proxy.ts: 51ms, render: 1733ms)
+ GET / 200 in 2.4s (compile: 899ms, proxy.ts: 153ms, render: 1393ms)
+ GET / 200 in 1268ms (compile: 193ms, proxy.ts: 70ms, render: 1005ms)
+ GET / 200 in 764ms (compile: 131ms, proxy.ts: 25ms, render: 608ms)
+ GET / 200 in 775ms (compile: 102ms, proxy.ts: 32ms, render: 641ms)
+ GET / 200 in 665ms (compile: 253ms, proxy.ts: 18ms, render: 394ms)
+ GET / 200 in 90ms (compile: 12ms, proxy.ts: 8ms, render: 70ms)
+ GET / 200 in 117ms (compile: 6ms, proxy.ts: 14ms, render: 96ms)
+ GET /api/auth/session 200 in 18ms (compile: 7ms, proxy.ts: 6ms, render: 6ms)
+ GET / 200 in 87ms (compile: 5ms, proxy.ts: 6ms, render: 76ms)
+ GET /api/auth/providers 200 in 20ms (compile: 7ms, proxy.ts: 6ms, render: 8ms)
+ GET /api/auth/csrf 200 in 21ms (compile: 10ms, proxy.ts: 4ms, render: 8ms)
+ GET /purchases 404 in 61ms (compile: 13ms, proxy.ts: 2ms, render: 45ms)
+ POST /api/auth/callback/credentials 200 in 245ms (compile: 3ms, proxy.ts: 3ms, render: 240ms)
+ GET /api/auth/session 200 in 26ms (compile: 13ms, proxy.ts: 5ms, render: 8ms)
+ GET /api/auth/session 200 in 15ms (compile: 3ms, proxy.ts: 4ms, render: 7ms)
+ GET /api/dashboard 200 in 80ms (compile: 1944µs, proxy.ts: 2ms, render: 76ms)
+ GET /api/auth/session 200 in 33ms (compile: 14ms, proxy.ts: 5ms, render: 14ms)
+ GET / 200 in 162ms (compile: 21ms, proxy.ts: 2ms, render: 138ms)
+ GET / 200 in 190ms (compile: 6ms, proxy.ts: 2ms, render: 181ms)
+ GET / 200 in 142ms (compile: 16ms, proxy.ts: 4ms, render: 122ms)
+ GET / 200 in 88ms (compile: 2ms, proxy.ts: 1407µs, render: 84ms)
+ GET /api/auth/session 200 in 19ms (compile: 8ms, proxy.ts: 3ms, render: 9ms)
+ GET / 200 in 46ms (compile: 3ms, proxy.ts: 4ms, render: 39ms)
+ GET /api/auth/providers 200 in 11ms (compile: 3ms, proxy.ts: 3ms, render: 5ms)
+ GET /api/auth/csrf 200 in 20ms (compile: 7ms, proxy.ts: 2ms, render: 11ms)
+ POST /api/auth/callback/credentials 200 in 167ms (compile: 9ms, proxy.ts: 6ms, render: 152ms)
+ GET /api/auth/session 200 in 16ms (compile: 6ms, proxy.ts: 3ms, render: 6ms)
+ GET /purchases 404 in 71ms (compile: 15ms, proxy.ts: 1672µs, render: 55ms)
+ GET /api/auth/session 200 in 74ms (compile: 55ms, proxy.ts: 7ms, render: 12ms)
+ GET /api/dashboard 200 in 76ms (compile: 19ms, proxy.ts: 7ms, render: 51ms)
+ GET / 200 in 176ms (compile: 19ms, proxy.ts: 6ms, render: 150ms)
+ GET / 200 in 182ms (compile: 40ms, proxy.ts: 4ms, render: 138ms)
+ GET /api/auth/session 200 in 22ms (compile: 14ms, proxy.ts: 3ms, render: 5ms)
+ GET / 200 in 33ms (compile: 1868µs, proxy.ts: 3ms, render: 28ms)
+ GET / 200 in 231ms (compile: 74ms, proxy.ts: 36ms, render: 121ms)
+ GET / 200 in 215ms (compile: 110ms, proxy.ts: 25ms, render: 80ms)
+ GET /api/auth/session 200 in 160ms (compile: 37ms, proxy.ts: 87ms, render: 37ms)
+ GET /api/auth/session 200 in 103ms (compile: 84ms, proxy.ts: 6ms, render: 12ms)
+ GET /api/auth/providers 200 in 66ms (compile: 23ms, proxy.ts: 8ms, render: 35ms)
+ GET /api/auth/providers 200 in 82ms (compile: 45ms, proxy.ts: 8ms, render: 28ms)
+ GET /icons/icon-192x192.png 404 in 534ms (compile: 96ms, render: 438ms)
+ GET /api/auth/csrf 200 in 158ms (compile: 25ms, proxy.ts: 124ms, render: 9ms)
+ GET /icons/icon-192x192.png 404 in 564ms (compile: 149ms, render: 415ms)
+ GET /api/auth/csrf 200 in 166ms (compile: 149ms, proxy.ts: 9ms, render: 8ms)
+ GET / 200 in 247ms (compile: 74ms, proxy.ts: 11ms, render: 162ms)
+ GET / 200 in 245ms (compile: 41ms, proxy.ts: 20ms, render: 185ms)
+ GET /purchases 404 in 70ms (compile: 10ms, proxy.ts: 6ms, render: 55ms)
+[Slow Query] 412ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[Slow Query] 435ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ GET /purchases 404 in 390ms (compile: 14ms, proxy.ts: 6ms, render: 369ms)
+ POST /api/auth/callback/credentials 200 in 1047ms (compile: 10ms, proxy.ts: 3ms, render: 1033ms)
+ POST /api/auth/callback/credentials 200 in 1081ms (compile: 11ms, proxy.ts: 3ms, render: 1066ms)
+ GET /api/auth/session 200 in 183ms (compile: 86ms, proxy.ts: 46ms, render: 51ms)
+ GET /api/auth/session 200 in 152ms (compile: 92ms, proxy.ts: 25ms, render: 35ms)
+ GET /api/auth/session 200 in 178ms (compile: 92ms, proxy.ts: 18ms, render: 69ms)
+ GET /api/auth/session 200 in 391ms (compile: 283ms, proxy.ts: 35ms, render: 73ms)
+ GET /api/auth/session 200 in 586ms (compile: 426ms, proxy.ts: 30ms, render: 131ms)
+ GET /api/auth/session 200 in 598ms (compile: 516ms, proxy.ts: 31ms, render: 51ms)
+[Slow Query] 249ms - SELECT 1
+[Slow Query] 311ms - SELECT 1
+[Slow Query] 354ms - SELECT SUM("whtAmount") AS "_sum$whtAmount" FROM (SELECT "public"."WithholdingTax"."whtAmount" FROM "public"."WithholdingTax" WHERE ("public"."WithholdingTax"."taxYear" = $1 AND "public"."WithholdingTax"."type" = CAST($2::text AS "public"."WhtType")) OFFSET $3) AS "sub"
+[Slow Query] 337ms - SELECT 1
+[Slow Query] 105ms - SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Invoice"."id" FROM "public"."Invoice" WHERE ("public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) AND "public"."Invoice"."dueDate" < $3) OFFSET $4) AS "sub"
+[Slow Query] 402ms - SELECT "public"."JournalEntry"."id", "public"."JournalEntry"."entryNo", "public"."JournalEntry"."date", "public"."JournalEntry"."description", "public"."JournalEntry"."reference", "public"."JournalEntry"."documentType", "public"."JournalEntry"."documentId", "public"."JournalEntry"."totalDebit", "public"."JournalEntry"."totalCredit", "public"."JournalEntry"."status"::text, "public"."JournalEntry"."isAdjustment", "public"."JournalEntry"."isReversing", "public"."JournalEntry"."reversingId", "public"."JournalEntry"."createdById", "public"."JournalEntry"."approvedById", "public"."JournalEntry"."approvedAt", "public"."JournalEntry"."idempotencyKey", "public"."JournalEntry"."notes", "public"."JournalEntry"."isActive", "public"."JournalEntry"."deletedAt", "public"."JournalEntry"."deletedBy", "public"."JournalEntry"."createdAt", "public"."JournalEntry"."updatedAt" FROM "public"."JournalEntry" WHERE ("public"."JournalEntry"."date" >= $1 AND "public"."JournalEntry"."date" <= $2 AND "public"."JournalEntry"."status" = CAST($3::text AS "public"."EntryStatus")) OFFSET $4
+[Slow Query] 347ms - SELECT 1
+[Slow Query] 417ms - SELECT SUM("totalAmount") AS "_sum$totalAmount", SUM("paidAmount") AS "_sum$paidAmount" FROM (SELECT "public"."PurchaseInvoice"."totalAmount", "public"."PurchaseInvoice"."paidAmount" FROM "public"."PurchaseInvoice" WHERE "public"."PurchaseInvoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3) AS "sub"
+[Slow Query] 367ms - SELECT 1
+[Slow Query] 142ms - SELECT "public"."PurchaseInvoice"."id", "public"."PurchaseInvoice"."dueDate", "public"."PurchaseInvoice"."totalAmount", "public"."PurchaseInvoice"."paidAmount" FROM "public"."PurchaseInvoice" WHERE "public"."PurchaseInvoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3
+[Slow Query] 498ms - SELECT SUM("totalAmount") AS "_sum$totalAmount", SUM("paidAmount") AS "_sum$paidAmount" FROM (SELECT "public"."Invoice"."totalAmount", "public"."Invoice"."paidAmount" FROM "public"."Invoice" WHERE "public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3) AS "sub"
+[Slow Query] 264ms - SELECT "public"."JournalEntry"."id", "public"."JournalEntry"."entryNo", "public"."JournalEntry"."date", "public"."JournalEntry"."description", "public"."JournalEntry"."reference", "public"."JournalEntry"."documentType", "public"."JournalEntry"."documentId", "public"."JournalEntry"."totalDebit", "public"."JournalEntry"."totalCredit", "public"."JournalEntry"."status"::text, "public"."JournalEntry"."isAdjustment", "public"."JournalEntry"."isReversing", "public"."JournalEntry"."reversingId", "public"."JournalEntry"."createdById", "public"."JournalEntry"."approvedById", "public"."JournalEntry"."approvedAt", "public"."JournalEntry"."idempotencyKey", "public"."JournalEntry"."notes", "public"."JournalEntry"."isActive", "public"."JournalEntry"."deletedAt", "public"."JournalEntry"."deletedBy", "public"."JournalEntry"."createdAt", "public"."JournalEntry"."updatedAt" FROM "public"."JournalEntry" WHERE ("public"."JournalEntry"."date" >= $1 AND "public"."JournalEntry"."date" <= $2 AND "public"."JournalEntry"."status" = CAST($3::text AS "public"."EntryStatus")) OFFSET $4
+[Slow Query] 463ms - SELECT 1
+[Slow Query] 121ms - SELECT "public"."JournalLine"."id", "public"."JournalLine"."entryId", "public"."JournalLine"."lineNo", "public"."JournalLine"."accountId", "public"."JournalLine"."description", "public"."JournalLine"."debit", "public"."JournalLine"."credit", "public"."JournalLine"."reference", "public"."JournalLine"."createdAt", "public"."JournalLine"."updatedAt" FROM "public"."JournalLine" WHERE "public"."JournalLine"."entryId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44) OFFSET $45
+[Slow Query] 191ms - SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Invoice"."id" FROM "public"."Invoice" WHERE "public"."Invoice"."status" = CAST($1::text AS "public"."InvoiceStatus") OFFSET $2) AS "sub"
+[Slow Query] 314ms - SELECT SUM("totalAmount") AS "_sum$totalAmount", SUM("paidAmount") AS "_sum$paidAmount" FROM (SELECT "public"."Invoice"."totalAmount", "public"."Invoice"."paidAmount" FROM "public"."Invoice" WHERE "public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3) AS "sub"
+[Slow Query] 546ms - SELECT SUM("whtAmount") AS "_sum$whtAmount" FROM (SELECT "public"."WithholdingTax"."whtAmount" FROM "public"."WithholdingTax" WHERE ("public"."WithholdingTax"."taxYear" = $1 AND "public"."WithholdingTax"."type" = CAST($2::text AS "public"."WhtType")) OFFSET $3) AS "sub"
+[Slow Query] 529ms - SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Invoice"."id" FROM "public"."Invoice" WHERE "public"."Invoice"."status" = CAST($1::text AS "public"."InvoiceStatus") OFFSET $2) AS "sub"
+[Slow Query] 547ms - SELECT "public"."Invoice"."id", "public"."Invoice"."dueDate", "public"."Invoice"."totalAmount", "public"."Invoice"."paidAmount" FROM "public"."Invoice" WHERE "public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3
+[Slow Query] 206ms - SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."VatRecord"."id" FROM "public"."VatRecord" WHERE ("public"."VatRecord"."taxMonth" = $1 AND "public"."VatRecord"."taxYear" = $2 AND "public"."VatRecord"."reportStatus" = CAST($3::text AS "public"."VatReportStatus")) OFFSET $4) AS "sub"
+[Slow Query] 563ms - SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Invoice"."id" FROM "public"."Invoice" WHERE ("public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) AND "public"."Invoice"."dueDate" < $3) OFFSET $4) AS "sub"
+[Slow Query] 588ms - SELECT SUM("public"."VatRecord"."vatAmount") AS "_sum$vatAmount", "public"."VatRecord"."taxMonth" FROM "public"."VatRecord" WHERE ("public"."VatRecord"."taxYear" = $1 AND "public"."VatRecord"."type" = CAST($2::text AS "public"."VatRecordType")) GROUP BY "public"."VatRecord"."taxMonth" OFFSET $3
+[Slow Query] 197ms - SELECT "public"."JournalEntry"."id", "public"."JournalEntry"."entryNo", "public"."JournalEntry"."date", "public"."JournalEntry"."description", "public"."JournalEntry"."reference", "public"."JournalEntry"."documentType", "public"."JournalEntry"."documentId", "public"."JournalEntry"."totalDebit", "public"."JournalEntry"."totalCredit", "public"."JournalEntry"."status"::text, "public"."JournalEntry"."isAdjustment", "public"."JournalEntry"."isReversing", "public"."JournalEntry"."reversingId", "public"."JournalEntry"."createdById", "public"."JournalEntry"."approvedById", "public"."JournalEntry"."approvedAt", "public"."JournalEntry"."idempotencyKey", "public"."JournalEntry"."notes", "public"."JournalEntry"."isActive", "public"."JournalEntry"."deletedAt", "public"."JournalEntry"."deletedBy", "public"."JournalEntry"."createdAt", "public"."JournalEntry"."updatedAt" FROM "public"."JournalEntry" WHERE ("public"."JournalEntry"."date" >= $1 AND "public"."JournalEntry"."date" <= $2 AND "public"."JournalEntry"."status" = CAST($3::text AS "public"."EntryStatus")) OFFSET $4
+ GET /api/dashboard 200 in 1139ms (compile: 338ms, proxy.ts: 28ms, render: 773ms)
+ GET /api/dashboard 200 in 1152ms (compile: 124ms, proxy.ts: 27ms, render: 1001ms)
+ GET / 200 in 765ms (compile: 204ms, proxy.ts: 58ms, render: 503ms)
+ GET / 200 in 657ms (compile: 185ms, proxy.ts: 67ms, render: 405ms)
+ GET / 200 in 829ms (compile: 143ms, proxy.ts: 56ms, render: 630ms)
+ GET / 200 in 738ms (compile: 126ms, proxy.ts: 86ms, render: 526ms)
+ GET / 200 in 723ms (compile: 217ms, proxy.ts: 72ms, render: 434ms)
+ GET / 200 in 743ms (compile: 158ms, proxy.ts: 76ms, render: 509ms)
+ GET / 200 in 334ms (compile: 170ms, proxy.ts: 10ms, render: 154ms)
+ GET /api/auth/session 200 in 35ms (compile: 14ms, proxy.ts: 6ms, render: 15ms)
+ GET / 200 in 136ms (compile: 4ms, proxy.ts: 7ms, render: 125ms)
+ GET /api/auth/providers 200 in 12ms (compile: 4ms, proxy.ts: 2ms, render: 6ms)
+ GET /api/auth/csrf 200 in 15ms (compile: 1917µs, proxy.ts: 1574µs, render: 11ms)
+ GET /purchases 404 in 89ms (compile: 26ms, proxy.ts: 3ms, render: 59ms)
+ GET /api/auth/session 200 in 29ms (compile: 10ms, proxy.ts: 8ms, render: 11ms)
+ GET / 200 in 69ms (compile: 10ms, proxy.ts: 2ms, render: 57ms)
+[Slow Query] 1197ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ GET / 200 in 74ms (compile: 14ms, proxy.ts: 4ms, render: 56ms)
+ POST /api/auth/callback/credentials 200 in 1542ms (compile: 4ms, proxy.ts: 3ms, render: 1535ms)
+ GET /api/auth/session 200 in 52ms (compile: 25ms, proxy.ts: 4ms, render: 24ms)
+ GET /api/auth/session 200 in 106ms (compile: 49ms, proxy.ts: 8ms, render: 49ms)
+ GET /api/dashboard 200 in 178ms (compile: 36ms, proxy.ts: 11ms, render: 131ms)
+ GET / 200 in 317ms (compile: 154ms, proxy.ts: 9ms, render: 153ms)
+ GET / 200 in 385ms (compile: 85ms, proxy.ts: 10ms, render: 289ms)
+ GET /api/auth/session 200 in 48ms (compile: 19ms, proxy.ts: 12ms, render: 17ms)
+ GET / 200 in 98ms (compile: 12ms, proxy.ts: 7ms, render: 79ms)
+ GET /icons/icon-192x192.png 404 in 198ms (compile: 112ms, render: 86ms)
+ GET /api/auth/providers 200 in 32ms (compile: 11ms, proxy.ts: 4ms, render: 17ms)
+ GET /api/auth/csrf 200 in 19ms (compile: 10ms, proxy.ts: 3ms, render: 7ms)
+ POST /api/auth/callback/credentials 200 in 216ms (compile: 1715µs, proxy.ts: 10ms, render: 204ms)
+ GET /api/auth/session 200 in 99ms (compile: 34ms, proxy.ts: 48ms, render: 17ms)
+ GET /api/auth/session 200 in 69ms (compile: 24ms, proxy.ts: 7ms, render: 38ms)
+[Slow Query] 105ms - SELECT "public"."JournalEntry"."id", "public"."JournalEntry"."entryNo", "public"."JournalEntry"."date", "public"."JournalEntry"."description", "public"."JournalEntry"."reference", "public"."JournalEntry"."documentType", "public"."JournalEntry"."documentId", "public"."JournalEntry"."totalDebit", "public"."JournalEntry"."totalCredit", "public"."JournalEntry"."status"::text, "public"."JournalEntry"."isAdjustment", "public"."JournalEntry"."isReversing", "public"."JournalEntry"."reversingId", "public"."JournalEntry"."createdById", "public"."JournalEntry"."approvedById", "public"."JournalEntry"."approvedAt", "public"."JournalEntry"."idempotencyKey", "public"."JournalEntry"."notes", "public"."JournalEntry"."isActive", "public"."JournalEntry"."deletedAt", "public"."JournalEntry"."deletedBy", "public"."JournalEntry"."createdAt", "public"."JournalEntry"."updatedAt" FROM "public"."JournalEntry" WHERE ("public"."JournalEntry"."date" >= $1 AND "public"."JournalEntry"."date" <= $2 AND "public"."JournalEntry"."status" = CAST($3::text AS "public"."EntryStatus")) OFFSET $4
+ GET / 200 in 141ms (compile: 86ms, proxy.ts: 17ms, render: 38ms)
+[Slow Query] 109ms - SELECT SUM("whtAmount") AS "_sum$whtAmount" FROM (SELECT "public"."WithholdingTax"."whtAmount" FROM "public"."WithholdingTax" WHERE ("public"."WithholdingTax"."taxYear" = $1 AND "public"."WithholdingTax"."type" = CAST($2::text AS "public"."WhtType")) OFFSET $3) AS "sub"
+ GET / 200 in 149ms (compile: 47ms, proxy.ts: 9ms, render: 94ms)
+[Slow Query] 116ms - SELECT SUM("totalAmount") AS "_sum$totalAmount", SUM("paidAmount") AS "_sum$paidAmount" FROM (SELECT "public"."PurchaseInvoice"."totalAmount", "public"."PurchaseInvoice"."paidAmount" FROM "public"."PurchaseInvoice" WHERE "public"."PurchaseInvoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3) AS "sub"
+ GET /api/dashboard 200 in 247ms (compile: 37ms, proxy.ts: 9ms, render: 200ms)
+ GET /purchases 404 in 189ms (compile: 72ms, proxy.ts: 11ms, render: 106ms)
+ GET /api/auth/session 200 in 85ms (compile: 58ms, proxy.ts: 13ms, render: 14ms)
+ GET / 200 in 117ms (compile: 8ms, proxy.ts: 8ms, render: 101ms)
+ GET / 200 in 444ms (compile: 14ms, proxy.ts: 8ms, render: 421ms)
+ GET / 200 in 457ms (compile: 46ms, proxy.ts: 8ms, render: 403ms)
+ GET /api/auth/session 200 in 65ms (compile: 27ms, proxy.ts: 14ms, render: 24ms)
+ GET /api/auth/session 200 in 64ms (compile: 32ms, proxy.ts: 14ms, render: 17ms)
+ GET /api/auth/providers 200 in 92ms (compile: 70ms, proxy.ts: 9ms, render: 14ms)
+ GET /api/auth/providers 200 in 91ms (compile: 72ms, proxy.ts: 7ms, render: 12ms)
+ GET /icons/icon-192x192.png 404 in 478ms (compile: 101ms, render: 377ms)
+ GET /icons/icon-192x192.png 404 in 479ms (compile: 166ms, render: 313ms)
+ GET /api/auth/csrf 200 in 30ms (compile: 15ms, proxy.ts: 7ms, render: 9ms)
+ GET /api/auth/csrf 200 in 29ms (compile: 16ms, proxy.ts: 6ms, render: 7ms)
+ GET / 200 in 287ms (compile: 56ms, proxy.ts: 35ms, render: 196ms)
+ GET / 200 in 292ms (compile: 33ms, proxy.ts: 36ms, render: 224ms)
+[Slow Query] 115ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ GET /purchases 404 in 125ms (compile: 34ms, proxy.ts: 3ms, render: 89ms)
+ GET /purchases 404 in 131ms (compile: 16ms, proxy.ts: 3ms, render: 111ms)
+ POST /api/auth/callback/credentials 200 in 539ms (compile: 14ms, proxy.ts: 7ms, render: 518ms)
+ POST /api/auth/callback/credentials 200 in 538ms (compile: 17ms, proxy.ts: 5ms, render: 516ms)
+ GET /api/auth/session 200 in 45ms (compile: 20ms, proxy.ts: 7ms, render: 17ms)
+ GET /api/auth/session 200 in 46ms (compile: 23ms, proxy.ts: 7ms, render: 17ms)
+ GET /api/auth/session 200 in 139ms (compile: 99ms, proxy.ts: 8ms, render: 31ms)
+ GET /api/auth/session 200 in 134ms (compile: 87ms, proxy.ts: 17ms, render: 30ms)
+ GET /api/dashboard 200 in 204ms (compile: 33ms, proxy.ts: 22ms, render: 148ms)
+ GET /api/dashboard 200 in 225ms (compile: 40ms, proxy.ts: 16ms, render: 169ms)
+ GET /api/auth/session 200 in 237ms (compile: 117ms, proxy.ts: 68ms, render: 52ms)
+ GET /api/auth/session 200 in 253ms (compile: 124ms, proxy.ts: 72ms, render: 57ms)
+ GET / 200 in 535ms (compile: 95ms, proxy.ts: 10ms, render: 430ms)
+ GET / 200 in 618ms (compile: 204ms, proxy.ts: 11ms, render: 403ms)
+ GET / 200 in 682ms (compile: 30ms, proxy.ts: 6ms, render: 647ms)
+ GET / 200 in 679ms (compile: 146ms, proxy.ts: 7ms, render: 526ms)
+ GET / 200 in 265ms (compile: 112ms, proxy.ts: 21ms, render: 132ms)
+ GET / 200 in 192ms (compile: 114ms, proxy.ts: 11ms, render: 67ms)
+ GET / 200 in 38ms (compile: 6ms, proxy.ts: 5ms, render: 28ms)
+ GET /api/auth/session 200 in 31ms (compile: 10ms, proxy.ts: 7ms, render: 14ms)
+ GET / 200 in 30ms (compile: 2ms, proxy.ts: 4ms, render: 24ms)
+ GET /api/auth/providers 200 in 17ms (compile: 5ms, proxy.ts: 4ms, render: 7ms)
+ GET /api/auth/csrf 200 in 17ms (compile: 6ms, proxy.ts: 4ms, render: 7ms)
+ GET /purchases 404 in 172ms (compile: 20ms, proxy.ts: 3ms, render: 149ms)
+[Slow Query] 290ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ GET /api/auth/session 200 in 31ms (compile: 12ms, proxy.ts: 10ms, render: 9ms)
+[Slow Query] 188ms - SELECT "public"."User"."id", "public"."User"."maxSessions" FROM "public"."User" WHERE ("public"."User"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ GET / 200 in 85ms (compile: 8ms, proxy.ts: 3ms, render: 74ms)
+[Slow Query] 159ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+ POST /api/auth/callback/credentials 200 in 1137ms (compile: 4ms, proxy.ts: 3ms, render: 1129ms)
+ GET /api/auth/session 200 in 20ms (compile: 6ms, proxy.ts: 7ms, render: 7ms)
+ GET /api/auth/session 200 in 15ms (compile: 5ms, proxy.ts: 3ms, render: 8ms)
+ GET /api/dashboard 200 in 62ms (compile: 2ms, proxy.ts: 3ms, render: 57ms)
+ GET / 200 in 41ms (compile: 23ms, proxy.ts: 2ms, render: 16ms)
+ GET / 200 in 44ms (compile: 4ms, proxy.ts: 2ms, render: 38ms)
+ GET / 200 in 53ms (compile: 10ms, proxy.ts: 3ms, render: 40ms)
+ GET /api/auth/session 200 in 16ms (compile: 7ms, proxy.ts: 2ms, render: 7ms)
+ GET / 200 in 43ms (compile: 1424µs, proxy.ts: 1540µs, render: 40ms)
+ GET /api/auth/providers 200 in 13ms (compile: 4ms, proxy.ts: 3ms, render: 6ms)
+ GET /api/auth/csrf 200 in 10ms (compile: 2ms, proxy.ts: 1992µs, render: 5ms)
+ POST /api/auth/callback/credentials 200 in 161ms (compile: 3ms, proxy.ts: 3ms, render: 155ms)
+ GET /api/auth/session 200 in 10ms (compile: 4ms, proxy.ts: 1410µs, render: 5ms)
+ GET /purchases 404 in 87ms (compile: 11ms, proxy.ts: 1799µs, render: 75ms)
+ GET /api/auth/session 200 in 36ms (compile: 18ms, proxy.ts: 6ms, render: 12ms)
+ GET /api/dashboard 200 in 55ms (compile: 4ms, proxy.ts: 1755µs, render: 49ms)
+ GET / 200 in 52ms (compile: 23ms, proxy.ts: 6ms, render: 23ms)
+ GET / 200 in 58ms (compile: 6ms, proxy.ts: 7ms, render: 45ms)
+ GET /api/auth/session 200 in 19ms (compile: 6ms, proxy.ts: 7ms, render: 6ms)
+ GET / 200 in 29ms (compile: 3ms, proxy.ts: 1870µs, render: 24ms)
+ GET / 200 in 64ms (compile: 5ms, proxy.ts: 6ms, render: 53ms)
+ GET /api/auth/session 200 in 20ms (compile: 8ms, proxy.ts: 3ms, render: 9ms)
+ GET / 200 in 87ms (compile: 3ms, proxy.ts: 3ms, render: 80ms)
+ GET /api/auth/providers 200 in 16ms (compile: 6ms, proxy.ts: 3ms, render: 7ms)
+ GET /api/auth/csrf 200 in 16ms (compile: 5ms, proxy.ts: 3ms, render: 8ms)
+ GET /purchases 404 in 60ms (compile: 8ms, proxy.ts: 1707µs, render: 50ms)
+ POST /api/auth/callback/credentials 200 in 275ms (compile: 4ms, proxy.ts: 3ms, render: 267ms)
+ GET /api/auth/session 200 in 13ms (compile: 5ms, proxy.ts: 2ms, render: 6ms)
+ GET /api/auth/session 200 in 15ms (compile: 4ms, proxy.ts: 3ms, render: 8ms)
+ GET / 200 in 48ms (compile: 20ms, proxy.ts: 3ms, render: 25ms)
+ GET /api/dashboard 200 in 79ms (compile: 2ms, proxy.ts: 3ms, render: 74ms)
+ GET / 200 in 63ms (compile: 5ms, proxy.ts: 2ms, render: 55ms)
+ GET /api/auth/session 200 in 26ms (compile: 13ms, proxy.ts: 4ms, render: 10ms)
+ GET / 200 in 56ms (compile: 6ms, proxy.ts: 1966µs, render: 47ms)
+ GET / 200 in 56ms (compile: 4ms, proxy.ts: 4ms, render: 48ms)
+ GET /api/auth/session 200 in 29ms (compile: 10ms, proxy.ts: 11ms, render: 8ms)
+ GET / 200 in 47ms (compile: 4ms, proxy.ts: 3ms, render: 40ms)
+ GET /api/auth/providers 200 in 34ms (compile: 26ms, proxy.ts: 3ms, render: 6ms)
+ GET /api/auth/csrf 200 in 17ms (compile: 6ms, proxy.ts: 5ms, render: 6ms)
+ GET /purchases 404 in 46ms (compile: 11ms, proxy.ts: 1576µs, render: 34ms)
+ POST /api/auth/callback/credentials 200 in 209ms (compile: 7ms, proxy.ts: 3ms, render: 199ms)
+ GET /api/auth/session 200 in 13ms (compile: 4ms, proxy.ts: 3ms, render: 6ms)
+ GET /api/auth/session 200 in 12ms (compile: 3ms, proxy.ts: 1645µs, render: 8ms)
+ GET /api/dashboard 200 in 77ms (compile: 3ms, proxy.ts: 2ms, render: 72ms)
+ GET /api/auth/session 200 in 54ms (compile: 26ms, proxy.ts: 9ms, render: 19ms)
+ GET / 200 in 209ms (compile: 51ms, proxy.ts: 7ms, render: 152ms)
+ GET / 200 in 213ms (compile: 16ms, proxy.ts: 5ms, render: 193ms)
+ GET / 200 in 72ms (compile: 8ms, proxy.ts: 8ms, render: 56ms)
+ GET / 200 in 203ms (compile: 4ms, proxy.ts: 3ms, render: 196ms)
+ GET / 200 in 170ms (compile: 10ms, proxy.ts: 4ms, render: 156ms)
+ GET /api/auth/session 200 in 29ms (compile: 11ms, proxy.ts: 6ms, render: 13ms)
+ GET /api/auth/session 200 in 37ms (compile: 19ms, proxy.ts: 9ms, render: 10ms)
+ GET / 200 in 174ms (compile: 7ms, proxy.ts: 6ms, render: 161ms)
+ GET / 200 in 173ms (compile: 36ms, proxy.ts: 5ms, render: 133ms)
+ GET /api/auth/providers 200 in 42ms (compile: 16ms, proxy.ts: 5ms, render: 21ms)
+ GET /api/auth/providers 200 in 44ms (compile: 22ms, proxy.ts: 6ms, render: 17ms)
+ GET /api/auth/csrf 200 in 21ms (compile: 3ms, proxy.ts: 9ms, render: 9ms)
+ GET /api/auth/csrf 200 in 29ms (compile: 13ms, proxy.ts: 8ms, render: 8ms)
+ POST /api/auth/callback/credentials 200 in 311ms (compile: 18ms, proxy.ts: 8ms, render: 284ms)
+ POST /api/auth/callback/credentials 200 in 315ms (compile: 14ms, proxy.ts: 6ms, render: 295ms)
+ GET /api/auth/session 200 in 63ms (compile: 22ms, proxy.ts: 2ms, render: 39ms)
+ GET /api/auth/session 200 in 65ms (compile: 31ms, proxy.ts: 2ms, render: 32ms)
+ GET /purchases 404 in 361ms (compile: 167ms, proxy.ts: 40ms, render: 154ms)
+ GET /purchases 404 in 342ms (compile: 184ms, proxy.ts: 5ms, render: 153ms)
+ GET /api/auth/session 200 in 89ms (compile: 48ms, proxy.ts: 15ms, render: 26ms)
+ GET /api/dashboard 200 in 81ms (compile: 14ms, proxy.ts: 12ms, render: 55ms)
+ GET /api/auth/session 200 in 96ms (compile: 48ms, proxy.ts: 14ms, render: 34ms)
+ GET /api/dashboard 200 in 92ms (compile: 17ms, proxy.ts: 13ms, render: 63ms)
+ GET / 200 in 149ms (compile: 56ms, proxy.ts: 12ms, render: 81ms)
+ GET / 200 in 171ms (compile: 38ms, proxy.ts: 6ms, render: 127ms)
+ GET / 200 in 145ms (compile: 49ms, proxy.ts: 35ms, render: 61ms)
+ GET / 200 in 156ms (compile: 35ms, proxy.ts: 36ms, render: 85ms)
+ GET /api/auth/session 200 in 44ms (compile: 26ms, proxy.ts: 6ms, render: 12ms)
+ GET /api/auth/session 200 in 53ms (compile: 31ms, proxy.ts: 12ms, render: 9ms)
+ GET / 200 in 69ms (compile: 7ms, proxy.ts: 5ms, render: 57ms)
+ GET / 200 in 70ms (compile: 17ms, proxy.ts: 5ms, render: 48ms)
+ GET / 200 in 87ms (compile: 16ms, proxy.ts: 8ms, render: 63ms)
+ GET /api/auth/session 200 in 19ms (compile: 9ms, proxy.ts: 2ms, render: 8ms)
+ GET / 200 in 35ms (compile: 2ms, proxy.ts: 1378µs, render: 31ms)
+ GET /api/auth/providers 200 in 18ms (compile: 9ms, proxy.ts: 1848µs, render: 7ms)
+ GET /api/auth/csrf 200 in 9ms (compile: 3ms, proxy.ts: 2ms, render: 4ms)
+ POST /api/auth/callback/credentials 200 in 141ms (compile: 3ms, proxy.ts: 4ms, render: 133ms)
+ GET /purchases 404 in 59ms (compile: 15ms, proxy.ts: 2ms, render: 41ms)
+ GET /api/auth/session 200 in 15ms (compile: 7ms, proxy.ts: 1433µs, render: 7ms)
+ GET /api/auth/session 200 in 43ms (compile: 24ms, proxy.ts: 8ms, render: 11ms)
+ GET /api/dashboard 200 in 66ms (compile: 9ms, proxy.ts: 7ms, render: 50ms)
+ GET / 200 in 41ms (compile: 18ms, proxy.ts: 9ms, render: 14ms)
+ GET / 200 in 46ms (compile: 10ms, proxy.ts: 2ms, render: 34ms)
+ GET /api/auth/session 200 in 13ms (compile: 7ms, proxy.ts: 3ms, render: 3ms)
+ GET / 200 in 27ms (compile: 2ms, proxy.ts: 3ms, render: 23ms)
+ GET / 200 in 191ms (compile: 11ms, proxy.ts: 2ms, render: 178ms)
+ GET /api/auth/session 200 in 17ms (compile: 9ms, proxy.ts: 3ms, render: 5ms)
+ GET / 200 in 39ms (compile: 5ms, proxy.ts: 2ms, render: 32ms)
+ GET /api/auth/providers 200 in 96ms (compile: 57ms, proxy.ts: 8ms, render: 31ms)
+ GET /api/auth/csrf 200 in 31ms (compile: 12ms, proxy.ts: 12ms, render: 7ms)
+ POST /api/auth/callback/credentials 200 in 187ms (compile: 6ms, proxy.ts: 3ms, render: 177ms)
+ GET /purchases 404 in 77ms (compile: 17ms, proxy.ts: 1700µs, render: 58ms)
+ GET /api/auth/session 200 in 29ms (compile: 16ms, proxy.ts: 3ms, render: 10ms)
+ GET /api/auth/session 200 in 27ms (compile: 12ms, proxy.ts: 1958µs, render: 12ms)
+ GET /api/dashboard 200 in 71ms (compile: 6ms, proxy.ts: 4ms, render: 61ms)
+ GET / 200 in 61ms (compile: 23ms, proxy.ts: 4ms, render: 34ms)
+ GET / 200 in 68ms (compile: 6ms, proxy.ts: 5ms, render: 57ms)
+ GET /api/auth/session 200 in 32ms (compile: 14ms, proxy.ts: 10ms, render: 8ms)
+ GET / 200 in 47ms (compile: 7ms, proxy.ts: 3ms, render: 37ms)
+ GET / 200 in 65ms (compile: 5ms, proxy.ts: 3ms, render: 57ms)
+ GET /api/auth/session 200 in 18ms (compile: 9ms, proxy.ts: 2ms, render: 6ms)
+ GET / 200 in 56ms (compile: 2ms, proxy.ts: 3ms, render: 51ms)
+ GET /api/auth/providers 200 in 13ms (compile: 5ms, proxy.ts: 1896µs, render: 6ms)
+ GET /api/auth/csrf 200 in 14ms (compile: 4ms, proxy.ts: 2ms, render: 8ms)
+ GET /purchases 404 in 35ms (compile: 5ms, proxy.ts: 1715µs, render: 28ms)
+ POST /api/auth/callback/credentials 200 in 154ms (compile: 6ms, proxy.ts: 4ms, render: 144ms)
+ GET /api/auth/session 200 in 18ms (compile: 10ms, proxy.ts: 1941µs, render: 6ms)
+ GET /api/auth/session 200 in 25ms (compile: 11ms, proxy.ts: 3ms, render: 10ms)
+ GET /api/dashboard 200 in 40ms (compile: 7ms, proxy.ts: 3ms, render: 30ms)
+ GET / 200 in 39ms (compile: 22ms, proxy.ts: 3ms, render: 15ms)
+ GET / 200 in 44ms (compile: 7ms, proxy.ts: 3ms, render: 35ms)
+ GET /api/auth/session 200 in 29ms (compile: 9ms, proxy.ts: 9ms, render: 12ms)
+ GET / 200 in 32ms (compile: 2ms, proxy.ts: 1483µs, render: 28ms)
+ GET /api/health 503 in 12ms (compile: 3ms, proxy.ts: 2ms, render: 7ms)
+ POST /api/auth/callback/credentials 302 in 10ms (compile: 4ms, proxy.ts: 1666µs, render: 5ms)
+ GET /api/purchase-requests 401 in 11ms (compile: 3ms, proxy.ts: 1243µs, render: 7ms)
+⨯ ./src/app/page.tsx:28:1
+Module not found: Can't resolve '@/components/purchase-orders/purchase-order-list'
+[0m [90m 26 |[39m [36mimport[39m { [33mStockTakePage[39m } [36mfrom[39m [32m'@/components/stock-takes/stock-take-page'[39m
+ [90m 27 |[39m [36mimport[39m { [33mPurchaseRequestList[39m } [36mfrom[39m [32m'@/components/purchase-requests/purchase-request-list'[39m
+[31m[1m>[22m[39m[90m 28 |[39m [36mimport[39m { [33mPurchaseOrderList[39m } [36mfrom[39m [32m'@/components/purchase-orders/purchase-order-list'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 29 |[39m [36mimport[39m { [33mPurchaseList[39m } [36mfrom[39m [32m'@/components/purchases/purchase-list'[39m
+ [90m 30 |[39m [36mimport[39m { [33mReports[39m } [36mfrom[39m [32m'@/components/reports/reports'[39m
+ [90m 31 |[39m [36mimport[39m { [33mPeriodManagement[39m } [36mfrom[39m [32m'@/components/accounting-periods/period-management'[39m[0m
+
+Import map: aliased to relative './src/components/purchase-orders/purchase-order-list' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/page.tsx:28:1
+Module not found: Can't resolve '@/components/purchase-orders/purchase-order-list'
+[0m [90m 26 |[39m [36mimport[39m { [33mStockTakePage[39m } [36mfrom[39m [32m'@/components/stock-takes/stock-take-page'[39m
+ [90m 27 |[39m [36mimport[39m { [33mPurchaseRequestList[39m } [36mfrom[39m [32m'@/components/purchase-requests/purchase-request-list'[39m
+[31m[1m>[22m[39m[90m 28 |[39m [36mimport[39m { [33mPurchaseOrderList[39m } [36mfrom[39m [32m'@/components/purchase-orders/purchase-order-list'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 29 |[39m [36mimport[39m { [33mPurchaseList[39m } [36mfrom[39m [32m'@/components/purchases/purchase-list'[39m
+ [90m 30 |[39m [36mimport[39m { [33mReports[39m } [36mfrom[39m [32m'@/components/reports/reports'[39m
+ [90m 31 |[39m [36mimport[39m { [33mPeriodManagement[39m } [36mfrom[39m [32m'@/components/accounting-periods/period-management'[39m[0m
+
+Import map: aliased to relative './src/components/purchase-orders/purchase-order-list' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/page.tsx:28:1
+Module not found: Can't resolve '@/components/purchase-orders/purchase-order-list'
+[0m [90m 26 |[39m [36mimport[39m { [33mStockTakePage[39m } [36mfrom[39m [32m'@/components/stock-takes/stock-take-page'[39m
+ [90m 27 |[39m [36mimport[39m { [33mPurchaseRequestList[39m } [36mfrom[39m [32m'@/components/purchase-requests/purchase-request-list'[39m
+[31m[1m>[22m[39m[90m 28 |[39m [36mimport[39m { [33mPurchaseOrderList[39m } [36mfrom[39m [32m'@/components/purchase-orders/purchase-order-list'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 29 |[39m [36mimport[39m { [33mPurchaseList[39m } [36mfrom[39m [32m'@/components/purchases/purchase-list'[39m
+ [90m 30 |[39m [36mimport[39m { [33mReports[39m } [36mfrom[39m [32m'@/components/reports/reports'[39m
+ [90m 31 |[39m [36mimport[39m { [33mPeriodManagement[39m } [36mfrom[39m [32m'@/components/accounting-periods/period-management'[39m[0m
+
+Import map: aliased to relative './src/components/purchase-orders/purchase-order-list' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/page.tsx:28:1
+Module not found: Can't resolve '@/components/purchase-orders/purchase-order-list'
+[0m [90m 26 |[39m [36mimport[39m { [33mStockTakePage[39m } [36mfrom[39m [32m'@/components/stock-takes/stock-take-page'[39m
+ [90m 27 |[39m [36mimport[39m { [33mPurchaseRequestList[39m } [36mfrom[39m [32m'@/components/purchase-requests/purchase-request-list'[39m
+[31m[1m>[22m[39m[90m 28 |[39m [36mimport[39m { [33mPurchaseOrderList[39m } [36mfrom[39m [32m'@/components/purchase-orders/purchase-order-list'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 29 |[39m [36mimport[39m { [33mPurchaseList[39m } [36mfrom[39m [32m'@/components/purchases/purchase-list'[39m
+ [90m 30 |[39m [36mimport[39m { [33mReports[39m } [36mfrom[39m [32m'@/components/reports/reports'[39m
+ [90m 31 |[39m [36mimport[39m { [33mPeriodManagement[39m } [36mfrom[39m [32m'@/components/accounting-periods/period-management'[39m[0m
+
+Import map: aliased to relative './src/components/purchase-orders/purchase-order-list' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:60:1
+Module not found: Can't resolve './purchase-order-edit-dialog'
+[0m [90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+ [90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+[31m[1m>[22m[39m[90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 61 |[39m
+ [90m 62 |[39m [36minterface[39m [33mVendor[39m {
+ [90m 63 |[39m   id[33m:[39m string[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:60:1
+Module not found: Can't resolve './purchase-order-edit-dialog'
+[0m [90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+ [90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+[31m[1m>[22m[39m[90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 61 |[39m
+ [90m 62 |[39m [36minterface[39m [33mVendor[39m {
+ [90m 63 |[39m   id[33m:[39m string[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:60:1
+Module not found: Can't resolve './purchase-order-edit-dialog'
+[0m [90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+ [90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+[31m[1m>[22m[39m[90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 61 |[39m
+ [90m 62 |[39m [36minterface[39m [33mVendor[39m {
+ [90m 63 |[39m   id[33m:[39m string[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:60:1
+Module not found: Can't resolve './purchase-order-edit-dialog'
+[0m [90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+ [90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+[31m[1m>[22m[39m[90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 61 |[39m
+ [90m 62 |[39m [36minterface[39m [33mVendor[39m {
+ [90m 63 |[39m   id[33m:[39m string[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:59:1
+Module not found: Can't resolve './purchase-order-form'
+[0m [90m 57 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'@/hooks/use-toast'[39m
+ [90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+[31m[1m>[22m[39m[90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m 61 |[39m
+ [90m 62 |[39m [36minterface[39m [33mVendor[39m {[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:59:1
+Module not found: Can't resolve './purchase-order-form'
+[0m [90m 57 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'@/hooks/use-toast'[39m
+ [90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+[31m[1m>[22m[39m[90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m 61 |[39m
+ [90m 62 |[39m [36minterface[39m [33mVendor[39m {[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:59:1
+Module not found: Can't resolve './purchase-order-form'
+[0m [90m 57 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'@/hooks/use-toast'[39m
+ [90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+[31m[1m>[22m[39m[90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m 61 |[39m
+ [90m 62 |[39m [36minterface[39m [33mVendor[39m {[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:59:1
+Module not found: Can't resolve './purchase-order-form'
+[0m [90m 57 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'@/hooks/use-toast'[39m
+ [90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+[31m[1m>[22m[39m[90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m 61 |[39m
+ [90m 62 |[39m [36minterface[39m [33mVendor[39m {[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:58:1
+Module not found: Can't resolve './purchase-order-view-dialog'
+[0m [90m 56 |[39m } [36mfrom[39m [32m'@/components/ui/select'[39m
+ [90m 57 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'@/hooks/use-toast'[39m
+[31m[1m>[22m[39m[90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+ [90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m 61 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:58:1
+Module not found: Can't resolve './purchase-order-view-dialog'
+[0m [90m 56 |[39m } [36mfrom[39m [32m'@/components/ui/select'[39m
+ [90m 57 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'@/hooks/use-toast'[39m
+[31m[1m>[22m[39m[90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+ [90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m 61 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:58:1
+Module not found: Can't resolve './purchase-order-view-dialog'
+[0m [90m 56 |[39m } [36mfrom[39m [32m'@/components/ui/select'[39m
+ [90m 57 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'@/hooks/use-toast'[39m
+[31m[1m>[22m[39m[90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+ [90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m 61 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/components/purchase-orders/purchase-order-list.tsx:58:1
+Module not found: Can't resolve './purchase-order-view-dialog'
+[0m [90m 56 |[39m } [36mfrom[39m [32m'@/components/ui/select'[39m
+ [90m 57 |[39m [36mimport[39m { useToast } [36mfrom[39m [32m'@/hooks/use-toast'[39m
+[31m[1m>[22m[39m[90m 58 |[39m [36mimport[39m { [33mPurchaseOrderViewDialog[39m } [36mfrom[39m [32m'./purchase-order-view-dialog'[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 59 |[39m [36mimport[39m { [33mPurchaseOrderForm[39m } [36mfrom[39m [32m'./purchase-order-form'[39m
+ [90m 60 |[39m [36mimport[39m { [33mPurchaseOrderEditDialog[39m } [36mfrom[39m [32m'./purchase-order-edit-dialog'[39m
+ [90m 61 |[39m[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/purchase-orders/purchase-order-list.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+✓ Compiled in 228ms
+✓ Finished filesystem cache database compaction in 14.9s
+ GET / 200 in 4.0s (compile: 2.5s, proxy.ts: 596ms, render: 946ms)
+ GET / 200 in 43ms (compile: 3ms, proxy.ts: 6ms, render: 35ms)
+ GET / 200 in 188ms (compile: 153ms, proxy.ts: 9ms, render: 25ms)
+ GET / 200 in 23ms (compile: 1583µs, proxy.ts: 1156µs, render: 20ms)
+ GET / 200 in 322ms (compile: 39ms, proxy.ts: 9ms, render: 274ms)
+ GET / 200 in 329ms (compile: 15ms, proxy.ts: 13ms, render: 302ms)
+ GET / 200 in 365ms (compile: 73ms, proxy.ts: 3ms, render: 289ms)
+ GET / 200 in 374ms (compile: 96ms, proxy.ts: 7ms, render: 271ms)
+ GET /api/auth/session 200 in 215ms (compile: 141ms, proxy.ts: 11ms, render: 64ms)
+ GET /api/auth/session 200 in 458ms (compile: 339ms, proxy.ts: 63ms, render: 56ms)
+ GET /api/auth/session 200 in 440ms (compile: 347ms, proxy.ts: 40ms, render: 53ms)
+ GET /api/auth/session 200 in 169ms (compile: 139ms, proxy.ts: 19ms, render: 11ms)
+ GET / 200 in 367ms (compile: 36ms, proxy.ts: 16ms, render: 315ms)
+ GET / 200 in 371ms (compile: 120ms, proxy.ts: 7ms, render: 244ms)
+ GET / 200 in 212ms (compile: 22ms, proxy.ts: 10ms, render: 179ms)
+ GET / 200 in 107ms (compile: 7ms, proxy.ts: 9ms, render: 91ms)
+ GET /api/auth/providers 200 in 18ms (compile: 5ms, proxy.ts: 4ms, render: 9ms)
+ GET /api/auth/providers 200 in 17ms (compile: 10ms, proxy.ts: 3ms, render: 4ms)
+ GET /api/auth/csrf 200 in 13ms (compile: 5ms, proxy.ts: 3ms, render: 5ms)
+ GET /api/auth/csrf 200 in 13ms (compile: 6ms, proxy.ts: 1434µs, render: 6ms)
+ GET /api/auth/providers 200 in 14ms (compile: 4ms, proxy.ts: 1429µs, render: 8ms)
+ GET /api/auth/csrf 200 in 12ms (compile: 5ms, proxy.ts: 1735µs, render: 5ms)
+ GET /api/auth/providers 200 in 24ms (compile: 7ms, proxy.ts: 5ms, render: 12ms)
+ GET /api/auth/csrf 200 in 15ms (compile: 3ms, proxy.ts: 7ms, render: 5ms)
+ POST /api/auth/callback/credentials 200 in 751ms (compile: 6ms, proxy.ts: 3ms, render: 742ms)
+ POST /api/auth/callback/credentials 200 in 519ms (compile: 9ms, proxy.ts: 2ms, render: 508ms)
+ POST /api/auth/callback/credentials 200 in 562ms (compile: 19ms, proxy.ts: 1691µs, render: 541ms)
+ POST /api/auth/callback/credentials 200 in 759ms (compile: 5ms, proxy.ts: 2ms, render: 752ms)
+ GET /api/auth/session 200 in 20ms (compile: 11ms, proxy.ts: 2ms, render: 7ms)
+ GET /api/auth/session 200 in 24ms (compile: 12ms, proxy.ts: 1870µs, render: 10ms)
+ GET /api/auth/session 200 in 24ms (compile: 11ms, proxy.ts: 3ms, render: 10ms)
+ GET /api/auth/session 200 in 33ms (compile: 13ms, proxy.ts: 1577µs, render: 18ms)
+ GET /api/auth/session 200 in 122ms (compile: 93ms, proxy.ts: 7ms, render: 23ms)
+ GET /api/auth/session 200 in 130ms (compile: 95ms, proxy.ts: 4ms, render: 31ms)
+ GET /api/auth/session 200 in 190ms (compile: 106ms, proxy.ts: 5ms, render: 79ms)
+ GET /api/dashboard 200 in 240ms (compile: 72ms, proxy.ts: 7ms, render: 161ms)
+ GET /api/auth/session 200 in 256ms (compile: 74ms, proxy.ts: 54ms, render: 128ms)
+ GET /api/dashboard 200 in 241ms (compile: 33ms, proxy.ts: 6ms, render: 202ms)
+ GET /api/dashboard 200 in 252ms (compile: 31ms, proxy.ts: 7ms, render: 214ms)
+ GET /api/dashboard 200 in 300ms (compile: 27ms, proxy.ts: 50ms, render: 223ms)
+ GET / 200 in 642ms (compile: 83ms, proxy.ts: 5ms, render: 553ms)
+ GET / 200 in 645ms (compile: 118ms, proxy.ts: 20ms, render: 507ms)
+ GET / 200 in 671ms (compile: 62ms, proxy.ts: 5ms, render: 604ms)
+ GET / 200 in 540ms (compile: 219ms, proxy.ts: 6ms, render: 315ms)
+ GET / 200 in 656ms (compile: 103ms, proxy.ts: 20ms, render: 533ms)
+ GET / 200 in 474ms (compile: 299ms, proxy.ts: 56ms, render: 119ms)
+ GET / 200 in 614ms (compile: 132ms, proxy.ts: 8ms, render: 474ms)
+ GET / 200 in 580ms (compile: 192ms, proxy.ts: 40ms, render: 347ms)
+ GET / 200 in 367ms (compile: 14ms, proxy.ts: 14ms, render: 339ms)
+ GET / 200 in 366ms (compile: 43ms, proxy.ts: 10ms, render: 313ms)
+ GET / 200 in 370ms (compile: 97ms, proxy.ts: 3ms, render: 269ms)
+ GET / 200 in 416ms (compile: 116ms, proxy.ts: 3ms, render: 297ms)
+ GET /api/auth/session 200 in 172ms (compile: 68ms, proxy.ts: 53ms, render: 51ms)
+ GET /api/auth/session 200 in 153ms (compile: 79ms, proxy.ts: 39ms, render: 36ms)
+ GET /api/auth/session 200 in 166ms (compile: 98ms, proxy.ts: 38ms, render: 30ms)
+ GET /api/auth/session 200 in 272ms (compile: 232ms, proxy.ts: 23ms, render: 18ms)
+ GET /api/auth/providers 200 in 84ms (compile: 60ms, proxy.ts: 7ms, render: 17ms)
+ GET /api/auth/providers 200 in 84ms (compile: 66ms, proxy.ts: 7ms, render: 11ms)
+ GET /api/auth/providers 200 in 87ms (compile: 29ms, proxy.ts: 48ms, render: 10ms)
+ GET /api/auth/csrf 200 in 23ms (compile: 7ms, proxy.ts: 5ms, render: 11ms)
+ GET /api/auth/csrf 200 in 23ms (compile: 10ms, proxy.ts: 2ms, render: 11ms)
+ GET /api/auth/csrf 200 in 25ms (compile: 17ms, proxy.ts: 2ms, render: 6ms)
+ GET / 200 in 376ms (compile: 39ms, proxy.ts: 17ms, render: 320ms)
+ GET / 200 in 377ms (compile: 127ms, proxy.ts: 15ms, render: 235ms)
+ GET / 200 in 378ms (compile: 139ms, proxy.ts: 16ms, render: 222ms)
+ GET / 200 in 170ms (compile: 47ms, proxy.ts: 1588µs, render: 122ms)
+ GET /api/auth/providers 200 in 87ms (compile: 79ms, proxy.ts: 3ms, render: 6ms)
+ GET /api/auth/csrf 200 in 14ms (compile: 4ms, proxy.ts: 4ms, render: 6ms)
+ POST /api/auth/callback/credentials 200 in 312ms (compile: 15ms, proxy.ts: 4ms, render: 294ms)
+ POST /api/auth/callback/credentials 200 in 309ms (compile: 10ms, proxy.ts: 6ms, render: 293ms)
+ GET /api/auth/session 200 in 17ms (compile: 5ms, proxy.ts: 1798µs, render: 10ms)
+ POST /api/auth/callback/credentials 200 in 407ms (compile: 15ms, proxy.ts: 5ms, render: 387ms)
+ GET /api/auth/session 200 in 22ms (compile: 7ms, proxy.ts: 3ms, render: 12ms)
+ POST /api/auth/callback/credentials 200 in 174ms (compile: 3ms, proxy.ts: 1810µs, render: 169ms)
+ GET /api/auth/session 200 in 61ms (compile: 22ms, proxy.ts: 4ms, render: 36ms)
+ GET /api/auth/session 200 in 68ms (compile: 34ms, proxy.ts: 6ms, render: 28ms)
+ GET /api/auth/session 200 in 88ms (compile: 39ms, proxy.ts: 6ms, render: 43ms)
+ GET /api/dashboard 200 in 204ms (compile: 39ms, proxy.ts: 5ms, render: 160ms)
+ GET /api/dashboard 200 in 257ms (compile: 47ms, proxy.ts: 11ms, render: 198ms)
+ GET /api/auth/session 200 in 250ms (compile: 204ms, proxy.ts: 21ms, render: 25ms)
+ GET /api/auth/session 200 in 234ms (compile: 186ms, proxy.ts: 7ms, render: 41ms)
+ GET /api/dashboard 200 in 284ms (compile: 119ms, proxy.ts: 13ms, render: 153ms)
+ GET / 200 in 514ms (compile: 85ms, proxy.ts: 17ms, render: 411ms)
+ GET /api/auth/session 200 in 253ms (compile: 176ms, proxy.ts: 15ms, render: 62ms)
+ GET /api/dashboard 200 in 332ms (compile: 118ms, proxy.ts: 28ms, render: 186ms)
+ GET / 200 in 626ms (compile: 130ms, proxy.ts: 20ms, render: 476ms)
+ GET / 200 in 702ms (compile: 42ms, proxy.ts: 12ms, render: 648ms)
+ GET / 200 in 840ms (compile: 115ms, proxy.ts: 18ms, render: 707ms)
+ GET / 200 in 599ms (compile: 100ms, proxy.ts: 19ms, render: 480ms)
+ GET / 200 in 604ms (compile: 51ms, proxy.ts: 10ms, render: 543ms)
+ GET / 200 in 244ms (compile: 118ms, proxy.ts: 49ms, render: 78ms)
+ GET / 200 in 278ms (compile: 45ms, proxy.ts: 50ms, render: 182ms)
+ GET / 200 in 58ms (compile: 9ms, proxy.ts: 12ms, render: 37ms)
+ GET / 200 in 142ms (compile: 19ms, proxy.ts: 19ms, render: 104ms)
+ GET /icons/icon-192x192.png 404 in 183ms (compile: 102ms, render: 81ms)
+ GET /icons/icon-192x192.png 404 in 196ms (compile: 85ms, render: 111ms)
+ GET /api/auth/session 200 in 32ms (compile: 19ms, proxy.ts: 1986µs, render: 11ms)
+ GET / 200 in 107ms (compile: 9ms, proxy.ts: 8ms, render: 90ms)
+ GET / 200 in 100ms (compile: 4ms, proxy.ts: 7ms, render: 89ms)
+ GET /api/auth/providers 200 in 51ms (compile: 26ms, proxy.ts: 5ms, render: 21ms)
+ GET /api/auth/csrf 200 in 59ms (compile: 47ms, proxy.ts: 9ms, render: 4ms)
+[Slow Query] 117ms - SELECT 1
+ GET /api/auth/session 200 in 89ms (compile: 69ms, proxy.ts: 12ms, render: 9ms)
+ GET /icons/icon-192x192.png 404 in 624ms (compile: 118ms, render: 506ms)
+ GET /icons/icon-192x192.png 404 in 629ms (compile: 182ms, render: 447ms)
+ GET / 200 in 223ms (compile: 12ms, proxy.ts: 4ms, render: 206ms)
+ GET / 200 in 138ms (compile: 8ms, proxy.ts: 3ms, render: 127ms)
+ POST /api/auth/callback/credentials 200 in 794ms (compile: 20ms, proxy.ts: 6ms, render: 769ms)
+ GET /api/auth/session 200 in 75ms (compile: 44ms, proxy.ts: 3ms, render: 28ms)
+ GET /api/auth/providers 200 in 34ms (compile: 23ms, proxy.ts: 6ms, render: 5ms)
+ GET /api/auth/csrf 200 in 38ms (compile: 29ms, proxy.ts: 4ms, render: 5ms)
+ GET /api/auth/session 200 in 54ms (compile: 6ms, proxy.ts: 1645µs, render: 47ms)
+[Slow Query] 170ms - SELECT 1
+[Slow Query] 165ms - SELECT "public"."Invoice"."id", "public"."Invoice"."dueDate", "public"."Invoice"."totalAmount", "public"."Invoice"."paidAmount" FROM "public"."Invoice" WHERE "public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3
+[Slow Query] 149ms - SELECT 1
+[Slow Query] 132ms - SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."VatRecord"."id" FROM "public"."VatRecord" WHERE ("public"."VatRecord"."taxMonth" = $1 AND "public"."VatRecord"."taxYear" = $2 AND "public"."VatRecord"."reportStatus" = CAST($3::text AS "public"."VatReportStatus")) OFFSET $4) AS "sub"
+[Slow Query] 193ms - SELECT "public"."JournalEntry"."id", "public"."JournalEntry"."entryNo", "public"."JournalEntry"."date", "public"."JournalEntry"."description", "public"."JournalEntry"."reference", "public"."JournalEntry"."documentType", "public"."JournalEntry"."documentId", "public"."JournalEntry"."totalDebit", "public"."JournalEntry"."totalCredit", "public"."JournalEntry"."status"::text, "public"."JournalEntry"."isAdjustment", "public"."JournalEntry"."isReversing", "public"."JournalEntry"."reversingId", "public"."JournalEntry"."createdById", "public"."JournalEntry"."approvedById", "public"."JournalEntry"."approvedAt", "public"."JournalEntry"."idempotencyKey", "public"."JournalEntry"."notes", "public"."JournalEntry"."isActive", "public"."JournalEntry"."deletedAt", "public"."JournalEntry"."deletedBy", "public"."JournalEntry"."createdAt", "public"."JournalEntry"."updatedAt" FROM "public"."JournalEntry" WHERE ("public"."JournalEntry"."date" >= $1 AND "public"."JournalEntry"."date" <= $2 AND "public"."JournalEntry"."status" = CAST($3::text AS "public"."EntryStatus")) OFFSET $4
+[Slow Query] 194ms - SELECT SUM("totalAmount") AS "_sum$totalAmount", SUM("paidAmount") AS "_sum$paidAmount" FROM (SELECT "public"."PurchaseInvoice"."totalAmount", "public"."PurchaseInvoice"."paidAmount" FROM "public"."PurchaseInvoice" WHERE "public"."PurchaseInvoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3) AS "sub"
+[Slow Query] 206ms - SELECT "public"."JournalEntry"."id", "public"."JournalEntry"."entryNo", "public"."JournalEntry"."date", "public"."JournalEntry"."description", "public"."JournalEntry"."reference", "public"."JournalEntry"."documentType", "public"."JournalEntry"."documentId", "public"."JournalEntry"."totalDebit", "public"."JournalEntry"."totalCredit", "public"."JournalEntry"."status"::text, "public"."JournalEntry"."isAdjustment", "public"."JournalEntry"."isReversing", "public"."JournalEntry"."reversingId", "public"."JournalEntry"."createdById", "public"."JournalEntry"."approvedById", "public"."JournalEntry"."approvedAt", "public"."JournalEntry"."idempotencyKey", "public"."JournalEntry"."notes", "public"."JournalEntry"."isActive", "public"."JournalEntry"."deletedAt", "public"."JournalEntry"."deletedBy", "public"."JournalEntry"."createdAt", "public"."JournalEntry"."updatedAt" FROM "public"."JournalEntry" WHERE ("public"."JournalEntry"."date" >= $1 AND "public"."JournalEntry"."date" <= $2 AND "public"."JournalEntry"."status" = CAST($3::text AS "public"."EntryStatus")) OFFSET $4
+[Slow Query] 170ms - SELECT SUM("whtAmount") AS "_sum$whtAmount" FROM (SELECT "public"."WithholdingTax"."whtAmount" FROM "public"."WithholdingTax" WHERE ("public"."WithholdingTax"."taxYear" = $1 AND "public"."WithholdingTax"."type" = CAST($2::text AS "public"."WhtType")) OFFSET $3) AS "sub"
+[Slow Query] 146ms - SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Invoice"."id" FROM "public"."Invoice" WHERE ("public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) AND "public"."Invoice"."dueDate" < $3) OFFSET $4) AS "sub"
+[Slow Query] 200ms - SELECT SUM("whtAmount") AS "_sum$whtAmount" FROM (SELECT "public"."WithholdingTax"."whtAmount" FROM "public"."WithholdingTax" WHERE ("public"."WithholdingTax"."taxYear" = $1 AND "public"."WithholdingTax"."type" = CAST($2::text AS "public"."WhtType")) OFFSET $3) AS "sub"
+[Slow Query] 182ms - SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Invoice"."id" FROM "public"."Invoice" WHERE "public"."Invoice"."status" = CAST($1::text AS "public"."InvoiceStatus") OFFSET $2) AS "sub"
+[Slow Query] 245ms - SELECT SUM("public"."VatRecord"."vatAmount") AS "_sum$vatAmount", "public"."VatRecord"."taxMonth" FROM "public"."VatRecord" WHERE ("public"."VatRecord"."taxYear" = $1 AND "public"."VatRecord"."type" = CAST($2::text AS "public"."VatRecordType")) GROUP BY "public"."VatRecord"."taxMonth" OFFSET $3
+ GET /api/dashboard 200 in 597ms (compile: 64ms, proxy.ts: 4ms, render: 529ms)
+[Slow Query] 238ms - SELECT "public"."PurchaseInvoice"."id", "public"."PurchaseInvoice"."dueDate", "public"."PurchaseInvoice"."totalAmount", "public"."PurchaseInvoice"."paidAmount" FROM "public"."PurchaseInvoice" WHERE "public"."PurchaseInvoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3
+ GET /api/auth/session 200 in 213ms (compile: 199ms, proxy.ts: 7ms, render: 7ms)
+ POST /api/auth/callback/credentials 200 in 858ms (compile: 63ms, proxy.ts: 57ms, render: 738ms)
+ GET / 200 in 691ms (compile: 82ms, proxy.ts: 44ms, render: 566ms)
+ GET / 200 in 770ms (compile: 44ms, proxy.ts: 52ms, render: 674ms)
+ GET /icons/icon-192x192.png 404 in 415ms (compile: 75ms, render: 340ms)
+ GET /api/auth/session 200 in 111ms (compile: 94ms, proxy.ts: 5ms, render: 12ms)
+ GET /icons/icon-192x192.png 404 in 419ms (compile: 117ms, render: 302ms)
+ GET / 200 in 510ms (compile: 29ms, proxy.ts: 96ms, render: 385ms)
+ GET / 200 in 125ms (compile: 28ms, proxy.ts: 7ms, render: 90ms)
+ GET /api/auth/session 200 in 165ms (compile: 103ms, proxy.ts: 6ms, render: 57ms)
+ GET /api/auth/providers 200 in 86ms (compile: 77ms, proxy.ts: 3ms, render: 6ms)
+[Slow Query] 119ms - SELECT "public"."JournalEntry"."id", "public"."JournalEntry"."entryNo", "public"."JournalEntry"."date", "public"."JournalEntry"."description", "public"."JournalEntry"."reference", "public"."JournalEntry"."documentType", "public"."JournalEntry"."documentId", "public"."JournalEntry"."totalDebit", "public"."JournalEntry"."totalCredit", "public"."JournalEntry"."status"::text, "public"."JournalEntry"."isAdjustment", "public"."JournalEntry"."isReversing", "public"."JournalEntry"."reversingId", "public"."JournalEntry"."createdById", "public"."JournalEntry"."approvedById", "public"."JournalEntry"."approvedAt", "public"."JournalEntry"."idempotencyKey", "public"."JournalEntry"."notes", "public"."JournalEntry"."isActive", "public"."JournalEntry"."deletedAt", "public"."JournalEntry"."deletedBy", "public"."JournalEntry"."createdAt", "public"."JournalEntry"."updatedAt" FROM "public"."JournalEntry" WHERE ("public"."JournalEntry"."date" >= $1 AND "public"."JournalEntry"."date" <= $2 AND "public"."JournalEntry"."status" = CAST($3::text AS "public"."EntryStatus")) OFFSET $4
+[Slow Query] 121ms - SELECT SUM("whtAmount") AS "_sum$whtAmount" FROM (SELECT "public"."WithholdingTax"."whtAmount" FROM "public"."WithholdingTax" WHERE ("public"."WithholdingTax"."taxYear" = $1 AND "public"."WithholdingTax"."type" = CAST($2::text AS "public"."WhtType")) OFFSET $3) AS "sub"
+[Slow Query] 119ms - SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."VatRecord"."id" FROM "public"."VatRecord" WHERE ("public"."VatRecord"."taxMonth" = $1 AND "public"."VatRecord"."taxYear" = $2 AND "public"."VatRecord"."reportStatus" = CAST($3::text AS "public"."VatReportStatus")) OFFSET $4) AS "sub"
+[Slow Query] 123ms - SELECT SUM("whtAmount") AS "_sum$whtAmount" FROM (SELECT "public"."WithholdingTax"."whtAmount" FROM "public"."WithholdingTax" WHERE ("public"."WithholdingTax"."taxYear" = $1 AND "public"."WithholdingTax"."type" = CAST($2::text AS "public"."WhtType")) OFFSET $3) AS "sub"
+ GET /api/dashboard 200 in 349ms (compile: 9ms, proxy.ts: 5ms, render: 336ms)
+ GET /api/auth/csrf 200 in 153ms (compile: 100ms, proxy.ts: 47ms, render: 6ms)
+ GET / 200 in 206ms (compile: 117ms, proxy.ts: 7ms, render: 82ms)
+ GET / 200 in 267ms (compile: 58ms, proxy.ts: 35ms, render: 173ms)
+ POST /api/auth/callback/credentials 200 in 511ms (compile: 15ms, proxy.ts: 2ms, render: 494ms)
+ GET /icons/icon-192x192.png 404 in 300ms (compile: 35ms, render: 264ms)
+ GET /icons/icon-192x192.png 404 in 311ms (compile: 59ms, render: 252ms)
+ GET /api/auth/session 200 in 43ms (compile: 25ms, proxy.ts: 7ms, render: 11ms)
+ GET /api/auth/session 200 in 100ms (compile: 69ms, proxy.ts: 5ms, render: 26ms)
+ GET /icons/icon-192x192.png 404 in 155ms (compile: 49ms, render: 106ms)
+ GET /icons/icon-192x192.png 404 in 154ms (compile: 57ms, render: 98ms)
+[Slow Query] 101ms - SELECT "public"."JournalEntry"."id", "public"."JournalEntry"."entryNo", "public"."JournalEntry"."date", "public"."JournalEntry"."description", "public"."JournalEntry"."reference", "public"."JournalEntry"."documentType", "public"."JournalEntry"."documentId", "public"."JournalEntry"."totalDebit", "public"."JournalEntry"."totalCredit", "public"."JournalEntry"."status"::text, "public"."JournalEntry"."isAdjustment", "public"."JournalEntry"."isReversing", "public"."JournalEntry"."reversingId", "public"."JournalEntry"."createdById", "public"."JournalEntry"."approvedById", "public"."JournalEntry"."approvedAt", "public"."JournalEntry"."idempotencyKey", "public"."JournalEntry"."notes", "public"."JournalEntry"."isActive", "public"."JournalEntry"."deletedAt", "public"."JournalEntry"."deletedBy", "public"."JournalEntry"."createdAt", "public"."JournalEntry"."updatedAt" FROM "public"."JournalEntry" WHERE ("public"."JournalEntry"."date" >= $1 AND "public"."JournalEntry"."date" <= $2 AND "public"."JournalEntry"."status" = CAST($3::text AS "public"."EntryStatus")) OFFSET $4
+[Slow Query] 105ms - SELECT SUM("public"."VatRecord"."vatAmount") AS "_sum$vatAmount", "public"."VatRecord"."taxMonth" FROM "public"."VatRecord" WHERE ("public"."VatRecord"."taxYear" = $1 AND "public"."VatRecord"."type" = CAST($2::text AS "public"."VatRecordType")) GROUP BY "public"."VatRecord"."taxMonth" OFFSET $3
+[Slow Query] 105ms - SELECT SUM("totalAmount") AS "_sum$totalAmount", SUM("paidAmount") AS "_sum$paidAmount" FROM (SELECT "public"."Invoice"."totalAmount", "public"."Invoice"."paidAmount" FROM "public"."Invoice" WHERE "public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3) AS "sub"
+[Slow Query] 117ms - SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."VatRecord"."id" FROM "public"."VatRecord" WHERE ("public"."VatRecord"."taxMonth" = $1 AND "public"."VatRecord"."taxYear" = $2 AND "public"."VatRecord"."reportStatus" = CAST($3::text AS "public"."VatReportStatus")) OFFSET $4) AS "sub"
+[Slow Query] 120ms - SELECT "public"."Invoice"."id", "public"."Invoice"."dueDate", "public"."Invoice"."totalAmount", "public"."Invoice"."paidAmount" FROM "public"."Invoice" WHERE "public"."Invoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3
+ GET /api/dashboard 200 in 238ms (compile: 2ms, proxy.ts: 3ms, render: 232ms)
+ GET /api/auth/session 200 in 195ms (compile: 142ms, proxy.ts: 46ms, render: 7ms)
+ GET / 200 in 224ms (compile: 35ms, proxy.ts: 17ms, render: 172ms)
+ GET / 200 in 231ms (compile: 18ms, proxy.ts: 14ms, render: 200ms)
+ GET /icons/icon-192x192.png 404 in 218ms (compile: 62ms, render: 156ms)
+ GET /icons/icon-192x192.png 404 in 210ms (compile: 101ms, render: 109ms)
+ GET / 200 in 65ms (compile: 6ms, proxy.ts: 3ms, render: 56ms)
+ GET /api/auth/providers 200 in 37ms (compile: 15ms, proxy.ts: 11ms, render: 11ms)
+ GET /api/auth/csrf 200 in 15ms (compile: 9ms, proxy.ts: 1691µs, render: 4ms)
+ GET /icons/icon-192x192.png 404 in 108ms (compile: 25ms, render: 83ms)
+ GET /icons/icon-192x192.png 404 in 111ms (compile: 8ms, render: 103ms)
+ POST /api/auth/callback/credentials 200 in 265ms (compile: 5ms, proxy.ts: 4ms, render: 256ms)
+ GET /api/auth/session 200 in 18ms (compile: 5ms, proxy.ts: 4ms, render: 9ms)
+ GET /api/auth/session 200 in 16ms (compile: 7ms, proxy.ts: 1856µs, render: 7ms)
+ GET /api/dashboard 200 in 90ms (compile: 6ms, proxy.ts: 3ms, render: 81ms)
+ GET / 200 in 77ms (compile: 6ms, proxy.ts: 3ms, render: 69ms)
+ GET / 200 in 84ms (compile: 40ms, proxy.ts: 4ms, render: 41ms)
+ GET /icons/icon-192x192.png 404 in 111ms (compile: 41ms, render: 70ms)
+ GET /icons/icon-192x192.png 404 in 122ms (compile: 31ms, render: 91ms)
+ GET / 200 in 155ms (compile: 27ms, proxy.ts: 6ms, render: 122ms)
+ GET / 200 in 151ms (compile: 106ms, proxy.ts: 4ms, render: 41ms)
+ GET / 200 in 165ms (compile: 53ms, proxy.ts: 9ms, render: 103ms)
+ GET / 200 in 171ms (compile: 66ms, proxy.ts: 13ms, render: 92ms)
+ GET /api/auth/session 200 in 79ms (compile: 44ms, proxy.ts: 13ms, render: 22ms)
+ GET /api/auth/session 200 in 78ms (compile: 48ms, proxy.ts: 14ms, render: 15ms)
+ GET /api/auth/session 200 in 88ms (compile: 49ms, proxy.ts: 14ms, render: 25ms)
+ GET /api/auth/session 200 in 90ms (compile: 51ms, proxy.ts: 14ms, render: 25ms)
+ GET / 200 in 376ms (compile: 39ms, proxy.ts: 9ms, render: 328ms)
+ GET / 200 in 375ms (compile: 63ms, proxy.ts: 8ms, render: 304ms)
+ GET / 200 in 363ms (compile: 198ms, proxy.ts: 13ms, render: 152ms)
+ GET / 200 in 367ms (compile: 178ms, proxy.ts: 13ms, render: 177ms)
+ GET /api/auth/providers 200 in 51ms (compile: 13ms, proxy.ts: 21ms, render: 17ms)
+ GET /api/auth/providers 200 in 51ms (compile: 15ms, proxy.ts: 19ms, render: 17ms)
+ GET /api/auth/providers 200 in 50ms (compile: 17ms, proxy.ts: 19ms, render: 15ms)
+ GET /api/auth/providers 200 in 61ms (compile: 27ms, proxy.ts: 20ms, render: 14ms)
+ GET /api/auth/csrf 200 in 48ms (compile: 25ms, proxy.ts: 6ms, render: 17ms)
+ GET /api/auth/csrf 200 in 49ms (compile: 24ms, proxy.ts: 8ms, render: 17ms)
+ GET /api/auth/csrf 200 in 47ms (compile: 33ms, proxy.ts: 4ms, render: 10ms)
+ GET /api/auth/csrf 200 in 45ms (compile: 32ms, proxy.ts: 5ms, render: 8ms)
+[Slow Query] 561ms - SELECT 1
+[Slow Query] 573ms - SELECT 1
+[Slow Query] 573ms - SELECT 1
+[Slow Query] 573ms - SELECT 1
+ POST /api/auth/callback/credentials 200 in 1104ms (compile: 25ms, proxy.ts: 4ms, render: 1076ms)
+ POST /api/auth/callback/credentials 200 in 1112ms (compile: 27ms, proxy.ts: 4ms, render: 1081ms)
+ POST /api/auth/callback/credentials 200 in 1112ms (compile: 33ms, proxy.ts: 6ms, render: 1073ms)
+ POST /api/auth/callback/credentials 200 in 1127ms (compile: 18ms, proxy.ts: 11ms, render: 1098ms)
+ GET /api/auth/session 200 in 25ms (compile: 16ms, proxy.ts: 3ms, render: 6ms)
+ GET /api/auth/session 200 in 28ms (compile: 15ms, proxy.ts: 1907µs, render: 11ms)
+ GET /api/auth/session 200 in 29ms (compile: 16ms, proxy.ts: 3ms, render: 10ms)
+ GET /api/auth/session 200 in 29ms (compile: 17ms, proxy.ts: 3ms, render: 9ms)
+ GET /api/auth/session 200 in 90ms (compile: 40ms, proxy.ts: 1920µs, render: 48ms)
+ GET /api/auth/session 200 in 189ms (compile: 92ms, proxy.ts: 47ms, render: 49ms)
+ GET /api/dashboard 200 in 159ms (compile: 56ms, proxy.ts: 16ms, render: 86ms)
+ GET /api/dashboard 200 in 170ms (compile: 54ms, proxy.ts: 25ms, render: 91ms)
+ GET /api/dashboard 200 in 141ms (compile: 34ms, proxy.ts: 21ms, render: 87ms)
+ GET /api/auth/session 200 in 180ms (compile: 111ms, proxy.ts: 18ms, render: 51ms)
+ GET /api/dashboard 200 in 141ms (compile: 33ms, proxy.ts: 17ms, render: 91ms)
+ GET /api/auth/session 200 in 183ms (compile: 110ms, proxy.ts: 19ms, render: 53ms)
+ GET / 200 in 1905ms (compile: 43ms, proxy.ts: 11ms, render: 1851ms)
+ GET / 200 in 1913ms (compile: 25ms, proxy.ts: 9ms, render: 1879ms)
+ GET / 200 in 1807ms (compile: 480ms, proxy.ts: 2ms, render: 1325ms)
+ GET / 200 in 1821ms (compile: 18ms, proxy.ts: 3ms, render: 1800ms)
+ GET / 200 in 804ms (compile: 537ms, proxy.ts: 60ms, render: 207ms)
+ GET / 200 in 1120ms (compile: 249ms, proxy.ts: 356ms, render: 516ms)
+ GET / 200 in 1139ms (compile: 135ms, proxy.ts: 366ms, render: 638ms)
+ GET / 200 in 860ms (compile: 437ms, proxy.ts: 60ms, render: 363ms)
+ GET / 200 in 360ms (compile: 16ms, proxy.ts: 7ms, render: 337ms)
+ GET / 200 in 379ms (compile: 54ms, proxy.ts: 13ms, render: 311ms)
+ GET / 200 in 496ms (compile: 10ms, proxy.ts: 9ms, render: 477ms)
+ GET / 200 in 542ms (compile: 40ms, proxy.ts: 6ms, render: 495ms)
+ GET /api/auth/session 200 in 466ms (compile: 267ms, proxy.ts: 85ms, render: 114ms)
+ GET /api/auth/session 200 in 414ms (compile: 279ms, proxy.ts: 22ms, render: 114ms)
+ GET /api/auth/session 200 in 668ms (compile: 254ms, proxy.ts: 14ms, render: 400ms)
+ GET /api/auth/session 200 in 885ms (compile: 290ms, proxy.ts: 14ms, render: 582ms)
+ GET /api/auth/providers 200 in 768ms (compile: 705ms, proxy.ts: 46ms, render: 17ms)
+ GET /api/auth/providers 200 in 775ms (compile: 709ms, proxy.ts: 44ms, render: 21ms)
+ GET /api/auth/providers 200 in 184ms (compile: 132ms, proxy.ts: 45ms, render: 6ms)
+ GET /api/auth/providers 200 in 183ms (compile: 131ms, proxy.ts: 44ms, render: 8ms)
+ GET /api/auth/csrf 200 in 67ms (compile: 39ms, proxy.ts: 16ms, render: 11ms)
+ GET /api/auth/csrf 200 in 56ms (compile: 32ms, proxy.ts: 14ms, render: 10ms)
+ GET /icons/icon-192x192.png 404 in 1571ms (compile: 117ms, render: 1454ms)
+ GET /icons/icon-192x192.png 404 in 1568ms (compile: 189ms, render: 1379ms)
+ GET /icons/icon-192x192.png 404 in 1537ms (compile: 453ms, render: 1084ms)
+ GET /icons/icon-192x192.png 404 in 1534ms (compile: 492ms, render: 1042ms)
+ GET /api/auth/csrf 200 in 58ms (compile: 40ms, proxy.ts: 6ms, render: 12ms)
+ GET /api/auth/csrf 200 in 58ms (compile: 40ms, proxy.ts: 10ms, render: 8ms)
+ GET / 200 in 928ms (compile: 135ms, proxy.ts: 44ms, render: 749ms)
+ GET / 200 in 932ms (compile: 276ms, proxy.ts: 42ms, render: 615ms)
+ GET / 200 in 879ms (compile: 531ms, proxy.ts: 22ms, render: 326ms)
+ GET / 200 in 869ms (compile: 585ms, proxy.ts: 49ms, render: 236ms)
+[Slow Query] 1718ms - SELECT 1
+[Slow Query] 1747ms - SELECT 1
+[Slow Query] 1747ms - SELECT 1
+[Slow Query] 1734ms - SELECT 1
+[Slow Query] 292ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[Slow Query] 292ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[Slow Query] 304ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[Slow Query] 307ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[Slow Query] 118ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+[Slow Query] 118ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+[Slow Query] 171ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+[Slow Query] 171ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+ POST /api/auth/callback/credentials 200 in 2.8s (compile: 31ms, proxy.ts: 9ms, render: 2.7s)
+ GET /api/auth/session 200 in 30ms (compile: 17ms, proxy.ts: 4ms, render: 9ms)
+[Slow Query] 107ms - INSERT INTO "public"."UserSession" ("id","userId","sessionToken","ipAddress","userAgent","createdAt","lastActiveAt","expiresAt","isValid") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING "public"."UserSession"."id", "public"."UserSession"."userId", "public"."UserSession"."sessionToken", "public"."UserSession"."ipAddress", "public"."UserSession"."userAgent", "public"."UserSession"."createdAt", "public"."UserSession"."lastActiveAt", "public"."UserSession"."expiresAt", "public"."UserSession"."isValid", "public"."UserSession"."rotatedFrom"
+[Slow Query] 129ms - INSERT INTO "public"."UserSession" ("id","userId","sessionToken","ipAddress","userAgent","createdAt","lastActiveAt","expiresAt","isValid") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING "public"."UserSession"."id", "public"."UserSession"."userId", "public"."UserSession"."sessionToken", "public"."UserSession"."ipAddress", "public"."UserSession"."userAgent", "public"."UserSession"."createdAt", "public"."UserSession"."lastActiveAt", "public"."UserSession"."expiresAt", "public"."UserSession"."isValid", "public"."UserSession"."rotatedFrom"
+[Slow Query] 152ms - UPDATE "public"."UserSession" SET "isValid" = $1 WHERE ("public"."UserSession"."id" = $2 AND 1=1) RETURNING "public"."UserSession"."id", "public"."UserSession"."userId", "public"."UserSession"."sessionToken", "public"."UserSession"."ipAddress", "public"."UserSession"."userAgent", "public"."UserSession"."createdAt", "public"."UserSession"."lastActiveAt", "public"."UserSession"."expiresAt", "public"."UserSession"."isValid", "public"."UserSession"."rotatedFrom"
+ GET /api/auth/session 200 in 34ms (compile: 10ms, proxy.ts: 14ms, render: 11ms)
+ POST /api/auth/callback/credentials 200 in 3.0s (compile: 35ms, proxy.ts: 3ms, render: 2.9s)
+ GET /api/dashboard 200 in 145ms (compile: 1321µs, proxy.ts: 1734µs, render: 142ms)
+ POST /api/auth/callback/credentials 200 in 3.2s (compile: 31ms, proxy.ts: 11ms, render: 3.2s)
+[Slow Query] 185ms - INSERT INTO "public"."AuditLog" ("id","timestamp","userId","action","entityType","entityId","beforeState","afterState","ipAddress","userAgent","hash","prevHash") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING "public"."AuditLog"."id", "public"."AuditLog"."timestamp", "public"."AuditLog"."userId", "public"."AuditLog"."action", "public"."AuditLog"."entityType", "public"."AuditLog"."entityId", "public"."AuditLog"."beforeState", "public"."AuditLog"."afterState", "public"."AuditLog"."ipAddress", "public"."AuditLog"."userAgent", "public"."AuditLog"."hash", "public"."AuditLog"."prevHash"
+ POST /api/auth/callback/credentials 200 in 3.2s (compile: 23ms, proxy.ts: 2ms, render: 3.2s)
+ GET /api/auth/session 200 in 227ms (compile: 28ms, proxy.ts: 170ms, render: 28ms)
+ GET /api/auth/session 200 in 131ms (compile: 53ms, proxy.ts: 5ms, render: 74ms)
+ GET /api/auth/session 200 in 271ms (compile: 120ms, proxy.ts: 6ms, render: 145ms)
+ GET / 200 in 569ms (compile: 69ms, proxy.ts: 11ms, render: 489ms)
+ GET / 200 in 633ms (compile: 29ms, proxy.ts: 11ms, render: 592ms)
+ GET /api/auth/session 200 in 393ms (compile: 221ms, proxy.ts: 43ms, render: 129ms)
+ GET /api/dashboard 200 in 405ms (compile: 170ms, proxy.ts: 12ms, render: 223ms)
+[Slow Query] 114ms - SELECT SUM("totalAmount") AS "_sum$totalAmount", SUM("paidAmount") AS "_sum$paidAmount" FROM (SELECT "public"."PurchaseInvoice"."totalAmount", "public"."PurchaseInvoice"."paidAmount" FROM "public"."PurchaseInvoice" WHERE "public"."PurchaseInvoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3) AS "sub"
+ GET /api/dashboard 200 in 346ms (compile: 66ms, proxy.ts: 25ms, render: 254ms)
+ GET /api/auth/session 200 in 578ms (compile: 222ms, proxy.ts: 21ms, render: 335ms)
+ GET /api/auth/session 200 in 840ms (compile: 464ms, proxy.ts: 55ms, render: 321ms)
+ GET /api/dashboard 200 in 802ms (compile: 175ms, proxy.ts: 10ms, render: 617ms)
+ GET / 200 in 1055ms (compile: 358ms, proxy.ts: 66ms, render: 631ms)
+ GET / 200 in 1088ms (compile: 295ms, proxy.ts: 238ms, render: 555ms)
+ GET / 200 in 642ms (compile: 233ms, proxy.ts: 15ms, render: 395ms)
+ GET / 200 in 730ms (compile: 128ms, proxy.ts: 14ms, render: 588ms)
+ GET / 200 in 695ms (compile: 112ms, proxy.ts: 195ms, render: 388ms)
+ GET / 200 in 709ms (compile: 159ms, proxy.ts: 89ms, render: 460ms)
+ GET / 200 in 300ms (compile: 9ms, proxy.ts: 8ms, render: 283ms)
+ GET / 200 in 308ms (compile: 40ms, proxy.ts: 7ms, render: 262ms)
+ GET / 200 in 309ms (compile: 72ms, proxy.ts: 3ms, render: 234ms)
+ GET / 200 in 313ms (compile: 134ms, proxy.ts: 4ms, render: 176ms)
+ GET /api/auth/session 200 in 127ms (compile: 86ms, proxy.ts: 17ms, render: 24ms)
+ GET /api/auth/session 200 in 123ms (compile: 85ms, proxy.ts: 20ms, render: 18ms)
+ GET /api/auth/session 200 in 129ms (compile: 101ms, proxy.ts: 9ms, render: 19ms)
+ GET /api/auth/session 200 in 188ms (compile: 73ms, proxy.ts: 19ms, render: 95ms)
+ GET /api/auth/providers 200 in 68ms (compile: 41ms, proxy.ts: 8ms, render: 19ms)
+ GET /api/auth/providers 200 in 70ms (compile: 44ms, proxy.ts: 8ms, render: 19ms)
+ GET /api/auth/providers 200 in 72ms (compile: 46ms, proxy.ts: 8ms, render: 18ms)
+ GET /api/auth/providers 200 in 73ms (compile: 46ms, proxy.ts: 12ms, render: 15ms)
+ GET /api/auth/csrf 200 in 30ms (compile: 19ms, proxy.ts: 5ms, render: 6ms)
+ GET /api/auth/csrf 200 in 31ms (compile: 17ms, proxy.ts: 4ms, render: 10ms)
+ GET /api/auth/csrf 200 in 35ms (compile: 18ms, proxy.ts: 5ms, render: 12ms)
+ GET /api/auth/csrf 200 in 34ms (compile: 20ms, proxy.ts: 4ms, render: 11ms)
+ GET / 200 in 477ms (compile: 43ms, proxy.ts: 10ms, render: 424ms)
+ GET / 200 in 474ms (compile: 119ms, proxy.ts: 11ms, render: 343ms)
+ GET / 200 in 478ms (compile: 75ms, proxy.ts: 100ms, render: 302ms)
+ GET / 200 in 382ms (compile: 141ms, proxy.ts: 8ms, render: 234ms)
+[Slow Query] 107ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+[Slow Query] 108ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+[Slow Query] 108ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+[Slow Query] 217ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+[Slow Query] 228ms - UPDATE "public"."UserSession" SET "isValid" = $1 WHERE ("public"."UserSession"."id" = $2 AND 1=1) RETURNING "public"."UserSession"."id", "public"."UserSession"."userId", "public"."UserSession"."sessionToken", "public"."UserSession"."ipAddress", "public"."UserSession"."userAgent", "public"."UserSession"."createdAt", "public"."UserSession"."lastActiveAt", "public"."UserSession"."expiresAt", "public"."UserSession"."isValid", "public"."UserSession"."rotatedFrom"
+[Slow Query] 103ms - UPDATE "public"."UserSession" SET "isValid" = $1 WHERE ("public"."UserSession"."id" = $2 AND 1=1) RETURNING "public"."UserSession"."id", "public"."UserSession"."userId", "public"."UserSession"."sessionToken", "public"."UserSession"."ipAddress", "public"."UserSession"."userAgent", "public"."UserSession"."createdAt", "public"."UserSession"."lastActiveAt", "public"."UserSession"."expiresAt", "public"."UserSession"."isValid", "public"."UserSession"."rotatedFrom"
+[Slow Query] 229ms - UPDATE "public"."UserSession" SET "isValid" = $1 WHERE ("public"."UserSession"."id" = $2 AND 1=1) RETURNING "public"."UserSession"."id", "public"."UserSession"."userId", "public"."UserSession"."sessionToken", "public"."UserSession"."ipAddress", "public"."UserSession"."userAgent", "public"."UserSession"."createdAt", "public"."UserSession"."lastActiveAt", "public"."UserSession"."expiresAt", "public"."UserSession"."isValid", "public"."UserSession"."rotatedFrom"
+[Slow Query] 148ms - INSERT INTO "public"."UserSession" ("id","userId","sessionToken","ipAddress","userAgent","createdAt","lastActiveAt","expiresAt","isValid") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING "public"."UserSession"."id", "public"."UserSession"."userId", "public"."UserSession"."sessionToken", "public"."UserSession"."ipAddress", "public"."UserSession"."userAgent", "public"."UserSession"."createdAt", "public"."UserSession"."lastActiveAt", "public"."UserSession"."expiresAt", "public"."UserSession"."isValid", "public"."UserSession"."rotatedFrom"
+[Slow Query] 103ms - INSERT INTO "public"."ActivityLog" ("id","userId","action","module","status","createdAt") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "public"."ActivityLog"."id", "public"."ActivityLog"."userId", "public"."ActivityLog"."action", "public"."ActivityLog"."module", "public"."ActivityLog"."recordId", "public"."ActivityLog"."details", "public"."ActivityLog"."ipAddress", "public"."ActivityLog"."status", "public"."ActivityLog"."errorMessage", "public"."ActivityLog"."createdAt"
+[Slow Query] 101ms - UPDATE "public"."User" SET "lastLoginAt" = $1, "updatedAt" = $2 WHERE ("public"."User"."id" = $3 AND 1=1) RETURNING "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt"
+[Slow Query] 106ms - UPDATE "public"."User" SET "lastLoginAt" = $1, "updatedAt" = $2 WHERE ("public"."User"."id" = $3 AND 1=1) RETURNING "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt"
+[Slow Query] 114ms - UPDATE "public"."User" SET "lastLoginAt" = $1, "updatedAt" = $2 WHERE ("public"."User"."id" = $3 AND 1=1) RETURNING "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt"
+ POST /api/auth/callback/credentials 200 in 1033ms (compile: 31ms, proxy.ts: 3ms, render: 999ms)
+ POST /api/auth/callback/credentials 200 in 1045ms (compile: 25ms, proxy.ts: 6ms, render: 1014ms)
+ POST /api/auth/callback/credentials 200 in 1037ms (compile: 37ms, proxy.ts: 4ms, render: 996ms)
+ POST /api/auth/callback/credentials 200 in 1044ms (compile: 33ms, proxy.ts: 3ms, render: 1008ms)
+ GET /api/auth/session 200 in 27ms (compile: 10ms, proxy.ts: 6ms, render: 11ms)
+ GET /api/auth/session 200 in 27ms (compile: 12ms, proxy.ts: 4ms, render: 10ms)
+ GET /api/auth/session 200 in 27ms (compile: 12ms, proxy.ts: 3ms, render: 12ms)
+ GET /api/auth/session 200 in 34ms (compile: 13ms, proxy.ts: 1455µs, render: 20ms)
+ GET /api/auth/session 200 in 88ms (compile: 57ms, proxy.ts: 6ms, render: 24ms)
+ GET /api/auth/session 200 in 112ms (compile: 62ms, proxy.ts: 9ms, render: 41ms)
+ GET /api/dashboard 200 in 101ms (compile: 15ms, proxy.ts: 21ms, render: 65ms)
+ GET /api/auth/session 200 in 123ms (compile: 62ms, proxy.ts: 8ms, render: 54ms)
+ GET /api/auth/session 200 in 129ms (compile: 60ms, proxy.ts: 17ms, render: 52ms)
+ GET /api/dashboard 200 in 144ms (compile: 20ms, proxy.ts: 6ms, render: 118ms)
+ GET /api/dashboard 200 in 156ms (compile: 23ms, proxy.ts: 4ms, render: 129ms)
+[Slow Query] 146ms - SELECT "public"."JournalEntry"."id", "public"."JournalEntry"."entryNo", "public"."JournalEntry"."date", "public"."JournalEntry"."description", "public"."JournalEntry"."reference", "public"."JournalEntry"."documentType", "public"."JournalEntry"."documentId", "public"."JournalEntry"."totalDebit", "public"."JournalEntry"."totalCredit", "public"."JournalEntry"."status"::text, "public"."JournalEntry"."isAdjustment", "public"."JournalEntry"."isReversing", "public"."JournalEntry"."reversingId", "public"."JournalEntry"."createdById", "public"."JournalEntry"."approvedById", "public"."JournalEntry"."approvedAt", "public"."JournalEntry"."idempotencyKey", "public"."JournalEntry"."notes", "public"."JournalEntry"."isActive", "public"."JournalEntry"."deletedAt", "public"."JournalEntry"."deletedBy", "public"."JournalEntry"."createdAt", "public"."JournalEntry"."updatedAt" FROM "public"."JournalEntry" WHERE ("public"."JournalEntry"."date" >= $1 AND "public"."JournalEntry"."date" <= $2 AND "public"."JournalEntry"."status" = CAST($3::text AS "public"."EntryStatus")) OFFSET $4
+ GET /api/dashboard 200 in 274ms (compile: 31ms, proxy.ts: 3ms, render: 240ms)
+ GET / 200 in 435ms (compile: 54ms, proxy.ts: 5ms, render: 376ms)
+ GET / 200 in 422ms (compile: 129ms, proxy.ts: 13ms, render: 279ms)
+ GET / 200 in 446ms (compile: 33ms, proxy.ts: 5ms, render: 409ms)
+ GET / 200 in 375ms (compile: 118ms, proxy.ts: 20ms, render: 237ms)
+ GET / 200 in 454ms (compile: 87ms, proxy.ts: 11ms, render: 355ms)
+ GET / 200 in 383ms (compile: 230ms, proxy.ts: 64ms, render: 89ms)
+ GET / 200 in 448ms (compile: 104ms, proxy.ts: 4ms, render: 341ms)
+ GET / 200 in 476ms (compile: 197ms, proxy.ts: 20ms, render: 260ms)
+ GET / 200 in 196ms (compile: 9ms, proxy.ts: 10ms, render: 177ms)
+ GET / 200 in 194ms (compile: 26ms, proxy.ts: 7ms, render: 161ms)
+ GET / 200 in 193ms (compile: 53ms, proxy.ts: 2ms, render: 138ms)
+ GET / 200 in 197ms (compile: 71ms, proxy.ts: 3ms, render: 123ms)
+ GET /api/auth/session 200 in 113ms (compile: 51ms, proxy.ts: 38ms, render: 24ms)
+ GET /api/auth/session 200 in 85ms (compile: 40ms, proxy.ts: 24ms, render: 20ms)
+ GET /api/auth/session 200 in 114ms (compile: 47ms, proxy.ts: 16ms, render: 50ms)
+ GET /api/auth/providers 200 in 158ms (compile: 63ms, proxy.ts: 78ms, render: 18ms)
+ GET /api/auth/providers 200 in 156ms (compile: 64ms, proxy.ts: 79ms, render: 14ms)
+ GET /api/auth/providers 200 in 125ms (compile: 56ms, proxy.ts: 53ms, render: 16ms)
+ GET /api/auth/csrf 200 in 47ms (compile: 25ms, proxy.ts: 8ms, render: 15ms)
+ GET /api/auth/csrf 200 in 51ms (compile: 28ms, proxy.ts: 6ms, render: 17ms)
+ GET /api/auth/csrf 200 in 56ms (compile: 32ms, proxy.ts: 6ms, render: 18ms)
+ GET / 200 in 653ms (compile: 31ms, proxy.ts: 36ms, render: 586ms)
+ GET / 200 in 649ms (compile: 89ms, proxy.ts: 35ms, render: 526ms)
+ GET / 200 in 634ms (compile: 128ms, proxy.ts: 20ms, render: 486ms)
+ GET /api/auth/session 200 in 22ms (compile: 6ms, proxy.ts: 11ms, render: 5ms)
+ GET / 200 in 72ms (compile: 5ms, proxy.ts: 2ms, render: 65ms)
+ POST /api/auth/callback/credentials 200 in 643ms (compile: 27ms, proxy.ts: 9ms, render: 607ms)
+ GET /api/auth/providers 200 in 22ms (compile: 11ms, proxy.ts: 3ms, render: 8ms)
+ POST /api/auth/callback/credentials 200 in 637ms (compile: 37ms, proxy.ts: 5ms, render: 595ms)
+ POST /api/auth/callback/credentials 200 in 648ms (compile: 31ms, proxy.ts: 7ms, render: 610ms)
+ GET /api/auth/session 200 in 43ms (compile: 16ms, proxy.ts: 4ms, render: 23ms)
+ GET /api/auth/csrf 200 in 51ms (compile: 30ms, proxy.ts: 5ms, render: 16ms)
+ GET /api/auth/session 200 in 56ms (compile: 34ms, proxy.ts: 3ms, render: 19ms)
+ GET /api/auth/session 200 in 65ms (compile: 37ms, proxy.ts: 3ms, render: 25ms)
+ GET /api/auth/session 200 in 146ms (compile: 90ms, proxy.ts: 1640µs, render: 54ms)
+ GET /api/dashboard 200 in 221ms (compile: 32ms, proxy.ts: 46ms, render: 143ms)
+ GET /api/auth/session 200 in 240ms (compile: 77ms, proxy.ts: 43ms, render: 121ms)
+ GET /api/dashboard 200 in 186ms (compile: 29ms, proxy.ts: 9ms, render: 147ms)
+ GET /api/auth/session 200 in 227ms (compile: 160ms, proxy.ts: 8ms, render: 58ms)
+ GET /api/dashboard 200 in 226ms (compile: 117ms, proxy.ts: 18ms, render: 91ms)
+ POST /api/auth/callback/credentials 200 in 400ms (compile: 112ms, proxy.ts: 8ms, render: 279ms)
+ GET / 200 in 179ms (compile: 47ms, proxy.ts: 5ms, render: 127ms)
+ GET / 200 in 133ms (compile: 29ms, proxy.ts: 3ms, render: 101ms)
+ GET / 200 in 205ms (compile: 26ms, proxy.ts: 6ms, render: 173ms)
+ GET /api/auth/session 200 in 41ms (compile: 17ms, proxy.ts: 4ms, render: 20ms)
+ GET / 200 in 142ms (compile: 15ms, proxy.ts: 3ms, render: 124ms)
+ GET / 200 in 95ms (compile: 8ms, proxy.ts: 9ms, render: 78ms)
+ GET / 200 in 111ms (compile: 24ms, proxy.ts: 8ms, render: 80ms)
+ GET /api/auth/session 200 in 22ms (compile: 5ms, proxy.ts: 3ms, render: 14ms)
+ GET /api/dashboard 200 in 43ms (compile: 6ms, proxy.ts: 3ms, render: 34ms)
+ GET / 200 in 129ms (compile: 25ms, proxy.ts: 2ms, render: 103ms)
+ GET / 200 in 137ms (compile: 5ms, proxy.ts: 2ms, render: 129ms)
+ GET / 200 in 312ms (compile: 7ms, proxy.ts: 9ms, render: 296ms)
+ GET / 200 in 337ms (compile: 26ms, proxy.ts: 48ms, render: 263ms)
+ GET / 200 in 299ms (compile: 43ms, proxy.ts: 8ms, render: 249ms)
+ GET / 200 in 297ms (compile: 48ms, proxy.ts: 9ms, render: 239ms)
+ GET /api/auth/session 200 in 94ms (compile: 41ms, proxy.ts: 24ms, render: 29ms)
+ GET /api/auth/session 200 in 93ms (compile: 48ms, proxy.ts: 27ms, render: 19ms)
+ GET /api/auth/session 200 in 95ms (compile: 49ms, proxy.ts: 27ms, render: 19ms)
+ GET /api/auth/session 200 in 94ms (compile: 52ms, proxy.ts: 25ms, render: 16ms)
+ GET / 200 in 154ms (compile: 52ms, proxy.ts: 6ms, render: 96ms)
+ GET / 200 in 157ms (compile: 6ms, proxy.ts: 5ms, render: 145ms)
+ GET / 200 in 156ms (compile: 24ms, proxy.ts: 6ms, render: 126ms)
+ GET / 200 in 160ms (compile: 41ms, proxy.ts: 6ms, render: 113ms)
+ GET /api/auth/providers 200 in 46ms (compile: 19ms, proxy.ts: 10ms, render: 17ms)
+ GET /api/auth/providers 200 in 46ms (compile: 20ms, proxy.ts: 11ms, render: 15ms)
+ GET /api/auth/providers 200 in 46ms (compile: 20ms, proxy.ts: 13ms, render: 14ms)
+ GET /api/auth/providers 200 in 47ms (compile: 18ms, proxy.ts: 15ms, render: 14ms)
+ GET /api/auth/csrf 200 in 40ms (compile: 12ms, proxy.ts: 4ms, render: 23ms)
+ GET /api/auth/csrf 200 in 41ms (compile: 20ms, proxy.ts: 9ms, render: 12ms)
+ GET /api/auth/csrf 200 in 37ms (compile: 21ms, proxy.ts: 5ms, render: 11ms)
+ GET /api/auth/csrf 200 in 37ms (compile: 22ms, proxy.ts: 4ms, render: 12ms)
+[Slow Query] 947ms - SELECT 1
+[Slow Query] 947ms - SELECT 1
+[Slow Query] 947ms - SELECT 1
+[Slow Query] 947ms - SELECT 1
+[Slow Query] 284ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[Slow Query] 284ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[Slow Query] 284ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[Slow Query] 284ms - SELECT "public"."User"."id", "public"."User"."email", "public"."User"."password", "public"."User"."name", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."lastLoginAt", "public"."User"."mfaSecret", "public"."User"."mfaEnabled", "public"."User"."mfaVerifiedAt", "public"."User"."maxSessions", "public"."User"."createdAt", "public"."User"."updatedAt" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[Slow Query] 153ms - SELECT "public"."User"."id", "public"."User"."maxSessions" FROM "public"."User" WHERE ("public"."User"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[Slow Query] 156ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+[Slow Query] 156ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+[Slow Query] 156ms - DELETE FROM "public"."UserSession" WHERE ("public"."UserSession"."expiresAt" < $1 AND "public"."UserSession"."userId" = $2)
+ POST /api/auth/callback/credentials 200 in 2.3s (compile: 19ms, proxy.ts: 3ms, render: 2.3s)
+ POST /api/auth/callback/credentials 200 in 2.3s (compile: 16ms, proxy.ts: 3ms, render: 2.3s)
+ POST /api/auth/callback/credentials 200 in 2.3s (compile: 18ms, proxy.ts: 3ms, render: 2.3s)
+ POST /api/auth/callback/credentials 200 in 2.3s (compile: 10ms, proxy.ts: 3ms, render: 2.3s)
+ GET /api/auth/session 200 in 42ms (compile: 20ms, proxy.ts: 6ms, render: 17ms)
+ GET /api/auth/session 200 in 44ms (compile: 26ms, proxy.ts: 4ms, render: 14ms)
+ GET /api/auth/session 200 in 46ms (compile: 31ms, proxy.ts: 4ms, render: 11ms)
+ GET /api/auth/session 200 in 48ms (compile: 32ms, proxy.ts: 4ms, render: 12ms)
+ GET /api/auth/session 200 in 173ms (compile: 62ms, proxy.ts: 62ms, render: 50ms)
+ GET /api/auth/session 200 in 110ms (compile: 51ms, proxy.ts: 21ms, render: 37ms)
+ GET /api/auth/session 200 in 87ms (compile: 62ms, proxy.ts: 6ms, render: 20ms)
+ GET /api/auth/session 200 in 91ms (compile: 61ms, proxy.ts: 6ms, render: 24ms)
+ GET /api/dashboard 200 in 171ms (compile: 22ms, proxy.ts: 6ms, render: 142ms)
+ GET /api/dashboard 200 in 173ms (compile: 18ms, proxy.ts: 6ms, render: 149ms)
+ GET /api/dashboard 200 in 176ms (compile: 13ms, proxy.ts: 6ms, render: 158ms)
+ GET /api/dashboard 200 in 319ms (compile: 17ms, proxy.ts: 6ms, render: 296ms)
+[Slow Query] 194ms - SELECT "public"."PurchaseInvoice"."id", "public"."PurchaseInvoice"."dueDate", "public"."PurchaseInvoice"."totalAmount", "public"."PurchaseInvoice"."paidAmount" FROM "public"."PurchaseInvoice" WHERE "public"."PurchaseInvoice"."status" IN (CAST($1::text AS "public"."InvoiceStatus"),CAST($2::text AS "public"."InvoiceStatus")) OFFSET $3
+ GET / 200 in 211ms (compile: 35ms, proxy.ts: 4ms, render: 171ms)
+ GET / 200 in 209ms (compile: 78ms, proxy.ts: 5ms, render: 126ms)
+ GET / 200 in 211ms (compile: 115ms, proxy.ts: 7ms, render: 89ms)
+ GET / 200 in 219ms (compile: 17ms, proxy.ts: 5ms, render: 197ms)
+ GET / 200 in 208ms (compile: 166ms, proxy.ts: 9ms, render: 33ms)
+ GET / 200 in 218ms (compile: 63ms, proxy.ts: 6ms, render: 149ms)
+ GET / 200 in 219ms (compile: 143ms, proxy.ts: 8ms, render: 68ms)
+ GET / 200 in 221ms (compile: 155ms, proxy.ts: 8ms, render: 58ms)
+ GET / 200 in 269ms (compile: 25ms, proxy.ts: 4ms, render: 241ms)
+ GET / 200 in 268ms (compile: 7ms, proxy.ts: 3ms, render: 258ms)
+ GET / 200 in 277ms (compile: 39ms, proxy.ts: 8ms, render: 231ms)
+ GET / 200 in 289ms (compile: 51ms, proxy.ts: 10ms, render: 228ms)
+ GET /api/auth/session 200 in 115ms (compile: 59ms, proxy.ts: 26ms, render: 30ms)
+ GET /api/auth/session 200 in 110ms (compile: 68ms, proxy.ts: 20ms, render: 22ms)
+ GET /api/auth/session 200 in 119ms (compile: 68ms, proxy.ts: 20ms, render: 31ms)
+ GET /api/auth/session 200 in 123ms (compile: 60ms, proxy.ts: 31ms, render: 32ms)
+ GET / 200 in 301ms (compile: 97ms, proxy.ts: 22ms, render: 181ms)
+ GET / 200 in 307ms (compile: 25ms, proxy.ts: 24ms, render: 258ms)
+ GET / 200 in 302ms (compile: 179ms, proxy.ts: 26ms, render: 98ms)
+ GET / 200 in 293ms (compile: 185ms, proxy.ts: 20ms, render: 88ms)
+ GET /api/auth/providers 200 in 42ms (compile: 17ms, proxy.ts: 10ms, render: 16ms)
+ GET /api/auth/providers 200 in 38ms (compile: 17ms, proxy.ts: 7ms, render: 15ms)
+ GET /api/auth/providers 200 in 40ms (compile: 16ms, proxy.ts: 8ms, render: 16ms)
+ GET /api/auth/providers 200 in 43ms (compile: 23ms, proxy.ts: 10ms, render: 9ms)
+ GET /api/auth/csrf 200 in 24ms (compile: 9ms, proxy.ts: 7ms, render: 8ms)
+ GET /api/auth/csrf 200 in 26ms (compile: 11ms, proxy.ts: 6ms, render: 9ms)
+ GET /api/auth/csrf 200 in 30ms (compile: 13ms, proxy.ts: 6ms, render: 11ms)
+ GET /api/auth/csrf 200 in 28ms (compile: 19ms, proxy.ts: 1626µs, render: 7ms)
+ POST /api/auth/callback/credentials 200 in 496ms (compile: 18ms, proxy.ts: 5ms, render: 472ms)
+ POST /api/auth/callback/credentials 200 in 502ms (compile: 15ms, proxy.ts: 7ms, render: 481ms)
+ POST /api/auth/callback/credentials 200 in 516ms (compile: 15ms, proxy.ts: 4ms, render: 497ms)
+ POST /api/auth/callback/credentials 200 in 517ms (compile: 15ms, proxy.ts: 7ms, render: 494ms)
+ GET /api/auth/session 200 in 23ms (compile: 12ms, proxy.ts: 2ms, render: 8ms)
+ GET /api/auth/session 200 in 25ms (compile: 15ms, proxy.ts: 3ms, render: 7ms)
+ GET /api/auth/session 200 in 39ms (compile: 20ms, proxy.ts: 1902µs, render: 17ms)
+ GET /api/auth/session 200 in 51ms (compile: 22ms, proxy.ts: 3ms, render: 26ms)
+ GET /api/auth/session 200 in 148ms (compile: 85ms, proxy.ts: 5ms, render: 58ms)
+ GET /api/auth/session 200 in 163ms (compile: 129ms, proxy.ts: 4ms, render: 30ms)
+ GET /api/auth/session 200 in 149ms (compile: 109ms, proxy.ts: 16ms, render: 25ms)
+ GET /api/dashboard 200 in 191ms (compile: 59ms, proxy.ts: 21ms, render: 110ms)
+ GET /api/auth/session 200 in 189ms (compile: 104ms, proxy.ts: 21ms, render: 64ms)
+ GET /api/dashboard 200 in 175ms (compile: 68ms, proxy.ts: 8ms, render: 99ms)
+ GET /api/dashboard 200 in 169ms (compile: 58ms, proxy.ts: 12ms, render: 99ms)
+ GET /api/dashboard 200 in 209ms (compile: 39ms, proxy.ts: 21ms, render: 149ms)
+ GET / 200 in 300ms (compile: 41ms, proxy.ts: 4ms, render: 255ms)
+ GET / 200 in 291ms (compile: 110ms, proxy.ts: 5ms, render: 177ms)
+ GET / 200 in 318ms (compile: 28ms, proxy.ts: 5ms, render: 286ms)
+ GET / 200 in 253ms (compile: 150ms, proxy.ts: 17ms, render: 86ms)
+ GET / 200 in 312ms (compile: 67ms, proxy.ts: 4ms, render: 242ms)
+ GET / 200 in 171ms (compile: 80ms, proxy.ts: 18ms, render: 73ms)
+ GET / 200 in 281ms (compile: 119ms, proxy.ts: 4ms, render: 158ms)
+ GET / 200 in 192ms (compile: 80ms, proxy.ts: 8ms, render: 104ms)
+ GET / 200 in 615ms (compile: 15ms, proxy.ts: 11ms, render: 589ms)
+ GET / 200 in 607ms (compile: 37ms, proxy.ts: 3ms, render: 566ms)
+ GET / 200 in 622ms (compile: 53ms, proxy.ts: 14ms, render: 555ms)
+ GET / 200 in 616ms (compile: 99ms, proxy.ts: 7ms, render: 510ms)
+ GET /api/auth/session 200 in 133ms (compile: 50ms, proxy.ts: 44ms, render: 39ms)
+ GET /api/auth/session 200 in 102ms (compile: 61ms, proxy.ts: 14ms, render: 27ms)
+ GET /api/auth/session 200 in 102ms (compile: 56ms, proxy.ts: 20ms, render: 26ms)
+ GET /api/auth/session 200 in 117ms (compile: 57ms, proxy.ts: 23ms, render: 37ms)
+ GET /api/auth/providers 200 in 77ms (compile: 51ms, proxy.ts: 13ms, render: 13ms)
+ GET /api/auth/providers 200 in 77ms (compile: 51ms, proxy.ts: 14ms, render: 12ms)
+ GET /api/auth/providers 200 in 77ms (compile: 45ms, proxy.ts: 21ms, render: 11ms)
+ GET /api/auth/providers 200 in 78ms (compile: 44ms, proxy.ts: 26ms, render: 8ms)
+ GET / 200 in 598ms (compile: 261ms, proxy.ts: 5ms, render: 331ms)
+ GET / 200 in 627ms (compile: 36ms, proxy.ts: 24ms, render: 567ms)
+ GET / 200 in 625ms (compile: 111ms, proxy.ts: 25ms, render: 489ms)
+ GET / 200 in 598ms (compile: 310ms, proxy.ts: 23ms, render: 265ms)
+ GET /api/auth/csrf 200 in 27ms (compile: 13ms, proxy.ts: 5ms, render: 10ms)
+ GET /api/auth/csrf 200 in 29ms (compile: 15ms, proxy.ts: 4ms, render: 9ms)
+ GET /api/auth/csrf 200 in 30ms (compile: 17ms, proxy.ts: 4ms, render: 10ms)
+ GET /api/auth/csrf 200 in 31ms (compile: 17ms, proxy.ts: 5ms, render: 10ms)
+[Slow Query] 154ms - SELECT 1
+[Slow Query] 154ms - SELECT 1
+[Slow Query] 154ms - SELECT 1
+[Slow Query] 154ms - SELECT 1
+ POST /api/auth/callback/credentials 200 in 619ms (compile: 10ms, proxy.ts: 4ms, render: 606ms)
+ POST /api/auth/callback/credentials 200 in 620ms (compile: 10ms, proxy.ts: 5ms, render: 605ms)
+ POST /api/auth/callback/credentials 200 in 625ms (compile: 8ms, proxy.ts: 4ms, render: 613ms)
+ POST /api/auth/callback/credentials 200 in 623ms (compile: 15ms, proxy.ts: 2ms, render: 605ms)
+ GET /api/auth/session 200 in 73ms (compile: 34ms, proxy.ts: 8ms, render: 32ms)
+ GET /api/auth/session 200 in 73ms (compile: 56ms, proxy.ts: 5ms, render: 12ms)
+ GET /api/auth/session 200 in 74ms (compile: 31ms, proxy.ts: 32ms, render: 11ms)
+ GET /api/auth/session 200 in 56ms (compile: 32ms, proxy.ts: 4ms, render: 20ms)
+ GET /api/auth/session 200 in 208ms (compile: 76ms, proxy.ts: 95ms, render: 37ms)
+ GET /api/auth/session 200 in 166ms (compile: 75ms, proxy.ts: 58ms, render: 33ms)
+ GET /api/auth/session 200 in 166ms (compile: 78ms, proxy.ts: 56ms, render: 33ms)
+ GET /api/dashboard 200 in 132ms (compile: 15ms, proxy.ts: 11ms, render: 105ms)
+ GET /api/dashboard 200 in 138ms (compile: 23ms, proxy.ts: 4ms, render: 111ms)
+ GET /api/dashboard 200 in 153ms (compile: 16ms, proxy.ts: 10ms, render: 127ms)
+ GET /api/dashboard 200 in 214ms (compile: 15ms, proxy.ts: 64ms, render: 135ms)
+ GET /api/auth/session 200 in 154ms (compile: 80ms, proxy.ts: 5ms, render: 70ms)
+ GET / 200 in 1649ms (compile: 1115ms, proxy.ts: 8ms, render: 526ms)
+ GET / 200 in 1663ms (compile: 1138ms, proxy.ts: 8ms, render: 517ms)
+ GET / 200 in 1665ms (compile: 397ms, proxy.ts: 23ms, render: 1245ms)
+ GET / 200 in 1694ms (compile: 1023ms, proxy.ts: 8ms, render: 663ms)
+ GET / 200 in 1699ms (compile: 1067ms, proxy.ts: 8ms, render: 623ms)
+ GET / 200 in 1708ms (compile: 1170ms, proxy.ts: 8ms, render: 530ms)
+ GET / 200 in 554ms (compile: 192ms, proxy.ts: 36ms, render: 326ms)
+ GET / 200 in 626ms (compile: 117ms, proxy.ts: 36ms, render: 474ms)
+ GET / 200 in 442ms (compile: 11ms, proxy.ts: 9ms, render: 422ms)
+ GET / 200 in 452ms (compile: 80ms, proxy.ts: 7ms, render: 365ms)
+ GET / 200 in 447ms (compile: 93ms, proxy.ts: 3ms, render: 351ms)
+ GET / 200 in 518ms (compile: 124ms, proxy.ts: 4ms, render: 391ms)
+ GET /api/auth/session 200 in 97ms (compile: 45ms, proxy.ts: 21ms, render: 31ms)
+ GET /api/auth/session 200 in 98ms (compile: 52ms, proxy.ts: 18ms, render: 27ms)
+ GET /api/auth/session 200 in 99ms (compile: 54ms, proxy.ts: 17ms, render: 29ms)
+ GET /api/auth/session 200 in 110ms (compile: 55ms, proxy.ts: 15ms, render: 40ms)
+ GET /api/auth/providers 200 in 105ms (compile: 29ms, proxy.ts: 34ms, render: 42ms)
+ GET /api/auth/providers 200 in 103ms (compile: 32ms, proxy.ts: 35ms, render: 36ms)
+ GET /api/auth/providers 200 in 113ms (compile: 57ms, proxy.ts: 38ms, render: 18ms)
+ GET /api/auth/providers 200 in 76ms (compile: 65ms, proxy.ts: 3ms, render: 9ms)
+ GET /api/auth/csrf 200 in 35ms (compile: 19ms, proxy.ts: 10ms, render: 6ms)
+ GET /api/auth/csrf 200 in 38ms (compile: 18ms, proxy.ts: 12ms, render: 8ms)
+ GET /api/auth/csrf 200 in 37ms (compile: 21ms, proxy.ts: 2ms, render: 14ms)
+ GET /api/auth/csrf 200 in 36ms (compile: 25ms, proxy.ts: 3ms, render: 8ms)
+ GET / 200 in 638ms (compile: 99ms, proxy.ts: 8ms, render: 532ms)
+ GET / 200 in 640ms (compile: 50ms, proxy.ts: 9ms, render: 582ms)
+ GET / 200 in 638ms (compile: 143ms, proxy.ts: 7ms, render: 488ms)
+ GET / 200 in 637ms (compile: 240ms, proxy.ts: 25ms, render: 373ms)
+ POST /api/auth/callback/credentials 200 in 481ms (compile: 22ms, proxy.ts: 3ms, render: 456ms)
+ POST /api/auth/callback/credentials 200 in 484ms (compile: 21ms, proxy.ts: 2ms, render: 460ms)
+ POST /api/auth/callback/credentials 200 in 493ms (compile: 19ms, proxy.ts: 3ms, render: 472ms)
+ POST /api/auth/callback/credentials 200 in 494ms (compile: 18ms, proxy.ts: 4ms, render: 472ms)
+ GET /api/auth/session 200 in 39ms (compile: 17ms, proxy.ts: 9ms, render: 13ms)
+ GET /api/auth/session 200 in 35ms (compile: 20ms, proxy.ts: 5ms, render: 10ms)
+ GET /api/auth/session 200 in 37ms (compile: 23ms, proxy.ts: 4ms, render: 10ms)
+ GET /api/auth/session 200 in 40ms (compile: 24ms, proxy.ts: 4ms, render: 12ms)
+ GET /api/auth/session 200 in 149ms (compile: 99ms, proxy.ts: 10ms, render: 40ms)
+ GET /api/auth/session 200 in 139ms (compile: 54ms, proxy.ts: 56ms, render: 29ms)
+ GET /api/auth/session 200 in 115ms (compile: 58ms, proxy.ts: 18ms, render: 39ms)
+ GET /api/auth/session 200 in 132ms (compile: 72ms, proxy.ts: 4ms, render: 55ms)
+ GET /api/dashboard 200 in 133ms (compile: 35ms, proxy.ts: 11ms, render: 87ms)
+ GET /api/dashboard 200 in 151ms (compile: 20ms, proxy.ts: 6ms, render: 126ms)
+ GET /api/dashboard 200 in 174ms (compile: 17ms, proxy.ts: 20ms, render: 138ms)
+ GET /api/dashboard 200 in 164ms (compile: 18ms, proxy.ts: 6ms, render: 140ms)
+ GET / 200 in 2.8s (compile: 536ms, proxy.ts: 8ms, render: 2.3s)
+ GET / 200 in 2.9s (compile: 2.2s, proxy.ts: 25ms, render: 615ms)
+ GET / 200 in 2.8s (compile: 2.4s, proxy.ts: 7ms, render: 450ms)
+ GET / 200 in 2.8s (compile: 2.5s, proxy.ts: 9ms, render: 324ms)
+ GET / 200 in 2.9s (compile: 67ms, proxy.ts: 8ms, render: 2.8s)
+ GET / 200 in 2.9s (compile: 414ms, proxy.ts: 7ms, render: 2.5s)
+ GET / 200 in 2.9s (compile: 2.2s, proxy.ts: 7ms, render: 626ms)
+ GET / 200 in 2.9s (compile: 2.4s, proxy.ts: 5ms, render: 418ms)
+ GET /api/health 200 in 62ms (compile: 40ms, proxy.ts: 6ms, render: 16ms)
+✓ Finished filesystem cache database compaction in 26.9s
+✓ Finished writing to filesystem cache in 22.0s
+ GET /api/health 200 in 432ms (compile: 107ms, proxy.ts: 113ms, render: 212ms)

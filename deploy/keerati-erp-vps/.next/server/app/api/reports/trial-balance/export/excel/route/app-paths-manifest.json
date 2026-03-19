@@ -1,0 +1,3 @@
+{
+  "/api/reports/trial-balance/export/excel/route": "app/api/reports/trial-balance/export/excel/route.js"
+}

@@ -1,0 +1,18 @@
+▲ Next.js 16.1.6
+- Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+
+✓ Starting...
+✓ Ready in 75ms
+prisma:error 
+Invalid `prisma.$queryRaw()` invocation:
+
+
+error: Error validating datasource `db`: the URL must start with the protocol `postgresql://` or `postgres://`.
+  -->  schema.prisma:11
+   | 
+10 |   provider = "postgresql"
+11 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1

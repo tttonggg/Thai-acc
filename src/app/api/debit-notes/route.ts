@@ -78,13 +78,11 @@ export async function GET(request: NextRequest) {
       ]
     }
 
+    // Fetch debit notes without vendor first to avoid null relationship errors
     const [debitNotes, total] = await Promise.all([
       db.debitNote.findMany({
         where,
         include: {
-          vendor: {
-            select: { id: true, code: true, name: true, taxId: true }
-          },
           purchaseInvoice: {
             select: { id: true, invoiceNo: true }
           },
@@ -96,14 +94,63 @@ export async function GET(request: NextRequest) {
       db.debitNote.count({ where }),
     ])
 
-    return apiResponse({
+    // Fetch vendors separately for debit notes that have them
+    const vendorIds = debitNotes.map((dn: any) => dn.vendorId).filter((id: string) => id != null)
+    const vendors = vendorIds.length > 0
+      ? await db.vendor.findMany({
+          where: {
+            id: { in: vendorIds }
+          },
+          select: { id: true, code: true, name: true, taxId: true }
+        })
+      : []
+
+    // Create a map for quick vendor lookup
+    const vendorMap = new Map(vendors.map((v: any) => [v.id, v]))
+
+    // Attach vendors to debit notes
+    const debitNotesWithVendors = debitNotes.map((dn: any) => ({
+      ...dn,
+      vendor: dn.vendorId ? vendorMap.get(dn.vendorId) || null : null
+    }))
+
+    // Filter out debit notes with null vendors (data integrity issue)
+    const validDebitNotes = debitNotesWithVendors.filter((dn: any) => dn.vendor !== null)
+
+    // Transform data to match frontend interface (flatten vendor.name to vendorName)
+    const transformedDebitNotes = validDebitNotes.map((dn: any) => {
+      try {
+        return {
+          ...dn,
+          vendorName: dn.vendor?.name || '',
+          vendorCode: dn.vendor?.code || '',
+          vendorTaxId: dn.vendor?.taxId || '',
+          debitNoteDate: dn.debitNoteDate ? dn.debitNoteDate.toISOString() : '',
+          createdAt: dn.createdAt ? dn.createdAt.toISOString() : '',
+          updatedAt: dn.updatedAt ? dn.updatedAt.toISOString() : '',
+        }
+      } catch (err) {
+        console.error('Error transforming debit note:', dn.id, err)
+        return {
+          ...dn,
+          vendorName: '',
+          vendorCode: '',
+          vendorTaxId: '',
+          debitNoteDate: '',
+          createdAt: '',
+          updatedAt: '',
+        }
+      }
+    })
+
+    return Response.json({
       success: true,
-      data: debitNotes,
+      data: transformedDebitNotes,
       pagination: {
         page,
         limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        total: validDebitNotes.length, // Use actual count after filtering
+        totalPages: Math.ceil(validDebitNotes.length / limit),
       },
     })
   } catch (error) {
@@ -173,9 +220,9 @@ export async function POST(request: NextRequest) {
         tx.chartOfAccount.findFirst({
           where: { code: settings?.purchaseAccountId || '5110' }
         }),
-        // VAT Input (1xxx) - Default to '1160'
+        // VAT Input (1145) - ภาษีมูลค่าเพิ่มซื้อ
         tx.chartOfAccount.findFirst({
-          where: { code: settings?.vatInputAccountId || '1160' }
+          where: { code: settings?.vatInputAccountId || '1145' }
         }),
         // Accounts Payable (2xxx) - Default to '2110'
         tx.chartOfAccount.findFirst({
@@ -187,7 +234,7 @@ export async function POST(request: NextRequest) {
         throw new Error(`Purchases account not found: ${settings?.purchaseAccountId || '5110'}`)
       }
       if (!vatInputAccount) {
-        throw new Error(`VAT input account not found: ${settings?.vatInputAccountId || '1160'}`)
+        throw new Error(`VAT input account not found: ${settings?.vatInputAccountId || '1145'}`)
       }
       if (!apAccount) {
         throw new Error(`AP account not found: ${settings?.apAccountId || '2110'}`)
@@ -262,35 +309,59 @@ export async function POST(request: NextRequest) {
         data: { journalEntryId: journalEntry.id }
       })
 
+      // Create VAT INPUT record (ภาษีซื้อ) for debit notes from suppliers
+      await tx.vatRecord.create({
+        data: {
+          type: 'INPUT',
+          documentNo: debitNoteNo,
+          documentDate: validatedData.debitNoteDate,
+          documentType: 'DEBIT_NOTE',
+          referenceId: note.id,
+          vendorId: validatedData.vendorId,
+          vendorName: vendor.name,
+          vendorTaxId: vendor.taxId,
+          description: `ใบเพิ่มหนี้จากผู้ขาย ${debitNoteNo}`,
+          subtotal: validatedData.subtotal,
+          vatRate: validatedData.vatRate,
+          vatAmount: validatedData.vatAmount,
+          totalAmount: validatedData.totalAmount,
+          taxMonth: validatedData.debitNoteDate.getMonth() + 1,
+          taxYear: validatedData.debitNoteDate.getFullYear(),
+        }
+      })
+
       return note
     })
 
-    // Handle stock additions for returned goods (outside transaction)
+    // ✅ OPTIMIZED: Handle stock additions for returned goods in batch (outside transaction)
     if (validatedData.reason === 'RETURNED_GOODS') {
-      for (const line of validatedData.lines) {
-        if (line.productId) {
-          try {
-            // Get or create default warehouse
-            let warehouse = await db.warehouse.findFirst({
-              where: { type: 'MAIN', isActive: true }
-            })
+      // Filter lines that have products
+      const productLines = validatedData.lines.filter(line => line.productId)
 
-            if (!warehouse) {
-              warehouse = await db.warehouse.create({
-                data: {
-                  code: 'WH-MAIN',
-                  name: 'คลังสินค้าหลัก',
-                  type: 'MAIN',
-                  location: 'หลัก',
-                  isActive: true
-                }
-              })
-            }
+      if (productLines.length > 0) {
+        try {
+          // Get or create default warehouse ONCE (not in loop)
+          let warehouse = await db.warehouse.findFirst({
+            where: { type: 'MAIN', isActive: true }
+          })
 
-            // Record stock receipt (adds to inventory)
-            await db.stockMovement.create({
+          if (!warehouse) {
+            warehouse = await db.warehouse.create({
               data: {
-                productId: line.productId,
+                code: 'WH-MAIN',
+                name: 'คลังสินค้าหลัก',
+                type: 'MAIN',
+                location: 'หลัก',
+                isActive: true
+              }
+            })
+          }
+
+          // Batch create all stock movements in parallel
+          await Promise.all(productLines.map(line =>
+            db.stockMovement.create({
+              data: {
+                productId: line.productId!,
                 warehouseId: warehouse.id,
                 type: 'RECEIVE',
                 quantity: line.quantity,
@@ -303,10 +374,10 @@ export async function POST(request: NextRequest) {
                 sourceChannel: 'DEBIT_NOTE',
               }
             })
-          } catch (stockError) {
-            // Log but don't fail the debit note
-            console.error('Stock receipt error:', stockError)
-          }
+          ))
+        } catch (stockError) {
+          // Log but don't fail the debit note
+          console.error('Stock receipt error:', stockError)
         }
       }
     }
@@ -327,7 +398,8 @@ export async function POST(request: NextRequest) {
       return unauthorizedError()
     }
     if (error instanceof z.ZodError) {
-      return apiError('ข้อมูลไม่ถูกต้อง', 400)
+      const issues = error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')
+      return apiError(`ข้อมูลไม่ถูกต้อง: ${issues}`, 400)
     }
     if (error instanceof Error && error.message.includes('account not found')) {
       return apiError(`บัญชีไม่ถูกต้อง: ${error.message}`, 400)

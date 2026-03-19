@@ -33,10 +33,10 @@ test.describe('Authentication Login', () => {
       await page.click('button[type="submit"]')
 
       // Wait for navigation - check for dashboard appearing (more reliable)
-      await expect(page.locator('h1:has-text("ภาพรวมธุรกิจ")').or(page.locator('nav, aside').first()).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('h1:has-text("ภาพรวมธุรกิจ")').or(page.locator('nav, aside').first())).toBeVisible({ timeout: 10000 });
 
       // Take a screenshot for debugging
-      await page.screenshot({ path: `test-results/login-${user.role}-success.png` })
+      await page.screenshot({ path: `test-results/login-${user.role}-success.png` });
 
       // Check that we're on dashboard - look for sidebar or main content
       // The dashboard might show either the heading OR be loading initially

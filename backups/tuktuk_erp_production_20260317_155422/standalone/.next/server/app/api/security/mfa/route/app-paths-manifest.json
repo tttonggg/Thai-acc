@@ -1,0 +1,3 @@
+{
+  "/api/security/mfa/route": "app/api/security/mfa/route.js"
+}

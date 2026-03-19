@@ -6,13 +6,36 @@ This file provides essential guidance for AI coding agents working on the **Thai
 
 This is a comprehensive accounting application designed for Thai SME businesses, complying with Thai Financial Reporting Standards (TFRS). The system supports Thai tax requirements including VAT (ภาษีมูลค่าเพิ่ม) at 7%, Withholding Tax (ภาษีหัก ณ ที่จ่าย) PND3/PND53, and Social Security calculations.
 
-**Implementation Status**: ✅ **100% COMPLETE** - All 6 expansion modules fully implemented and integrated:
+**Implementation Status**: ✅ **100% COMPLETE** - All core modules and 6 expansion modules fully implemented and integrated:
+
+### Core Modules
+- Chart of Accounts (ผังบัญชี)
+- Journal Entries (บันทึกบัญชี)
+- Sales Invoices (ใบกำกับภาษี/ใบเสร็จรับเงิน)
+- Purchase Invoices (ใบซื้อ)
+- Receipts (ใบเสร็จรับเงิน)
+- Payments (ใบจ่ายเงิน)
+- Credit Notes (ใบลดหนี้)
+- Debit Notes (ใบเพิ่มหนี้)
+- VAT Reports (รายงานภาษีมูลค่าเพิ่ม)
+- Financial Reports (งบการเงิน)
+
+### Expansion Modules (Phase 1-3 Complete)
 - WHT Automation & 50 Tawi (ภาษีหัก ณ ที่จ่าย)
 - Inventory & Stock Management (คลังสินค้า)
 - Fixed Assets & Depreciation (ทะเบียนทรัพย์สิน)
 - Banking & Cheque Management (ธนาคารและเช็ค)
 - Petty Cash Management (เงินสดย่อย)
 - Payroll & Compensation (เงินเดือน)
+
+### Additional Features
+- Purchase Requests & Orders (ใบขอซื้อ/ใบสั่งซื้อ)
+- Multi-currency Support
+- Budget Management
+- Webhook Management
+- Backup/Restore
+- Activity Logging & Audit Trail
+- Invoice Commenting & Collaboration
 
 ## Technology Stack
 
@@ -21,8 +44,8 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 | Framework | Next.js (App Router) | 16.1.1 |
 | Language | TypeScript | 5.x |
 | Styling | Tailwind CSS | 4.x |
-| UI Components | shadcn/ui | New York style |
-| Database | Prisma ORM + SQLite | 6.11.1 |
+| UI Components | shadcn/ui (Radix UI) | New York style |
+| Database | Prisma ORM + PostgreSQL/SQLite | 6.11.1 |
 | Authentication | NextAuth.js | 4.24.11 |
 | State Management | Zustand | 5.x |
 | Data Fetching | TanStack Query | 5.x |
@@ -31,18 +54,21 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 | Testing | Vitest + Playwright | 4.x / 1.x |
 | PDF Generation | jsPDF + pdfkit | 4.x / 0.17.x |
 | Excel Export | xlsx | 0.18.x |
+| GraphQL | Apollo Server | 5.x |
 | Runtime | Bun (preferred) or Node.js | - |
 
 ## Project Structure
 
 ```
 ├── prisma/                    # Database schema and seed files
-│   ├── schema.prisma          # Prisma schema (50+ models, 1250+ lines)
-│   ├── seed.ts                # Initial data seeding
-│   └── dev.db                 # SQLite database
+│   ├── schema.prisma          # Prisma schema (60+ models, 2300+ lines)
+│   ├── schema-enhanced.prisma # Enhanced version with audit fields
+│   ├── schema-postgres.prisma # PostgreSQL-specific schema
+│   ├── seed.ts                # Initial data seeding (181 accounts)
+│   └── dev.db                 # SQLite database (development)
 ├── src/
 │   ├── app/                   # Next.js App Router
-│   │   ├── api/              # REST API routes (90+ endpoints)
+│   │   ├── api/              # REST API routes (173+ endpoints)
 │   │   │   ├── accounts/     # Chart of accounts APIs
 │   │   │   ├── invoices/     # Invoice management APIs
 │   │   │   ├── journal/      # Journal entry APIs
@@ -52,16 +78,18 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 │   │   │   ├── banking/      # Bank & cheque APIs
 │   │   │   ├── petty-cash/   # Petty cash APIs
 │   │   │   ├── wht/          # Withholding tax APIs
-│   │   │   └── reports/      # Financial report APIs
+│   │   │   ├── reports/      # Financial report APIs
+│   │   │   ├── auth/         # NextAuth.js configuration
+│   │   │   └── graphql/      # GraphQL API endpoint
 │   │   ├── layout.tsx        # Root layout with providers
 │   │   ├── page.tsx          # Dashboard/home page (SPA architecture)
 │   │   └── globals.css       # Global styles
-│   ├── components/           # React components
+│   ├── components/           # React components (47+ modules)
 │   │   ├── ui/              # shadcn/ui components (DO NOT MODIFY)
 │   │   ├── layout/          # Sidebar, Header navigation
 │   │   ├── journal/         # Journal entry management
-│   │   ├── invoices/        # Sales invoices (ใบกำกับภาษี)
-│   │   ├── accounts/        # Chart of accounts (ผังบัญชี)
+│   │   ├── invoices/        # Sales invoices
+│   │   ├── accounts/        # Chart of accounts
 │   │   ├── inventory/       # Stock management
 │   │   ├── banking/         # Bank accounts & cheques
 │   │   ├── assets/          # Fixed assets
@@ -70,19 +98,19 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 │   │   ├── wht/             # Withholding tax reports
 │   │   ├── ar/              # Accounts Receivable (customers)
 │   │   ├── ap/              # Accounts Payable (vendors)
-│   │   ├── receipts/        # Receipts (ใบเสร็จรับเงิน)
-│   │   ├── payments/        # Payments (ใบจ่ายเงิน)
-│   │   ├── credit-notes/    # Credit notes (ใบลดหนี้)
-│   │   ├── debit-notes/     # Debit notes (ใบเพิ่มหนี้)
+│   │   ├── receipts/        # Receipts
+│   │   ├── payments/        # Payments
+│   │   ├── credit-notes/    # Credit notes
+│   │   ├── debit-notes/     # Debit notes
 │   │   ├── products/        # Product management
 │   │   ├── vat/             # VAT reports
 │   │   ├── reports/         # Financial reports
 │   │   ├── settings/        # System settings
 │   │   ├── admin/           # Admin functions
 │   │   └── auth/            # Authentication components
-│   ├── lib/                  # Utilities and service layer
+│   ├── lib/                  # Utilities and service layer (53 files)
 │   │   ├── db.ts            # Prisma client singleton
-│   │   ├── auth.ts          # NextAuth configuration
+│   │   ├── auth.ts          # NextAuth configuration (MFA support)
 │   │   ├── validations.ts   # Zod validation schemas
 │   │   ├── api-utils.ts     # API response helpers
 │   │   ├── thai-accounting.ts    # Thai-specific accounting functions
@@ -94,60 +122,97 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 │   │   ├── cheque-service.ts     # Cheque management
 │   │   ├── stock-take-service.ts # Stock taking logic
 │   │   ├── pdf-generator.ts      # PDF generation (50 Tawi)
+│   │   ├── pdfkit-generator.ts   # PDFKit implementation
 │   │   ├── excel-export.ts       # Excel export functionality
-│   │   ├── activity-logger.ts    # Audit logging
-│   │   └── rate-limit.ts         # API rate limiting
-│   ├── stores/              # Zustand state management
-│   │   └── auth-store.ts    # Authentication state
+│   │   ├── activity-logger.ts    # Activity logging
+│   │   ├── audit-logger.ts       # Security audit logging
+│   │   ├── rate-limit.ts         # API rate limiting
+│   │   ├── csrf-service.ts       # CSRF protection
+│   │   ├── mfa-service.ts        # Multi-factor authentication
+│   │   ├── encryption.ts         # Encryption utilities
+│   │   └── webhook-service.ts    # Webhook management
+│   ├── stores/              # Zustand state management (3 stores)
 │   ├── hooks/               # Custom React hooks
-│   │   ├── use-toast.ts     # Toast notifications
-│   │   ├── use-mobile.ts    # Mobile detection
-│   │   └── use-delete-confirm.ts # Delete confirmation
 │   ├── test/                # Test utilities and setup
-│   │   ├── setup.ts         # Vitest setup
-│   │   └── utils/           # Test utilities
-│   └── middleware.ts        # Rate limiting & auth middleware
-├── e2e/                     # Playwright E2E tests (18 test files)
+│   └── middleware.ts        # Rate limiting, CSRF & auth middleware
+├── e2e/                     # Playwright E2E tests (28 test files)
 ├── tests/                   # Additional test files
 │   ├── global-setup.ts      # Global test setup
 │   └── global-teardown.ts   # Global test teardown
 ├── public/                  # Static assets
-└── docs/                    # Documentation
+├── docs/                    # Documentation
+├── infrastructure/          # Docker, K8s, Helm configs
+├── scripts/                 # Automation scripts
+└── monitoring/              # Prometheus & Grafana configs
 ```
 
 ## Build and Development Commands
 
+### Development
 ```bash
-# Development (port 3000)
-bun run dev
+# Development server (port 3000)
+bun run dev              # or: npm run dev
 
-# Production Build
-bun run build              # Creates .next/standalone/ output
+# Production build
+bun run build            # Creates .next/standalone/ output
 
-# Production Server
-bun run start             # Start with Bun
-npm run start:node        # Start with Node.js
+# Production server
+bun run start            # Start with Bun
+npm run start:node       # Start with Node.js
+```
 
-# Linting
-bun run lint              # Run ESLint
+### Code Quality
+```bash
+bun run lint             # Run ESLint
+bun run lint:fix         # Fix ESLint issues
+bun run format           # Format with Prettier
+bun run format:check     # Check formatting
+bun run type-check       # TypeScript type checking
+```
 
-# Database Operations
-bun run db:generate       # Generate Prisma client (REQUIRED after schema changes)
-bun run db:push          # Push schema without migrations
-bun run db:migrate       # Create and run migrations
-bun run db:reset         # Reset database (WARNING: destroys all data)
-npx prisma db seed       # Seed Thai chart of accounts (181 accounts)
-bun run seed:fresh       # Reset + seed
+### Database Operations
+```bash
+bun run db:generate      # Generate Prisma client (REQUIRED after schema changes)
+bun run db:push         # Push schema without migrations
+bun run db:migrate      # Create and run migrations
+bun run db:reset        # Reset database (WARNING: destroys all data)
+npx prisma db seed      # Seed Thai chart of accounts (181 accounts)
+bun run seed:fresh      # Reset + seed
+```
 
-# Testing
+### Testing
+```bash
+# Unit & Integration Tests (Vitest)
 bun run test             # Run Vitest in watch mode
 bun run test:run         # Run tests once
 bun run test:coverage    # Run with coverage report
+bun run test:unit        # Run unit tests only
+bun run test:integration # Run integration tests only
+
+# E2E Tests (Playwright)
 bun run test:e2e         # Run Playwright E2E tests
 bun run test:e2e:ui      # Run E2E tests with UI mode
+bun run test:e2e:mobile  # Mobile responsive tests
+bun run test:e2e:performance  # Performance tests
+
+# Test Suites
 bun run test:quick       # Quick test run
 bun run test:full        # Full test suite
 bun run test:master      # Master test runner
+bun run test:all         # Run all tests (unit + integration + e2e)
+```
+
+### Docker
+```bash
+bun run docker:build      # Build Docker image
+bun run docker:run        # Run Docker container
+bun run docker:compose:up # Start with docker-compose (full stack)
+```
+
+### Security
+```bash
+bun run security:scan     # Scan for secrets
+bun run security:deps     # Check dependencies
 ```
 
 **Important**: Always run `bun run db:generate` after modifying `prisma/schema.prisma`.
@@ -157,23 +222,46 @@ bun run test:master      # Master test runner
 Required `.env` file:
 
 ```env
+# Database (SQLite for dev, PostgreSQL for production)
 DATABASE_URL=file:./prisma/dev.db    # SQLite path
-NEXTAUTH_URL=http://localhost:3000   # App URL
-NEXTAUTH_SECRET=your-secret-key      # JWT secret (generate strong key for production)
+# DATABASE_URL=postgresql://user:pass@localhost:5432/thai_erp  # PostgreSQL
+
+# Authentication
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-min-32-characters-long
+
+# Optional Services
+REDIS_URL=redis://localhost:6379
+MINIO_ENDPOINT=localhost
+MINIO_PORT=9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET=thai-erp-uploads
+
+# Monitoring
+SENTRY_DSN=
+LOG_LEVEL=info
+
+# Feature Flags
+ENABLE_SWAGGER=true
+ENABLE_DEBUG_ROUTES=false
 ```
 
-**Production Note**: In standalone mode, `DATABASE_URL` must use an **absolute path**:
+**Production Note**: In standalone mode, `DATABASE_URL` must use an **absolute path** for SQLite:
 ```env
 # Correct for production:
-DATABASE_URL=file:/absolute/path/to/.next/standalone/dev.db
+DATABASE_URL=file:/absolute/path/to/.next/standalone/prisma/dev.db
 ```
+
+See `.env.example` for all available configuration options.
 
 ## Code Style Guidelines
 
-### TypeScript
+### TypeScript Configuration
+- Target: ES2017
 - Strict mode enabled but `noImplicitAny: false` for flexibility
-- Use path alias `@/` for imports from `src/`
-- Export types explicitly for complex interfaces
+- Path alias `@/` maps to `./src/`
+- JSX: `react-jsx`
 
 ### Naming Conventions
 - **Components**: PascalCase (e.g., `InvoiceList.tsx`)
@@ -226,30 +314,50 @@ export async function POST(req: Request) {
 }
 ```
 
+### ESLint Rules
+The project uses relaxed ESLint rules for development efficiency:
+- `@typescript-eslint/no-explicit-any`: off
+- `@typescript-eslint/no-unused-vars`: off
+- `react-hooks/exhaustive-deps`: off
+- `no-console`: off
+- Most strict rules are disabled to allow rapid development
+
 ## Testing Strategy
 
 ### Unit Tests (Vitest)
-- Location: `src/lib/__tests__/` or co-located with source files
-- Setup: `src/test/setup.ts`
-- Coverage: v8 provider with text/json/html/lcov reports
-- Environment: jsdom for DOM testing
+- **Location**: `src/lib/__tests__/` or co-located with source files
+- **Setup**: `src/test/setup.ts`
+- **Environment**: jsdom for DOM testing
+- **Coverage**: v8 provider with text/json/html/lcov reports
+- **Thresholds**: 
+  - Lines: 90%
+  - Functions: 90%
+  - Branches: 85%
+  - Statements: 90%
+- **Timeout**: 30 seconds for integration tests
+- **Retry**: 2 retries for flaky tests
 
 ### E2E Tests (Playwright)
-- Location: `e2e/` directory
-- Browsers: Chromium, Firefox, WebKit
-- Base URL: `http://localhost:3000`
-- Test bypass header: `x-playwright-test: true` (bypasses rate limiting)
+- **Location**: `e2e/` directory (28 test files)
+- **Browsers**: Chromium, Firefox, WebKit, Microsoft Edge
+- **Mobile**: iPhone 12, iPhone SE, Galaxy S8, iPad, iPad Pro
+- **Base URL**: `http://localhost:3000`
+- **Test bypass header**: `x-playwright-test: true` (bypasses rate limiting)
+- **Timeout**: 60 seconds per test
+- **Retries**: 2 in CI, 0 locally
+- **Workers**: 1 in CI for stability
 
 ### Test Categories
 | Category | Files | Description |
 |----------|-------|-------------|
-| Authentication | `01-login-*.spec.ts`, `login*.spec.ts` | Login flows, session management |
+| Authentication | `01-login-*.spec.ts`, `login*.spec.ts` | Login flows, MFA, session management |
 | Master Data | `02-master-*.spec.ts` | Customers, vendors, products, accounts |
-| Transactions | `03-accounting-*.spec.ts`, `invoices.spec.ts` | Journal entries, invoices |
+| Transactions | `03-accounting-*.spec.ts` | Journal entries, invoices |
 | Navigation | `04-sidebar-*.spec.ts`, `05-sidebar-*.spec.ts` | UI navigation tests |
 | Reports | `04-database-validation-*.spec.ts` | Financial reports, VAT reports |
-| Module Tests | `0*-modules-*.spec.ts` | All 6 expansion modules |
+| Module Tests | `0*-modules-*.spec.ts` | All expansion modules |
 | Production | `10-production-*.spec.ts` | Comprehensive production tests |
+| Critical | `critical-workflows.spec.ts` | Business-critical paths |
 
 ### Running Specific Tests
 ```bash
@@ -292,7 +400,7 @@ Documents automatically generate journal entries when posted:
 - **4xxx** - Revenue (รายได้)
 - **5xxx** - Expenses (ค่าใช้จ่าย)
 
-### 5. Role-Based Access Control
+### 5. Role-Based Access Control (RBAC)
 Four user roles with decreasing permissions:
 - **ADMIN** - Full access including user management
 - **ACCOUNTANT** - Full accounting operations
@@ -354,26 +462,47 @@ SSC_RATE = 5% (max ฿750/month for employee)
 
 ## Security Considerations
 
-### Authentication
+### Authentication & Authorization
 - JWT-based sessions (8-hour expiry)
-- bcrypt password hashing (10 rounds)
+- bcrypt password hashing (12 rounds)
 - NextAuth.js with credentials provider
+- MFA (TOTP) support via speakeasy
+- Concurrent session limiting (default: 3 sessions per user)
+- Password strength validation with zxcvbn
 
-### Rate Limiting
-- Authentication endpoints: Strict limiting
-- API routes: Moderate limiting
-- Test bypass: `x-playwright-test: true` header
-- Middleware: `src/middleware.ts`
+### Middleware Protection (`src/middleware.ts`)
+- **Rate Limiting**: Strict for auth, moderate for API
+- **CSRF Protection**: Required for POST/PUT/PATCH/DELETE
+- **Security Headers**: CSP, X-Frame-Options, X-Content-Type-Options, etc.
+- **Test Bypass**: `x-playwright-test: true` header for E2E tests
+
+### CSRF Protection
+- CSRF tokens required for state-changing operations
+- Token validation in API routes
+- Exempt paths configured in `csrf-service.ts`
 
 ### Input Validation
 - All API inputs use Zod schemas (`src/lib/validations.ts`)
 - File upload restrictions (size, type)
 - SQL injection prevention via Prisma
 
+### Audit & Logging
+- Tamper-evident audit logs with hash chain
+- Activity logging for all user actions
+- IP address and user agent tracking
+- Security event logging (login, logout, failures)
+
+### Encryption
+- Sensitive data encryption at rest
+- Environment variable encryption support
+- Secure session management
+
 ### Production Security
 - HTTPS required
 - `NEXTAUTH_SECRET` must be set
 - Absolute database paths in standalone mode
+- Non-root Docker user
+- Security headers enabled
 
 ## Test Accounts
 
@@ -383,6 +512,32 @@ SSC_RATE = 5% (max ฿750/month for employee)
 | accountant@thaiaccounting.com | acc123 | ACCOUNTANT |
 | user@thaiaccounting.com | user123 | USER |
 | viewer@thaiaccounting.com | viewer123 | VIEWER |
+
+## Docker Deployment
+
+### Development Stack
+Full development environment with docker-compose:
+- Next.js app (port 3000)
+- PostgreSQL (port 5432)
+- Redis (port 6379)
+- MinIO S3-compatible storage (port 9000/9001)
+- pgAdmin (port 5050)
+- Prometheus (port 9090)
+- Grafana (port 3001)
+
+### Production Dockerfile
+Multi-stage build for optimized production image:
+1. **Dependencies stage**: Install and generate Prisma client
+2. **Builder stage**: Build Next.js application
+3. **Runner stage**: Production-optimized image with non-root user
+
+### Standalone Build
+```bash
+bun run build
+# Output: .next/standalone/server.js
+```
+
+**CRITICAL**: Update `.next/standalone/.env` with absolute `DATABASE_URL` path before starting.
 
 ## Common Development Tasks
 
@@ -422,7 +577,7 @@ bun run db:migrate
 ### Login Issues
 If seeing "อีเมลหรือรหัสผ่านไม่ถูกต้อง" (Email or password incorrect):
 1. Check `DATABASE_URL` uses absolute path in production
-2. Verify database exists: `ls -lh .next/standalone/dev.db`
+2. Verify database exists: `ls -lh .next/standalone/prisma/dev.db`
 3. Check Prisma connection: `node -e "const { PrismaClient } = require('@prisma/client'); const p = new PrismaClient(); p.user.findMany().then(u => console.log('Users:', u.length)).finally(() => p.\$disconnect());"`
 
 ### Build Issues
@@ -435,25 +590,11 @@ If seeing "อีเมลหรือรหัสผ่านไม่ถูก
 - Prisma: Run `bun run db:generate` after any schema change
 - Migration conflicts: Use `bun run db:reset` (destroys data)
 
-## Deployment Notes
-
-### Standalone Build
-The project builds to `.next/standalone/` for Docker-friendly deployment:
-
-```bash
-bun run build
-# Output: .next/standalone/server.js
-```
-
-**CRITICAL**: Update `.next/standalone/.env` with absolute `DATABASE_URL` path before starting.
-
-### Production Checklist
-- [ ] Set strong `NEXTAUTH_SECRET`
-- [ ] Update `DATABASE_URL` to absolute path
-- [ ] Configure HTTPS
-- [ ] Set up database backups
-- [ ] Enable logging/monitoring
-- [ ] Run E2E tests against production build
+### Prisma Client Issues
+If you see "PrismaClient is not configured to run in Edge Runtime":
+- Ensure you're not importing from `@prisma/client` in middleware
+- Use separate service files for database operations
+- Keep `thai-accounting.ts` free of database imports
 
 ## File Modification Guidelines
 
@@ -461,12 +602,14 @@ bun run build
 - `src/components/ui/*` - shadcn/ui components (use `npx shadcn add` instead)
 - `node_modules/` - Use package manager
 - `.next/` - Build output
+- `prisma/migrations/` - After creation (unless fixing)
 
 ### Modify with Caution
 - `prisma/schema.prisma` - Requires regeneration
 - `src/lib/db.ts` - Prisma client singleton
 - `src/lib/auth.ts` - Auth configuration affects all routes
 - `src/middleware.ts` - Affects all API requests
+- `src/app/page.tsx` - Main entry point with module routing
 
 ### Safe to Modify
 - `src/components/[module]/*` - Module components
@@ -477,21 +620,18 @@ bun run build
 ## Related Documentation
 
 - `CLAUDE.md` - Detailed project guidance for Claude Code
-- `README.md` - General project overview (scaffold template)
+- `README.md` - General project overview
 - `ROADMAP.md` - Development roadmap
-- Various `*-IMPLEMENTATION.md` files - Module-specific documentation:
-  - `CREDIT-DEBIT-NOTES-IMPLEMENTATION.md`
-  - `BANK_RECONCILIATION_IMPLEMENTATION.md`
-  - `CHEQUE_CLEARING_IMPLEMENTATION.md`
-  - `PETTY-CASH-IMPLEMENTATION.md`
-  - `PAYROLL_JOURNAL_IMPLEMENTATION.md`
-  - `PDF-GENERATOR-IMPLEMENTATION.md`
-  - `EXCEL-EXPORT-IMPLEMENTATION.md`
-  - `BACKUP-RESTORE-FEATURE.md`
-  - `SECURITY-IMPLEMENTATION-SUMMARY.md`
+- `FAQ.md` - Frequently asked questions
+- `CONTRIBUTING.md` - Contribution guidelines
+- `DEVELOPER_GUIDE.md` - Developer documentation
+- Various `*-IMPLEMENTATION.md` files - Module-specific documentation
+- `SECURITY_HARDENING.md` - Security implementation details
 
 ---
 
 **System Status**: ✅ Production Ready (100% Complete)
+
+**Last Updated**: 2026-03-18
 
 For questions or issues, refer to existing documentation files or run tests to verify functionality.

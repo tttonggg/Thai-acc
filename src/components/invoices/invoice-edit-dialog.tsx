@@ -6,7 +6,11 @@ import {
   Trash2,
   Save,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
+  MessageSquare,
+  History,
+  Link2,
+  Edit
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,7 +36,13 @@ import {
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CommentSection } from './comment-section'
+import { AuditLog } from './audit-log'
+import { RelatedDocuments } from './related-documents'
+import { LineItemEditor } from './line-item-editor'
 import { useToast } from '@/hooks/use-toast'
+import { useSession } from 'next-auth/react'
 
 // Types
 interface Customer {
@@ -111,12 +121,14 @@ const vatRates = [0, 7, 10]
 
 export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: InvoiceEditDialogProps) {
   const { toast } = useToast()
+  const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
   const [fetchingData, setFetchingData] = useState(false)
   const [fetchingInvoice, setFetchingInvoice] = useState(false)
   const [customers, setCustomers] = useState<Customer[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [invoice, setInvoice] = useState<Invoice | null>(null)
+  const [commentCount, setCommentCount] = useState(0)
 
   const [formData, setFormData] = useState({
     customerId: '',
@@ -168,17 +180,18 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
       if (invoiceRes.ok) {
         const invoiceData = await invoiceRes.json()
         const invoice = invoiceData?.data
-        
+
         if (!invoice) {
           throw new Error('ไม่พบข้อมูลใบกำกับภาษี')
         }
-        
+
         setInvoice(invoice)
+        setCommentCount(invoice._count?.comments || 0)
 
         // Populate form data
         setFormData({
           customerId: invoice?.customerId || '',
-          invoiceDate: invoice.date ? invoice.date.split('T')[0] : new Date().toISOString().split('T')[0],
+          invoiceDate: invoice.invoiceDate ? invoice.invoiceDate.split('T')[0] : new Date().toISOString().split('T')[0],
           type: invoice.type || 'TAX_INVOICE',
           status: invoice.status || 'DRAFT',
           reference: invoice.reference || '',
@@ -466,7 +479,34 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
             <span className="ml-2 text-muted-foreground">กำลังโหลดข้อมูล...</span>
           </div>
         ) : (
-          <div className="space-y-6">
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="details">รายละเอียด</TabsTrigger>
+              <TabsTrigger value="comments" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                คอมเมนต์
+                {commentCount > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 min-w-[20px] px-1">
+                    {commentCount}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="audit" className="flex items-center gap-2">
+                <History className="h-4 w-4" />
+                ประวัติ
+              </TabsTrigger>
+              <TabsTrigger value="related" className="flex items-center gap-2">
+                <Link2 className="h-4 w-4" />
+                เอกสารเกี่ยวข้อง
+              </TabsTrigger>
+              <TabsTrigger value="line-editor" className="flex items-center gap-2">
+                <Edit className="h-4 w-4" />
+                แก้ไขรายการ
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="details" className="space-y-6 mt-6">
+              <div className="space-y-6">
             {/* Status-based alerts */}
             {isIssuedWarning && (
               <Alert className="bg-yellow-50 border-yellow-200">
@@ -928,7 +968,86 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
                 </Button>
               )}
             </div>
-          </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="comments" className="mt-6">
+              {session?.user ? (
+                <CommentSection
+                  invoiceId={invoiceId}
+                  currentUser={{
+                    id: session.user.id,
+                    name: session.user.name,
+                    email: session.user.email,
+                    role: session.user.role
+                  }}
+                />
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  กรุณาเข้าสู่ระบบเพื่อดูคอมเมนต์
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="audit" className="mt-6">
+              <AuditLog
+                invoiceId={invoiceId}
+                entityType="ALL"
+                showFilters={true}
+                maxHeight="500px"
+              />
+            </TabsContent>
+
+            <TabsContent value="related" className="mt-6">
+              <RelatedDocuments
+                invoiceId={invoiceId}
+                onDocumentClick={(module, id) => {
+                  // Navigate to related document
+                  window.location.href = `/${module}/${id}`
+                }}
+              />
+            </TabsContent>
+
+            <TabsContent value="line-editor" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>แก้ไขรายการสินค้า/บริการ</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    เลือกรายการเพื่อแก้ไข พร้อมบันทึกประวัติการเปลี่ยนแปลง
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {lines.map((line, index) => (
+                      <div
+                        key={line.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                      >
+                        <div className="flex-1">
+                          <p className="font-medium">รายการที่ {index + 1}</p>
+                          <p className="text-sm text-gray-600">{line.description}</p>
+                          <p className="text-xs text-gray-500">
+                            {line.quantity} {line.unit} × {line.unitPrice.toLocaleString()} ฿ = {line.amount.toLocaleString()} ฿
+                          </p>
+                        </div>
+                        <Badge variant={invoice?.status === 'DRAFT' ? 'default' : 'secondary'}>
+                          {invoice?.status === 'DRAFT' ? 'สามารถแก้ไข' : 'ล็อก'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                  {invoice?.status !== 'DRAFT' && (
+                    <Alert className="mt-4">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        รายการสินค้าสามารถแก้ไขได้เฉพาะในสถานะร่าง (DRAFT) เท่านั้น
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         )}
       </DialogContent>
     </Dialog>

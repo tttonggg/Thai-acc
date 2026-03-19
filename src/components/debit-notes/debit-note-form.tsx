@@ -59,8 +59,9 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
         ])
         const vendorsData = await vendorsRes.json()
         const productsData = await productsRes.json()
-        setVendors(vendorsData.vendors || vendorsData)
-        setProducts(productsData.products || productsData)
+        // APIs return { success: true, data: [...] }
+        setVendors(Array.isArray(vendorsData.data) ? vendorsData.data : [])
+        setProducts(Array.isArray(productsData.data) ? productsData.data : [])
       } catch (error) {
         console.error('Failed to fetch data:', error)
       }
@@ -236,7 +237,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
                 <div className="space-y-2">
                   <Label>ผู้ขาย *</Label>
                   <Select value={form.watch('vendorId')} onValueChange={(v) => form.setValue('vendorId', v)}>
-                    <SelectTrigger><SelectValue placeholder="เลือกผู้ขาย" /></SelectTrigger>
+                    <SelectTrigger className="!h-11 text-base"><SelectValue placeholder="เลือกผู้ขาย" /></SelectTrigger>
                     <SelectContent>
                       {vendors.map((vendor) => <SelectItem key={vendor.id} value={vendor.id}>{vendor.code} - {vendor.name}</SelectItem>)}
                     </SelectContent>
@@ -259,7 +260,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
                 <div className="space-y-2">
                   <Label>อ้างอิงใบซื้อ (ถ้ามี)</Label>
                   <Select value={form.watch('purchaseInvoiceId') || ''} onValueChange={(v) => form.setValue('purchaseInvoiceId', v || null)}>
-                    <SelectTrigger><SelectValue placeholder="เลือกใบซื้อ" /></SelectTrigger>
+                    <SelectTrigger className="!h-11 text-base"><SelectValue placeholder="เลือกใบซื้อ" /></SelectTrigger>
                     <SelectContent>
                       {purchaseInvoices.map((inv) => <SelectItem key={inv.id} value={inv.id}>{inv.invoiceNo} - ฿{inv.totalAmount.toLocaleString()}</SelectItem>)}
                     </SelectContent>
@@ -268,7 +269,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
                 <div className="space-y-2">
                   <Label>เหตุผล *</Label>
                   <Select value={form.watch('reason')} onValueChange={(v) => form.setValue('reason', v as any)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="!h-11 text-base"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="ADDITIONAL_CHARGES">ค่าใช้จ่ายเพิ่มเติม</SelectItem>
                       <SelectItem value="RETURNED_GOODS">สินค้าที่คืน</SelectItem>
@@ -295,12 +296,12 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2"><Label>รายการ *</Label><Input value={line.description} onChange={(e) => updateLine(index, 'description', e.target.value)} placeholder="ระบุรายการ" /></div>
-                    <div className="space-y-2"><Label>สินค้า (ถ้ามี)</Label><Select value={line.productId || ''} onValueChange={(v) => { const p = products.find(x => x.id === v); if (p) { updateLine(index, 'productId', v); updateLine(index, 'unitPrice', p.costPrice); updateLine(index, 'vatRate', p.vatRate); }}}><SelectTrigger><SelectValue placeholder="เลือกสินค้า" /></SelectTrigger><SelectContent>{products.map((p) => <SelectItem key={p.id} value={p.id}>{p.code} - {p.name}</SelectItem>)}</SelectContent></Select></div>
+                    <div className="space-y-2"><Label>สินค้า (ถ้ามี)</Label><Select value={line.productId || ''} onValueChange={(v) => { const p = products.find(x => x.id === v); if (p) { updateLine(index, 'productId', v); updateLine(index, 'unitPrice', p.costPrice); updateLine(index, 'vatRate', p.vatRate); }}}><SelectTrigger className="!h-11 text-base"><SelectValue placeholder="เลือกสินค้า" /></SelectTrigger><SelectContent>{products.map((p) => <SelectItem key={p.id} value={p.id}>{p.code} - {p.name}</SelectItem>)}</SelectContent></Select></div>
                   </div>
                   <div className="grid grid-cols-4 gap-3">
-                    <div className="space-y-2"><Label>จำนวน *</Label><Input type="number" step="0.01" value={line.quantity} onChange={(e) => updateLine(index, 'quantity', parseFloat(e.target.value) || 0)} /></div>
-                    <div className="space-y-2"><Label>ราคาต่อหน่วย *</Label><Input type="number" step="0.01" value={line.unitPrice} onChange={(e) => updateLine(index, 'unitPrice', parseFloat(e.target.value) || 0)} /></div>
-                    <div className="space-y-2"><Label>VAT (%)</Label><Input type="number" step="0.01" value={line.vatRate} onChange={(e) => updateLine(index, 'vatRate', parseFloat(e.target.value) || 0)} /></div>
+                    <div className="space-y-2"><Label>จำนวน *</Label><Input type="number" className="!h-11 text-base" step="0.01" value={line.quantity} onChange={(e) => updateLine(index, 'quantity', parseFloat(e.target.value) || 0)} /></div>
+                    <div className="space-y-2"><Label>ราคาต่อหน่วย *</Label><Input type="number" className="!h-11 text-base" step="0.01" value={line.unitPrice} onChange={(e) => updateLine(index, 'unitPrice', parseFloat(e.target.value) || 0)} /></div>
+                    <div className="space-y-2"><Label>VAT (%)</Label><Input type="number" className="!h-11 text-base" step="0.01" value={line.vatRate} onChange={(e) => updateLine(index, 'vatRate', parseFloat(e.target.value) || 0)} /></div>
                     <div className="space-y-2"><Label>จำนวนเงิน</Label><Input type="text" value={`฿${(line.quantity * line.unitPrice).toLocaleString()}`} disabled /></div>
                   </div>
                 </div>

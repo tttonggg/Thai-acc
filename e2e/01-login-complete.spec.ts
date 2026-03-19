@@ -153,7 +153,7 @@ test.describe('Phase 1: Authentication & Login Tests', () => {
     await page.click('button[type="submit"]')
 
     // Wait for dashboard
-    await expect(page.locator('h1:has-text("ภาพรวมธุรกิจ")').or(page.locator('nav, aside').first()).toBeVisible({ timeout: 10000 })
+    await expect(page.locator('h1:has-text("ภาพรวมธุรกิจ")').or(page.locator('nav, aside').first())).toBeVisible({ timeout: 10000 })
 
     // For now, just verify we're logged in and can see dashboard
     await expect(page.locator('nav, aside').first()).toBeVisible()
@@ -192,7 +192,7 @@ test.describe('Phase 1: Authentication & Login Tests', () => {
     await page.click('button[type="submit"]')
 
     // Wait for dashboard to load
-    await expect(page.locator('h1:has-text("ภาพรวมธุรกิจ")').or(page.locator('nav, aside').first()).toBeVisible({ timeout: 10000 })
+    await expect(page.locator('h1:has-text("ภาพรวมธุรกิจ")').or(page.locator('nav, aside').first())).toBeVisible({ timeout: 10000 })
 
     const endTime = Date.now()
     const duration = endTime - startTime
@@ -239,12 +239,12 @@ test.describe('Phase 1: Role-Based Access Control', () => {
       await page.click('button[type="submit"]')
 
       // Wait for login to complete - check for dashboard
-      await expect(page.locator('h1:has-text("ภาพรวมธุรกิจ")').or(page.locator('nav, aside').first()).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('h1:has-text("ภาพรวมธุรกิจ")').or(page.locator('nav, aside').first())).toBeVisible({ timeout: 10000 });
 
       // Wait for navigation/sidebar to load
-      await page.waitForTimeout(1000)
+      await page.waitForTimeout(1000);
 
-      const sidebar = page.locator('nav, aside').first()
+      const sidebar = page.locator('nav, aside').first();
 
       for (const item of MENU_ITEMS) {
         const itemLocator = sidebar.locator(`text=${item.label}`)

@@ -1,0 +1,11 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/debit-notes/[id]/route.js")
+R.c("server/chunks/[root-of-the-server]__159d027a._.js")
+R.c("server/chunks/[root-of-the-server]__b1993c7f._.js")
+R.c("server/chunks/[root-of-the-server]__499dc1a6._.js")
+R.c("server/chunks/[root-of-the-server]__09c3bdaf._.js")
+R.c("server/chunks/[root-of-the-server]__4fe60fa6._.js")
+R.c("server/chunks/node_modules_crypto-js_7ad87ba5._.js")
+R.c("server/chunks/node_modules_next_dist_79f1aee4._.js")
+R.c("server/chunks/_next-internal_server_app_api_debit-notes_[id]_route_actions_9c18f1a1.js")
+R.m(991624)
+module.exports=R.m(991624).exports

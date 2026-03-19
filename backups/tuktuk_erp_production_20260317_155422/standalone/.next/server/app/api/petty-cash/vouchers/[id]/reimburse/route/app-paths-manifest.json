@@ -1,0 +1,3 @@
+{
+  "/api/petty-cash/vouchers/[id]/reimburse/route": "app/api/petty-cash/vouchers/[id]/reimburse/route.js"
+}

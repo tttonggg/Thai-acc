@@ -1,0 +1,225 @@
+import { test, expect } from '@playwright/test'
+
+// Test credentials from the project
+const TEST_USERS = [
+  { email: 'admin@thaiaccounting.com', password: 'admin123', role: 'ADMIN' },
+  { email: 'accountant@thaiaccounting.com', password: 'acc123', role: 'ACCOUNTANT' },
+  { email: 'user@thaiaccounting.com', password: 'user123', role: 'USER' },
+  { email: 'viewer@thaiaccounting.com', password: 'viewer123', role: 'VIEWER' },
+]
+
+test.describe('Authentication Login', () => {
+  test.beforeEach(async ({ page }) => {
+    // Clear cookies and storage before each test
+    await page.context().clearCookies()
+    // Add a small delay to avoid rate limiting
+    await page.waitForTimeout(500)
+  })
+
+  for (const user of TEST_USERS) {
+    test(`should login successfully as ${user.role}`, async ({ page }) => {
+      // Navigate to home page
+      await page.goto('/')
+
+      // Wait for login page to appear (check for login form)
+      await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 5000 })
+      await expect(page.locator('input[type="password"]')).toBeVisible()
+
+      // Fill in login form
+      await page.fill('input[type="email"]', user.email)
+      await page.fill('input[type="password"]', user.password)
+
+      // Submit the form
+      await page.click('button[type="submit"]')
+
+      // Wait for navigation - check for dashboard appearing (more reliable)
+      await expect(page.locator('h1:has-text("ภาพรวมธุรกิจ")').or(page.locator('nav, aside').first()).toBeVisible({ timeout: 10000 })
+
+      // Take a screenshot for debugging
+      await page.screenshot({ path: `test-results/login-${user.role}-success.png` })
+
+      // Check that we're on dashboard - look for sidebar or main content
+      // The dashboard might show either the heading OR be loading initially
+      const dashboardVisible = await page.locator('h1:has-text("ภาพรวมธุรกิจ")').isVisible({ timeout: 5000 }).catch(() => false)
+
+      if (!dashboardVisible) {
+        // If dashboard heading not visible, check for other elements that indicate we're logged in
+        const sidebarVisible = await page.locator('nav, aside, [data-testid="sidebar"]').isVisible().catch(() => false)
+        const mainContentVisible = await page.locator('main').isVisible().catch(() => false)
+
+        if (!sidebarVisible && !mainContentVisible) {
+          throw new Error('Login may have succeeded but dashboard elements not found. Check screenshot.')
+        }
+      }
+
+      // Check for summary cards (they might be loading)
+      await expect(page.locator('text=รายได้รวม').or(page.locator('text=ค่าใช้จ่ายรวม')).or(page.locator('nav')).first()).toBeVisible({ timeout: 5000 })
+    })
+  }
+
+  test('should show error with invalid credentials', async ({ page }) => {
+    await page.goto('/')
+
+    // Wait for login form
+    await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 5000 })
+
+    // Fill in invalid credentials
+    await page.fill('input[type="email"]', 'invalid@test.com')
+    await page.fill('input[type="password"]', 'wrongpassword')
+
+    // Submit the form
+    await page.click('button[type="submit"]')
+
+    // Should show error message (Thai)
+    await expect(page.locator('text=อีเมลหรือรหัสผ่านไม่ถูกต้อง')).toBeVisible({ timeout: 5000 })
+
+    // Should still be on login page
+    await expect(page.locator('input[type="email"]')).toBeVisible()
+  })
+
+  test('should validate required fields', async ({ page }) => {
+    await page.goto('/')
+
+    // Wait for login form
+    await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 5000 })
+
+    // Try to submit without filling fields
+    await page.click('button[type="submit"]')
+
+    // Browser should show HTML5 validation
+    const emailInput = page.locator('input[type="email"]')
+    const isRequired = await emailInput.evaluate(el => el.hasAttribute('required'))
+    expect(isRequired).toBeTruthy()
+  })
+
+  test('should persist session across page reloads', async ({ page }) => {
+    const user = TEST_USERS[0] // Admin user
+
+    // Navigate and login
+    await page.goto('/')
+    await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 5000 })
+
+    await page.fill('input[type="email"]', user.email)
+    await page.fill('input[type="password"]', user.password)
+    await page.click('button[type="submit"]')
+
+    // Wait for dashboard - check that login form is gone
+    await expect(page.locator('input[type="email"]')).not.toBeVisible({ timeout: 10000 })
+
+    // Reload the page
+    await page.reload()
+
+    // Should still be logged in - dashboard should still be visible
+    await expect(page.locator('h1:has-text("ภาพรวมธุรกิจ")')).toBeVisible({ timeout: 5000 })
+
+    // Login form should not be visible
+    await expect(page.locator('input[type="email"]')).not.toBeVisible()
+  })
+
+  test('should logout successfully', async ({ page }) => {
+    const user = TEST_USERS[0] // Admin user
+
+    // Login
+    await page.goto('/')
+    await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 5000 })
+
+    await page.fill('input[type="email"]', user.email)
+    await page.fill('input[type="password"]', user.password)
+    await page.click('button[type="submit"]')
+
+    // Wait for dashboard - check that login form is gone
+    await expect(page.locator('input[type="email"]')).not.toBeVisible({ timeout: 10000 })
+
+    // Click logout - look for logout button in header or sidebar
+    const logoutButton = page.locator('button:has-text("ออกจากระบบ"), button[aria-label="Logout"]').first()
+
+    if (await logoutButton.isVisible({ timeout: 5000 })) {
+      await logoutButton.click()
+
+      // Should return to login page
+      await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 5000 })
+      await expect(page.locator('h1:has-text("Thai Accounting ERP")')).toBeVisible()
+    }
+  })
+})
+
+test.describe('Login Page UI', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.context().clearCookies()
+  })
+
+  test('should display login form elements', async ({ page }) => {
+    await page.goto('/')
+
+    // Check for form elements
+    await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('input[type="password"]')).toBeVisible()
+    await expect(page.locator('button[type="submit"]')).toBeVisible()
+  })
+
+  test('should display Thai language labels', async ({ page }) => {
+    await page.goto('/')
+
+    // Check for Thai text
+    await expect(page.locator('h1:has-text("Thai Accounting ERP")')).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('text=โปรแกรมบัญชีมาตรฐานไทย')).toBeVisible()
+    await expect(page.locator('button:has-text("เข้าสู่ระบบ")')).toBeVisible()
+    await expect(page.locator('text=อีเมล')).toBeVisible()
+    await expect(page.locator('text=รหัสผ่าน')).toBeVisible()
+    await expect(page.locator('text=กรุณากรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบ')).toBeVisible()
+  })
+
+  test('should display demo credentials', async ({ page }) => {
+    await page.goto('/')
+
+    // Check for demo credentials section
+    await expect(page.locator('text=บัญชีทดสอบ')).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('text=admin@thaiaccounting.com')).toBeVisible()
+    await expect(page.locator('text=admin123')).toBeVisible()
+  })
+
+  test('should show loading state during login', async ({ page }) => {
+    await page.goto('/')
+
+    // Wait for form
+    await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 5000 })
+
+    // Fill with valid credentials
+    await page.fill('input[type="email"]', 'admin@thaiaccounting.com')
+    await page.fill('input[type="password"]', 'admin123')
+
+    // Click submit and immediately check for loading state
+    await page.click('button[type="submit"]')
+
+    // Wait for login to complete - check that email input is gone
+    await expect(page.locator('input[type="email"]')).not.toBeVisible({ timeout: 10000 })
+  })
+})
+
+test.describe('Session Management', () => {
+  test('should handle multiple tabs', async ({ context }) => {
+    const user = TEST_USERS[0]
+
+    // Create first tab and login
+    const page1 = await context.newPage()
+    await page1.goto('/')
+    await expect(page1.locator('input[type="email"]')).toBeVisible({ timeout: 5000 })
+
+    await page1.fill('input[type="email"]', user.email)
+    await page1.fill('input[type="password"]', user.password)
+    await page1.click('button[type="submit"]')
+
+    await expect(page1.locator('input[type="email"]')).not.toBeVisible({ timeout: 10000 })
+
+    // Create second tab and navigate - should be logged in
+    const page2 = await context.newPage()
+    await page2.goto('/')
+
+    // Should show dashboard directly (no login form)
+    await expect(page2.locator('input[type="email"]')).not.toBeVisible({ timeout: 5000 })
+
+    // Close pages
+    await page1.close()
+    await page2.close()
+  })
+})

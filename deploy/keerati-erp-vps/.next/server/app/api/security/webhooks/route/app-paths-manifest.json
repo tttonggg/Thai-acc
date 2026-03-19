@@ -1,0 +1,3 @@
+{
+  "/api/security/webhooks/route": "app/api/security/webhooks/route.js"
+}

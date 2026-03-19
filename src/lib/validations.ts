@@ -359,3 +359,217 @@ export const interCompanyTransactionSchema = z.object({
   amount: z.number().positive(),
   description: z.string().optional(),
 })
+
+// ============================================
+// Invoice Commenting System Validations
+// ============================================
+
+// Invoice Comment validations
+export const invoiceCommentSchema = z.object({
+  content: z.string().min(1, "กรุณากรอกความคิดเห็น"),
+  isInternal: z.boolean().default(false),
+  parentId: z.string().optional().nullable(),
+  mentions: z.array(z.string()).default([]),
+  attachments: z.array(z.object({
+    name: z.string(),
+    url: z.string().url(),
+    size: z.number().int().positive(),
+    type: z.string(),
+  })).optional(),
+  resolved: z.boolean().default(false),
+})
+
+export const updateInvoiceCommentSchema = z.object({
+  content: z.string().min(1, "กรุณากรอกความคิดเห็น").optional(),
+  isInternal: z.boolean().optional(),
+  resolved: z.boolean().optional(),
+})
+
+// Invoice Line Edit validations
+export const invoiceLineEditSchema = z.object({
+  description: z.string().min(1, "กรุณากรอกรายการ").optional(),
+  quantity: z.number().positive("จำนวนต้องมากกว่า 0").optional(),
+  unit: z.string().optional(),
+  unitPrice: z.number().int().min(0, "ราคาต่อหน่วยต้องไม่ติดลบ").optional(),
+  discount: z.number().int().min(0, "ส่วนลดต้องไม่ติดลบ").optional(),
+  changeReason: z.string().optional(),
+})
+
+// Related Document validations
+export const relatedDocumentSchema = z.object({
+  relatedModule: z.enum(["invoice", "receipt", "credit_note", "debit_note", "payment"]),
+  relatedId: z.string().min(1, "กรุณาระบุเอกสารที่เกี่ยวข้อง"),
+  relationType: z.enum(["LINKS", "CANCELS", "REPLACES", "REFUNDS", "ADJUSTS"]),
+  notes: z.string().optional(),
+})
+
+// Comment Query validations
+export const commentQuerySchema = z.object({
+  includeInternal: z.boolean().default(false),
+  includeResolved: z.boolean().default(true),
+  limit: z.number().int().positive().max(100).default(50),
+  cursor: z.string().optional(),
+})
+
+// Audit Log Query validations
+export const auditLogQuerySchema = z.object({
+  limit: z.number().int().positive().max(100).default(50),
+  cursor: z.string().optional(),
+  action: z.string().optional(),
+})
+
+// Purchase Order validations
+export const purchaseOrderLineSchema = z.object({
+  productId: z.string().optional().nullable(),
+  description: z.string().min(1, "กรุณากรอกรายการ"),
+  quantity: z.number().positive("จำนวนต้องมากกว่า 0"),
+  unit: z.string().default("ชิ้น"),
+  unitPrice: z.number().min(0, "ราคาต่อหน่วยต้องไม่ติดลบ"),
+  discount: z.number().min(0).default(0),
+  vatRate: z.number().min(0).max(100).default(7),
+  specUrl: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+export const purchaseOrderSchema = z.object({
+  orderDate: z.string().or(z.date()).optional(),
+  expectedDate: z.string().or(z.date()).optional().nullable(),
+  vendorId: z.string().min(1, "กรุณาเลือกผู้ขาย"),
+  vendorContact: z.string().optional(),
+  vendorEmail: z.string().email("รูปแบบอีเมลไม่ถูกต้อง").optional().or(z.literal("")),
+  vendorPhone: z.string().optional(),
+  vendorAddress: z.string().optional(),
+  shippingTerms: z.string().optional(),
+  paymentTerms: z.string().optional(),
+  deliveryAddress: z.string().optional(),
+  budgetId: z.string().optional(),
+  notes: z.string().optional(),
+  internalNotes: z.string().optional(),
+  vendorNotes: z.string().optional(),
+  lines: z.array(purchaseOrderLineSchema).min(1, "ต้องมีอย่างน้อย 1 รายการ"),
+})
+
+// Purchase Order update validations (only allow certain fields)
+export const purchaseOrderUpdateSchema = z.object({
+  orderDate: z.string().or(z.date()).optional(),
+  expectedDate: z.string().or(z.date()).optional().nullable(),
+  vendorContact: z.string().optional(),
+  vendorEmail: z.string().email("รูปแบบอีเมลไม่ถูกต้อง").optional().or(z.literal("")),
+  vendorPhone: z.string().optional(),
+  vendorAddress: z.string().optional(),
+  shippingTerms: z.string().optional(),
+  paymentTerms: z.string().optional(),
+  deliveryAddress: z.string().optional(),
+  notes: z.string().optional(),
+  internalNotes: z.string().optional(),
+  vendorNotes: z.string().optional(),
+})
+
+// Purchase Order ship validations
+export const purchaseOrderShipSchema = z.object({
+  trackingNumber: z.string().optional(),
+  shippingMethod: z.string().optional(),
+  estimatedDelivery: z.string().or(z.date()).optional().nullable(),
+  notes: z.string().optional(),
+})
+
+// Purchase Order receive validations
+export const purchaseOrderReceiveLineSchema = z.object({
+  lineId: z.string().min(1, "กรุณาระบุรายการ"),
+  receivedQty: z.number().min(0, "จำนวนที่รับต้องไม่ติดลบ"),
+})
+
+export const purchaseOrderReceiveSchema = z.object({
+  lines: z.array(purchaseOrderReceiveLineSchema).min(1, "ต้องมีอย่างน้อย 1 รายการ"),
+  notes: z.string().optional(),
+})
+
+// Purchase Order cancel validations
+export const purchaseOrderCancelSchema = z.object({
+  reason: z.string().min(1, "กรุณาระบุเหตุผลการยกเลิก"),
+})
+
+export type PurchaseOrderInput = z.infer<typeof purchaseOrderSchema>
+export type PurchaseOrderLineInput = z.infer<typeof purchaseOrderLineSchema>
+export type PurchaseOrderUpdateInput = z.infer<typeof purchaseOrderUpdateSchema>
+export type PurchaseOrderShipInput = z.infer<typeof purchaseOrderShipSchema>
+export type PurchaseOrderReceiveInput = z.infer<typeof purchaseOrderReceiveSchema>
+
+// ============================================
+// Quotation Validations
+// รับรองข้อมูลใบเสนอราคา
+// ============================================
+
+// Quotation Line validations
+export const quotationLineSchema = z.object({
+  productId: z.string().optional().nullable(),
+  description: z.string().min(1, "กรุณากรอกรายการ"),
+  quantity: z.number().positive("จำนวนต้องมากกว่า 0"),
+  unit: z.string().default("ชิ้น"),
+  unitPrice: z.number().min(0, "ราคาต้องไม่ติดลบ"),
+  discount: z.number().min(0).default(0),
+  vatRate: z.number().min(0).max(100).default(7),
+  notes: z.string().optional(),
+})
+
+// Quotation validations
+export const quotationSchema = z.object({
+  quotationNo: z.string().optional(),
+  quotationDate: z.string().or(z.date()).optional(),
+  validUntil: z.string().min(1, "วันหมดอายุต้องไม่ว่างเปล่า"),
+  customerId: z.string().min(1, "กรุณาเลือกลูกค้า"),
+  contactPerson: z.string().optional(),
+  reference: z.string().optional(),
+  discountAmount: z.number().min(0).default(0),
+  discountPercent: z.number().min(0).max(100).default(0),
+  vatRate: z.number().min(0).max(100).default(7),
+  terms: z.string().optional(),
+  notes: z.string().optional(),
+  internalNotes: z.string().optional(),
+  lines: z.array(quotationLineSchema).min(1, "ต้องมีอย่างน้อย 1 รายการ"),
+})
+
+// Quotation update validations (only allow certain fields when editing)
+export const quotationUpdateSchema = z.object({
+  validUntil: z.string().optional(),
+  contactPerson: z.string().optional(),
+  reference: z.string().optional(),
+  discountAmount: z.number().int().min(0).optional(),
+  discountPercent: z.number().min(0).max(100).optional(),
+  vatRate: z.number().min(0).max(100).optional(),
+  terms: z.string().optional(),
+  notes: z.string().optional(),
+  internalNotes: z.string().optional(),
+})
+
+// Quotation send validations
+export const quotationSendSchema = z.object({
+  // No additional fields required for sending
+})
+
+// Quotation approve validations
+export const quotationApproveSchema = z.object({
+  // No additional fields required for approval
+})
+
+// Quotation reject validations
+export const quotationRejectSchema = z.object({
+  reason: z.string().min(1, "กรุณาระบุเหตุผลการปฏิเสธ"),
+})
+
+// Quotation convert to invoice validations
+export const quotationConvertSchema = z.object({
+  // No additional fields required for conversion
+})
+
+// Quotation cancel validations
+export const quotationCancelSchema = z.object({
+  reason: z.string().min(1, "กรุณาระบุเหตุผลการยกเลิก"),
+})
+
+export type QuotationInput = z.infer<typeof quotationSchema>
+export type QuotationLineInput = z.infer<typeof quotationLineSchema>
+export type QuotationUpdateInput = z.infer<typeof quotationUpdateSchema>
+export type QuotationRejectInput = z.infer<typeof quotationRejectSchema>
+export type QuotationCancelInput = z.infer<typeof quotationCancelSchema>
+export type PurchaseOrderCancelInput = z.infer<typeof purchaseOrderCancelSchema>

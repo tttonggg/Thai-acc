@@ -147,6 +147,87 @@ export function ReceiptList() {
     setIsViewDialogOpen(true)
   }
 
+  const handlePrint = async (receipt: Receipt) => {
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      toast({
+        title: 'ไม่สามารถเปิดหน้าต่างได้',
+        description: 'กรุณาอนุญาตให้เปิดหน้าต่างใหม่',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    const paymentMethodLabels: Record<string, string> = {
+      CASH: 'เงินสด',
+      CHEQUE: 'เช็ค',
+      TRANSFER: 'โอนเงิน',
+      CREDIT: 'บัตรเครดิต',
+      OTHER: 'อื่นๆ',
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>ใบเสร็จรับเงิน - ${receipt.receiptNo}</title>
+        <meta charset="UTF-8">
+        <style>
+          body { 
+            font-family: 'Sarabun', 'TH Sarabun New', sans-serif; 
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+          }
+          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+          .header h1 { margin: 0; font-size: 24px; }
+          .header p { margin: 5px 0; color: #666; }
+          .info { margin-bottom: 20px; }
+          .info p { margin: 5px 0; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+          th { background-color: #f5f5f5; font-weight: bold; }
+          .text-right { text-align: right; }
+          .summary { margin-top: 20px; border-top: 2px solid #333; padding-top: 20px; }
+          .summary-row { display: flex; justify-content: space-between; margin: 5px 0; }
+          .summary-row.total { font-weight: bold; font-size: 18px; }
+          @media print { body { padding: 0; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>ใบเสร็จรับเงิน</h1>
+          <p>เลขที่: ${receipt.receiptNo}</p>
+          <p>วันที่: ${new Date(receipt.receiptDate).toLocaleDateString('th-TH')}</p>
+        </div>
+        
+        <div class="info">
+          <p><strong>ลูกค้า:</strong> ${receipt.customer?.name || '-'}</p>
+          <p><strong>วิธีการชำระ:</strong> ${paymentMethodLabels[receipt.paymentMethod] || receipt.paymentMethod}</p>
+        </div>
+
+        <div class="summary">
+          <div class="summary-row total">
+            <span>จำนวนเงิน</span>
+            <span>${(receipt.amount || 0).toLocaleString('th-TH')} บาท</span>
+          </div>
+          ${receipt.whtAmount > 0 ? `
+          <div class="summary-row">
+            <span>ภาษีหัก ณ ที่จ่าย</span>
+            <span>${(receipt.whtAmount || 0).toLocaleString('th-TH')} บาท</span>
+          </div>
+          ` : ''}
+        </div>
+
+        <script>window.onload = () => { setTimeout(() => window.print(), 500); }</script>
+      </body>
+      </html>
+    `
+    
+    printWindow.document.write(html)
+    printWindow.document.close()
+  }
+
   const handlePost = async (receiptId: string) => {
     setPostingReceipt(receiptId)
     try {
@@ -403,6 +484,14 @@ export function ReceiptList() {
                           )}
                         </Button>
                       )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handlePrint(receipt)}
+                      >
+                        <Printer className="h-4 w-4 text-green-600" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"

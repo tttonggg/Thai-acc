@@ -486,7 +486,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                       <FormLabel htmlFor="customerId">ลูกค้า</FormLabel>
                       <Select onValueChange={handleCustomerChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger id="customerId" aria-label="เลือกลูกค้า">
+                          <SelectTrigger className="!h-11 text-base" id="customerId" aria-label="เลือกลูกค้า">
                             <SelectValue placeholder="เลือกลูกค้า" />
                           </SelectTrigger>
                         </FormControl>
@@ -513,7 +513,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                       <FormLabel htmlFor="paymentMethod">วิธีการชำระเงิน</FormLabel>
                       <Select onValueChange={handlePaymentMethodChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger id="paymentMethod" aria-label="เลือกวิธีการชำระเงิน">
+                          <SelectTrigger className="!h-11 text-base" id="paymentMethod" aria-label="เลือกวิธีการชำระเงิน">
                             <SelectValue />
                           </SelectTrigger>
                         </FormControl>
@@ -539,7 +539,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                         <FormLabel>บัญชีธนาคาร</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="!h-11 text-base">
                               <SelectValue placeholder="เลือกบัญชีธนาคาร" />
                             </SelectTrigger>
                           </FormControl>
@@ -619,7 +619,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                   <FormItem>
                     <FormLabel>จำนวนเงินรับโดยสิ้นเชิง</FormLabel>
                     <FormControl>
-                      <Input
+                      <Input className="!h-11 text-base"
                         type="number"
                         {...field}
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
@@ -698,7 +698,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                             <TableCell className="text-right">฿{invoice.balance.toLocaleString()}</TableCell>
                             <TableCell className="text-right">
                               {allocation ? (
-                                <Input
+                                <Input className="!h-11 text-base"
                                   type="number"
                                   value={allocation.amount}
                                   onChange={(e) => updateAllocationAmount(
@@ -731,7 +731,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                                   )}
                                   aria-label="อัตราหัก ณ ที่จ่าย"
                                 >
-                                  <SelectTrigger className="w-20" aria-label="เลือกอัตรา WHT">
+                                  <SelectTrigger className="!h-11 text-base" className="w-20" aria-label="เลือกอัตรา WHT">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>

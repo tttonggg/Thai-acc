@@ -1,0 +1,3 @@
+{
+  "/api/reports/income-statement/export/pdf/route": "app/api/reports/income-statement/export/pdf/route.js"
+}

@@ -95,7 +95,8 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
       try {
         const res = await fetch('/api/customers')
         const data = await res.json()
-        setCustomers(data.customers || data)
+        // API returns { success: true, data: [...] }
+        setCustomers(Array.isArray(data.data) ? data.data : [])
       } catch (error) {
         console.error('Failed to fetch customers:', error)
       }
@@ -108,7 +109,8 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
       try {
         const res = await fetch('/api/products')
         const data = await res.json()
-        setProducts(data.products || data)
+        // API returns { success: true, data: [...] }
+        setProducts(Array.isArray(data.data) ? data.data : [])
       } catch (error) {
         console.error('Failed to fetch products:', error)
       }
@@ -332,7 +334,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                     aria-invalid={form.formState.errors.customerId ? 'true' : 'false'}
                     aria-describedby={form.formState.errors.customerId ? 'customerId-error' : undefined}
                   >
-                    <SelectTrigger id="customerId">
+                    <SelectTrigger className="!h-11 text-base" id="customerId">
                       <SelectValue placeholder="เลือกลูกค้า" />
                     </SelectTrigger>
                     <SelectContent>
@@ -389,7 +391,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                     onValueChange={(value) => form.setValue('invoiceId', value || null)}
                     aria-label="เลือกใบกำกับภาษีอ้างอิง"
                   >
-                    <SelectTrigger id="invoiceId">
+                    <SelectTrigger className="!h-11 text-base" id="invoiceId">
                       <SelectValue placeholder="เลือกใบกำกับภาษี" />
                     </SelectTrigger>
                     <SelectContent>
@@ -411,7 +413,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                     aria-invalid={form.formState.errors.reason ? 'true' : 'false'}
                     aria-describedby={form.formState.errors.reason ? 'reason-error' : undefined}
                   >
-                    <SelectTrigger id="reason">
+                    <SelectTrigger className="!h-11 text-base" id="reason">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -466,7 +468,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor={`description-${index}`}>รายการ *</Label>
-                      <Input
+                      <Input className="!h-11 text-base"
                         id={`description-${index}`}
                         value={line.description}
                         onChange={(e) => updateLine(index, 'description', e.target.value)}
@@ -489,11 +491,11 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                         }}
                         aria-label="เลือกสินค้า"
                       >
-                        <SelectTrigger id={`product-${index}`}>
+                        <SelectTrigger className="!h-11 text-base" id={`product-${index}`}>
                           <SelectValue placeholder="เลือกสินค้า" />
                         </SelectTrigger>
                         <SelectContent>
-                          <Input
+                          <Input className="!h-11 text-base"
                             placeholder="ค้นหา..."
                             value={searchProduct}
                             onChange={(e) => setSearchProduct(e.target.value)}
@@ -512,7 +514,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                   <div className="grid grid-cols-4 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor={`quantity-${index}`}>จำนวน *</Label>
-                      <Input
+                      <Input className="!h-11 text-base"
                         id={`quantity-${index}`}
                         type="number"
                         step="0.01"
@@ -524,7 +526,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
 
                     <div className="space-y-2">
                       <Label htmlFor={`unitPrice-${index}`}>ราคาต่อหน่วย *</Label>
-                      <Input
+                      <Input className="!h-11 text-base"
                         id={`unitPrice-${index}`}
                         type="number"
                         step="0.01"
@@ -536,7 +538,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
 
                     <div className="space-y-2">
                       <Label htmlFor={`vatRate-${index}`}>อัตรา VAT (%)</Label>
-                      <Input
+                      <Input className="!h-11 text-base"
                         id={`vatRate-${index}`}
                         type="number"
                         step="0.01"
@@ -548,7 +550,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
 
                 <div className="space-y-2">
                   <Label htmlFor={`amount-${index}`}>จำนวนเงิน</Label>
-                  <Input
+                  <Input className="!h-11 text-base"
                     id={`amount-${index}`}
                     type="text"
                     value={`฿${(line.quantity * line.unitPrice).toLocaleString()}`}

@@ -97,9 +97,9 @@ interface PurchaseEditDialogProps {
 }
 
 const purchaseTypeLabels: Record<string, string> = {
-  TAX_INVOICE: 'ใบกำกับภาษี',
-  RECEIPT: 'ใบเสร็จรับเงิน',
-  DELIVERY_NOTE: 'ใบส่งของ',
+  TAX_INVOICE: 'ใบซื้อ/ใบกำกับภาษีซื้อ',
+  RECEIPT: 'ใบเสร็จรับเงินซื้อ',
+  DELIVERY_NOTE: 'ใบส่งของซื้อ',
 }
 
 const statusLabels: Record<string, string> = {
@@ -504,7 +504,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
             {/* Invoice Number (Read-only) */}
             <div>
               <Label htmlFor="invoiceNo">เลขที่เอกสาร</Label>
-              <Input
+              <Input className="!h-11 text-base"
                 id="invoiceNo"
                 value={purchase?.invoiceNo || ''}
                 disabled
@@ -554,7 +554,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
 
               <div>
                 <Label htmlFor="invoiceDate">วันที่เอกสาร</Label>
-                <Input
+                <Input className="!h-11 text-base"
                   id="invoiceDate"
                   type="date"
                   value={formData.invoiceDate}
@@ -566,7 +566,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
 
               <div>
                 <Label htmlFor="dueDate">วันครบกำหนด</Label>
-                <Input
+                <Input className="!h-11 text-base"
                   id="dueDate"
                   type="date"
                   value={formData.dueDate}
@@ -581,7 +581,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="vendorInvoiceNo">เลขที่ใบกำกับภาษีผู้ขาย</Label>
-                <Input
+                <Input className="!h-11 text-base"
                   id="vendorInvoiceNo"
                   placeholder="เลขที่ใบกำกับภาษีของผู้ขาย"
                   value={formData.vendorInvoiceNo}
@@ -591,7 +591,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
               </div>
               <div>
                 <Label htmlFor="reference">เลขที่อ้างอิง</Label>
-                <Input
+                <Input className="!h-11 text-base"
                   id="reference"
                   placeholder="เลขที่อ้างอิง (ถ้ามี)"
                   value={formData.reference}
@@ -604,7 +604,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
             {/* PO Number */}
             <div>
               <Label htmlFor="poNumber">เลขที่ PO</Label>
-              <Input
+              <Input className="!h-11 text-base"
                 id="poNumber"
                 placeholder="เลขที่ Purchase Order (ถ้ามี)"
                 value={formData.poNumber}
@@ -643,7 +643,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
                             </SelectContent>
                           </Select>
                         )}
-                        <Input
+                        <Input className="!h-11 text-base"
                           placeholder="รายการสินค้า/บริการ"
                           value={line.description}
                           onChange={(e) => updateLine(line.id, 'description', e.target.value)}
@@ -657,7 +657,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
 
                       {/* Quantity */}
                       <div>
-                        <Input
+                        <Input className="!h-11 text-base"
                           type="number"
                           min="0"
                           step="1"
@@ -698,7 +698,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
 
                       {/* Unit Price */}
                       <div>
-                        <Input
+                        <Input className="!h-11 text-base"
                           type="number"
                           min="0"
                           step="0.01"
@@ -712,7 +712,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
 
                       {/* Discount */}
                       <div className="relative">
-                        <Input
+                        <Input className="!h-11 text-base"
                           type="number"
                           min="0"
                           max="100"
@@ -795,7 +795,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="discountPercent">ส่วนลด (%)</Label>
-                      <Input
+                      <Input className="!h-11 text-base"
                         id="discountPercent"
                         type="number"
                         min="0"
@@ -807,7 +807,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
                     </div>
                     <div>
                       <Label htmlFor="discountAmount">ส่วนลด (บาท)</Label>
-                      <Input
+                      <Input className="!h-11 text-base"
                         id="discountAmount"
                         type="number"
                         min="0"
@@ -880,7 +880,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
 
               <div>
                 <Label htmlFor="notes">หมายเหตุ</Label>
-                <Input
+                <Input className="!h-11 text-base"
                   id="notes"
                   placeholder="หมายเหตุ (ถ้ามี)"
                   value={formData.notes}
@@ -891,7 +891,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
 
               <div>
                 <Label htmlFor="internalNotes">หมายเหตุภายใน</Label>
-                <Input
+                <Input className="!h-11 text-base"
                   id="internalNotes"
                   placeholder="หมายเหตุภายใน (ถ้ามี)"
                   value={formData.internalNotes}

@@ -143,6 +143,107 @@ export function WhtReport() {
   const totalPnd3 = pnd3Records.reduce((sum, r) => sum + (r.tax || 0), 0)
   const totalPnd53 = pnd53Records.reduce((sum, r) => sum + (r.tax || 0), 0)
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) return
+
+    const monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน']
+    const monthName = monthNames[parseInt(selectedMonth) - 1] || selectedMonth
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>รายงานภาษีหัก ณ ที่จ่าย</title>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: 'Sarabun', 'TH Sarabun New', sans-serif; padding: 20px; }
+          h1 { text-align: center; margin-bottom: 10px; }
+          h2 { font-size: 16px; margin-top: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f5f5f5; }
+          .summary { margin: 20px 0; padding: 15px; background: #f9f9f9; }
+          .text-right { text-align: right; }
+          .total { font-weight: bold; }
+          .section { margin-top: 30px; }
+        </style>
+      </head>
+      <body>
+        <h1>รายงานภาษีหัก ณ ที่จ่าย</h1>
+        <p style="text-align: center;">ประจำเดือน ${monthName} พ.ศ. ${selectedYear}</p>
+        
+        <div class="summary">
+          <h3>สรุปภาษีหัก ณ ที่จ่าย</h3>
+          <p>ภงด.3 (เงินเดือน/ค่าจ้าง): ${totalPnd3.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท (${pnd3Records.length} รายการ)</p>
+          <p>ภงด.53 (ค่าบริการ/ค่าเช่า): ${totalPnd53.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท (${pnd53Records.length} รายการ)</p>
+          <p class="total">รวมภาษีหัก ณ ที่จ่ายทั้งหมด: ${(totalPnd3 + totalPnd53).toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
+        </div>
+
+        <div class="section">
+          <h2>รายการภงด.3 (เงินเดือน/ค่าจ้าง)</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>วันที่</th>
+                <th>เลขที่เอกสาร</th>
+                <th>ชื่อผู้รับเงิน</th>
+                <th>ประเภทเงินได้</th>
+                <th class="text-right">อัตรา%</th>
+                <th class="text-right">ภาษีที่หัก</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pnd3Records.map(r => `
+                <tr>
+                  <td>${new Date(r.date).toLocaleDateString('th-TH')}</td>
+                  <td>${r.docNo}</td>
+                  <td>${r.name}</td>
+                  <td>${r.incomeType || '-'}</td>
+                  <td class="text-right">${r.rate}%</td>
+                  <td class="text-right">${(r.tax || 0).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2>รายการภงด.53 (ค่าบริการ/ค่าเช่า/อื่นๆ)</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>วันที่</th>
+                <th>เลขที่เอกสาร</th>
+                <th>ชื่อผู้รับเงิน</th>
+                <th>ประเภทเงินได้</th>
+                <th class="text-right">อัตรา%</th>
+                <th class="text-right">ภาษีที่หัก</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pnd53Records.map(r => `
+                <tr>
+                  <td>${new Date(r.date).toLocaleDateString('th-TH')}</td>
+                  <td>${r.docNo}</td>
+                  <td>${r.name}</td>
+                  <td>${r.incomeType || '-'}</td>
+                  <td class="text-right">${r.rate}%</td>
+                  <td class="text-right">${(r.tax || 0).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <script>window.onload = () => { window.print(); }</script>
+      </body>
+      </html>
+    `
+    printWindow.document.write(html)
+    printWindow.document.close()
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -174,7 +275,7 @@ export function WhtReport() {
               <SelectItem value="2565">2565</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handlePrint}>
             <Printer className="h-4 w-4 mr-2" />
             พิมพ์
           </Button>

@@ -73,9 +73,9 @@ interface PurchaseFormProps {
 }
 
 const purchaseTypeLabels: Record<string, string> = {
-  TAX_INVOICE: 'ใบกำกับภาษี',
-  RECEIPT: 'ใบเสร็จรับเงิน',
-  DELIVERY_NOTE: 'ใบส่งของ',
+  TAX_INVOICE: 'ใบซื้อ/ใบกำกับภาษีซื้อ',
+  RECEIPT: 'ใบเสร็จรับเงินซื้อ',
+  DELIVERY_NOTE: 'ใบส่งของซื้อ',
 }
 
 const vatRates = [0, 7, 10]
@@ -131,7 +131,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
     try {
       const [vendorsRes, productsRes] = await Promise.all([
         fetch('/api/vendors'),
-        fetch('/api/products').catch(() => ({ ok: false, json: async () => ({ data: [] }) })),
+        fetch('/api/products'),
       ])
 
       if (vendorsRes.ok) {
@@ -139,12 +139,17 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
         setVendors(vendorsData.data || [])
       }
 
+      // Always set products to an array, even on error
       if (productsRes.ok) {
         const productsData = await productsRes.json()
-        setProducts(productsData.data || [])
+        setProducts(Array.isArray(productsData.data) ? productsData.data : [])
+      } else {
+        setProducts([])
       }
     } catch (error) {
       console.error('Error fetching initial data:', error)
+      // Ensure products is always an array
+      setProducts([])
     } finally {
       setFetchingData(false)
     }
@@ -424,7 +429,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                 >
                   <SelectTrigger
                     id="vendorId"
-                    className={errors.vendorId ? 'border-destructive' : ''}
+                    className={`!h-11 text-base ${errors.vendorId ? 'border-destructive' : ''}`}
                   >
                     <SelectValue placeholder="เลือกผู้ขาย" />
                   </SelectTrigger>
@@ -447,6 +452,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                 <Input
                   id="invoiceDate"
                   type="date"
+                  className="!h-11 text-base"
                   value={formData.invoiceDate}
                   onChange={(e) => setFormData(prev => ({ ...prev, invoiceDate: e.target.value }))}
                   max={new Date().toISOString().split('T')[0]}
@@ -458,6 +464,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                 <Input
                   id="dueDate"
                   type="date"
+                  className="!h-11 text-base"
                   value={formData.dueDate}
                   onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
                   min={formData.invoiceDate}
@@ -472,6 +479,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                 <Input
                   id="vendorInvoiceNo"
                   placeholder="เลขที่ใบกำกับภาษีของผู้ขาย"
+                  className="!h-11 text-base"
                   value={formData.vendorInvoiceNo}
                   onChange={(e) => setFormData(prev => ({ ...prev, vendorInvoiceNo: e.target.value }))}
                 />
@@ -481,6 +489,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                 <Input
                   id="reference"
                   placeholder="เลขที่อ้างอิง (ถ้ามี)"
+                  className="!h-11 text-base"
                   value={formData.reference}
                   onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))}
                 />
@@ -493,6 +502,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
               <Input
                 id="poNumber"
                 placeholder="เลขที่ Purchase Order (ถ้ามี)"
+                className="!h-11 text-base"
                 value={formData.poNumber}
                 onChange={(e) => setFormData(prev => ({ ...prev, poNumber: e.target.value }))}
               />
@@ -527,7 +537,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                             value={line.productId || ''}
                             onValueChange={(value) => selectProduct(line.id, value)}
                           >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full !h-11 text-base">
                               <SelectValue placeholder="เลือกสินค้า" />
                             </SelectTrigger>
                             <SelectContent>
@@ -543,7 +553,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           placeholder="รายการสินค้า/บริการ"
                           value={line.description}
                           onChange={(e) => updateLine(line.id, 'description', e.target.value)}
-                          className={errors[`line_${line.id}_description`] ? 'border-destructive' : ''}
+                          className={`!h-11 text-base ${errors[`line_${line.id}_description`] ? 'border-destructive' : ''}`}
                         />
                         {errors[`line_${line.id}_description`] && (
                           <p className="text-xs text-destructive">{errors[`line_${line.id}_description`]}</p>
@@ -558,7 +568,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           step="1"
                           value={line.quantity}
                           onChange={(e) => updateLine(line.id, 'quantity', parseFloat(e.target.value) || 0)}
-                          className={errors[`line_${line.id}_quantity`] ? 'border-destructive' : ''}
+                          className={`!h-11 text-base ${errors[`line_${line.id}_quantity`] ? 'border-destructive' : ''}`}
                         />
                         {errors[`line_${line.id}_quantity`] && (
                           <p className="text-xs text-destructive md:hidden mt-1">
@@ -573,7 +583,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           value={line.unit}
                           onValueChange={(value) => updateLine(line.id, 'unit', value)}
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full !h-11 text-base">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -598,7 +608,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           placeholder="0.00"
                           value={line.unitPrice}
                           onChange={(e) => updateLine(line.id, 'unitPrice', parseFloat(e.target.value) || 0)}
-                          className={errors[`line_${line.id}_unitPrice`] ? 'border-destructive' : ''}
+                          className={`!h-11 text-base ${errors[`line_${line.id}_unitPrice`] ? 'border-destructive' : ''}`}
                         />
                       </div>
 
@@ -612,7 +622,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           placeholder="0"
                           value={line.discount}
                           onChange={(e) => updateLine(line.id, 'discount', parseFloat(e.target.value) || 0)}
-                          className="pr-6"
+                          className="!h-11 text-base pr-6"
                         />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
                       </div>
@@ -623,7 +633,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           value={line.vatRate.toString()}
                           onValueChange={(value) => updateLine(line.id, 'vatRate', parseFloat(value))}
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full !h-11 text-base">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -689,6 +699,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                         type="number"
                         min="0"
                         max="100"
+                        className="!h-11 text-base"
                         value={formData.discountPercent}
                         onChange={(e) => setFormData(prev => ({ ...prev, discountPercent: parseFloat(e.target.value) || 0 }))}
                       />
@@ -700,6 +711,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                         type="number"
                         min="0"
                         step="0.01"
+                        className="!h-11 text-base"
                         value={formData.discountAmount}
                         onChange={(e) => setFormData(prev => ({ ...prev, discountAmount: parseFloat(e.target.value) || 0 }))}
                       />
@@ -752,7 +764,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                   value={formData.withholdingRate.toString()}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, withholdingRate: parseFloat(value) }))}
                 >
-                  <SelectTrigger id="withholdingRate">
+                  <SelectTrigger id="withholdingRate" className="!h-11 text-base">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -769,6 +781,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                 <Input
                   id="notes"
                   placeholder="หมายเหตุ (ถ้ามี)"
+                  className="!h-11 text-base"
                   value={formData.notes}
                   onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                 />
@@ -779,6 +792,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                 <Input
                   id="internalNotes"
                   placeholder="หมายเหตุภายใน (ถ้ามี)"
+                  className="!h-11 text-base"
                   value={formData.internalNotes}
                   onChange={(e) => setFormData(prev => ({ ...prev, internalNotes: e.target.value }))}
                 />

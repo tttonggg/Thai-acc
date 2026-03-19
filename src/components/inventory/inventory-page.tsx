@@ -748,8 +748,16 @@ function StockTransfersTab() {
 
 // ─── Main Component ────────────────────────────────────────────────────────
 
-export function InventoryPage() {
-  const [tab, setTab] = useState<'balance' | 'movements' | 'warehouses' | 'transfers'>('balance')
+export function InventoryPage({ initialTab }: { initialTab?: 'balance' | 'movements' | 'warehouses' | 'transfers' } = {}) {
+  const [tab, setTab] = useState<'balance' | 'movements' | 'warehouses' | 'transfers'>(initialTab || 'balance')
+
+  // Update tab when initialTab prop changes (e.g., when navigating between /inventory and /warehouses)
+  useEffect(() => {
+    if (initialTab) {
+      setTab(initialTab)
+    }
+  }, [initialTab])
+
   const tabs = [
     { id: 'balance' as const, label: 'ยอดคงเหลือ', icon: Package },
     { id: 'movements' as const, label: 'การเคลื่อนไหว', icon: ArrowLeftRight },

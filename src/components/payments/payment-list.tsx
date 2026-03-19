@@ -153,6 +153,123 @@ export function PaymentList() {
     setIsViewDialogOpen(true)
   }
 
+  const handlePrint = async (payment: Payment) => {
+    try {
+      // Fetch full payment details
+      const res = await fetch(`/api/payments/${payment.id}`)
+      if (!res.ok) throw new Error('Fetch failed')
+      const result = await res.json()
+      const fullPayment = result.data || result
+
+      const printWindow = window.open('', '_blank')
+      if (!printWindow) {
+        toast({
+          title: 'ไม่สามารถเปิดหน้าต่างได้',
+          description: 'กรุณาอนุญาตให้เปิดหน้าต่างใหม่',
+          variant: 'destructive'
+        })
+        return
+      }
+
+      const paymentMethodLabels: Record<string, string> = {
+        CASH: 'เงินสด',
+        TRANSFER: 'โอนเงิน',
+        CHEQUE: 'เช็ค',
+        CREDIT: 'บัตรเครดิต',
+        OTHER: 'อื่นๆ',
+      }
+
+      const statusLabels: Record<string, string> = {
+        DRAFT: 'ร่าง',
+        POSTED: 'ลงบัญชีแล้ว',
+        CANCELLED: 'ยกเลิก',
+      }
+
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>ใบจ่ายเงิน - ${fullPayment.paymentNo}</title>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: 'Sarabun', 'TH Sarabun New', sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .header h1 { margin: 0; font-size: 24px; }
+            .section { margin: 20px 0; }
+            .section h3 { border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+            table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f5f5f5; }
+            .text-right { text-align: right; }
+            .total { font-weight: bold; font-size: 18px; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>ใบจ่ายเงิน</h1>
+            <p>เลขที่: ${fullPayment.paymentNo}</p>
+            <p>วันที่: ${new Date(fullPayment.paymentDate).toLocaleDateString('th-TH')}</p>
+            <p>สถานะ: ${statusLabels[fullPayment.status] || fullPayment.status}</p>
+          </div>
+          
+          <div class="section">
+            <h3>ข้อมูลผู้ขาย</h3>
+            <p><strong>ชื่อ:</strong> ${fullPayment.vendor?.name || payment.vendorName || '-'}</p>
+            <p><strong>เลขประจำตัวผู้เสียภาษี:</strong> ${fullPayment.vendor?.taxId || '-'}</p>
+          </div>
+
+          <div class="section">
+            <h3>รายละเอียดการจ่าย</h3>
+            <p><strong>วิธีการจ่าย:</strong> ${paymentMethodLabels[fullPayment.paymentMethod] || fullPayment.paymentMethod}</p>
+            ${fullPayment.bankAccount ? `<p><strong>ธนาคาร:</strong> ${fullPayment.bankAccount.bankName} (${fullPayment.bankAccount.accountNumber})</p>` : ''}
+            ${fullPayment.chequeNo ? `<p><strong>เลขที่เช็ค:</strong> ${fullPayment.chequeNo}</p>` : ''}
+          </div>
+
+          ${fullPayment.allocations && fullPayment.allocations.length > 0 ? `
+          <div class="section">
+            <h3>การจัดจ่ายใบซื้อ</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>เลขที่ใบซื้อ</th>
+                  <th class="text-right">จำนวนเงิน</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${fullPayment.allocations.map((a: any) => `
+                  <tr>
+                    <td>${a.invoice?.invoiceNo || '-'}</td>
+                    <td class="text-right">${(a.amount || 0).toLocaleString('th-TH')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          ` : ''}
+
+          <div class="section">
+            <p class="total">ยอดจ่ายรวม: ${(fullPayment.amount || 0).toLocaleString('th-TH')} บาท</p>
+            ${(fullPayment.whtAmount || 0) > 0 ? `<p>ภาษีหัก ณ ที่จ่าย: ${(fullPayment.whtAmount || 0).toLocaleString('th-TH')} บาท</p>` : ''}
+            ${(fullPayment.unallocated || 0) > 0 ? `<p>คงเหลือ (เครดิตเจ้าหนี้): ${(fullPayment.unallocated || 0).toLocaleString('th-TH')} บาท</p>` : ''}
+          </div>
+
+          <script>window.onload = () => { setTimeout(() => window.print(), 500); }</script>
+        </body>
+        </html>
+      `
+      
+      printWindow.document.write(html)
+      printWindow.document.close()
+    } catch (error) {
+      toast({
+        title: 'พิมพ์ไม่สำเร็จ',
+        description: 'กรุณาลองอีกครั้ง',
+        variant: 'destructive'
+      })
+    }
+  }
+
   const handlePost = async (paymentId: string) => {
     try {
       const res = await fetch(`/api/payments/${paymentId}`, {
@@ -397,6 +514,15 @@ export function PaymentList() {
                         onClick={() => handleView(payment.id)}
                       >
                         <Eye className="h-4 w-4 text-gray-600" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handlePrint(payment)}
+                        title="พิมพ์"
+                      >
+                        <Printer className="h-4 w-4 text-blue-600" />
                       </Button>
                       {payment.status === 'DRAFT' && (
                         <>

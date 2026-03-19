@@ -22,3 +22,5 @@ export { PettyCashPage } from './petty-cash.page';
 export { InventoryPage } from './inventory.page';
 export { CreditNotesPage } from './credit-notes.page';
 export { DebitNotesPage } from './debit-notes.page';
+export { PurchaseRequestsPage } from './purchase-requests.page';
+export { PurchaseOrdersPage } from './purchase-orders.page';

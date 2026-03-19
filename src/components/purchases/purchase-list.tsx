@@ -97,14 +97,43 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('/api/purchases')
+        // Add cache-busting timestamp to prevent stale responses
+        const cacheBuster = new Date().getTime()
+        const res = await fetch(`/api/purchases?_=${cacheBuster}`)
         if (!res.ok) throw new Error('Fetch failed')
         const result = await res.json()
-        // API returns { success: true, data: [...], pagination: {...} }
-        const purchasesData = result.data || result.purchases || []
-        if (!Array.isArray(purchasesData)) {
-          throw new Error('Invalid purchases data format')
+
+        // Handle empty response
+        if (!result || typeof result !== 'object') {
+          throw new Error('Invalid response from server')
         }
+
+        // Check for API error response
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to load purchases')
+        }
+
+        // Check for missing data property
+        if (!result.data) {
+          console.error('Response missing data property:', result)
+          throw new Error('No data received from server')
+        }
+
+        // API returns { success: true, data: [...], pagination: {...} }
+        const purchasesData = result.data || []
+        if (!Array.isArray(purchasesData)) {
+          console.error('Unexpected data format:', result)
+          console.error('Response type:', typeof result)
+          console.error('Has success?', 'success' in result)
+          console.error('Has data?', 'data' in result)
+          console.error('Data type:', typeof result.data)
+          console.error('Data value:', result.data)
+          console.error('Is data null?', result.data === null)
+          console.error('Is data undefined?', result.data === undefined)
+          setPurchases([]) // Set empty array instead of throwing error
+          return
+        }
+        console.log('Successfully loaded', purchasesData.length, 'purchases')
         setPurchases(purchasesData)
       } catch (err) {
         const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล'

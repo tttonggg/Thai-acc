@@ -1,0 +1,195 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║           Thai Accounting ERP - Production Ready Package                     ║
+║           โปรแกรมบัญชีไทย - แพ็คเกจพร้อมใช้งาน                               ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📦 PACKAGE INFORMATION
+═══════════════════════════════════════════════════════════════════════════════
+
+File Name:     Thai-ERP-Production-Ready.zip
+Size:          964 KB (compressed)
+Files:         534 files
+Created:       2026-03-18
+Version:       1.0.0
+
+📁 CONTENTS
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Source Code (450+ files)
+   • Next.js App Router (API routes, pages)
+   • React Components (PR/PO/Purchases)
+   • Services & Utilities
+   • TypeScript types
+
+✅ Purchase Order Module (NEW!)
+   • purchase-order-list.tsx       (791 lines)
+   • purchase-order-form.tsx       (749 lines)
+   • purchase-order-view-dialog.tsx (640 lines)
+   • purchase-order-edit-dialog.tsx (712 lines)
+   • Total: 2,892 lines
+
+✅ E2E Tests (NEW!)
+   • purchase-workflow.spec.ts     (788 lines, 17 tests)
+   • purchase-helpers.ts           (574 lines)
+   • purchase-requests.page.ts     (359 lines)
+   • purchase-orders.page.ts       (396 lines)
+   • Total: 2,117 lines
+
+✅ Database
+   • SQLite database (dev.db)      ~2.1 MB
+   • PostgreSQL schema
+   • SQLite schema
+   • Auto-select schema loader
+   • Seed data (181 accounts)
+
+✅ Documentation
+   • README.md                     (Quick start)
+   • SETUP.md                      (Detailed guide)
+   • MANIFEST.md                   (File listing)
+   • QUICKSTART.sh                 (Auto setup script)
+
+✅ Configuration
+   • package.json
+   • tsconfig.json
+   • next.config.ts
+   • playwright.config.ts
+   • vitest.config.ts
+   • .env.example
+   • .env.production
+
+🚀 QUICK START
+═══════════════════════════════════════════════════════════════════════════════
+
+Method 1: Automatic (Recommended)
+─────────────────────────────────
+1. unzip Thai-ERP-Production-Ready.zip
+2. cd Thai-ERP-Production-Ready
+3. ./QUICKSTART.sh
+4. npm run dev
+5. Open http://localhost:3000
+
+Method 2: Manual
+────────────────
+1. unzip Thai-ERP-Production-Ready.zip
+2. cd Thai-ERP-Production-Ready
+3. cp config/* ./
+4. npm install
+5. npm run db:generate
+6. npm run db:push
+7. npx prisma db seed
+8. npm run dev
+9. Open http://localhost:3000
+
+👤 TEST ACCOUNTS
+═══════════════════════════════════════════════════════════════════════════════
+
+Role        | Email                          | Password
+────────────┼────────────────────────────────┼──────────
+ADMIN       | admin@thaiaccounting.com       | admin123
+ACCOUNTANT  | accountant@thaiaccounting.com  | acc123
+USER        | user@thaiaccounting.com        | user123
+VIEWER      | viewer@thaiaccounting.com      | viewer123
+
+🧪 TESTING
+═══════════════════════════════════════════════════════════════════════════════
+
+Unit Tests:
+  npm run test:unit
+
+E2E Tests:
+  npx playwright install
+  npx playwright test e2e/purchase-workflow.spec.ts
+
+All Tests:
+  npm run test:all
+
+🏗️ BUILD PRODUCTION
+═══════════════════════════════════════════════════════════════════════════════
+
+npm run build
+
+Output: .next/standalone/
+Run:    node .next/standalone/server.js
+
+🔧 TECHNOLOGY STACK
+═══════════════════════════════════════════════════════════════════════════════
+
+• Next.js 16.1.1
+• React 19.0.0
+• TypeScript 5.7.3
+• Prisma 6.11.1
+• Tailwind CSS 4.0.8
+• NextAuth.js 4.24.11
+• Playwright 1.50.1
+• Vitest 3.0.5
+
+📋 NEW FEATURES IN THIS PACKAGE
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Purchase Order Module
+   • Complete CRUD operations
+   • Status workflow (Draft → Pending → Confirmed → Shipped → Received)
+   • Line item management
+   • Vendor integration
+   • Budget checking
+
+2. E2E Test Suite
+   • 17 test cases covering PR/PO workflow
+   • Page Object Models
+   • API helpers
+   • Screenshot capture
+
+3. Dual Database Support
+   • Automatic schema selection
+   • PostgreSQL for production
+   • SQLite for development
+   • Seamless switching
+
+4. Sidebar Integration
+   • New menu items: PR, PO, Purchases
+   • Proper routing
+   • Icon updates
+
+⚠️ REQUIREMENTS
+═══════════════════════════════════════════════════════════════════════════════
+
+• Node.js 18.x or 20.x
+• npm or bun
+• 4GB RAM minimum
+• 2GB disk space
+
+📚 DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════════
+
+• README.md      - Overview and quick reference
+• SETUP.md       - Step-by-step installation guide
+• MANIFEST.md    - Complete file listing
+• QUICKSTART.sh  - Automated setup script
+
+🆘 TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+Port 3000 in use:
+  lsof -ti:3000 | xargs kill -9
+
+Database issues:
+  npm run db:generate
+  npm run db:push
+
+Missing dependencies:
+  rm -rf node_modules
+  npm install
+
+Build errors:
+  npm run db:generate
+  npm run build
+
+═══════════════════════════════════════════════════════════════════════════════
+
+For support, refer to the documentation files included in this package.
+
+Happy accounting! 🧮
+
+═══════════════════════════════════════════════════════════════════════════════

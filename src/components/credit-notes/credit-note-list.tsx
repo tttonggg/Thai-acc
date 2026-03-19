@@ -111,7 +111,7 @@ export function CreditNoteList() {
   const filteredCreditNotes = (creditNotes || []).filter(cn => {
     if (!cn || typeof cn !== 'object') return false
 
-    const matchesSearch = cn.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = cn.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           cn.creditNoteNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           cn.invoice?.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === 'all' || cn.status === filterStatus
@@ -182,15 +182,22 @@ export function CreditNoteList() {
             <h1 className="text-2xl font-bold text-gray-800">ใบลดหนี้ (Credit Notes)</h1>
             <p className="text-gray-500 mt-1">จัดการใบลดหนี้สำหรับลูกค้า</p>
           </div>
-          <CreditNoteForm
-            open={isAddDialogOpen}
-            onClose={() => setIsAddDialogOpen(false)}
-            onSuccess={handleCreditNoteSuccess}
-          />
+          <Button
+            className="bg-red-600 hover:bg-red-700"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            สร้างใบลดหนี้
+          </Button>
         </div>
         <Alert>
           <AlertDescription>ไม่พบข้อมูลใบลดหนี้</AlertDescription>
         </Alert>
+        <CreditNoteForm
+          open={isAddDialogOpen}
+          onClose={() => setIsAddDialogOpen(false)}
+          onSuccess={handleCreditNoteSuccess}
+        />
       </div>
     )
   }
@@ -301,7 +308,7 @@ export function CreditNoteList() {
                 <TableRow key={cn.id}>
                   <TableCell className="font-mono">{cn.creditNoteNo}</TableCell>
                   <TableCell>{formatDate(cn.creditNoteDate)}</TableCell>
-                  <TableCell>{cn.customer?.name}</TableCell>
+                  <TableCell>{cn.customerName || '-'}</TableCell>
                   <TableCell className="font-mono">{cn.invoice?.invoiceNo || '-'}</TableCell>
                   <TableCell>{reasonLabels[cn.reason] || cn.reason}</TableCell>
                   <TableCell className="text-right">฿{(cn.subtotal ?? 0).toLocaleString()}</TableCell>

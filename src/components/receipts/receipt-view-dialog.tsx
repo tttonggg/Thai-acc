@@ -104,17 +104,145 @@ export function ReceiptViewDialog({
     }
   }
 
+  const handlePrint = () => {
+    if (!receipt) return
+    
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      toast({
+        title: 'ไม่สามารถเปิดหน้าต่างได้',
+        description: 'กรุณาอนุญาตให้เปิดหน้าต่างใหม่',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>ใบเสร็จรับเงิน - ${receipt.receiptNo}</title>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: 'Sarabun', 'TH Sarabun New', sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+          .header h1 { margin: 0; font-size: 24px; }
+          .section { margin: 20px 0; }
+          .section h3 { border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+          table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f5f5f5; }
+          .text-right { text-align: right; }
+          .total { font-weight: bold; font-size: 16px; }
+          @media print { body { padding: 0; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>ใบเสร็จรับเงิน</h1>
+          <p>เลขที่: ${receipt.receiptNo}</p>
+          <p>วันที่: ${new Date(receipt.receiptDate).toLocaleDateString('th-TH')}</p>
+          <p>สถานะ: ${statusLabels[receipt.status]}</p>
+        </div>
+        
+        <div class="section">
+          <h3>ข้อมูลลูกค้า</h3>
+          <p><strong>ชื่อ:</strong> ${receipt.customer?.name || '-'}</p>
+          <p><strong>รหัส:</strong> ${receipt.customer?.code || '-'}</p>
+          ${receipt.customer?.taxId ? `<p><strong>เลขประจำตัวผู้เสียภาษี:</strong> ${receipt.customer.taxId}</p>` : ''}
+        </div>
+
+        <div class="section">
+          <h3>รายละเอียดการชำระ</h3>
+          <p><strong>วิธีการชำระ:</strong> ${paymentMethodLabels[receipt.paymentMethod]}</p>
+          ${receipt.bankAccount ? `<p><strong>ธนาคาร:</strong> ${receipt.bankAccount.bankName} (${receipt.bankAccount.accountNumber})</p>` : ''}
+          ${receipt.chequeNo ? `<p><strong>เลขที่เช็ค:</strong> ${receipt.chequeNo}</p>` : ''}
+        </div>
+
+        ${receipt.allocations.length > 0 ? `
+        <div class="section">
+          <h3>รายการจัดจ่าย</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>เลขที่ใบกำกับภาษี</th>
+                <th class="text-right">จำนวนเงิน</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${receipt.allocations.map(a => `
+                <tr>
+                  <td>${a.invoice.invoiceNo}</td>
+                  <td class="text-right">${a.amount.toLocaleString('th-TH')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        ` : ''}
+
+        <div class="section">
+          <p class="total">ยอดรับเงินรวม: ${receipt.amount.toLocaleString('th-TH')} บาท</p>
+          ${receipt.totalWht > 0 ? `<p>ภาษีหัก ณ ที่จ่าย: ${receipt.totalWht.toLocaleString('th-TH')} บาท</p>` : ''}
+        </div>
+
+        <script>window.onload = () => { setTimeout(() => window.print(), 500); }</script>
+      </body>
+      </html>
+    `
+    
+    printWindow.document.write(html)
+    printWindow.document.close()
+  }
+
   const handleDownload = async () => {
     setDownloading(true)
     try {
-      const response = await fetch(`/api/receipts/${receiptId}/export/pdf`)
-      if (!response.ok) throw new Error('Download failed')
-
-      const blob = await response.blob()
+      // Client-side download as HTML
+      if (!receipt) return
+      
+      const paymentMethodLabels: Record<string, string> = {
+        CASH: 'เงินสด',
+        CHEQUE: 'เช็ค',
+        TRANSFER: 'โอนเงิน',
+        CREDIT: 'บัตรเครดิต',
+        OTHER: 'อื่นๆ',
+      }
+      
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>ใบเสร็จรับเงิน - ${receipt.receiptNo}</title>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: 'Sarabun', 'TH Sarabun New', sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; }
+            .header h1 { margin: 0; }
+            .info { margin: 20px 0; }
+            .total { font-weight: bold; font-size: 18px; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>ใบเสร็จรับเงิน</h1>
+            <p>เลขที่: ${receipt.receiptNo}</p>
+            <p>วันที่: ${new Date(receipt.receiptDate).toLocaleDateString('th-TH')}</p>
+          </div>
+          <div class="info">
+            <p><strong>ลูกค้า:</strong> ${receipt.customer?.name || '-'}</p>
+            <p><strong>วิธีการชำระ:</strong> ${paymentMethodLabels[receipt.paymentMethod] || receipt.paymentMethod}</p>
+            <p class="total">จำนวนเงิน: ${receipt.amount.toLocaleString('th-TH')} บาท</p>
+          </div>
+        </body>
+        </html>
+      `
+      
+      const blob = new Blob([html], { type: 'text/html' })
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${receipt?.receiptNo}.html`
+      a.download = `${receipt.receiptNo}.html`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
@@ -122,7 +250,7 @@ export function ReceiptViewDialog({
 
       toast({
         title: 'ดาวน์โหลดสำเร็จ',
-        description: `ดาวน์โหลด ${receipt?.receiptNo} เรียบร้อยแล้ว`
+        description: `ดาวน์โหลด ${receipt.receiptNo} เรียบร้อยแล้ว`
       })
     } catch (error) {
       toast({
@@ -280,6 +408,14 @@ export function ReceiptViewDialog({
                   </Button>
                 </>
               )}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handlePrint}
+              >
+                <Printer className="h-4 w-4 mr-2" />
+                พิมพ์
+              </Button>
               <Button
                 size="sm"
                 variant="outline"

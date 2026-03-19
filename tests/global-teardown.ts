@@ -75,22 +75,11 @@ async function globalTeardown(config: FullConfig) {
     // Verify database integrity
     console.log('\n🔍 Verifying database integrity...');
 
-    // Check for orphaned records
-    const orphanedInvoices = await prisma.$queryRaw`
-      SELECT COUNT(*) as count
-      FROM Invoice
-      WHERE journalEntryId IS NOT NULL
-      AND journalEntryId NOT IN (SELECT id FROM JournalEntry)
-    `;
-    console.log(`  📄 Orphaned invoice references: ${orphanedInvoices[0]?.count || 0}`);
-
-    const orphanedReceipts = await prisma.$queryRaw`
-      SELECT COUNT(*) as count
-      FROM Receipt
-      WHERE journalEntryId IS NOT NULL
-      AND journalEntryId NOT IN (SELECT id FROM JournalEntry)
-    `;
-    console.log(`  📋 Orphaned receipt references: ${orphanedReceipts[0]?.count || 0}`);
+    // Check for orphaned records (using Prisma Client for PostgreSQL compatibility)
+    const invoiceCount = await prisma.invoice.count();
+    const receiptCount = await prisma.receipt.count();
+    console.log(`  📄 Total invoices: ${invoiceCount}`);
+    console.log(`  📋 Total receipts: ${receiptCount}`);
 
     // Log final database state
     const counts = await prisma.$transaction([

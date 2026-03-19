@@ -1,0 +1,13 @@
+var R=require("../../../chunks/[turbopack]_runtime.js")("server/app/api/purchases/route.js")
+R.c("server/chunks/src_lib_validations_ts_9a13e6d3._.js")
+R.c("server/chunks/[root-of-the-server]__5eba1df5._.js")
+R.c("server/chunks/[root-of-the-server]__b1993c7f._.js")
+R.c("server/chunks/[root-of-the-server]__9947ad4f._.js")
+R.c("server/chunks/node_modules_crypto-js_7ad87ba5._.js")
+R.c("server/chunks/[root-of-the-server]__09c3bdaf._.js")
+R.c("server/chunks/[root-of-the-server]__4fe60fa6._.js")
+R.c("server/chunks/node_modules_zod_v4_classic_external_fa90cebf.js")
+R.c("server/chunks/node_modules_next_dist_79f1aee4._.js")
+R.c("server/chunks/_next-internal_server_app_api_purchases_route_actions_e0a6c739.js")
+R.m(964202)
+module.exports=R.m(964202).exports

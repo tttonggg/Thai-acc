@@ -107,7 +107,7 @@ export function DebitNoteList() {
   const filteredDebitNotes = (debitNotes || []).filter(dn => {
     if (!dn || typeof dn !== 'object') return false
 
-    const matchesSearch = dn.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = dn.vendorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           dn.debitNoteNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           dn.purchaseInvoice?.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === 'all' || dn.status === filterStatus
@@ -178,15 +178,22 @@ export function DebitNoteList() {
             <h1 className="text-2xl font-bold text-gray-800">ใบเพิ่มหนี้ (Debit Notes)</h1>
             <p className="text-gray-500 mt-1">จัดการใบเพิ่มหนี้สำหรับผู้ขาย</p>
           </div>
-          <DebitNoteForm
-            open={isAddDialogOpen}
-            onClose={() => setIsAddDialogOpen(false)}
-            onSuccess={handleDebitNoteSuccess}
-          />
+          <Button
+            className="bg-orange-600 hover:bg-orange-700"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            สร้างใบเพิ่มหนี้
+          </Button>
         </div>
         <Alert>
           <AlertDescription>ไม่พบข้อมูลใบเพิ่มหนี้</AlertDescription>
         </Alert>
+        <DebitNoteForm
+          open={isAddDialogOpen}
+          onClose={() => setIsAddDialogOpen(false)}
+          onSuccess={handleDebitNoteSuccess}
+        />
       </div>
     )
   }

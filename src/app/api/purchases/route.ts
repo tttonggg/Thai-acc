@@ -42,7 +42,8 @@ export async function GET(request: Request) {
         { reference: { contains: search } },
       ]
     }
-    
+
+    // Fetch purchase invoices without vendor first to avoid null relationship errors
     const [purchases, total] = await Promise.all([
       db.purchaseInvoice.findMany({
         where,
@@ -50,9 +51,6 @@ export async function GET(request: Request) {
         skip,
         take: limit,
         include: {
-          vendor: {
-            select: { id: true, code: true, name: true, taxId: true }
-          },
           lines: {
             select: {
               id: true,
@@ -68,21 +66,83 @@ export async function GET(request: Request) {
       }),
       db.purchaseInvoice.count({ where })
     ])
-    
-    return apiResponse({
+
+    // Fetch vendors separately for purchases that have them
+    const vendorIds = purchases.map((p: any) => p.vendorId).filter((id: string) => id != null)
+    const vendors = vendorIds.length > 0
+      ? await db.vendor.findMany({
+          where: {
+            id: { in: vendorIds }
+          },
+          select: { id: true, code: true, name: true, taxId: true }
+        })
+      : []
+
+    // Create a map for quick vendor lookup
+    const vendorMap = new Map(vendors.map((v: any) => [v.id, v]))
+
+    // Attach vendors to purchases
+    const purchasesWithVendors = purchases.map((p: any) => ({
+      ...p,
+      vendor: p.vendorId ? vendorMap.get(p.vendorId) || null : null
+    }))
+
+    // Filter out purchases with null vendors (data integrity issue)
+    const validPurchases = purchasesWithVendors.filter((p: any) => p.vendor !== null)
+
+    // Transform data to match frontend interface (flatten vendor.name to vendorName)
+    console.log('Raw purchases data:', JSON.stringify(validPurchases, null, 2).substring(0, 500))
+
+    const transformedPurchases = validPurchases.map((purchase: any) => {
+      try {
+        return {
+          ...purchase,
+          vendorName: purchase.vendor?.name || '',
+          vendorCode: purchase.vendor?.code || '',
+          vendorTaxId: purchase.vendor?.taxId || '',
+          invoiceDate: purchase.invoiceDate ? purchase.invoiceDate.toISOString() : '',
+          dueDate: purchase.dueDate ? purchase.dueDate.toISOString() : null,
+          createdAt: purchase.createdAt ? purchase.createdAt.toISOString() : '',
+          updatedAt: purchase.updatedAt ? purchase.updatedAt.toISOString() : '',
+        }
+      } catch (err) {
+        console.error('Error transforming purchase invoice:', purchase.id, err)
+        return {
+          ...purchase,
+          vendorName: '',
+          vendorCode: '',
+          vendorTaxId: '',
+          invoiceDate: '',
+          dueDate: null,
+          createdAt: '',
+          updatedAt: '',
+        }
+      }
+    })
+
+    console.log('Transformed purchases data:', JSON.stringify(transformedPurchases, null, 2).substring(0, 500))
+
+    // Return response with pagination included in data object
+    return Response.json({
       success: true,
-      data: purchases,
+      data: transformedPurchases,
       pagination: {
         page,
         limit,
-        total,
-        totalPages: Math.ceil(total / limit)
+        total: validPurchases.length, // Use actual count after filtering
+        totalPages: Math.ceil(validPurchases.length / limit)
       }
     })
   } catch (error) {
+    console.error('Purchases API Error:', error)
     if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
       return unauthorizedError()
     }
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    })
     return apiError("เกิดข้อผิดพลาดในการดึงข้อมูลใบซื้อ")
   }
 }
@@ -190,8 +250,8 @@ export async function POST(request: Request) {
       data: { status: "ISSUED" }
     })
 
-    // Record stock movements for inventory items
-    // Get or create default warehouse
+    // ✅ OPTIMIZED: Record stock movements for inventory items in batch
+    // Get or create default warehouse ONCE
     let warehouse = await db.warehouse.findFirst({
       where: { type: "MAIN", isActive: true }
     })
@@ -209,20 +269,29 @@ export async function POST(request: Request) {
       })
     }
 
-    // Process each line item for stock movement
-    for (const line of purchase.lines) {
-      // Only record stock movement for products that track inventory
-      if (line.productId) {
-        try {
-          const product = await db.product.findUnique({
-            where: { id: line.productId },
-            select: { isInventory: true, costPrice: true }
-          })
+    // Filter lines that have products
+    const productLines = purchase.lines.filter(line => line.productId)
 
+    if (productLines.length > 0) {
+      try {
+        // Get all products in ONE query (not in loop)
+        const products = await db.product.findMany({
+          where: {
+            id: { in: productLines.map(line => line.productId!) }
+          },
+          select: { id: true, isInventory: true, costPrice: true }
+        })
+
+        // Create a map for quick lookup
+        const productMap = new Map(products.map(p => [p.id, p]))
+
+        // Batch record all stock movements in parallel
+        await Promise.all(productLines.map(async (line) => {
+          const product = productMap.get(line.productId!)
           // Only record if product is inventory-tracked
           if (product && product.isInventory) {
-            await recordStockMovement({
-              productId: line.productId,
+            return recordStockMovement({
+              productId: line.productId!,
               warehouseId: warehouse.id,
               type: "RECEIVE",
               quantity: line.quantity,
@@ -231,11 +300,16 @@ export async function POST(request: Request) {
               referenceNo: purchase.invoiceNo,
               notes: `รับสินค้าจากใบซื้อ ${purchase.invoiceNo}`,
               sourceChannel: "PURCHASE"
+            }).catch(stockError => {
+              // Stock movement error but don't fail the entire purchase
+              console.error('Stock movement error:', stockError)
             })
           }
-        } catch (stockError) {
-          // Stock movement error but don't fail the entire purchase
-        }
+          return Promise.resolve()
+        }))
+      } catch (stockError) {
+        // Stock movement batch error but don't fail the entire purchase
+        console.error('Stock batch error:', stockError)
       }
     }
 

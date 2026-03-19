@@ -79,13 +79,11 @@ export async function GET(request: NextRequest) {
       ]
     }
 
+    // Fetch credit notes without customer first to avoid null relationship errors
     const [creditNotes, total] = await Promise.all([
       db.creditNote.findMany({
         where,
         include: {
-          customer: {
-            select: { id: true, code: true, name: true, taxId: true }
-          },
           invoice: {
             select: { id: true, invoiceNo: true }
           },
@@ -97,14 +95,63 @@ export async function GET(request: NextRequest) {
       db.creditNote.count({ where }),
     ])
 
-    return apiResponse({
+    // Fetch customers separately for credit notes that have them
+    const customerIds = creditNotes.map((cn: any) => cn.customerId).filter((id: string) => id != null)
+    const customers = customerIds.length > 0
+      ? await db.customer.findMany({
+          where: {
+            id: { in: customerIds }
+          },
+          select: { id: true, code: true, name: true, taxId: true }
+        })
+      : []
+
+    // Create a map for quick customer lookup
+    const customerMap = new Map(customers.map((c: any) => [c.id, c]))
+
+    // Attach customers to credit notes
+    const creditNotesWithCustomers = creditNotes.map((cn: any) => ({
+      ...cn,
+      customer: cn.customerId ? customerMap.get(cn.customerId) || null : null
+    }))
+
+    // Filter out credit notes with null customers (data integrity issue)
+    const validCreditNotes = creditNotesWithCustomers.filter((cn: any) => cn.customer !== null)
+
+    // Transform data to match frontend interface (flatten customer.name to customerName)
+    const transformedCreditNotes = validCreditNotes.map((cn: any) => {
+      try {
+        return {
+          ...cn,
+          customerName: cn.customer?.name || '',
+          customerCode: cn.customer?.code || '',
+          customerTaxId: cn.customer?.taxId || '',
+          creditNoteDate: cn.creditNoteDate ? cn.creditNoteDate.toISOString() : '',
+          createdAt: cn.createdAt ? cn.createdAt.toISOString() : '',
+          updatedAt: cn.updatedAt ? cn.updatedAt.toISOString() : '',
+        }
+      } catch (err) {
+        console.error('Error transforming credit note:', cn.id, err)
+        return {
+          ...cn,
+          customerName: '',
+          customerCode: '',
+          customerTaxId: '',
+          creditNoteDate: '',
+          createdAt: '',
+          updatedAt: '',
+        }
+      }
+    })
+
+    return Response.json({
       success: true,
-      data: creditNotes,
+      data: transformedCreditNotes,
       pagination: {
         page,
         limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        total: validCreditNotes.length, // Use actual count after filtering
+        totalPages: Math.ceil(validCreditNotes.length / limit),
       },
     })
   } catch (error) {
@@ -266,31 +313,34 @@ export async function POST(request: NextRequest) {
       return note
     })
 
-    // Handle stock returns if configured (outside transaction)
-    for (const line of validatedData.lines) {
-      if (line.returnStock && line.productId) {
-        try {
-          // Get or create default warehouse
-          let warehouse = await db.warehouse.findFirst({
-            where: { type: 'MAIN', isActive: true }
-          })
+    // ✅ OPTIMIZED: Handle stock returns in batch (outside transaction)
+    // Filter lines that need stock return
+    const returnLines = validatedData.lines.filter(line => line.returnStock && line.productId)
 
-          if (!warehouse) {
-            warehouse = await db.warehouse.create({
-              data: {
-                code: 'WH-MAIN',
-                name: 'คลังสินค้าหลัก',
-                type: 'MAIN',
-                location: 'หลัก',
-                isActive: true
-              }
-            })
-          }
+    if (returnLines.length > 0) {
+      try {
+        // Get or create default warehouse ONCE (not in loop)
+        let warehouse = await db.warehouse.findFirst({
+          where: { type: 'MAIN', isActive: true }
+        })
 
-          // Record stock return (adds back to inventory)
-          await db.stockMovement.create({
+        if (!warehouse) {
+          warehouse = await db.warehouse.create({
             data: {
-              productId: line.productId,
+              code: 'WH-MAIN',
+              name: 'คลังสินค้าหลัก',
+              type: 'MAIN',
+              location: 'หลัก',
+              isActive: true
+            }
+          })
+        }
+
+        // Batch create all stock movements in parallel
+        await Promise.all(returnLines.map(line =>
+          db.stockMovement.create({
+            data: {
+              productId: line.productId!,
               warehouseId: warehouse.id,
               type: 'RETURN',
               quantity: line.quantity,
@@ -303,10 +353,10 @@ export async function POST(request: NextRequest) {
               sourceChannel: 'CREDIT_NOTE',
             }
           })
-        } catch (stockError) {
-          // Log but don't fail the credit note
-          console.error('Stock return error:', stockError)
-        }
+        ))
+      } catch (stockError) {
+        // Log but don't fail the credit note
+        console.error('Stock return error:', stockError)
       }
     }
 
@@ -326,7 +376,8 @@ export async function POST(request: NextRequest) {
       return unauthorizedError()
     }
     if (error instanceof z.ZodError) {
-      return apiError('ข้อมูลไม่ถูกต้อง', 400)
+      const issues = error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')
+      return apiError(`ข้อมูลไม่ถูกต้อง: ${issues}`, 400)
     }
     if (error instanceof Error && error.message.includes('account not found')) {
       return apiError(`บัญชีไม่ถูกต้อง: ${error.message}`, 400)

@@ -323,7 +323,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger id="vendorId" aria-label="เลือกผู้ขาย">
+                              <SelectTrigger className="!h-11 text-base" id="vendorId" aria-label="เลือกผู้ขาย">
                                 <SelectValue placeholder="เลือกผู้ขาย" />
                               </SelectTrigger>
                             </FormControl>
@@ -364,7 +364,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                           <FormLabel htmlFor="paymentMethod">วิธีจ่าย</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
-                              <SelectTrigger id="paymentMethod" aria-label="เลือกวิธีจ่ายเงิน">
+                              <SelectTrigger className="!h-11 text-base" id="paymentMethod" aria-label="เลือกวิธีจ่ายเงิน">
                                 <SelectValue />
                               </SelectTrigger>
                             </FormControl>
@@ -390,7 +390,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                             <FormLabel htmlFor="bankAccountId">บัญชีธนาคาร</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
-                                <SelectTrigger id="bankAccountId" aria-label="เลือกบัญชีธนาคาร">
+                                <SelectTrigger className="!h-11 text-base" id="bankAccountId" aria-label="เลือกบัญชีธนาคาร">
                                   <SelectValue placeholder="เลือกบัญชี" />
                                 </SelectTrigger>
                               </FormControl>
@@ -448,7 +448,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                       <FormItem>
                         <FormLabel htmlFor="amount">จำนวนเงินรวม</FormLabel>
                         <FormControl>
-                          <Input
+                          <Input className="!h-11 text-base"
                             id="amount"
                             type="number"
                             step="0.01"
@@ -511,7 +511,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                             <div className="grid grid-cols-3 gap-2">
                               <div>
                                 <label htmlFor={`allocate-${invoice.id}`} className="text-xs text-gray-500">จัดจ่าย</label>
-                                <Input
+                                <Input className="!h-11 text-base"
                                   id={`allocate-${invoice.id}`}
                                   type="number"
                                   step="0.01"
@@ -559,7 +559,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                                   }}
                                   aria-label="เลือกอัตราหัก ณ ที่จ่าย"
                                 >
-                                  <SelectTrigger id={`whtRate-${invoice.id}`}>
+                                  <SelectTrigger className="!h-11 text-base" id={`whtRate-${invoice.id}`}>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -574,7 +574,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
 
                               <div>
                                 <label htmlFor={`whtAmount-${invoice.id}`} className="text-xs text-gray-500">WHT จำนวน</label>
-                                <Input
+                                <Input className="!h-11 text-base"
                                   id={`whtAmount-${invoice.id}`}
                                   type="text"
                                   readOnly

@@ -64,12 +64,24 @@ interface VatReport {
 }
 
 export function VatReport() {
-  const [selectedMonth, setSelectedMonth] = useState('6')
-  const [selectedYear, setSelectedYear] = useState('2567')
+  // Initialize with current month and year (Thai Buddhist calendar)
+  const currentDate = new Date()
+  const currentMonth = (currentDate.getMonth() + 1).toString()
+  const currentYear = (currentDate.getFullYear() + 543)
+
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth)
+  const [selectedYear, setSelectedYear] = useState(currentYear.toString())
   const [data, setData] = useState<VatReport | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
+
+  // Generate year options: current year and 2 years back
+  const yearOptions = [
+    currentYear,
+    currentYear - 1,
+    currentYear - 2,
+  ]
 
   useEffect(() => {
     const fetchVatReport = async () => {
@@ -158,6 +170,99 @@ export function VatReport() {
   const totalVatInput = vatInputRecords.reduce((sum, r) => sum + r.vat, 0)
   const netVatVal = totalVatOutput - totalVatInput
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) return
+
+    const monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 
+                       'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
+    const monthName = monthNames[parseInt(selectedMonth) - 1]
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>รายงานภาษีมูลค่าเพิ่ม</title>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: 'Sarabun', 'TH Sarabun New', sans-serif; padding: 20px; }
+          h1 { text-align: center; margin-bottom: 10px; }
+          h2 { font-size: 16px; margin-top: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f5f5f5; }
+          .summary { margin: 20px 0; padding: 15px; background: #f9f9f9; }
+          .text-right { text-align: right; }
+          .total { font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <h1>รายงานภาษีมูลค่าเพิ่ม</h1>
+        <p style="text-align: center;">ประจำเดือน ${monthName} พ.ศ. ${selectedYear}</p>
+        
+        <div class="summary">
+          <h3>สรุปภาษีมูลค่าเพิ่ม</h3>
+          <p>ภาษีขาย (Output VAT): ${totalVatOutput.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
+          <p>ภาษีซื้อ (Input VAT): ${totalVatInput.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
+          <p class="total">ภาษีต้องชำระ/คืน: ${netVatVal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
+        </div>
+
+        <h2>รายการภาษีขาย</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>วันที่</th>
+              <th>เลขที่เอกสาร</th>
+              <th>ชื่อ</th>
+              <th class="text-right">มูลค่า</th>
+              <th class="text-right">ภาษี</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${vatOutputRecords.map(r => `
+              <tr>
+                <td>${new Date(r.date).toLocaleDateString('th-TH')}</td>
+                <td>${r.docNo}</td>
+                <td>${r.name}</td>
+                <td class="text-right">${r.amount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                <td class="text-right">${r.vat.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <h2>รายการภาษีซื้อ</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>วันที่</th>
+              <th>เลขที่เอกสาร</th>
+              <th>ชื่อ</th>
+              <th class="text-right">มูลค่า</th>
+              <th class="text-right">ภาษี</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${vatInputRecords.map(r => `
+              <tr>
+                <td>${new Date(r.date).toLocaleDateString('th-TH')}</td>
+                <td>${r.docNo}</td>
+                <td>${r.name}</td>
+                <td class="text-right">${r.amount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                <td class="text-right">${r.vat.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <script>window.onload = () => { window.print(); }</script>
+      </body>
+      </html>
+    `
+    printWindow.document.write(html)
+    printWindow.document.close()
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -190,12 +295,14 @@ export function VatReport() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2567">2567</SelectItem>
-              <SelectItem value="2566">2566</SelectItem>
-              <SelectItem value="2565">2565</SelectItem>
+              {yearOptions.map(year => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handlePrint}>
             <Printer className="h-4 w-4 mr-2" />
             พิมพ์
           </Button>
