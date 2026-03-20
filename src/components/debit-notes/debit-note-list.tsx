@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/select'
 import { DebitNoteForm } from './debit-note-form'
 import { DebitNoteViewDialog } from './debit-note-view-dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 
 interface DebitNote {
@@ -284,55 +285,57 @@ export function DebitNoteList() {
       {/* Debit Note Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่</TableHead>
-                <TableHead>วันที่</TableHead>
-                <TableHead>ผู้ขาย</TableHead>
-                <TableHead>เลขที่ใบซื้อ</TableHead>
-                <TableHead>เหตุผล</TableHead>
-                <TableHead className="text-right">มูลค่าก่อน VAT</TableHead>
-                <TableHead className="text-right">VAT</TableHead>
-                <TableHead className="text-right">ยอดรวม</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredDebitNotes.map((dn) => (
-                <TableRow key={dn.id}>
-                  <TableCell className="font-mono">{dn.debitNoteNo}</TableCell>
-                  <TableCell>{formatDate(dn.debitNoteDate)}</TableCell>
-                  <TableCell>{dn.vendor?.name}</TableCell>
-                  <TableCell className="font-mono">{dn.purchaseInvoice?.invoiceNo || '-'}</TableCell>
-                  <TableCell>{reasonLabels[dn.reason] || dn.reason}</TableCell>
-                  <TableCell className="text-right">฿{(dn.subtotal ?? 0).toLocaleString()}</TableCell>
-                  <TableCell className="text-right">฿{(dn.vatAmount ?? 0).toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-semibold text-orange-600">
-                    +฿{(dn.totalAmount ?? 0).toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={statusColors[dn.status]}>
-                      {statusLabels[dn.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleView(dn.id)}
-                      >
-                        <Eye className="h-4 w-4 text-gray-600" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>เลขที่</TableHead>
+                  <TableHead>วันที่</TableHead>
+                  <TableHead>ผู้ขาย</TableHead>
+                  <TableHead>เลขที่ใบซื้อ</TableHead>
+                  <TableHead>เหตุผล</TableHead>
+                  <TableHead className="text-right">มูลค่าก่อน VAT</TableHead>
+                  <TableHead className="text-right">VAT</TableHead>
+                  <TableHead className="text-right">ยอดรวม</TableHead>
+                  <TableHead>สถานะ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredDebitNotes.map((dn) => (
+                  <TableRow key={dn.id}>
+                    <TableCell className="font-mono">{dn.debitNoteNo}</TableCell>
+                    <TableCell>{formatDate(dn.debitNoteDate)}</TableCell>
+                    <TableCell>{dn.vendor?.name}</TableCell>
+                    <TableCell className="font-mono">{dn.purchaseInvoice?.invoiceNo || '-'}</TableCell>
+                    <TableCell>{reasonLabels[dn.reason] || dn.reason}</TableCell>
+                    <TableCell className="text-right">฿{(dn.subtotal ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">฿{(dn.vatAmount ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-semibold text-orange-600">
+                      +฿{(dn.totalAmount ?? 0).toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={statusColors[dn.status]}>
+                        {statusLabels[dn.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleView(dn.id)}
+                        >
+                          <Eye className="h-4 w-4 text-gray-600" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

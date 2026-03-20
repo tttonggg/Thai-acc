@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { AssetEditDialog } from './asset-edit-dialog'
 import { DepreciationScheduleViewer } from './depreciation-schedule-viewer'
@@ -222,64 +223,66 @@ function AssetListTab() {
 
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader><TableRow><TableHead>รหัส</TableHead><TableHead>ชื่อสินทรัพย์</TableHead><TableHead>วันที่ซื้อ</TableHead><TableHead className="text-right">ราคาทุน</TableHead><TableHead className="text-right">NBV</TableHead><TableHead className="text-center">อายุ (ปี)</TableHead><TableHead className="text-center">สถานะ</TableHead><TableHead className="text-center">จัดการ</TableHead></TableRow></TableHeader>
-            <TableBody>
-              {assets.length === 0
-                ? <TableRow><TableCell colSpan={8} className="text-center py-8 text-gray-400">ยังไม่มีสินทรัพย์ถาวร</TableCell></TableRow>
-                : assets.map(a => (
-                  <TableRow key={a.id}>
-                    <TableCell className="font-mono text-sm">{a.code}</TableCell>
-                    <TableCell className="font-medium">{a.name}</TableCell>
-                    <TableCell className="text-sm">{fd(a.purchaseDate)}</TableCell>
-                    <TableCell className="text-right">฿{fc(a.purchaseCost)}</TableCell>
-                    <TableCell className="text-right font-semibold text-green-600">฿{fc(a.netBookValue ?? a.purchaseCost)}</TableCell>
-                    <TableCell className="text-center">{a.usefulLifeYears}</TableCell>
-                    <TableCell className="text-center">
-                      <button
-                        onClick={() => handleToggleStatus(a)}
-                        className="hover:opacity-80 transition-opacity"
-                      >
-                        <Badge variant={a.isActive ? 'default' : 'secondary'} className="text-xs cursor-pointer">
-                          {a.isActive ? 'ใช้งาน' : 'ปลดระวาง'}
-                        </Badge>
-                      </button>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0"
-                          onClick={() => handleViewSchedule(a)}
-                          title="ดูตารางค่าเสื่อมราคา"
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader><TableRow><TableHead>รหัส</TableHead><TableHead>ชื่อสินทรัพย์</TableHead><TableHead>วันที่ซื้อ</TableHead><TableHead className="text-right">ราคาทุน</TableHead><TableHead className="text-right">NBV</TableHead><TableHead className="text-center">อายุ (ปี)</TableHead><TableHead className="text-center">สถานะ</TableHead><TableHead className="text-center">จัดการ</TableHead></TableRow></TableHeader>
+              <TableBody>
+                {assets.length === 0
+                  ? <TableRow><TableCell colSpan={8} className="text-center py-8 text-gray-400">ยังไม่มีสินทรัพย์ถาวร</TableCell></TableRow>
+                  : assets.map(a => (
+                    <TableRow key={a.id}>
+                      <TableCell className="font-mono text-sm">{a.code}</TableCell>
+                      <TableCell className="font-medium">{a.name}</TableCell>
+                      <TableCell className="text-sm">{fd(a.purchaseDate)}</TableCell>
+                      <TableCell className="text-right">฿{fc(a.purchaseCost)}</TableCell>
+                      <TableCell className="text-right font-semibold text-green-600">฿{fc(a.netBookValue ?? a.purchaseCost)}</TableCell>
+                      <TableCell className="text-center">{a.usefulLifeYears}</TableCell>
+                      <TableCell className="text-center">
+                        <button
+                          onClick={() => handleToggleStatus(a)}
+                          className="hover:opacity-80 transition-opacity"
                         >
-                          <Eye className="h-4 w-4 text-blue-600" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0"
-                          onClick={() => handleEditAsset(a)}
-                          title="แก้ไข"
-                        >
-                          <Edit className="h-4 w-4 text-amber-600" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0"
-                          onClick={() => handleDeleteAsset(a)}
-                          title="ลบ"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
+                          <Badge variant={a.isActive ? 'default' : 'secondary'} className="text-xs cursor-pointer">
+                            {a.isActive ? 'ใช้งาน' : 'ปลดระวาง'}
+                          </Badge>
+                        </button>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0"
+                            onClick={() => handleViewSchedule(a)}
+                            title="ดูตารางค่าเสื่อมราคา"
+                          >
+                            <Eye className="h-4 w-4 text-blue-600" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0"
+                            onClick={() => handleEditAsset(a)}
+                            title="แก้ไข"
+                          >
+                            <Edit className="h-4 w-4 text-amber-600" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0"
+                            onClick={() => handleDeleteAsset(a)}
+                            title="ลบ"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

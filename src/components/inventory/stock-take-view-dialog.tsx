@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -290,11 +292,19 @@ export function StockTakeViewDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[1200px] max-h-[90vh] overflow-y-auto">
+        <VisuallyHidden>
+          <DialogDescription>
+            แสดงรายละเอียดการตรวจนับสต็อกทั้งหมดรวมทั้งผลต่าง สาเหตุ และสถานะ
+          </DialogDescription>
+        </VisuallyHidden>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
             รายละเอียดการตรวจนับสต็อก
           </DialogTitle>
+          <DialogDescription>
+            ดูรายละเอียดการตรวจนับสต็อกทั้งหมดรวมทั้งผลต่าง สาเหตุ และสถานะ
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">

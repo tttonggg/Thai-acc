@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/select'
 import { CreditNoteForm } from './credit-note-form'
 import { CreditNoteViewDialog } from './credit-note-view-dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 
 interface CreditNote {
@@ -288,55 +289,57 @@ export function CreditNoteList() {
       {/* Credit Note Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่</TableHead>
-                <TableHead>วันที่</TableHead>
-                <TableHead>ลูกค้า</TableHead>
-                <TableHead>เลขที่ใบกำกับภาษี</TableHead>
-                <TableHead>เหตุผล</TableHead>
-                <TableHead className="text-right">มูลค่าก่อน VAT</TableHead>
-                <TableHead className="text-right">VAT</TableHead>
-                <TableHead className="text-right">ยอดรวม</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCreditNotes.map((cn) => (
-                <TableRow key={cn.id}>
-                  <TableCell className="font-mono">{cn.creditNoteNo}</TableCell>
-                  <TableCell>{formatDate(cn.creditNoteDate)}</TableCell>
-                  <TableCell>{cn.customerName || '-'}</TableCell>
-                  <TableCell className="font-mono">{cn.invoice?.invoiceNo || '-'}</TableCell>
-                  <TableCell>{reasonLabels[cn.reason] || cn.reason}</TableCell>
-                  <TableCell className="text-right">฿{(cn.subtotal ?? 0).toLocaleString()}</TableCell>
-                  <TableCell className="text-right">฿{(cn.vatAmount ?? 0).toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-semibold text-red-600">
-                    -฿{(cn.totalAmount ?? 0).toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={statusColors[cn.status]}>
-                      {statusLabels[cn.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleView(cn.id)}
-                      >
-                        <Eye className="h-4 w-4 text-gray-600" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>เลขที่</TableHead>
+                  <TableHead>วันที่</TableHead>
+                  <TableHead>ลูกค้า</TableHead>
+                  <TableHead>เลขที่ใบกำกับภาษี</TableHead>
+                  <TableHead>เหตุผล</TableHead>
+                  <TableHead className="text-right">มูลค่าก่อน VAT</TableHead>
+                  <TableHead className="text-right">VAT</TableHead>
+                  <TableHead className="text-right">ยอดรวม</TableHead>
+                  <TableHead>สถานะ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredCreditNotes.map((cn) => (
+                  <TableRow key={cn.id}>
+                    <TableCell className="font-mono">{cn.creditNoteNo}</TableCell>
+                    <TableCell>{formatDate(cn.creditNoteDate)}</TableCell>
+                    <TableCell>{cn.customerName || '-'}</TableCell>
+                    <TableCell className="font-mono">{cn.invoice?.invoiceNo || '-'}</TableCell>
+                    <TableCell>{reasonLabels[cn.reason] || cn.reason}</TableCell>
+                    <TableCell className="text-right">฿{(cn.subtotal ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">฿{(cn.vatAmount ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-semibold text-red-600">
+                      -฿{(cn.totalAmount ?? 0).toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={statusColors[cn.status]}>
+                        {statusLabels[cn.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleView(cn.id)}
+                        >
+                          <Eye className="h-4 w-4 text-gray-600" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

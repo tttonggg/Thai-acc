@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import {
   Plus,
   Trash2,
@@ -26,6 +27,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
@@ -397,6 +399,11 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <VisuallyHidden>
+          <DialogDescription>
+            สร้างใหม่ invoice dialog สำหรับสร้างใบกำกับภาษีใหม่พร้อมรายการสินค้าและการคำนวณยอดรวม
+          </DialogDescription>
+        </VisuallyHidden>
         <DialogHeader>
           <DialogTitle className="text-xl">
             สร้าง{invoiceTypeLabels[formData.type]}ใหม่

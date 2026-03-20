@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -165,6 +166,11 @@ export function PettyCashVoucherEditDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>แก้ไขใบสำคัญเงินสดย่อย</DialogTitle>
+          <VisuallyHidden asChild>
+            <DialogDescription>
+              ดีไซน์แบบฟอร์มสำหรับแก้ไขใบสำคัญเงินสดย่อย สามารถแก้ไขข้อมูลกองทุน วันที่ จำนวนเงิน ผู้รับเงิน รายละเอียดค่าใช้จ่ายและบัญชี GL ได้
+            </DialogDescription>
+          </VisuallyHidden>
         </DialogHeader>
 
         <div className="space-y-4">

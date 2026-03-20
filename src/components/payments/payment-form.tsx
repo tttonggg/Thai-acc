@@ -131,9 +131,18 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
       try {
         const res = await fetch(`/api/payments/unpaid-invoices?vendorId=${selectedVendor}`)
         if (res.ok) {
-          const data = await res.json()
-          setUnpaidInvoices(data.invoices || [])
-          setApBalance(data.totalAPBalance || 0)
+          const response = await res.json()
+          // API returns { success: true, data: { invoices: [...], totalAPBalance: ..., vendorId: ... } }
+          if (response.success && response.data) {
+            setUnpaidInvoices(response.data.invoices || [])
+            setApBalance(response.data.totalAPBalance || 0)
+          } else {
+            // Fallback for backward compatibility
+            setUnpaidInvoices(response.invoices || [])
+            setApBalance(response.totalAPBalance || 0)
+          }
+        } else {
+          console.error('API returned error:', res.status, res.statusText)
         }
       } catch (error) {
         console.error('Error loading unpaid invoices:', error)

@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
@@ -162,45 +163,47 @@ function StockBalanceTab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>รหัส</TableHead>
-                <TableHead>ชื่อสินค้า</TableHead>
-                <TableHead>คลัง</TableHead>
-                <TableHead className="text-right">จำนวน</TableHead>
-                <TableHead className="text-right">ต้นทุน/หน่วย (WAC)</TableHead>
-                <TableHead className="text-right">มูลค่ารวม</TableHead>
-                <TableHead className="text-right">ดำเนินการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {balances.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center text-gray-400 py-8">ยังไม่มีข้อมูลสินค้าคงเหลือ</TableCell></TableRow>
-              ) : balances.map(b => (
-                <TableRow key={b.id}>
-                  <TableCell className="font-mono text-sm">{b.product.code}</TableCell>
-                  <TableCell>{b.product.name}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{b.warehouse.name}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-semibold">{fc(b.quantity)}</TableCell>
-                  <TableCell className="text-right">฿{fc(b.unitCost)}</TableCell>
-                  <TableCell className="text-right font-semibold text-purple-600">฿{fc(b.totalCost)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleAdjust(b)}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>รหัส</TableHead>
+                  <TableHead>ชื่อสินค้า</TableHead>
+                  <TableHead>คลัง</TableHead>
+                  <TableHead className="text-right">จำนวน</TableHead>
+                  <TableHead className="text-right">ต้นทุน/หน่วย (WAC)</TableHead>
+                  <TableHead className="text-right">มูลค่ารวม</TableHead>
+                  <TableHead className="text-right">ดำเนินการ</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {balances.length === 0 ? (
+                  <TableRow><TableCell colSpan={7} className="text-center text-gray-400 py-8">ยังไม่มีข้อมูลสินค้าคงเหลือ</TableCell></TableRow>
+                ) : balances.map(b => (
+                  <TableRow key={b.id}>
+                    <TableCell className="font-mono text-sm">{b.product.code}</TableCell>
+                    <TableCell>{b.product.name}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{b.warehouse.name}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">{fc(b.quantity)}</TableCell>
+                    <TableCell className="text-right">฿{fc(b.unitCost)}</TableCell>
+                    <TableCell className="text-right font-semibold text-purple-600">฿{fc(b.totalCost)}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleAdjust(b)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 
@@ -353,55 +356,57 @@ function StockMovementsTab() {
 
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>วันที่</TableHead>
-                <TableHead>ประเภท</TableHead>
-                <TableHead>สินค้า</TableHead>
-                <TableHead>คลัง</TableHead>
-                <TableHead className="text-right">จำนวน</TableHead>
-                <TableHead className="text-right">ต้นทุน/หน่วย</TableHead>
-                <TableHead className="text-right">รวม</TableHead>
-                <TableHead>อ้างอิง</TableHead>
-                <TableHead className="text-right">ดำเนินการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {movements.length === 0 ? (
-                <TableRow><TableCell colSpan={9} className="text-center text-gray-400 py-8">ยังไม่มีการเคลื่อนไหว</TableCell></TableRow>
-              ) : movements.map(m => {
-                const mt = MOVEMENT_TYPES[m.type] || { label: m.type, color: 'bg-gray-100 text-gray-700', icon: Package }
-                const isOut = ['ISSUE', 'TRANSFER_OUT'].includes(m.type)
-                return (
-                  <TableRow key={m.id}>
-                    <TableCell className="text-sm">{fd(m.date)}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${mt.color}`}>{mt.label}</span>
-                    </TableCell>
-                    <TableCell className="text-sm">{m.product.code} — {m.product.name}</TableCell>
-                    <TableCell className="text-sm">{m.warehouse.name}</TableCell>
-                    <TableCell className={`text-right font-semibold ${isOut ? 'text-red-600' : 'text-green-600'}`}>
-                      {isOut ? '-' : '+'}{fc(Math.abs(m.quantity))}
-                    </TableCell>
-                    <TableCell className="text-right text-sm">฿{fc(m.unitCost)}</TableCell>
-                    <TableCell className="text-right font-semibold">฿{fc(m.totalCost)}</TableCell>
-                    <TableCell className="text-xs text-gray-400">{m.referenceNo || m.notes || '—'}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleViewMovement(m.id)}
-                        className="text-blue-600 hover:text-blue-700"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>วันที่</TableHead>
+                  <TableHead>ประเภท</TableHead>
+                  <TableHead>สินค้า</TableHead>
+                  <TableHead>คลัง</TableHead>
+                  <TableHead className="text-right">จำนวน</TableHead>
+                  <TableHead className="text-right">ต้นทุน/หน่วย</TableHead>
+                  <TableHead className="text-right">รวม</TableHead>
+                  <TableHead>อ้างอิง</TableHead>
+                  <TableHead className="text-right">ดำเนินการ</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {movements.length === 0 ? (
+                  <TableRow><TableCell colSpan={9} className="text-center text-gray-400 py-8">ยังไม่มีการเคลื่อนไหว</TableCell></TableRow>
+                ) : movements.map(m => {
+                  const mt = MOVEMENT_TYPES[m.type] || { label: m.type, color: 'bg-gray-100 text-gray-700', icon: Package }
+                  const isOut = ['ISSUE', 'TRANSFER_OUT'].includes(m.type)
+                  return (
+                    <TableRow key={m.id}>
+                      <TableCell className="text-sm">{fd(m.date)}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${mt.color}`}>{mt.label}</span>
+                      </TableCell>
+                      <TableCell className="text-sm">{m.product.code} — {m.product.name}</TableCell>
+                      <TableCell className="text-sm">{m.warehouse.name}</TableCell>
+                      <TableCell className={`text-right font-semibold ${isOut ? 'text-red-600' : 'text-green-600'}`}>
+                        {isOut ? '-' : '+'}{fc(Math.abs(m.quantity))}
+                      </TableCell>
+                      <TableCell className="text-right text-sm">฿{fc(m.unitCost)}</TableCell>
+                      <TableCell className="text-right font-semibold">฿{fc(m.totalCost)}</TableCell>
+                      <TableCell className="text-xs text-gray-400">{m.referenceNo || m.notes || '—'}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleViewMovement(m.id)}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 
@@ -682,57 +687,59 @@ function StockTransfersTab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่โอน</TableHead>
-                <TableHead>วันที่</TableHead>
-                <TableHead>สินค้า</TableHead>
-                <TableHead>จากคลัง</TableHead>
-                <TableHead></TableHead>
-                <TableHead>ไปยังคลัง</TableHead>
-                <TableHead className="text-right">จำนวน</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead className="text-right">ดำเนินการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transfers.length === 0 ? (
-                <TableRow><TableCell colSpan={9} className="text-center text-gray-400 py-8">ยังไม่มีการโอนสินค้า</TableCell></TableRow>
-              ) : transfers.map(t => (
-                <TableRow key={t.transferNo}>
-                  <TableCell className="font-mono text-sm font-semibold">{t.transferNo}</TableCell>
-                  <TableCell className="text-sm">{fd(t.date)}</TableCell>
-                  <TableCell className="text-sm">{t.product.code} — {t.product.name}</TableCell>
-                  <TableCell className="text-sm">
-                    <Badge variant="outline">{t.fromWarehouse.name}</Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <ArrowRight className="h-4 w-4 text-gray-400 mx-auto" />
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    <Badge variant="outline">{t.toWarehouse.name}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-semibold text-blue-600">{fc(t.quantity)}</TableCell>
-                  <TableCell>
-                    <Badge className={t.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
-                      {t.status === 'COMPLETED' ? 'สำเร็จ' : 'ระหว่างดำเนินการ'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleCompleteTransfer(t)}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      {t.status === 'COMPLETED' ? <MoreHorizontal className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
-                    </Button>
-                  </TableCell>
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>เลขที่โอน</TableHead>
+                  <TableHead>วันที่</TableHead>
+                  <TableHead>สินค้า</TableHead>
+                  <TableHead>จากคลัง</TableHead>
+                  <TableHead></TableHead>
+                  <TableHead>ไปยังคลัง</TableHead>
+                  <TableHead className="text-right">จำนวน</TableHead>
+                  <TableHead>สถานะ</TableHead>
+                  <TableHead className="text-right">ดำเนินการ</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {transfers.length === 0 ? (
+                  <TableRow><TableCell colSpan={9} className="text-center text-gray-400 py-8">ยังไม่มีการโอนสินค้า</TableCell></TableRow>
+                ) : transfers.map(t => (
+                  <TableRow key={t.transferNo}>
+                    <TableCell className="font-mono text-sm font-semibold">{t.transferNo}</TableCell>
+                    <TableCell className="text-sm">{fd(t.date)}</TableCell>
+                    <TableCell className="text-sm">{t.product.code} — {t.product.name}</TableCell>
+                    <TableCell className="text-sm">
+                      <Badge variant="outline">{t.fromWarehouse.name}</Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <ArrowRight className="h-4 w-4 text-gray-400 mx-auto" />
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      <Badge variant="outline">{t.toWarehouse.name}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-semibold text-blue-600">{fc(t.quantity)}</TableCell>
+                    <TableCell>
+                      <Badge className={t.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+                        {t.status === 'COMPLETED' ? 'สำเร็จ' : 'ระหว่างดำเนินการ'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleCompleteTransfer(t)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        {t.status === 'COMPLETED' ? <MoreHorizontal className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

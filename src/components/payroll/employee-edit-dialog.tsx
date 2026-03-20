@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react'
 import { User, X } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -140,6 +140,11 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
             <User className="h-5 w-5" />
             {isEdit ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่'}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {isEdit
+              ? 'แก้ไขข้อมูลพนักงานทั้งหมดรวมถึงข้อมูลส่วนตัว ที่อยู่ ข้อมูลภาษีและประกันสังคม ข้อมูลธนาคารและสถานะการทำงาน'
+              : 'เพิ่มข้อมูลพนักงานใหม่โดยเติมข้อมูลส่วนตัว ที่อยู่ ข้อมูลภาษีและประกันสังคม และข้อมูลธนาคาร'}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">

@@ -27,6 +27,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Table,
   TableBody,
@@ -494,112 +495,114 @@ export function PurchaseRequestList() {
       {/* PR Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่</TableHead>
-                <TableHead>วันที่</TableHead>
-                <TableHead>แผนก</TableHead>
-                <TableHead>ผู้ขอ</TableHead>
-                <TableHead className="text-right">วงเงิน (บาท)</TableHead>
-                <TableHead>ความสำคัญ</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead className="text-center">รายการ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPRs.length === 0 ? (
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-gray-500">
-                    <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>ไม่พบใบขอซื้อ</p>
-                  </TableCell>
+                  <TableHead>เลขที่</TableHead>
+                  <TableHead>วันที่</TableHead>
+                  <TableHead>แผนก</TableHead>
+                  <TableHead>ผู้ขอ</TableHead>
+                  <TableHead className="text-right">วงเงิน (บาท)</TableHead>
+                  <TableHead>ความสำคัญ</TableHead>
+                  <TableHead>สถานะ</TableHead>
+                  <TableHead className="text-center">รายการ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
-              ) : (
-                filteredPRs.map((pr) => (
-                  <TableRow key={pr.id} className="cursor-pointer hover:bg-gray-50">
-                    <TableCell className="font-mono font-medium">{pr.requestNo}</TableCell>
-                    <TableCell>
-                      {new Date(pr.requestDate).toLocaleDateString('th-TH')}
-                    </TableCell>
-                    <TableCell>
-                      {pr.departmentData ? (
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-3 w-3 text-gray-400" />
-                          <span>{pr.departmentData.name}</span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <User className="h-3 w-3 text-gray-400" />
-                        <span>{pr.requestedByUser.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      ฿{(pr.estimatedAmount / 100).toLocaleString('th-TH', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={priorityColors[pr.priority]} variant="outline">
-                        {priorityLabels[pr.priority]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={statusColors[pr.status]} variant="outline">
-                        {statusLabels[pr.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant="secondary">{pr._count?.lines || 0} รายการ</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleView(pr)}
-                        >
-                          <Eye className="h-4 w-4 text-gray-600" />
-                        </Button>
-                        {pr.status === 'DRAFT' && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleEdit(pr.id)}
-                            >
-                              <Edit className="h-4 w-4 text-blue-600" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleDelete(pr.id)}
-                              disabled={deletingPR === pr.id}
-                            >
-                              {deletingPR === pr.id ? (
-                                <Loader2 className="h-4 w-4 text-red-600 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              )}
-                            </Button>
-                          </>
-                        )}
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {filteredPRs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center py-8 text-gray-500">
+                      <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p>ไม่พบใบขอซื้อ</p>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  filteredPRs.map((pr) => (
+                    <TableRow key={pr.id} className="cursor-pointer hover:bg-gray-50">
+                      <TableCell className="font-mono font-medium">{pr.requestNo}</TableCell>
+                      <TableCell>
+                        {new Date(pr.requestDate).toLocaleDateString('th-TH')}
+                      </TableCell>
+                      <TableCell>
+                        {pr.departmentData ? (
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-3 w-3 text-gray-400" />
+                            <span>{pr.departmentData.name}</span>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <User className="h-3 w-3 text-gray-400" />
+                          <span>{pr.requestedByUser.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        ฿{(pr.estimatedAmount / 100).toLocaleString('th-TH', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={priorityColors[pr.priority]} variant="outline">
+                          {priorityLabels[pr.priority]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={statusColors[pr.status]} variant="outline">
+                          {statusLabels[pr.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="secondary">{pr._count?.lines || 0} รายการ</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleView(pr)}
+                          >
+                            <Eye className="h-4 w-4 text-gray-600" />
+                          </Button>
+                          {pr.status === 'DRAFT' && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handleEdit(pr.id)}
+                              >
+                                <Edit className="h-4 w-4 text-blue-600" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handleDelete(pr.id)}
+                                disabled={deletingPR === pr.id}
+                              >
+                                {deletingPR === pr.id ? (
+                                  <Loader2 className="h-4 w-4 text-red-600 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4 text-red-600" />
+                                )}
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

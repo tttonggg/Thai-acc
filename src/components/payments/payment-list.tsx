@@ -42,6 +42,7 @@ import {
 } from '@/components/ui/dialog'
 import { PaymentForm } from './payment-form'
 import { PaymentViewDialog } from './payment-view-dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 
 interface Payment {
@@ -472,86 +473,88 @@ export function PaymentList() {
       {/* Payment Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่</TableHead>
-                <TableHead>วันที่จ่าย</TableHead>
-                <TableHead>ผู้ขาย</TableHead>
-                <TableHead>วิธีจ่าย</TableHead>
-                <TableHead className="text-right">จำนวนเงิน</TableHead>
-                <TableHead className="text-right">จัดจ่าย</TableHead>
-                <TableHead className="text-right">คงเหลือ</TableHead>
-                <TableHead className="text-right">หัก ณ ที่จ่าย</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPayments.map((payment) => (
-                <TableRow key={payment.id}>
-                  <TableCell className="font-mono">{payment.paymentNo}</TableCell>
-                  <TableCell>{payment.paymentDate}</TableCell>
-                  <TableCell>{payment.vendorName}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{paymentMethodLabels[payment.paymentMethod]}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">฿{payment.amount.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">฿{payment.allocated.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">฿{payment.unallocated.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">฿{payment.whtAmount.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge className={statusColors[payment.status]}>
-                      {statusLabels[payment.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleView(payment.id)}
-                      >
-                        <Eye className="h-4 w-4 text-gray-600" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handlePrint(payment)}
-                        title="พิมพ์"
-                      >
-                        <Printer className="h-4 w-4 text-blue-600" />
-                      </Button>
-                      {payment.status === 'DRAFT' && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => handlePost(payment.id)}
-                            title="ลงบัญชี"
-                          >
-                            <Printer className="h-4 w-4 text-green-600" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => handleDelete(payment.id)}
-                            title="ลบ"
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>เลขที่</TableHead>
+                  <TableHead>วันที่จ่าย</TableHead>
+                  <TableHead>ผู้ขาย</TableHead>
+                  <TableHead>วิธีจ่าย</TableHead>
+                  <TableHead className="text-right">จำนวนเงิน</TableHead>
+                  <TableHead className="text-right">จัดจ่าย</TableHead>
+                  <TableHead className="text-right">คงเหลือ</TableHead>
+                  <TableHead className="text-right">หัก ณ ที่จ่าย</TableHead>
+                  <TableHead>สถานะ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredPayments.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell className="font-mono">{payment.paymentNo}</TableCell>
+                    <TableCell>{payment.paymentDate}</TableCell>
+                    <TableCell>{payment.vendorName}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{paymentMethodLabels[payment.paymentMethod]}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">฿{payment.amount.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">฿{payment.allocated.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">฿{payment.unallocated.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">฿{payment.whtAmount.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge className={statusColors[payment.status]}>
+                        {statusLabels[payment.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleView(payment.id)}
+                        >
+                          <Eye className="h-4 w-4 text-gray-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handlePrint(payment)}
+                          title="พิมพ์"
+                        >
+                          <Printer className="h-4 w-4 text-blue-600" />
+                        </Button>
+                        {payment.status === 'DRAFT' && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handlePost(payment.id)}
+                              title="ลงบัญชี"
+                            >
+                              <Printer className="h-4 w-4 text-green-600" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleDelete(payment.id)}
+                              title="ลบ"
+                            >
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

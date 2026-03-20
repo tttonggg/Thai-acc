@@ -18,10 +18,12 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { useToast } from '@/hooks/use-toast'
 
 interface Customer {
@@ -199,6 +201,11 @@ export function CustomerEditDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <VisuallyHidden>
+          <DialogDescription>
+            Edit customer information dialog
+          </DialogDescription>
+        </VisuallyHidden>
         <DialogHeader>
           <DialogTitle>แก้ไขข้อมูลลูกค้า</DialogTitle>
         </DialogHeader>

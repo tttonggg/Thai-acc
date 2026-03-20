@@ -4,6 +4,7 @@ import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -113,6 +114,9 @@ export function ProductEditDialog({
           <DialogTitle>
             {product?.id ? 'แก้ไขสินค้า/บริการ' : 'เพิ่มสินค้า/บริการใหม่'}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Edit product information dialog
+          </DialogDescription>
         </DialogHeader>
 
         <ProductForm

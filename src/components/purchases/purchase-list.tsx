@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Table,
   TableBody,
@@ -365,75 +366,77 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
       {/* Purchase Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่</TableHead>
-                <TableHead>เลขที่ใบกำกับภาษี</TableHead>
-                <TableHead>วันที่</TableHead>
-                <TableHead>ผู้ขาย</TableHead>
-                <TableHead className="text-right">มูลค่าก่อน VAT</TableHead>
-                <TableHead className="text-right">VAT</TableHead>
-                <TableHead className="text-right">ยอดรวม</TableHead>
-                <TableHead className="text-right">จ่ายแล้ว</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPurchases.map((purchase) => (
-                <TableRow key={purchase.id}>
-                  <TableCell className="font-mono">{purchase.invoiceNo}</TableCell>
-                  <TableCell className="font-mono text-sm">{purchase.vendorInvoiceNo || '-'}</TableCell>
-                  <TableCell>
-                    {new Date(purchase.invoiceDate).toLocaleDateString('th-TH')}
-                  </TableCell>
-                  <TableCell>{purchase.vendorName}</TableCell>
-                  <TableCell className="text-right">฿{(purchase.subtotal ?? 0).toLocaleString()}</TableCell>
-                  <TableCell className="text-right">฿{(purchase.vatAmount ?? 0).toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-semibold">฿{(purchase.totalAmount ?? 0).toLocaleString()}</TableCell>
-                  <TableCell className="text-right">฿{(purchase.paidAmount ?? 0).toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge className={statusColors[purchase.status]}>
-                      {statusLabels[purchase.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => openViewDialog(purchase.id)}
-                      >
-                        <Eye className="h-4 w-4 text-gray-600" />
-                      </Button>
-                      {(purchase.status === 'DRAFT') && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => openEditDialog(purchase.id)}
-                          >
-                            <Edit className="h-4 w-4 text-blue-600" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => handleDelete(purchase.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>เลขที่</TableHead>
+                  <TableHead>เลขที่ใบกำกับภาษี</TableHead>
+                  <TableHead>วันที่</TableHead>
+                  <TableHead>ผู้ขาย</TableHead>
+                  <TableHead className="text-right">มูลค่าก่อน VAT</TableHead>
+                  <TableHead className="text-right">VAT</TableHead>
+                  <TableHead className="text-right">ยอดรวม</TableHead>
+                  <TableHead className="text-right">จ่ายแล้ว</TableHead>
+                  <TableHead>สถานะ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredPurchases.map((purchase) => (
+                  <TableRow key={purchase.id}>
+                    <TableCell className="font-mono">{purchase.invoiceNo}</TableCell>
+                    <TableCell className="font-mono text-sm">{purchase.vendorInvoiceNo || '-'}</TableCell>
+                    <TableCell>
+                      {new Date(purchase.invoiceDate).toLocaleDateString('th-TH')}
+                    </TableCell>
+                    <TableCell>{purchase.vendorName}</TableCell>
+                    <TableCell className="text-right">฿{(purchase.subtotal ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">฿{(purchase.vatAmount ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-semibold">฿{(purchase.totalAmount ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">฿{(purchase.paidAmount ?? 0).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge className={statusColors[purchase.status]}>
+                        {statusLabels[purchase.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => openViewDialog(purchase.id)}
+                        >
+                          <Eye className="h-4 w-4 text-gray-600" />
+                        </Button>
+                        {(purchase.status === 'DRAFT') && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => openEditDialog(purchase.id)}
+                            >
+                              <Edit className="h-4 w-4 text-blue-600" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleDelete(purchase.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

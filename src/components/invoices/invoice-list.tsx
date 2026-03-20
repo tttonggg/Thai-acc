@@ -44,6 +44,7 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { InvoiceForm } from '@/components/invoices/invoice-form'
 import { InvoiceEditDialog } from '@/components/invoices/invoice-edit-dialog'
 import { useToast } from '@/hooks/use-toast'
@@ -859,114 +860,116 @@ export function InvoiceList() {
       {/* Invoice Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่</TableHead>
-                <TableHead>วันที่</TableHead>
-                <TableHead>ประเภท</TableHead>
-                <TableHead>ลูกค้า</TableHead>
-                <TableHead className="text-right">มูลค่าก่อน VAT</TableHead>
-                <TableHead className="text-right">VAT</TableHead>
-                <TableHead className="text-right">ยอดรวม</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead className="text-center">คอมเมนต์</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredInvoices.map((invoice) => (
-                <TableRow
-                  key={invoice.id}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleViewDetail(invoice.id)}
-                >
-                  <TableCell className="font-mono">{invoice.invoiceNo}</TableCell>
-                  <TableCell>{invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('th-TH') : '-'}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{typeLabels[invoice.type]}</Badge>
-                  </TableCell>
-                  <TableCell>{invoice.customerName}</TableCell>
-                  <TableCell className="text-right">฿{(invoice.subtotal ?? 0).toLocaleString()}</TableCell>
-                  <TableCell className="text-right">฿{(invoice.vatAmount ?? 0).toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-semibold">฿{(invoice.totalAmount ?? 0).toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge className={statusColors[invoice.status]}>
-                      {statusLabels[invoice.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {invoice._count?.comments ? (
-                      <Badge variant="secondary" className="flex items-center gap-1 w-fit mx-auto">
-                        <MessageSquare className="h-3 w-3" />
-                        {invoice._count.comments}
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleView(invoice.id)
-                        }}
-                      >
-                        <Eye className="h-4 w-4 text-gray-600" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          openEditDialog(invoice.id)
-                        }}
-                      >
-                        <Edit className="h-4 w-4 text-blue-600" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handlePrint(invoice.id)
-                        }}
-                        disabled={printingInvoice === invoice.id}
-                      >
-                        {printingInvoice === invoice.id ? (
-                          <Loader2 className="h-4 w-4 text-green-600 animate-spin" />
-                        ) : (
-                          <Printer className="h-4 w-4 text-green-600" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDownload(invoice.id, invoice.invoiceNo)
-                        }}
-                        disabled={downloadingInvoice === invoice.id}
-                      >
-                        {downloadingInvoice === invoice.id ? (
-                          <Loader2 className="h-4 w-4 text-purple-600 animate-spin" />
-                        ) : (
-                          <Download className="h-4 w-4 text-purple-600" />
-                        )}
-                      </Button>
-                    </div>
-                  </TableCell>
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>เลขที่</TableHead>
+                  <TableHead>วันที่</TableHead>
+                  <TableHead>ประเภท</TableHead>
+                  <TableHead>ลูกค้า</TableHead>
+                  <TableHead className="text-right">มูลค่าก่อน VAT</TableHead>
+                  <TableHead className="text-right">VAT</TableHead>
+                  <TableHead className="text-right">ยอดรวม</TableHead>
+                  <TableHead>สถานะ</TableHead>
+                  <TableHead className="text-center">คอมเมนต์</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredInvoices.map((invoice) => (
+                  <TableRow
+                    key={invoice.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleViewDetail(invoice.id)}
+                  >
+                    <TableCell className="font-mono">{invoice.invoiceNo}</TableCell>
+                    <TableCell>{invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('th-TH') : '-'}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{typeLabels[invoice.type]}</Badge>
+                    </TableCell>
+                    <TableCell>{invoice.customerName}</TableCell>
+                    <TableCell className="text-right">฿{(invoice.subtotal ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">฿{(invoice.vatAmount ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-semibold">฿{(invoice.totalAmount ?? 0).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge className={statusColors[invoice.status]}>
+                        {statusLabels[invoice.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {invoice._count?.comments ? (
+                        <Badge variant="secondary" className="flex items-center gap-1 w-fit mx-auto">
+                          <MessageSquare className="h-3 w-3" />
+                          {invoice._count.comments}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleView(invoice.id)
+                          }}
+                        >
+                          <Eye className="h-4 w-4 text-gray-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            openEditDialog(invoice.id)
+                          }}
+                        >
+                          <Edit className="h-4 w-4 text-blue-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handlePrint(invoice.id)
+                          }}
+                          disabled={printingInvoice === invoice.id}
+                        >
+                          {printingInvoice === invoice.id ? (
+                            <Loader2 className="h-4 w-4 text-green-600 animate-spin" />
+                          ) : (
+                            <Printer className="h-4 w-4 text-green-600" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDownload(invoice.id, invoice.invoiceNo)
+                          }}
+                          disabled={downloadingInvoice === invoice.id}
+                        >
+                          {downloadingInvoice === invoice.id ? (
+                            <Loader2 className="h-4 w-4 text-purple-600 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4 text-purple-600" />
+                          )}
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

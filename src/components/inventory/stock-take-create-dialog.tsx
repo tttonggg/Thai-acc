@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -266,6 +268,11 @@ export function StockTakeCreateDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+        <VisuallyHidden>
+          <DialogDescription>
+            สร้างใบตรวจนับสต็อกสินค้าในคลังสินค้าเพื่อปรับปรุงจำนวนให้ตรงกับจริง
+          </DialogDescription>
+        </VisuallyHidden>
         <DialogHeader>
           <DialogTitle>สร้างใบตรวจนับสินค้า (Stock Take)</DialogTitle>
         </DialogHeader>

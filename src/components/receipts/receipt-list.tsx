@@ -44,6 +44,7 @@ import {
 } from '@/components/ui/dialog'
 import { ReceiptForm } from './receipt-form'
 import { ReceiptViewDialog } from './receipt-view-dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 
 interface Receipt {
@@ -422,95 +423,97 @@ export function ReceiptList() {
       {/* Receipt Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่</TableHead>
-                <TableHead>วันที่</TableHead>
-                <TableHead>ลูกค้า</TableHead>
-                <TableHead>วิธีชำระ</TableHead>
-                <TableHead className="text-right">ยอดรับเงิน</TableHead>
-                <TableHead className="text-right">จัดจ่าย</TableHead>
-                <TableHead className="text-right">หัก ณ ที่จ่าย</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredReceipts.map((receipt) => (
-                <TableRow key={receipt.id}>
-                  <TableCell className="font-mono">{receipt.receiptNo}</TableCell>
-                  <TableCell>{new Date(receipt.receiptDate).toLocaleDateString('th-TH')}</TableCell>
-                  <TableCell>{receipt.customer?.name}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{paymentMethodLabels[receipt.paymentMethod]}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-semibold">
-                    ฿{(receipt.amount ?? 0).toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    ฿{(receipt.totalAllocated ?? 0).toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {receipt.whtAmount > 0 ? `฿${receipt.whtAmount.toLocaleString()}` : '-'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={statusColors[receipt.status]}>
-                      {statusLabels[receipt.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleView(receipt.id)}
-                      >
-                        <Eye className="h-4 w-4 text-gray-600" />
-                      </Button>
-                      {receipt.status === 'DRAFT' && (
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>เลขที่</TableHead>
+                  <TableHead>วันที่</TableHead>
+                  <TableHead>ลูกค้า</TableHead>
+                  <TableHead>วิธีชำระ</TableHead>
+                  <TableHead className="text-right">ยอดรับเงิน</TableHead>
+                  <TableHead className="text-right">จัดจ่าย</TableHead>
+                  <TableHead className="text-right">หัก ณ ที่จ่าย</TableHead>
+                  <TableHead>สถานะ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredReceipts.map((receipt) => (
+                  <TableRow key={receipt.id}>
+                    <TableCell className="font-mono">{receipt.receiptNo}</TableCell>
+                    <TableCell>{new Date(receipt.receiptDate).toLocaleDateString('th-TH')}</TableCell>
+                    <TableCell>{receipt.customer?.name}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{paymentMethodLabels[receipt.paymentMethod]}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                      ฿{(receipt.amount ?? 0).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      ฿{(receipt.totalAllocated ?? 0).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {receipt.whtAmount > 0 ? `฿${receipt.whtAmount.toLocaleString()}` : '-'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={statusColors[receipt.status]}>
+                        {statusLabels[receipt.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => handlePost(receipt.id)}
-                          disabled={postingReceipt === receipt.id}
+                          onClick={() => handleView(receipt.id)}
                         >
-                          {postingReceipt === receipt.id ? (
-                            <Loader2 className="h-4 w-4 text-green-600 animate-spin" />
+                          <Eye className="h-4 w-4 text-gray-600" />
+                        </Button>
+                        {receipt.status === 'DRAFT' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handlePost(receipt.id)}
+                            disabled={postingReceipt === receipt.id}
+                          >
+                            {postingReceipt === receipt.id ? (
+                              <Loader2 className="h-4 w-4 text-green-600 animate-spin" />
+                            ) : (
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            )}
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handlePrint(receipt)}
+                        >
+                          <Printer className="h-4 w-4 text-green-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleDownload(receipt.id, receipt.receiptNo)}
+                          disabled={downloadingReceipt === receipt.id}
+                        >
+                          {downloadingReceipt === receipt.id ? (
+                            <Loader2 className="h-4 w-4 text-purple-600 animate-spin" />
                           ) : (
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            <Download className="h-4 w-4 text-purple-600" />
                           )}
                         </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handlePrint(receipt)}
-                      >
-                        <Printer className="h-4 w-4 text-green-600" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleDownload(receipt.id, receipt.receiptNo)}
-                        disabled={downloadingReceipt === receipt.id}
-                      >
-                        {downloadingReceipt === receipt.id ? (
-                          <Loader2 className="h-4 w-4 text-purple-600 animate-spin" />
-                        ) : (
-                          <Download className="h-4 w-4 text-purple-600" />
-                        )}
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

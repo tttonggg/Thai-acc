@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -175,6 +176,14 @@ export function PettyCashFundEditDialog({
           <DialogTitle>
             {mode === 'create' ? 'สร้างกองทุนเงินสดย่อย' : 'แก้ไขกองทุนเงินสดย่อย'}
           </DialogTitle>
+          <VisuallyHidden asChild>
+            <DialogDescription>
+              {mode === 'create'
+                ? 'ดีไซน์แบบฟอร์มสำหรับสร้างกองทุนเงินสดย่อยใหม่ กรุณากรอกรหัส ชื่อ ผู้ถือกองทุน บัญชี GL และวงเงินสูงสุด'
+                : 'ดีไซน์แบบฟอร์มสำหรับแก้ไขข้อมูลกองทุนเงินสดย่อย สามารถแก้ไขชื่อ ผู้ถือกองทุน บัญชี GL วงเงินสูงสุดและสถานะได้'
+              }
+            </DialogDescription>
+          </VisuallyHidden>
         </DialogHeader>
 
         <div className="space-y-4">

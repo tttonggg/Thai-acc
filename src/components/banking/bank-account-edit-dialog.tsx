@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -116,6 +117,11 @@ export function BankAccountEditDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{account ? 'แก้ไขบัญชีธนาคาร' : 'เพิ่มบัญชีธนาคาร'}</DialogTitle>
+          <VisuallyHidden asChild>
+            <DialogDescription>
+              {account ? 'แก้ไขข้อมูลบัญชีธนาคารของบริษัท' : 'สร้างบัญชีธนาคารใหม่'}
+            </DialogDescription>
+          </VisuallyHidden>
         </DialogHeader>
         <div className="space-y-3 py-4">
           <div className="grid grid-cols-2 gap-3">

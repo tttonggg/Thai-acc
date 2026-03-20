@@ -43,6 +43,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { CustomerEditDialog } from './customer-edit-dialog'
 
@@ -618,88 +619,90 @@ export function CustomerList() {
       {/* Customer Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>รหัส</TableHead>
-                <TableHead>ชื่อลูกค้า</TableHead>
-                <TableHead>เลขประจำตัวผู้เสียภาษี</TableHead>
-                <TableHead>ติดต่อ</TableHead>
-                <TableHead className="text-right">วงเงินเครดิต</TableHead>
-                <TableHead className="text-right">ยอดคงเหลือ</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCustomers.length === 0 ? (
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                    ไม่พบข้อมูลที่ตรงกับการค้นหา
-                  </TableCell>
+                  <TableHead>รหัส</TableHead>
+                  <TableHead>ชื่อลูกค้า</TableHead>
+                  <TableHead>เลขประจำตัวผู้เสียภาษี</TableHead>
+                  <TableHead>ติดต่อ</TableHead>
+                  <TableHead className="text-right">วงเงินเครดิต</TableHead>
+                  <TableHead className="text-right">ยอดคงเหลือ</TableHead>
+                  <TableHead>สถานะ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
-              ) : (
-                filteredCustomers.map((customer) => {
-                  // Extra safety check for each customer
-                  if (!customer || typeof customer !== 'object') return null
-                  
-                  const customerStatus = customer?.status ?? 'inactive'
-                  const isActive = customerStatus === 'active'
-                  
-                  return (
-                    <TableRow key={customer.id || `customer-${Math.random()}`}>
-                      <TableCell className="font-mono">{customer.code || '-'}</TableCell>
-                      <TableCell className="font-medium">{customer.name || 'ไม่ระบุชื่อ'}</TableCell>
-                      <TableCell className="font-mono text-sm">{customer.taxId || '-'}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-1 text-sm">
-                            <Phone className="h-3 w-3 text-gray-400" />
-                            {customer.phone || '-'}
+              </TableHeader>
+              <TableBody>
+                {filteredCustomers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                      ไม่พบข้อมูลที่ตรงกับการค้นหา
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredCustomers.map((customer) => {
+                    // Extra safety check for each customer
+                    if (!customer || typeof customer !== 'object') return null
+
+                    const customerStatus = customer?.status ?? 'inactive'
+                    const isActive = customerStatus === 'active'
+
+                    return (
+                      <TableRow key={customer.id || `customer-${Math.random()}`}>
+                        <TableCell className="font-mono">{customer.code || '-'}</TableCell>
+                        <TableCell className="font-medium">{customer.name || 'ไม่ระบุชื่อ'}</TableCell>
+                        <TableCell className="font-mono text-sm">{customer.taxId || '-'}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-1 text-sm">
+                              <Phone className="h-3 w-3 text-gray-400" />
+                              {customer.phone || '-'}
+                            </div>
+                            <div className="flex items-center gap-1 text-sm text-gray-500">
+                              <Mail className="h-3 w-3" />
+                              {customer.email || '-'}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1 text-sm text-gray-500">
-                            <Mail className="h-3 w-3" />
-                            {customer.email || '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ฿{customer.creditLimit?.toLocaleString?.() ?? '0'}
+                        </TableCell>
+                        <TableCell className="text-right font-semibold text-blue-600">
+                          ฿{customer.balance?.toLocaleString?.() ?? '0'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                            {isActive ? 'ใช้งาน' : 'ไม่ใช้งาน'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex justify-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => openEditDialog(customer)}
+                            >
+                              <Edit className="h-4 w-4 text-blue-600" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => openDeleteDialog(customer)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        ฿{customer.creditLimit?.toLocaleString?.() ?? '0'}
-                      </TableCell>
-                      <TableCell className="text-right font-semibold text-blue-600">
-                        ฿{customer.balance?.toLocaleString?.() ?? '0'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                          {isActive ? 'ใช้งาน' : 'ไม่ใช้งาน'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => openEditDialog(customer)}
-                          >
-                            <Edit className="h-4 w-4 text-blue-600" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => openDeleteDialog(customer)}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })
-              )}
-            </TableBody>
-          </Table>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

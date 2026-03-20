@@ -51,6 +51,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 
 interface Quotation {
@@ -483,147 +484,149 @@ export function QuotationList() {
       {/* Quotation Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่</TableHead>
-                <TableHead>วันที่</TableHead>
-                <TableHead>ลูกค้า</TableHead>
-                <TableHead className="text-right">มูลค่าสุทธิ (บาท)</TableHead>
-                <TableHead>วันหมดอายุ</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead className="text-center">รายการ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredQuotations.length === 0 ? (
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                    <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>ไม่พบใบเสนอราคา</p>
-                  </TableCell>
+                  <TableHead>เลขที่</TableHead>
+                  <TableHead>วันที่</TableHead>
+                  <TableHead>ลูกค้า</TableHead>
+                  <TableHead className="text-right">มูลค่าสุทธิ (บาท)</TableHead>
+                  <TableHead>วันหมดอายุ</TableHead>
+                  <TableHead>สถานะ</TableHead>
+                  <TableHead className="text-center">รายการ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
-              ) : (
-                filteredQuotations.map((quotation) => (
-                  <TableRow
-                    key={quotation.id}
-                    className="cursor-pointer hover:bg-gray-50"
-                  >
-                    <TableCell className="font-mono font-medium">
-                      {quotation.quotationNo}
-                      {quotation.reference && (
-                        <div className="text-xs text-gray-500">
-                          Ref: {quotation.reference}
+              </TableHeader>
+              <TableBody>
+                {filteredQuotations.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                      <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p>ไม่พบใบเสนอราคา</p>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredQuotations.map((quotation) => (
+                    <TableRow
+                      key={quotation.id}
+                      className="cursor-pointer hover:bg-gray-50"
+                    >
+                      <TableCell className="font-mono font-medium">
+                        {quotation.quotationNo}
+                        {quotation.reference && (
+                          <div className="text-xs text-gray-500">
+                            Ref: {quotation.reference}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(quotation.quotationDate).toLocaleDateString('th-TH')}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-3 w-3 text-gray-400" />
+                          <span>{quotation.customer?.name || '-'}</span>
                         </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(quotation.quotationDate).toLocaleDateString('th-TH')}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-3 w-3 text-gray-400" />
-                        <span>{quotation.customer?.name || '-'}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      ฿{(quotation.totalAmount / 100).toLocaleString('th-TH', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                      {quotation.vatAmount > 0 && (
-                        <div className="text-xs text-gray-500">
-                          (VAT ฿{(quotation.vatAmount / 100).toFixed(2)})
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        ฿{(quotation.totalAmount / 100).toLocaleString('th-TH', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                        {quotation.vatAmount > 0 && (
+                          <div className="text-xs text-gray-500">
+                            (VAT ฿{(quotation.vatAmount / 100).toFixed(2)})
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3 w-3 text-gray-400" />
+                          <span>
+                            {new Date(quotation.validUntil).toLocaleDateString('th-TH')}
+                          </span>
+                          {isExpiringSoon(quotation.validUntil) &&
+                            quotation.status !== 'EXPIRED' && (
+                              <Badge className="bg-orange-100 text-orange-800 border-orange-300">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                ใกล้หมดอายุ
+                              </Badge>
+                            )}
+                          {isExpired(quotation.validUntil) &&
+                            quotation.status !== 'EXPIRED' && (
+                              <Badge className="bg-red-100 text-red-800 border-red-300">
+                                หมดอายุ
+                              </Badge>
+                            )}
                         </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-3 w-3 text-gray-400" />
-                        <span>
-                          {new Date(quotation.validUntil).toLocaleDateString('th-TH')}
-                        </span>
-                        {isExpiringSoon(quotation.validUntil) &&
-                          quotation.status !== 'EXPIRED' && (
-                            <Badge className="bg-orange-100 text-orange-800 border-orange-300">
-                              <AlertTriangle className="h-3 w-3 mr-1" />
-                              ใกล้หมดอายุ
-                            </Badge>
-                          )}
-                        {isExpired(quotation.validUntil) &&
-                          quotation.status !== 'EXPIRED' && (
-                            <Badge className="bg-red-100 text-red-800 border-red-300">
-                              หมดอายุ
-                            </Badge>
-                          )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={statusColors[quotation.status]}
-                        variant="outline"
-                      >
-                        {statusLabels[quotation.status]}
-                      </Badge>
-                      {quotation.invoiceId && (
-                        <div className="text-xs text-green-600 mt-1">
-                          <FileCheck className="h-3 w-3 inline mr-1" />
-                          {quotation.invoice?.invoiceNo}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant="secondary">
-                        {quotation._count?.lines || quotation.lines?.length || 0} รายการ
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleView(quotation)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={statusColors[quotation.status]}
+                          variant="outline"
                         >
-                          <Eye className="h-4 w-4 text-gray-600" />
-                        </Button>
-                        {(quotation.status === 'DRAFT' ||
-                          quotation.status === 'REVISED' ||
-                          quotation.status === 'REJECTED') && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleEdit(quotation.id)}
-                            >
-                              <Edit className="h-4 w-4 text-blue-600" />
-                            </Button>
-                            {quotation.status === 'DRAFT' && (
+                          {statusLabels[quotation.status]}
+                        </Badge>
+                        {quotation.invoiceId && (
+                          <div className="text-xs text-green-600 mt-1">
+                            <FileCheck className="h-3 w-3 inline mr-1" />
+                            {quotation.invoice?.invoiceNo}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="secondary">
+                          {quotation._count?.lines || quotation.lines?.length || 0} รายการ
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleView(quotation)}
+                          >
+                            <Eye className="h-4 w-4 text-gray-600" />
+                          </Button>
+                          {(quotation.status === 'DRAFT' ||
+                            quotation.status === 'REVISED' ||
+                            quotation.status === 'REJECTED') && (
+                            <>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8"
-                                onClick={() => handleDelete(quotation.id)}
-                                disabled={deletingQuotation === quotation.id}
+                                onClick={() => handleEdit(quotation.id)}
                               >
-                                {deletingQuotation === quotation.id ? (
-                                  <Loader2 className="h-4 w-4 text-red-600 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-4 w-4 text-red-600" />
-                                )}
+                                <Edit className="h-4 w-4 text-blue-600" />
                               </Button>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                              {quotation.status === 'DRAFT' && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleDelete(quotation.id)}
+                                  disabled={deletingQuotation === quotation.id}
+                                >
+                                  {deletingQuotation === quotation.id ? (
+                                    <Loader2 className="h-4 w-4 text-red-600 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4 text-red-600" />
+                                  )}
+                                </Button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

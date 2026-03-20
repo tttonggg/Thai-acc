@@ -12,7 +12,8 @@ function getStatusLabel(status: string): string {
   }
   return statusMap[status] || status
 }
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -136,6 +137,11 @@ export function ChequeEditDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{cheque ? 'แก้ไขเช็ค' : 'เพิ่มเช็ค'}</DialogTitle>
+          <VisuallyHidden asChild>
+            <DialogDescription>
+              {cheque ? 'แก้ไขข้อมูลเช็ครับหรือเช็คจ่าย' : 'สร้างเช็ครับหรือเช็คจ่ายใหม่'}
+            </DialogDescription>
+          </VisuallyHidden>
         </DialogHeader>
         <div className="space-y-3 py-4">
           <div className="grid grid-cols-2 gap-3">

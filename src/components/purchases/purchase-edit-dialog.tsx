@@ -27,6 +27,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
@@ -464,6 +465,9 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
           <DialogTitle className="text-xl">
             แก้ไข{purchase ? purchaseTypeLabels[purchase.type] : ''} - {purchase?.invoiceNo}
           </DialogTitle>
+          <DialogDescription>
+            แก้ไขข้อมูลใบซื้อที่มีเลขที่ {purchase?.invoiceNo} สามารถแก้ไขข้อมูลพื้นฐานรายการสินค้าและยอดรวมได้
+          </DialogDescription>
           {purchase && (
             <div className="flex items-center gap-2 mt-1">
               <Badge className={statusColors[purchase.status]}>

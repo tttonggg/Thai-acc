@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
@@ -493,85 +494,87 @@ export function StockTakePage() {
               ))}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>เลขที่</TableHead>
-                  <TableHead>วันที่</TableHead>
-                  <TableHead>คลังสินค้า</TableHead>
-                  <TableHead>จำนวนรายการ</TableHead>
-                  <TableHead>ผลต่าง</TableHead>
-                  <TableHead>สถานะ</TableHead>
-                  <TableHead className="text-right">จัดการ</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredStockTakes.length === 0 ? (
+            <ScrollArea className="w-full">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-gray-500 py-8">
-                      ไม่พบข้อมูลการตรวจนับสต็อก
-                    </TableCell>
+                    <TableHead>เลขที่</TableHead>
+                    <TableHead>วันที่</TableHead>
+                    <TableHead>คลังสินค้า</TableHead>
+                    <TableHead>จำนวนรายการ</TableHead>
+                    <TableHead>ผลต่าง</TableHead>
+                    <TableHead>สถานะ</TableHead>
+                    <TableHead className="text-right">จัดการ</TableHead>
                   </TableRow>
-                ) : (
-                  filteredStockTakes.map((stockTake) => {
-                    const summary = calculateSummary(stockTake)
-                    const statusConfig = STATUS_CONFIG[stockTake.status]
-                    const StatusIcon = statusConfig.icon
+                </TableHeader>
+                <TableBody>
+                  {filteredStockTakes.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center text-gray-500 py-8">
+                        ไม่พบข้อมูลการตรวจนับสต็อก
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredStockTakes.map((stockTake) => {
+                      const summary = calculateSummary(stockTake)
+                      const statusConfig = STATUS_CONFIG[stockTake.status]
+                      const StatusIcon = statusConfig.icon
 
-                    return (
-                      <TableRow key={stockTake.id}>
-                        <TableCell className="font-medium">{stockTake.takeNo}</TableCell>
-                        <TableCell>{fd(stockTake.date)}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Warehouse className="w-4 h-4 text-gray-400" />
-                            {stockTake.warehouse.code} - {stockTake.warehouse.name}
-                          </div>
-                        </TableCell>
-                        <TableCell>{summary.totalItems} รายการ</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {summary.totalVariance !== 0 && (
-                              <>
-                                {summary.totalVariance < 0 ? (
-                                  <TrendingDown className="w-4 h-4 text-red-600" />
-                                ) : (
-                                  <TrendingUp className="w-4 h-4 text-green-600" />
-                                )}
-                                <span
-                                  className={summary.totalVariance < 0 ? 'text-red-600' : 'text-green-600'}
-                                >
-                                  {summary.totalVariance > 0 ? '+' : ''}
-                                  {summary.totalVariance}
-                                </span>
-                              </>
-                            )}
-                            {summary.totalVariance === 0 && <span className="text-gray-400">-</span>}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={statusConfig.color}>
-                            <StatusIcon className="w-3 h-3 mr-1" />
-                            {statusConfig.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleView(stockTake)}
-                            className="gap-1"
-                          >
-                            <Eye className="w-4 h-4" />
-                            ดูรายละเอียด
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
-                )}
-              </TableBody>
-            </Table>
+                      return (
+                        <TableRow key={stockTake.id}>
+                          <TableCell className="font-medium">{stockTake.takeNo}</TableCell>
+                          <TableCell>{fd(stockTake.date)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Warehouse className="w-4 h-4 text-gray-400" />
+                              {stockTake.warehouse.code} - {stockTake.warehouse.name}
+                            </div>
+                          </TableCell>
+                          <TableCell>{summary.totalItems} รายการ</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {summary.totalVariance !== 0 && (
+                                <>
+                                  {summary.totalVariance < 0 ? (
+                                    <TrendingDown className="w-4 h-4 text-red-600" />
+                                  ) : (
+                                    <TrendingUp className="w-4 h-4 text-green-600" />
+                                  )}
+                                  <span
+                                    className={summary.totalVariance < 0 ? 'text-red-600' : 'text-green-600'}
+                                  >
+                                    {summary.totalVariance > 0 ? '+' : ''}
+                                    {summary.totalVariance}
+                                  </span>
+                                </>
+                              )}
+                              {summary.totalVariance === 0 && <span className="text-gray-400">-</span>}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={statusConfig.color}>
+                              <StatusIcon className="w-3 h-3 mr-1" />
+                              {statusConfig.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleView(stockTake)}
+                              className="gap-1"
+                            >
+                              <Eye className="w-4 h-4" />
+                              ดูรายละเอียด
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </ScrollArea>
           )}
         </CardContent>
       </Card>
@@ -698,104 +701,106 @@ export function StockTakePage() {
               {/* Lines Table */}
               <div>
                 <h3 className="font-semibold mb-2">รายการตรวจนับ</h3>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>สินค้า</TableHead>
-                      <TableHead className="text-right">ยอดระบบ</TableHead>
-                      <TableHead className="text-right">นับจริง</TableHead>
-                      <TableHead className="text-right">ผลต่าง</TableHead>
-                      <TableHead className="text-center">จัดการ</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {selectedStockTake.lines.map((line) => (
-                      <TableRow key={line.id}>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{line.product.name}</p>
-                            <p className="text-sm text-gray-500">{line.product.code}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">{line.systemQuantity}</TableCell>
-                        <TableCell className="text-right">
-                          {editingLine?.id === line.id ? (
-                            <Input
-                              type="number"
-                              value={newActualQty}
-                              onChange={(e) => setNewActualQty(Number(e.target.value))}
-                              className="w-24"
-                            />
-                          ) : (
+                <ScrollArea className="w-full">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>สินค้า</TableHead>
+                        <TableHead className="text-right">ยอดระบบ</TableHead>
+                        <TableHead className="text-right">นับจริง</TableHead>
+                        <TableHead className="text-right">ผลต่าง</TableHead>
+                        <TableHead className="text-center">จัดการ</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedStockTake.lines.map((line) => (
+                        <TableRow key={line.id}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{line.product.name}</p>
+                              <p className="text-sm text-gray-500">{line.product.code}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">{line.systemQuantity}</TableCell>
+                          <TableCell className="text-right">
+                            {editingLine?.id === line.id ? (
+                              <Input
+                                type="number"
+                                value={newActualQty}
+                                onChange={(e) => setNewActualQty(Number(e.target.value))}
+                                className="w-24"
+                              />
+                            ) : (
+                              <span
+                                className={
+                                  line.actualQuantity !== line.systemQuantity
+                                    ? 'font-bold text-blue-600'
+                                    : ''
+                                }
+                              >
+                                {line.actualQuantity}
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
                             <span
                               className={
-                                line.actualQuantity !== line.systemQuantity
-                                  ? 'font-bold text-blue-600'
+                                line.varianceQuantity < 0
+                                  ? 'text-red-600 font-medium'
+                                  : line.varianceQuantity > 0
+                                  ? 'text-green-600 font-medium'
                                   : ''
                               }
                             >
-                              {line.actualQuantity}
+                              {line.varianceQuantity !== 0 ? (
+                                <>
+                                  {line.varianceQuantity > 0 ? '+' : ''}
+                                  {line.varianceQuantity}
+                                </>
+                              ) : (
+                                '-'
+                              )}
                             </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <span
-                            className={
-                              line.varianceQuantity < 0
-                                ? 'text-red-600 font-medium'
-                                : line.varianceQuantity > 0
-                                ? 'text-green-600 font-medium'
-                                : ''
-                            }
-                          >
-                            {line.varianceQuantity !== 0 ? (
-                              <>
-                                {line.varianceQuantity > 0 ? '+' : ''}
-                                {line.varianceQuantity}
-                              </>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {editingLine?.id === line.id ? (
+                              <div className="flex gap-1 justify-center">
+                                <Button size="sm" onClick={handleUpdateLine}>
+                                  บันทึก
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setEditingLine(null)
+                                    setNewActualQty(0)
+                                  }}
+                                >
+                                  ยกเลิก
+                                </Button>
+                              </div>
                             ) : (
-                              '-'
-                            )}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {editingLine?.id === line.id ? (
-                            <div className="flex gap-1 justify-center">
-                              <Button size="sm" onClick={handleUpdateLine}>
-                                บันทึก
-                              </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  setEditingLine(null)
-                                  setNewActualQty(0)
+                                  setEditingLine(line)
+                                  setNewActualQty(line.actualQuantity)
                                 }}
+                                disabled={
+                                  selectedStockTake.status === 'COMPLETED' ||
+                                  selectedStockTake.status === 'CANCELLED'
+                                }
                               >
-                                ยกเลิก
+                                <Edit className="w-3 h-3" />
                               </Button>
-                            </div>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditingLine(line)
-                                setNewActualQty(line.actualQuantity)
-                              }}
-                              disabled={
-                                selectedStockTake.status === 'COMPLETED' ||
-                                selectedStockTake.status === 'CANCELLED'
-                              }
-                            >
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
               </div>
 
               {/* Actions */}

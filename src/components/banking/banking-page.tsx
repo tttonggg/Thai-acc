@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { BankAccountEditDialog } from './bank-account-edit-dialog'
 import { ChequeEditDialog } from './cheque-edit-dialog'
@@ -244,56 +245,58 @@ function ChequeRegisterTab() {
       </div>
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader><TableRow><TableHead>เลขที่</TableHead><TableHead>ประเภท</TableHead><TableHead>ธนาคาร</TableHead><TableHead>ผู้รับ/จ่าย</TableHead><TableHead>ครบกำหนด</TableHead><TableHead className="text-right">จำนวน</TableHead><TableHead className="text-center">สถานะ</TableHead><TableHead className="text-center">จัดการ</TableHead></TableRow></TableHeader>
-            <TableBody>
-              {cheques.length === 0 ? <TableRow><TableCell colSpan={8} className="text-center py-8 text-gray-400">ยังไม่มีรายการเช็ค</TableCell></TableRow>
-                : cheques.map(c => {
-                  const st = CHEQUE_STATUS[c.status] || { label: c.status, color: 'bg-gray-100 text-gray-600' }
-                  const canEdit = c.status === 'ON_HAND'
-                  return (
-                    <TableRow key={c.id}>
-                      <TableCell className="font-mono text-sm">{c.chequeNo}</TableCell>
-                      <TableCell><Badge variant={c.type === 'RECEIVE' ? 'default' : 'secondary'} className="text-xs">{c.type === 'RECEIVE' ? 'รับ' : 'จ่าย'}</Badge></TableCell>
-                      <TableCell className="text-sm">{c.bankAccount.bankName}</TableCell>
-                      <TableCell className="text-sm">{c.payeeName || '—'}</TableCell>
-                      <TableCell className="text-sm">{fd(c.dueDate)}</TableCell>
-                      <TableCell className="text-right font-semibold">฿{fc(c.amount)}</TableCell>
-                      <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${st.color}`}>{st.label}</span></TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex justify-center gap-1">
-                          {canEdit && (
-                            <>
-                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => handleEdit(c)}>
-                                <Pencil className="h-3 w-3" />
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader><TableRow><TableHead>เลขที่</TableHead><TableHead>ประเภท</TableHead><TableHead>ธนาคาร</TableHead><TableHead>ผู้รับ/จ่าย</TableHead><TableHead>ครบกำหนด</TableHead><TableHead className="text-right">จำนวน</TableHead><TableHead className="text-center">สถานะ</TableHead><TableHead className="text-center">จัดการ</TableHead></TableRow></TableHeader>
+              <TableBody>
+                {cheques.length === 0 ? <TableRow><TableCell colSpan={8} className="text-center py-8 text-gray-400">ยังไม่มีรายการเช็ค</TableCell></TableRow>
+                  : cheques.map(c => {
+                    const st = CHEQUE_STATUS[c.status] || { label: c.status, color: 'bg-gray-100 text-gray-600' }
+                    const canEdit = c.status === 'ON_HAND'
+                    return (
+                      <TableRow key={c.id}>
+                        <TableCell className="font-mono text-sm">{c.chequeNo}</TableCell>
+                        <TableCell><Badge variant={c.type === 'RECEIVE' ? 'default' : 'secondary'} className="text-xs">{c.type === 'RECEIVE' ? 'รับ' : 'จ่าย'}</Badge></TableCell>
+                        <TableCell className="text-sm">{c.bankAccount.bankName}</TableCell>
+                        <TableCell className="text-sm">{c.payeeName || '—'}</TableCell>
+                        <TableCell className="text-sm">{fd(c.dueDate)}</TableCell>
+                        <TableCell className="text-right font-semibold">฿{fc(c.amount)}</TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${st.color}`}>{st.label}</span></TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex justify-center gap-1">
+                            {canEdit && (
+                              <>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => handleEdit(c)}>
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600 hover:text-red-700" onClick={() => confirmDelete(c)}>
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </>
+                            )}
+                            {c.status === 'ON_HAND' && (
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-yellow-600 hover:text-yellow-700" onClick={() => updateStatus(c, 'DEPOSITED')} title="นำฝาก">
+                                <ArrowRight className="h-3 w-3" />
                               </Button>
-                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600 hover:text-red-700" onClick={() => confirmDelete(c)}>
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </>
-                          )}
-                          {c.status === 'ON_HAND' && (
-                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-yellow-600 hover:text-yellow-700" onClick={() => updateStatus(c, 'DEPOSITED')} title="นำฝาก">
-                              <ArrowRight className="h-3 w-3" />
-                            </Button>
-                          )}
-                          {c.status === 'DEPOSITED' && (
-                            <>
-                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-green-600 hover:text-green-700" onClick={() => updateStatus(c, 'CLEARED')} title="ผ่าน">
-                                <CheckCircle className="h-3 w-3" />
-                              </Button>
-                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600 hover:text-red-700" onClick={() => updateStatus(c, 'BOUNCED')} title="เด้ง">
-                                <XCircle className="h-3 w-3" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-            </TableBody>
-          </Table>
+                            )}
+                            {c.status === 'DEPOSITED' && (
+                              <>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-green-600 hover:text-green-700" onClick={() => updateStatus(c, 'CLEARED')} title="ผ่าน">
+                                  <CheckCircle className="h-3 w-3" />
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600 hover:text-red-700" onClick={() => updateStatus(c, 'BOUNCED')} title="เด้ง">
+                                  <XCircle className="h-3 w-3" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

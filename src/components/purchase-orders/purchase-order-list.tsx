@@ -28,6 +28,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Table,
   TableBody,
@@ -449,96 +450,98 @@ export function PurchaseOrderList() {
       {/* PO Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่</TableHead>
-                <TableHead>วันที่</TableHead>
-                <TableHead>ผู้ขาย</TableHead>
-                <TableHead className="text-right">ยอดรวม</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead>การจ่ายเงิน</TableHead>
-                <TableHead className="text-center">รายการ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPOs.length === 0 ? (
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                    <Truck className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>ไม่พบใบสั่งซื้อ</p>
-                  </TableCell>
+                  <TableHead>เลขที่</TableHead>
+                  <TableHead>วันที่</TableHead>
+                  <TableHead>ผู้ขาย</TableHead>
+                  <TableHead className="text-right">ยอดรวม</TableHead>
+                  <TableHead>สถานะ</TableHead>
+                  <TableHead>การจ่ายเงิน</TableHead>
+                  <TableHead className="text-center">รายการ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
-              ) : (
-                filteredPOs.map((po) => (
-                  <TableRow key={po.id} className="cursor-pointer hover:bg-gray-50">
-                    <TableCell className="font-mono font-medium">{po.orderNo}</TableCell>
-                    <TableCell>
-                      {new Date(po.orderDate).toLocaleDateString('th-TH')}
-                    </TableCell>
-                    <TableCell>{po.vendorName}</TableCell>
-                    <TableCell className="text-right font-medium">
-                      ฿{(po.totalAmount / 100).toLocaleString('th-TH', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={statusColors[po.status]} variant="outline">
-                        {statusLabels[po.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={paymentStatusColors[po.paymentStatus]} variant="outline">
-                        {paymentStatusLabels[po.paymentStatus]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant="secondary">{po._count?.lines || 0} รายการ</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleView(po)}
-                        >
-                          <Eye className="h-4 w-4 text-gray-600" />
-                        </Button>
-                        {po.status === 'DRAFT' && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleEdit(po.id)}
-                            >
-                              <Edit className="h-4 w-4 text-blue-600" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleDelete(po.id)}
-                              disabled={deletingPO === po.id}
-                            >
-                              {deletingPO === po.id ? (
-                                <Loader2 className="h-4 w-4 text-red-600 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              )}
-                            </Button>
-                          </>
-                        )}
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {filteredPOs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                      <Truck className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p>ไม่พบใบสั่งซื้อ</p>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  filteredPOs.map((po) => (
+                    <TableRow key={po.id} className="cursor-pointer hover:bg-gray-50">
+                      <TableCell className="font-mono font-medium">{po.orderNo}</TableCell>
+                      <TableCell>
+                        {new Date(po.orderDate).toLocaleDateString('th-TH')}
+                      </TableCell>
+                      <TableCell>{po.vendorName}</TableCell>
+                      <TableCell className="text-right font-medium">
+                        ฿{(po.totalAmount / 100).toLocaleString('th-TH', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={statusColors[po.status]} variant="outline">
+                          {statusLabels[po.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={paymentStatusColors[po.paymentStatus]} variant="outline">
+                          {paymentStatusLabels[po.paymentStatus]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="secondary">{po._count?.lines || 0} รายการ</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleView(po)}
+                          >
+                            <Eye className="h-4 w-4 text-gray-600" />
+                          </Button>
+                          {po.status === 'DRAFT' && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handleEdit(po.id)}
+                              >
+                                <Edit className="h-4 w-4 text-blue-600" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handleDelete(po.id)}
+                                disabled={deletingPO === po.id}
+                              >
+                                {deletingPO === po.id ? (
+                                  <Loader2 className="h-4 w-4 text-red-600 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4 text-red-600" />
+                                )}
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

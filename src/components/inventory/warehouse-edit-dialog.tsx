@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -117,6 +118,11 @@ export function WarehouseEditDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
+        <VisuallyHidden>
+          <DialogDescription>
+            {warehouse ? 'แก้ไขคลังสินค้าในระบบ' : 'สร้างคลังสินค้าใหม่ในระบบ'}
+          </DialogDescription>
+        </VisuallyHidden>
         <DialogHeader>
           <DialogTitle>
             {warehouse ? 'แก้ไขคลังสินค้า' : 'สร้างคลังสินค้าใหม่'}

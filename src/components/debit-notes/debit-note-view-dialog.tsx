@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Loader2, FileText, Building2, Calendar } from 'lucide-react'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
 interface DebitNoteViewDialogProps {
   debitNoteId: string
@@ -97,6 +98,9 @@ export function DebitNoteViewDialog({ debitNoteId, open, onOpenChange }: DebitNo
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <VisuallyHidden>
+            <DialogTitle>กำลังโหลดข้อมูลใบเพิ่มหนี้</DialogTitle>
+          </VisuallyHidden>
           <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-gray-400" /></div>
         </DialogContent>
       </Dialog>
@@ -107,6 +111,9 @@ export function DebitNoteViewDialog({ debitNoteId, open, onOpenChange }: DebitNo
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <VisuallyHidden>
+            <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบเพิ่มหนี้</DialogTitle>
+          </VisuallyHidden>
           <div className="text-center py-12 text-gray-500">ไม่พบข้อมูลใบเพิ่มหนี้</div>
         </DialogContent>
       </Dialog>
@@ -121,6 +128,9 @@ export function DebitNoteViewDialog({ debitNoteId, open, onOpenChange }: DebitNo
             <span>รายละเอียดใบเพิ่มหนี้</span>
             <Badge className={statusColors[debitNote.status]}>{statusLabels[debitNote.status]}</Badge>
           </DialogTitle>
+          <DialogDescription>
+            ดูรายละเอียดใบเพิ่มหนี้ทั้งหมดรวมทั้งข้อมูลผู้จัดจำหน่าย บัญชี และบันทึกบัญชี
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">

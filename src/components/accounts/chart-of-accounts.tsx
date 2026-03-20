@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Plus,
   Search,
@@ -421,9 +421,16 @@ export function ChartOfAccounts() {
       const isExpanded = expandedIds.includes(account.id)
       const children = getChildAccounts(account.id)
 
+      const rowElement = (
+        <>
+          {renderAccountRow(account, depth)}
+        </>
+      )
+
+      // Add key to the first element in the fragment
       rows.push(
         <React.Fragment key={account.id}>
-          {renderAccountRow(account, depth)}
+          {rowElement}
         </React.Fragment>
       )
 

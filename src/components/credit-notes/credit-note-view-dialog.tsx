@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Loader2, FileText, User, Calendar, FileText as FileIcon } from 'lucide-react'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
 interface CreditNoteViewDialogProps {
   creditNoteId: string
@@ -107,6 +108,9 @@ export function CreditNoteViewDialog({ creditNoteId, open, onOpenChange }: Credi
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <VisuallyHidden>
+            <DialogTitle>กำลังโหลดข้อมูลใบลดหนี้</DialogTitle>
+          </VisuallyHidden>
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>
@@ -119,6 +123,9 @@ export function CreditNoteViewDialog({ creditNoteId, open, onOpenChange }: Credi
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <VisuallyHidden>
+            <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบลดหนี้</DialogTitle>
+          </VisuallyHidden>
           <div className="text-center py-12 text-gray-500">
             ไม่พบข้อมูลใบลดหนี้
           </div>
@@ -137,6 +144,9 @@ export function CreditNoteViewDialog({ creditNoteId, open, onOpenChange }: Credi
               {statusLabels[creditNote.status]}
             </Badge>
           </DialogTitle>
+          <DialogDescription>
+            ดูรายละเอียดใบลดหนี้ทั้งหมดรวมทั้งข้อมูลลูกค้า บัญชี และบันทึกบัญชี
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">

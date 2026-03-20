@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -276,6 +277,11 @@ export function AssetEditDialog({
           <DialogTitle>
             {mode === 'edit' ? 'แก้ไขสินทรัพย์ถาวร' : 'ลงทะเบียนสินทรัพย์ถาวร (TAS 16)'}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {mode === 'edit'
+              ? 'แก้ไขข้อมูลสินทรัพย์ถาวรรวมถึงราคาทุน อายุการใช้งาน อัตราค่าเสื่อมราคาและการเชื่อมโยงกับบัญชีทางบัญชี'
+              : 'ลงทะเบียนสินทรัพย์ถาวรใหม่พร้อมการตั้งค่าค่าเสื่อมราคาและการเชื่อมโยงกับบัญชีทางบัญชี'}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>

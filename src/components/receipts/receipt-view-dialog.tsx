@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
 interface ReceiptAllocation {
   id: string
@@ -349,6 +350,9 @@ export function ReceiptViewDialog({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[700px]">
+          <VisuallyHidden>
+            <DialogTitle>กำลังโหลดข้อมูลใบเสร็จ</DialogTitle>
+          </VisuallyHidden>
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>
@@ -358,7 +362,18 @@ export function ReceiptViewDialog({
   }
 
   if (!receipt) {
-    return null
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[700px]">
+          <VisuallyHidden>
+            <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบเสร็จ</DialogTitle>
+          </VisuallyHidden>
+          <div className="text-center py-12 text-red-600">
+            ไม่พบข้อมูลใบเสร็จ
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
   }
 
   return (

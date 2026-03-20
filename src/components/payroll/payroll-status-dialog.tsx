@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react'
 import { CheckCircle, DollarSign, Users, AlertCircle, FileText } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
@@ -128,6 +128,11 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
             <FileText className="h-5 w-5" />
             รายละเอียดและสถานะงวดเงินเดือน
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            แสดงรายละเอียดงวดเงินเดือนสำหรับงวด {THAI_MONTHS[payrollRun.periodMonth - 1]} {payrollRun.periodYear + 543}
+            รวมถึงสถานะการอนุมัติการจ่ายเงิน รายละเอียดทางการเงิน เงินเดือน ประกันสังคม ภาษี
+            และสถานะการบันทึกบัญชี
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">

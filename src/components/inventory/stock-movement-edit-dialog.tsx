@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -139,6 +140,11 @@ export function StockMovementEditDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
+        <VisuallyHidden>
+          <DialogDescription>
+            แก้ไขหมายเหตุหรือยกเลิกการเคลื่อนไหวสินค้าในคลังสินค้า
+          </DialogDescription>
+        </VisuallyHidden>
         <DialogHeader>
           <DialogTitle>รายละเอียดการเคลื่อนไหวสินค้า</DialogTitle>
         </DialogHeader>

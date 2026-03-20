@@ -6,9 +6,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -109,6 +111,11 @@ export function InvoicePreviewDialog({
       onOpenChange(open)
     }}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+        <VisuallyHidden>
+          <DialogDescription>
+            พรีวิว invoice dialog สำหรับดูตัวอย่างใบกำกับภาษีก่อนพิมพ์หรือดาวน์โหลดพร้อมการปรับแต่งรูปแบบ
+          </DialogDescription>
+        </VisuallyHidden>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Eye className="w-5 h-5" />

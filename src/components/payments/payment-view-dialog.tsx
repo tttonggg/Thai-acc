@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -225,6 +226,10 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-3xl">
+          <VisuallyHidden>
+            <DialogTitle>กำลังโหลดข้อมูลใบจ่ายเงิน</DialogTitle>
+            <DialogDescription>กำลังดึงข้อมูลใบจ่ายเงินจากระบบ</DialogDescription>
+          </VisuallyHidden>
           <div className="flex justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>

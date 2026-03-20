@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { PettyCashFundEditDialog } from './fund-edit-dialog'
 import { PettyCashVoucherEditDialog } from './voucher-edit-dialog'
@@ -436,102 +437,104 @@ function VouchersTab({ funds }: { funds: Fund[] }) {
       {/* Vouchers Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่</TableHead>
-                <TableHead>วันที่</TableHead>
-                <TableHead>กองทุน</TableHead>
-                <TableHead>จ่ายให้</TableHead>
-                <TableHead>รายละเอียด</TableHead>
-                <TableHead className="text-right">จำนวน</TableHead>
-                <TableHead className="text-center">สถานะ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {vouchers.length === 0 ? (
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-gray-400">
-                    <Receipt className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                    ยังไม่มีใบสำคัญ
-                  </TableCell>
+                  <TableHead>เลขที่</TableHead>
+                  <TableHead>วันที่</TableHead>
+                  <TableHead>กองทุน</TableHead>
+                  <TableHead>จ่ายให้</TableHead>
+                  <TableHead>รายละเอียด</TableHead>
+                  <TableHead className="text-right">จำนวน</TableHead>
+                  <TableHead className="text-center">สถานะ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
-              ) : vouchers.map(v => {
-                const status = getVoucherStatus(v)
-                return (
-                  <TableRow key={v.id}>
-                    <TableCell className="font-mono text-sm">{v.voucherNo}</TableCell>
-                    <TableCell className="text-sm">{fd(v.date)}</TableCell>
-                    <TableCell className="text-sm">{v.fund?.name || '—'}</TableCell>
-                    <TableCell className="text-sm">{v.payee}</TableCell>
-                    <TableCell className="text-sm text-gray-600">{v.description}</TableCell>
-                    <TableCell className="text-right font-semibold">฿{fc(v.amount)}</TableCell>
-                    <TableCell className="text-center">
-                      <Badge className={`text-xs ${status.color}`}>
-                        {status.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        {/* Edit button - only for pending vouchers */}
-                        {canEditVoucher(v) && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEdit(v)}
-                            className="h-8 w-8 p-0"
-                            title="แก้ไข"
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                        )}
-
-                        {/* Delete button - only for pending vouchers */}
-                        {canEditVoucher(v) && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setDeleteConfirm(v)}
-                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                            title="ลบ"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        )}
-
-                        {/* Approve button - only for pending vouchers */}
-                        {canApproveVoucher(v) && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleApprove(v)}
-                            className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
-                            title="อนุมัติ"
-                          >
-                            <CheckCircle className="h-3 w-3" />
-                          </Button>
-                        )}
-
-                        {/* Reimburse button - only for approved but not reimbursed */}
-                        {canReimburseVoucher(v) && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setReimburseDialog(v)}
-                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700"
-                            title="เติมเงิน"
-                          >
-                            <DollarSign className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {vouchers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-gray-400">
+                      <Receipt className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                      ยังไม่มีใบสำคัญ
                     </TableCell>
                   </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+                ) : vouchers.map(v => {
+                  const status = getVoucherStatus(v)
+                  return (
+                    <TableRow key={v.id}>
+                      <TableCell className="font-mono text-sm">{v.voucherNo}</TableCell>
+                      <TableCell className="text-sm">{fd(v.date)}</TableCell>
+                      <TableCell className="text-sm">{v.fund?.name || '—'}</TableCell>
+                      <TableCell className="text-sm">{v.payee}</TableCell>
+                      <TableCell className="text-sm text-gray-600">{v.description}</TableCell>
+                      <TableCell className="text-right font-semibold">฿{fc(v.amount)}</TableCell>
+                      <TableCell className="text-center">
+                        <Badge className={`text-xs ${status.color}`}>
+                          {status.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          {/* Edit button - only for pending vouchers */}
+                          {canEditVoucher(v) && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleEdit(v)}
+                              className="h-8 w-8 p-0"
+                              title="แก้ไข"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                          )}
+
+                          {/* Delete button - only for pending vouchers */}
+                          {canEditVoucher(v) && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setDeleteConfirm(v)}
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                              title="ลบ"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+
+                          {/* Approve button - only for pending vouchers */}
+                          {canApproveVoucher(v) && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleApprove(v)}
+                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+                              title="อนุมัติ"
+                            >
+                              <CheckCircle className="h-3 w-3" />
+                            </Button>
+                          )}
+
+                          {/* Reimburse button - only for approved but not reimbursed */}
+                          {canReimburseVoucher(v) && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setReimburseDialog(v)}
+                              className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700"
+                              title="เติมเงิน"
+                            >
+                              <DollarSign className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

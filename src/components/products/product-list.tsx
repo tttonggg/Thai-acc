@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Table,
   TableBody,
@@ -311,7 +312,7 @@ export function ProductList() {
               <p className="text-sm mt-2">ลองปรับตัวกรองหรือเพิ่มสินค้าใหม่</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <ScrollArea className="w-full">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -423,7 +424,7 @@ export function ProductList() {
                   })}
                 </TableBody>
               </Table>
-            </div>
+            </ScrollArea>
           )}
         </CardContent>
       </Card>

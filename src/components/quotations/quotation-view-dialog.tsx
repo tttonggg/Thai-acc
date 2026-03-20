@@ -43,6 +43,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
 interface QuotationLine {
   id: string
@@ -594,6 +595,9 @@ export function QuotationViewDialog({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <VisuallyHidden>
+            <DialogTitle>กำลังโหลดข้อมูลใบเสนอราคา</DialogTitle>
+          </VisuallyHidden>
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             <span className="ml-2 text-muted-foreground">กำลังโหลดข้อมูล...</span>
@@ -607,6 +611,9 @@ export function QuotationViewDialog({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl">
+          <VisuallyHidden>
+            <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบเสนอราคา</DialogTitle>
+          </VisuallyHidden>
           <div className="text-center py-12 text-red-600">
             เกิดข้อผิดพลาด: {error || 'ไม่พบข้อมูล'}
           </div>

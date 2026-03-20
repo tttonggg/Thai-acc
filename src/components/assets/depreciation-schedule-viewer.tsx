@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -94,6 +94,11 @@ export function DepreciationScheduleViewer({
             <Calendar className="h-5 w-5" />
             ตารางค่าเสื่อมราคา - {asset?.name} ({asset?.code})
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            แสดงตารางค่าเสื่อมราคาเดือนต่อเดือนของสินทรัพย์ {asset?.name}
+            รวมถึงค่าเสื่อมราคาสะสม มูลค่าสุทธิปัจจุบัน (Net Book Value)
+            และสถานะการบันทึกลงบัญชี
+          </DialogDescription>
         </DialogHeader>
 
         {/* Summary Cards */}

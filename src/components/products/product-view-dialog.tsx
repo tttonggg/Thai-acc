@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -157,6 +158,9 @@ export function ProductViewDialog({
             <Package className="h-5 w-5" />
             รายละเอียดสินค้า/บริการ
           </DialogTitle>
+          <DialogDescription>
+            ดูรายละเอียดสินค้า/บริการทั้งหมดรวมทั้งราคา สต็อก ภาษี และข้อมูลอื่นๆ
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">

@@ -26,6 +26,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
@@ -399,6 +400,9 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
           <DialogTitle className="text-xl">
             สร้าง{purchaseTypeLabels[formData.type]}ใหม่
           </DialogTitle>
+          <DialogDescription>
+            กรอกรายละเอียดใบซื้อ รายการสินค้า และคำนวณยอดรวม ใบซื้อนี้จะถูกบันทึกลงระบบและลงบัญชีการเงิน
+          </DialogDescription>
         </DialogHeader>
 
         {fetchingData ? (

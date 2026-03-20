@@ -12,9 +12,11 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -310,6 +312,10 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <VisuallyHidden>
+            <DialogTitle>กำลังโหลดข้อมูลใบซื้อ</DialogTitle>
+            <DialogDescription>กำลังดึงข้อมูลใบซื้อจากระบบ</DialogDescription>
+          </VisuallyHidden>
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             <span className="ml-2 text-muted-foreground">กำลังโหลดข้อมูล...</span>
@@ -323,6 +329,10 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl">
+          <VisuallyHidden>
+            <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบซื้อ</DialogTitle>
+            <DialogDescription>ไม่สามารถดึงข้อมูลใบซื้อได้ กรุณาลองใหม่</DialogDescription>
+          </VisuallyHidden>
           <div className="text-center py-12 text-red-600">
             เกิดข้อผิดพลาด: {error || 'ไม่พบข้อมูล'}
           </div>

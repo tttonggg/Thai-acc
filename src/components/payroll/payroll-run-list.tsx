@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { PayrollRunStatusDialog } from './payroll-status-dialog'
 
@@ -223,64 +224,66 @@ export function PayrollRunList() {
       <Card>
         <CardHeader className="pb-2"><CardTitle className="text-base">ประวัติรอบเงินเดือน</CardTitle></CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>เลขที่รอบ</TableHead>
-                <TableHead>งวด</TableHead>
-                <TableHead>จำนวนพนักงาน</TableHead>
-                <TableHead className="text-right">ฐานเงินเดือน</TableHead>
-                <TableHead className="text-right">ประกันสังคม</TableHead>
-                <TableHead className="text-right">ภาษี PND1</TableHead>
-                <TableHead className="text-right">เงินได้สุทธิ</TableHead>
-                <TableHead className="text-center">สถานะ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {runs.length === 0 ? (
-                <TableRow><TableCell colSpan={9} className="text-center py-8 text-gray-400"><DollarSign className="h-10 w-10 mx-auto mb-2 opacity-30" />ยังไม่มีรอบเงินเดือน</TableCell></TableRow>
-              ) : runs.map(r => {
-                const st = PAYROLL_STATUS[r.status] || { label: r.status, color: 'bg-gray-100 text-gray-600' }
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-mono text-sm">{r.runNo}</TableCell>
-                    <TableCell className="font-medium">{THAI_MONTHS[r.periodMonth - 1]} {r.periodYear + 543}</TableCell>
-                    <TableCell className="text-center">{r.payrolls.length} คน</TableCell>
-                    <TableCell className="text-right">฿{fc(r.totalBaseSalary)}</TableCell>
-                    <TableCell className="text-right text-purple-600">฿{fc(r.totalSsc)}</TableCell>
-                    <TableCell className="text-right text-red-600">฿{fc(r.totalTax)}</TableCell>
-                    <TableCell className="text-right font-bold text-green-600">฿{fc(r.totalNetPay)}</TableCell>
-                    <TableCell className="text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${st.color}`}>{st.label}</span>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex justify-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleViewDetails(r.id)}
-                          className="h-8 w-8 p-0"
-                          title="ดูรายละเอียดพนักงาน"
-                        >
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleManageStatus(r)}
-                          className="h-8 w-8 p-0"
-                          title="จัดการสถานะ"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>เลขที่รอบ</TableHead>
+                  <TableHead>งวด</TableHead>
+                  <TableHead>จำนวนพนักงาน</TableHead>
+                  <TableHead className="text-right">ฐานเงินเดือน</TableHead>
+                  <TableHead className="text-right">ประกันสังคม</TableHead>
+                  <TableHead className="text-right">ภาษี PND1</TableHead>
+                  <TableHead className="text-right">เงินได้สุทธิ</TableHead>
+                  <TableHead className="text-center">สถานะ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {runs.length === 0 ? (
+                  <TableRow><TableCell colSpan={9} className="text-center py-8 text-gray-400"><DollarSign className="h-10 w-10 mx-auto mb-2 opacity-30" />ยังไม่มีรอบเงินเดือน</TableCell></TableRow>
+                ) : runs.map(r => {
+                  const st = PAYROLL_STATUS[r.status] || { label: r.status, color: 'bg-gray-100 text-gray-600' }
+                  return (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-mono text-sm">{r.runNo}</TableCell>
+                      <TableCell className="font-medium">{THAI_MONTHS[r.periodMonth - 1]} {r.periodYear + 543}</TableCell>
+                      <TableCell className="text-center">{r.payrolls.length} คน</TableCell>
+                      <TableCell className="text-right">฿{fc(r.totalBaseSalary)}</TableCell>
+                      <TableCell className="text-right text-purple-600">฿{fc(r.totalSsc)}</TableCell>
+                      <TableCell className="text-right text-red-600">฿{fc(r.totalTax)}</TableCell>
+                      <TableCell className="text-right font-bold text-green-600">฿{fc(r.totalNetPay)}</TableCell>
+                      <TableCell className="text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${st.color}`}>{st.label}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleViewDetails(r.id)}
+                            className="h-8 w-8 p-0"
+                            title="ดูรายละเอียดพนักงาน"
+                          >
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleManageStatus(r)}
+                            className="h-8 w-8 p-0"
+                            title="จัดการสถานะ"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 

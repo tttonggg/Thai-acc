@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -162,63 +163,65 @@ export function EmployeeList() {
 
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>รหัส</TableHead>
-                <TableHead>ชื่อ-นามสกุล</TableHead>
-                <TableHead>ตำแหน่ง / แผนก</TableHead>
-                <TableHead className="text-right">เงินเดือน</TableHead>
-                <TableHead className="text-right">SSC (5%)</TableHead>
-                <TableHead className="text-center">สถานะ</TableHead>
-                <TableHead className="text-center">จัดการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-gray-400"><Users className="h-10 w-10 mx-auto mb-2 opacity-30" />{search ? 'ไม่พบพนักงานที่ค้นหา' : 'ยังไม่มีพนักงาน'}</TableCell></TableRow>
-              ) : filtered.map(e => (
-                <TableRow key={e.id}>
-                  <TableCell className="font-mono text-sm">{e.employeeCode}</TableCell>
-                  <TableCell>
-                    <p className="font-medium">{e.firstName} {e.lastName}</p>
-                    {e.taxId && <p className="text-xs text-gray-400">{e.taxId}</p>}
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {e.position || '—'}
-                    {e.department && <span className="text-gray-400 ml-1">/ {e.department}</span>}
-                  </TableCell>
-                  <TableCell className="text-right font-semibold">฿{fc(e.baseSalary)}</TableCell>
-                  <TableCell className="text-right text-purple-600">฿{fc(Math.min(e.baseSalary * 0.05, 750))}</TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant={e.isActive ? 'default' : 'secondary'} className="text-xs">{e.isActive ? 'ทำงาน' : 'ลาออก'}</Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex justify-center gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleEditEmployee(e)}
-                        className="h-8 w-8 p-0"
-                        title="แก้ไข"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteEmployee(e)}
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        title="ลบ"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <ScrollArea className="w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>รหัส</TableHead>
+                  <TableHead>ชื่อ-นามสกุล</TableHead>
+                  <TableHead>ตำแหน่ง / แผนก</TableHead>
+                  <TableHead className="text-right">เงินเดือน</TableHead>
+                  <TableHead className="text-right">SSC (5%)</TableHead>
+                  <TableHead className="text-center">สถานะ</TableHead>
+                  <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filtered.length === 0 ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-gray-400"><Users className="h-10 w-10 mx-auto mb-2 opacity-30" />{search ? 'ไม่พบพนักงานที่ค้นหา' : 'ยังไม่มีพนักงาน'}</TableCell></TableRow>
+                ) : filtered.map(e => (
+                  <TableRow key={e.id}>
+                    <TableCell className="font-mono text-sm">{e.employeeCode}</TableCell>
+                    <TableCell>
+                      <p className="font-medium">{e.firstName} {e.lastName}</p>
+                      {e.taxId && <p className="text-xs text-gray-400">{e.taxId}</p>}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {e.position || '—'}
+                      {e.department && <span className="text-gray-400 ml-1">/ {e.department}</span>}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">฿{fc(e.baseSalary)}</TableCell>
+                    <TableCell className="text-right text-purple-600">฿{fc(Math.min(e.baseSalary * 0.05, 750))}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant={e.isActive ? 'default' : 'secondary'} className="text-xs">{e.isActive ? 'ทำงาน' : 'ลาออก'}</Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex justify-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleEditEmployee(e)}
+                          className="h-8 w-8 p-0"
+                          title="แก้ไข"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteEmployee(e)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          title="ลบ"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
 
