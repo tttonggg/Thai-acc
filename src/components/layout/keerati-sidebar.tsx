@@ -5,7 +5,7 @@
 // FIXED: Proper contrast for all theme variants
 // ============================================
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   LayoutDashboard,
   FileText,
@@ -59,6 +59,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useThemeStore, themeColors, ThemeVariant } from '@/stores/theme-store'
+import { useTheme } from 'next-themes'
 import {
   Dialog,
   DialogContent,
@@ -200,6 +201,7 @@ interface SidebarProps {
   userRole?: string
   userName?: string
   onLogout?: () => void
+  onCloseMobile?: () => void
 }
 
 const roleLabels: Record<string, string> = {
@@ -214,11 +216,11 @@ const roleLabels: Record<string, string> = {
 // ============================================
 function ThemeCustomizer() {
   const [open, setOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const { theme, setTheme } = useTheme()
   const {
-    theme,
-    setTheme,
-    isDarkMode,
-    toggleDarkMode,
+    theme: pastelTheme,
+    setTheme: setPastelTheme,
     animationsEnabled,
     toggleAnimations,
     borderRadius,
@@ -226,6 +228,15 @@ function ThemeCustomizer() {
     accentIntensity,
     setAccentIntensity,
   } = useThemeStore()
+
+  // Prevent hydration mismatch with next-themes
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Sync next-themes with Zustand pastel theme (with fallback to prevent issues)
+  const isDarkMode = mounted && theme === 'dark'
+  const toggleDarkMode = () => setTheme(isDarkMode ? 'light' : 'dark')
 
   const radiusLabels = { sm: 'เล็ก', md: 'ปานกลาง', lg: 'ใหญ่', xl: 'ใหญ่พิเศษ' }
 
@@ -271,22 +282,22 @@ function ThemeCustomizer() {
               {(Object.keys(themeColors) as ThemeVariant[]).map((variant) => (
                 <button
                   key={variant}
-                  onClick={() => setTheme(variant)}
+                  onClick={() => setPastelTheme(variant)}
                   className={cn(
                     "relative p-3 rounded-xl transition-all hover:scale-105",
-                    theme === variant ? "ring-2 ring-offset-2 ring-[var(--primary)] scale-105" : ""
+                    pastelTheme === variant ? "ring-2 ring-offset-2 ring-[var(--primary)] scale-105" : ""
                   )}
                   style={{ background: themeColors[variant].gradient }}
                   title={themeColors[variant].nameTh}
                 >
-                  {theme === variant && (
+                  {pastelTheme === variant && (
                     <Heart size={14} className="absolute top-1 right-1 text-[var(--primary-foreground)] drop-shadow-md" fill="currentColor" />
                   )}
                 </button>
               ))}
             </div>
             <p className="text-xs text-[var(--muted-foreground)] text-center">
-              {themeColors[theme].nameTh} ({themeColors[theme].name})
+              {themeColors[pastelTheme].nameTh} ({themeColors[pastelTheme].name})
             </p>
           </div>
 
@@ -346,9 +357,10 @@ export function KeeratiSidebar({
   userRole = 'VIEWER',
   userName = 'ผู้ใช้',
   onLogout,
+  onCloseMobile,
 }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
-  const { expandedGroups, toggleGroup, isSidebarCollapsed, toggleSidebar, isDarkMode } = useThemeStore()
+  const { expandedGroups, toggleGroup, isSidebarCollapsed, toggleSidebar } = useThemeStore()
 
   const isCollapsed = isSidebarCollapsed
 
@@ -360,9 +372,12 @@ export function KeeratiSidebar({
       )}
     >
       {/* 🎀 Logo Header */}
-      <div className="flex items-center justify-between p-4 border-b border-[var(--sidebar-border)]">
-        <div className={cn("flex items-center gap-3", isCollapsed && "justify-center w-full")}>
-          <div 
+      <div className={cn(
+        "flex items-center border-b border-[var(--sidebar-border)]",
+        isCollapsed ? "flex-col gap-2 py-3 px-2" : "justify-between px-4 py-4"
+      )}>
+        <div className={cn("flex items-center", isCollapsed ? "justify-center w-full" : "gap-3")}>
+          <div
             className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg transition-transform hover:scale-110"
             style={{ background: 'linear-gradient(135deg, #ffb6c1, #ffd1dc)' }}
           >
@@ -375,14 +390,16 @@ export function KeeratiSidebar({
             </div>
           )}
         </div>
-        {!isCollapsed && (
-          <button
-            onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-[var(--sidebar-accent)] text-[var(--sidebar-foreground)] transition-colors flex-shrink-0"
-          >
-            <ChevronLeft size={18} />
-          </button>
-        )}
+        <button
+          onClick={toggleSidebar}
+          className={cn(
+            "rounded-lg hover:bg-[var(--sidebar-accent)] text-[var(--sidebar-foreground)] transition-colors flex-shrink-0",
+            isCollapsed ? "p-2" : "p-2"
+          )}
+          title={isCollapsed ? "ขยายเมนู" : "ย่อเมนู"}
+        >
+          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
       </div>
 
       {/* 🗂️ Grouped Navigation */}
@@ -397,7 +414,10 @@ export function KeeratiSidebar({
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveModule(item.id)}
+                onClick={() => {
+                  setActiveModule(item.id)
+                  onCloseMobile?.()
+                }}
                 className={cn(
                   "w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200",
                   isActive
@@ -452,7 +472,10 @@ export function KeeratiSidebar({
                       return (
                         <button
                           key={item.id}
-                          onClick={() => setActiveModule(item.id)}
+                          onClick={() => {
+                            setActiveModule(item.id)
+                            onCloseMobile?.()
+                          }}
                           className={cn(
                             "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm",
                             isActive
@@ -460,8 +483,8 @@ export function KeeratiSidebar({
                               : "hover:bg-[var(--sidebar-accent)] text-[var(--sidebar-foreground)]"
                           )}
                         >
-                          <Icon size={16} />
-                          <span>{item.label}</span>
+                          <Icon size={16} className="flex-shrink-0" />
+                          <span className="text-left flex-1">{item.label}</span>
                         </button>
                       )
                     })}

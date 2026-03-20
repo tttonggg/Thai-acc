@@ -29,6 +29,7 @@ import { PurchaseRequestList } from '@/components/purchase-requests/purchase-req
 import { PurchaseOrderList } from '@/components/purchase-orders/purchase-order-list'
 import { PurchaseList } from '@/components/purchases/purchase-list'
 import { QuotationList } from '@/components/quotations/quotation-list'
+import { ReceiptList } from '@/components/receipts/receipt-list'
 import { Reports } from '@/components/reports/reports'
 import { PeriodManagement } from '@/components/accounting-periods/period-management'
 import { BudgetManagement } from '@/components/budgets/budget-management'
@@ -36,6 +37,11 @@ import { Settings } from '@/components/settings/settings'
 import { LoginPage } from '@/components/auth/login-page'
 import { UserManagement } from '@/components/auth/user-management'
 import { PermissionGuard } from '@/components/auth/permission-guard'
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { DataExportPage } from '@/components/admin/data-export-page'
 import { BackupRestorePage } from '@/components/admin/backup-restore-page'
 import { DataImportPage } from '@/components/admin/data-import-page'
@@ -69,6 +75,7 @@ import {
   Activity,
   Webhook,
   BarChart,
+  Menu,
 } from 'lucide-react'
 
 export type Module =
@@ -78,6 +85,7 @@ export type Module =
   | 'invoices'
   | 'invoice-detail'
   | 'quotations'
+  | 'receipts'
   | 'vat'
   | 'wht'
   | 'customers'
@@ -111,6 +119,7 @@ export default function Home() {
   const { data: session, status } = useSession()
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Sync URL with activeModule using history API (doesn't trigger Next.js routing)
   useEffect(() => {
@@ -122,6 +131,7 @@ export default function Home() {
         'journal': '/journal',
         'invoices': '/invoices',
         'quotations': '/quotations',
+        'receipts': '/receipts',
         'vat': '/vat',
         'wht': '/wht',
         'customers': '/customers',
@@ -169,6 +179,7 @@ export default function Home() {
         '/journal': 'journal',
         '/invoices': 'invoices',
         '/quotations': 'quotations',
+        '/receipts': 'receipts',
         '/vat': 'vat',
         '/wht': 'wht',
         '/customers': 'customers',
@@ -273,6 +284,8 @@ export default function Home() {
         ) : null
       case 'quotations':
         return <QuotationList />
+      case 'receipts':
+        return <ReceiptList />
       case 'vat':
         return <VatReport />
       case 'wht':
@@ -436,17 +449,43 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Keerati Sidebar */}
-      <KeeratiSidebar 
-        activeModule={activeModule}
-        setActiveModule={setActiveModule}
-        userRole={userRole}
-        userName={session.user?.name || session.user?.email}
-        onLogout={() => signOut({ callbackUrl: '/' })}
-      />
-      
+      {/* Mobile Hamburger Menu */}
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <button
+              className="p-2 bg-background border border-border rounded-lg shadow-sm"
+              aria-label="เปิดเมนู"
+            >
+              <Menu size={24} className="text-foreground" />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-80">
+            <KeeratiSidebar
+              activeModule={activeModule}
+              setActiveModule={setActiveModule}
+              userRole={userRole}
+              userName={session.user?.name || session.user?.email}
+              onLogout={() => signOut({ callbackUrl: '/' })}
+              onCloseMobile={() => setMobileMenuOpen(false)}
+            />
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block">
+        <KeeratiSidebar
+          activeModule={activeModule}
+          setActiveModule={setActiveModule}
+          userRole={userRole}
+          userName={session.user?.name || session.user?.email}
+          onLogout={() => signOut({ callbackUrl: '/' })}
+        />
+      </div>
+
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-[var(--background)]">
+      <div className="flex-1 flex flex-col overflow-hidden bg-[var(--background)] md:pt-0 pt-16">
         {/* Content Area */}
         <main className="flex-1 overflow-auto p-6">
           {renderModule()}
