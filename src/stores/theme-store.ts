@@ -9,7 +9,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type ThemeVariant = 'default' | 'mint' | 'lavender' | 'peach' | 'sky' | 'lemon' | 'coral';
+export type ThemeVariant = 'default' | 'mint' | 'lavender' | 'peach' | 'sky' | 'lemon' | 'coral' | 'professional';
 
 export interface ThemeState {
   // Theme variant
@@ -212,5 +212,11 @@ export const themeColors: Record<ThemeVariant, { name: string; nameTh: string; c
     nameTh: 'คอรัลพีช',
     color: '#ff9e8d',
     gradient: 'linear-gradient(135deg, #ffb6b0, #ff9e8d)',
+  },
+  professional: {
+    name: 'Professional Amber',
+    nameTh: 'อาชีพแอมเบอร์',
+    color: '#F59E0B',
+    gradient: 'linear-gradient(135deg, #FBBF24, #F59E0B)',
   },
 };
