@@ -533,7 +533,7 @@ export function JournalEntry() {
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="แก้ไขรายการ">
+                        <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="แก้ไขรายการ">
                           <Edit className="h-4 w-4 text-blue-600" aria-hidden="true" />
                         </Button>
                       </div>

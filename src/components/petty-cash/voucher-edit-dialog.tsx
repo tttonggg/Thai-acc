@@ -163,7 +163,7 @@ export function PettyCashVoucherEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[95vw] md:max-w-md">
         <DialogHeader>
           <DialogTitle>แก้ไขใบสำคัญเงินสดย่อย</DialogTitle>
           <VisuallyHidden asChild>
@@ -205,7 +205,7 @@ export function PettyCashVoucherEditDialog({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label htmlFor="date">วันที่</Label>
               <Input

@@ -44,6 +44,7 @@ import { PaymentForm } from './payment-form'
 import { PaymentViewDialog } from './payment-view-dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
+import { getStatusBadgeProps } from '@/lib/status-badge'
 
 interface Payment {
   id: string
@@ -58,16 +59,16 @@ interface Payment {
   status: string
 }
 
-const statusColors: Record<string, string> = {
-  DRAFT: 'bg-gray-100 text-gray-800',
-  POSTED: 'bg-green-100 text-green-800',
-  CANCELLED: 'bg-red-100 text-red-800',
-}
-
 const statusLabels: Record<string, string> = {
   DRAFT: 'ร่าง',
   POSTED: 'ลงบัญชีแล้ว',
   CANCELLED: 'ยกเลิก',
+}
+
+// Helper function to get status badge
+const getStatusBadge = (status: string) => {
+  const config = getStatusBadgeProps(status)
+  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>
 }
 
 const paymentMethodLabels: Record<string, string> = {
@@ -503,16 +504,14 @@ export function PaymentList() {
                     <TableCell className="text-right">฿{payment.unallocated.toLocaleString()}</TableCell>
                     <TableCell className="text-right">฿{payment.whtAmount.toLocaleString()}</TableCell>
                     <TableCell>
-                      <Badge className={statusColors[payment.status]}>
-                        {statusLabels[payment.status]}
-                      </Badge>
+                      {getStatusBadge(payment.status)}
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-center gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
                           onClick={() => handleView(payment.id)}
                         >
                           <Eye className="h-4 w-4 text-gray-600" />
@@ -520,7 +519,7 @@ export function PaymentList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
                           onClick={() => handlePrint(payment)}
                           title="พิมพ์"
                         >
@@ -531,7 +530,7 @@ export function PaymentList() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-11 w-11"
                               onClick={() => handlePost(payment.id)}
                               title="ลงบัญชี"
                             >
@@ -540,7 +539,7 @@ export function PaymentList() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-11 w-11"
                               onClick={() => handleDelete(payment.id)}
                               title="ลบ"
                             >

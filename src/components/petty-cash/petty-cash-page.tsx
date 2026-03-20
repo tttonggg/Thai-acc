@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
+import { getStatusBadgeProps } from '@/lib/status-badge'
 import { PettyCashFundEditDialog } from './fund-edit-dialog'
 import { PettyCashVoucherEditDialog } from './voucher-edit-dialog'
 
@@ -377,9 +378,16 @@ function VouchersTab({ funds }: { funds: Fund[] }) {
   const totalUnreimbursed = vouchers.filter(v => !v.isReimbursed).reduce((s, v) => s + v.amount, 0)
 
   const getVoucherStatus = (voucher: Voucher) => {
-    if (voucher.isReimbursed) return { label: 'เติมแล้ว', color: 'bg-green-100 text-green-700' }
-    if (voucher.journalEntryId) return { label: 'อนุมัติแล้ว', color: 'bg-blue-100 text-blue-700' }
-    return { label: 'รออนุมัติ', color: 'bg-yellow-100 text-yellow-700' }
+    if (voucher.isReimbursed) {
+      const config = getStatusBadgeProps('COMPLETED')
+      return { label: 'เติมแล้ว', variant: config.variant }
+    }
+    if (voucher.journalEntryId) {
+      const config = getStatusBadgeProps('APPROVED')
+      return { label: 'อนุมัติแล้ว', variant: config.variant }
+    }
+    const config = getStatusBadgeProps('PENDING')
+    return { label: 'รออนุมัติ', variant: config.variant }
   }
 
   return (
@@ -470,7 +478,7 @@ function VouchersTab({ funds }: { funds: Fund[] }) {
                       <TableCell className="text-sm text-gray-600">{v.description}</TableCell>
                       <TableCell className="text-right font-semibold">฿{fc(v.amount)}</TableCell>
                       <TableCell className="text-center">
-                        <Badge className={`text-xs ${status.color}`}>
+                        <Badge variant={status.variant} className="text-xs">
                           {status.label}
                         </Badge>
                       </TableCell>

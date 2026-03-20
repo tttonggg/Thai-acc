@@ -243,7 +243,7 @@ function ThemeCustomizer() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)] transition-colors w-full">
+        <button className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)] transition-colors w-full">
           <Palette size={18} />
           <span>ปรับแต่งธีม</span>
         </button>
@@ -477,7 +477,7 @@ export function KeeratiSidebar({
                             onCloseMobile?.()
                           }}
                           className={cn(
-                            "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm",
+                            "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-sm",
                             isActive
                               ? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] font-medium shadow-sm"
                               : "hover:bg-[var(--sidebar-accent)] text-[var(--sidebar-foreground)]"

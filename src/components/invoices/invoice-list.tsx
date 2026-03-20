@@ -48,6 +48,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { InvoiceForm } from '@/components/invoices/invoice-form'
 import { InvoiceEditDialog } from '@/components/invoices/invoice-edit-dialog'
 import { useToast } from '@/hooks/use-toast'
+import { getStatusBadgeProps } from '@/lib/status-badge'
 
 interface Invoice {
   id: string
@@ -65,20 +66,18 @@ interface Invoice {
   }
 }
 
-const statusColors: Record<string, string> = {
-  DRAFT: 'bg-gray-100 text-gray-800',
-  ISSUED: 'bg-blue-100 text-blue-800',
-  PARTIAL: 'bg-yellow-100 text-yellow-800',
-  PAID: 'bg-green-100 text-green-800',
-  CANCELLED: 'bg-red-100 text-red-800',
-}
-
 const statusLabels: Record<string, string> = {
   DRAFT: 'ร่าง',
   ISSUED: 'ออกแล้ว',
   PARTIAL: 'รับชำระบางส่วน',
   PAID: 'รับชำระเต็มจำนวน',
   CANCELLED: 'ยกเลิก',
+}
+
+// Helper function to get status badge
+const getStatusBadge = (status: string) => {
+  const config = getStatusBadgeProps(status)
+  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>
 }
 
 const typeLabels: Record<string, string> = {
@@ -893,9 +892,7 @@ export function InvoiceList() {
                     <TableCell className="text-right">฿{(invoice.vatAmount ?? 0).toLocaleString()}</TableCell>
                     <TableCell className="text-right font-semibold">฿{(invoice.totalAmount ?? 0).toLocaleString()}</TableCell>
                     <TableCell>
-                      <Badge className={statusColors[invoice.status]}>
-                        {statusLabels[invoice.status]}
-                      </Badge>
+                      {getStatusBadge(invoice.status)}
                     </TableCell>
                     <TableCell className="text-center">
                       {invoice._count?.comments ? (
@@ -912,7 +909,7 @@ export function InvoiceList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleView(invoice.id)
@@ -923,7 +920,7 @@ export function InvoiceList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
                           onClick={(e) => {
                             e.stopPropagation()
                             openEditDialog(invoice.id)
@@ -934,7 +931,7 @@ export function InvoiceList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
                           onClick={(e) => {
                             e.stopPropagation()
                             handlePrint(invoice.id)
@@ -950,7 +947,7 @@ export function InvoiceList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleDownload(invoice.id, invoice.invoiceNo)

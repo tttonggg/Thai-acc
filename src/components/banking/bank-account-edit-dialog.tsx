@@ -114,7 +114,7 @@ export function BankAccountEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-[95vw] md:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{account ? 'แก้ไขบัญชีธนาคาร' : 'เพิ่มบัญชีธนาคาร'}</DialogTitle>
           <VisuallyHidden asChild>
@@ -124,7 +124,7 @@ export function BankAccountEditDialog({
           </VisuallyHidden>
         </DialogHeader>
         <div className="space-y-3 py-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label htmlFor="code">รหัส *</Label>
               <Input
@@ -153,7 +153,7 @@ export function BankAccountEditDialog({
               placeholder="สาขาถนนสุขุมวิท"
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label htmlFor="accountNumber">เลขที่บัญชี *</Label>
               <Input

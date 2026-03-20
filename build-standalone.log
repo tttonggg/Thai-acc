@@ -1,0 +1,272 @@
+
+> nextjs_tailwind_shadcn_ts@0.2.0 build
+> npm run db:select-schema && next build && npm run build:standalone
+
+
+> nextjs_tailwind_shadcn_ts@0.2.0 db:select-schema
+> node prisma/schema-loader.js
+
+✅ Using SQLITE schema
+   Source: /Users/tong/Thai-acc/prisma/schema-sqlite.prisma
+   Target: /Users/tong/Thai-acc/prisma/schema.prisma
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.production, .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 13.8s
+  Skipping validation of types
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/105) ...
+  Generating static pages using 7 workers (26/105) 
+  Generating static pages using 7 workers (52/105) 
+  Generating static pages using 7 workers (78/105) 
+✓ Generating static pages using 7 workers (105/105) in 244.9ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api
+├ ƒ /api/accounting-periods
+├ ƒ /api/accounting-periods/check
+├ ƒ /api/accounts
+├ ƒ /api/accounts/[id]
+├ ƒ /api/accounts/export
+├ ƒ /api/admin/activity-log
+├ ƒ /api/admin/activity-log/export
+├ ƒ /api/admin/analytics
+├ ƒ /api/admin/audit-logs
+├ ƒ /api/admin/backup
+├ ƒ /api/admin/backups
+├ ƒ /api/admin/backups/download/[filename]
+├ ƒ /api/admin/backups/upload
+├ ƒ /api/admin/export
+├ ƒ /api/admin/health
+├ ƒ /api/admin/import
+├ ƒ /api/admin/restore
+├ ƒ /api/admin/webhooks
+├ ƒ /api/admin/webhooks/[id]
+├ ƒ /api/admin/webhooks/[id]/test
+├ ƒ /api/analytics
+├ ƒ /api/assets
+├ ƒ /api/assets/[id]
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/auth/mfa/disable
+├ ƒ /api/auth/mfa/setup
+├ ƒ /api/auth/mfa/status
+├ ƒ /api/auth/mfa/verify
+├ ƒ /api/backup/export
+├ ƒ /api/backup/import
+├ ƒ /api/bank-accounts
+├ ƒ /api/bank-accounts/[id]
+├ ƒ /api/bank-accounts/[id]/reconcile
+├ ƒ /api/budgets
+├ ƒ /api/budgets/[id]
+├ ƒ /api/cheques
+├ ƒ /api/cheques/[id]
+├ ƒ /api/company
+├ ƒ /api/credit-notes
+├ ƒ /api/credit-notes/[id]
+├ ƒ /api/csrf/token
+├ ƒ /api/currencies
+├ ƒ /api/customers
+├ ƒ /api/customers/[id]
+├ ƒ /api/dashboard
+├ ƒ /api/debit-notes
+├ ƒ /api/debit-notes/[id]
+├ ƒ /api/departments
+├ ƒ /api/departments/[id]
+├ ƒ /api/docs
+├ ƒ /api/employees
+├ ƒ /api/employees/[id]
+├ ƒ /api/entities
+├ ƒ /api/entities/[id]
+├ ƒ /api/exchange-rates
+├ ƒ /api/graphql
+├ ƒ /api/health
+├ ƒ /api/inter-company
+├ ƒ /api/invoices
+├ ƒ /api/invoices/[id]
+├ ƒ /api/invoices/[id]/audit
+├ ƒ /api/invoices/[id]/comments
+├ ƒ /api/invoices/[id]/comments/[commentId]
+├ ƒ /api/invoices/[id]/export/pdf
+├ ƒ /api/invoices/[id]/issue
+├ ƒ /api/invoices/[id]/lines/[lineId]
+├ ƒ /api/invoices/[id]/preview
+├ ƒ /api/invoices/[id]/related
+├ ƒ /api/invoices/[id]/void
+├ ƒ /api/invoices/next-number
+├ ƒ /api/journal
+├ ƒ /api/journal-entries/[id]/export/pdf
+├ ƒ /api/journal/[id]
+├ ƒ /api/journal/[id]/post
+├ ƒ /api/journal/[id]/reverse
+├ ƒ /api/journal/post
+├ ƒ /api/metrics
+├ ƒ /api/notifications
+├ ƒ /api/notifications/[id]/read
+├ ƒ /api/notifications/read-all
+├ ƒ /api/payments
+├ ƒ /api/payments/[id]
+├ ƒ /api/payments/unpaid-invoices
+├ ƒ /api/payroll
+├ ƒ /api/payroll/[id]
+├ ƒ /api/payroll/[id]/payslip
+├ ƒ /api/petty-cash/funds
+├ ƒ /api/petty-cash/funds/[id]
+├ ƒ /api/petty-cash/vouchers
+├ ƒ /api/petty-cash/vouchers/[id]
+├ ƒ /api/petty-cash/vouchers/[id]/approve
+├ ƒ /api/petty-cash/vouchers/[id]/reimburse
+├ ƒ /api/products
+├ ƒ /api/products/[id]
+├ ƒ /api/purchase-orders
+├ ƒ /api/purchase-orders/[id]
+├ ƒ /api/purchase-orders/[id]/cancel
+├ ƒ /api/purchase-orders/[id]/confirm
+├ ƒ /api/purchase-orders/[id]/receive
+├ ƒ /api/purchase-orders/[id]/ship
+├ ƒ /api/purchase-orders/[id]/submit
+├ ƒ /api/purchase-requests
+├ ƒ /api/purchase-requests/[id]
+├ ƒ /api/purchase-requests/[id]/approve
+├ ƒ /api/purchase-requests/[id]/convert-to-po
+├ ƒ /api/purchase-requests/[id]/reject
+├ ƒ /api/purchase-requests/[id]/submit
+├ ƒ /api/purchases
+├ ƒ /api/purchases/[id]
+├ ƒ /api/purchases/[id]/post
+├ ƒ /api/quotations
+├ ƒ /api/quotations/[id]
+├ ƒ /api/quotations/[id]/approve
+├ ƒ /api/quotations/[id]/convert-to-invoice
+├ ƒ /api/quotations/[id]/reject
+├ ƒ /api/quotations/[id]/send
+├ ƒ /api/receipts
+├ ƒ /api/receipts/[id]
+├ ƒ /api/receipts/[id]/export/pdf
+├ ƒ /api/receipts/[id]/post
+├ ƒ /api/receipts/unpaid-invoices
+├ ƒ /api/reports/balance-sheet
+├ ƒ /api/reports/balance-sheet/export/excel
+├ ƒ /api/reports/balance-sheet/export/pdf
+├ ƒ /api/reports/custom
+├ ƒ /api/reports/general-ledger
+├ ƒ /api/reports/income-statement
+├ ƒ /api/reports/income-statement/export/excel
+├ ƒ /api/reports/income-statement/export/pdf
+├ ƒ /api/reports/scheduled
+├ ƒ /api/reports/scheduled/[id]
+├ ƒ /api/reports/scheduled/[id]/run
+├ ƒ /api/reports/scheduled/[id]/runs
+├ ƒ /api/reports/templates
+├ ƒ /api/reports/trial-balance
+├ ƒ /api/reports/trial-balance/export/excel
+├ ƒ /api/reports/trial-balance/export/pdf
+├ ƒ /api/reports/vat
+├ ƒ /api/reports/wht
+├ ƒ /api/security/audit
+├ ƒ /api/security/mfa
+├ ƒ /api/security/password
+├ ƒ /api/security/sessions
+├ ƒ /api/security/webhooks
+├ ƒ /api/sessions
+├ ƒ /api/settings
+├ ƒ /api/stock-balances
+├ ƒ /api/stock-movements
+├ ƒ /api/stock-movements/[id]
+├ ƒ /api/stock-takes
+├ ƒ /api/stock-takes/[id]
+├ ƒ /api/stock-takes/[id]/approve
+├ ƒ /api/stock-takes/[id]/post
+├ ƒ /api/stock/transfers
+├ ƒ /api/stock/transfers/[id]
+├ ƒ /api/tax-forms
+├ ƒ /api/tax-forms/[id]
+├ ƒ /api/tax-forms/[id]/export
+├ ƒ /api/test-auth
+├ ƒ /api/upload
+├ ƒ /api/user/preferences
+├ ƒ /api/user/recent-items
+├ ƒ /api/users
+├ ƒ /api/users/[id]
+├ ƒ /api/v1/invoices
+├ ƒ /api/v1/invoices/[id]
+├ ƒ /api/v2/invoices
+├ ƒ /api/v2/invoices/[id]
+├ ƒ /api/vendors
+├ ƒ /api/vendors/[id]
+├ ƒ /api/versions
+├ ƒ /api/warehouses
+├ ƒ /api/warehouses/[id]
+├ ƒ /api/webhooks
+├ ƒ /api/webhooks/[id]
+├ ƒ /api/wht
+├ ƒ /api/wht/[id]
+├ ƒ /api/wht/[id]/pdf
+├ ○ /docs
+└ ○ /stock-takes
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> nextjs_tailwind_shadcn_ts@0.2.0 build:standalone
+> cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && node scripts/build-production.js && cd .next/standalone && npm install --production --legacy-peer-deps && cd ../.. && echo 'Build complete! Standalone directory ready.' && echo 'IMPORTANT: Update .next/standalone/.env with absolute DATABASE_URL path'
+
+🏗️  Preparing Production Build for Standalone Deployment
+
+
+📋 Setting up SQLite schema for build...
+
+🔧 Generating Prisma client...
+warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+For more information, see: https://pris.ly/prisma-config
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.19.2) to ./node_modules/@prisma/client in 532ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+
+📦 Copying Prisma files to standalone...
+📄 Copied: prisma/schema.prisma -> .next/standalone/prisma/schema.prisma
+📄 Copied: prisma/schema-sqlite.prisma -> .next/standalone/prisma/schema-sqlite.prisma
+
+📦 Copying Prisma client...
+
+📝 Creating production .env template...
+
+✅ Production build preparation complete!
+
+📋 Next steps:
+   1. Update .next/standalone/.env with your absolute DATABASE_URL path
+   2. Copy your SQLite database to the specified path
+   3. Start the server: npm run start
+npm warn config production Use `--omit=dev` instead.
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated lodash.get@4.4.2: This package is deprecated. Use the optional chaining (?.) operator instead.
+npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+npm warn deprecated glob@7.1.6: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated intersection-observer@0.10.0: The Intersection Observer polyfill is no longer needed and can safely be removed. Intersection Observer has been Baseline since 2019.
+npm warn deprecated jpeg-exif@1.1.4: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+> nextjs_tailwind_shadcn_ts@0.2.0 prepare
+> husky install
+
+sh: husky: command not found
+npm error code 127
+npm error path /Users/tong/Thai-acc/.next/standalone
+npm error command failed
+npm error command sh -c husky install
+npm error A complete log of this run can be found in: /Users/tong/.npm/_logs/2026-03-20T02_32_11_126Z-debug-0.log

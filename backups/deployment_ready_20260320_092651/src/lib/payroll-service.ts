@@ -1,0 +1,233 @@
+// ============================================
+// 👥 Payroll Service (Agent 06: Payroll & HR Engineer)
+// Thai SSC (ประกันสังคม) & PND1 Tax Calculator
+// ============================================
+
+/**
+ * Calculates Social Security Contribution (ประกันสังคม)
+ * Rate: 5% of salary, capped at ฿750/month
+ * (per Thai Social Security Act, max insurable salary = ฿15,000)
+ */
+export function calculateSSC(baseSalary: number): number {
+  const sscRate = 0.05
+  const maxSSC = 750 // บาท
+  return Math.min(baseSalary * sscRate, maxSSC)
+}
+
+/**
+ * Calculates PND1 (ภ.ง.ด.1) Withholding Tax on monthly income
+ * Using annual progressive rates, converted to monthly
+ * Thai Revenue Department 2024 rates
+ */
+export function calculatePND1(annualIncome: number): number {
+  // Personal allowance: ฿60,000
+  const personalAllowance = 60_000
+  const taxableIncome = Math.max(0, annualIncome - personalAllowance)
+
+  let tax = 0
+  // Progressive rates 2024 (Thailand)
+  const brackets = [
+    { limit: 150_000, rate: 0 },       // 0 - 150,000 = 0%
+    { limit: 300_000, rate: 0.05 },     // 150,001 - 300,000 = 5%
+    { limit: 500_000, rate: 0.10 },     // 300,001 - 500,000 = 10%
+    { limit: 750_000, rate: 0.15 },     // 500,001 - 750,000 = 15%
+    { limit: 1_000_000, rate: 0.20 },   // 750,001 - 1,000,000 = 20%
+    { limit: 2_000_000, rate: 0.25 },   // 1,000,001 - 2,000,000 = 25%
+    { limit: 5_000_000, rate: 0.30 },   // 2,000,001 - 5,000,000 = 30%
+    { limit: Infinity, rate: 0.35 },    // > 5,000,000 = 35%
+  ]
+
+  let previousLimit = 0
+  for (const bracket of brackets) {
+    if (taxableIncome <= previousLimit) break
+    const taxableInBracket = Math.min(taxableIncome, bracket.limit) - previousLimit
+    tax += taxableInBracket * bracket.rate
+    previousLimit = bracket.limit
+  }
+
+  // Return monthly PND1
+  return Math.round(tax / 12)
+}
+
+/**
+ * Calculates full payroll for a single employee in a payroll run.
+ * Returns breakdown of all components.
+ */
+export function calculateEmployeePayroll(params: {
+  baseSalary: number
+  additions?: number    // OT, bonus, allowances
+  deductions?: number   // absence deductions
+  isYearEnd?: boolean   // if true, use December bonus income
+}): {
+  baseSalary: number
+  additions: number
+  deductions: number
+  grossSalary: number
+  socialSecurity: number   // employee portion (deducted from gross)
+  withholdingTax: number   // PND1
+  netPay: number
+} {
+  const { baseSalary, additions = 0, deductions = 0 } = params
+  const grossSalary = baseSalary + additions - deductions
+
+  // SSC on base salary only (per Thai SSC regulations)
+  const socialSecurity = calculateSSC(baseSalary)
+
+  // PND1 on annual gross (simplified: monthly gross × 12)
+  const annualGross = grossSalary * 12
+  const withholdingTax = calculatePND1(annualGross)
+
+  const netPay = grossSalary - socialSecurity - withholdingTax
+
+  return {
+    baseSalary,
+    additions,
+    deductions,
+    grossSalary,
+    socialSecurity,
+    withholdingTax,
+    netPay: Math.max(0, netPay),
+  }
+}
+
+/**
+ * Employer SSC contribution (also 5%, capped at ฿750)
+ * This is an additional expense to the company
+ */
+export function calculateEmployerSSC(baseSalary: number): number {
+  return calculateSSC(baseSalary)
+}
+
+/**
+ * Creates GL journal entry for payroll when approved/posted
+ * Journal entry breakdown:
+ * - Debit: Salary Expense (5310) - Total gross salary + employer SSC
+ * - Credit: SSC Payable (2133) - Employee SSC deducted
+ * - Credit: WHT Payable (2131) - Income tax withheld (PND1)
+ * - Credit: Wages Payable (2140) - Net salary payable
+ */
+export async function createPayrollJournalEntry(
+  payrollRunId: string,
+  userId?: string
+) {
+  const prisma = (await import('@/lib/db')).default
+
+  return await prisma.$transaction(async (tx) => {
+    const payrollRun = await tx.payrollRun.findUnique({
+      where: { id: payrollRunId },
+      include: { payrolls: true }
+    })
+
+    if (!payrollRun) {
+      throw new Error(`Payroll run ${payrollRunId} not found`)
+    }
+
+    if (payrollRun.journalEntryId) {
+      throw new Error('Payroll already has journal entry')
+    }
+
+    // Get required accounts
+    const salaryExpenseAccount = await tx.chartOfAccount.findUnique({
+      where: { code: '5310' } // เงินเดือนและค่าจ้าง
+    })
+    const sscPayableAccount = await tx.chartOfAccount.findUnique({
+      where: { code: '2133' } // ประกันสังคมต้องจ่าย
+    })
+    const whtPayableAccount = await tx.chartOfAccount.findUnique({
+      where: { code: '2131' } // ภาษีเงินได้หัก ณ ที่จ่าย
+    })
+    const wagesPayableAccount = await tx.chartOfAccount.findUnique({
+      where: { code: '2140' } // เงินเดือนต้องจ่าย
+    })
+
+    if (!salaryExpenseAccount || !sscPayableAccount || !whtPayableAccount || !wagesPayableAccount) {
+      throw new Error('Required payroll accounts not found in chart of accounts')
+    }
+
+    // Calculate totals
+    const totalGrossSalary = payrollRun.totalBaseSalary + payrollRun.totalAdditions - payrollRun.totalDeductions
+    const totalEmployeeSSC = payrollRun.totalSsc
+    const totalEmployerSSC = payrollRun.payrolls.reduce((sum, p) => {
+      const empSSC = calculateEmployerSSC(p.baseSalary)
+      return sum + empSSC
+    }, 0)
+    const totalWHT = payrollRun.totalTax
+    const totalNetPay = payrollRun.totalNetPay
+
+    // Calculate debit amount (gross salary + employer SSC)
+    const totalDebit = totalGrossSalary + totalEmployerSSC
+
+    // Verify double-entry balance
+    const totalCredit = totalEmployeeSSC + totalWHT + totalNetPay
+    if (Math.abs(totalDebit - totalCredit) > 0.01) {
+      throw new Error(`Payroll journal entry not balanced: Debit=${totalDebit}, Credit=${totalCredit}`)
+    }
+
+    // Generate journal entry number
+    const count = await tx.journalEntry.count()
+    const entryNo = `PAY-${payrollRun.periodYear}${String(payrollRun.periodMonth).padStart(2, '0')}-${String(count + 1).padStart(4, '0')}`
+
+    // Create journal entry
+    let lineNo = 1
+    const journalEntry = await tx.journalEntry.create({
+      data: {
+        entryNo,
+        entryDate: payrollRun.paymentDate,
+        description: `เงินเดือนเดือน ${payrollRun.periodMonth}/${payrollRun.periodYear}`,
+        documentType: 'PAYROLL',
+        documentId: payrollRunId,
+        totalDebit,
+        totalCredit,
+        status: 'POSTED',
+        createdById: userId,
+        lines: {
+          create: [
+            {
+              lineNo: lineNo++,
+              accountId: salaryExpenseAccount.id,
+              description: `เงินเดือนและค่าจ้าง ${payrollRun.periodMonth}/${payrollRun.periodYear}`,
+              debit: totalGrossSalary,
+              credit: 0,
+            },
+            {
+              lineNo: lineNo++,
+              accountId: salaryExpenseAccount.id,
+              description: `ประกันสังคมส่วนนายจ้าง ${payrollRun.periodMonth}/${payrollRun.periodYear}`,
+              debit: totalEmployerSSC,
+              credit: 0,
+            },
+            {
+              lineNo: lineNo++,
+              accountId: sscPayableAccount.id,
+              description: `ประกันสังคมส่วนลูกจ้าง ${payrollRun.periodMonth}/${payrollRun.periodYear}`,
+              debit: 0,
+              credit: totalEmployeeSSC,
+            },
+            {
+              lineNo: lineNo++,
+              accountId: whtPayableAccount.id,
+              description: `ภาษีเงินได้หัก ณ ที่จ่าย (ภงด.1) ${payrollRun.periodMonth}/${payrollRun.periodYear}`,
+              debit: 0,
+              credit: totalWHT,
+            },
+            {
+              lineNo: lineNo++,
+              accountId: wagesPayableAccount.id,
+              description: `เงินเดือนต้องจ่าย ${payrollRun.periodMonth}/${payrollRun.periodYear}`,
+              debit: 0,
+              credit: totalNetPay,
+            }
+          ]
+        }
+      }
+    })
+
+    // Update payroll run with journal entry ID
+    await tx.payrollRun.update({
+      where: { id: payrollRunId },
+      data: { journalEntryId: journalEntry.id }
+    })
+
+    return journalEntry
+  })
+}

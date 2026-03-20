@@ -77,7 +77,7 @@ export function Header({
 
         {/* Right Section */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="relative">
+          <Button variant="ghost" size="icon" className="relative h-11 w-11">
             <Bell className="h-5 w-5 text-gray-600" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
           </Button>

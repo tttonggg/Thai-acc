@@ -134,7 +134,7 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
@@ -150,7 +150,7 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
         <div className="space-y-4">
           {/* Basic Info */}
           <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <Label>รหัสพนักงาน *</Label>
                 <Input
@@ -169,7 +169,7 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <Label>ชื่อ *</Label>
                 <Input
@@ -188,7 +188,7 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <Label>ตำแหน่ง</Label>
                 <Input
@@ -228,7 +228,7 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
           <div className="space-y-3 border-t pt-3">
             <h3 className="text-sm font-medium text-gray-700">ภาษีและประกันสังคม</h3>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <Label>เลขบัตรประชาชน</Label>
                 <Input
@@ -254,7 +254,7 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
           <div className="space-y-3 border-t pt-3">
             <h3 className="text-sm font-medium text-gray-700">ข้อมูลธนาคาร</h3>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <Label>เลขที่บัญชีธนาคาร</Label>
                 <Input

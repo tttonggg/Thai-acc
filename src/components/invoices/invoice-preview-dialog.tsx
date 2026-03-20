@@ -110,7 +110,7 @@ export function InvoicePreviewDialog({
       if (!open) cleanup()
       onOpenChange(open)
     }}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="max-w-[95vw] md:max-w-6xl max-h-[90vh] overflow-hidden">
         <VisuallyHidden>
           <DialogDescription>
             พรีวิว invoice dialog สำหรับดูตัวอย่างใบกำกับภาษีก่อนพิมพ์หรือดาวน์โหลดพร้อมการปรับแต่งรูปแบบ

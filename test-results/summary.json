@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-03-19T03:46:26.303Z",
+  "timestamp": "2026-03-19T10:14:14.239Z",
   "totalTests": 0,
   "passed": 0,
   "failed": 0,
   "skipped": 0,
   "artifacts": {
-    "screenshots": 2,
+    "screenshots": 0,
     "videos": 0,
     "traces": 0
   }

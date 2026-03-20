@@ -53,6 +53,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
+import { getStatusBadgeProps } from '@/lib/status-badge'
 
 interface Quotation {
   id: string
@@ -104,15 +105,10 @@ const statusLabels: Record<string, string> = {
   CANCELLED: 'ยกเลิก',
 }
 
-const statusColors: Record<string, string> = {
-  DRAFT: 'bg-gray-100 text-gray-800 border-gray-300',
-  SENT: 'bg-blue-100 text-blue-800 border-blue-300',
-  APPROVED: 'bg-green-100 text-green-800 border-green-300',
-  REJECTED: 'bg-red-100 text-red-800 border-red-300',
-  REVISED: 'bg-orange-100 text-orange-800 border-orange-300',
-  EXPIRED: 'bg-purple-100 text-purple-800 border-purple-300',
-  CONVERTED: 'bg-teal-100 text-teal-800 border-teal-300',
-  CANCELLED: 'bg-gray-100 text-gray-800 border-gray-300',
+// Helper function to get status badge
+const getStatusBadge = (status: string) => {
+  const config = getStatusBadgeProps(status)
+  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>
 }
 
 export function QuotationList() {
@@ -562,12 +558,7 @@ export function QuotationList() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          className={statusColors[quotation.status]}
-                          variant="outline"
-                        >
-                          {statusLabels[quotation.status]}
-                        </Badge>
+                        {getStatusBadge(quotation.status)}
                         {quotation.invoiceId && (
                           <div className="text-xs text-green-600 mt-1">
                             <FileCheck className="h-3 w-3 inline mr-1" />
@@ -585,7 +576,7 @@ export function QuotationList() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-11 w-11"
                             onClick={() => handleView(quotation)}
                           >
                             <Eye className="h-4 w-4 text-gray-600" />
@@ -597,7 +588,7 @@ export function QuotationList() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8"
+                                className="h-11 w-11"
                                 onClick={() => handleEdit(quotation.id)}
                               >
                                 <Edit className="h-4 w-4 text-blue-600" />
@@ -606,7 +597,7 @@ export function QuotationList() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8"
+                                  className="h-11 w-11"
                                   onClick={() => handleDelete(quotation.id)}
                                   disabled={deletingQuotation === quotation.id}
                                 >
@@ -670,12 +661,7 @@ export function QuotationList() {
             <DialogDescription>
               {selectedQuotation && (
                 <div className="flex items-center gap-4 mt-2">
-                  <Badge
-                    className={statusColors[selectedQuotation.status]}
-                    variant="outline"
-                  >
-                    {statusLabels[selectedQuotation.status]}
-                  </Badge>
+                  {getStatusBadge(selectedQuotation.status)}
                   {isExpiringSoon(selectedQuotation.validUntil) &&
                     selectedQuotation.status !== 'EXPIRED' && (
                       <Badge className="bg-orange-100 text-orange-800 border-orange-300">

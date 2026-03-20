@@ -317,7 +317,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                   <CardTitle className="text-lg">รายละเอียดการจ่ายเงิน</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="vendorId"
@@ -364,7 +364,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="paymentMethod"
@@ -419,7 +419,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                   </div>
 
                   {paymentMethod === 'CHEQUE' && (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
                         name="chequeNo"
@@ -517,7 +517,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
 ค้างจ่าย ฿{invoice.balance.toLocaleString()}                              </Badge>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                               <div>
                                 <label htmlFor={`allocate-${invoice.id}`} className="text-xs text-gray-500">จัดจ่าย</label>
                                 <Input className="!h-11 text-base"

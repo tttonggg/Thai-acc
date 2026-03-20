@@ -117,7 +117,7 @@ export function WarehouseEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[95vw] md:max-w-md">
         <VisuallyHidden>
           <DialogDescription>
             {warehouse ? 'แก้ไขคลังสินค้าในระบบ' : 'สร้างคลังสินค้าใหม่ในระบบ'}
@@ -130,7 +130,7 @@ export function WarehouseEditDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="code">รหัสคลัง *</Label>
               <Input

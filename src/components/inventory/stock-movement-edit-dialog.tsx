@@ -139,7 +139,7 @@ export function StockMovementEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[95vw] md:max-w-md">
         <VisuallyHidden>
           <DialogDescription>
             แก้ไขหมายเหตุหรือยกเลิกการเคลื่อนไหวสินค้าในคลังสินค้า
@@ -159,7 +159,7 @@ export function StockMovementEditDialog({
               </div>
               <Badge className={mt.color}>{mt.label}</Badge>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
               <div>
                 <span className="text-gray-500">คลัง:</span>
                 <span className="ml-1 font-medium">{movement.warehouse.name}</span>

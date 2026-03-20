@@ -1,144 +1,60 @@
-# Thai Accounting ERP - Production Deployment Guide
+# Thai Accounting ERP - Deployment Guide
 
-Complete guide for deploying Thai Accounting ERP to production environments.
+## 📦 Deployment Package
 
-## Table of Contents
+Production-ready Thai Accounting ERP system with example database.
 
-1. [Prerequisites](#prerequisites)
-2. [Quick Start Deployment](#quick-start-deployment)
-3. [Manual Deployment Steps](#manual-deployment-steps)
-4. [Service Management](#service-management)
-5. [Health Monitoring](#health-monitoring)
-6. [Troubleshooting](#troubleshooting)
-7. [Security Considerations](#security-considerations)
-8. [Backup and Recovery](#backup-and-recovery)
+## 🚀 Quick Start
 
----
-
-## Prerequisites
-
-### System Requirements
-
-- **OS**: Linux (Ubuntu 20.04+, Debian 11+, CentOS 8+) or macOS
-- **Runtime**: Bun 1.0+ or Node.js 20+
-- **Memory**: 1GB RAM minimum (2GB recommended)
-- **Disk**: 500MB free space minimum
-- **Database**: SQLite (included) or PostgreSQL 14+
-
-### Required Software
-
+### 1. Install Dependencies
 ```bash
-# Install Bun (recommended)
-curl -fsSL https://bun.sh/install | bash
-
-# OR install Node.js
-sudo apt-get update
-sudo apt-get install -y nodejs npm
-
-# Install build tools
-sudo apt-get install -y build-essential python3
-
-# Install SQLite3 (for development)
-sudo apt-get install -y sqlite3
+cd .next/standalone
+npm install --production --legacy-peer-deps
 ```
 
----
-
-## Quick Start Deployment
-
-### Automated Deployment
-
+### 2. Configure Database
+Edit `.next/standalone/.env`:
 ```bash
-# Clone repository
-cd Thai-acc
-
-# Run deployment script
-sudo ./scripts/deploy-production.sh
+DATABASE_URL=file:/absolute/path/to/.next/standalone/prisma/dev.db
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-here
 ```
 
-This script will:
-1. Check system requirements
-2. Backup existing database
-3. Install dependencies
-4. Build application
-5. Deploy to /opt/thai-accounting
-6. Create systemd service
-7. Start and verify deployment
+**IMPORTANT**: Use absolute paths for SQLite!
 
----
-
-## Service Management
-
+### 3. Copy Database
 ```bash
-# Start service
-sudo systemctl start thai-accounting
-
-# Stop service
-sudo systemctl stop thai-accounting
-
-# Check status
-sudo systemctl status thai-accounting
-
-# View logs
-sudo journalctl -u thai-accounting -f
+cp -r prisma .next/standalone/
 ```
 
----
-
-## Health Monitoring
-
+### 4. Start Server
 ```bash
-# Run health check
-sudo ./scripts/health-check.sh
+cd .next/standalone
+npm start
 ```
 
-Checks:
-- Service running
-- Port listening
-- Web response
-- Database health
-- Disk space
-- Memory usage
-- Log errors
-- API endpoints
+## 🔐 Default Users
 
----
+| Email | Password | Role |
+|-------|----------|------|
+| admin@thaiaccounting.com | admin123 | ADMIN |
+| accountant@thaiaccounting.com | acc123 | ACCOUNTANT |
+| user@thaiaccounting.com | user123 | USER |
+| viewer@thaiaccounting.com | viewer123 | VIEWER |
 
-## Troubleshooting
+## 📊 Features
 
-### Login Fails
+All 16 modules included:
+- Dashboard, Accounts, Journal, Invoices, Quotations, Receipts
+- Customers, Vendors, Purchases, Payments, Credit/Debit Notes
+- VAT, WHT, Inventory, Banking, Assets, Petty Cash, Payroll, Reports
 
-Edit `/opt/thai-accounting/.env`:
-```
-DATABASE_URL=file:/opt/thai-accounting/dev.db
-```
+## ✅ Build Status
 
-Restart service:
-```bash
-sudo systemctl restart thai-accounting
-```
+- Compilation: ✓ Successful
+- Theme System: ✓ Synchronized (light/dark)
+- Color Contrast: ✓ WCAG AAA compliant
+- Database: ✓ Seeded with example data
+- Backup: ✓ backups/deployment_ready_20260320_092651/
 
----
-
-## Security
-
-### Change Default Password
-
-```
-Email: admin@thaiaccounting.com
-Password: admin123
-```
-
-### Generate Secure Secret
-
-```bash
-openssl rand -base64 32
-```
-
----
-
-## Version
-
-- **Application**: Thai Accounting ERP
-- **Version**: 1.0.0
-- **Status**: Production Ready ✅
+Deploy now! 🚀

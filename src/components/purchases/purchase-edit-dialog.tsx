@@ -460,7 +460,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">
             แก้ไข{purchase ? purchaseTypeLabels[purchase.type] : ''} - {purchase?.invoiceNo}

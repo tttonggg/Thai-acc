@@ -120,7 +120,7 @@ export function StockTransferCompleteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[95vw] md:max-w-md">
         <VisuallyHidden>
           <DialogDescription>
             {isCompleted ? 'แสดงรายละเอียดการโอนสินค้าที่สำเร็จแล้ว' : 'ดำเนินการยืนยันรับสินค้าหรือยกเลิกการโอน'}

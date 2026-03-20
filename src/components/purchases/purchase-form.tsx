@@ -413,7 +413,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
         ) : (
           <div className="space-y-6">
             {/* Vendor & Dates */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div className="md:col-span-1">
                 <Label htmlFor="vendorId" className="required">
                   ผู้ขาย *
@@ -661,7 +661,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          className="h-11 w-11 text-destructive hover:text-destructive"
                           onClick={() => removeLine(line.id)}
                           disabled={lines.length === 1}
                         >
@@ -761,7 +761,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
             </Card>
 
             {/* Withholding Tax & Notes */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="withholdingRate">หัก ณ ที่จ่าย (%)</Label>
                 <Select

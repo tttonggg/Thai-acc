@@ -349,7 +349,7 @@ export function ReceiptViewDialog({
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[700px]">
+        <DialogContent className="max-w-[95vw] md:max-w-[700px]">
           <VisuallyHidden>
             <DialogTitle>กำลังโหลดข้อมูลใบเสร็จ</DialogTitle>
           </VisuallyHidden>
@@ -364,7 +364,7 @@ export function ReceiptViewDialog({
   if (!receipt) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[700px]">
+        <DialogContent className="max-w-[95vw] md:max-w-[700px]">
           <VisuallyHidden>
             <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบเสร็จ</DialogTitle>
           </VisuallyHidden>

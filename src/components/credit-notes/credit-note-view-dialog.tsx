@@ -107,7 +107,7 @@ export function CreditNoteViewDialog({ creditNoteId, open, onOpenChange }: Credi
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
           <VisuallyHidden>
             <DialogTitle>กำลังโหลดข้อมูลใบลดหนี้</DialogTitle>
           </VisuallyHidden>
@@ -122,7 +122,7 @@ export function CreditNoteViewDialog({ creditNoteId, open, onOpenChange }: Credi
   if (!creditNote) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
           <VisuallyHidden>
             <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบลดหนี้</DialogTitle>
           </VisuallyHidden>

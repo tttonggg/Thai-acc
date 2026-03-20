@@ -37,6 +37,7 @@ import { PurchaseForm } from '@/components/purchases/purchase-form'
 import { PurchaseEditDialog } from '@/components/purchases/purchase-edit-dialog'
 import { PurchaseViewDialog } from '@/components/purchases/purchase-view-dialog'
 import { useToast } from '@/hooks/use-toast'
+import { getStatusBadgeProps } from '@/lib/status-badge'
 
 interface Purchase {
   id: string
@@ -52,20 +53,18 @@ interface Purchase {
   paidAmount: number
 }
 
-const statusColors: Record<string, string> = {
-  DRAFT: 'bg-gray-100 text-gray-800',
-  POSTED: 'bg-blue-100 text-blue-800',
-  PAID: 'bg-green-100 text-green-800',
-  CANCELLED: 'bg-red-100 text-red-800',
-  ISSUED: 'bg-blue-100 text-blue-800',
-}
-
 const statusLabels: Record<string, string> = {
   DRAFT: 'ร่าง',
   POSTED: 'ลงบัญชีแล้ว',
   PAID: 'จ่ายแล้ว',
   CANCELLED: 'ยกเลิก',
   ISSUED: 'ออกแล้ว',
+}
+
+// Helper function to get status badge
+const getStatusBadge = (status: string) => {
+  const config = getStatusBadgeProps(status)
+  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>
 }
 
 const typeLabels: Record<string, string> = {
@@ -396,16 +395,14 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
                     <TableCell className="text-right font-semibold">฿{(purchase.totalAmount ?? 0).toLocaleString()}</TableCell>
                     <TableCell className="text-right">฿{(purchase.paidAmount ?? 0).toLocaleString()}</TableCell>
                     <TableCell>
-                      <Badge className={statusColors[purchase.status]}>
-                        {statusLabels[purchase.status]}
-                      </Badge>
+                      {getStatusBadge(purchase.status)}
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-center gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
                           onClick={() => openViewDialog(purchase.id)}
                         >
                           <Eye className="h-4 w-4 text-gray-600" />
@@ -415,7 +412,7 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-11 w-11"
                               onClick={() => openEditDialog(purchase.id)}
                             >
                               <Edit className="h-4 w-4 text-blue-600" />
@@ -423,7 +420,7 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-11 w-11"
                               onClick={() => handleDelete(purchase.id)}
                             >
                               <Trash2 className="h-4 w-4 text-red-600" />

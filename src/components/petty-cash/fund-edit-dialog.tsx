@@ -171,7 +171,7 @@ export function PettyCashFundEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[95vw] md:max-w-md">
         <DialogHeader>
           <DialogTitle>
             {mode === 'create' ? 'สร้างกองทุนเงินสดย่อย' : 'แก้ไขกองทุนเงินสดย่อย'}
@@ -187,7 +187,7 @@ export function PettyCashFundEditDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label htmlFor="code">รหัส *</Label>
               <Input
@@ -225,7 +225,7 @@ export function PettyCashFundEditDialog({
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label htmlFor="maxAmount">วงเงินสูงสุด (฿) *</Label>
               <Input

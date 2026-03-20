@@ -398,6 +398,7 @@ export function ProductList() {
                               size="icon"
                               onClick={() => handleViewProduct(product)}
                               title="ดูรายละเอียด"
+                              className="h-11 w-11"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -406,6 +407,7 @@ export function ProductList() {
                               size="icon"
                               onClick={() => handleEditProduct(product)}
                               title="แก้ไข"
+                              className="h-11 w-11"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -414,6 +416,7 @@ export function ProductList() {
                               size="icon"
                               onClick={() => handleDeleteClick(product)}
                               title="ลบ"
+                              className="h-11 w-11"
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>

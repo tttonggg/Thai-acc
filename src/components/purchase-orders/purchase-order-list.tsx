@@ -54,6 +54,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
+import { getStatusBadgeProps } from '@/lib/status-badge'
 import { PurchaseOrderForm } from './purchase-order-form'
 
 interface PurchaseOrder {
@@ -111,26 +112,22 @@ const statusLabels: Record<string, string> = {
   CANCELLED: 'ยกเลิก',
 }
 
-const statusColors: Record<string, string> = {
-  DRAFT: 'bg-gray-100 text-gray-800 border-gray-300',
-  PENDING: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  APPROVED: 'bg-blue-100 text-blue-800 border-blue-300',
-  ORDERED: 'bg-purple-100 text-purple-800 border-purple-300',
-  RECEIVING: 'bg-orange-100 text-orange-800 border-orange-300',
-  RECEIVED: 'bg-green-100 text-green-800 border-green-300',
-  CANCELLED: 'bg-red-100 text-red-800 border-red-300',
-}
-
 const paymentStatusLabels: Record<string, string> = {
   UNPAID: 'ยังไม่จ่าย',
   PARTIAL: 'จ่ายบางส่วน',
   PAID: 'จ่ายครบแล้ว',
 }
 
-const paymentStatusColors: Record<string, string> = {
-  UNPAID: 'bg-red-100 text-red-800 border-red-300',
-  PARTIAL: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  PAID: 'bg-green-100 text-green-800 border-green-300',
+// Helper function to get status badge
+const getStatusBadge = (status: string) => {
+  const config = getStatusBadgeProps(status)
+  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>
+}
+
+// Helper function to get payment status badge
+const getPaymentStatusBadge = (status: string) => {
+  const config = getStatusBadgeProps(status)
+  return <Badge variant={config.variant}>{paymentStatusLabels[status] || config.label}</Badge>
 }
 
 export function PurchaseOrderList() {
@@ -487,14 +484,10 @@ export function PurchaseOrderList() {
                         })}
                       </TableCell>
                       <TableCell>
-                        <Badge className={statusColors[po.status]} variant="outline">
-                          {statusLabels[po.status]}
-                        </Badge>
+                        {getStatusBadge(po.status)}
                       </TableCell>
                       <TableCell>
-                        <Badge className={paymentStatusColors[po.paymentStatus]} variant="outline">
-                          {paymentStatusLabels[po.paymentStatus]}
-                        </Badge>
+                        {getPaymentStatusBadge(po.paymentStatus)}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="secondary">{po._count?.lines || 0} รายการ</Badge>

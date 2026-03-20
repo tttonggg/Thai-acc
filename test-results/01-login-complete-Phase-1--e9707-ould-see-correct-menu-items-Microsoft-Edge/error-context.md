@@ -1,0 +1,379 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - img [ref=e7]
+          - generic [ref=e11]:
+            - heading "Keerati ERP" [level=1] [ref=e12]
+            - paragraph [ref=e13]: โปรแกรมบัญชีสไตล์คุณ
+        - button "ย่อเมนู" [ref=e14]:
+          - img [ref=e15]
+      - navigation [ref=e17]:
+        - button "หน้าหลัก (Main)" [ref=e19]:
+          - img [ref=e20]
+          - generic [ref=e25]: หน้าหลัก (Main)
+          - img [ref=e26]
+        - generic [ref=e28]:
+          - button "งานขาย (Sales)" [ref=e29]:
+            - img [ref=e30]
+            - generic [ref=e35]: งานขาย (Sales)
+            - img [ref=e36]
+          - generic [ref=e38]:
+            - button "ลูกค้า (Customers)" [ref=e39]:
+              - img [ref=e40]
+              - generic [ref=e45]: ลูกค้า (Customers)
+            - button "ใบเสนอราคา (Quotation)" [ref=e46]:
+              - img [ref=e47]
+              - generic [ref=e50]: ใบเสนอราคา (Quotation)
+            - button "ใบกำกับภาษี (Tax Invoice)" [ref=e51]:
+              - img [ref=e52]
+              - generic [ref=e55]: ใบกำกับภาษี (Tax Invoice)
+            - button "ใบลดหนี้ (Credit Note)" [ref=e56]:
+              - img [ref=e57]
+              - generic [ref=e60]: ใบลดหนี้ (Credit Note)
+            - button "ใบเสร็จรับเงิน (Receipt)" [ref=e61]:
+              - img [ref=e62]
+              - generic [ref=e65]: ใบเสร็จรับเงิน (Receipt)
+        - generic [ref=e66]:
+          - button "งานซื้อ (Purchasing)" [ref=e67]:
+            - img [ref=e68]
+            - generic [ref=e73]: งานซื้อ (Purchasing)
+            - img [ref=e74]
+          - generic [ref=e76]:
+            - button "ผู้ขาย (Vendors)" [ref=e77]:
+              - img [ref=e78]
+              - generic [ref=e83]: ผู้ขาย (Vendors)
+            - button "ใบขอซื้อ (PR)" [ref=e84]:
+              - img [ref=e85]
+              - generic [ref=e88]: ใบขอซื้อ (PR)
+            - button "ใบสั่งซื้อ (PO)" [ref=e89]:
+              - img [ref=e90]
+              - generic [ref=e94]: ใบสั่งซื้อ (PO)
+            - button "ใบซื้อ (Purchase Invoice)" [ref=e95]:
+              - img [ref=e96]
+              - generic [ref=e99]: ใบซื้อ (Purchase Invoice)
+            - button "ใบจ่ายเงิน (Payment)" [ref=e100]:
+              - img [ref=e101]
+              - generic [ref=e103]: ใบจ่ายเงิน (Payment)
+            - button "ใบเพิ่มหนี้ (Debit Note)" [ref=e104]:
+              - img [ref=e105]
+              - generic [ref=e108]: ใบเพิ่มหนี้ (Debit Note)
+        - generic [ref=e109]:
+          - button "สินค้าและคลัง (Inventory)" [ref=e110]:
+            - img [ref=e111]
+            - generic [ref=e115]: สินค้าและคลัง (Inventory)
+            - img [ref=e116]
+          - generic [ref=e118]:
+            - button "สต็อกสินค้า (Stock)" [ref=e119]:
+              - img [ref=e120]
+              - generic [ref=e124]: สต็อกสินค้า (Stock)
+            - button "สินค้า (Products)" [ref=e125]:
+              - img [ref=e126]
+              - generic [ref=e130]: สินค้า (Products)
+            - button "คลังสินค้า (Warehouses)" [ref=e131]:
+              - img [ref=e132]
+              - generic [ref=e136]: คลังสินค้า (Warehouses)
+        - generic [ref=e137]:
+          - button "บัญชี (Accounting)" [ref=e138]:
+            - img [ref=e139]
+            - generic [ref=e141]: บัญชี (Accounting)
+            - img [ref=e142]
+          - generic [ref=e144]:
+            - button "ผังบัญชี (Chart of Accounts)" [ref=e145]:
+              - img [ref=e146]
+              - generic [ref=e148]: ผังบัญชี (Chart of Accounts)
+            - button "บันทึกบัญชี (Journal Entry)" [ref=e149]:
+              - img [ref=e150]
+              - generic [ref=e153]: บันทึกบัญชี (Journal Entry)
+            - button "ธนาคาร (Banking)" [ref=e154]:
+              - img [ref=e155]
+              - generic [ref=e159]: ธนาคาร (Banking)
+            - button "ทรัพย์สินถาวร (Fixed Assets)" [ref=e160]:
+              - img [ref=e161]
+              - generic [ref=e165]: ทรัพย์สินถาวร (Fixed Assets)
+            - button "เงินสดย่อย (Petty Cash)" [ref=e166]:
+              - img [ref=e167]
+              - generic [ref=e170]: เงินสดย่อย (Petty Cash)
+        - button "ภาษี (Tax)" [ref=e172]:
+          - img [ref=e173]
+          - generic [ref=e175]: ภาษี (Tax)
+          - img [ref=e176]
+        - button "บุคลากร (HR & Payroll)" [ref=e179]:
+          - img [ref=e180]
+          - generic [ref=e185]: บุคลากร (HR & Payroll)
+          - img [ref=e186]
+        - generic [ref=e188]:
+          - button "รายงาน (Reports)" [ref=e189]:
+            - img [ref=e190]
+            - generic [ref=e192]: รายงาน (Reports)
+            - img [ref=e193]
+          - generic [ref=e195]:
+            - button "รายงานทั้งหมด (All Reports)" [ref=e196]:
+              - img [ref=e197]
+              - generic [ref=e199]: รายงานทั้งหมด (All Reports)
+            - button "งวดบัญชี (Accounting Periods)" [ref=e200]:
+              - img [ref=e201]
+              - generic [ref=e203]: งวดบัญชี (Accounting Periods)
+            - button "งบประมาณ (Budgets)" [ref=e204]:
+              - img [ref=e205]
+              - generic [ref=e208]: งบประมาณ (Budgets)
+      - generic [ref=e209]:
+        - button "ปรับแต่งธีม" [ref=e210]:
+          - img [ref=e211]
+          - generic [ref=e217]: ปรับแต่งธีม
+        - button "ผ ผู้ใช้ทั่วไป ผู้ใช้ทั่วไป" [ref=e218]:
+          - generic [ref=e220]: ผ
+          - generic [ref=e221]:
+            - paragraph [ref=e222]: ผู้ใช้ทั่วไป
+            - paragraph [ref=e223]: ผู้ใช้ทั่วไป
+        - generic [ref=e224]:
+          - paragraph [ref=e225]: Keerati ERP v1.0 🛺
+          - paragraph [ref=e226]: Made with 💕
+    - main [ref=e228]:
+      - generic [ref=e229]:
+        - generic [ref=e230]:
+          - heading "ภาพรวมธุรกิจ" [level=1] [ref=e231]
+          - paragraph [ref=e232]: ภาพรวมสถานะทางการเงินและบัญชี
+        - generic [ref=e233]:
+          - generic [ref=e236]:
+            - generic [ref=e237]:
+              - paragraph [ref=e238]: รายได้รวม (เดือนนี้)
+              - paragraph [ref=e239]: ฿407,175
+              - generic [ref=e240]:
+                - img [ref=e241]
+                - generic [ref=e244]: 0%
+                - generic [ref=e245]: จากเดือนก่อน
+            - img [ref=e247]
+          - generic [ref=e252]:
+            - generic [ref=e253]:
+              - paragraph [ref=e254]: ค่าใช้จ่ายรวม (เดือนนี้)
+              - paragraph [ref=e255]: ฿271,338
+              - generic [ref=e256]:
+                - img [ref=e257]
+                - generic [ref=e260]: 0%
+                - generic [ref=e261]: จากเดือนก่อน
+            - img [ref=e263]
+          - generic [ref=e268]:
+            - generic [ref=e269]:
+              - paragraph [ref=e270]: ลูกหนี้การค้า
+              - paragraph [ref=e271]: ฿1,846,685
+              - generic [ref=e272]:
+                - img [ref=e273]
+                - generic [ref=e276]: 0%
+                - generic [ref=e277]: จากเดือนก่อน
+            - img [ref=e279]
+          - generic [ref=e286]:
+            - generic [ref=e287]:
+              - paragraph [ref=e288]: เจ้าหนี้การค้า
+              - paragraph [ref=e289]: ฿561,854
+              - generic [ref=e290]:
+                - img [ref=e291]
+                - generic [ref=e294]: 0%
+                - generic [ref=e295]: จากเดือนก่อน
+            - img [ref=e297]
+        - generic [ref=e302]:
+          - generic [ref=e303]:
+            - generic [ref=e304]:
+              - generic [ref=e305]: รายได้ vs ค่าใช้จ่าย
+              - generic [ref=e306]: เปรียบเทียบรายได้และค่าใช้จ่ายรายเดือน
+            - generic [ref=e309]:
+              - img [ref=e310]:
+                - generic [ref=e315]:
+                  - generic [ref=e317]: ม.ค.
+                  - generic [ref=e319]: ก.พ.
+                  - generic [ref=e321]: มี.ค.
+                  - generic [ref=e323]: เม.ย.
+                  - generic [ref=e325]: พ.ค.
+                  - generic [ref=e327]: มิ.ย.
+                  - generic [ref=e329]: ก.ค.
+                  - generic [ref=e331]: ส.ค.
+                  - generic [ref=e333]: ก.ย.
+                  - generic [ref=e335]: ต.ค.
+                  - generic [ref=e337]: พ.ย.
+                  - generic [ref=e339]: ธ.ค.
+                - generic [ref=e341]:
+                  - generic [ref=e343]: 0K
+                  - generic [ref=e345]: 55K
+                  - generic [ref=e347]: 110K
+                  - generic [ref=e349]: 165K
+                  - generic [ref=e351]: 220K
+              - list [ref=e371]:
+                - listitem [ref=e372]:
+                  - img [ref=e373]
+                  - text: รายได้
+                - listitem [ref=e375]:
+                  - img [ref=e376]
+                  - text: ค่าใช้จ่าย
+              - generic:
+                - generic:
+                  - paragraph: พ.ย.
+                  - list:
+                    - listitem: ": ฿0"
+                    - listitem: ": ฿0"
+          - generic [ref=e378]:
+            - generic [ref=e379]:
+              - generic [ref=e380]: ภาษีมูลค่าเพิ่ม
+              - generic [ref=e381]: ภาษีขายและภาษีซื้อรายเดือน
+            - generic [ref=e384]:
+              - img [ref=e385]:
+                - generic [ref=e390]:
+                  - generic [ref=e392]: ม.ค.
+                  - generic [ref=e394]: ก.พ.
+                  - generic [ref=e396]: มี.ค.
+                  - generic [ref=e398]: เม.ย.
+                  - generic [ref=e400]: พ.ค.
+                  - generic [ref=e402]: มิ.ย.
+                  - generic [ref=e404]: ก.ค.
+                  - generic [ref=e406]: ส.ค.
+                  - generic [ref=e408]: ก.ย.
+                  - generic [ref=e410]: ต.ค.
+                  - generic [ref=e412]: พ.ย.
+                  - generic [ref=e414]: ธ.ค.
+                - generic [ref=e416]:
+                  - generic [ref=e418]: 0K
+                  - generic [ref=e420]: 9.5K
+                  - generic [ref=e422]: 19K
+                  - generic [ref=e424]: 28.5K
+                  - generic [ref=e426]: 38K
+              - list [ref=e432]:
+                - listitem [ref=e433]:
+                  - img [ref=e434]
+                  - text: ภาษีขาย
+                - listitem [ref=e436]:
+                  - img [ref=e437]
+                  - text: ภาษีซื้อ
+        - generic [ref=e439]:
+          - generic [ref=e440]:
+            - generic [ref=e441]:
+              - generic [ref=e442]: ลูกหนี้ตามอายุหนี้
+              - generic [ref=e443]: จำแนกตามระยะเวลาครบกำหนด
+            - generic [ref=e444]:
+              - img [ref=e447]:
+                - generic [ref=e449]:
+                  - img [ref=e451]
+                  - img [ref=e453]
+                  - img [ref=e455]
+                  - img [ref=e457]
+              - generic [ref=e458]:
+                - generic [ref=e461]: "ปัจจุบัน: ฿809,592"
+                - generic [ref=e464]: "31-60 วัน: ฿79,652"
+                - generic [ref=e467]: "61-90 วัน: ฿448,022"
+                - generic [ref=e470]: "90+ วัน: ฿509,420"
+          - generic [ref=e471]:
+            - generic [ref=e472]:
+              - generic [ref=e473]: เจ้าหนี้ตามอายุหนี้
+              - generic [ref=e474]: จำแนกตามระยะเวลาครบกำหนด
+            - generic [ref=e475]:
+              - img [ref=e478]:
+                - img [ref=e482]
+              - generic [ref=e483]:
+                - generic [ref=e486]: "ปัจจุบัน: ฿561,854"
+                - generic [ref=e489]: "31-60 วัน: ฿0"
+                - generic [ref=e492]: "61-90 วัน: ฿0"
+                - generic [ref=e495]: "90+ วัน: ฿0"
+        - generic [ref=e496]:
+          - generic [ref=e497]:
+            - heading "การขายและรายได้" [level=2] [ref=e498]
+            - generic [ref=e499]:
+              - generic [ref=e501] [cursor=pointer]:
+                - generic [ref=e502]:
+                  - img [ref=e504]
+                  - img [ref=e507]
+                - heading "ใบเสนอราคา" [level=3] [ref=e509]
+                - paragraph [ref=e510]: สร้างและจัดการใบเสนอราคา
+              - generic [ref=e515] [cursor=pointer]:
+                - generic [ref=e516]:
+                  - img [ref=e518]
+                  - img [ref=e521]
+                - heading "ใบกำกับภาษี" [level=3] [ref=e523]
+                - paragraph [ref=e524]: ออกใบกำกับภาษีและใบเสร็จ
+              - generic [ref=e529] [cursor=pointer]:
+                - generic [ref=e530]:
+                  - img [ref=e532]
+                  - img [ref=e534]
+                - heading "ใบเสร็จรับเงิน" [level=3] [ref=e536]
+                - paragraph [ref=e537]: บันทึกการรับชำระเงิน
+              - generic [ref=e542] [cursor=pointer]:
+                - generic [ref=e543]:
+                  - img [ref=e545]
+                  - img [ref=e549]
+                - heading "ใบลดหนี้" [level=3] [ref=e551]
+                - paragraph [ref=e552]: ออกใบลดหนี้และคืนเงิน
+          - generic [ref=e556]:
+            - heading "การซื้อและค่าใช้จ่าย" [level=2] [ref=e557]
+            - generic [ref=e558]:
+              - generic [ref=e560] [cursor=pointer]:
+                - generic [ref=e561]:
+                  - img [ref=e563]
+                  - img [ref=e567]
+                - heading "ใบสั่งซื้อ" [level=3] [ref=e569]
+                - paragraph [ref=e570]: ขออนุมัติและสั่งซื้อสินค้า
+              - generic [ref=e575] [cursor=pointer]:
+                - generic [ref=e576]:
+                  - img [ref=e578]
+                  - img [ref=e580]
+                - heading "ใบจ่ายเงิน" [level=3] [ref=e582]
+                - paragraph [ref=e583]: บันทึกการจ่ายชำระเงิน
+              - generic [ref=e588] [cursor=pointer]:
+                - generic [ref=e589]:
+                  - img [ref=e591]
+                  - img [ref=e595]
+                - heading "ใบเพิ่มหนี้" [level=3] [ref=e597]
+                - paragraph [ref=e598]: ออกใบเพิ่มหนี้และปรับปรุง
+          - generic [ref=e602]:
+            - heading "สินค้าและทรัพย์สิน" [level=2] [ref=e603]
+            - generic [ref=e604]:
+              - generic [ref=e606] [cursor=pointer]:
+                - generic [ref=e607]:
+                  - img [ref=e609]
+                  - img [ref=e613]
+                - heading "สินค้าคงคลัง" [level=3] [ref=e615]
+                - paragraph [ref=e616]: จัดการสต็อกและคลังสินค้า
+              - generic [ref=e621] [cursor=pointer]:
+                - generic [ref=e622]:
+                  - img [ref=e624]
+                  - img [ref=e627]
+                - heading "ทรัพย์สินถาวร" [level=3] [ref=e629]
+                - paragraph [ref=e630]: บันทึกทรัพย์สินและค่าเสื่อม
+              - generic [ref=e635] [cursor=pointer]:
+                - generic [ref=e636]:
+                  - img [ref=e638]
+                  - img [ref=e641]
+                - heading "ธนาคาร" [level=3] [ref=e643]
+                - paragraph [ref=e644]: บัญชีธนาคารและเช็ค
+          - generic [ref=e648]:
+            - heading "บุคคลและการเงิน" [level=2] [ref=e649]
+            - generic [ref=e650]:
+              - generic [ref=e652] [cursor=pointer]:
+                - generic [ref=e653]:
+                  - img [ref=e655]
+                  - img [ref=e658]
+                - heading "เงินสดย่อย" [level=3] [ref=e660]
+                - paragraph [ref=e661]: กองทุนและเบิกจ่าย
+              - generic [ref=e666] [cursor=pointer]:
+                - generic [ref=e667]:
+                  - img [ref=e669]
+                  - img [ref=e674]
+                - heading "เงินเดือน" [level=3] [ref=e676]
+                - paragraph [ref=e677]: คำนวณเงินเดือนและภาษี
+              - generic [ref=e682] [cursor=pointer]:
+                - generic [ref=e683]:
+                  - img [ref=e685]
+                  - img [ref=e688]
+                - heading "หัก ณ ที่จ่าย" [level=3] [ref=e690]
+                - paragraph [ref=e691]: ภงด.3 และ ภงด.53
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e700] [cursor=pointer]:
+    - generic [ref=e703]:
+      - text: Compiling
+      - generic [ref=e704]:
+        - generic [ref=e705]: .
+        - generic [ref=e706]: .
+        - generic [ref=e707]: .
+  - alert [ref=e708]
+  - generic [ref=e709]: 9.5K
+```

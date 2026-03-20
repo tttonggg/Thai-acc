@@ -457,7 +457,7 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-6xl max-h-[90vh] overflow-y-auto">
         <VisuallyHidden>
           <DialogDescription>
             แก้ไข invoice dialog สำหรับแก้ไขรายละเอียดใบกำกับภาษีและข้อมูลที่เกี่ยวข้อง
@@ -811,7 +811,7 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          className="h-11 w-11 text-destructive hover:text-destructive"
                           onClick={() => removeLine(line.id)}
                           disabled={lines.length === 1 || isEditingRestricted}
                         >

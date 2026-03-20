@@ -594,7 +594,7 @@ export function QuotationViewDialog({
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
           <VisuallyHidden>
             <DialogTitle>กำลังโหลดข้อมูลใบเสนอราคา</DialogTitle>
           </VisuallyHidden>
@@ -610,7 +610,7 @@ export function QuotationViewDialog({
   if (error || !quotation) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[95vw] md:max-w-4xl">
           <VisuallyHidden>
             <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบเสนอราคา</DialogTitle>
           </VisuallyHidden>
@@ -633,7 +633,7 @@ export function QuotationViewDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto print:max-h-none print:overflow-visible">
+        <DialogContent className="max-w-[95vw] md:max-w-5xl max-h-[90vh] overflow-y-auto print:max-h-none print:overflow-visible">
           <DialogHeader className="print:hidden">
             <div className="flex items-center justify-between">
               <div>

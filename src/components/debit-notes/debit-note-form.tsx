@@ -223,7 +223,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>สร้างใบเพิ่มหนี้ (Debit Note)</DialogTitle>
           <DialogDescription>สร้างใบเพิ่มหนี้สำหรับผู้ขายเพื่อเพิ่มหนี้จากใบซื้อ</DialogDescription>
@@ -233,7 +233,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
           <Card>
             <CardHeader><CardTitle className="text-lg">ข้อมูลใบเพิ่มหนี้</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>ผู้ขาย *</Label>
                   <Select value={form.watch('vendorId')} onValueChange={(v) => form.setValue('vendorId', v)}>
@@ -256,7 +256,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
                   </Popover>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>อ้างอิงใบซื้อ (ถ้ามี)</Label>
                   <Select value={form.watch('purchaseInvoiceId') || ''} onValueChange={(v) => form.setValue('purchaseInvoiceId', v || null)}>
@@ -294,11 +294,11 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
                     <h4 className="font-medium">รายการที่ {index + 1}</h4>
                     {lines.length > 1 && <Button type="button" variant="ghost" size="icon" onClick={() => removeLine(index)}><Trash2 className="h-4 w-4 text-red-600" /></Button>}
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-2"><Label>รายการ *</Label><Input value={line.description} onChange={(e) => updateLine(index, 'description', e.target.value)} placeholder="ระบุรายการ" /></div>
                     <div className="space-y-2"><Label>สินค้า (ถ้ามี)</Label><Select value={line.productId || ''} onValueChange={(v) => { const p = products.find(x => x.id === v); if (p) { updateLine(index, 'productId', v); updateLine(index, 'unitPrice', p.costPrice); updateLine(index, 'vatRate', p.vatRate); }}}><SelectTrigger className="!h-11 text-base"><SelectValue placeholder="เลือกสินค้า" /></SelectTrigger><SelectContent>{products.map((p) => <SelectItem key={p.id} value={p.id}>{p.code} - {p.name}</SelectItem>)}</SelectContent></Select></div>
                   </div>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div className="space-y-2"><Label>จำนวน *</Label><Input type="number" className="!h-11 text-base" step="0.01" value={line.quantity} onChange={(e) => updateLine(index, 'quantity', parseFloat(e.target.value) || 0)} /></div>
                     <div className="space-y-2"><Label>ราคาต่อหน่วย *</Label><Input type="number" className="!h-11 text-base" step="0.01" value={line.unitPrice} onChange={(e) => updateLine(index, 'unitPrice', parseFloat(e.target.value) || 0)} /></div>
                     <div className="space-y-2"><Label>VAT (%)</Label><Input type="number" className="!h-11 text-base" step="0.01" value={line.vatRate} onChange={(e) => updateLine(index, 'vatRate', parseFloat(e.target.value) || 0)} /></div>

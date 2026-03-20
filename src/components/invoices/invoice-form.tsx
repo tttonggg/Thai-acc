@@ -398,7 +398,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-6xl max-h-[90vh] overflow-y-auto">
         <VisuallyHidden>
           <DialogDescription>
             สร้างใหม่ invoice dialog สำหรับสร้างใบกำกับภาษีใหม่พร้อมรายการสินค้าและการคำนวณยอดรวม
@@ -423,7 +423,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
         ) : (
           <div className="space-y-6">
             {/* Customer & Type */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <Label htmlFor="customerId" className="required">
                   ลูกค้า *

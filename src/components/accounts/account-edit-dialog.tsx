@@ -259,7 +259,7 @@ export function AccountEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -268,7 +268,7 @@ export function AccountEditDialog({
         <form onSubmit={handleSubmit}>
           <div className="space-y-6 py-4">
             {/* Account Code */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="code" className="text-right">
                 รหัสบัญชี <span className="text-red-500">*</span>
               </Label>
@@ -288,7 +288,7 @@ export function AccountEditDialog({
             </div>
 
             {/* Account Name (Thai) */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
                 ชื่อบัญชี <span className="text-red-500">*</span>
               </Label>
@@ -307,7 +307,7 @@ export function AccountEditDialog({
             </div>
 
             {/* Account Name (English) */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="nameEn" className="text-right">
                 ชื่อบัญชี (Eng)
               </Label>
@@ -322,7 +322,7 @@ export function AccountEditDialog({
             </div>
 
             {/* Account Type */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="type" className="text-right">
                 ประเภทบัญชี <span className="text-red-500">*</span>
               </Label>
@@ -355,7 +355,7 @@ export function AccountEditDialog({
 
             {/* Parent Account (only for new accounts) */}
             {!isEditMode && (
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
                 <Label htmlFor="parentId" className="text-right">
                   บัญชีหลัก
                 </Label>
@@ -382,7 +382,7 @@ export function AccountEditDialog({
             )}
 
             {/* Account Detail Type */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="isDetail" className="text-right">
                 ประเภทบัญชี
               </Label>
@@ -410,7 +410,7 @@ export function AccountEditDialog({
 
             {/* Active Status (only for edit mode) */}
             {isEditMode && (
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
                 <Label htmlFor="isActive" className="text-right">
                   สถานะ
                 </Label>
@@ -430,7 +430,7 @@ export function AccountEditDialog({
             )}
 
             {/* Notes */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="notes" className="text-right">
                 หมายเหตุ
               </Label>

@@ -97,7 +97,7 @@ export function DebitNoteViewDialog({ debitNoteId, open, onOpenChange }: DebitNo
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
           <VisuallyHidden>
             <DialogTitle>กำลังโหลดข้อมูลใบเพิ่มหนี้</DialogTitle>
           </VisuallyHidden>
@@ -110,7 +110,7 @@ export function DebitNoteViewDialog({ debitNoteId, open, onOpenChange }: DebitNo
   if (!debitNote) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
           <VisuallyHidden>
             <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบเพิ่มหนี้</DialogTitle>
           </VisuallyHidden>

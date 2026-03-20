@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ใบกำกับภาษี / Tax Invoice</title>
+  <style>
+    /* Thai Fonts - Load from Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Sarabun', 'TH Sarabun New', sans-serif;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    .invoice-container {
+      max-width: 210mm;
+      margin: 0 auto;
+      background: white;
+      padding: 12mm;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-radius: 4px;
+    }
+
+    /* Header with Logo */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .company-info {
+      flex: 1;
+    }
+
+    .company-logo {
+      max-width: 80px;
+      max-height: 80px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .company-logo.has-logo {
+      display: block;
+    }
+
+    .company-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a237e;
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .company-details {
+      font-size: 10px;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 3px;
+    }
+
+    .company-tax-id {
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* Document Title Badge */
+    .doc-title-badge {
+      text-align: center;
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 8px rgba(26, 35, 126, 0.3);
+    }
+
+    .doc-title-badge h1 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .doc-title-badge .subtitle {
+      font-size: 11px;
+      opacity: 0.95;
+      margin-top: 3px;
+      font-weight: 400;
+    }
+
+    /* Info Grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-bottom: 25px;
+    }
+
+    .info-section {
+      background: #fafafa;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 3px solid #1a237e;
+    }
+
+    .info-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #1a237e;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-row {
+      display: flex;
+      margin-bottom: 8px;
+      font-size: 10px;
+    }
+
+    .info-label {
+      color: #666;
+      min-width: 85px;
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: #1a1a1a;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .customer-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a237e;
+      margin-bottom: 10px;
+    }
+
+    /* Items Table */
+    .table-wrapper {
+      margin: 25px 0;
+      overflow: hidden;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    .items-table thead {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+    }
+
+    .items-table th {
+      color: white;
+      padding: 12px 10px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border: none;
+    }
+
+    .items-table th:first-child {
+      text-align: center;
+      border-radius: 8px 0 0 0;
+    }
+
+    .items-table th:last-child {
+      text-align: right;
+      border-radius: 0 8px 0 0;
+    }
+
+    .items-table tbody tr {
+      border-bottom: 1px solid #eee;
+      transition: background 0.2s;
+    }
+
+    .items-table tbody tr:hover {
+      background: #f8f9ff;
+    }
+
+    .items-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .items-table td {
+      padding: 11px 10px;
+      font-size: 10px;
+      color: #333;
+      vertical-align: top;
+    }
+
+    .items-table td.text-right {
+      text-align: right;
+    }
+
+    .items-table td.text-center {
+      text-align: center;
+    }
+
+    .items-table td.no {
+      font-weight: 600;
+      color: #1a237e;
+      text-align: center;
+    }
+
+    .items-table td.description {
+      font-weight: 500;
+    }
+
+    .items-table td.amount {
+      font-weight: 600;
+      color: #1a237e;
+      text-align: right;
+    }
+
+    /* Summary Section */
+    .summary-section {
+      display: flex;
+      justify-content: flex-end;
+      margin: 25px 0;
+    }
+
+    .summary-box {
+      width: 240px;
+      background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 10px;
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+    }
+
+    .summary-label {
+      color: #555;
+      font-weight: 500;
+    }
+
+    .summary-value {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .summary-row.total {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      margin: 0 -18px -18px -18px;
+      padding: 15px 18px;
+      border-radius: 0 0 8px 8px;
+      border-bottom: none;
+    }
+
+    .summary-row.total .summary-label {
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .summary-row.total .summary-value {
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .summary-row.highlight {
+      color: #1a237e;
+      font-weight: 600;
+    }
+
+    /* Terms Section */
+    .terms-section {
+      margin-top: 25px;
+      padding: 18px;
+      background: #f8f9ff;
+      border-left: 4px solid #1a237e;
+      border-radius: 4px;
+    }
+
+    .terms-title {
+      font-weight: 700;
+      font-size: 11px;
+      color: #1a237e;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .terms-content {
+      font-size: 9px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    .terms-content div {
+      margin-bottom: 5px;
+      padding-left: 15px;
+      position: relative;
+    }
+
+    .terms-content div:before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #1a237e;
+      font-weight: 700;
+    }
+
+    /* Signature Section */
+    .signature-section {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 35px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .signature-box {
+      width: 180px;
+      text-align: center;
+    }
+
+    .signature-space {
+      height: 60px;
+      border: 1px dashed #ccc;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 9px;
+      background: #fafafa;
+    }
+
+    .signature-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 2px;
+    }
+
+    .signature-date {
+      font-size: 9px;
+      color: #666;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .footer-text {
+      font-size: 9px;
+      color: #888;
+      margin-bottom: 3px;
+    }
+
+    .footer-highlight {
+      font-size: 10px;
+      font-weight: 600;
+      color: #1a237e;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .invoice-container {
+        box-shadow: none;
+        max-width: 100%;
+        padding: 10mm;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .items-table tbody tr:hover {
+        background: white;
+      }
+    }
+
+    /* Customization Panel */
+    .customization-panel {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      max-width: 270px;
+      z-index: 1000;
+      border: 1px solid #e0e0e0;
+    }
+
+    .customization-panel h3 {
+      font-size: 14px;
+      margin-bottom: 15px;
+      color: #1a237e;
+      font-weight: 700;
+    }
+
+    .setting-group {
+      margin-bottom: 15px;
+    }
+
+    .setting-group label {
+      display: block;
+      font-size: 10px;
+      margin-bottom: 6px;
+      color: #555;
+      font-weight: 600;
+    }
+
+    .setting-group input[type="range"] {
+      width: 100%;
+      accent-color: #1a237e;
+    }
+
+    .setting-group select {
+      width: 100%;
+      padding: 6px;
+      font-size: 11px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: white;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      margin-right: 5px;
+      margin-top: 8px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+    }
+
+    .btn-secondary {
+      background: #757575;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #616161;
+    }
+  </style>
+</head>
+<body>
+  <!-- Customization Panel -->
+  <div class="customization-panel no-print">
+    <h3>🎨 ปรับแต่ง / Customize</h3>
+
+    <div class="setting-group">
+      <label>ขนาดตัวอักษร / Font Size</label>
+      <input type="range" id="fontSize" min="9" max="14" value="11" onchange="updateFontSize(this.value)">
+      <span id="fontSizeValue">11px</span>
+    </div>
+
+    <div class="setting-group">
+      <label>ระยะห่างบรรทัด / Line Height</label>
+      <input type="range" id="lineHeight" min="1.3" max="2.0" step="0.1" value="1.5" onchange="updateLineHeight(this.value)">
+      <span id="lineHeightValue">1.5</span>
+    </div>
+
+    <div class="setting-group">
+      <label>ธีมสี / Color Theme</label>
+      <select id="colorTheme" onchange="updateColorTheme(this.value)">
+        <option value="blue">น้ำเงิน / Blue</option>
+        <option value="green">เขียว / Green</option>
+        <option value="red">แดง / Red</option>
+        <option value="purple">ม่วง / Purple</option>
+        <option value="gray">เทา / Gray</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์ / Print</button>
+    <button class="btn btn-secondary" onclick="resetSettings()">🔄 รีเซ็ต / Reset</button>
+  </div>
+
+  <!-- Invoice Container -->
+  <div class="invoice-container" id="invoice">
+    <!-- Header -->
+    <div class="header">
+      <div class="company-info">
+        <img src="" alt="Company Logo" class="company-logo" id="companyLogo">
+        <div class="company-name" id="companyName">บริษัท ตัวอย่าง จำกัด</div>
+        <div class="company-details" id="companyAddress">123 ถนนสุขุมวิท คลองตัน เขตคลองเตย กรุงเทพฯ 10110</div>
+        <div class="company-details company-tax-id" id="companyTaxId">เลขประจำตัวผู้เสียภาษี: 0105551234567</div>
+        <div class="company-details" id="companyPhone">โทร: 02-123-4567 | อีเมล: info@company.co.th</div>
+      </div>
+    </div>
+
+    <!-- Document Title Badge -->
+    <div class="doc-title-badge">
+      <h1>ใบกำกับภาษี</h1>
+      <div class="subtitle">TAX INVOICE</div>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+      <!-- Left Column - Invoice Details -->
+      <div class="info-section">
+        <div class="info-section-title">รายละเอียดเอกสาร / Document Details</div>
+        <div class="info-row">
+          <span class="info-label">เลขที่ / No.</span>
+          <span class="info-value" id="invoiceNo">INV-2026-0001</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">วันที่ / Date</span>
+          <span class="info-value" id="invoiceDate">18/03/2569</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">ครบกำหนด / Due</span>
+          <span class="info-value" id="dueDate">17/04/2569</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">อ้างอิง / Ref.</span>
+          <span class="info-value" id="reference">PO-2026-001</span>
+        </div>
+      </div>
+
+      <!-- Right Column - Customer -->
+      <div class="info-section">
+        <div class="info-section-title">ข้อมูลลูกค้า / Customer Information</div>
+        <div class="customer-name" id="customerName">บริษัท ลูกค้า จำกัด</div>
+        <div class="info-row">
+          <span class="info-label">เลขประจำตัวผู้เสียภาษี</span>
+          <span class="info-value" id="customerTaxId">0105557654321</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">ที่อยู่ / Address</span>
+          <span class="info-value" id="customerAddress">456 ถนนสีลม ปทุมวัน กรุงเทพฯ 10330</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">สาขา / Branch</span>
+          <span class="info-value" id="customerBranch">สำนักงานใหญ่</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="table-wrapper">
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th style="width: 6%">ลำดับ<br><small>No.</small></th>
+            <th style="width: 42%">รายการ<br><small>Description</small></th>
+            <th style="width: 10%">จำนวน<br><small>Qty</small></th>
+            <th style="width: 10%">หน่วย<br><small>Unit</small></th>
+            <th style="width: 12%">ราคา/หน่วย<br><small>Price</small></th>
+            <th style="width: 8%">ส่วนลด<br><small>Disc.</small></th>
+            <th style="width: 12%">จำนวนเงิน<br><small>Amount</small></th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody">
+          <tr>
+            <td class="no">1</td>
+            <td class="description">บริการให้คำปรึกษาด้านระบบบัญชี</td>
+            <td class="text-center">1</td>
+            <td class="text-center">ครั้ง</td>
+            <td class="text-right">5,000.00</td>
+            <td class="text-right">-</td>
+            <td class="amount">5,000.00</td>
+          </tr>
+          <tr>
+            <td class="no">2</td>
+            <td class="description">การติดตั้งซอฟต์แวร์บัญชี</td>
+            <td class="text-center">2</td>
+            <td class="text-center">เครื่อง</td>
+            <td class="text-right">2,500.00</td>
+            <td class="text-right">500.00</td>
+            <td class="amount">4,500.00</td>
+          </tr>
+          <tr>
+            <td class="no">3</td>
+            <td class="description">การอบรมการใช้งานระบบ</td>
+            <td class="text-center">5</td>
+            <td class="text-center">ชั่วโมง</td>
+            <td class="text-right">500.00</td>
+            <td class="text-right">-</td>
+            <td class="amount">2,500.00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-section">
+      <div class="summary-box">
+        <div class="summary-row">
+          <span class="summary-label">ยอดรวม / Subtotal</span>
+          <span class="summary-value" id="subtotal">12,000.00</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">ส่วนลด / Discount</span>
+          <span class="summary-value" id="discount">(500.00)</span>
+        </div>
+        <div class="summary-row highlight">
+          <span class="summary-label">ภาษีมูลค่าเพิ่ม 7% / VAT</span>
+          <span class="summary-value" id="vat">805.00</span>
+        </div>
+        <div class="summary-row total">
+          <span class="summary-label">ยอดสุทธิ / Grand Total</span>
+          <span class="summary-value" id="total">12,305.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terms -->
+    <div class="terms-section">
+      <div class="terms-title">เงื่อนไขและวิธีการชำระเงิน / Terms & Payment</div>
+      <div class="terms-content">
+        <div>ชำระภายใน 30 วันนับจากวันที่รับใบกำกับภาษี / Payment due within 30 days from invoice date</div>
+        <div>กรุณาระบุเลขที่ใบกำกับภาษีในการติดต่อและโอนเงิน / Please quote invoice number in all correspondence and payments</div>
+        <div><strong>ธนาคาร / Bank:</strong> ธนาคารกรุงไทย | <strong>บัญชี / Account:</strong> xxx-xxxxx-x | <strong>ชื่อบัญชี / Account Name:</strong> บริษัท ตัวอย่าง จำกัด</div>
+        <div>ส่วนลดการชำระเงินล่วงหน้า 2% หากชำระภายใน 15 วัน / 2% discount for payment within 15 days</div>
+      </div>
+    </div>
+
+    <!-- Signature Section -->
+    <div class="signature-section">
+      <div class="signature-box">
+        <div class="signature-space">ลายเซ็น / Signature</div>
+        <div class="signature-label">ผู้ออกเอกสาร / Authorized By</div>
+        <div class="signature-date" id="signatureDate">วันที่: 18/03/2569</div>
+      </div>
+      <div class="signature-box">
+        <div class="signature-space">ลายเซ็น / Signature</div>
+        <div class="signature-label">ผู้รับเอกสาร / Received By</div>
+        <div class="signature-date">วันที่: ____________</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-highlight">บริษัท ตัวอย่าง จำกัด</div>
+      <div class="footer-text">เอกสารนี้เป็นการสร้างจากระบบคอมพิวเตอร์ที่เชื่อถือได้ / This is a computer-generated document from trusted system</div>
+      <div class="footer-text">หน้า 1 จาก 1 หน้า | พิมพ์เมื่อ: <span id="printDate">18/03/2569 14:30</span></div>
+    </div>
+  </div>
+
+  <script>
+    // Color themes
+    const colorThemes = {
+      blue: {
+        primary: '#1a237e',
+        secondary: '#283593',
+        gradient: 'linear-gradient(135deg, #1a237e 0%, #283593 100%)'
+      },
+      green: {
+        primary: '#1b5e20',
+        secondary: '#2e7d32',
+        gradient: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)'
+      },
+      red: {
+        primary: '#c62828',
+        secondary: '#d32f2f',
+        gradient: 'linear-gradient(135deg, #c62828 0%, #d32f2f 100%)'
+      },
+      purple: {
+        primary: '#6a1b9a',
+        secondary: '#7b1fa2',
+        gradient: 'linear-gradient(135deg, #6a1b9a 0%, #7b1fa2 100%)'
+      },
+      gray: {
+        primary: '#424242',
+        secondary: '#616161',
+        gradient: 'linear-gradient(135deg, #424242 0%, #616161 100%)'
+      }
+    };
+
+    // Load invoice data
+    function loadInvoiceData() {
+      const params = new URLSearchParams(window.location.search);
+      const dataStr = params.get('data') || window.invoiceData;
+
+      if (dataStr) {
+        try {
+          const data = JSON.parse(decodeURIComponent(dataStr));
+          updateInvoice(data);
+        } catch (e) {
+          console.error('Error parsing invoice data:', e);
+        }
+      }
+    }
+
+    // Update invoice with data
+    function updateInvoice(data) {
+      if (data.company) {
+        document.getElementById('companyName').textContent = data.company.name || '';
+        document.getElementById('companyAddress').textContent = data.company.address || '';
+        document.getElementById('companyTaxId').textContent = data.company.taxId || '';
+        document.getElementById('companyPhone').textContent =
+          (data.company.phone ? `โทร: ${data.company.phone}` : '') +
+          (data.company.email ? ` | อีเมล: ${data.company.email}` : '');
+
+        // Logo handling
+        if (data.company.logo) {
+          const logoImg = document.getElementById('companyLogo');
+          logoImg.src = data.company.logo;
+          logoImg.classList.add('has-logo');
+        }
+      }
+
+      if (data.invoice) {
+        document.getElementById('invoiceNo').textContent = data.invoice.invoiceNo || '';
+        document.getElementById('invoiceDate').textContent = data.invoice.invoiceDate || '';
+        document.getElementById('dueDate').textContent = data.invoice.dueDate || '';
+        document.getElementById('reference').textContent = data.invoice.reference || '';
+      }
+
+      if (data.customer) {
+        document.getElementById('customerName').textContent = data.customer.name || '';
+        document.getElementById('customerTaxId').textContent = data.customer.taxId || '';
+        document.getElementById('customerAddress').textContent = data.customer.address || '';
+        document.getElementById('customerBranch').textContent = data.customer.branch || 'สำนักงานใหญ่';
+      }
+
+      if (data.items && data.items.length > 0) {
+        const tbody = document.getElementById('itemsBody');
+        tbody.innerHTML = data.items.map((item, i) => `
+          <tr>
+            <td class="no">${i + 1}</td>
+            <td class="description">${item.description}</td>
+            <td class="text-center">${item.quantity}</td>
+            <td class="text-center">${item.unit}</td>
+            <td class="text-right">${formatNumber(item.unitPrice)}</td>
+            <td class="text-right">${item.discount > 0 ? formatNumber(item.discount) : '-'}</td>
+            <td class="amount">${formatNumber(item.amount)}</td>
+          </tr>
+        `).join('');
+      }
+
+      if (data.summary) {
+        if (data.summary.subtotal !== undefined) {
+          document.getElementById('subtotal').textContent = formatNumber(data.summary.subtotal);
+        }
+        if (data.summary.discount !== undefined) {
+          document.getElementById('discount').textContent =
+            data.summary.discount > 0 ? `(${formatNumber(data.summary.discount)})` : '-';
+        }
+        if (data.summary.vat !== undefined) {
+          document.getElementById('vat').textContent = formatNumber(data.summary.vat);
+        }
+        if (data.summary.total !== undefined) {
+          document.getElementById('total').textContent = formatNumber(data.summary.total);
+        }
+      }
+
+      // Update print date
+      const now = new Date();
+      const printDate = formatDateThai(now) + ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('printDate').textContent = printDate;
+      document.getElementById('signatureDate').textContent = `วันที่: ${formatDateThai(now)}`;
+    }
+
+    // Format number with commas
+    function formatNumber(num) {
+      return parseFloat(num).toLocaleString('th-TH', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    // Format date to Thai
+    function formatDateThai(date) {
+      const d = new Date(date);
+      const day = d.getDate().toString().padStart(2, '0');
+      const month = (d.getMonth() + 1).toString().padStart(2, '0');
+      const year = d.getFullYear() + 543;
+      return `${day}/${month}/${year}`;
+    }
+
+    // Customization functions
+    function updateFontSize(size) {
+      document.body.style.fontSize = size + 'px';
+      document.getElementById('fontSizeValue').textContent = size + 'px';
+    }
+
+    function updateLineHeight(height) {
+      document.body.style.lineHeight = height;
+      document.getElementById('lineHeightValue').textContent = height;
+    }
+
+    function updateColorTheme(theme) {
+      const colors = colorThemes[theme];
+      if (!colors) return;
+
+      document.documentElement.style.setProperty('--primary-color', colors.primary);
+      document.documentElement.style.setProperty('--secondary-color', colors.secondary);
+
+      // Update all elements with primary color
+      const elementsToUpdate = document.querySelectorAll('.company-name, .info-section-title, .items-table td.no, .items-table td.amount');
+      elementsToUpdate.forEach(el => {
+        el.style.color = colors.primary;
+      });
+
+      // Update badges and headers
+      document.querySelectorAll('.doc-title-badge, .items-table thead').forEach(el => {
+        el.style.background = colors.gradient;
+      });
+
+      // Update info section border
+      document.querySelectorAll('.info-section').forEach(el => {
+        el.style.borderLeftColor = colors.primary;
+      });
+
+      // Update terms section
+      document.querySelectorAll('.terms-section').forEach(el => {
+        el.style.borderLeftColor = colors.primary;
+        el.style.background = theme === 'gray' ? '#f5f5f5' : '#f8f9ff';
+      });
+    }
+
+    function resetSettings() {
+      document.getElementById('fontSize').value = 11;
+      document.getElementById('lineHeight').value = 1.5;
+      document.getElementById('colorTheme').value = 'blue';
+
+      updateFontSize(11);
+      updateLineHeight(1.5);
+      updateColorTheme('blue');
+    }
+
+    // Load data on page load
+    window.addEventListener('DOMContentLoaded', loadInvoiceData);
+  </script>
+</body>
+</html>

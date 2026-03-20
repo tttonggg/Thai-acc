@@ -272,7 +272,7 @@ export function AssetEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {mode === 'edit' ? 'แก้ไขสินทรัพย์ถาวร' : 'ลงทะเบียนสินทรัพย์ถาวร (TAS 16)'}
@@ -287,7 +287,7 @@ export function AssetEditDialog({
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             {/* Code */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="code">
                   รหัสสินทรัพย์ <span className="text-red-500">*</span>
@@ -324,7 +324,7 @@ export function AssetEditDialog({
             </div>
 
             {/* Purchase Date & Cost */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="purchaseDate">
                   วันที่ซื้อ <span className="text-red-500">*</span>
@@ -374,7 +374,7 @@ export function AssetEditDialog({
             </div>
 
             {/* Salvage Value & Useful Life */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="salvageValue">ค่าซาก (บาท)</Label>
                 <Input
@@ -456,7 +456,7 @@ export function AssetEditDialog({
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="accumDepAccountId">บัญชีค่าเสื่อมสะสม</Label>
                   <Select

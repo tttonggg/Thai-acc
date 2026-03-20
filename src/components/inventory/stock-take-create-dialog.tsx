@@ -267,7 +267,7 @@ export function StockTakeCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-[900px] max-h-[90vh] overflow-y-auto">
         <VisuallyHidden>
           <DialogDescription>
             สร้างใบตรวจนับสต็อกสินค้าในคลังสินค้าเพื่อปรับปรุงจำนวนให้ตรงกับจริง

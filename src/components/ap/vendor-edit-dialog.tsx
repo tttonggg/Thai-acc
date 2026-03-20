@@ -217,7 +217,7 @@ export function VendorEditDialog({
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             {/* Vendor Code (Read-only) */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="code" className="text-right">
                 รหัสผู้ขาย
               </Label>
@@ -230,7 +230,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Name (Required) */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
                 ชื่อผู้ขาย <span className="text-red-500">*</span>
               </Label>
@@ -249,7 +249,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Tax ID */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="taxId" className="text-right">
                 เลขประจำตัวผู้เสียภาษี
               </Label>
@@ -269,7 +269,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Vendor Type */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="vendorType" className="text-right">
                 ประเภทผู้ขาย
               </Label>
@@ -289,7 +289,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Address */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="address" className="text-right">
                 ที่อยู่
               </Label>
@@ -303,7 +303,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Phone */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="phone" className="text-right">
                 เบอร์โทรศัพท์
               </Label>
@@ -317,7 +317,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Email */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="email" className="text-right">
                 อีเมล
               </Label>
@@ -337,7 +337,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Payment Terms */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="paymentTerms" className="text-right">
                 เครดิต (วัน)
               </Label>
@@ -353,7 +353,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Contact Person */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="contactPerson" className="text-right">
                 ผู้ติดต่อ
               </Label>
@@ -367,7 +367,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Payment Method */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="paymentMethod" className="text-right">
                 วิธีชำระเงิน
               </Label>
@@ -389,7 +389,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Bank Name */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="bankName" className="text-right">
                 ธนาคาร
               </Label>
@@ -403,7 +403,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Bank Account Number */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="bankAccountNumber" className="text-right">
                 เลขที่บัญชี
               </Label>
@@ -417,7 +417,7 @@ export function VendorEditDialog({
             </div>
 
             {/* Status */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
               <Label htmlFor="status" className="text-right">
                 สถานะ
               </Label>

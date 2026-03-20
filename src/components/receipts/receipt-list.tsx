@@ -46,6 +46,7 @@ import { ReceiptForm } from './receipt-form'
 import { ReceiptViewDialog } from './receipt-view-dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
+import { getStatusBadgeProps } from '@/lib/status-badge'
 
 interface Receipt {
   id: string
@@ -65,16 +66,16 @@ interface Receipt {
   notes?: string
 }
 
-const statusColors: Record<string, string> = {
-  DRAFT: 'bg-gray-100 text-gray-800',
-  POSTED: 'bg-green-100 text-green-800',
-  CANCELLED: 'bg-red-100 text-red-800',
-}
-
 const statusLabels: Record<string, string> = {
   DRAFT: 'ร่าง',
   POSTED: 'ลงบัญชีแล้ว',
   CANCELLED: 'ยกเลิก',
+}
+
+// Helper function to get status badge
+const getStatusBadge = (status: string) => {
+  const config = getStatusBadgeProps(status)
+  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>
 }
 
 const paymentMethodLabels: Record<string, string> = {
@@ -457,16 +458,14 @@ export function ReceiptList() {
                       {receipt.whtAmount > 0 ? `฿${receipt.whtAmount.toLocaleString()}` : '-'}
                     </TableCell>
                     <TableCell>
-                      <Badge className={statusColors[receipt.status]}>
-                        {statusLabels[receipt.status]}
-                      </Badge>
+                      {getStatusBadge(receipt.status)}
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-center gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
                           onClick={() => handleView(receipt.id)}
                         >
                           <Eye className="h-4 w-4 text-gray-600" />
@@ -475,7 +474,7 @@ export function ReceiptList() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-11 w-11"
                             onClick={() => handlePost(receipt.id)}
                             disabled={postingReceipt === receipt.id}
                           >
@@ -489,7 +488,7 @@ export function ReceiptList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
                           onClick={() => handlePrint(receipt)}
                         >
                           <Printer className="h-4 w-4 text-green-600" />
@@ -497,7 +496,7 @@ export function ReceiptList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
                           onClick={() => handleDownload(receipt.id, receipt.receiptNo)}
                           disabled={downloadingReceipt === receipt.id}
                         >

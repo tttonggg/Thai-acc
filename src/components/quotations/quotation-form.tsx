@@ -300,7 +300,7 @@ export function QuotationForm({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {/* Quotation Date */}
               <FormField
                 control={form.control}
@@ -453,7 +453,7 @@ export function QuotationForm({
             </div>
 
             {/* Discount and VAT */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="discountPercent"

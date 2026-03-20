@@ -311,7 +311,7 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
           <VisuallyHidden>
             <DialogTitle>กำลังโหลดข้อมูลใบซื้อ</DialogTitle>
             <DialogDescription>กำลังดึงข้อมูลใบซื้อจากระบบ</DialogDescription>
@@ -328,7 +328,7 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
   if (error || !purchase) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-[95vw] md:max-w-4xl">
           <VisuallyHidden>
             <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบซื้อ</DialogTitle>
             <DialogDescription>ไม่สามารถดึงข้อมูลใบซื้อได้ กรุณาลองใหม่</DialogDescription>
@@ -343,7 +343,7 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto print:max-h-none print:overflow-visible">
+      <DialogContent className="max-w-[95vw] md:max-w-5xl max-h-[90vh] overflow-y-auto print:max-h-none print:overflow-visible">
         <DialogHeader className="print:hidden">
           <div className="flex items-center justify-between">
             <div>

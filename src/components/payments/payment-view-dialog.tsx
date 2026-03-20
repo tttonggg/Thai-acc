@@ -225,7 +225,7 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
   if (loading || !payment) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-[95vw] md:max-w-3xl">
           <VisuallyHidden>
             <DialogTitle>กำลังโหลดข้อมูลใบจ่ายเงิน</DialogTitle>
             <DialogDescription>กำลังดึงข้อมูลใบจ่ายเงินจากระบบ</DialogDescription>
@@ -243,7 +243,7 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>

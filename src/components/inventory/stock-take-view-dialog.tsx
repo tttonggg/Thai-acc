@@ -263,7 +263,7 @@ export function StockTakeViewDialog({
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[1200px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] md:max-w-[1200px] max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>

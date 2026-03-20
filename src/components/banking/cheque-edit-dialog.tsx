@@ -134,7 +134,7 @@ export function ChequeEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-[95vw] md:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{cheque ? 'แก้ไขเช็ค' : 'เพิ่มเช็ค'}</DialogTitle>
           <VisuallyHidden asChild>
@@ -144,7 +144,7 @@ export function ChequeEditDialog({
           </VisuallyHidden>
         </DialogHeader>
         <div className="space-y-3 py-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label htmlFor="chequeNo">เลขที่เช็ค *</Label>
               <Input
@@ -182,7 +182,7 @@ export function ChequeEditDialog({
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label htmlFor="amount">จำนวนเงิน *</Label>
               <Input

@@ -311,7 +311,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>สร้างใบลดหนี้ (Credit Note)</DialogTitle>
           <DialogDescription>สร้างใบลดหนี้สำหรับลูกค้าเพื่อลดหนี้จากใบกำกับภาษี</DialogDescription>
@@ -324,7 +324,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
               <CardTitle className="text-lg">ข้อมูลใบลดหนี้</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="customerId">ลูกค้า *</Label>
                   <Select
@@ -383,7 +383,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="invoiceId">อ้างอิงใบกำกับภาษี (ถ้ามี)</Label>
                   <Select
@@ -465,7 +465,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor={`description-${index}`}>รายการ *</Label>
                       <Input className="!h-11 text-base"
@@ -511,7 +511,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor={`quantity-${index}`}>จำนวน *</Label>
                       <Input className="!h-11 text-base"

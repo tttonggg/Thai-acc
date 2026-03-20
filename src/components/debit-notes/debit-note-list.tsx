@@ -32,6 +32,7 @@ import { DebitNoteForm } from './debit-note-form'
 import { DebitNoteViewDialog } from './debit-note-view-dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
+import { getStatusBadgeProps } from '@/lib/status-badge'
 
 interface DebitNote {
   id: string
@@ -47,14 +48,15 @@ interface DebitNote {
   notes?: string
 }
 
-const statusColors: Record<string, string> = {
-  ISSUED: 'bg-blue-100 text-blue-800',
-  CANCELLED: 'bg-red-100 text-red-800',
-}
-
 const statusLabels: Record<string, string> = {
   ISSUED: 'ออกแล้ว',
   CANCELLED: 'ยกเลิก',
+}
+
+// Helper function to get status badge
+const getStatusBadge = (status: string) => {
+  const config = getStatusBadgeProps(status)
+  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>
 }
 
 const reasonLabels: Record<string, string> = {
@@ -315,16 +317,14 @@ export function DebitNoteList() {
                       +฿{(dn.totalAmount ?? 0).toLocaleString()}
                     </TableCell>
                     <TableCell>
-                      <Badge className={statusColors[dn.status]}>
-                        {statusLabels[dn.status]}
-                      </Badge>
+                      {getStatusBadge(dn.status)}
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-center gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-11 w-11"
                           onClick={() => handleView(dn.id)}
                         >
                           <Eye className="h-4 w-4 text-gray-600" />
