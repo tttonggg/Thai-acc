@@ -100,12 +100,12 @@ function SummaryCard({ title, value, change, changeLabel, icon, iconBg }: Summar
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500 mb-1">{title}</p>
-            <p className="text-2xl font-bold text-gray-800">{value}</p>
+            <p className="text-sm text-muted-foreground mb-1">{title}</p>
+            <p className="text-2xl font-bold text-foreground">{value}</p>
             <div className={`flex items-center gap-1 mt-2 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
               {isPositive ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
               <span className="text-sm font-medium">{Math.abs(change)}%</span>
-              <span className="text-xs text-gray-400">{changeLabel}</span>
+              <span className="text-xs text-muted-foreground">{changeLabel}</span>
             </div>
           </div>
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${iconBg}`}>
@@ -229,8 +229,8 @@ function ShortcutCard({ title, description, icon, stats, color, onClick, loading
           </div>
           <ChevronRight className={`h-5 w-5 ${colors.iconColor} opacity-50`} />
         </div>
-        <h3 className="font-semibold text-gray-800 mb-1">{title}</h3>
-        <p className="text-sm text-gray-500 mb-3">{description}</p>
+        <h3 className="font-semibold text-foreground mb-1">{title}</h3>
+        <p className="text-sm text-muted-foreground mb-3">{description}</p>
         {!loading && (
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="secondary" className="text-xs">
@@ -490,8 +490,8 @@ export function Dashboard() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">ภาพรวมธุรกิจ</h1>
-        <p className="text-gray-500 mt-1">ภาพรวมสถานะทางการเงินและบัญชี</p>
+        <h1 className="text-2xl font-bold text-foreground">ภาพรวมธุรกิจ</h1>
+        <p className="text-muted-foreground mt-1">ภาพรวมสถานะทางการเงินและบัญชี</p>
       </div>
 
       {/* Summary Cards */}
@@ -627,7 +627,7 @@ export function Dashboard() {
               {data?.arAging?.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-gray-600">{item.name}: ฿{item?.value?.toLocaleString() ?? '0'}</span>
+                  <span className="text-xs text-muted-foreground">{item.name}: ฿{item?.value?.toLocaleString() ?? '0'}</span>
                 </div>
               ))}
             </div>
@@ -665,7 +665,7 @@ export function Dashboard() {
               {data?.apAging?.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-gray-600">{item.name}: ฿{item?.value?.toLocaleString() ?? '0'}</span>
+                  <span className="text-xs text-muted-foreground">{item.name}: ฿{item?.value?.toLocaleString() ?? '0'}</span>
                 </div>
               ))}
             </div>
@@ -677,7 +677,7 @@ export function Dashboard() {
       <div className="space-y-6">
         {/* Sales & Revenue */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">การขายและรายได้</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">การขายและรายได้</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <ShortcutCard
               title="ใบเสนอราคา"
@@ -720,7 +720,7 @@ export function Dashboard() {
 
         {/* Purchases & Expenses */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">การซื้อและค่าใช้จ่าย</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">การซื้อและค่าใช้จ่าย</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <ShortcutCard
               title="ใบสั่งซื้อ"
@@ -754,7 +754,7 @@ export function Dashboard() {
 
         {/* Inventory & Assets */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">สินค้าและทรัพย์สิน</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">สินค้าและทรัพย์สิน</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <ShortcutCard
               title="สินค้าคงคลัง"
@@ -788,7 +788,7 @@ export function Dashboard() {
 
         {/* HR & Finance */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">บุคคลและการเงิน</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">บุคคลและการเงิน</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <ShortcutCard
               title="เงินสดย่อย"
