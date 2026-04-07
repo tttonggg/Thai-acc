@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
-import { generateDocNumber } from "@/lib/api-utils"
-import { recordStockMovement } from "@/lib/inventory-service"
+import { generateDocNumber, requireAuth, apiResponse, apiError, notFoundError, unauthorizedError } from "@/lib/api-utils"
 import { checkPeriodStatus } from "@/lib/period-service"
 
 // POST /api/invoices/[id]/issue - Issue invoice
@@ -12,11 +11,11 @@ export async function POST(
   try {
     const user = await requireAuth(request)
     const { id } = await params
-    
+
     if (user.role === "VIEWER") {
       return apiError("ไม่มีสิทธิ์ออกใบกำกับภาษี", 403)
     }
-    
+
     const existing = await db.invoice.findUnique({
       where: { id },
       include: {
@@ -24,63 +23,225 @@ export async function POST(
         customer: true
       }
     })
-    
+
     if (!existing) {
       return notFoundError("ไม่พบใบกำกับภาษี")
     }
-    
+
     if (existing.status !== "DRAFT") {
       return apiError("ใบกำกับภาษีนี้ออกแล้ว")
     }
-    
+
     if (existing.lines.length === 0) {
       return apiError("ใบกำกับภาษีต้องมีอย่างน้อย 1 รายการ")
     }
-    
+
     // B1. Period Locking - Check if period is open
     const periodCheck = await checkPeriodStatus(existing.invoiceDate)
     if (!periodCheck.isValid) {
       return apiError(periodCheck.error || "ไม่สามารถออกใบกำกับภาษีในงวดที่ปิดแล้ว")
     }
-    
-    // Update status to issued
-    const invoice = await db.invoice.update({
-      where: { id },
-      data: { status: "ISSUED" }
-    })
 
-    // Create VAT record
-    await db.vatRecord.create({
-      data: {
-        type: "OUTPUT",
-        documentNo: existing.invoiceNo,
-        documentDate: existing.invoiceDate,
-        documentType: "INVOICE",
-        referenceId: existing.id,
-        customerId: existing.customerId,
-        customerName: existing.customer.name,
-        customerTaxId: existing.customer.taxId,
-        description: existing.description || `ใบกำกับภาษี ${existing.invoiceNo}`,
-        subtotal: existing.subtotal,
-        vatRate: existing.vatRate,
-        vatAmount: existing.vatAmount,
-        totalAmount: existing.totalAmount,
-        taxMonth: existing.invoiceDate.getMonth() + 1,
-        taxYear: existing.invoiceDate.getFullYear(),
+    // Execute all operations in a transaction
+    const result = await db.$transaction(async (tx) => {
+      // 1. Create VAT record
+      await tx.vatRecord.create({
+        data: {
+          type: "OUTPUT",
+          documentNo: existing.invoiceNo,
+          documentDate: existing.invoiceDate,
+          documentType: "INVOICE",
+          referenceId: existing.id,
+          customerId: existing.customerId,
+          customerName: existing.customer.name,
+          customerTaxId: existing.customer.taxId,
+          description: existing.description || `ใบกำกับภาษี ${existing.invoiceNo}`,
+          subtotal: existing.subtotal,
+          vatRate: existing.vatRate,
+          vatAmount: existing.vatAmount,
+          totalAmount: existing.totalAmount,
+          taxMonth: existing.invoiceDate.getMonth() + 1,
+          taxYear: existing.invoiceDate.getFullYear(),
+        }
+      })
+
+      // 2. Create COGS journal entry for inventory items (if applicable)
+      const productIds = existing.lines
+        .map(line => line.productId)
+        .filter((id): id is string => id !== null)
+
+      let cogsJournalEntryId: string | null = null
+
+      if (productIds.length > 0) {
+        const products = await tx.product.findMany({
+          where: { id: { in: productIds } },
+          select: { id: true, costPrice: true, isInventory: true }
+        })
+
+        const productMap = new Map(products.map(p => [p.id, p]))
+
+        let totalCOGS = 0
+        for (const line of existing.lines) {
+          if (!line.productId) continue
+
+          const product = productMap.get(line.productId)
+          if (product && product.isInventory) {
+            totalCOGS += product.costPrice * line.quantity
+          }
+        }
+
+        if (totalCOGS > 0) {
+          const cogsAccount = await tx.chartOfAccount.findUnique({
+            where: { code: '5110' }
+          })
+
+          const inventoryAccount = await tx.chartOfAccount.findUnique({
+            where: { code: '1140' }
+          })
+
+          if (!cogsAccount || !inventoryAccount) {
+            throw new Error(`ไม่พบบัญชี: COGS (5110) หรือ สินค้าคงเหลือ (1140)`)
+          }
+
+          const entryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE')
+
+          const cogsJournalEntry = await tx.journalEntry.create({
+            data: {
+              entryNo,
+              date: existing.invoiceDate,
+              description: `ต้นทุนขาย ${existing.invoiceNo}`,
+              reference: existing.invoiceNo,
+              documentType: 'INVOICE',
+              documentId: existing.id,
+              totalDebit: totalCOGS,
+              totalCredit: totalCOGS,
+              status: 'POSTED',
+              createdById: user.id,
+              approvedById: user.id,
+              approvedAt: new Date(),
+              lines: {
+                create: [
+                  {
+                    lineNo: 1,
+                    accountId: cogsAccount.id,
+                    description: 'ต้นทุนขาย',
+                    debit: totalCOGS,
+                    credit: 0,
+                    reference: existing.invoiceNo
+                  },
+                  {
+                    lineNo: 2,
+                    accountId: inventoryAccount.id,
+                    description: 'ลดสินค้าคงเหลือ',
+                    debit: 0,
+                    credit: totalCOGS,
+                    reference: existing.invoiceNo
+                  }
+                ]
+              }
+            }
+          })
+
+          cogsJournalEntryId = cogsJournalEntry.id
+        }
       }
+
+      // 3. Create Revenue journal entry
+      const arAccount = await tx.chartOfAccount.findUnique({
+        where: { code: '1120' }
+      })
+
+      const revenueAccount = await tx.chartOfAccount.findUnique({
+        where: { code: '4100' }
+      })
+
+      const vatOutputAccount = await tx.chartOfAccount.findUnique({
+        where: { code: '2132' }
+      })
+
+      if (!arAccount || !revenueAccount || !vatOutputAccount) {
+        throw new Error(`ไม่พบบัญชี: AR (1120), รายได้ (4100), หรือ VAT ขาย (2132)`)
+      }
+
+      const totalAmount = existing.totalAmount
+      const subtotal = existing.subtotal
+      const vatAmount = existing.vatAmount
+
+      // Validate amounts
+      if (subtotal + vatAmount !== totalAmount) {
+        throw new Error(`ยอดไม่ถูกต้อง: subtotal(${subtotal}) + vat(${vatAmount}) != total(${totalAmount})`)
+      }
+
+      const revenueEntryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE')
+
+      await tx.journalEntry.create({
+        data: {
+          entryNo: revenueEntryNo,
+          date: existing.invoiceDate,
+          description: `รายได้ขาย ${existing.invoiceNo}`,
+          reference: existing.invoiceNo,
+          documentType: 'INVOICE_REVENUE',
+          documentId: existing.id,
+          totalDebit: totalAmount,
+          totalCredit: totalAmount,
+          status: 'POSTED',
+          createdById: user.id,
+          approvedById: user.id,
+          approvedAt: new Date(),
+          lines: {
+            create: [
+              {
+                lineNo: 1,
+                accountId: arAccount.id,
+                description: 'ลูกหนี้การค้า',
+                debit: totalAmount,
+                credit: 0,
+                reference: existing.invoiceNo
+              },
+              {
+                lineNo: 2,
+                accountId: revenueAccount.id,
+                description: 'รายได้ขาย',
+                debit: 0,
+                credit: subtotal,
+                reference: existing.invoiceNo
+              },
+              {
+                lineNo: 3,
+                accountId: vatOutputAccount.id,
+                description: 'ภาษีมูลค่าเพิ่มขาย',
+                debit: 0,
+                credit: vatAmount,
+                reference: existing.invoiceNo
+              }
+            ]
+          }
+        }
+      })
+
+      // 4. Update invoice status to ISSUED and link COGS journal entry
+      const invoice = await tx.invoice.update({
+        where: { id },
+        data: {
+          status: "ISSUED",
+          journalEntryId: cogsJournalEntryId
+        }
+      })
+
+      return invoice
+    }, {
+      maxWait: 10000,
+      timeout: 30000,
     })
 
-    // Record stock movements for inventory items
+    // 5. Record stock movements AFTER transaction commits (outside transaction)
+    // This is done separately to avoid nested transaction issues
     try {
-      // Get default warehouse
       const inventoryConfig = await db.inventoryConfig.findUnique({
         where: { id: "default" }
       })
 
-      if (!inventoryConfig?.defaultWarehouseId) {
-        // Skip stock movement recording if no warehouse configured
-      } else {
-        // Get product details for cost price
+      if (inventoryConfig?.defaultWarehouseId) {
         const productIds = existing.lines
           .map(line => line.productId)
           .filter((id): id is string => id !== null)
@@ -93,231 +254,69 @@ export async function POST(
 
           const productMap = new Map(products.map(p => [p.id, p]))
 
-          // Process each line item
           for (const line of existing.lines) {
             if (!line.productId) continue
 
             const product = productMap.get(line.productId)
             if (!product || !product.isInventory) continue
 
-            // Record stock movement (ISSUE = negative quantity for outgoing stock)
-            await recordStockMovement({
-              productId: line.productId,
-              warehouseId: inventoryConfig.defaultWarehouseId,
-              type: "ISSUE",
-              quantity: line.quantity, // Positive quantity, type ISSUE handles outgoing
-              unitCost: product.costPrice,
-              referenceId: existing.id,
-              referenceNo: existing.invoiceNo,
-              notes: `ออกใบกำกับภาษี่ ${existing.invoiceNo}`,
-              sourceChannel: "INVOICE"
+            // Record stock movement
+            const existingBalance = await db.stockBalance.findUnique({
+              where: {
+                productId_warehouseId: {
+                  productId: line.productId,
+                  warehouseId: inventoryConfig.defaultWarehouseId
+                }
+              }
+            })
+
+            const newQty = (existingBalance?.quantity || 0) - line.quantity
+
+            if (newQty < 0) {
+              console.warn(`Insufficient stock for product ${line.productId}: available ${existingBalance?.quantity || 0}, needed ${line.quantity}`)
+            }
+
+            await db.stockMovement.create({
+              data: {
+                productId: line.productId,
+                warehouseId: inventoryConfig.defaultWarehouseId,
+                type: 'ISSUE',
+                quantity: line.quantity,
+                unitCost: product.costPrice,
+                referenceId: existing.id,
+                referenceNo: existing.invoiceNo,
+                notes: `ออกใบกำกับภาษี ${existing.invoiceNo}`,
+                sourceChannel: 'INVOICE',
+                balanceAfter: Math.max(0, newQty)
+              }
+            })
+
+            await db.stockBalance.update({
+              where: {
+                productId_warehouseId: {
+                  productId: line.productId,
+                  warehouseId: inventoryConfig.defaultWarehouseId
+                }
+              },
+              data: {
+                quantity: Math.max(0, newQty),
+                totalCost: Math.max(0, newQty) * product.costPrice
+              }
             })
           }
         }
       }
     } catch (stockError) {
-      // Stock movement recording failed but don't fail the invoice issuance
-      // Continue with successful response
+      // Log stock movement errors but don't fail the invoice
+      console.error('Stock movement recording failed:', stockError)
     }
 
-    // Create COGS journal entry for inventory items
-    try {
-      // Get product details for cost price
-      const productIds = existing.lines
-        .map(line => line.productId)
-        .filter((id): id is string => id !== null)
-
-      if (productIds.length > 0) {
-        const products = await db.product.findMany({
-          where: { id: { in: productIds } },
-          select: { id: true, costPrice: true, isInventory: true }
-        })
-
-        const productMap = new Map(products.map(p => [p.id, p]))
-
-        // Calculate total COGS for inventory items
-        let totalCOGS = 0
-        for (const line of existing.lines) {
-          if (!line.productId) continue
-
-          const product = productMap.get(line.productId)
-          if (product && product.isInventory) {
-            totalCOGS += product.costPrice * line.quantity
-          }
-        }
-
-        // Only create journal entry if there are inventory items with cost
-        if (totalCOGS > 0) {
-          // Get COGS expense account (5110) and Inventory asset account (1140)
-          const cogsAccount = await db.chartOfAccount.findUnique({
-            where: { code: '5110' }
-          })
-
-          const inventoryAccount = await db.chartOfAccount.findUnique({
-            where: { code: '1140' }
-          })
-
-          if (cogsAccount && inventoryAccount) {
-            // Generate journal entry number
-            const now = new Date()
-            const thaiYear = now.getFullYear() + 543
-            const prefix = `JV-${thaiYear}`
-
-            const lastEntry = await db.journalEntry.findFirst({
-              where: { entryNo: { startsWith: prefix } },
-              orderBy: { entryNo: 'desc' },
-              select: { entryNo: true }
-            })
-
-            let nextNum = 1
-            if (lastEntry) {
-              const parts = lastEntry.entryNo.split('-')
-              const lastNum = parseInt(parts[parts.length - 1] || '0', 10)
-              nextNum = lastNum + 1
-            }
-
-            const entryNo = `${prefix}-${String(nextNum).padStart(4, '0')}`
-
-            // Create journal entry for COGS
-            const journalEntry = await db.journalEntry.create({
-              data: {
-                entryNo,
-                date: existing.invoiceDate,
-                description: `ต้นทุนขาย ${existing.invoiceNo}`,
-                reference: existing.invoiceNo,
-                documentType: 'INVOICE',
-                documentId: existing.id,
-                totalDebit: totalCOGS,
-                totalCredit: totalCOGS,
-                status: 'POSTED',
-                createdById: user.id,
-                approvedById: user.id,
-                approvedAt: new Date(),
-                lines: {
-                  create: [
-                    {
-                      lineNo: 1,
-                      accountId: cogsAccount.id,
-                      description: 'ต้นทุนขาย',
-                      debit: totalCOGS,
-                      credit: 0,
-                      reference: existing.invoiceNo
-                    },
-                    {
-                      lineNo: 2,
-                      accountId: inventoryAccount.id,
-                      description: 'ลดสินค้าคงเหลือ',
-                      debit: 0,
-                      credit: totalCOGS,
-                      reference: existing.invoiceNo
-                    }
-                  ]
-                }
-              }
-            })
-
-            // Update invoice with journal entry ID
-            await db.invoice.update({
-              where: { id },
-              data: { journalEntryId: journalEntry.id }
-            })
-
-          } else {
-            // COGS or Inventory account not found, skipping COGS journal entry
-          }
-        }
-      }
-    } catch (cogsError) {
-      // COGS journal entry creation failed but don't fail the invoice issuance
-      // Continue with successful response
-    }
-
-    // Create Revenue journal entry for the invoice
-    try {
-      // Get required accounts: AR (1101), Revenue (4100), VAT Output (2104)
-      const arAccount = await db.chartOfAccount.findUnique({
-        where: { code: '1101' }
-      })
-
-      const revenueAccount = await db.chartOfAccount.findUnique({
-        where: { code: '4100' }
-      })
-
-      const vatOutputAccount = await db.chartOfAccount.findUnique({
-        where: { code: '2104' }
-      })
-
-      if (arAccount && revenueAccount && vatOutputAccount) {
-        // Generate journal entry number for revenue entry
-        const entryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE')
-
-        // Calculate line amounts
-        const totalAmount = existing.totalAmount
-        const subtotal = existing.subtotal
-        const vatAmount = existing.vatAmount
-
-        // Create journal entry for Revenue
-        const revenueJournalEntry = await db.journalEntry.create({
-          data: {
-            entryNo,
-            date: existing.invoiceDate,
-            description: `รายได้ขาย ${existing.invoiceNo}`,
-            reference: existing.invoiceNo,
-            documentType: 'INVOICE_REVENUE',
-            documentId: existing.id,
-            totalDebit: totalAmount,
-            totalCredit: totalAmount,
-            status: 'POSTED',
-            createdById: user.id,
-            approvedById: user.id,
-            approvedAt: new Date(),
-            lines: {
-              create: [
-                {
-                  lineNo: 1,
-                  accountId: arAccount.id,
-                  description: 'ลูกหนี้การค้า',
-                  debit: totalAmount,
-                  credit: 0,
-                  reference: existing.invoiceNo
-                },
-                {
-                  lineNo: 2,
-                  accountId: revenueAccount.id,
-                  description: 'รายได้ขาย',
-                  debit: 0,
-                  credit: subtotal,
-                  reference: existing.invoiceNo
-                },
-                {
-                  lineNo: 3,
-                  accountId: vatOutputAccount.id,
-                  description: 'ภาษีมูลค่าเพิ่มขาย',
-                  debit: 0,
-                  credit: vatAmount,
-                  reference: existing.invoiceNo
-                }
-              ]
-            }
-          }
-        })
-
-        // Note: We don't update invoice.journalEntryId here since it already 
-        // references the COGS entry. The revenue entry is tracked separately
-        // via documentId reference.
-      } else {
-        // One or more required accounts not found, skipping revenue journal entry
-      }
-    } catch (revenueError) {
-      // Revenue journal entry creation failed but don't fail the invoice issuance
-      // Continue with successful response
-    }
-
-    return apiResponse({ message: "ออกใบกำกับภาษีสำเร็จ", invoice })
+    return apiResponse({ message: "ออกใบกำกับภาษีสำเร็จ", invoice: result })
   } catch (error) {
+    console.error('Error issuing invoice:', error)
     if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
       return unauthorizedError()
     }
-    return apiError("เกิดข้อผิดพลาดในการออกใบกำกับภาษี")
+    return apiError(error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการออกใบกำกับภาษี")
   }
 }

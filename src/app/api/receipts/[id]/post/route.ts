@@ -66,22 +66,23 @@ export async function POST(
         }
 
         // Get GL accounts
-        // Cash (1101) or Bank (1102) based on payment method
+        // Cash (1110) or Bank based on payment method
         let cashAccountId: string | null = null
         if (receipt.paymentMethod === 'CASH') {
-          // Find cash account (1101 - เงินสด)
+          // Find cash account (1110 - เงินสดและเงินฝากธนาคาร)
           const cashAccount = await tx.chartOfAccount.findFirst({
-            where: { code: '1101' }
+            where: { code: '1110' }
           })
           cashAccountId = cashAccount?.id || null
         } else {
-          // Bank account (1102) or use bank account's GL account
-          const bankAccount = await tx.chartOfAccount.findFirst({
-            where: { code: '1102' }
-          })
+          // Bank account or use bank account's GL account
           if (receipt.bankAccount?.glAccountId) {
             cashAccountId = receipt.bankAccount.glAccountId
           } else {
+            // Fallback: find any bank account
+            const bankAccount = await tx.chartOfAccount.findFirst({
+              where: { code: { startsWith: '111' } }
+            })
             cashAccountId = bankAccount?.id || null
           }
         }
@@ -90,18 +91,18 @@ export async function POST(
           throw new Error('ไม่พบบัญชีเงินสด/ธนาคาร')
         }
 
-        // AR account (1103 - ลูกหนี้การค้า)
+        // AR account (1120 - ลูกหนี้การค้า)
         const arAccount = await tx.chartOfAccount.findFirst({
-          where: { code: '1103' }
+          where: { code: '1120' }
         })
 
         if (!arAccount) {
           throw new Error('ไม่พบบัญชีลูกหนี้การค้า')
         }
 
-        // WHT Payable account (2130 - ภาษีหัก ณ ที่จ่าย)
+        // WHT Payable account (2131 - ภาษีเงินได้หัก ณ ที่จ่าย)
         const whtPayableAccount = await tx.chartOfAccount.findFirst({
-          where: { code: '2130' }
+          where: { code: '2131' }
         })
 
         // Generate journal entry number using utility
@@ -130,6 +131,9 @@ export async function POST(
           credit: 0,
         })
 
+        // Calculate total allocations
+        const totalAllocations = receipt.allocations.reduce((sum, alloc) => sum + alloc.amount, 0)
+
         // Credit: AR for each invoice allocation
         for (const alloc of receipt.allocations) {
           journalLines.push({
@@ -149,6 +153,20 @@ export async function POST(
             description: `ภาษีหัก ณ ที่จ่าย`,
             debit: 0,
             credit: totalWht,
+          })
+        }
+
+        // Credit: Unallocated amount to AR (advance payment from customer)
+        // This ensures the journal entry is always balanced
+        const totalCredits = totalAllocations + totalWht
+        const unallocated = receipt.amount - totalCredits
+        if (unallocated > 0) {
+          journalLines.push({
+            lineNo: lineNo++,
+            accountId: arAccount.id,
+            description: `เงินรับล่วงหน้า/รอจัดสรร`,
+            debit: 0,
+            credit: unallocated,
           })
         }
 

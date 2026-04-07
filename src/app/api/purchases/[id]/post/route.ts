@@ -42,26 +42,8 @@ export async function POST(
       data: { status: "POSTED" }
     })
 
-    // Create VAT INPUT record (ภาษีซื้อ)
-    await db.vatRecord.create({
-      data: {
-        type: "INPUT",
-        documentNo: existing.invoiceNo,
-        documentDate: existing.invoiceDate,
-        documentType: "PURCHASE_INVOICE",
-        referenceId: existing.id,
-        vendorId: existing.vendorId,
-        vendorName: existing.vendor.name,
-        vendorTaxId: existing.vendor.taxId,
-        description: existing.vendorInvoiceNo || `ใบกำกับภาษีจากผู้ขาย ${existing.invoiceNo}`,
-        subtotal: existing.subtotal,
-        vatRate: existing.vatRate || 7,
-        vatAmount: existing.vatAmount,
-        totalAmount: existing.totalAmount,
-        taxMonth: existing.invoiceDate.getMonth() + 1,
-        taxYear: existing.invoiceDate.getFullYear(),
-      }
-    })
+    // NOTE: VAT record is already created in the purchase creation route
+    // Do not create duplicate VAT records here
 
     // Record stock movements for inventory items
     try {
