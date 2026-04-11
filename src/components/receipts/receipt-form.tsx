@@ -320,7 +320,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
     if (totalAllocated > values.amount) {
       toast({
         title: 'ยอดจัดจ่ายเกินกว่ายอดรับเงิน',
-        description: `จัดจ่ายรวม: ฿${totalAllocated.toLocaleString()} เกินกว่ายอดรับ: ฿${values.amount.toLocaleString()}`,
+        description: `จัดจ่ายรวม: ฿${(totalAllocated / 100).toLocaleString()} เกินกว่ายอดรับ: ฿${(values.amount / 100).toLocaleString()}`,
         variant: 'destructive',
       })
       return false
@@ -622,7 +622,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                       <Input className="!h-11 text-base"
                         type="number"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => field.onChange(Math.round(parseFloat(e.target.value) * 100) || 0)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -653,7 +653,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                 <div>
                   <CardTitle>จัดจ่ายใบกำกับภาษี</CardTitle>
                   <p className="text-sm text-gray-500 mt-1">
-                    ยอดรวม: ฿{amount.toLocaleString()} | จัดจ่ายแล้ว: ฿{totalAllocated.toLocaleString()} | คงเหลือ: ฿{unallocated.toLocaleString()}
+                    ยอดรวม: ฿{(amount / 100).toLocaleString()} | จัดจ่ายแล้ว: ฿{(totalAllocated / 100).toLocaleString()} | คงเหลือ: ฿{(unallocated / 100).toLocaleString()}
                   </p>
                 </div>
                 <Button

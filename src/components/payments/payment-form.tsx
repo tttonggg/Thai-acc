@@ -462,7 +462,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                             type="number"
                             step="0.01"
                             {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => field.onChange(Math.round(parseFloat(e.target.value) * 100) || 0)}
                             aria-label="จำนวนเงินรวม"
                           />
                         </FormControl>
@@ -475,7 +475,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                     <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
                       <AlertCircle className="h-4 w-4 text-blue-600" />
                       <span className="text-sm text-blue-800">
-ยอดค้างจ่าย: ฿{apBalance.toLocaleString()}                      </span>
+ยอดค้างจ่าย: ฿{(apBalance / 100).toLocaleString()}                      </span>
                     </div>
                   )}
                 </CardContent>
@@ -525,9 +525,9 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                                   type="number"
                                   step="0.01"
                                   placeholder="0.00"
-                                  value={allocations.find(a => a.invoiceId === invoice.id)?.amount || ''}
+                                  value={allocations.find(a => a.invoiceId === invoice.id)?.amount ? (allocations.find(a => a.invoiceId === invoice.id)!.amount / 100) : ''}
                                   onChange={(e) => {
-                                    const value = parseFloat(e.target.value) || 0
+                                    const value = Math.round(parseFloat(e.target.value) * 100) || 0
                                     const index = allocations.findIndex(a => a.invoiceId === invoice.id)
                                     if (index >= 0) {
                                       updateAllocationAmount(index, value)

@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"gh workflow run deploy.yml --ref ci-cd-pipeline 2>&1\",\"description\":\"Trigger CI/CD workflow on new branch\"}",
+  "error": "Exit code 1\nHTTP 404: workflow deploy.yml not found on the default branch (https://api.github.com/repos/tttonggg/Thai-acc/actions/workflows/deploy.yml)",
+  "timestamp": "2026-04-11T15:41:23.185Z",
+  "retry_count": 1
+}
