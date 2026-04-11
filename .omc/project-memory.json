@@ -1,0 +1,568 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1775922189079,
+  "projectRoot": "/Users/tong/Thai-acc",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "next",
+        "version": "16.1.1",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "19.0.0",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "19.0.0",
+        "category": "frontend"
+      },
+      {
+        "name": "@playwright/test",
+        "version": "1.58.2",
+        "category": "testing"
+      },
+      {
+        "name": "vitest",
+        "version": "4.0.18",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "next dev -p 3000 2>&1 | tee dev.log",
+      "build": "npm run db:select-schema && next build && npm run build:standalone",
+      "build:standalone": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && node scripts/build-production.js && cd .next/standalone && npm install --production --legacy-peer-deps && cd ../.. && echo 'Build complete! Standalone directory ready.' && echo 'IMPORTANT: Update .next/standalone/.env with absolute DATABASE_URL path'",
+      "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
+      "start:node": "NODE_ENV=production node .next/standalone/server.js 2>&1 | tee server.log",
+      "lint": "eslint .",
+      "lint:fix": "eslint . --fix",
+      "format": "prettier --write .",
+      "format:check": "prettier --check .",
+      "type-check": "tsc --noEmit",
+      "test": "vitest",
+      "test:run": "vitest run",
+      "test:coverage": "vitest run --coverage",
+      "test:e2e": "playwright test",
+      "test:e2e:ui": "playwright test --ui",
+      "test:e2e:visual": "playwright test e2e/visual-regression.spec.ts",
+      "test:e2e:mobile": "playwright test e2e/mobile-responsive.spec.ts --project='Mobile Chrome' --project='Mobile Safari'",
+      "test:e2e:performance": "playwright test e2e/performance.spec.ts",
+      "test:integration": "vitest run --config vitest.integration.config.ts",
+      "test:unit": "vitest run --config vitest.unit.config.ts",
+      "test:quick": "./scripts/test-quick.sh",
+      "test:full": "./scripts/test-full.sh",
+      "test:module": "./scripts/test-module.sh",
+      "test:verify-db": "./scripts/verify-database.sh",
+      "test:master": "ts-node tests/master-test-runner.ts",
+      "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+      "test:lighthouse": "lhci autorun",
+      "test:percy": "percy exec -- playwright test e2e/visual-regression.spec.ts",
+      "test:smoke": "./scripts/test-automation.sh smoke",
+      "test:automated": "./scripts/test-automation.sh",
+      "test:schedule": "./scripts/test-scheduler.sh",
+      "test:clean": "./scripts/test-automation.sh clean",
+      "test:report": "./scripts/test-automation.sh report",
+      "db:prepare-schemas": "node scripts/prepare-schemas.js",
+      "db:select-schema": "node prisma/schema-loader.js",
+      "db:push": "npm run db:select-schema && prisma db push",
+      "db:generate": "npm run db:select-schema && prisma generate",
+      "db:migrate": "npm run db:select-schema && prisma migrate dev",
+      "db:reset": "npm run db:select-schema && prisma migrate reset",
+      "seed": "ts-node prisma/seed.ts",
+      "seed:fresh": "ts-node prisma/reset-db.ts && npm run seed",
+      "docker:build": "docker build -t thai-erp:latest .",
+      "docker:run": "docker run -p 3000:3000 --env-file .env thai-erp:latest",
+      "docker:compose:up": "docker-compose up -d",
+      "docker:compose:down": "docker-compose down",
+      "docker:compose:logs": "docker-compose logs -f",
+      "k8s:deploy": "helm upgrade --install thai-erp ./infrastructure/helm -n thai-erp",
+      "k8s:delete": "helm uninstall thai-erp -n thai-erp",
+      "security:scan": "./scripts/security/scan-secrets.sh",
+      "security:sbom": "./scripts/security/generate-sbom.sh",
+      "security:deps": "./scripts/security/dependency-check.sh",
+      "ci:all": "npm run lint && npm run type-check && npm run test:coverage && npm run build",
+      "prepare": "husky install"
+    }
+  },
+  "conventions": {
+    "namingStyle": "camelCase",
+    "importStyle": null,
+    "testPattern": "*.test.ts",
+    "fileOrganization": "type-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "examples",
+      "public",
+      "scripts",
+      "src",
+      "test",
+      "tests"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "Thai-ERP-Production-Ready": {
+      "path": "Thai-ERP-Production-Ready",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1775922189066,
+      "keyFiles": [
+        "MANIFEST.md",
+        "QUICKSTART.sh",
+        "README.md",
+        "SETUP.md",
+        "THAI_ERP_PACKAGE_SUMMARY.txt"
+      ]
+    },
+    "backup_20260325_115045": {
+      "path": "backup_20260325_115045",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1775922189067,
+      "keyFiles": []
+    },
+    "backups": {
+      "path": "backups",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1775922189070,
+      "keyFiles": [
+        "dev.db.backup-20260313-113716",
+        "prod.db.20260313_153450",
+        "thai-acc-backup-20260313-113717.tar.gz"
+      ]
+    },
+    "coverage": {
+      "path": "coverage",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1775922189070,
+      "keyFiles": []
+    },
+    "db": {
+      "path": "db",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775922189070,
+      "keyFiles": [
+        "custom.db"
+      ]
+    },
+    "deploy": {
+      "path": "deploy",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1775922189070,
+      "keyFiles": [
+        "PRODUCTION-READY-CHECKLIST.md",
+        "README.md",
+        "VPS-DEPLOYMENT-GUIDE.md",
+        "keerati-erp-vps.zip",
+        "คู่มือผู้ใช้-Keerati-ERP.md"
+      ]
+    },
+    "design-system": {
+      "path": "design-system",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1775922189070,
+      "keyFiles": []
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 22,
+      "lastAccessed": 1775922189070,
+      "keyFiles": [
+        "BACKUP_RESTORE.md",
+        "CONFIGURATION.md",
+        "CREDIT-NOTE-BUTTON-LOCATION.md",
+        "DATABASE_SETUP.md",
+        "DATA_IMPORT_GUIDE.md"
+      ]
+    },
+    "download": {
+      "path": "download",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1775922189070,
+      "keyFiles": [
+        "README.md",
+        "SETUP-INSTRUCTIONS.md",
+        "thai-accounting-erp-project.zip"
+      ]
+    },
+    "e2e": {
+      "path": "e2e",
+      "purpose": null,
+      "fileCount": 37,
+      "lastAccessed": 1775922189071,
+      "keyFiles": [
+        "01-login-complete.spec.ts",
+        "01-login-complete.spec.ts.bak",
+        "02-master-data-api.spec.ts",
+        "02-master-data-creation.spec.ts",
+        "03-accounting-transactions-api.spec.ts"
+      ]
+    },
+    "examples": {
+      "path": "examples",
+      "purpose": "Example code",
+      "fileCount": 1,
+      "lastAccessed": 1775922189071,
+      "keyFiles": [
+        "petty-cash-api-usage.ts"
+      ]
+    },
+    "infrastructure": {
+      "path": "infrastructure",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775922189071,
+      "keyFiles": []
+    },
+    "logs": {
+      "path": "logs",
+      "purpose": null,
+      "fileCount": 11,
+      "lastAccessed": 1775922189072,
+      "keyFiles": [
+        "dev-server-20260318_200000.log",
+        "dev-server-20260319_200000.log",
+        "dev-server-20260319_210000.log",
+        "dev-server-20260320_040222.log",
+        "dev-server-20260320_070424.log"
+      ]
+    },
+    "mini-services": {
+      "path": "mini-services",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775922189072,
+      "keyFiles": []
+    },
+    "monitoring": {
+      "path": "monitoring",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1775922189072,
+      "keyFiles": [
+        "loki-config.yml",
+        "prometheus.yml",
+        "promtail-config.yml",
+        "status-page.html"
+      ]
+    },
+    "playwright-report": {
+      "path": "playwright-report",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775922189073,
+      "keyFiles": [
+        "index.html"
+      ]
+    },
+    "prisma": {
+      "path": "prisma",
+      "purpose": null,
+      "fileCount": 15,
+      "lastAccessed": 1775922189073,
+      "keyFiles": [
+        "SEED_README.md",
+        "check-credit-notes.ts",
+        "create-sample-cn-dn.ts",
+        "db",
+        "dev.db"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 6,
+      "lastAccessed": 1775922189073,
+      "keyFiles": [
+        "icon.svg",
+        "logo.svg",
+        "manifest.json",
+        "robots.txt",
+        "service-worker.js"
+      ]
+    },
+    "screenshots": {
+      "path": "screenshots",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775922189073,
+      "keyFiles": []
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 37,
+      "lastAccessed": 1775922189074,
+      "keyFiles": [
+        "CODE_REFACTORING_PLAN.md",
+        "TEST_AUTOMATION_README.md",
+        "analyze-query-performance.sh",
+        "audit-modules.ts",
+        "backfill-vat-records.ts"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 3,
+      "lastAccessed": 1775922189074,
+      "keyFiles": [
+        "instrumentation.ts",
+        "middleware.ts"
+      ]
+    },
+    "templates": {
+      "path": "templates",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1775922189074,
+      "keyFiles": [
+        "accounts_template.csv",
+        "customers_template.csv",
+        "products_template.csv",
+        "vendors_template.csv"
+      ]
+    },
+    "test": {
+      "path": "test",
+      "purpose": "Test files",
+      "fileCount": 1,
+      "lastAccessed": 1775922189074,
+      "keyFiles": []
+    },
+    "test-artifacts": {
+      "path": "test-artifacts",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775922189074,
+      "keyFiles": []
+    },
+    "test-history": {
+      "path": "test-history",
+      "purpose": null,
+      "fileCount": 26,
+      "lastAccessed": 1775922189075,
+      "keyFiles": [
+        "quick_20260317_221802.json",
+        "smoke_20260317_220001.json",
+        "smoke_20260318_090001.json",
+        "smoke_20260318_100000.json",
+        "smoke_20260318_110000.json"
+      ]
+    },
+    "test-reports": {
+      "path": "test-reports",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1775922189075,
+      "keyFiles": [
+        "invoice-commenting-feature-report.md",
+        "invoice-commenting-manual-test-checklist.md",
+        "invoice-commenting-test-execution-summary.md"
+      ]
+    },
+    "test-results": {
+      "path": "test-results",
+      "purpose": null,
+      "fileCount": 8,
+      "lastAccessed": 1775922189076,
+      "keyFiles": [
+        "smoke_report_20260319_170001.md",
+        "smoke_report_20260319_220001.md",
+        "smoke_report_20260319_230000.md",
+        "smoke_report_20260320_070424.md",
+        "smoke_report_20260320_100000.md"
+      ]
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 8,
+      "lastAccessed": 1775922189076,
+      "keyFiles": [
+        "README.md",
+        "USAGE.md",
+        "cheque-clearing.test.ts",
+        "global-setup.ts",
+        "global-teardown.ts"
+      ]
+    },
+    "upload": {
+      "path": "upload",
+      "purpose": null,
+      "fileCount": 16,
+      "lastAccessed": 1775922189076,
+      "keyFiles": [
+        "IMG_1758.png",
+        "IMG_1759.png",
+        "IMG_1760.png",
+        "IMG_1761.png",
+        "IMG_1762.png"
+      ]
+    },
+    "Thai-ERP-Production-Ready/config": {
+      "path": "Thai-ERP-Production-Ready/config",
+      "purpose": "Configuration files",
+      "fileCount": 9,
+      "lastAccessed": 1775922189077,
+      "keyFiles": [
+        "next.config.ts",
+        "package.json",
+        "playwright.config.ts"
+      ]
+    },
+    "Thai-ERP-Production-Ready/docs": {
+      "path": "Thai-ERP-Production-Ready/docs",
+      "purpose": "Documentation",
+      "fileCount": 0,
+      "lastAccessed": 1775922189077,
+      "keyFiles": []
+    },
+    "prisma/migrations": {
+      "path": "prisma/migrations",
+      "purpose": "Database migrations",
+      "fileCount": 2,
+      "lastAccessed": 1775922189078,
+      "keyFiles": [
+        "20250315_add_performance_indexes.sql",
+        "migration_lock.toml"
+      ]
+    },
+    "src/app": {
+      "path": "src/app",
+      "purpose": "Application code",
+      "fileCount": 3,
+      "lastAccessed": 1775922189078,
+      "keyFiles": [
+        "globals.css",
+        "layout.tsx",
+        "page.tsx"
+      ]
+    },
+    "src/components": {
+      "path": "src/components",
+      "purpose": "UI components",
+      "fileCount": 7,
+      "lastAccessed": 1775922189078,
+      "keyFiles": [
+        "api-error-boundary.tsx",
+        "async-error-boundary.tsx",
+        "error-boundary.tsx"
+      ]
+    },
+    "src/lib": {
+      "path": "src/lib",
+      "purpose": "Library code",
+      "fileCount": 56,
+      "lastAccessed": 1775922189078,
+      "keyFiles": [
+        "PDF-GENERATOR-README.md",
+        "activity-logger.ts",
+        "api-analytics.ts"
+      ]
+    },
+    "src/middleware": {
+      "path": "src/middleware",
+      "purpose": "Middleware",
+      "fileCount": 1,
+      "lastAccessed": 1775922189078,
+      "keyFiles": [
+        "idempotency.ts"
+      ]
+    },
+    "src/test": {
+      "path": "src/test",
+      "purpose": "Test files",
+      "fileCount": 1,
+      "lastAccessed": 1775922189079,
+      "keyFiles": [
+        "setup.ts"
+      ]
+    },
+    "test/api": {
+      "path": "test/api",
+      "purpose": "API routes",
+      "fileCount": 8,
+      "lastAccessed": 1775922189079,
+      "keyFiles": [
+        "accounts.test.ts",
+        "customers.test.ts",
+        "invoices-comments-api.test.ts"
+      ]
+    },
+    "tests/api": {
+      "path": "tests/api",
+      "purpose": "API routes",
+      "fileCount": 2,
+      "lastAccessed": 1775922189079,
+      "keyFiles": [
+        "authentication.test.ts",
+        "endpoints.test.ts"
+      ]
+    },
+    "tests/examples": {
+      "path": "tests/examples",
+      "purpose": "Example code",
+      "fileCount": 1,
+      "lastAccessed": 1775922189079,
+      "keyFiles": [
+        "test-utilities-example.spec.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src/components/receipts/receipt-form.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1775922209675,
+      "type": "file"
+    },
+    {
+      "path": "src/components/payments/payment-form.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1775922214297,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
