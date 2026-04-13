@@ -570,6 +570,12 @@
       "type": "file"
     },
     {
+      "path": "tsconfig.json",
+      "accessCount": 3,
+      "lastAccessed": 1776083363168,
+      "type": "file"
+    },
+    {
       "path": "src/app/api/purchases/route.ts",
       "accessCount": 2,
       "lastAccessed": 1776082993138,
@@ -580,6 +586,30 @@
       "accessCount": 1,
       "lastAccessed": 1776082974585,
       "type": "directory"
+    },
+    {
+      "path": "CI-CD-STATUS.md",
+      "accessCount": 1,
+      "lastAccessed": 1776083051766,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 1,
+      "lastAccessed": 1776083103344,
+      "type": "file"
+    },
+    {
+      "path": "CI-CD-FIXES.md",
+      "accessCount": 1,
+      "lastAccessed": 1776083286658,
+      "type": "file"
+    },
+    {
+      "path": "sentry.client.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776083349014,
+      "type": "file"
     }
   ],
   "userDirectives": []
