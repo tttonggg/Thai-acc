@@ -514,7 +514,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                                 </span>
                               </div>
                               <Badge variant="outline">
-ค้างจ่าย ฿{invoice.balance.toLocaleString()}                              </Badge>
+ค้างจ่าย ฿{(invoice.balance / 100).toLocaleString()}                              </Badge>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -525,9 +525,22 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                                   type="number"
                                   step="0.01"
                                   placeholder="0.00"
-                                  value={allocations.find(a => a.invoiceId === invoice.id)?.amount ? (allocations.find(a => a.invoiceId === invoice.id)!.amount / 100) : ''}
+                                  value={(() => {
+                                    const alloc = allocations.find(a => a.invoiceId === invoice.id)
+                                    return alloc && alloc.amount > 0 ? (alloc.amount / 100).toFixed(2) : ''
+                                  })()}
                                   onChange={(e) => {
-                                    const value = Math.round(parseFloat(e.target.value) * 100) || 0
+                                    const inputValue = e.target.value
+                                    if (inputValue === '' || inputValue === '-') {
+                                      const index = allocations.findIndex(a => a.invoiceId === invoice.id)
+                                      if (index >= 0) {
+                                        const newAllocations = [...allocations]
+                                        newAllocations[index].amount = 0
+                                        form.setValue('allocations', newAllocations)
+                                      }
+                                      return
+                                    }
+                                    const value = Math.round(parseFloat(inputValue) * 100) || 0
                                     const index = allocations.findIndex(a => a.invoiceId === invoice.id)
                                     if (index >= 0) {
                                       updateAllocationAmount(index, value)
@@ -537,7 +550,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                                         invoiceNo: invoice.invoiceNo,
                                         amount: value,
                                         whtRate: 3,
-                                        whtAmount: (value * 3) / 100,
+                                        whtAmount: Math.round((value * 3) / 100),
                                       }]
                                       form.setValue('allocations', newAllocations)
                                     }

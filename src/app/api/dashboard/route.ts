@@ -135,8 +135,8 @@ export async function GET(request: NextRequest) {
       }, 0)
     }, 0)
 
-    const accountsReceivable = (arBalance._sum.totalAmount || 0) - (arBalance._sum.paidAmount || 0)
-    const accountsPayable = (apBalance._sum.totalAmount || 0) - (apBalance._sum.paidAmount || 0)
+    const accountsReceivable = Math.round(((arBalance._sum.totalAmount || 0) - (arBalance._sum.paidAmount || 0)) / 100)
+    const accountsPayable = Math.round(((apBalance._sum.totalAmount || 0) - (apBalance._sum.paidAmount || 0)) / 100)
 
     return NextResponse.json({
       success: true,
