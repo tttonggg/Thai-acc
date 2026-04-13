@@ -77,8 +77,9 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
       }
       try {
         const res = await fetch(`/api/purchases?vendorId=${selectedVendorId}&status=ISSUED,PAID`)
-        const data = await res.json()
-        setPurchaseInvoices((data.purchases || data).filter((inv: PurchaseInvoice) => inv.status !== 'CANCELLED'))
+        const response = await res.json()
+        const purchaseData = response.data || response.purchases || []
+        setPurchaseInvoices(purchaseData.filter((inv: PurchaseInvoice) => inv.status !== 'CANCELLED'))
       } catch (error) {
         console.error('Failed to fetch purchase invoices:', error)
       }

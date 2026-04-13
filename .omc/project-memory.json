@@ -552,16 +552,34 @@
   },
   "hotPaths": [
     {
-      "path": "src/components/receipts/receipt-form.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1775922209675,
+      "path": "src/components/payments/payment-form.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1776082821692,
       "type": "file"
     },
     {
-      "path": "src/components/payments/payment-form.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1775922214297,
+      "path": "src/components/receipts/receipt-form.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1776082827361,
       "type": "file"
+    },
+    {
+      "path": "src/components/debit-notes/debit-note-form.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1776083000704,
+      "type": "file"
+    },
+    {
+      "path": "src/app/api/purchases/route.ts",
+      "accessCount": 2,
+      "lastAccessed": 1776082993138,
+      "type": "file"
+    },
+    {
+      "path": "src/app/api",
+      "accessCount": 1,
+      "lastAccessed": 1776082974585,
+      "type": "directory"
     }
   ],
   "userDirectives": []
