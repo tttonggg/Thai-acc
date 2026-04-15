@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { requireAuth } from '@/lib/api-utils'
 import { logCreate } from '@/lib/activity-logger'
 import { getClientIp } from '@/lib/api-utils'
+import { bahtToSatang, satangToBaht } from '@/lib/currency'
 
 // Validation schema
 const invoiceLineSchema = z.object({
@@ -125,10 +126,29 @@ export async function GET(request: NextRequest) {
       }),
       prisma.invoice.count({ where }),
     ])
-    
+
+    // Convert Satang to Baht for all monetary fields
+    const invoicesInBaht = invoices.map(invoice => ({
+      ...invoice,
+      subtotal: satangToBaht(invoice.subtotal),
+      vatAmount: satangToBaht(invoice.vatAmount),
+      totalAmount: satangToBaht(invoice.totalAmount),
+      discountAmount: satangToBaht(invoice.discountAmount),
+      withholdingAmount: satangToBaht(invoice.withholdingAmount),
+      netAmount: satangToBaht(invoice.netAmount),
+      paidAmount: satangToBaht(invoice.paidAmount),
+      lines: invoice.lines.map(line => ({
+        ...line,
+        unitPrice: satangToBaht(line.unitPrice),
+        discount: satangToBaht(line.discount),
+        amount: satangToBaht(line.amount),
+        vatAmount: satangToBaht(line.vatAmount),
+      })),
+    }))
+
     return NextResponse.json({
       success: true,
-      data: invoices,
+      data: invoicesInBaht,
       pagination: {
         page,
         limit,
@@ -203,15 +223,15 @@ export async function POST(request: NextRequest) {
         type: validatedData.type,
         reference: validatedData.reference,
         poNumber: validatedData.poNumber,
-        subtotal,
+        subtotal: bahtToSatang(subtotal),
         vatRate: 7,
-        vatAmount,
-        totalAmount,
-        discountAmount: validatedData.discountAmount,
+        vatAmount: bahtToSatang(vatAmount),
+        totalAmount: bahtToSatang(totalAmount),
+        discountAmount: bahtToSatang(validatedData.discountAmount),
         discountPercent: validatedData.discountPercent,
         withholdingRate: finalWhtRate,
-        withholdingAmount,
-        netAmount,
+        withholdingAmount: bahtToSatang(withholdingAmount),
+        netAmount: bahtToSatang(netAmount),
         paidAmount: 0,
         status: 'DRAFT',
         notes: validatedData.notes,
@@ -224,11 +244,11 @@ export async function POST(request: NextRequest) {
             description: line.description,
             quantity: line.quantity,
             unit: line.unit,
-            unitPrice: line.unitPrice,
-            discount: line.discount,
-            amount: line.amount,
+            unitPrice: bahtToSatang(line.unitPrice),
+            discount: bahtToSatang(line.discount),
+            amount: bahtToSatang(line.amount),
             vatRate: line.vatRate,
-            vatAmount: line.vatAmount,
+            vatAmount: bahtToSatang(line.vatAmount),
           })),
         },
       },
@@ -246,7 +266,26 @@ export async function POST(request: NextRequest) {
       type: invoice.type,
     }, ipAddress)
 
-    return NextResponse.json({ success: true, data: invoice })
+    // Convert Satang to Baht for response
+    const invoiceInBaht = {
+      ...invoice,
+      subtotal: satangToBaht(invoice.subtotal),
+      vatAmount: satangToBaht(invoice.vatAmount),
+      totalAmount: satangToBaht(invoice.totalAmount),
+      discountAmount: satangToBaht(invoice.discountAmount),
+      withholdingAmount: satangToBaht(invoice.withholdingAmount),
+      netAmount: satangToBaht(invoice.netAmount),
+      paidAmount: satangToBaht(invoice.paidAmount),
+      lines: invoice.lines.map(line => ({
+        ...line,
+        unitPrice: satangToBaht(line.unitPrice),
+        discount: satangToBaht(line.discount),
+        amount: satangToBaht(line.amount),
+        vatAmount: satangToBaht(line.vatAmount),
+      })),
+    }
+
+    return NextResponse.json({ success: true, data: invoiceInBaht })
   } catch (error: any) {
     if (error.name === 'ZodError') {
       return NextResponse.json(

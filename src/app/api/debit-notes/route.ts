@@ -3,6 +3,7 @@ import { requireAuth, apiResponse, apiError, unauthorizedError, forbiddenError, 
 import { AuthError } from '@/lib/api-auth'
 import { db } from '@/lib/db'
 import { z } from 'zod'
+import { bahtToSatang, satangToBaht } from '@/lib/currency'
 
 // Wrapper that properly handles auth with request context
 async function requireAuthWithRequest(request: NextRequest): Promise<any> {
@@ -122,6 +123,9 @@ export async function GET(request: NextRequest) {
       try {
         return {
           ...dn,
+          subtotal: satangToBaht(dn.subtotal),
+          vatAmount: satangToBaht(dn.vatAmount),
+          totalAmount: satangToBaht(dn.totalAmount),
           vendorName: dn.vendor?.name || '',
           vendorCode: dn.vendor?.code || '',
           vendorTaxId: dn.vendor?.taxId || '',
@@ -247,10 +251,10 @@ export async function POST(request: NextRequest) {
           vendorId: validatedData.vendorId,
           purchaseInvoiceId: validatedData.purchaseInvoiceId,
           reason: validatedData.reason,
-          subtotal: validatedData.subtotal,
+          subtotal: bahtToSatang(validatedData.subtotal),
           vatRate: validatedData.vatRate,
-          vatAmount: validatedData.vatAmount,
-          totalAmount: validatedData.totalAmount,
+          vatAmount: bahtToSatang(validatedData.vatAmount),
+          totalAmount: bahtToSatang(validatedData.totalAmount),
           status: 'ISSUED',
           notes: validatedData.notes,
         },
@@ -281,14 +285,14 @@ export async function POST(request: NextRequest) {
                 lineNo: 1,
                 accountId: purchasesAccount.id,
                 description: `ค่าใช้จ่ายเพิ่มเติม ${debitNoteNo}`,
-                debit: validatedData.subtotal,
+                debit: bahtToSatang(validatedData.subtotal),
                 credit: 0,
               },
               {
                 lineNo: 2,
                 accountId: vatInputAccount.id,
                 description: `VAT ใบเพิ่มหนี้ ${debitNoteNo}`,
-                debit: validatedData.vatAmount,
+                debit: bahtToSatang(validatedData.vatAmount),
                 credit: 0,
               },
               {
@@ -321,10 +325,10 @@ export async function POST(request: NextRequest) {
           vendorName: vendor.name,
           vendorTaxId: vendor.taxId,
           description: `ใบเพิ่มหนี้จากผู้ขาย ${debitNoteNo}`,
-          subtotal: validatedData.subtotal,
+          subtotal: bahtToSatang(validatedData.subtotal),
           vatRate: validatedData.vatRate,
-          vatAmount: validatedData.vatAmount,
-          totalAmount: validatedData.totalAmount,
+          vatAmount: bahtToSatang(validatedData.vatAmount),
+          totalAmount: bahtToSatang(validatedData.totalAmount),
           taxMonth: validatedData.debitNoteDate.getMonth() + 1,
           taxYear: validatedData.debitNoteDate.getFullYear(),
         }
@@ -391,7 +395,15 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return apiResponse({ success: true, data: completeDebitNote }, 201)
+    // Convert Satang to Baht for response
+    const debitNoteInBaht = {
+      ...completeDebitNote,
+      subtotal: satangToBaht(completeDebitNote.subtotal),
+      vatAmount: satangToBaht(completeDebitNote.vatAmount),
+      totalAmount: satangToBaht(completeDebitNote.totalAmount),
+    }
+
+    return apiResponse({ success: true, data: debitNoteInBaht }, 201)
   } catch (error) {
     console.error('Debit Note Creation Error:', error)
     if (error instanceof AuthError || (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต'))) {

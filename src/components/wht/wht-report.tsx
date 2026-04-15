@@ -139,9 +139,12 @@ export function WhtReport() {
   // Safely handle undefined/null arrays from API response
   const pnd3Records = data.pnd3Records || []
   const pnd53Records = data.pnd53Records || []
-  
+
   const totalPnd3 = pnd3Records.reduce((sum, r) => sum + (r.tax || 0), 0)
   const totalPnd53 = pnd53Records.reduce((sum, r) => sum + (r.tax || 0), 0)
+
+  // Convert Satang to Baht for display
+  const formatBaht = (satang: number) => (satang / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank')
@@ -175,9 +178,9 @@ export function WhtReport() {
         
         <div class="summary">
           <h3>สรุปภาษีหัก ณ ที่จ่าย</h3>
-          <p>ภงด.3 (เงินเดือน/ค่าจ้าง): ${totalPnd3.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท (${pnd3Records.length} รายการ)</p>
-          <p>ภงด.53 (ค่าบริการ/ค่าเช่า): ${totalPnd53.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท (${pnd53Records.length} รายการ)</p>
-          <p class="total">รวมภาษีหัก ณ ที่จ่ายทั้งหมด: ${(totalPnd3 + totalPnd53).toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
+          <p>ภงด.3 (เงินเดือน/ค่าจ้าง): ${formatBaht(totalPnd3)} บาท (${pnd3Records.length} รายการ)</p>
+          <p>ภงด.53 (ค่าบริการ/ค่าเช่า): ${formatBaht(totalPnd53)} บาท (${pnd53Records.length} รายการ)</p>
+          <p class="total">รวมภาษีหัก ณ ที่จ่ายทั้งหมด: ${formatBaht(totalPnd3 + totalPnd53)} บาท</p>
         </div>
 
         <div class="section">
@@ -201,7 +204,7 @@ export function WhtReport() {
                   <td>${r.name}</td>
                   <td>${r.incomeType || '-'}</td>
                   <td class="text-right">${r.rate}%</td>
-                  <td class="text-right">${(r.tax || 0).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                  <td class="text-right">${formatBaht(r.tax || 0)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -229,7 +232,7 @@ export function WhtReport() {
                   <td>${r.name}</td>
                   <td>${r.incomeType || '-'}</td>
                   <td class="text-right">${r.rate}%</td>
-                  <td class="text-right">${(r.tax || 0).toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                  <td class="text-right">${formatBaht(r.tax || 0)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -292,7 +295,7 @@ export function WhtReport() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">ภงด.3 (เงินเดือน/ค่าจ้าง)</p>
-                <p className="text-2xl font-bold text-purple-600">฿{totalPnd3.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-purple-600">฿{formatBaht(totalPnd3)}</p>
                 <p className="text-xs text-gray-400">{pnd3Records.length} รายการ</p>
               </div>
               <FileText className="h-10 w-10 text-purple-200" />
@@ -304,7 +307,7 @@ export function WhtReport() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">ภงด.53 (ค่าบริการ/ค่าเช่า)</p>
-                <p className="text-2xl font-bold text-teal-600">฿{totalPnd53.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-teal-600">฿{formatBaht(totalPnd53)}</p>
                 <p className="text-xs text-gray-400">{pnd53Records.length} รายการ</p>
               </div>
               <FileText className="h-10 w-10 text-teal-200" />
@@ -316,7 +319,7 @@ export function WhtReport() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">รวมภาษีที่ต้องยื่น</p>
-                <p className="text-2xl font-bold text-red-600">฿{(totalPnd3 + totalPnd53).toLocaleString()}</p>
+                <p className="text-2xl font-bold text-red-600">฿{formatBaht(totalPnd3 + totalPnd53)}</p>
                 <p className="text-xs text-gray-400">{pnd3Records.length + pnd53Records.length} รายการ</p>
               </div>
               <Calculator className="h-10 w-10 text-red-200" />
@@ -358,16 +361,16 @@ export function WhtReport() {
                       <TableCell>
                         <Badge variant="outline">{record.incomeType}</Badge>
                       </TableCell>
-                      <TableCell className="text-right">฿{record.income.toLocaleString()}</TableCell>
+                      <TableCell className="text-right">฿{formatBaht(record.income || 0)}</TableCell>
                       <TableCell className="text-center">{record.rate}%</TableCell>
-                      <TableCell className="text-right text-teal-600 font-semibold">฿{record.tax.toLocaleString()}</TableCell>
+                      <TableCell className="text-right text-teal-600 font-semibold">฿{formatBaht(record.tax || 0)}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="bg-teal-50">
                     <TableCell colSpan={4} className="font-semibold">รวม</TableCell>
-                    <TableCell className="text-right font-semibold">฿{pnd53Records.reduce((s, r) => s + (r.income || 0), 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-semibold">฿{formatBaht(pnd53Records.reduce((s, r) => s + (r.income || 0), 0))}</TableCell>
                     <TableCell></TableCell>
-                    <TableCell className="text-right font-semibold text-teal-600">฿{totalPnd53.toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-semibold text-teal-600">฿{formatBaht(totalPnd53)}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -398,16 +401,16 @@ export function WhtReport() {
                       <TableCell>{record.date}</TableCell>
                       <TableCell className="font-mono">{record.docNo}</TableCell>
                       <TableCell>{record.name}</TableCell>
-                      <TableCell className="text-right">฿{record.income.toLocaleString()}</TableCell>
+                      <TableCell className="text-right">฿{formatBaht(record.income || 0)}</TableCell>
                       <TableCell className="text-center">{record.rate}%</TableCell>
-                      <TableCell className="text-right text-purple-600 font-semibold">฿{record.tax.toLocaleString()}</TableCell>
+                      <TableCell className="text-right text-purple-600 font-semibold">฿{formatBaht(record.tax || 0)}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="bg-purple-50">
                     <TableCell colSpan={3} className="font-semibold">รวม</TableCell>
-                    <TableCell className="text-right font-semibold">฿{pnd3Records.reduce((s, r) => s + (r.income || 0), 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-semibold">฿{formatBaht(pnd3Records.reduce((s, r) => s + (r.income || 0), 0))}</TableCell>
                     <TableCell></TableCell>
-                    <TableCell className="text-right font-semibold text-purple-600">฿{totalPnd3.toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-semibold text-purple-600">฿{formatBaht(totalPnd3)}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>

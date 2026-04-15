@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { requireAuth, apiResponse, apiError, unauthorizedError, generateDocNumber } from "@/lib/api-utils"
 import { z } from "zod"
+import { bahtToSatang, satangToBaht } from "@/lib/currency"
 
 // Validation schema
 const paymentAllocationSchema = z.object({
@@ -90,9 +91,26 @@ export async function GET(request: Request) {
       db.payment.count({ where })
     ])
 
+    // Convert Satang to Baht for all monetary fields
+    const paymentsInBaht = payments.map(payment => ({
+      ...payment,
+      amount: satangToBaht(payment.amount),
+      whtAmount: satangToBaht(payment.whtAmount),
+      unallocated: satangToBaht(payment.unallocated),
+      allocations: payment.allocations.map(alloc => ({
+        ...alloc,
+        amount: satangToBaht(alloc.amount),
+        whtAmount: satangToBaht(alloc.whtAmount),
+        invoice: alloc.invoice ? {
+          ...alloc.invoice,
+          totalAmount: satangToBaht(alloc.invoice.totalAmount),
+        } : alloc.invoice,
+      })),
+    }))
+
     return Response.json({
       success: true,
-      data: payments,
+      data: paymentsInBaht,
       pagination: {
         page,
         limit,
@@ -174,18 +192,18 @@ export async function POST(request: Request) {
         bankAccountId: validatedData.bankAccountId,
         chequeNo: validatedData.chequeNo,
         chequeDate: validatedData.chequeDate ? new Date(validatedData.chequeDate) : null,
-        amount: validatedData.amount,
-        whtAmount: totalWHT,
-        unallocated: validatedData.amount - totalAllocated,
+        amount: bahtToSatang(validatedData.amount),
+        whtAmount: bahtToSatang(totalWHT),
+        unallocated: bahtToSatang(validatedData.amount - totalAllocated),
         notes: validatedData.notes,
         status: validatedData.status,
         createdById: user.id,
         allocations: {
           create: validatedData.allocations.map((allocation, index) => ({
             invoiceId: allocation.invoiceId,
-            amount: allocation.amount,
+            amount: bahtToSatang(allocation.amount),
             whtRate: allocation.whtRate,
-            whtAmount: allocation.whtAmount,
+            whtAmount: bahtToSatang(allocation.whtAmount),
             notes: allocation.notes,
           }))
         }
@@ -212,7 +230,7 @@ export async function POST(request: Request) {
           type: "PAY",
           bankAccountId: validatedData.bankAccountId || "",
           dueDate: validatedData.chequeDate ? new Date(validatedData.chequeDate) : new Date(validatedData.paymentDate),
-          amount: validatedData.amount,
+          amount: bahtToSatang(validatedData.amount),
           payeeName: vendor.name,
           status: "ON_HAND",
           documentRef: paymentNo,
@@ -226,7 +244,20 @@ export async function POST(request: Request) {
       await postPaymentToGL(payment)
     }
 
-    return apiResponse(payment, 201)
+    // Convert Satang to Baht for response
+    const paymentInBaht = {
+      ...payment,
+      amount: satangToBaht(payment.amount),
+      whtAmount: satangToBaht(payment.whtAmount),
+      unallocated: satangToBaht(payment.unallocated),
+      allocations: payment.allocations.map(alloc => ({
+        ...alloc,
+        amount: satangToBaht(alloc.amount),
+        whtAmount: satangToBaht(alloc.whtAmount),
+      })),
+    }
+
+    return apiResponse(paymentInBaht, 201)
   } catch (error) {
     if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
       return unauthorizedError()

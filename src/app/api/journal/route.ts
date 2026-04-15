@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { z } from 'zod'
 import { requireAuth, requireRole } from '@/lib/api-utils'
+import { bahtToSatang, satangToBaht } from '@/lib/currency'
 
 // Validation schema for journal entry
 const journalLineSchema = z.object({
@@ -107,10 +108,22 @@ export async function GET(request: NextRequest) {
       }),
       prisma.journalEntry.count({ where }),
     ])
-    
+
+    // Convert Satang to Baht for response
+    const entriesWithBaht = entries.map((entry: any) => ({
+      ...entry,
+      totalDebit: satangToBaht(entry.totalDebit),
+      totalCredit: satangToBaht(entry.totalCredit),
+      lines: entry.lines.map((line: any) => ({
+        ...line,
+        debit: satangToBaht(line.debit),
+        credit: satangToBaht(line.credit),
+      })),
+    }))
+
     return NextResponse.json({
       success: true,
-      data: entries,
+      data: entriesWithBaht,
       pagination: {
         page,
         limit,
@@ -148,29 +161,39 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const validatedData = journalEntrySchema.parse(body)
-    
-    // Calculate totals
-    const totalDebit = validatedData.lines.reduce((sum, line) => sum + line.debit, 0)
-    const totalCredit = validatedData.lines.reduce((sum, line) => sum + line.credit, 0)
-    
+
+    // Convert Baht to Satang for debit/credit amounts
+    const dataInSatang = {
+      ...validatedData,
+      lines: validatedData.lines.map((line) => ({
+        ...line,
+        debit: bahtToSatang(line.debit),
+        credit: bahtToSatang(line.credit),
+      })),
+    }
+
+    // Calculate totals (already in Satang)
+    const totalDebit = dataInSatang.lines.reduce((sum, line) => sum + line.debit, 0)
+    const totalCredit = dataInSatang.lines.reduce((sum, line) => sum + line.credit, 0)
+
     // Generate entry number
     const entryNo = await generateEntryNumber()
-    
+
     // Create journal entry with lines
     const entry = await prisma.journalEntry.create({
       data: {
         entryNo,
-        date: validatedData.date,
-        description: validatedData.description,
-        reference: validatedData.reference,
-        documentType: validatedData.documentType,
-        documentId: validatedData.documentId,
+        date: dataInSatang.date,
+        description: dataInSatang.description,
+        reference: dataInSatang.reference,
+        documentType: dataInSatang.documentType,
+        documentId: dataInSatang.documentId,
         totalDebit,
         totalCredit,
-        notes: validatedData.notes,
+        notes: dataInSatang.notes,
         status: 'DRAFT',
         lines: {
-          create: validatedData.lines.map((line, index) => ({
+          create: dataInSatang.lines.map((line, index) => ({
             lineNo: index + 1,
             accountId: line.accountId,
             description: line.description,
@@ -187,8 +210,20 @@ export async function POST(request: NextRequest) {
         },
       },
     })
-    
-    return NextResponse.json({ success: true, data: entry })
+
+    // Convert response to Baht
+    const entryInBaht = {
+      ...entry,
+      totalDebit: satangToBaht(entry.totalDebit),
+      totalCredit: satangToBaht(entry.totalCredit),
+      lines: entry.lines.map((line: any) => ({
+        ...line,
+        debit: satangToBaht(line.debit),
+        credit: satangToBaht(line.credit),
+      })),
+    }
+
+    return NextResponse.json({ success: true, data: entryInBaht })
   } catch (error: any) {
     if (error.name === 'ZodError') {
       return NextResponse.json(

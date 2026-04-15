@@ -2029,11 +2029,11 @@ model PurchaseRequestLine {
   description     String           // รายการสินค้า
   quantity        Float            // จำนวนที่ขอ
   unit            String           @default("ชิ้น") // หน่วย
-  unitPrice       Float            @default(0) // ราคาประมาณการ
-  discount        Float            @default(0) // ส่วนลด
+  unitPrice       Int              @default(0) // ราคาประมาณการ (สตางค์)
+  discount        Int              @default(0) // ส่วนลด (สตางค์)
   vatRate         Float            @default(7) // อัตรา VAT %
-  vatAmount       Float            @default(0) // ภาษีมูลค่าเพิ่ม
-  amount          Float            @default(0) // จำนวนเงิน
+  vatAmount       Int              @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  amount          Int              @default(0) // จำนวนเงิน (สตางค์)
 
   // ข้อมูลเพิ่มเติม
   suggestedVendor String?         // ผู้ขายที่แนะนำ
@@ -2134,11 +2134,11 @@ model PurchaseOrderLine {
   quantity        Float          // จำนวนสั่งซื้อ
   receivedQty     Float          @default(0) // จำนวนที่รับแล้ว
   unit            String         @default("ชิ้น") // หน่วย
-  unitPrice       Float          @default(0) // ราคาต่อหน่วย
-  discount        Float          @default(0) // ส่วนลด
+  unitPrice       Int            @default(0) // ราคาต่อหน่วย (สตางค์)
+  discount        Int            @default(0) // ส่วนลด (สตางค์)
   vatRate         Float          @default(7) // อัตรา VAT %
-  vatAmount       Float          @default(0) // ภาษีมูลค่าเพิ่ม
-  amount          Float          @default(0) // จำนวนเงิน
+  vatAmount       Int            @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  amount          Int            @default(0) // จำนวนเงิน (สตางค์)
 
   // ข้อมูลเพิ่มเติม
   specUrl         String?        // URL รายละเอียดสินค้า

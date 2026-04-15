@@ -5,6 +5,7 @@
 
 import prisma from '@/lib/db'
 import { generateDocNumber } from '@/lib/api-utils'
+import { bahtToSatang, satangToBaht, calculatePercent } from '@/lib/currency'
 
 // ============================================
 // Custom Error Classes
@@ -1059,6 +1060,8 @@ export async function validateBudgetAvailability(
 /**
  * Calculate PO Line Amounts
  * คำนวณยอดรายการใบสั่งซื้อ
+ *
+ * CRITICAL: All inputs are in Satang, all outputs are in Satang
  */
 export function calculatePOLine(line: {
   quantity: number
@@ -1066,37 +1069,40 @@ export function calculatePOLine(line: {
   discount: number
   vatRate: number
 }): POLineCalculation {
+  // All inputs should be in Satang
   const subtotal = line.quantity * line.unitPrice
-  const discountAmount = subtotal * (line.discount / 100)
+  const discountAmount = calculatePercent(subtotal, line.discount)
   const afterDiscount = subtotal - discountAmount
-  const vatAmount = afterDiscount * (line.vatRate / 100)
+  const vatAmount = calculatePercent(afterDiscount, line.vatRate)
   const amount = afterDiscount + vatAmount
 
   return {
-    subtotal: Math.round(subtotal * 100) / 100,
-    discountAmount: Math.round(discountAmount * 100) / 100,
-    afterDiscount: Math.round(afterDiscount * 100) / 100,
-    vatAmount: Math.round(vatAmount * 100) / 100,
-    amount: Math.round(amount * 100) / 100,
+    subtotal: Math.round(subtotal),
+    discountAmount: Math.round(discountAmount),
+    afterDiscount: Math.round(afterDiscount),
+    vatAmount: Math.round(vatAmount),
+    amount: Math.round(amount),
   }
 }
 
 /**
  * Calculate PO Total Amounts
  * คำนวณยอดรวมใบสั่งซื้อ
+ *
+ * CRITICAL: All inputs and outputs are in Satang
  */
 export function calculatePOTotal(
   lines: Array<{ amount: number }>,
   discountAmount: number
 ): POTotalCalculation {
   const subtotal = lines.reduce((sum, line) => sum + line.amount, 0)
-  const vatAmount = subtotal * 0.07 // 7% VAT
+  const vatAmount = calculatePercent(subtotal, 7) // 7% VAT
   const totalAmount = subtotal + vatAmount - discountAmount
 
   return {
-    subtotal: Math.round(subtotal * 100) / 100,
-    vatAmount: Math.round(vatAmount * 100) / 100,
-    totalAmount: Math.round(totalAmount * 100) / 100,
+    subtotal: Math.round(subtotal),
+    vatAmount: Math.round(vatAmount),
+    totalAmount: Math.round(totalAmount),
   }
 }
 

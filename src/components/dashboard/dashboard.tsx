@@ -627,7 +627,7 @@ export function Dashboard() {
               {data?.arAging?.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-muted-foreground">{item.name}: ฿{(item?.value ?? 0 / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-xs text-muted-foreground">{item.name}: ฿{((item?.value ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
                 </div>
               ))}
             </div>
@@ -665,7 +665,7 @@ export function Dashboard() {
               {data?.apAging?.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-muted-foreground">{item.name}: ฿{(item?.value ?? 0 / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-xs text-muted-foreground">{item.name}: ฿{((item?.value ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
                 </div>
               ))}
             </div>

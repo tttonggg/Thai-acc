@@ -5,6 +5,7 @@ import { generateDocNumber, calculateInvoiceTotals } from "@/lib/api-utils"
 import { purchaseInvoiceSchema } from "@/lib/validations"
 import { recordStockMovement } from "@/lib/inventory-service"
 import { AuthError } from "@/lib/api-auth"
+import { bahtToSatang, satangToBaht } from "@/lib/currency"
 
 // GET /api/purchases - List purchase invoices
 export async function GET(request: NextRequest) {
@@ -102,6 +103,13 @@ export async function GET(request: NextRequest) {
       try {
         return {
           ...purchase,
+          subtotal: satangToBaht(purchase.subtotal),
+          discountAmount: satangToBaht(purchase.discountAmount),
+          vatAmount: satangToBaht(purchase.vatAmount),
+          totalAmount: satangToBaht(purchase.totalAmount),
+          withholdingAmount: satangToBaht(purchase.withholdingAmount),
+          netAmount: satangToBaht(purchase.netAmount),
+          paidAmount: satangToBaht(purchase.paidAmount || 0),
           vendorName: purchase.vendor?.name || '',
           vendorCode: purchase.vendor?.code || '',
           vendorTaxId: purchase.vendor?.taxId || '',
@@ -109,6 +117,13 @@ export async function GET(request: NextRequest) {
           dueDate: purchase.dueDate ? purchase.dueDate.toISOString() : null,
           createdAt: purchase.createdAt ? purchase.createdAt.toISOString() : '',
           updatedAt: purchase.updatedAt ? purchase.updatedAt.toISOString() : '',
+          lines: purchase.lines?.map((line: any) => ({
+            ...line,
+            unitPrice: satangToBaht(line.unitPrice),
+            discount: satangToBaht(line.discount),
+            amount: satangToBaht(line.amount),
+            vatAmount: satangToBaht(line.vatAmount),
+          })) || [],
         }
       } catch (err) {
         console.error('Error transforming purchase invoice:', purchase.id, err)
@@ -195,14 +210,14 @@ export async function POST(request: NextRequest) {
         type: validatedData.type,
         reference: validatedData.reference,
         poNumber: validatedData.poNumber,
-        subtotal: Math.round(totals.subtotal * 100),  // Baht → Satang
-        discountAmount: Math.round(totals.totalDiscount * 100),  // Baht → Satang
+        subtotal: bahtToSatang(totals.subtotal),
+        discountAmount: bahtToSatang(totals.totalDiscount),
         vatRate: 7,
-        vatAmount: Math.round(totals.vatAmount * 100),  // Baht → Satang
-        totalAmount: Math.round(totals.totalAmount * 100),  // Baht → Satang
+        vatAmount: bahtToSatang(totals.vatAmount),
+        totalAmount: bahtToSatang(totals.totalAmount),
         withholdingRate: validatedData.withholdingRate,
-        withholdingAmount: Math.round(totals.withholdingAmount * 100),  // Baht → Satang
-        netAmount: Math.round(totals.netAmount * 100),  // Baht → Satang
+        withholdingAmount: bahtToSatang(totals.withholdingAmount),
+        netAmount: bahtToSatang(totals.netAmount),
         notes: validatedData.notes,
         internalNotes: validatedData.internalNotes,
         createdById: user.id,
@@ -213,11 +228,11 @@ export async function POST(request: NextRequest) {
             description: line.description,
             quantity: line.quantity,
             unit: line.unit,
-            unitPrice: Math.round(line.unitPrice * 100),  // Baht → Satang
-            discount: Math.round(line.discount * 100),  // Baht → Satang
-            amount: Math.round(((line.quantity * line.unitPrice) - line.discount) * 100),  // Baht → Satang
+            unitPrice: bahtToSatang(line.unitPrice),
+            discount: bahtToSatang(line.discount),
+            amount: bahtToSatang((line.quantity * line.unitPrice) - line.discount),
             vatRate: line.vatRate,
-            vatAmount: Math.round((((line.quantity * line.unitPrice) - line.discount) * (line.vatRate / 100)) * 100),  // Baht → Satang
+            vatAmount: bahtToSatang(((line.quantity * line.unitPrice) - line.discount) * (line.vatRate / 100)),
             notes: line.notes,
           }))
         }
@@ -318,7 +333,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return apiResponse(purchase, 201)
+    // Convert Satang to Baht for response
+    const purchaseInBaht = {
+      ...purchase,
+      subtotal: satangToBaht(purchase.subtotal),
+      discountAmount: satangToBaht(purchase.discountAmount),
+      vatAmount: satangToBaht(purchase.vatAmount),
+      totalAmount: satangToBaht(purchase.totalAmount),
+      withholdingAmount: satangToBaht(purchase.withholdingAmount),
+      netAmount: satangToBaht(purchase.netAmount),
+      lines: purchase.lines.map(line => ({
+        ...line,
+        unitPrice: satangToBaht(line.unitPrice),
+        discount: satangToBaht(line.discount),
+        amount: satangToBaht(line.amount),
+        vatAmount: satangToBaht(line.vatAmount),
+      })),
+    }
+
+    return apiResponse(purchaseInBaht, 201)
   } catch (error) {
     if (error instanceof AuthError) {
       return unauthorizedError()

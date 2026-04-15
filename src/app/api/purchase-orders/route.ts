@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { generateDocNumber } from '@/lib/api-utils'
 import { z } from 'zod'
+import { bahtToSatang, satangToBaht } from '@/lib/currency'
 
 // Validation schema for PO line item
 const poLineSchema = z.object({
@@ -162,9 +163,28 @@ export async function GET(request: NextRequest) {
       prisma.purchaseOrder.count({ where }),
     ])
 
+    // Convert Satang to Baht for response
+    const posWithBaht = pos.map((po: any) => ({
+      ...po,
+      subtotal: satangToBaht(po.subtotal),
+      vatAmount: satangToBaht(po.vatAmount),
+      totalAmount: satangToBaht(po.totalAmount),
+      budget: po.budget ? {
+        ...po.budget,
+        remainingAmount: satangToBaht(po.budget.remainingAmount),
+      } : null,
+      lines: po.lines.map((line: any) => ({
+        ...line,
+        unitPrice: satangToBaht(line.unitPrice),
+        discount: satangToBaht(line.discount),
+        vatAmount: satangToBaht(line.vatAmount),
+        amount: satangToBaht(line.amount),
+      })),
+    }))
+
     return NextResponse.json({
       success: true,
-      data: pos,
+      data: posWithBaht,
       pagination: {
         total,
         page,
@@ -199,12 +219,24 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = purchaseOrderSchema.parse(body)
 
+    // Convert Baht to Satang for all monetary fields
+    const dataInSatang = {
+      ...validatedData,
+      lines: validatedData.lines.map((line) => ({
+        ...line,
+        unitPrice: bahtToSatang(line.unitPrice),
+        discount: bahtToSatang(line.discount),
+        vatAmount: bahtToSatang(line.vatAmount),
+        amount: bahtToSatang(line.amount),
+      })),
+    }
+
     // Generate PO number if not provided
-    const orderNo = validatedData.orderNo || await generateDocNumber('PO', 'PO')
+    const orderNo = dataInSatang.orderNo || await generateDocNumber('PO', 'PO')
 
     // Check if vendor exists
     const vendor = await prisma.vendor.findUnique({
-      where: { id: validatedData.vendorId },
+      where: { id: dataInSatang.vendorId },
     })
 
     if (!vendor) {
@@ -215,9 +247,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if PR exists (if specified)
-    if (validatedData.purchaseRequestId) {
+    if (dataInSatang.purchaseRequestId) {
       const pr = await prisma.purchaseRequest.findUnique({
-        where: { id: validatedData.purchaseRequestId },
+        where: { id: dataInSatang.purchaseRequestId },
       })
 
       if (!pr) {
@@ -229,9 +261,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if budget exists and has sufficient funds (if specified)
-    if (validatedData.budgetId) {
+    if (dataInSatang.budgetId) {
       const budget = await prisma.departmentBudget.findUnique({
-        where: { id: validatedData.budgetId },
+        where: { id: dataInSatang.budgetId },
       })
 
       if (!budget) {
@@ -241,8 +273,8 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Calculate total amount
-      const totalAmount = validatedData.lines.reduce((sum, line) => sum + line.amount, 0)
+      // Calculate total amount (already in Satang)
+      const totalAmount = dataInSatang.lines.reduce((sum, line) => sum + line.amount, 0)
 
       if (budget.remainingAmount < totalAmount) {
         return NextResponse.json(
@@ -252,25 +284,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calculate amounts for each line
-    const lines = validatedData.lines.map((line) => {
+    // Calculate amounts for each line (already in Satang)
+    const lines = dataInSatang.lines.map((line) => {
       const subtotal = line.quantity * line.unitPrice
-      const discountAmount = subtotal * (line.discount / 100)
+      const discountAmount = Math.round(subtotal * (line.discount / 100))
       const afterDiscount = subtotal - discountAmount
-      const vatAmount = afterDiscount * (line.vatRate / 100)
+      const vatAmount = Math.round(afterDiscount * (line.vatRate / 100))
       const amount = afterDiscount + vatAmount
 
       return {
         ...line,
-        vatAmount: Math.round(vatAmount * 100) / 100,
-        amount: Math.round(amount * 100) / 100,
+        vatAmount,
+        amount,
       }
     })
 
-    // Calculate totals
+    // Calculate totals (already in Satang)
     const subtotal = lines.reduce((sum, line) => {
       const lineSubtotal = line.quantity * line.unitPrice
-      const discountAmount = lineSubtotal * (line.discount / 100)
+      const discountAmount = Math.round(lineSubtotal * (line.discount / 100))
       return sum + (lineSubtotal - discountAmount)
     }, 0)
 
@@ -283,26 +315,26 @@ export async function POST(request: NextRequest) {
       const purchaseOrder = await tx.purchaseOrder.create({
         data: {
           orderNo,
-          orderDate: validatedData.orderDate ? new Date(validatedData.orderDate) : new Date(),
-          vendorId: validatedData.vendorId,
-          vendorContact: validatedData.vendorContact,
-          vendorEmail: validatedData.vendorEmail || null,
-          vendorPhone: validatedData.vendorPhone,
-          vendorAddress: validatedData.vendorAddress,
-          purchaseRequestId: validatedData.purchaseRequestId,
-          shippingTerms: validatedData.shippingTerms,
-          paymentTerms: validatedData.paymentTerms,
-          deliveryAddress: validatedData.deliveryAddress,
-          budgetId: validatedData.budgetId,
-          expectedDate: validatedData.expectedDate ? new Date(validatedData.expectedDate) : null,
-          notes: validatedData.notes,
-          internalNotes: validatedData.internalNotes,
-          vendorNotes: validatedData.vendorNotes,
-          attachments: validatedData.attachments,
-          subtotal: Math.round(subtotal * 100) / 100,
+          orderDate: dataInSatang.orderDate ? new Date(dataInSatang.orderDate) : new Date(),
+          vendorId: dataInSatang.vendorId,
+          vendorContact: dataInSatang.vendorContact,
+          vendorEmail: dataInSatang.vendorEmail || null,
+          vendorPhone: dataInSatang.vendorPhone,
+          vendorAddress: dataInSatang.vendorAddress,
+          purchaseRequestId: dataInSatang.purchaseRequestId,
+          shippingTerms: dataInSatang.shippingTerms,
+          paymentTerms: dataInSatang.paymentTerms,
+          deliveryAddress: dataInSatang.deliveryAddress,
+          budgetId: dataInSatang.budgetId,
+          expectedDate: dataInSatang.expectedDate ? new Date(dataInSatang.expectedDate) : null,
+          notes: dataInSatang.notes,
+          internalNotes: dataInSatang.internalNotes,
+          vendorNotes: dataInSatang.vendorNotes,
+          attachments: dataInSatang.attachments,
+          subtotal: Math.round(subtotal),
           vatRate: 7,
-          vatAmount: Math.round(totalVatAmount * 100) / 100,
-          totalAmount: Math.round(totalAmount * 100) / 100,
+          vatAmount: Math.round(totalVatAmount),
+          totalAmount: Math.round(totalAmount),
           status: 'DRAFT',
           createdById: session.user.id,
           lines: {
@@ -360,10 +392,29 @@ export async function POST(request: NextRequest) {
       return purchaseOrder
     })
 
+    // Convert response to Baht
+    const poInBaht = {
+      ...po,
+      subtotal: satangToBaht(po.subtotal),
+      vatAmount: satangToBaht(po.vatAmount),
+      totalAmount: satangToBaht(po.totalAmount),
+      budget: po.budget ? {
+        ...po.budget,
+        remainingAmount: satangToBaht(po.budget.remainingAmount),
+      } : null,
+      lines: po.lines.map((line: any) => ({
+        ...line,
+        unitPrice: satangToBaht(line.unitPrice),
+        discount: satangToBaht(line.discount),
+        vatAmount: satangToBaht(line.vatAmount),
+        amount: satangToBaht(line.amount),
+      })),
+    }
+
     return NextResponse.json(
       {
         success: true,
-        data: po,
+        data: poInBaht,
         message: 'สร้างใบสั่งซื้อสำเร็จ',
       },
       { status: 201 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, apiResponse, apiError, unauthorizedError, forbiddenError, generateDocNumber } from '@/lib/api-utils'
 import { db } from '@/lib/db'
 import { z } from 'zod'
+import { bahtToSatang, satangToBaht } from '@/lib/currency'
 
 // Wrapper that properly handles auth with request context
 async function requireAuthWithRequest(request: NextRequest): Promise<any> {
@@ -122,6 +123,9 @@ export async function GET(request: NextRequest) {
       try {
         return {
           ...cn,
+          subtotal: satangToBaht(cn.subtotal),
+          vatAmount: satangToBaht(cn.vatAmount),
+          totalAmount: satangToBaht(cn.totalAmount),
           customerName: cn.customer?.name || '',
           customerCode: cn.customer?.code || '',
           customerTaxId: cn.customer?.taxId || '',
@@ -247,10 +251,10 @@ export async function POST(request: NextRequest) {
           customerId: validatedData.customerId,
           invoiceId: validatedData.invoiceId,
           reason: validatedData.reason,
-          subtotal: Math.round(validatedData.subtotal * 100),
+          subtotal: bahtToSatang(validatedData.subtotal),
           vatRate: validatedData.vatRate,
-          vatAmount: Math.round(validatedData.vatAmount * 100),
-          totalAmount: Math.round(validatedData.totalAmount * 100),
+          vatAmount: bahtToSatang(validatedData.vatAmount),
+          totalAmount: bahtToSatang(validatedData.totalAmount),
           status: 'ISSUED',
           notes: validatedData.notes,
         },
@@ -281,14 +285,14 @@ export async function POST(request: NextRequest) {
                 lineNo: 1,
                 accountId: salesReturnsAccount.id,
                 description: `คืนสินค้า/ลดหนี้ ${creditNoteNo}`,
-                debit: Math.round(validatedData.subtotal * 100),
+                debit: bahtToSatang(validatedData.subtotal),
                 credit: 0,
               },
               {
                 lineNo: 2,
                 accountId: vatOutputAccount.id,
                 description: `VAT ใบลดหนี้ ${creditNoteNo}`,
-                debit: Math.round(validatedData.vatAmount * 100),
+                debit: bahtToSatang(validatedData.vatAmount),
                 credit: 0,
               },
               {
@@ -368,7 +372,15 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return apiResponse({ success: true, data: completeCreditNote }, 201)
+    // Convert Satang to Baht for response
+    const creditNoteInBaht = {
+      ...completeCreditNote,
+      subtotal: satangToBaht(completeCreditNote.subtotal),
+      vatAmount: satangToBaht(completeCreditNote.vatAmount),
+      totalAmount: satangToBaht(completeCreditNote.totalAmount),
+    }
+
+    return apiResponse({ success: true, data: creditNoteInBaht }, 201)
   } catch (error) {
     console.error('Credit Note Creation Error:', error)
     return unauthorizedError()

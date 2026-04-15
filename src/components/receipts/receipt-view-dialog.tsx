@@ -574,7 +574,7 @@ export function ReceiptViewDialog({
               )}
               <div className="flex justify-between text-lg font-bold border-t pt-2">
                 <span>ยอดสุทธิ</span>
-                <span>฿{receipt.amount.toLocaleString()}</span>
+                <span>฿{(receipt.amount / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>

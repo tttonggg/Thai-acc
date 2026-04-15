@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "./auth"
 import { db } from "./db"
 import type { UserRole } from "@prisma/client"
+import { calculatePercent } from "./currency"
 
 export async function getCurrentUser() {
   const session = await getServerSession(authOptions)
@@ -119,6 +120,7 @@ export async function generateDocNumber(type: string, prefix: string): Promise<s
 }
 
 // Calculate totals for invoice
+// CRITICAL: All inputs and outputs are in Satang
 export function calculateInvoiceTotals(
   lines: Array<{
     quantity: number
@@ -132,29 +134,29 @@ export function calculateInvoiceTotals(
 ) {
   let subtotal = 0
   let totalVat = 0
-  
+
   for (const line of lines) {
     const lineAmount = (line.quantity * line.unitPrice) - line.discount
-    const lineVat = lineAmount * (line.vatRate / 100)
+    const lineVat = calculatePercent(lineAmount, line.vatRate)
     subtotal += lineAmount
     totalVat += lineVat
   }
-  
-  const discountFromPercent = subtotal * (discountPercent / 100)
+
+  const discountFromPercent = calculatePercent(subtotal, discountPercent)
   const totalDiscount = discountAmount + discountFromPercent
   const netSubtotal = subtotal - totalDiscount
-  const netVat = totalVat - (totalVat * (discountPercent / 100))
+  const netVat = totalVat - calculatePercent(totalVat, discountPercent)
   const totalAmount = netSubtotal + netVat
-  const withholdingAmount = netSubtotal * (withholdingRate / 100)
+  const withholdingAmount = calculatePercent(netSubtotal, withholdingRate)
   const netAmount = totalAmount - withholdingAmount
-  
+
   return {
-    subtotal: Math.round(subtotal * 100) / 100,
-    totalDiscount: Math.round(totalDiscount * 100) / 100,
-    vatAmount: Math.round(netVat * 100) / 100,
-    totalAmount: Math.round(totalAmount * 100) / 100,
-    withholdingAmount: Math.round(withholdingAmount * 100) / 100,
-    netAmount: Math.round(netAmount * 100) / 100,
+    subtotal: Math.round(subtotal),
+    totalDiscount: Math.round(totalDiscount),
+    vatAmount: Math.round(netVat),
+    totalAmount: Math.round(totalAmount),
+    withholdingAmount: Math.round(withholdingAmount),
+    netAmount: Math.round(netAmount),
   }
 }
 

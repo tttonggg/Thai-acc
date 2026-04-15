@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
+import { bahtToSatang, satangToBaht } from '@/lib/currency'
 
 // Validation schema for Quotation line item
 const quotationLineSchema = z.object({
@@ -143,9 +144,25 @@ export async function GET(request: NextRequest) {
       prisma.quotation.count({ where }),
     ])
 
+    // Convert Satang to Baht for response
+    const quotationsWithBaht = quotations.map((q: any) => ({
+      ...q,
+      subtotal: satangToBaht(q.subtotal),
+      discountAmount: satangToBaht(q.discountAmount),
+      vatAmount: satangToBaht(q.vatAmount),
+      totalAmount: satangToBaht(q.totalAmount),
+      lines: q.lines.map((line: any) => ({
+        ...line,
+        unitPrice: satangToBaht(line.unitPrice),
+        discount: satangToBaht(line.discount),
+        vatAmount: satangToBaht(line.vatAmount),
+        amount: satangToBaht(line.amount),
+      })),
+    }))
+
     return NextResponse.json({
       success: true,
-      data: quotations,
+      data: quotationsWithBaht,
       pagination: {
         total,
         page,
@@ -188,6 +205,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = quotationSchema.parse(body)
 
+    // Convert Baht to Satang for all monetary fields
+    const dataInSatang = {
+      ...validatedData,
+      subtotal: bahtToSatang(validatedData.subtotal),
+      discountAmount: bahtToSatang(validatedData.discountAmount),
+      vatAmount: bahtToSatang(validatedData.vatAmount),
+      totalAmount: bahtToSatang(validatedData.totalAmount),
+      lines: validatedData.lines.map((line) => ({
+        ...line,
+        unitPrice: bahtToSatang(line.unitPrice),
+        discount: bahtToSatang(line.discount),
+        vatAmount: bahtToSatang(line.vatAmount),
+        amount: bahtToSatang(line.amount),
+      })),
+    }
+
     // Generate Quotation number if not provided
     let quotationNo = validatedData.quotationNo
     if (!quotationNo) {
@@ -220,7 +253,7 @@ export async function POST(request: NextRequest) {
 
     // Check if customer exists
     const customer = await prisma.customer.findUnique({
-      where: { id: validatedData.customerId },
+      where: { id: dataInSatang.customerId },
     })
 
     if (!customer) {
@@ -230,8 +263,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Calculate amounts for each line
-    const lines = validatedData.lines.map((line) => {
+    // Calculate amounts for each line (already in Satang)
+    const lines = dataInSatang.lines.map((line) => {
       const subtotal = line.quantity * line.unitPrice
       const discountAmount = line.discount
       const afterDiscount = subtotal - discountAmount
@@ -245,11 +278,11 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Calculate totals
+    // Calculate totals (already in Satang)
     const subtotal = lines.reduce((sum, line) => sum + (line.quantity * line.unitPrice), 0)
-    const totalDiscount = validatedData.discountAmount + (subtotal * (validatedData.discountPercent / 100))
+    const totalDiscount = dataInSatang.discountAmount + Math.round(subtotal * (dataInSatang.discountPercent / 100))
     const afterDiscount = subtotal - totalDiscount
-    const vatAmount = Math.round(afterDiscount * (validatedData.vatRate / 100))
+    const vatAmount = Math.round(afterDiscount * (dataInSatang.vatRate / 100))
     const totalAmount = afterDiscount + vatAmount
 
     // Create Quotation with transaction
@@ -257,20 +290,20 @@ export async function POST(request: NextRequest) {
       const createdQuotation = await tx.quotation.create({
         data: {
           quotationNo,
-          quotationDate: validatedData.quotationDate ? new Date(validatedData.quotationDate) : new Date(),
-          validUntil: new Date(validatedData.validUntil),
-          customerId: validatedData.customerId,
-          contactPerson: validatedData.contactPerson,
-          reference: validatedData.reference,
+          quotationDate: dataInSatang.quotationDate ? new Date(dataInSatang.quotationDate) : new Date(),
+          validUntil: new Date(dataInSatang.validUntil),
+          customerId: dataInSatang.customerId,
+          contactPerson: dataInSatang.contactPerson,
+          reference: dataInSatang.reference,
           subtotal: Math.round(subtotal),
           discountAmount: Math.round(totalDiscount),
-          discountPercent: validatedData.discountPercent,
-          vatRate: validatedData.vatRate,
+          discountPercent: dataInSatang.discountPercent,
+          vatRate: dataInSatang.vatRate,
           vatAmount,
           totalAmount: Math.round(totalAmount),
-          terms: validatedData.terms,
-          notes: validatedData.notes,
-          internalNotes: validatedData.internalNotes,
+          terms: dataInSatang.terms,
+          notes: dataInSatang.notes,
+          internalNotes: dataInSatang.internalNotes,
           status: 'DRAFT',
           createdById: session.user.id,
           updatedById: session.user.id,
@@ -306,10 +339,26 @@ export async function POST(request: NextRequest) {
       return createdQuotation
     })
 
+    // Convert response to Baht
+    const quotationInBaht = {
+      ...quotation,
+      subtotal: satangToBaht(quotation.subtotal),
+      discountAmount: satangToBaht(quotation.discountAmount),
+      vatAmount: satangToBaht(quotation.vatAmount),
+      totalAmount: satangToBaht(quotation.totalAmount),
+      lines: quotation.lines.map((line: any) => ({
+        ...line,
+        unitPrice: satangToBaht(line.unitPrice),
+        discount: satangToBaht(line.discount),
+        vatAmount: satangToBaht(line.vatAmount),
+        amount: satangToBaht(line.amount),
+      })),
+    }
+
     return NextResponse.json(
       {
         success: true,
-        data: quotation,
+        data: quotationInBaht,
         message: 'สร้างใบเสนอราคาเรียบร้อยแล้ว',
       },
       { status: 201 }

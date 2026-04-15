@@ -115,6 +115,9 @@ export function Reports() {
   const [exportingReport, setExportingReport] = useState<string | null>(null)
   const { toast } = useToast()
 
+  // Convert Satang to Baht for display
+  const formatBaht = (satang: number) => (satang / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
   // Update date range when period changes
   useEffect(() => {
     const now = new Date()
@@ -347,14 +350,14 @@ export function Reports() {
                 <tr>
                   <td>${acc.code}</td>
                   <td>${acc.name}</td>
-                  <td class="text-right">${(acc.debit || 0) > 0 ? acc.debit.toLocaleString('th-TH', {minimumFractionDigits: 2}) : ''}</td>
-                  <td class="text-right">${(acc.credit || 0) > 0 ? acc.credit.toLocaleString('th-TH', {minimumFractionDigits: 2}) : ''}</td>
+                  <td class="text-right">${(acc.debit || 0) > 0 ? formatBaht(acc.debit) : ''}</td>
+                  <td class="text-right">${(acc.credit || 0) > 0 ? formatBaht(acc.credit) : ''}</td>
                 </tr>
               `).join('')}
               <tr style="font-weight: bold; background: #f5f5f5;">
                 <td colspan="2">รวม</td>
-                <td class="text-right">${totalDebit.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                <td class="text-right">${totalCredit.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                <td class="text-right">${formatBaht(totalDebit)}</td>
+                <td class="text-right">${formatBaht(totalCredit)}</td>
               </tr>
             </tbody>
           </table>
@@ -362,33 +365,33 @@ export function Reports() {
       } else if (reportId === 'balance_sheet') {
         contentHtml = `
           <h2>สินทรัพย์</h2>
-          <p>สินทรัพย์หมุนเวียน: ${(data.currentAssets || 0).toLocaleString('th-TH')} บาท</p>
-          <p>สินทรัพย์ไม่หมุนเวียน: ${(data.nonCurrentAssets || 0).toLocaleString('th-TH')} บาท</p>
-          <p style="font-weight: bold;">รวมสินทรัพย์: ${(data.totalAssets || 0).toLocaleString('th-TH')} บาท</p>
-          
+          <p>สินทรัพย์หมุนเวียน: ${formatBaht(data.currentAssets || 0)} บาท</p>
+          <p>สินทรัพย์ไม่หมุนเวียน: ${formatBaht(data.nonCurrentAssets || 0)} บาท</p>
+          <p style="font-weight: bold;">รวมสินทรัพย์: ${formatBaht(data.totalAssets || 0)} บาท</p>
+
           <h2>หนี้สิน</h2>
-          <p>หนี้สินหมุนเวียน: ${(data.currentLiabilities || 0).toLocaleString('th-TH')} บาท</p>
-          <p>หนี้สินไม่หมุนเวียน: ${(data.nonCurrentLiabilities || 0).toLocaleString('th-TH')} บาท</p>
-          <p style="font-weight: bold;">รวมหนี้สิน: ${(data.totalLiabilities || 0).toLocaleString('th-TH')} บาท</p>
-          
+          <p>หนี้สินหมุนเวียน: ${formatBaht(data.currentLiabilities || 0)} บาท</p>
+          <p>หนี้สินไม่หมุนเวียน: ${formatBaht(data.nonCurrentLiabilities || 0)} บาท</p>
+          <p style="font-weight: bold;">รวมหนี้สิน: ${formatBaht(data.totalLiabilities || 0)} บาท</p>
+
           <h2>ทุน</h2>
-          <p style="font-weight: bold;">รวมทุน: ${(data.totalEquity || 0).toLocaleString('th-TH')} บาท</p>
+          <p style="font-weight: bold;">รวมทุน: ${formatBaht(data.totalEquity || 0)} บาท</p>
         `
       } else if (reportId === 'income_statement') {
         contentHtml = `
           <h2>รายได้</h2>
-          <p>รายได้จากการขาย: ${(data.revenue || 0).toLocaleString('th-TH')} บาท</p>
-          <p>รายได้อื่น: ${(data.otherIncome || 0).toLocaleString('th-TH')} บาท</p>
-          <p style="font-weight: bold;">รวมรายได้: ${(data.totalRevenue || 0).toLocaleString('th-TH')} บาท</p>
-          
+          <p>รายได้จากการขาย: ${formatBaht(data.revenue || 0)} บาท</p>
+          <p>รายได้อื่น: ${formatBaht(data.otherIncome || 0)} บาท</p>
+          <p style="font-weight: bold;">รวมรายได้: ${formatBaht(data.totalRevenue || 0)} บาท</p>
+
           <h2>ค่าใช้จ่าย</h2>
-          <p>ต้นทุนขาย: ${(data.costOfSales || 0).toLocaleString('th-TH')} บาท</p>
-          <p>ค่าใช้จ่ายในการขาย: ${(data.sellingExpenses || 0).toLocaleString('th-TH')} บาท</p>
-          <p>ค่าใช้จ่ายในการบริหาร: ${(data.adminExpenses || 0).toLocaleString('th-TH')} บาท</p>
-          <p style="font-weight: bold;">รวมค่าใช้จ่าย: ${(data.totalExpenses || 0).toLocaleString('th-TH')} บาท</p>
-          
+          <p>ต้นทุนขาย: ${formatBaht(data.costOfSales || 0)} บาท</p>
+          <p>ค่าใช้จ่ายในการขาย: ${formatBaht(data.sellingExpenses || 0)} บาท</p>
+          <p>ค่าใช้จ่ายในการบริหาร: ${formatBaht(data.adminExpenses || 0)} บาท</p>
+          <p style="font-weight: bold;">รวมค่าใช้จ่าย: ${formatBaht(data.totalExpenses || 0)} บาท</p>
+
           <h2>ผลการดำเนินงาน</h2>
-          <p style="font-weight: bold; font-size: 18px;">กำไร(ขาดทุน)สุทธิ: ${(data.netIncome || 0).toLocaleString('th-TH')} บาท</p>
+          <p style="font-weight: bold; font-size: 18px;">กำไร(ขาดทุน)สุทธิ: ${formatBaht(data.netIncome || 0)} บาท</p>
         `
       } else {
         contentHtml = `<p>รายงานนี้แสดงในรูปแบบของหน้าเว็บเท่านั้น</p>`

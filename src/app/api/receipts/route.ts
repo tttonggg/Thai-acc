@@ -3,6 +3,7 @@ import prisma from '@/lib/db'
 import { z } from 'zod'
 import { requireAuth, generateDocNumber } from '@/lib/api-utils'
 import { generateDocumentNumber } from '@/lib/thai-accounting'
+import { bahtToSatang, satangToBaht } from '@/lib/currency'
 
 // Validation schema for receipt allocation
 const receiptAllocationSchema = z.object({
@@ -105,16 +106,28 @@ export async function GET(request: NextRequest) {
       prisma.receipt.count({ where }),
     ])
 
-    // Calculate allocated and unallocated amounts
+    // Calculate allocated and unallocated amounts and convert to Baht
     const receiptsWithCalculations = receipts.map(receipt => {
       const totalAllocated = receipt.allocations.reduce((sum, alloc) => sum + alloc.amount, 0)
       const totalWht = receipt.allocations.reduce((sum, alloc) => sum + alloc.whtAmount, 0)
 
       return {
         ...receipt,
-        totalAllocated,
-        totalWht,
-        remaining: receipt.amount - totalAllocated,
+        amount: satangToBaht(receipt.amount),
+        whtAmount: satangToBaht(receipt.whtAmount),
+        unallocated: satangToBaht(receipt.unallocated),
+        totalAllocated: satangToBaht(totalAllocated),
+        totalWht: satangToBaht(totalWht),
+        remaining: satangToBaht(receipt.amount - totalAllocated),
+        allocations: receipt.allocations.map(alloc => ({
+          ...alloc,
+          amount: satangToBaht(alloc.amount),
+          whtAmount: satangToBaht(alloc.whtAmount),
+          invoice: alloc.invoice ? {
+            ...alloc.invoice,
+            totalAmount: satangToBaht(alloc.invoice.totalAmount),
+          } : alloc.invoice,
+        })),
       }
     })
 
@@ -176,7 +189,7 @@ export async function POST(request: NextRequest) {
     const receiptNo = await generateDocNumber('RECEIPT', 'RCP')
 
     // Calculate unallocated amount (credit to customer) — convert to Satang
-    const unallocated = Math.round((validatedData.amount - totalAllocation) * 100)
+    const unallocated = bahtToSatang(validatedData.amount - totalAllocation)
 
     // Create receipt with allocations
     const receipt = await prisma.receipt.create({
@@ -188,17 +201,17 @@ export async function POST(request: NextRequest) {
         bankAccountId: validatedData.bankAccountId,
         chequeNo: validatedData.chequeNo,
         chequeDate: validatedData.chequeDate,
-        amount: Math.round(validatedData.amount * 100),
-        whtAmount: Math.round(totalWht * 100),
+        amount: bahtToSatang(validatedData.amount),
+        whtAmount: bahtToSatang(totalWht),
         unallocated,
         notes: validatedData.notes,
         status: 'DRAFT',
         allocations: {
           create: validatedData.allocations.map(alloc => ({
             invoiceId: alloc.invoiceId,
-            amount: Math.round(alloc.amount * 100),
+            amount: bahtToSatang(alloc.amount),
             whtRate: alloc.whtRate,
-            whtAmount: Math.round(alloc.whtAmount * 100),
+            whtAmount: bahtToSatang(alloc.whtAmount),
           }))
         }
       },
@@ -213,7 +226,20 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ success: true, data: receipt })
+    // Convert Satang to Baht for response
+    const receiptInBaht = {
+      ...receipt,
+      amount: satangToBaht(receipt.amount),
+      whtAmount: satangToBaht(receipt.whtAmount),
+      unallocated: satangToBaht(receipt.unallocated),
+      allocations: receipt.allocations.map(alloc => ({
+        ...alloc,
+        amount: satangToBaht(alloc.amount),
+        whtAmount: satangToBaht(alloc.whtAmount),
+      })),
+    }
+
+    return NextResponse.json({ success: true, data: receiptInBaht })
   } catch (error: any) {
     console.error('Error creating receipt:', error)
     if (error.name === 'ZodError') {

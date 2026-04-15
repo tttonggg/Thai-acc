@@ -101,6 +101,9 @@ export function CustomReportBuilder() {
   const [reportData, setReportData] = useState<any>(null)
   const { toast } = useToast()
 
+  // Convert Satang to Baht for display
+  const formatBaht = (satang: number) => (satang / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
   const form = useForm<CustomReportForm>({
     resolver: zodResolver(customReportSchema),
     defaultValues: {
@@ -751,7 +754,7 @@ export function CustomReportBuilder() {
                   <CardContent className="pt-4">
                     <p className="text-sm text-gray-500">รวมเดบิต</p>
                     <p className="text-2xl font-bold text-blue-600">
-                      ฿{reportData.totals?.debit?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'}
+                      ฿{reportData.totals?.debit !== undefined ? formatBaht(reportData.totals.debit) : '0.00'}
                     </p>
                   </CardContent>
                 </Card>
@@ -759,7 +762,7 @@ export function CustomReportBuilder() {
                   <CardContent className="pt-4">
                     <p className="text-sm text-gray-500">รวมเครดิต</p>
                     <p className="text-2xl font-bold text-green-600">
-                      ฿{reportData.totals?.credit?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'}
+                      ฿{reportData.totals?.credit !== undefined ? formatBaht(reportData.totals.credit) : '0.00'}
                     </p>
                   </CardContent>
                 </Card>
@@ -807,12 +810,12 @@ export function CustomReportBuilder() {
                         )}
                         {form.watch('columnDebits') && (
                           <td className="py-2 px-4 text-right text-blue-600">
-                            {account.debit > 0 ? `฿${account.debit.toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
+                            {account.debit > 0 ? `฿${formatBaht(account.debit)}` : '-'}
                           </td>
                         )}
                         {form.watch('columnCredits') && (
                           <td className="py-2 px-4 text-right text-green-600">
-                            {account.credit > 0 ? `฿${account.credit.toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
+                            {account.credit > 0 ? `฿${formatBaht(account.credit)}` : '-'}
                           </td>
                         )}
                       </tr>

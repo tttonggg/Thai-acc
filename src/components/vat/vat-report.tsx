@@ -170,6 +170,9 @@ export function VatReport() {
   const totalVatInput = vatInputRecords.reduce((sum, r) => sum + r.vat, 0)
   const netVatVal = totalVatOutput - totalVatInput
 
+  // Convert Satang to Baht for display
+  const formatBaht = (satang: number) => (satang / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
   const handlePrint = () => {
     const printWindow = window.open('', '_blank')
     if (!printWindow) return
@@ -202,9 +205,9 @@ export function VatReport() {
         
         <div class="summary">
           <h3>สรุปภาษีมูลค่าเพิ่ม</h3>
-          <p>ภาษีขาย (Output VAT): ${totalVatOutput.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
-          <p>ภาษีซื้อ (Input VAT): ${totalVatInput.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
-          <p class="total">ภาษีต้องชำระ/คืน: ${netVatVal.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
+          <p>ภาษีขาย (Output VAT): ${formatBaht(totalVatOutput)} บาท</p>
+          <p>ภาษีซื้อ (Input VAT): ${formatBaht(totalVatInput)} บาท</p>
+          <p class="total">ภาษีต้องชำระ/คืน: ${formatBaht(netVatVal)} บาท</p>
         </div>
 
         <h2>รายการภาษีขาย</h2>
@@ -224,8 +227,8 @@ export function VatReport() {
                 <td>${new Date(r.date).toLocaleDateString('th-TH')}</td>
                 <td>${r.docNo}</td>
                 <td>${r.name}</td>
-                <td class="text-right">${r.amount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                <td class="text-right">${r.vat.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                <td class="text-right">${formatBaht(r.amount || 0)}</td>
+                <td class="text-right">${formatBaht(r.vat || 0)}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -248,8 +251,8 @@ export function VatReport() {
                 <td>${new Date(r.date).toLocaleDateString('th-TH')}</td>
                 <td>${r.docNo}</td>
                 <td>${r.name}</td>
-                <td class="text-right">${r.amount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
-                <td class="text-right">${r.vat.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                <td class="text-right">${formatBaht(r.amount || 0)}</td>
+                <td class="text-right">${formatBaht(r.vat || 0)}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -319,7 +322,7 @@ export function VatReport() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">ภาษีขาย (Output VAT)</p>
-                <p className="text-2xl font-bold text-blue-600">฿{totalVatOutput?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold text-blue-600">฿{formatBaht(totalVatOutput || 0)}</p>
               </div>
               <TrendingUp className="h-10 w-10 text-blue-200" />
             </div>
@@ -330,7 +333,7 @@ export function VatReport() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">ภาษีซื้อ (Input VAT)</p>
-                <p className="text-2xl font-bold text-orange-600">฿{totalVatInput?.toLocaleString() ?? '0'}</p>
+                <p className="text-2xl font-bold text-orange-600">฿{formatBaht(totalVatInput || 0)}</p>
               </div>
               <TrendingDown className="h-10 w-10 text-orange-200" />
             </div>
@@ -342,7 +345,7 @@ export function VatReport() {
               <div>
                 <p className="text-sm text-gray-500">ภาษีที่ต้องชำระ</p>
                 <p className="text-2xl font-bold text-red-600">
-                  ฿{netVatVal?.toLocaleString() ?? '0'}
+                  ฿{formatBaht(netVatVal || 0)}
                 </p>
               </div>
               <Calculator className="h-10 w-10 text-red-200" />
@@ -361,7 +364,7 @@ export function VatReport() {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="month" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `${v/1000}K`} />
-              <Tooltip formatter={(value: number) => [`฿${value?.toLocaleString() ?? '0'}`, '']} />
+              <Tooltip formatter={(value: number) => [`฿${formatBaht(value || 0)}`, '']} />
               <Legend />
               <Bar dataKey="vatOutput" name="ภาษีขาย" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               <Bar dataKey="vatInput" name="ภาษีซื้อ" fill="#f59e0b" radius={[4, 4, 0, 0]} />
@@ -391,14 +394,14 @@ export function VatReport() {
                   <TableCell>{record.date}</TableCell>
                   <TableCell className="font-mono">{record.docNo}</TableCell>
                   <TableCell>{record.name}</TableCell>
-                  <TableCell className="text-right">฿{record.amount?.toLocaleString() ?? '0'}</TableCell>
-                  <TableCell className="text-right text-blue-600 font-semibold">฿{record.vat?.toLocaleString() ?? '0'}</TableCell>
+                  <TableCell className="text-right">฿{formatBaht(record.amount || 0)}</TableCell>
+                  <TableCell className="text-right text-blue-600 font-semibold">฿{formatBaht(record.vat || 0)}</TableCell>
                 </TableRow>
               ))}
               <TableRow className="bg-blue-50">
                 <TableCell colSpan={3} className="font-semibold">รวม</TableCell>
-                <TableCell className="text-right font-semibold">฿{vatOutputRecords.reduce((s, r) => s + (r.amount || 0), 0).toLocaleString()}</TableCell>
-                <TableCell className="text-right font-semibold text-blue-600">฿{totalVatOutput?.toLocaleString() ?? '0'}</TableCell>
+                <TableCell className="text-right font-semibold">฿{formatBaht(vatOutputRecords.reduce((s, r) => s + (r.amount || 0), 0))}</TableCell>
+                <TableCell className="text-right font-semibold text-blue-600">฿{formatBaht(totalVatOutput || 0)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -426,14 +429,14 @@ export function VatReport() {
                   <TableCell>{record.date}</TableCell>
                   <TableCell className="font-mono">{record.docNo}</TableCell>
                   <TableCell>{record.name}</TableCell>
-                  <TableCell className="text-right">฿{record.amount?.toLocaleString() ?? '0'}</TableCell>
-                  <TableCell className="text-right text-orange-600 font-semibold">฿{record.vat?.toLocaleString() ?? '0'}</TableCell>
+                  <TableCell className="text-right">฿{formatBaht(record.amount || 0)}</TableCell>
+                  <TableCell className="text-right text-orange-600 font-semibold">฿{formatBaht(record.vat || 0)}</TableCell>
                 </TableRow>
               ))}
               <TableRow className="bg-orange-50">
                 <TableCell colSpan={3} className="font-semibold">รวม</TableCell>
-                <TableCell className="text-right font-semibold">฿{vatInputRecords.reduce((s, r) => s + (r.amount || 0), 0).toLocaleString()}</TableCell>
-                <TableCell className="text-right font-semibold text-orange-600">฿{totalVatInput?.toLocaleString() ?? '0'}</TableCell>
+                <TableCell className="text-right font-semibold">฿{formatBaht(vatInputRecords.reduce((s, r) => s + (r.amount || 0), 0))}</TableCell>
+                <TableCell className="text-right font-semibold text-orange-600">฿{formatBaht(totalVatInput || 0)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>

@@ -4,6 +4,7 @@
 // ============================================
 
 import prisma from '@/lib/db'
+import { calculatePercent } from '@/lib/currency'
 
 // ============================================
 // Custom Error Classes
@@ -137,12 +138,15 @@ export async function generateQuotationNumber(): Promise<string> {
 /**
  * Calculate Quotation Line Amount
  * คำนวณยอดเงินรายการใบเสนอราคา
+ *
+ * CRITICAL: All inputs are in Satang, all outputs are in Satang
  */
 export function calculateQuotationLine(line: QuotationLineInput): QuotationLineCalculation {
+  // All inputs should be in Satang
   const subtotal = line.quantity * line.unitPrice
-  const discountAmount = line.discount
+  const discountAmount = line.discount // Already in Satang
   const afterDiscount = subtotal - discountAmount
-  const vatAmount = Math.round(afterDiscount * (line.vatRate / 100))
+  const vatAmount = calculatePercent(afterDiscount, line.vatRate)
   const amount = afterDiscount + vatAmount
 
   return {
@@ -157,6 +161,8 @@ export function calculateQuotationLine(line: QuotationLineInput): QuotationLineC
 /**
  * Calculate Quotation Totals
  * คำนวณยอดรวมใบเสนอราคา
+ *
+ * CRITICAL: All inputs and outputs are in Satang
  */
 export function calculateQuotationTotals(
   lines: QuotationLineInput[],
@@ -164,19 +170,19 @@ export function calculateQuotationTotals(
   discountPercent: number = 0,
   vatRate: number = 7
 ): QuotationTotalCalculation {
-  // Calculate subtotal from all lines
+  // Calculate subtotal from all lines (all in Satang)
   const subtotal = lines.reduce((sum, line) => {
     return sum + (line.quantity * line.unitPrice)
   }, 0)
 
-  // Calculate total discount
-  const totalDiscount = discountAmount + Math.round(subtotal * (discountPercent / 100))
+  // Calculate total discount (using Satang throughout)
+  const totalDiscount = discountAmount + calculatePercent(subtotal, discountPercent)
 
   // Calculate amount after discount
   const afterDiscount = subtotal - totalDiscount
 
-  // Calculate VAT
-  const vatAmount = Math.round(afterDiscount * (vatRate / 100))
+  // Calculate VAT (using Satang throughout)
+  const vatAmount = calculatePercent(afterDiscount, vatRate)
 
   // Calculate total amount
   const totalAmount = afterDiscount + vatAmount
