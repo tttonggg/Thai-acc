@@ -498,7 +498,7 @@ export function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <SummaryCard
           title="รายได้รวม (เดือนนี้)"
-          value={`฿${((data?.summary?.revenue?.amount ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
+          value={`฿${(data?.summary?.revenue?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
           change={data?.summary?.revenue?.change ?? 0}
           changeLabel="จากเดือนก่อน"
           icon={<TrendingUp className="h-6 w-6 text-white" />}
@@ -506,7 +506,7 @@ export function Dashboard() {
         />
         <SummaryCard
           title="ค่าใช้จ่ายรวม (เดือนนี้)"
-          value={`฿${((data?.summary?.expenses?.amount ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
+          value={`฿${(data?.summary?.expenses?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
           change={data?.summary?.expenses?.change ?? 0}
           changeLabel="จากเดือนก่อน"
           icon={<TrendingDown className="h-6 w-6 text-white" />}
@@ -514,7 +514,7 @@ export function Dashboard() {
         />
         <SummaryCard
           title="ลูกหนี้การค้า"
-          value={`฿${((data?.summary?.ar?.amount ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
+          value={`฿${(data?.summary?.ar?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
           change={data?.summary?.ar?.change ?? 0}
           changeLabel="จากเดือนก่อน"
           icon={<Users className="h-6 w-6 text-white" />}
@@ -522,7 +522,7 @@ export function Dashboard() {
         />
         <SummaryCard
           title="เจ้าหนี้การค้า"
-          value={`฿${((data?.summary?.ap?.amount ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
+          value={`฿${(data?.summary?.ap?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
           change={data?.summary?.ap?.change ?? 0}
           changeLabel="จากเดือนก่อน"
           icon={<Truck className="h-6 w-6 text-white" />}
@@ -545,7 +545,7 @@ export function Dashboard() {
                 <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `${v/1000}K`} />
                 <Tooltip
-                  formatter={(value: number) => [`฿${value?.toLocaleString() ?? '0'}`, '']}
+                  formatter={(value: number) => [`฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`, '']}
                   labelStyle={{ color: '#374151' }}
                 />
                 <Legend />
@@ -569,7 +569,7 @@ export function Dashboard() {
                 <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `${v/1000}K`} />
                 <Tooltip
-                  formatter={(value: number) => [`฿${value?.toLocaleString() ?? '0'}`, '']}
+                  formatter={(value: number) => [`฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`, '']}
                 />
                 <Legend />
                 <Line
@@ -620,14 +620,14 @@ export function Dashboard() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => `฿${value?.toLocaleString() ?? '0'}`} />
+                <Tooltip formatter={(value: number) => `฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
               </PieChart>
             </ResponsiveContainer>
             <div className="grid grid-cols-2 gap-2 mt-4">
               {data?.arAging?.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-muted-foreground">{item.name}: ฿{((item?.value ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-xs text-muted-foreground">{item.name}: ฿{(item?.value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
                 </div>
               ))}
             </div>
@@ -658,14 +658,14 @@ export function Dashboard() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => `฿${value?.toLocaleString() ?? '0'}`} />
+                <Tooltip formatter={(value: number) => `฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
               </PieChart>
             </ResponsiveContainer>
             <div className="grid grid-cols-2 gap-2 mt-4">
               {data?.apAging?.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-muted-foreground">{item.name}: ฿{((item?.value ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-xs text-muted-foreground">{item.name}: ฿{(item?.value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
                 </div>
               ))}
             </div>
