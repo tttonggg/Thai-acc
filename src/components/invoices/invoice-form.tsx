@@ -338,11 +338,31 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
         })),
       }
 
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+
+      // DEV: Skip CSRF entirely in development
+      if (process.env.NODE_ENV !== 'development') {
+        // Fetch CSRF token first for production
+        let csrfToken = ''
+        try {
+          const csrfRes = await fetch('/api/csrf/token')
+          if (csrfRes.ok) {
+            const csrfData = await csrfRes.json()
+            csrfToken = csrfData.token || ''
+          }
+        } catch (error) {
+          console.warn('Failed to fetch CSRF token:', error)
+        }
+        if (csrfToken) {
+          headers['x-csrf-token'] = csrfToken
+        }
+      }
+
       const response = await fetch('/api/invoices', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(payload),
       })
 

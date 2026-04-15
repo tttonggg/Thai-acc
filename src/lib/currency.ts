@@ -42,9 +42,7 @@ export function satangToBaht(satang: number): number {
   if (isNaN(satang)) {
     throw new Error('Cannot convert NaN to Baht')
   }
-  if (satang < 0) {
-    throw new Error('Cannot convert negative Satang to Baht')
-  }
+  // Allow negative values (for credit balances, etc) - just convert
   return satang / 100
 }
 

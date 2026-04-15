@@ -5,6 +5,7 @@ import { requireAuth } from '@/lib/api-utils'
 import { logCreate } from '@/lib/activity-logger'
 import { getClientIp } from '@/lib/api-utils'
 import { bahtToSatang, satangToBaht } from '@/lib/currency'
+import { validateCsrfToken, getCsrfTokenFromHeaders } from '@/lib/csrf-service-server'
 
 // Validation schema
 const invoiceLineSchema = z.object({
@@ -127,7 +128,8 @@ export async function GET(request: NextRequest) {
       prisma.invoice.count({ where }),
     ])
 
-    // Convert Satang to Baht for all monetary fields
+    // CRITICAL: Convert Satang to Baht for all monetary fields
+    // Database stores Satang (integers), API returns Baht (decimals)
     const invoicesInBaht = invoices.map(invoice => ({
       ...invoice,
       subtotal: satangToBaht(invoice.subtotal),
@@ -176,6 +178,26 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth()
+
+    // DEV ONLY: Skip CSRF validation in development
+    const isDev = process.env.NODE_ENV === 'development'
+
+    if (!isDev) {
+      // Validate CSRF token in production only
+      const csrfToken = getCsrfTokenFromHeaders(request.headers)
+      const sessionId = request.cookies.get('next-auth.session-token')?.value ||
+                        request.cookies.get('__Secure-next-auth.session-token')?.value ||
+                        request.headers.get('x-session-id') ||
+                        user.id
+
+      if (!csrfToken || !(await validateCsrfToken(csrfToken, sessionId))) {
+        return NextResponse.json(
+          { success: false, error: 'CSRF token ไม่ถูกต้องหรือหมดอายุ' },
+          { status: 403 }
+        )
+      }
+    }
+
     const ipAddress = getClientIp(request)
 
     const body = await request.json()
