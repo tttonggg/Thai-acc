@@ -267,6 +267,37 @@ const { theme, setTheme, toggleDarkMode } = useThemeStore()
 - `/THEME_CUSTOMIZATION.md` - Theme system documentation
 - `/TESTING_CHECKLIST.md` - QA checklist for mobile/themes
 
+## Active Work: UI/UX Redesign
+
+**Status**: Phase 1 ✅ Complete — Phase 2 & 3 Pending
+
+A comprehensive UI/UX redesign improving user workflow and empathy. Original components backed up to `src/components.invoices.backup-20260414/`.
+
+### Backup & Rollback
+```bash
+# Rollback invoice changes: cp src/components.invoices.backup-20260414/* src/components/invoices/
+git tag ui-redesign-invoice-done    # after invoice module
+git tag ui-redesign-grn-done        # after GRN module
+```
+
+### Phase 1: Invoice Redesign ✅ (Complete)
+- ✅ Quick filter buttons (ทั้งหมด/รอดำเนินการ/เร่งด่วน/เสร็จสิ้น)
+- ✅ Aging color badge (🔴 overdue/🟡 approaching/🟢 paid)
+- ✅ Outstanding amount column (ยอดค้างรับ)
+- ✅ Explicit "Post" button in row actions
+- ✅ Invoice edit: 3 tabs (Details | Comments & Audit | Related)
+- ✅ Invoice creation: WHT guidance tooltip with PND.53 rates
+
+### Phase 2: GRN + Three-Way Match (Pending)
+- New GRN components (list, form, detail)
+- Three-way match validation in purchase invoices
+- Variance report UI
+
+### Phase 3: Receipt/Payment + Navigation (Pending)
+- Receipt: 2-panel allocation layout
+- Payment: WHT category dropdown with PND.53 rate guidance
+- Sidebar: workflow-grouped (Sell → Buy → Accounting → Reports)
+
 ## Important Notes
 
 - **Never** import `src/lib/db.ts` in client components — server-side only

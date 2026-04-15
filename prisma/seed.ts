@@ -127,6 +127,7 @@ async function main() {
     { code: '1131', name: 'เงินมัดจำ', type: 'ASSET', level: 4, isDetail: true, parentId: '1130' },
     { code: '1132', name: 'ภาษีมูลค่าเพิ่มถูกหัก ณ ที่จ่าย', type: 'ASSET', level: 4, isDetail: true, parentId: '1130' },
     { code: '1140', name: 'สินค้าคงเหลือ', type: 'ASSET', level: 3, isDetail: true, parentId: '1100' },
+    { code: '1145', name: 'ภาษีมูลค่าเพิ่มซื้อ', type: 'ASSET', category: 'CURRENT_ASSET', isActive: true },
     { code: '1150', name: 'ค่าใช้จ่ายจ่ายล่วงหน้า', type: 'ASSET', level: 3, isDetail: true, parentId: '1100' },
     { code: '1200', name: 'สินทรัพย์ไม่หมุนเวียน', type: 'ASSET', level: 2, isDetail: false, parentId: '1000' },
     { code: '1210', name: 'ที่ดิน อาคารและอุปกรณ์', type: 'ASSET', level: 3, isDetail: false, parentId: '1200' },
@@ -148,6 +149,7 @@ async function main() {
     { code: '2133', name: 'ประกันสังคมต้องจ่าย', type: 'LIABILITY', level: 4, isDetail: true, parentId: '2130' },
     { code: '2140', name: 'เงินเดือนต้องจ่าย', type: 'LIABILITY', level: 3, isDetail: true, parentId: '2100' },
     { code: '2150', name: 'ภาษีเงินได้นิติบุคคลต้องชำระ', type: 'LIABILITY', level: 3, isDetail: true, parentId: '2100' },
+    { code: '2160', name: 'สินค้ารับมาแต่ยังไม่ออกใบกำกับ', type: 'LIABILITY', level: 3, isDetail: true, parentId: '2100' },
     { code: '2200', name: 'หนี้สินไม่หมุนเวียน', type: 'LIABILITY', level: 2, isDetail: false, parentId: '2000' },
     { code: '2210', name: 'เงินกู้ยืมระยะยาว', type: 'LIABILITY', level: 3, isDetail: true, parentId: '2200' },
     

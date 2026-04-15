@@ -5,7 +5,8 @@ import { isCsrfExemptPath, getCsrfTokenFromHeaders } from './lib/csrf-service';
 import { logError } from './lib/errors';
 
 export async function middleware(request: NextRequest) {
-  const { pathname, method } = request.nextUrl;
+  const pathname = request.nextUrl.pathname;
+  const method = request.method;
 
   // Start performance tracking (manual tracking without Edge Runtime dependencies)
   const startTime = Date.now();

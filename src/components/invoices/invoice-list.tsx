@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Plus,
   Search,
   Edit,
-  Trash2,
   Eye,
   Download,
   Printer,
   FileText,
   Loader2,
-  MessageSquare
+  MessageSquare,
+  Send
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -54,11 +54,13 @@ interface Invoice {
   id: string
   invoiceNo: string
   invoiceDate: string
+  dueDate?: string
   date?: string // Keep for backward compatibility
   customerName: string
   subtotal: number
   vatAmount: number
   totalAmount: number
+  paidAmount?: number
   status: string
   type: string
   _count?: {
@@ -88,9 +90,38 @@ const typeLabels: Record<string, string> = {
   DEBIT_NOTE: 'ใบเพิ่มหนี้',
 }
 
+// Quick filter options
+type QuickFilter = 'all' | 'pending' | 'overdue' | 'done'
+const quickFilters: { value: QuickFilter; label: string; activeClass: string }[] = [
+  { value: 'all', label: 'ทั้งหมด', activeClass: 'bg-blue-600 text-white hover:bg-blue-700' },
+  { value: 'pending', label: 'รอดำเนินการ', activeClass: 'bg-yellow-500 text-white hover:bg-yellow-600' },
+  { value: 'overdue', label: 'เร่งด่วน', activeClass: 'bg-red-500 text-white hover:bg-red-600' },
+  { value: 'done', label: 'เสร็จสิ้น', activeClass: 'bg-green-500 text-white hover:bg-green-600' },
+]
+
+// Compute aging badge for outstanding invoices
+function getAgingBadge(invoice: Invoice) {
+  if (invoice.status === 'PAID' || invoice.status === 'CANCELLED' || invoice.status === 'DRAFT') {
+    return null
+  }
+  const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null
+  if (!dueDate) return null
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const diffDays = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24))
+  if (diffDays > 0) {
+    return { emoji: '🔴', label: `${diffDays} วัน`, variant: 'destructive' as const }
+  }
+  if (diffDays >= -7) {
+    return { emoji: '🟡', label: 'ใกล้ครบกำหนด', variant: 'secondary' as const }
+  }
+  return null
+}
+
 export function InvoiceList() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [invoiceFormType, setInvoiceFormType] = useState<'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE'>('TAX_INVOICE')
   const [refreshKey, setRefreshKey] = useState(0)
@@ -101,6 +132,7 @@ export function InvoiceList() {
   const [error, setError] = useState<string | null>(null)
   const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null)
   const [printingInvoice, setPrintingInvoice] = useState<string | null>(null)
+  const [postingInvoice, setPostingInvoice] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -144,6 +176,23 @@ export function InvoiceList() {
     const matchesSearch = invoice.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           invoice.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === 'all' || invoice.status === filterStatus
+
+    // Quick filter logic
+    if (quickFilter !== 'all') {
+      const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const diffDays = dueDate ? Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24)) : -999
+      const aging = diffDays
+      if (quickFilter === 'pending') {
+        if (invoice.status === 'PAID' || invoice.status === 'CANCELLED') return false
+      } else if (quickFilter === 'overdue') {
+        if (aging <= 0 && invoice.status !== 'PAID' && invoice.status !== 'CANCELLED') return false
+      } else if (quickFilter === 'done') {
+        if (invoice.status !== 'PAID') return false
+      }
+    }
+
     return matchesSearch && matchesStatus
   })
 
@@ -163,7 +212,7 @@ export function InvoiceList() {
     setIsEditDialogOpen(true)
   }
 
-  const openInvoiceForm = (type: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE') => {
+  const openInvoiceForm = (type: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE') => {
     // Note: CREDIT_NOTE and DEBIT_NOTE should be created from their dedicated sections
     setInvoiceFormType(type)
     setIsAddDialogOpen(true)
@@ -183,6 +232,26 @@ export function InvoiceList() {
 
   const handlePrint = async (invoiceId: string) => {
     handlePrintInvoice(invoiceId, true)
+  }
+
+  const handlePostInvoice = async (invoiceId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!confirm('ต้องการออกใบกำกับภาษีฉบับนี้หรือไม่? การดำเนินการนี้จะสร้างรายการบัญชีโดยอัตโนมัติ')) return
+    setPostingInvoice(invoiceId)
+    try {
+      const res = await fetch(`/api/invoices/${invoiceId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': '' },
+        body: JSON.stringify({ action: 'post' }),
+      })
+      if (!res.ok) throw new Error('Post failed')
+      toast({ title: 'ออกใบกำกับภาษีสำเร็จ', description: 'เอกสารถูกออกเรียบร้อยแล้ว' })
+      setRefreshKey(prev => prev + 1)
+    } catch {
+      toast({ title: 'เกิดข้อผิดพลาด', description: 'ไม่สามารถออกใบกำกับภาษีได้', variant: 'destructive' })
+    } finally {
+      setPostingInvoice(null)
+    }
   }
 
   const handlePrintInvoice = async (invoiceId: string, autoPrint: boolean = true) => {
@@ -722,16 +791,16 @@ export function InvoiceList() {
               </Button>
             </DialogTrigger>
           </Dialog>
+          <Alert>
+            <AlertDescription>ไม่พบข้อมูล</AlertDescription>
+          </Alert>
+          <InvoiceForm
+            open={isAddDialogOpen}
+            onClose={() => setIsAddDialogOpen(false)}
+            onSuccess={handleInvoiceSuccess}
+            defaultType={invoiceFormType}
+          />
         </div>
-        <Alert>
-          <AlertDescription>ไม่พบข้อมูล</AlertDescription>
-        </Alert>
-        <InvoiceForm
-          open={isAddDialogOpen}
-          onClose={() => setIsAddDialogOpen(false)}
-          onSuccess={handleInvoiceSuccess}
-          defaultType={invoiceFormType}
-        />
       </div>
     )
   }
@@ -813,17 +882,36 @@ export function InvoiceList() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">รับชำระแล้ว (เดือนนี้)</p>
-            <p className="text-2xl font-bold text-green-600">฿{safeInvoices?.filter(i => i.status === 'PAID').reduce((sum, i) => sum + (i.totalAmount || 0), 0)?.toLocaleString() ?? '0'}</p>
-            <p className="text-xs text-gray-400">{safeInvoices?.filter(i => i.status === 'PAID').length ?? 0} รายการ</p>
+            <p className="text-2xl font-bold text-green-600">฿{(safeInvoices?.filter(i => i.status === 'PAID' || i.status === 'PARTIAL').reduce((sum, i) => sum + (i.paidAmount || 0), 0) / 100).toLocaleString() ?? '0'}</p>
+            <p className="text-xs text-gray-400">{safeInvoices?.filter(i => i.status === 'PAID' || i.status === 'PARTIAL').length ?? 0} รายการ</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">ภาษีขายรวม</p>
-            <p className="text-2xl font-bold text-purple-600">฿{safeInvoices?.reduce((sum, i) => sum + (i.vatAmount || 0), 0)?.toLocaleString() ?? '0'}</p>
+            <p className="text-2xl font-bold text-purple-600">฿{(safeInvoices?.reduce((sum, i) => sum + (i.vatAmount || 0), 0) / 100).toLocaleString() ?? '0'}</p>
             <p className="text-xs text-gray-400">เดือนนี้</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Quick Filter Buttons */}
+      <div className="flex gap-2 flex-wrap">
+        {quickFilters.map(qf => (
+          <Button
+            key={qf.value}
+            variant="outline"
+            size="sm"
+            className={`rounded-full px-4 text-sm font-medium transition-colors ${
+              quickFilter === qf.value
+                ? qf.activeClass
+                : 'bg-white dark:bg-transparent border-gray-300 text-gray-700 hover:bg-gray-100'
+            }`}
+            onClick={() => setQuickFilter(qf.value)}
+          >
+            {qf.label}
+          </Button>
+        ))}
       </div>
 
       {/* Search & Filter */}
@@ -832,8 +920,8 @@ export function InvoiceList() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input 
-                placeholder="ค้นหาตามชื่อลูกค้าหรือเลขที่เอกสาร..." 
+              <Input
+                placeholder="ค้นหาตามชื่อลูกค้าหรือเลขที่เอกสาร..."
                 className="pl-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -867,8 +955,7 @@ export function InvoiceList() {
                   <TableHead>วันที่</TableHead>
                   <TableHead>ประเภท</TableHead>
                   <TableHead>ลูกค้า</TableHead>
-                  <TableHead className="text-right">มูลค่าก่อน VAT</TableHead>
-                  <TableHead className="text-right">VAT</TableHead>
+                  <TableHead className="text-right">ยอดค้างรับ</TableHead>
                   <TableHead className="text-right">ยอดรวม</TableHead>
                   <TableHead>สถานะ</TableHead>
                   <TableHead className="text-center">คอมเมนต์</TableHead>
@@ -876,7 +963,10 @@ export function InvoiceList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredInvoices.map((invoice) => (
+                {filteredInvoices.map((invoice) => {
+                  const outstanding = Math.max(0, (invoice.totalAmount ?? 0) - (invoice.paidAmount ?? 0))
+                  const agingBadge = getAgingBadge(invoice)
+                  return (
                   <TableRow
                     key={invoice.id}
                     className="cursor-pointer hover:bg-muted/50"
@@ -888,11 +978,21 @@ export function InvoiceList() {
                       <Badge variant="outline">{typeLabels[invoice.type]}</Badge>
                     </TableCell>
                     <TableCell>{invoice.customerName}</TableCell>
-                    <TableCell className="text-right">฿{(invoice.subtotal ?? 0).toLocaleString()}</TableCell>
-                    <TableCell className="text-right">฿{(invoice.vatAmount ?? 0).toLocaleString()}</TableCell>
-                    <TableCell className="text-right font-semibold">฿{(invoice.totalAmount ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">
+                      <span className={outstanding > 0 ? 'font-semibold text-red-600' : 'text-green-600'}>
+                        ฿{(outstanding / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">฿{((invoice.totalAmount ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     <TableCell>
-                      {getStatusBadge(invoice.status)}
+                      <div className="flex flex-col gap-1">
+                        {getStatusBadge(invoice.status)}
+                        {agingBadge && (
+                          <Badge variant={agingBadge.variant} className="text-xs w-fit">
+                            {agingBadge.emoji} {agingBadge.label}
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">
                       {invoice._count?.comments ? (
@@ -905,11 +1005,27 @@ export function InvoiceList() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex justify-center gap-1">
+                      <div className="flex justify-center gap-1 flex-wrap">
+                        {invoice.status === 'DRAFT' && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="h-8 px-2 bg-blue-600 hover:bg-blue-700 text-white"
+                            onClick={(e) => handlePostInvoice(invoice.id, e)}
+                            disabled={postingInvoice === invoice.id}
+                          >
+                            {postingInvoice === invoice.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Send className="h-3 w-3 mr-1" />
+                            )}
+                            ออก
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-11 w-11"
+                          className="h-8 w-8"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleView(invoice.id)
@@ -920,7 +1036,7 @@ export function InvoiceList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-11 w-11"
+                          className="h-8 w-8"
                           onClick={(e) => {
                             e.stopPropagation()
                             openEditDialog(invoice.id)
@@ -931,7 +1047,7 @@ export function InvoiceList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-11 w-11"
+                          className="h-8 w-8"
                           onClick={(e) => {
                             e.stopPropagation()
                             handlePrint(invoice.id)
@@ -947,7 +1063,7 @@ export function InvoiceList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-11 w-11"
+                          className="h-8 w-8"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleDownload(invoice.id, invoice.invoiceNo)
@@ -963,7 +1079,8 @@ export function InvoiceList() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </ScrollArea>

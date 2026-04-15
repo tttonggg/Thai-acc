@@ -1,0 +1,12 @@
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Running Quick Tests[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34mℹ️  Server already running[0m
+[0;34m▶ Executing quick test suite...[0m
+./scripts/test-automation.sh: line 276: bun: command not found
+[0;31m❌ Quick tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Quick tests completed in 0s[0m
+[0;32m✅ Test report generated: /Users/tong/thai-acc/test-results/quick_report_20260414_020000.md[0m

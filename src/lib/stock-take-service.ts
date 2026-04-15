@@ -553,21 +553,14 @@ export async function cancelStockTake(params: {
       throw new Error('การตรวจนับนี้ถูกยกเลิกไปแล้ว')
     }
 
-    // Check if already posted
-    if ((stockTake.metadata as any)?.posted) {
-      throw new Error('ไม่สามารถยกเลิกการตรวจนับที่ลงบัญชีแล้วได้')
-    }
-
     // Update status to CANCELLED
     const updatedTake = await tx.stockTake.update({
       where: { id: takeId },
       data: {
         status: 'CANCELLED',
-        metadata: {
-          ...((stockTake.metadata as any) || {}),
-          cancelledAt: new Date().toISOString(),
-          cancelReason: reason,
-        },
+        notes: stockTake.notes
+          ? `${stockTake.notes}\n[CANCELLED ${new Date().toISOString()}] ${reason || ''}`
+          : `[CANCELLED ${new Date().toISOString()}] ${reason || ''}`,
       },
       include: {
         lines: {
@@ -607,25 +600,25 @@ export async function getStockTakeSummary(takeId: string) {
 
   // Calculate summary
   const totalItems = stockTake.lines.length
-  const totalSystemQty = stockTake.lines.reduce((sum, line) => sum + line.systemQuantity, 0)
-  const totalActualQty = stockTake.lines.reduce((sum, line) => sum + line.actualQuantity, 0)
-  const totalVarianceQty = stockTake.lines.reduce((sum, line) => sum + line.varianceQuantity, 0)
+  const totalSystemQty = stockTake.lines.reduce((sum, line) => sum + line.expectedQty, 0)
+  const totalActualQty = stockTake.lines.reduce((sum, line) => sum + line.actualQty, 0)
+  const totalVarianceQty = stockTake.lines.reduce((sum, line) => sum + line.varianceQty, 0)
   const totalSystemValue = stockTake.lines.reduce(
-    (sum, line) => sum + line.systemQuantity * line.unitCost,
+    (sum, line) => sum + line.expectedQty * line.costPerUnit,
     0
   )
   const totalActualValue = stockTake.lines.reduce(
-    (sum, line) => sum + line.actualQuantity * line.unitCost,
+    (sum, line) => sum + line.actualQty * line.costPerUnit,
     0
   )
   const totalVarianceValue = stockTake.lines.reduce(
-    (sum, line) => sum + line.varianceQuantity * line.unitCost,
+    (sum, line) => sum + line.varianceQty * line.costPerUnit,
     0
   )
 
-  const lossLines = stockTake.lines.filter((line) => line.varianceQuantity < 0)
-  const gainLines = stockTake.lines.filter((line) => line.varianceQuantity > 0)
-  const matchedLines = stockTake.lines.filter((line) => line.varianceQuantity === 0)
+  const lossLines = stockTake.lines.filter((line) => line.varianceQty < 0)
+  const gainLines = stockTake.lines.filter((line) => line.varianceQty > 0)
+  const matchedLines = stockTake.lines.filter((line) => line.varianceQty === 0)
 
   return {
     stockTake,
@@ -638,11 +631,11 @@ export async function getStockTakeSummary(takeId: string) {
       totalActualValue,
       totalVarianceValue,
       totalLoss: lossLines.reduce(
-        (sum, line) => sum + Math.abs(line.varianceQuantity) * line.unitCost,
+        (sum, line) => sum + Math.abs(line.varianceQty) * line.costPerUnit,
         0
       ),
       totalGain: gainLines.reduce(
-        (sum, line) => sum + line.varianceQuantity * line.unitCost,
+        (sum, line) => sum + line.varianceQty * line.costPerUnit,
         0
       ),
       lossCount: lossLines.length,

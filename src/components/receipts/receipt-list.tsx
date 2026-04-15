@@ -11,7 +11,8 @@ import {
   Printer,
   FileText,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  Send
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -86,9 +87,43 @@ const paymentMethodLabels: Record<string, string> = {
   OTHER: 'อื่นๆ',
 }
 
+// Quick filter options
+type QuickFilter = 'all' | 'pending' | 'overdue' | 'done'
+const quickFilters: { value: QuickFilter; label: string; activeClass: string }[] = [
+  { value: 'all', label: 'ทั้งหมด', activeClass: 'bg-blue-600 text-white hover:bg-blue-700' },
+  { value: 'pending', label: 'รอดำเนินการ', activeClass: 'bg-yellow-500 text-white hover:bg-yellow-600' },
+  { value: 'overdue', label: 'เร่งด่วน', activeClass: 'bg-red-500 text-white hover:bg-red-600' },
+  { value: 'done', label: 'เสร็จสิ้น', activeClass: 'bg-green-500 text-white hover:bg-green-600' },
+]
+
+// Compute aging badge for receipts
+function getAgingBadge(receipt: Receipt) {
+  if (receipt.status === 'PAID' || receipt.status === 'CANCELLED' || receipt.status === 'DRAFT') {
+    return null
+  }
+  // For receipts, we check if remaining > 0 (unallocated amount)
+  if (receipt.remaining <= 0) {
+    return null
+  }
+  // Receipts don't typically have due dates, but we can show aging based on creation date
+  // Consider a receipt as "overdue" if it's been >30 days since receipt date and still has remaining balance
+  const receiptDate = new Date(receipt.receiptDate)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const diffDays = Math.floor((today.getTime() - receiptDate.getTime()) / (1000 * 60 * 60 * 24))
+  if (diffDays > 30) {
+    return { emoji: '🔴', label: `${diffDays - 30}+ วัน`, variant: 'destructive' as const }
+  }
+  if (diffDays >= 21) {
+    return { emoji: '🟡', label: 'ใกล้เกินกำหนด', variant: 'secondary' as const }
+  }
+  return null
+}
+
 export function ReceiptList() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
   const [viewReceiptId, setViewReceiptId] = useState<string | null>(null)
@@ -135,6 +170,26 @@ export function ReceiptList() {
     const matchesSearch = receipt.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           receipt.receiptNo?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === 'all' || receipt.status === filterStatus
+
+    // Quick filter logic
+    if (quickFilter !== 'all') {
+      const receiptDate = new Date(receipt.receiptDate)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const diffDays = Math.floor((today.getTime() - receiptDate.getTime()) / (1000 * 60 * 60 * 24))
+      const hasRemaining = (receipt.remaining ?? 0) > 0
+
+      if (quickFilter === 'pending') {
+        if (receipt.status === 'PAID' || receipt.status === 'CANCELLED' || receipt.status === 'DRAFT') return false
+        if (!hasRemaining) return false
+      } else if (quickFilter === 'overdue') {
+        if (diffDays <= 30 || receipt.status === 'PAID' || receipt.status === 'CANCELLED' || receipt.status === 'DRAFT') return false
+        if (!hasRemaining) return false
+      } else if (quickFilter === 'done') {
+        if (receipt.status !== 'POSTED') return false
+      }
+    }
+
     return matchesSearch && matchesStatus
   })
 
@@ -368,7 +423,7 @@ export function ReceiptList() {
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">ลงบัญชีแล้ว (เดือนนี้)</p>
             <p className="text-2xl font-bold text-green-600">
-              ฿{safeReceipts?.filter(r => r.status === 'POSTED').reduce((sum, r) => sum + (r.amount || 0), 0)?.toLocaleString() ?? '0'}
+              ฿{(safeReceipts?.filter(r => r.status === 'POSTED').reduce((sum, r) => sum + (r.amount || 0), 0) / 100).toLocaleString() ?? '0'}
             </p>
             <p className="text-xs text-gray-400">{safeReceipts?.filter(r => r.status === 'POSTED').length ?? 0} รายการ</p>
           </CardContent>
@@ -377,7 +432,7 @@ export function ReceiptList() {
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">หัก ณ ที่จ่ายรวม</p>
             <p className="text-2xl font-bold text-purple-600">
-              ฿{safeReceipts?.reduce((sum, r) => sum + (r.whtAmount || 0), 0)?.toLocaleString() ?? '0'}
+              ฿{(safeReceipts?.reduce((sum, r) => sum + (r.whtAmount || 0), 0) / 100).toLocaleString() ?? '0'}
             </p>
             <p className="text-xs text-gray-400">เดือนนี้</p>
           </CardContent>
@@ -386,11 +441,30 @@ export function ReceiptList() {
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">ยอดค้างจ่าย</p>
             <p className="text-2xl font-bold text-orange-600">
-              ฿{safeReceipts?.reduce((sum, r) => sum + (r.remaining || 0), 0)?.toLocaleString() ?? '0'}
+              ฿{(safeReceipts?.reduce((sum, r) => sum + (r.remaining || 0), 0) / 100).toLocaleString() ?? '0'}
             </p>
             <p className="text-xs text-gray-400">เครดิตลูกค้า</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Quick Filter Buttons */}
+      <div className="flex gap-2 flex-wrap">
+        {quickFilters.map(qf => (
+          <Button
+            key={qf.value}
+            variant="outline"
+            size="sm"
+            className={`rounded-full px-4 text-sm font-medium transition-colors ${
+              quickFilter === qf.value
+                ? qf.activeClass
+                : 'bg-white dark:bg-transparent border-gray-300 text-gray-700 hover:bg-gray-100'
+            }`}
+            onClick={() => setQuickFilter(qf.value)}
+          >
+            {qf.label}
+          </Button>
+        ))}
       </div>
 
       {/* Search & Filter */}
@@ -430,65 +504,82 @@ export function ReceiptList() {
                 <TableRow>
                   <TableHead>เลขที่</TableHead>
                   <TableHead>วันที่</TableHead>
+                  <TableHead>ประเภท</TableHead>
                   <TableHead>ลูกค้า</TableHead>
-                  <TableHead>วิธีชำระ</TableHead>
-                  <TableHead className="text-right">ยอดรับเงิน</TableHead>
-                  <TableHead className="text-right">จัดจ่าย</TableHead>
-                  <TableHead className="text-right">หัก ณ ที่จ่าย</TableHead>
+                  <TableHead className="text-right">ยอดค้างรับ</TableHead>
+                  <TableHead className="text-right">ยอดรับ</TableHead>
                   <TableHead>สถานะ</TableHead>
+                  <TableHead>คอมเมนต์</TableHead>
                   <TableHead className="text-center">จัดการ</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredReceipts.map((receipt) => (
+                {filteredReceipts.map((receipt) => {
+                  const agingBadge = getAgingBadge(receipt)
+                  const outstanding = Math.max(0, (receipt.remaining ?? 0))
+                  return (
                   <TableRow key={receipt.id}>
                     <TableCell className="font-mono">{receipt.receiptNo}</TableCell>
                     <TableCell>{new Date(receipt.receiptDate).toLocaleDateString('th-TH')}</TableCell>
-                    <TableCell>{receipt.customer?.name}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{paymentMethodLabels[receipt.paymentMethod]}</Badge>
                     </TableCell>
+                    <TableCell>{receipt.customer?.name}</TableCell>
+                    <TableCell className="text-right">
+                      <span className={outstanding > 0 ? 'font-semibold text-red-600' : 'text-green-600'}>
+                        ฿{(outstanding / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-right font-semibold">
-                      ฿{(receipt.amount ?? 0).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      ฿{(receipt.totalAllocated ?? 0).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {receipt.whtAmount > 0 ? `฿${receipt.whtAmount.toLocaleString()}` : '-'}
+                      ฿{((receipt.amount ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </TableCell>
                     <TableCell>
-                      {getStatusBadge(receipt.status)}
+                      <div className="flex flex-col gap-1">
+                        {getStatusBadge(receipt.status)}
+                        {agingBadge && (
+                          <Badge variant={agingBadge.variant} className="text-xs w-fit">
+                            {agingBadge.emoji} {agingBadge.label}
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex justify-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-11 w-11"
-                          onClick={() => handleView(receipt.id)}
-                        >
-                          <Eye className="h-4 w-4 text-gray-600" />
-                        </Button>
+                      {receipt.notes ? (
+                        <span className="text-sm text-gray-600 truncate max-w-[200px] block">{receipt.notes}</span>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center gap-1 flex-wrap">
                         {receipt.status === 'DRAFT' && (
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-11 w-11"
+                            variant="default"
+                            size="sm"
+                            className="h-8 px-2 bg-blue-600 hover:bg-blue-700 text-white"
                             onClick={() => handlePost(receipt.id)}
                             disabled={postingReceipt === receipt.id}
                           >
                             {postingReceipt === receipt.id ? (
-                              <Loader2 className="h-4 w-4 text-green-600 animate-spin" />
+                              <Loader2 className="h-3 w-3 animate-spin" />
                             ) : (
-                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              <Send className="h-3 w-3 mr-1" />
                             )}
+                            ลงบัญชี
                           </Button>
                         )}
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-11 w-11"
+                          className="h-8 w-8"
+                          onClick={() => handleView(receipt.id)}
+                        >
+                          <Eye className="h-4 w-4 text-gray-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
                           onClick={() => handlePrint(receipt)}
                         >
                           <Printer className="h-4 w-4 text-green-600" />
@@ -496,7 +587,7 @@ export function ReceiptList() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-11 w-11"
+                          className="h-8 w-8"
                           onClick={() => handleDownload(receipt.id, receipt.receiptNo)}
                           disabled={downloadingReceipt === receipt.id}
                         >
@@ -509,7 +600,8 @@ export function ReceiptList() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  )
+                })}
               </TableBody>
             </Table>
           </ScrollArea>

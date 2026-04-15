@@ -31,6 +31,16 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table'
+import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 
 // Types
@@ -50,6 +60,38 @@ interface Product {
   costPrice?: number
   unit?: string
   vatRate?: number
+}
+
+interface PurchaseOrderLine {
+  id: string
+  lineNo: number
+  productId?: string
+  description: string
+  quantity: number
+  receivedQty: number
+  unit: string
+  unitPrice: number
+}
+
+interface PurchaseOrder {
+  id: string
+  orderNo: string
+  vendorId: string
+  lines: PurchaseOrderLine[]
+}
+
+interface ThreeWayMatchResult {
+  lineId: string
+  poQty: number
+  grnQty: number
+  invoiceQty: number
+  poPrice: number
+  invoicePrice: number
+  qtyVariancePercent: number
+  priceVariancePercent: number
+  status: 'MATCH' | 'WARNING' | 'BLOCKED'
+  qtyIssue: string
+  priceIssue: string
 }
 
 interface PurchaseLine {
@@ -119,6 +161,10 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
   ])
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null)
+  const [matchResults, setMatchResults] = useState<ThreeWayMatchResult[]>([])
+  const [overrideReason, setOverrideReason] = useState('')
+  const [showOverrideDialog, setShowOverrideDialog] = useState(false)
 
   // Fetch vendors and products on mount
   useEffect(() => {
@@ -126,6 +172,25 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
       fetchInitialData()
     }
   }, [open])
+
+  // Fetch PO details when PO number changes
+  useEffect(() => {
+    if (formData.poNumber && formData.poNumber.trim()) {
+      fetchPODetails(formData.poNumber.trim())
+    } else {
+      setSelectedPO(null)
+      setMatchResults([])
+    }
+  }, [formData.poNumber])
+
+  // Recalculate match results when lines or PO changes
+  useEffect(() => {
+    if (selectedPO && lines.length > 0) {
+      calculateThreeWayMatch()
+    } else {
+      setMatchResults([])
+    }
+  }, [selectedPO, lines])
 
   const fetchInitialData = async () => {
     setFetchingData(true)
@@ -154,6 +219,103 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
     } finally {
       setFetchingData(false)
     }
+  }
+
+  const fetchPODetails = async (poNumber: string) => {
+    try {
+      const res = await fetch(`/api/purchase-orders?orderNo=${poNumber}`)
+      if (res.ok) {
+        const result = await res.json()
+        if (result.data && result.data.length > 0) {
+          const po = result.data[0]
+          setSelectedPO(po)
+          // Pre-fill lines from PO
+          if (po.lines && po.lines.length > 0) {
+            const poLines: PurchaseLine[] = po.lines.map((line: PurchaseOrderLine, idx: number) => ({
+              id: Date.now().toString() + idx,
+              productId: line.productId,
+              description: line.description,
+              quantity: line.quantity - line.receivedQty, // Default to remaining qty
+              unit: line.unit,
+              unitPrice: line.unitPrice,
+              discount: 0,
+              vatRate: 7,
+              vatAmount: 0,
+              amount: 0,
+            }))
+            setLines(poLines.length > 0 ? poLines : lines)
+          }
+        } else {
+          toast({
+            title: 'ไม่พบ PO',
+            description: `ไม่พบเลขที่ PO ${poNumber} ในระบบ`,
+            variant: 'destructive',
+          })
+          setSelectedPO(null)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching PO details:', error)
+    }
+  }
+
+  const calculateThreeWayMatch = () => {
+    if (!selectedPO || !selectedPO.lines) return
+
+    const results: ThreeWayMatchResult[] = selectedPO.lines.map((poLine) => {
+      // Find matching invoice line by product or description
+      const invoiceLine = lines.find(
+        (l) => l.productId === poLine.productId || l.description === poLine.description
+      )
+
+      const invoiceQty = invoiceLine?.quantity || 0
+      const invoicePrice = invoiceLine?.unitPrice || 0
+
+      // Calculate quantity variance
+      const qtyDiff = Math.abs(poLine.quantity - invoiceQty)
+      const qtyVariancePercent = poLine.quantity > 0 ? (qtyDiff / poLine.quantity) * 100 : 0
+
+      // Calculate price variance
+      const priceDiff = Math.abs(poLine.unitPrice - invoicePrice)
+      const priceVariancePercent = poLine.unitPrice > 0 ? (priceDiff / poLine.unitPrice) * 100 : 0
+
+      // Determine status
+      let status: 'MATCH' | 'WARNING' | 'BLOCKED' = 'MATCH'
+      let qtyIssue = ''
+      let priceIssue = ''
+
+      if (qtyVariancePercent > 10) {
+        status = 'BLOCKED'
+        qtyIssue = `ปริมาณต่างกัน ${qtyVariancePercent.toFixed(1)}% (เกินกำหนด 10%)`
+      } else if (qtyVariancePercent > 5) {
+        status = 'WARNING'
+        qtyIssue = `ปริมาณต่างกัน ${qtyVariancePercent.toFixed(1)}%`
+      }
+
+      if (priceVariancePercent > 5) {
+        status = 'BLOCKED'
+        priceIssue = `ราคาต่างกัน ${priceVariancePercent.toFixed(1)}% (เกินกำหนด 5%)`
+      } else if (priceVariancePercent > 3) {
+        if (status !== 'BLOCKED') status = 'WARNING'
+        priceIssue = `ราคาต่างกัน ${priceVariancePercent.toFixed(1)}%`
+      }
+
+      return {
+        lineId: poLine.id,
+        poQty: poLine.quantity,
+        grnQty: poLine.receivedQty,
+        invoiceQty,
+        poPrice: poLine.unitPrice,
+        invoicePrice,
+        qtyVariancePercent,
+        priceVariancePercent,
+        status,
+        qtyIssue,
+        priceIssue,
+      }
+    })
+
+    setMatchResults(results)
   }
 
   // Calculate totals
@@ -287,8 +449,33 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
       }
     })
 
+    // Check three-way match blocking
+    const hasBlockedItems = matchResults.some((r) => r.status === 'BLOCKED')
+    if (hasBlockedItems && !overrideReason.trim()) {
+      newErrors.threeWayMatch = 'มีรายการที่ไม่ผ่านการตรวจสอบ 3-way match กรุณาระบุเหตุผลในการอนุมัติ'
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
+  }
+
+  const hasBlockedItems = (): boolean => {
+    return matchResults.some((r) => r.status === 'BLOCKED')
+  }
+
+  const hasWarningItems = (): boolean => {
+    return matchResults.some((r) => r.status === 'WARNING')
+  }
+
+  const getMatchStatusBadge = (status: 'MATCH' | 'WARNING' | 'BLOCKED') => {
+    switch (status) {
+      case 'MATCH':
+        return <Badge variant="default" className="bg-green-600">✅ ตรงกัน</Badge>
+      case 'WARNING':
+        return <Badge variant="default" className="bg-yellow-600">⚠️ แจ้งเตือน</Badge>
+      case 'BLOCKED':
+        return <Badge variant="destructive">🔴 ระงับ</Badge>
+    }
   }
 
   // Format currency
@@ -328,6 +515,18 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
           amount: line.amount,
           notes: line.notes,
         })),
+        // Include three-way match metadata
+        metadata: {
+          threeWayMatch: matchResults.length > 0 ? {
+            purchaseOrderId: selectedPO?.id,
+            purchaseOrderNo: formData.poNumber,
+            matchResults,
+            hasBlockedItems: hasBlockedItems(),
+            hasWarningItems: hasWarningItems(),
+            overrideReason: overrideReason || null,
+            validatedAt: new Date().toISOString(),
+          } : null,
+        },
       }
 
       const response = await fetch('/api/purchases', {
@@ -378,6 +577,9 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
         },
       ])
       setErrors({})
+      setSelectedPO(null)
+      setMatchResults([])
+      setOverrideReason('')
 
       onSuccess()
       onClose()
@@ -511,6 +713,168 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                 onChange={(e) => setFormData(prev => ({ ...prev, poNumber: e.target.value }))}
               />
             </div>
+
+            {/* Three-Way Match Validation Panel */}
+            {matchResults.length > 0 && (
+              <Card className={`border-2 ${hasBlockedItems() ? 'border-red-500 bg-red-50' : hasWarningItems() ? 'border-yellow-500 bg-yellow-50' : 'border-green-500 bg-green-50'}`}>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center justify-between">
+                    <span>📊 ตรวจสอบ 3-Way Match (PO vs ใบส่งของ vs ใบกำกับภาษี)</span>
+                    {hasBlockedItems() ? (
+                      <Badge variant="destructive" className="text-base">🔴 ระงับการบันทึก</Badge>
+                    ) : hasWarningItems() ? (
+                      <Badge variant="default" className="bg-yellow-600 text-base">⚠️ มีคำเตือน</Badge>
+                    ) : (
+                      <Badge variant="default" className="bg-green-600 text-base">✅ ผ่านการตรวจสอบ</Badge>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* Match Results Table */}
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12">ลำดับ</TableHead>
+                          <TableHead>รายการ</TableHead>
+                          <TableHead className="text-right">PO</TableHead>
+                          <TableHead className="text-right">รับแล้ว</TableHead>
+                          <TableHead className="text-right">ใบซื้อ</TableHead>
+                          <TableHead className="text-right">สถานะปริมาณ</TableHead>
+                          <TableHead className="text-right">ราคา PO</TableHead>
+                          <TableHead className="text-right">ราคาใบซื้อ</TableHead>
+                          <TableHead className="text-center">สถานะ</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {matchResults.map((result, idx) => (
+                          <TableRow key={result.lineId} className={
+                            result.status === 'BLOCKED' ? 'bg-red-100' :
+                            result.status === 'WARNING' ? 'bg-yellow-50' : ''
+                          }>
+                            <TableCell className="font-medium">{idx + 1}</TableCell>
+                            <TableCell>
+                              {selectedPO?.lines.find(l => l.id === result.lineId)?.description || '-'}
+                            </TableCell>
+                            <TableCell className="text-right">{result.poQty}</TableCell>
+                            <TableCell className="text-right">{result.grnQty}</TableCell>
+                            <TableCell className="text-right font-medium">
+                              {result.invoiceQty}
+                              {result.qtyVariancePercent > 5 && (
+                                <span className="ml-2 text-xs text-red-600">
+                                  ({result.qtyVariancePercent.toFixed(1)}%)
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {result.qtyIssue ? (
+                                <span className="text-xs text-red-600">{result.qtyIssue}</span>
+                              ) : (
+                                <span className="text-green-600 text-xs">✅ ตรง</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">{formatCurrency(result.poPrice)}</TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatCurrency(result.invoicePrice)}
+                              {result.priceVariancePercent > 3 && (
+                                <span className="ml-2 text-xs text-red-600">
+                                  ({result.priceVariancePercent.toFixed(1)}%)
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {getMatchStatusBadge(result.status)}
+                              {result.priceIssue && (
+                                <div className="mt-1 text-xs text-red-600">{result.priceIssue}</div>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Validation Messages */}
+                  {hasBlockedItems() && (
+                    <Alert className="mt-4 border-red-500 bg-red-50">
+                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                      <AlertDescription className="text-red-800">
+                        <div className="font-semibold mb-2">⚠️ ไม่สามารถบันทึกใบซื้อได้</div>
+                        <ul className="list-disc list-inside space-y-1 text-sm">
+                          <li>ปริมาณหรือราคาต่างกันเกินเกณฑ์ที่กำหนด (ปริมาณ {'>'} 10%, ราคา {'>'} 5%)</li>
+                          <li>กรุณาตรวจสอบรายการที่มีปัญหา หรือขออนุมัติพิเศษ</li>
+                        </ul>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {hasWarningItems() && !hasBlockedItems() && (
+                    <Alert className="mt-4 border-yellow-500 bg-yellow-50">
+                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                      <AlertDescription className="text-yellow-800">
+                        <div className="font-semibold mb-1">⚠️ มีความแตกต่างระดับคำเตือน</div>
+                        <p className="text-sm">ปริมาณหรือราคาต่างกันอยู่ในช่วงที่อนุญาต (ปริมาณ 5-10%, ราคา 3-5%)</p>
+                        <p className="text-sm">คุณสามารถบันทึกใบซื้อได้ แต่ควรตรวจสอบความถูกต้อง</p>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {!hasBlockedItems() && !hasWarningItems() && (
+                    <Alert className="mt-4 border-green-500 bg-green-50">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <AlertDescription className="text-green-800">
+                        <div className="font-semibold">✅ ผ่านการตรวจสอบ 3-Way Match</div>
+                        <p className="text-sm">ปริมาณและราคาตรงกับ PO และใบส่งของ สามารถดำเนินการต่อได้</p>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Actions for blocked items */}
+                  {hasBlockedItems() && (
+                    <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                        onClick={() => setShowOverrideDialog(true)}
+                      >
+                        📝 ขออนุมัติพิเศษ (Override)
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-orange-600 text-orange-600 hover:bg-orange-50"
+                        onClick={() => {
+                          toast({
+                            title: 'ส่งกลับไปตรวจสอบ',
+                            description: 'กรุณาติดต่อฝ่ายจัดซื้อเพื่อตรวจสอบ PO หรือ GRN',
+                          })
+                        }}
+                      >
+                        📧 แจ้งฝ่ายจัดซื้อ (Return to Vendor)
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Override Reason Input */}
+                  {overrideReason && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                      <div className="font-semibold text-blue-900 mb-1">📝 เหตุผลการอนุมัติพิเศษ:</div>
+                      <p className="text-sm text-blue-800">{overrideReason}</p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="mt-2 text-blue-600 hover:text-blue-800"
+                        onClick={() => setOverrideReason('')}
+                      >
+                        แก้ไขเหตุผล
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Line Items */}
             <Card>
@@ -835,6 +1199,71 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
           </div>
         )}
       </DialogContent>
+
+      {/* Override Reason Dialog */}
+      <Dialog open={showOverrideDialog} onOpenChange={setShowOverrideDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>ขออนุมัติพิเศษ (Override)</DialogTitle>
+            <DialogDescription>
+              ระบุเหตุผลในการอนุมัติใบซื้อที่ไม่ผ่านการตรวจสอบ 3-Way Match
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="overrideReason" className="required">เหตุผลการอนุมัติ *</Label>
+              <Textarea
+                id="overrideReason"
+                placeholder="ระบุเหตุผล เช่น: ราคาปรับตามราคาตลาด, ปริมาณเปลี่ยนตามการตรวจสอบจริง, ฯลฯ"
+                value={overrideReason}
+                onChange={(e) => setOverrideReason(e.target.value)}
+                rows={4}
+                className="!min-h-[100px]"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                เหตุผลนี้จะถูกบันทึกในระบบเพื่อการตรวจสอบภายหลัง
+              </p>
+            </div>
+            <Alert className="border-yellow-500 bg-yellow-50">
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-800 text-sm">
+                การอนุมัติพิเศษจะต้องได้รับการตรวจสอบจากผู้บังคับบัญชาระดับสูงกว่า
+              </AlertDescription>
+            </Alert>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowOverrideDialog(false)
+                setOverrideReason('')
+              }}
+            >
+              ยกเลิก
+            </Button>
+            <Button
+              onClick={() => {
+                if (!overrideReason.trim()) {
+                  toast({
+                    title: 'กรุณาระบุเหตุผล',
+                    description: 'ต้องระบุเหตุผลในการอนุมัติพิเศษ',
+                    variant: 'destructive',
+                  })
+                  return
+                }
+                setShowOverrideDialog(false)
+                toast({
+                  title: 'บันทึกเหตุผลแล้ว',
+                  description: 'สามารถกดบันทึกใบซื้อได้',
+                })
+              }}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              ยืนยันเหตุผล
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   )
 }

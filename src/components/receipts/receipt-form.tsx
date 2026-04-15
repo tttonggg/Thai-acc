@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { CalendarIcon, Plus, Trash2, Save, CheckCircle2 } from 'lucide-react'
+import { CalendarIcon, Save, CheckCircle2, AlertCircle, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -31,15 +31,9 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { useToast } from '@/hooks/use-toast'
+import { format } from 'date-fns'
+import { th } from 'date-fns/locale'
 
 const receiptSchema = z.object({
   receiptDate: z.string().min(1, 'กรุณาระบุวันที่'),
@@ -100,12 +94,28 @@ interface ReceiptFormProps {
   receipt?: Receipt
 }
 
+// Calculate aging days and status
+const getAgingStatus = (dueDate: string) => {
+  const today = new Date()
+  const due = new Date(dueDate)
+  const daysUntilDue = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+
+  if (daysUntilDue < 0) {
+    return { status: 'overdue', days: Math.abs(daysUntilDue), color: 'destructive' as const, icon: AlertCircle }
+  } else if (daysUntilDue <= 7) {
+    return { status: 'approaching', days: daysUntilDue, color: 'secondary' as const, icon: Clock }
+  } else {
+    return { status: 'current', days: daysUntilDue, color: 'default' as const, icon: CheckCircle2 }
+  }
+}
+
 export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormProps) {
   const [customers, setCustomers] = useState([])
   const [bankAccounts, setBankAccounts] = useState([])
   const [unpaidInvoices, setUnpaidInvoices] = useState([])
   const [loading, setLoading] = useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('')
   const { toast } = useToast()
 
   const form = useForm<ReceiptFormValues>({
@@ -175,7 +185,11 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
           const res = await fetch(`/api/receipts/unpaid-invoices?customerId=${selectedCustomerId}`)
           if (res.ok) {
             const data = await res.json()
-            setUnpaidInvoices(data.data || [])
+            // Sort by due date (oldest first)
+            const sorted = (data.data || []).sort((a: any, b: any) =>
+              new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+            )
+            setUnpaidInvoices(sorted)
           }
         } catch (error) {
           console.error('Error fetching unpaid invoices:', error)
@@ -188,14 +202,55 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
   const handleCustomerChange = (customerId: string) => {
     setSelectedCustomerId(customerId)
     form.setValue('customerId', customerId)
-    form.setValue('allocations', []) // Clear allocations when customer changes
+    form.setValue('allocations', [])
+    setSelectedInvoiceId('')
   }
 
   const handlePaymentMethodChange = (method: string) => {
     form.setValue('paymentMethod', method as any)
-    // Reset bank account if switching to cash
     if (method === 'CASH') {
       form.setValue('bankAccountId', '')
+    }
+  }
+
+  const getSelectedAllocation = () => {
+    if (!selectedInvoiceId) return null
+    return allocations?.find(a => a.invoiceId === selectedInvoiceId) || null
+  }
+
+  const updateSelectedAllocation = (updates: Partial<any>) => {
+    const currentAllocations = [...allocations]
+    const index = currentAllocations.findIndex(a => a.invoiceId === selectedInvoiceId)
+
+    if (index >= 0) {
+      const allocation = currentAllocations[index]
+
+      // Recalculate WHT if amount or rate changed
+      let newAmount = allocation.amount
+      let newRate = allocation.whtRate
+      let newWhtAmount = allocation.whtAmount
+
+      if ('amount' in updates) {
+        newAmount = updates.amount!
+        newWhtAmount = newAmount * (newRate / 100)
+      }
+      if ('whtRate' in updates) {
+        newRate = updates.whtRate!
+        newWhtAmount = newAmount * (newRate / 100)
+      }
+      if ('whtAmount' in updates) {
+        newWhtAmount = updates.whtAmount!
+      }
+
+      currentAllocations[index] = {
+        ...allocation,
+        amount: newAmount,
+        whtRate: newRate,
+        whtAmount: newWhtAmount,
+        ...updates,
+      }
+
+      form.setValue('allocations', currentAllocations)
     }
   }
 
@@ -204,14 +259,22 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
     const existingIndex = currentAllocations.findIndex(a => a.invoiceId === invoice.id)
 
     if (existingIndex >= 0) {
-      return // Already allocated
+      setSelectedInvoiceId(invoice.id)
+      return
     }
 
     const totalAllocated = currentAllocations.reduce((sum, a) => sum + a.amount, 0)
     const remaining = amount - totalAllocated
     const allocateAmount = Math.min(remaining, invoice.balance)
 
-    if (allocateAmount <= 0) return
+    if (allocateAmount <= 0) {
+      toast({
+        title: 'ไม่สามารถจัดจ่ายได้',
+        description: 'ยอดเงินคงเหลือไม่เพียงพอ',
+        variant: 'destructive',
+      })
+      return
+    }
 
     form.setValue('allocations', [
       ...currentAllocations,
@@ -224,42 +287,21 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
         balance: invoice.balance,
       }
     ])
+
+    setSelectedInvoiceId(invoice.id)
   }
 
-  const updateAllocationAmount = (index: number, newAmount: number) => {
+  const removeAllocation = () => {
+    if (!selectedInvoiceId) return
+
     const currentAllocations = [...allocations]
-    const allocation = currentAllocations[index]
+    const index = currentAllocations.findIndex(a => a.invoiceId === selectedInvoiceId)
 
-    const whtAmount = newAmount * (allocation.whtRate / 100)
-
-    currentAllocations[index] = {
-      ...allocation,
-      amount: newAmount,
-      whtAmount,
+    if (index >= 0) {
+      currentAllocations.splice(index, 1)
+      form.setValue('allocations', currentAllocations)
+      setSelectedInvoiceId('')
     }
-
-    form.setValue('allocations', currentAllocations)
-  }
-
-  const updateAllocationWhtRate = (index: number, newRate: number) => {
-    const currentAllocations = [...allocations]
-    const allocation = currentAllocations[index]
-
-    const whtAmount = allocation.amount * (newRate / 100)
-
-    currentAllocations[index] = {
-      ...allocation,
-      whtRate: newRate,
-      whtAmount,
-    }
-
-    form.setValue('allocations', currentAllocations)
-  }
-
-  const removeAllocation = (index: number) => {
-    const currentAllocations = [...allocations]
-    currentAllocations.splice(index, 1)
-    form.setValue('allocations', currentAllocations)
   }
 
   const autoAllocate = () => {
@@ -285,10 +327,15 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
     }
 
     form.setValue('allocations', newAllocations)
+    setSelectedInvoiceId('')
+
+    toast({
+      title: 'จัดจ่ายอัตโนมัติสำเร็จ',
+      description: `จัดจ่าย ${newAllocations.length} รายการ เรียงตามวันครบกำหนด`,
+    })
   }
 
   const validateForm = (values: ReceiptFormValues): boolean => {
-    // Validate customer selected
     if (!values.customerId) {
       toast({
         title: 'กรุณาเลือกลูกค้า',
@@ -297,7 +344,6 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
       return false
     }
 
-    // Validate amount > 0
     if (values.amount <= 0) {
       toast({
         title: 'กรุณาระบุจำนวนเงินมากกว่า 0',
@@ -306,7 +352,6 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
       return false
     }
 
-    // Validate at least 1 allocation
     if (!allocations || allocations.length === 0) {
       toast({
         title: 'กรุณาจัดจ่ายอย่างน้อย 1 รายการ',
@@ -315,7 +360,6 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
       return false
     }
 
-    // Validate totalAllocated <= amount
     const totalAllocated = allocations.reduce((sum, a) => sum + a.amount, 0)
     if (totalAllocated > values.amount) {
       toast({
@@ -326,7 +370,6 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
       return false
     }
 
-    // Validate bank account for transfer/cheque
     if ((values.paymentMethod === 'TRANSFER' || values.paymentMethod === 'CHEQUE') && !values.bankAccountId) {
       toast({
         title: 'กรุณาเลือกบัญชีธนาคาร',
@@ -336,7 +379,6 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
       return false
     }
 
-    // Validate cheque number for cheque payment
     if (values.paymentMethod === 'CHEQUE' && !values.chequeNo) {
       toast({
         title: 'กรุณาระบุเลขที่เช็ค',
@@ -350,41 +392,10 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
 
   const onSubmit = async (values: ReceiptFormValues) => {
     if (loading) return
-
-    // Client-side validation
     if (!validateForm(values)) return
 
     setLoading(true)
     try {
-      const totalAllocated = allocations.reduce((sum, a) => sum + a.amount, 0)
-
-      if (totalAllocated > values.amount) {
-        toast({
-          title: 'ผิดพลาด',
-          description: 'ยอดจัดจ่ายเกินกว่ายอดรับเงิน',
-          variant: 'destructive'
-        })
-        return
-      }
-
-      if ((values.paymentMethod === 'TRANSFER' || values.paymentMethod === 'CHEQUE') && !values.bankAccountId) {
-        toast({
-          title: 'ผิดพลาด',
-          description: 'กรุณาระบุบัญชีธนาคาร',
-          variant: 'destructive'
-        })
-        return
-      }
-
-      if (values.paymentMethod === 'CHEQUE' && !values.chequeNo) {
-        toast({
-          title: 'ผิดพลาด',
-          description: 'กรุณาระบุเลขที่เช็ค',
-          variant: 'destructive'
-        })
-        return
-      }
-
       const url = receipt ? `/api/receipts/${receipt.id}` : '/api/receipts'
       const method = receipt ? 'PUT' : 'POST'
 
@@ -428,6 +439,9 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
   const totalWht = allocations.reduce((sum, a) => sum + a.whtAmount, 0)
   const unallocated = amount - totalAllocated
 
+  const selectedAllocation = getSelectedAllocation()
+  const selectedInvoice = unpaidInvoices.find((inv: any) => inv.id === selectedInvoiceId)
+
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -435,7 +449,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
           {/* Payment Details */}
           <Card>
             <CardHeader>
-              <CardTitle>รายละเอียดการรับเงิน</CardTitle>
+              <CardTitle>รับเงินจาก</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -455,7 +469,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                               aria-label="เลือกวันที่รับเงิน"
                             >
                               {field.value ? (
-                                new Date(field.value).toLocaleDateString('th-TH')
+                                format(new Date(field.value), 'dd/MM/yyyy', { locale: th })
                               ) : (
                                 <span>เลือกวันที่</span>
                               )}
@@ -588,7 +602,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                                 className="w-full pl-3 text-left font-normal"
                               >
                                 {field.value ? (
-                                  new Date(field.value).toLocaleDateString('th-TH')
+                                  format(new Date(field.value), 'dd/MM/yyyy', { locale: th })
                                 ) : (
                                   <span>เลือกวันที่</span>
                                 )}
@@ -621,7 +635,9 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                     <FormControl>
                       <Input className="!h-11 text-base"
                         type="number"
+                        step="0.01"
                         {...field}
+                        value={field.value ? (field.value / 100).toFixed(2) : ''}
                         onChange={(e) => field.onChange(Math.round(parseFloat(e.target.value) * 100) || 0)}
                       />
                     </FormControl>
@@ -646,164 +662,252 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
             </CardContent>
           </Card>
 
-          {/* Invoice Allocation */}
+          {/* 2-Panel Allocation Layout */}
           {selectedCustomerId && (
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>จัดจ่ายใบกำกับภาษี</CardTitle>
-                  <p className="text-sm text-gray-500 mt-1">
-                    ยอดรวม: ฿{(amount / 100).toLocaleString()} | จัดจ่ายแล้ว: ฿{(totalAllocated / 100).toLocaleString()} | คงเหลือ: ฿{(unallocated / 100).toLocaleString()}
-                  </p>
+              <CardHeader>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <CardTitle>การจัดจ่ายใบกำกับภาษี</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      ยอดรับ: ฿{(amount / 100).toLocaleString()} | จัดจ่าย: ฿{(totalAllocated / 100).toLocaleString()} | WHT: ฿{(totalWht / 100).toLocaleString()} | คงเหลือ: ฿{(unallocated / 100).toLocaleString()}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={autoAllocate}
+                    disabled={amount <= 0 || unpaidInvoices.length === 0}
+                    aria-label="จัดจ่ายอัตโนมัติ"
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-2" aria-hidden="true" />
+                    จัดจ่ายอัตโนมัติ
+                  </Button>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={autoAllocate}
-                  disabled={amount <= 0 || unpaidInvoices.length === 0}
-                  aria-label="จัดจ่ายอัตโนมัติ"
-                >
-                  <CheckCircle2 className="h-4 w-4 mr-2" aria-hidden="true" />
-                  จัดจ่ายอัตโนมัติ
-                </Button>
               </CardHeader>
               <CardContent>
                 {unpaidInvoices.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-12 text-muted-foreground">
                     ไม่มีใบกำกับภาษีค้างจ่าย
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>เลขที่</TableHead>
-                        <TableHead>วันที่</TableHead>
-                        <TableHead className="text-right">ยอดรวม</TableHead>
-                        <TableHead className="text-right">ค้างจ่าย</TableHead>
-                        <TableHead className="text-right">จัดจ่าย</TableHead>
-                        <TableHead className="text-right">หัก ณ ที่จ่าย (%)</TableHead>
-                        <TableHead className="text-right">ภาษีหัก ณ ที่จ่าย</TableHead>
-                        <TableHead aria-label="การจัดการ"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {unpaidInvoices.map((invoice: any) => {
-                        const allocation = allocations?.find(a => a.invoiceId === invoice.id)
-                        return (
-                          <TableRow key={invoice.id}>
-                            <TableCell>{invoice.invoiceNo}</TableCell>
-                            <TableCell>{new Date(invoice.invoiceDate).toLocaleDateString('th-TH')}</TableCell>
-                            <TableCell className="text-right">฿{invoice.totalAmount.toLocaleString()}</TableCell>
-                            <TableCell className="text-right">฿{invoice.balance.toLocaleString()}</TableCell>
-                            <TableCell className="text-right">
-                              {allocation ? (
-                                <Input className="!h-11 text-base"
-                                  type="number"
-                                  value={allocation.amount}
-                                  onChange={(e) => updateAllocationAmount(
-                                    allocations.indexOf(allocation),
-                                    parseFloat(e.target.value) || 0
-                                  )}
-                                  className="w-24 text-right"
-                                  aria-label={`จำนวนเงินจัดจ่ายสำหรับ ${invoice.invoiceNo}`}
-                                />
-                              ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* LEFT PANEL: Outstanding Invoices */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-sm">ใบกำกับที่ค้างรับ</h3>
+                        <Badge variant="secondary">{unpaidInvoices.length} รายการ</Badge>
+                      </div>
+
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {unpaidInvoices.map((invoice: any) => {
+                          const allocation = allocations?.find(a => a.invoiceId === invoice.id)
+                          const isSelected = selectedInvoiceId === invoice.id
+                          const aging = getAgingStatus(invoice.dueDate)
+                          const AgingIcon = aging.icon
+
+                          return (
+                            <button
+                              key={invoice.id}
+                              type="button"
+                              onClick={() => setSelectedInvoiceId(invoice.id)}
+                              className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                                isSelected
+                                  ? 'border-primary bg-primary/5'
+                                  : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                              }`}
+                              aria-label={`เลือก ${invoice.invoiceNo}`}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-semibold text-sm truncate">{invoice.invoiceNo}</span>
+                                    {allocation && (
+                                      <Badge variant="default" className="text-xs">จัดจ่ายแล้ว</Badge>
+                                    )}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mb-2">
+                                    ครบกำหนด: {format(new Date(invoice.dueDate), 'dd/MM/yyyy', { locale: th })}
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <span className="text-muted-foreground">ยอด:</span>
+                                    <span className="font-medium">฿{(invoice.balance / 100).toLocaleString()}</span>
+                                    <span className="text-muted-foreground">/ ฿{(invoice.totalAmount / 100).toLocaleString()}</span>
+                                  </div>
+                                </div>
+                                <Badge variant={aging.color} className="shrink-0">
+                                  <AgingIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                                  {aging.status === 'overdue' && `เกิน ${aging.days} วัน`}
+                                  {aging.status === 'approaching' && `อีก ${aging.days} วัน`}
+                                  {aging.status === 'current' && 'ปกติ'}
+                                </Badge>
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+                          <p>แนะนำ: จัดจ่ายอัตโนมัติเรียงตามวันที่เก่าสุด (FIFO) เพื่อลดความเสี่ยงการเกินกำหนดชำระ</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* RIGHT PANEL: Allocation Details */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-sm">รายละเอียดการจัดจ่าย</h3>
+                        {selectedAllocation && (
+                          <Badge variant="outline">{selectedAllocation.invoiceNo}</Badge>
+                        )}
+                      </div>
+
+                      {!selectedInvoiceId ? (
+                        <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg text-muted-foreground">
+                          <div className="text-center">
+                            <p className="text-sm">เลือกใบกำกับภาษีทางซ้าย</p>
+                            <p className="text-xs mt-1">เพื่อจัดจ่ายหรือแก้ไขยอดจัดจ่าย</p>
+                          </div>
+                        </div>
+                      ) : selectedInvoice ? (
+                        <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                          {!selectedAllocation ? (
+                            // Not yet allocated - show add button
+                            <div className="space-y-4">
+                              <div className="text-center py-4">
+                                <p className="text-sm text-muted-foreground mb-1">ยอดค้างรับ</p>
+                                <p className="text-2xl font-bold">฿{(selectedInvoice.balance / 100).toLocaleString()}</p>
+                              </div>
+
+                              <Button
+                                type="button"
+                                className="w-full"
+                                onClick={() => addAllocation(selectedInvoice)}
+                                disabled={unallocated <= 0}
+                              >
+                                เพิ่มการจัดจ่าย
+                              </Button>
+
+                              <div className="text-xs text-center text-muted-foreground">
+                                ยอดคงเหลือที่จัดจ่ายได้: ฿{(Math.min(unallocated, selectedInvoice.balance) / 100).toLocaleString()}
+                              </div>
+                            </div>
+                          ) : (
+                            // Already allocated - show edit form
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="text-muted-foreground">ยอดค้างรับ:</span>
+                                  <p className="font-semibold">฿{(selectedInvoice.balance / 100).toLocaleString()}</p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">ครบกำหนด:</span>
+                                  <p className="font-semibold">
+                                    {format(new Date(selectedInvoice.dueDate), 'dd/MM/yyyy', { locale: th })}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="text-sm font-medium mb-1 block">จำนวนเงินจัดจ่าย</label>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    className="!h-11 text-base"
+                                    value={(selectedAllocation.amount / 100).toFixed(2)}
+                                    onChange={(e) => {
+                                      const newAmount = Math.round(parseFloat(e.target.value) * 100) || 0
+                                      updateSelectedAllocation({ amount: newAmount })
+                                    }}
+                                    max={selectedInvoice.balance / 100}
+                                    aria-label="จำนวนเงินจัดจ่าย"
+                                  />
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    สูงสุด: ฿{(selectedInvoice.balance / 100).toLocaleString()}
+                                  </p>
+                                </div>
+
+                                <div>
+                                  <label className="text-sm font-medium mb-1 block">หัก ณ ที่จ่าย (%)</label>
+                                  <Select
+                                    value={selectedAllocation.whtRate.toString()}
+                                    onValueChange={(val) => updateSelectedAllocation({ whtRate: parseFloat(val) })}
+                                  >
+                                    <SelectTrigger className="!h-11 text-base">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="0">0%</SelectItem>
+                                      <SelectItem value="1">1%</SelectItem>
+                                      <SelectItem value="3">3%</SelectItem>
+                                      <SelectItem value="5">5%</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                                  <div>
+                                    <span className="text-xs text-muted-foreground">WHT:</span>
+                                    <p className="font-semibold text-sm">฿{(selectedAllocation.whtAmount / 100).toLocaleString()}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-xs text-muted-foreground">ยอดสุทธิ:</span>
+                                    <p className="font-semibold text-sm text-primary">
+                                      ฿{((selectedAllocation.amount - selectedAllocation.whtAmount) / 100).toLocaleString()}
+                                    </p>
+                                  </div>
+                                </div>
+
                                 <Button
                                   type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => addAllocation(invoice)}
-                                  disabled={unallocated <= 0}
-                                  aria-label={`เพิ่มการจัดจ่ายสำหรับ ${invoice.invoiceNo}`}
+                                  variant="destructive"
+                                  className="w-full"
+                                  onClick={removeAllocation}
                                 >
-                                  <Plus className="h-3 w-3" aria-hidden="true" />
+                                  ลบการจัดจ่ายนี้
                                 </Button>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {allocation ? (
-                                <Select
-                                  value={allocation.whtRate.toString()}
-                                  onValueChange={(val) => updateAllocationWhtRate(
-                                    allocations.indexOf(allocation),
-                                    parseFloat(val)
-                                  )}
-                                  aria-label="อัตราหัก ณ ที่จ่าย"
-                                >
-                                  <SelectTrigger className="!h-11 text-base" className="w-20" aria-label="เลือกอัตรา WHT">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="0">0%</SelectItem>
-                                    <SelectItem value="1">1%</SelectItem>
-                                    <SelectItem value="3">3%</SelectItem>
-                                    <SelectItem value="5">5%</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              ) : (
-                                '-'
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {allocation ? `฿${allocation.whtAmount.toLocaleString()}` : '-'}
-                            </TableCell>
-                            <TableCell>
-                              {allocation && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-11 w-11"
-                                  onClick={() => removeAllocation(allocations.indexOf(allocation))}
-                                  aria-label={`ลบการจัดจ่าย ${invoice.invoiceNo}`}
-                                >
-                                  <Trash2 className="h-4 w-4 text-red-600" aria-hidden="true" />
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })}
-                    </TableBody>
-                  </Table>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                          ไม่พบข้อมูลใบกำกับภาษี
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>
           )}
 
-          {/* Summary */}
+          {/* Summary Bar */}
           {amount > 0 && (
-            <Card>
-              <CardContent className="p-6">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>ยอดรับเงินรวม</span>
-                    <span className="font-semibold">฿{amount.toLocaleString()}</span>
+            <Card className="bg-muted/50">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">ยอดรับ</p>
+                    <p className="text-lg font-bold">฿{(amount / 100).toLocaleString()}</p>
                   </div>
-                  {totalAllocated > 0 && (
-                    <>
-                      <div className="flex justify-between">
-                        <span>จัดจ่ายใบกำกับภาษี</span>
-                        <span>฿{totalAllocated.toLocaleString()}</span>
-                      </div>
-                      {totalWht > 0 && (
-                        <div className="flex justify-between">
-                          <span>ภาษีหัก ณ ที่จ่าย</span>
-                          <span>฿{totalWht.toLocaleString()}</span>
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {unallocated > 0 && (
-                    <div className="flex justify-between text-orange-600">
-                      <span>เครดิตคงเหลือ</span>
-                      <span>฿{unallocated.toLocaleString()}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-lg font-bold border-t pt-2">
-                    <span>ยอดสุทธิ</span>
-                    <span>฿{amount.toLocaleString()}</span>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">จัดจ่าย</p>
+                    <p className="text-lg font-bold text-primary">฿{(totalAllocated / 100).toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">WHT</p>
+                    <p className="text-lg font-bold text-orange-600">฿{(totalWht / 100).toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">คงเหลือ</p>
+                    <p className={`text-lg font-bold ${unallocated > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      ฿{(unallocated / 100).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </CardContent>

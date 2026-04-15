@@ -34,7 +34,7 @@ export async function createWebhookEndpoint(
     data: {
       name,
       url,
-      secret: encryptedSecret,
+      secret: encryptedSecret as string,
       events: events.join(','),
       retryCount,
       isActive: true,
@@ -121,11 +121,11 @@ export async function deliverWebhook(
         data: {
           webhookId,
           event,
-          payload: data,
+          payload: JSON.stringify(data),
           signature,
           responseStatus: response.status,
           responseBody: await response.text(),
-          retryCount: attempt,
+          duration: 0,
           success: response.ok,
         },
       });
@@ -135,24 +135,23 @@ export async function deliverWebhook(
       }
 
       lastError = `HTTP ${response.status}`;
-      
+
       // Don't retry 4xx errors (client errors)
       if (response.status >= 400 && response.status < 500) {
         break;
       }
     } catch (error) {
       lastError = error instanceof Error ? error.message : 'Unknown error';
-      
+
       // Record failed delivery attempt
       await prisma.webhookDelivery.create({
         data: {
           webhookId,
           event,
-          payload: data,
+          payload: JSON.stringify(data),
           signature,
-          retryCount: attempt,
           success: false,
-          errorMessage: lastError,
+          error: lastError,
         },
       });
     }
@@ -193,8 +192,8 @@ export async function getWebhookDeliveries(
     success: d.success,
     responseStatus: d.responseStatus,
     deliveredAt: d.deliveredAt,
-    retryCount: d.retryCount,
-    errorMessage: d.errorMessage,
+    retryCount: 0,
+    errorMessage: d.error || null,
   }));
 }
 

@@ -6,7 +6,8 @@ import {
   Plus,
   Trash2,
   Save,
-  Loader2
+  Loader2,
+  Info
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,6 +33,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { useToast } from '@/hooks/use-toast'
 
 // Types
@@ -770,7 +772,28 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
             {/* Withholding Tax & Notes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="withholdingRate">หัก ณ ที่จ่าย (%)</Label>
+                <div className="flex items-center gap-1.5">
+                  <Label htmlFor="withholdingRate">หัก ณ ที่จ่าย (%)</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="text-muted-foreground hover:text-foreground cursor-help" aria-label="ข้อมูลอัตราหัก ณ ที่จ่าย">
+                        <Info className="h-3.5 w-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <div className="space-y-1">
+                        <p className="font-semibold text-xs mb-2">อัตราหัก ณ ที่จ่าย ภ.ง.ด.53</p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
+                          <span>ค่าบริการ</span><span className="text-right font-medium">3%</span>
+                          <span>ค่าเช่า</span><span className="text-right font-medium">5%</span>
+                          <span>ค่าบริการวิชาชีพ</span><span className="text-right font-medium">3%</span>
+                          <span>ค่าจ้างทำของ</span><span className="text-right font-medium">1%</span>
+                          <span>ค่าโฆษณา</span><span className="text-right font-medium">2%</span>
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <Select
                   value={formData.withholdingRate.toString()}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, withholdingRate: parseFloat(value) }))}
@@ -781,9 +804,10 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="0">ไม่หัก ณ ที่จ่าย</SelectItem>
-                    <SelectItem value="1">1%</SelectItem>
-                    <SelectItem value="3">3%</SelectItem>
-                    <SelectItem value="5">5%</SelectItem>
+                    <SelectItem value="1">1% (ค่าจ้างทำของ)</SelectItem>
+                    <SelectItem value="2">2% (ค่าโฆษณา)</SelectItem>
+                    <SelectItem value="3">3% (ค่าบริการ/วิชาชีพ)</SelectItem>
+                    <SelectItem value="5">5% (ค่าเช่า)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

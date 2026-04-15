@@ -11,7 +11,7 @@ import {
   MessageSquare,
   History,
   Link2,
-  Edit
+  Send
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -42,7 +42,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CommentSection } from './comment-section'
 import { AuditLog } from './audit-log'
 import { RelatedDocuments } from './related-documents'
-import { LineItemEditor } from './line-item-editor'
 import { useToast } from '@/hooks/use-toast'
 import { useSession } from 'next-auth/react'
 
@@ -125,6 +124,7 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
   const { toast } = useToast()
   const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
+  const [posting, setPosting] = useState(false)
   const [fetchingData, setFetchingData] = useState(false)
   const [fetchingInvoice, setFetchingInvoice] = useState(false)
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -394,6 +394,28 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
     }).format(amount)
   }
 
+  // Post (issue) invoice
+  const handlePost = async () => {
+    if (!invoice) return
+    setPosting(true)
+    try {
+      const response = await fetch(`/api/invoices/${invoiceId}/post`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'ไม่สามารถออกใบกำกับภาษีได้')
+      toast({ title: 'ออกใบกำกับสำเร็จ', description: `ใบกำกับภาษีเลขที่ ${result.data?.invoiceNo || invoice.invoiceNo} ถูกออกแล้ว` })
+      onSuccess()
+      onOpenChange(false)
+    } catch (error: any) {
+      toast({ title: 'เกิดข้อผิดพลาด', description: error.message, variant: 'destructive' })
+    } finally {
+      setPosting(false)
+    }
+  }
+
   // Submit form
   const handleSubmit = async () => {
     if (!validateForm()) {
@@ -486,8 +508,31 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
             <span className="ml-2 text-muted-foreground">กำลังโหลดข้อมูล...</span>
           </div>
         ) : (
+          <>
+            {/* Prominent Post button */}
+            <div className="flex justify-end mb-4">
+              <Button
+                type="button"
+                onClick={handlePost}
+                disabled={posting || !invoice || invoice.status !== 'DRAFT'}
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6"
+              >
+                {posting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    กำลังออกใบกำกับ...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    ออกใบกำกับภาษี
+                  </>
+                )}
+              </Button>
+            </div>
+
           <Tabs defaultValue="details" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="details">รายละเอียด</TabsTrigger>
               <TabsTrigger value="comments" className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4" />
@@ -498,17 +543,9 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="audit" className="flex items-center gap-2">
-                <History className="h-4 w-4" />
-                ประวัติ
-              </TabsTrigger>
               <TabsTrigger value="related" className="flex items-center gap-2">
                 <Link2 className="h-4 w-4" />
                 เอกสารเกี่ยวข้อง
-              </TabsTrigger>
-              <TabsTrigger value="line-editor" className="flex items-center gap-2">
-                <Edit className="h-4 w-4" />
-                แก้ไขรายการ
               </TabsTrigger>
             </TabsList>
 
@@ -978,31 +1015,36 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
               </div>
             </TabsContent>
 
-            <TabsContent value="comments" className="mt-6">
+            <TabsContent value="comments" className="mt-6 space-y-6">
               {session?.user ? (
-                <CommentSection
-                  invoiceId={invoiceId}
-                  currentUser={{
-                    id: session.user.id,
-                    name: session.user.name,
-                    email: session.user.email,
-                    role: session.user.role
-                  }}
-                />
+                <>
+                  <CommentSection
+                    invoiceId={invoiceId}
+                    currentUser={{
+                      id: session.user.id ?? '',
+                      name: session.user.name ?? '',
+                      email: session.user.email ?? '',
+                      role: session.user.role ?? 'USER'
+                    }}
+                  />
+                  <div className="mt-6">
+                    <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground mb-3">
+                      <History className="h-4 w-4" />
+                      ประวัติการแก้ไข
+                    </h3>
+                    <AuditLog
+                      invoiceId={invoiceId}
+                      entityType="ALL"
+                      showFilters={false}
+                      maxHeight="400px"
+                    />
+                  </div>
+                </>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   กรุณาเข้าสู่ระบบเพื่อดูคอมเมนต์
                 </div>
               )}
-            </TabsContent>
-
-            <TabsContent value="audit" className="mt-6">
-              <AuditLog
-                invoiceId={invoiceId}
-                entityType="ALL"
-                showFilters={true}
-                maxHeight="500px"
-              />
             </TabsContent>
 
             <TabsContent value="related" className="mt-6">
@@ -1014,47 +1056,8 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
                 }}
               />
             </TabsContent>
-
-            <TabsContent value="line-editor" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>แก้ไขรายการสินค้า/บริการ</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    เลือกรายการเพื่อแก้ไข พร้อมบันทึกประวัติการเปลี่ยนแปลง
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {lines.map((line, index) => (
-                      <div
-                        key={line.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
-                      >
-                        <div className="flex-1">
-                          <p className="font-medium">รายการที่ {index + 1}</p>
-                          <p className="text-sm text-gray-600">{line.description}</p>
-                          <p className="text-xs text-gray-500">
-                            {line.quantity} {line.unit} × {line.unitPrice.toLocaleString()} ฿ = {line.amount.toLocaleString()} ฿
-                          </p>
-                        </div>
-                        <Badge variant={invoice?.status === 'DRAFT' ? 'default' : 'secondary'}>
-                          {invoice?.status === 'DRAFT' ? 'สามารถแก้ไข' : 'ล็อก'}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                  {invoice?.status !== 'DRAFT' && (
-                    <Alert className="mt-4">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription>
-                        รายการสินค้าสามารถแก้ไขได้เฉพาะในสถานะร่าง (DRAFT) เท่านั้น
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
           </Tabs>
+          </>
         )}
       </DialogContent>
     </Dialog>

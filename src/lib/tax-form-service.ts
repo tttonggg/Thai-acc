@@ -308,7 +308,7 @@ export async function fileTaxForm(
  * Export tax form to PDF
  * ส่งออกแบบฟอร์มภาษีเป็น PDF
  */
-export async function exportTaxFormToPDF(taxFormId: string): Promise<Buffer> {
+export async function exportTaxFormToPDF(taxFormId: string): Promise<Uint8Array> {
   const taxForm = await prisma.taxForm.findUnique({
     where: { id: taxFormId },
     include: { lines: true },

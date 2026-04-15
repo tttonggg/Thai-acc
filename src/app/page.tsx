@@ -29,6 +29,7 @@ import { PurchaseRequestList } from '@/components/purchase-requests/purchase-req
 import { PurchaseOrderList } from '@/components/purchase-orders/purchase-order-list'
 import { PurchaseList } from '@/components/purchases/purchase-list'
 import { QuotationList } from '@/components/quotations/quotation-list'
+import { GoodsReceiptNotesList } from '@/components/goods-receipt-notes'
 import { ReceiptList } from '@/components/receipts/receipt-list'
 import { Reports } from '@/components/reports/reports'
 import { PeriodManagement } from '@/components/accounting-periods/period-management'
@@ -93,6 +94,7 @@ export type Module =
   | 'purchase-requests'
   | 'purchase-orders'
   | 'purchases'
+  | 'goods-receipt-notes'
   | 'payments'
   | 'credit-notes'
   | 'debit-notes'
@@ -139,6 +141,7 @@ export default function Home() {
         'purchase-requests': '/purchase-requests',
         'purchase-orders': '/purchase-orders',
         'purchases': '/purchases',
+        'goods-receipt-notes': '/goods-receipt-notes',
         'payments': '/payments',
         'credit-notes': '/credit-notes',
         'debit-notes': '/debit-notes',
@@ -187,6 +190,7 @@ export default function Home() {
         '/purchase-requests': 'purchase-requests',
         '/purchase-orders': 'purchase-orders',
         '/purchases': 'purchases',
+        '/goods-receipt-notes': 'goods-receipt-notes',
         '/payments': 'payments',
         '/credit-notes': 'credit-notes',
         '/debit-notes': 'debit-notes',
@@ -301,6 +305,8 @@ export default function Home() {
         return <PurchaseOrderList />
       case 'purchases':
         return <PurchaseList />
+      case 'goods-receipt-notes':
+        return <GoodsReceiptNotesList />
       case 'payments':
         return <PaymentList />
       case 'credit-notes':

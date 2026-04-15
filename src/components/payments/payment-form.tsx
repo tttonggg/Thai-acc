@@ -31,8 +31,26 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle, Info } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+
+// WHT Categories for PND.53
+const WHT_CATEGORIES = [
+  { value: 'SERVICE', label: 'ค่าบริการ', rate: 3 },
+  { value: 'RENT', label: 'ค่าเช่า', rate: 5 },
+  { value: 'PROFESSIONAL', label: 'ค่าบริการวิชาชีพ', rate: 3 },
+  { value: 'CONTRACT', label: 'ค่าจ้างทำของ', rate: 1 },
+  { value: 'ADVERTISING', label: 'ค่าโฆษณา', rate: 2 },
+  { value: 'NONE', label: 'ไม่หักภาษี', rate: 0 },
+] as const
+
+type WHTCategory = typeof WHT_CATEGORIES[number]['value']
 
 const formSchema = z.object({
   vendorId: z.string().min(1, 'กรุณาเลือกผู้ขาย'),
@@ -47,6 +65,7 @@ const formSchema = z.object({
     invoiceId: z.string(),
     invoiceNo: z.string(),
     amount: z.number().min(0),
+    whtCategory: z.string().optional(),
     whtRate: z.number().min(0).max(100),
     whtAmount: z.number().min(0),
   })).min(1, 'ต้องมีการจัดจ่ายอย่างน้อย 1 รายการ'),
@@ -166,8 +185,9 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
         invoiceId: invoice.id,
         invoiceNo: invoice.invoiceNo,
         amount: allocateAmount,
+        whtCategory: 'SERVICE', // Default to service
         whtRate: 3, // Default 3%
-        whtAmount: 0,
+        whtAmount: Math.round((allocateAmount * 3) / 100),
       })
 
       remaining -= allocateAmount
@@ -180,15 +200,30 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
   const updateAllocationAmount = (index: number, value: number) => {
     const allocations = form.getValues('allocations')
     allocations[index].amount = value
-    allocations[index].whtAmount = (value * allocations[index].whtRate) / 100
+    allocations[index].whtAmount = Math.round((value * allocations[index].whtRate) / 100)
     form.setValue('allocations', allocations)
   }
 
-  // Update WHT rate
+  // Update WHT category and rate
+  const updateWHTCategory = (index: number, category: WHTCategory) => {
+    const allocations = form.getValues('allocations')
+    allocations[index].whtCategory = category
+
+    // Auto-populate rate based on category
+    const categoryConfig = WHT_CATEGORIES.find(c => c.value === category)
+    if (categoryConfig) {
+      allocations[index].whtRate = categoryConfig.rate
+      allocations[index].whtAmount = Math.round((allocations[index].amount * categoryConfig.rate) / 100)
+    }
+
+    form.setValue('allocations', allocations)
+  }
+
+  // Update WHT rate manually
   const updateWHTRate = (index: number, rate: number) => {
     const allocations = form.getValues('allocations')
     allocations[index].whtRate = rate
-    allocations[index].whtAmount = (allocations[index].amount * rate) / 100
+    allocations[index].whtAmount = Math.round((allocations[index].amount * rate) / 100)
     form.setValue('allocations', allocations)
   }
 
@@ -249,7 +284,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
     if (totalAllocated > values.amount) {
       toast({
         title: 'ยอดจัดจ่ายเกินกว่ายอดจ่ายเงิน',
-        description: `จัดจ่ายรวม: ฿${totalAllocated.toLocaleString()} เกินกว่ายอดจ่าย: ฿${values.amount.toLocaleString()}`,
+        description: `จัดจ่ายรวม: ฿${(totalAllocated / 100).toLocaleString()} เกินกว่ายอดจ่าย: ฿${(values.amount / 100).toLocaleString()}`,
         variant: 'destructive',
       })
       return false
@@ -462,6 +497,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                             type="number"
                             step="0.01"
                             {...field}
+                            value={field.value ? (field.value / 100).toFixed(2) : ''}
                             onChange={(e) => field.onChange(Math.round(parseFloat(e.target.value) * 100) || 0)}
                             aria-label="จำนวนเงินรวม"
                           />
@@ -486,7 +522,29 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                 <Card>
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">จัดจ่ายใบซื้อ</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-lg">จัดจ่ายใบซื้อ</CardTitle>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-md" side="right">
+                              <div className="space-y-2">
+                                <p className="font-medium">อัตราหัก ณ ที่จ่าย ตาม PND.53:</p>
+                                <ul className="text-sm space-y-1">
+                                  <li>• ค่าบริการ (Service): 3%</li>
+                                  <li>• ค่าเช่า (Rent): 5%</li>
+                                  <li>• ค่าบริการวิชาชีพ (Professional): 3%</li>
+                                  <li>• ค่าจ้างทำของ (Contract): 1%</li>
+                                  <li>• ค่าโฆษณา (Advertising): 2%</li>
+                                  <li>• ไม่หักภาษี (No WHT): 0%</li>
+                                </ul>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                       <Button
                         type="button"
                         variant="outline"
@@ -517,7 +575,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
 ค้างจ่าย ฿{(invoice.balance / 100).toLocaleString()}                              </Badge>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                               <div>
                                 <label htmlFor={`allocate-${invoice.id}`} className="text-xs text-gray-500">จัดจ่าย</label>
                                 <Input className="!h-11 text-base"
@@ -525,22 +583,9 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                                   type="number"
                                   step="0.01"
                                   placeholder="0.00"
-                                  value={(() => {
-                                    const alloc = allocations.find(a => a.invoiceId === invoice.id)
-                                    return alloc && alloc.amount > 0 ? (alloc.amount / 100).toFixed(2) : ''
-                                  })()}
+                                  value={allocations.find(a => a.invoiceId === invoice.id)?.amount ? (allocations.find(a => a.invoiceId === invoice.id)!.amount / 100) : ''}
                                   onChange={(e) => {
-                                    const inputValue = e.target.value
-                                    if (inputValue === '' || inputValue === '-') {
-                                      const index = allocations.findIndex(a => a.invoiceId === invoice.id)
-                                      if (index >= 0) {
-                                        const newAllocations = [...allocations]
-                                        newAllocations[index].amount = 0
-                                        form.setValue('allocations', newAllocations)
-                                      }
-                                      return
-                                    }
-                                    const value = Math.round(parseFloat(inputValue) * 100) || 0
+                                    const value = Math.round(parseFloat(e.target.value) * 100) || 0
                                     const index = allocations.findIndex(a => a.invoiceId === invoice.id)
                                     if (index >= 0) {
                                       updateAllocationAmount(index, value)
@@ -549,6 +594,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                                         invoiceId: invoice.id,
                                         invoiceNo: invoice.invoiceNo,
                                         amount: value,
+                                        whtCategory: 'SERVICE',
                                         whtRate: 3,
                                         whtAmount: Math.round((value * 3) / 100),
                                       }]
@@ -560,38 +606,51 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                               </div>
 
                               <div>
-                                <label htmlFor={`whtRate-${invoice.id}`} className="text-xs text-gray-500">WHT %</label>
+                                <label htmlFor={`whtCategory-${invoice.id}`} className="text-xs text-gray-500">หมวดหมู่ WHT</label>
                                 <Select
-                                  value={allocations.find(a => a.invoiceId === invoice.id)?.whtRate?.toString() || '0'}
+                                  value={allocations.find(a => a.invoiceId === invoice.id)?.whtCategory || 'SERVICE'}
                                   onValueChange={(value) => {
-                                    const rate = parseFloat(value)
+                                    const category = value as WHTCategory
                                     const index = allocations.findIndex(a => a.invoiceId === invoice.id)
                                     if (index >= 0) {
-                                      updateWHTRate(index, rate)
+                                      updateWHTCategory(index, category)
                                     } else {
+                                      const categoryConfig = WHT_CATEGORIES.find(c => c.value === category)
                                       const newAllocations = [...allocations, {
                                         invoiceId: invoice.id,
                                         invoiceNo: invoice.invoiceNo,
                                         amount: 0,
-                                        whtRate: rate,
+                                        whtCategory: category,
+                                        whtRate: categoryConfig?.rate || 0,
                                         whtAmount: 0,
                                       }]
                                       form.setValue('allocations', newAllocations)
                                     }
                                   }}
-                                  aria-label="เลือกอัตราหัก ณ ที่จ่าย"
+                                  aria-label="เลือกหมวดหมู่หัก ณ ที่จ่าย"
                                 >
-                                  <SelectTrigger className="!h-11 text-base" id={`whtRate-${invoice.id}`}>
+                                  <SelectTrigger className="!h-11 text-base" id={`whtCategory-${invoice.id}`}>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="0">0%</SelectItem>
-                                    <SelectItem value="1">1%</SelectItem>
-                                    <SelectItem value="2">2%</SelectItem>
-                                    <SelectItem value="3">3%</SelectItem>
-                                    <SelectItem value="5">5%</SelectItem>
+                                    {WHT_CATEGORIES.map((cat) => (
+                                      <SelectItem key={cat.value} value={cat.value}>
+                                        {cat.label} ({cat.rate}%)
+                                      </SelectItem>
+                                    ))}
                                   </SelectContent>
                                 </Select>
+                              </div>
+
+                              <div>
+                                <label htmlFor={`whtRate-${invoice.id}`} className="text-xs text-gray-500">อัตรา %</label>
+                                <Input className="!h-11 text-base"
+                                  id={`whtRate-${invoice.id}`}
+                                  type="text"
+                                  readOnly
+                                  value={`${allocations.find(a => a.invoiceId === invoice.id)?.whtRate || 0}%`}
+                                  aria-label="อัตราหัก ณ ที่จ่าย"
+                                />
                               </div>
 
                               <div>
@@ -601,7 +660,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                                   type="text"
                                   readOnly
                                   value={
-                                    allocations.find(a => a.invoiceId === invoice.id)?.whtAmount?.toLocaleString() || '0.00'
+                                    ((allocations.find(a => a.invoiceId === invoice.id)?.whtAmount || 0) / 100).toLocaleString() || '0.00'
                                   }
                                   aria-label="จำนวนภาษีหัก ณ ที่จ่าย"
                                 />
@@ -617,15 +676,19 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                       <div className="mt-4 pt-4 border-t space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>จัดจ่ายรวม:</span>
-                          <span className="font-medium">฿{totalAllocated.toLocaleString()}</span>
+                          <span className="font-medium">฿{(totalAllocated / 100).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span>หัก ณ ที่จ่ายรวม:</span>
-                          <span className="font-medium">฿{totalWHT.toLocaleString()}</span>
+                          <span className="font-medium text-amber-600">-฿{(totalWHT / 100).toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
+                        <div className="flex justify-between text-base font-semibold pt-2 border-t">
+                          <span>จ่ายสุทธิ:</span>
+                          <span className="text-green-600">฿{((totalAllocated - totalWHT) / 100).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600">
                           <span>คงเหลือ (เครดิตเจ้าหนี้):</span>
-                          <span className="font-medium">฿{unallocated.toLocaleString()}</span>
+                          <span>฿{(unallocated / 100).toLocaleString()}</span>
                         </div>
                       </div>
                     )}

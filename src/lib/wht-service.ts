@@ -88,30 +88,39 @@ export async function generateWhtFromReceipt(receiptId: string) {
   const receipt = await prisma.receipt.findUnique({
     where: { id: receiptId },
     include: {
-      invoice: {
+      allocations: {
         include: {
-          customer: true,
-          lines: {
-            include: { product: true }
+          invoice: {
+            include: {
+              customer: true,
+              lines: {
+                include: { product: true }
+              }
+            }
           }
         }
       }
     }
   });
 
-  if (!receipt || !receipt.invoice) return null;
+  if (!receipt || !receipt.allocations || receipt.allocations.length === 0) return null;
 
-  if (receipt.invoice.withholdingAmount > 0) {
+  const results: Awaited<ReturnType<typeof prisma.withholdingTax.create>>[] = [];
+
+  for (const allocation of receipt.allocations) {
+    const invoice = allocation.invoice;
+    if (!invoice || invoice.withholdingAmount <= 0) continue;
+
     const count = await prisma.withholdingTax.count();
     const docNo = `WHT-REC-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(count + 1).padStart(4, '0')}`;
-    
-    const isCompany = receipt.invoice.customer.taxId?.startsWith('0') || receipt.invoice.customer.name.includes('บริษัท');
+
+    const isCompany = invoice.customer.taxId?.startsWith('0') || invoice.customer.name.includes('บริษัท');
     const whtType = isCompany ? 'PND53' : 'PND3';
-    
-    let incomeType = "ค่าบริการ"; 
-    let whtRate = receipt.invoice.withholdingRate || 3;
-    
-    const serviceLine = receipt.invoice.lines.find(l => l.product?.type === 'SERVICE' && l.product?.incomeType != null);
+
+    let incomeType = "ค่าบริการ";
+    let whtRate = invoice.withholdingRate || 3;
+
+    const serviceLine = invoice.lines.find(l => l.product?.type === 'SERVICE' && l.product?.incomeType != null);
     if (serviceLine && serviceLine.product?.incomeType) {
       incomeType = serviceLine.product.incomeType.replace(/\d+%/, '').trim() || incomeType;
     }
@@ -123,23 +132,23 @@ export async function generateWhtFromReceipt(receiptId: string) {
         documentDate: receipt.receiptDate,
         documentType: 'RECEIPT',
         referenceId: receipt.id,
-        payeeId: receipt.invoice.customer.id,
-        payeeName: receipt.invoice.customer.name,
-        payeeTaxId: receipt.invoice.customer.taxId,
-        payeeAddress: receipt.invoice.customer.address || "-",
+        payeeId: invoice.customer.id,
+        payeeName: invoice.customer.name,
+        payeeTaxId: invoice.customer.taxId,
+        payeeAddress: invoice.customer.address || "-",
         description: `WHT from Receipt ${receipt.receiptNo}`,
         incomeType,
-        incomeAmount: Math.max(0, receipt.invoice.subtotal - receipt.invoice.discountAmount),
+        incomeAmount: Math.max(0, invoice.subtotal - invoice.discountAmount),
         whtRate,
-        whtAmount: receipt.invoice.withholdingAmount,
+        whtAmount: invoice.withholdingAmount,
         taxMonth: receipt.receiptDate.getMonth() + 1,
         taxYear: receipt.receiptDate.getFullYear(),
         reportStatus: 'PENDING'
       }
     });
 
-    return whtRecord;
+    results.push(whtRecord);
   }
-  
-  return null;
+
+  return results.length > 0 ? results : null;
 }

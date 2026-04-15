@@ -4,6 +4,7 @@
 // ============================================
 
 import prisma from '@/lib/db'
+import { generateDocNumber } from '@/lib/api-utils'
 
 // ============================================
 // Custom Error Classes
@@ -729,6 +730,7 @@ export async function markPOAsShipped(
 /**
  * Mark PO as Received
  * ทำเครื่องหมายใบสั่งซื้อว่ารับสินค้าแล้ว
+ * สร้าง GoodsReceiptNote + รายการบันทึกข้อมูล GR/IR + อัปเดต PO line
  */
 export async function markPOAsReceived(
   poId: string,
@@ -740,7 +742,8 @@ export async function markPOAsReceived(
     const po = await tx.purchaseOrder.findUnique({
       where: { id: poId },
       include: {
-        lines: true,
+        lines: { include: { product: true } },
+        vendor: true,
         purchaseRequest: true,
       },
     })
@@ -755,13 +758,26 @@ export async function markPOAsReceived(
       )
     }
 
-    // Update received quantities
+    // Build GRN lines from receivedItems
+    const grnLines: Array<{
+      poLineId: string
+      productId: string | null
+      description: string
+      unit: string | null
+      qtyOrdered: number
+      qtyReceived: number
+      qtyRejected: number
+      unitCost: number
+      amount: number
+      notes: string | null
+    }> = []
+
+    let totalReceivedAmount = 0
+
     for (const receivedItem of receivedItems) {
       const line = po.lines.find((l) => l.id === receivedItem.lineId)
       if (!line) {
-        throw new POWorkflowError(
-          `ไม่พบรายการสินค้า (Line item not found): ${receivedItem.lineId}`
-        )
+        throw new POWorkflowError(`ไม่พบรายการสินค้า (Line item not found): ${receivedItem.lineId}`)
       }
 
       if (receivedItem.receivedQty > line.quantity - line.receivedQty) {
@@ -770,47 +786,137 @@ export async function markPOAsReceived(
         )
       }
 
+      // Calculate unit cost (after discount, in satang)
+      const calculation = calculatePOLine({
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        discount: line.discount,
+        vatRate: line.vatRate,
+      })
+      const unitCostSatang = Math.round(calculation.afterDiscount / line.quantity)
+      const lineAmount = unitCostSatang * receivedItem.receivedQty
+
+      grnLines.push({
+        poLineId: line.id,
+        productId: line.productId ?? null,
+        description: line.description,
+        unit: line.unit ?? null,
+        qtyOrdered: line.quantity,
+        qtyReceived: receivedItem.receivedQty,
+        qtyRejected: 0,
+        unitCost: unitCostSatang / 100,
+        amount: lineAmount / 100,
+        notes: receivedItem.notes ?? null,
+      })
+
+      totalReceivedAmount += lineAmount
+    }
+
+    // Create GoodsReceiptNote
+    const grnNo = await generateDocNumber('GRN', 'GRN')
+    const today = new Date()
+
+    const grn = await tx.goodsReceiptNote.create({
+      data: {
+        grnNo,
+        date: today,
+        status: 'RECEIVED',
+        poId: po.id,
+        vendorId: po.vendorId,
+        warehouseId,
+        receivedById: userId ?? null,
+      },
+    })
+
+    // Create GRN lines
+    await tx.goodsReceiptNoteLine.createMany({
+      data: grnLines.map((l) => ({
+        grnId: grn.id,
+        ...l,
+      })),
+    })
+
+    // Create GR/IR journal entry: Dr Inventory (1140), Cr GR/IR Clearing (2160)
+    if (totalReceivedAmount > 0) {
+      const inventoryAccount = await tx.chartOfAccount.findUnique({ where: { code: '1140' } })
+      const grirAccount = await tx.chartOfAccount.findUnique({ where: { code: '2160' } })
+
+      if (!inventoryAccount || !grirAccount) {
+        throw new POWorkflowError(
+          'ไม่พบบัญชี Inventory (1140) หรือ GR/IR Clearing (2160) — กรุณาตรวจสอบ Chart of Accounts'
+        )
+      }
+
+      const journalNo = await generateDocNumber('JOURNAL_ENTRY', 'JE')
+      await tx.journalEntry.create({
+        data: {
+          entryNo: journalNo,
+          date: today,
+          description: `รับสินค้า GRN ${grnNo} จาก PO ${po.orderNo}`,
+          reference: grnNo,
+          documentType: 'GRN',
+          documentId: grn.id,
+          totalDebit: totalReceivedAmount,
+          totalCredit: totalReceivedAmount,
+          status: 'POSTED',
+          lines: {
+            create: [
+              {
+                lineNo: 1,
+                accountId: inventoryAccount.id,
+                description: `สินค้าคงคลัง — GRN ${grnNo}`,
+                debit: totalReceivedAmount,
+                credit: 0,
+                reference: grnNo,
+              },
+              {
+                lineNo: 2,
+                accountId: grirAccount.id,
+                description: `GR/IR Clearing — GRN ${grnNo}`,
+                debit: 0,
+                credit: totalReceivedAmount,
+                reference: grnNo,
+              },
+            ],
+          },
+        },
+      })
+    }
+
+    // Update received quantities on PO lines
+    for (const receivedItem of receivedItems) {
+      const line = po.lines.find((l) => l.id === receivedItem.lineId)
       await tx.purchaseOrderLine.update({
         where: { id: receivedItem.lineId },
         data: {
-          receivedQty: {
-            increment: receivedItem.receivedQty,
-          },
+          receivedQty: { increment: receivedItem.receivedQty },
           notes: receivedItem.notes
-            ? `${line.notes || ''}\n${receivedItem.notes}`
-            : line.notes,
+            ? `${line?.notes || ''}\n${receivedItem.notes}`
+            : line?.notes ?? undefined,
         },
       })
     }
 
     // Check if all items received
-    const updatedLines = await tx.purchaseOrderLine.findMany({
-      where: { orderId: poId },
-    })
-
-    const allReceived = updatedLines.every(
-      (line) => line.receivedQty >= line.quantity
-    )
+    const updatedLines = await tx.purchaseOrderLine.findMany({ where: { orderId: poId } })
+    const allReceived = updatedLines.every((line) => line.receivedQty >= line.quantity)
 
     const updatedPO = await tx.purchaseOrder.update({
       where: { id: poId },
       data: {
         status: allReceived ? 'RECEIVED' : 'SHIPPED',
         receivedAt: allReceived ? new Date() : null,
+        grnId: grn.id,
       },
       include: {
         vendor: true,
         purchaseRequest: true,
         budget: true,
-        lines: {
-          include: {
-            product: true,
-          },
-        },
+        lines: { include: { product: true } },
       },
     })
 
-    // Create stock movements for received items
+    // Create stock movements for inventory updates
     await createStockMovementFromPO(poId, warehouseId, receivedItems)
 
     return updatedPO
