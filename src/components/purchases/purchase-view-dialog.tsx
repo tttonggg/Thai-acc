@@ -132,12 +132,20 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
     setError(null)
     try {
       const res = await fetch(`/api/purchases/${purchaseId}`)
-      const result = await res.json()
 
+      // Handle non-OK responses with error JSON
       if (!res.ok) {
-        throw new Error(result.error || 'ไม่สามารถดึงข้อมูลใบซื้อได้')
+        let errorMessage = 'ไม่สามารถดึงข้อมูลใบซื้อได้'
+        try {
+          const errorData = await res.json()
+          errorMessage = errorData.error || errorMessage
+        } catch {
+          // JSON parse failed, use default message
+        }
+        throw new Error(errorMessage)
       }
 
+      const result = await res.json()
       setPurchase(result.data)
     } catch (err: any) {
       setError(err.message || 'เกิดข้อผิดพลาด')
