@@ -366,10 +366,15 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
         body: JSON.stringify(payload),
       })
 
-      const result = await response.json()
+      let result
+      try {
+        result = await response.json()
+      } catch (jsonError) {
+        throw new Error(`ไม่สามารถบันทึกใบกำกับภาษีได้ (${response.status})`)
+      }
 
       if (!response.ok) {
-        throw new Error(result.error || 'ไม่สามารถบันทึกใบกำกับภาษีได้')
+        throw new Error(result?.error || 'ไม่สามารถบันทึกใบกำกับภาษีได้')
       }
 
       toast({
