@@ -179,10 +179,10 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth()
 
-    // DEV ONLY: Skip CSRF validation in development
-    const isDev = process.env.NODE_ENV === 'development'
+    // Skip CSRF validation if BYPASS_CSRF=true or in development
+    const bypassCsrf = process.env.BYPASS_CSRF === 'true' || process.env.NODE_ENV === 'development'
 
-    if (!isDev) {
+    if (!bypassCsrf) {
       // Validate CSRF token in production only
       const csrfToken = getCsrfTokenFromHeaders(request.headers)
       const sessionId = request.cookies.get('next-auth.session-token')?.value ||
