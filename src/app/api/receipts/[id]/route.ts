@@ -3,6 +3,7 @@ import prisma from '@/lib/db'
 import { z } from 'zod'
 import { requireAuth, requireRole } from '@/lib/api-utils'
 import { generateDocumentNumber } from '@/lib/thai-accounting'
+import { bahtToSatang, satangToBaht } from '@/lib/currency'
 
 // Validation schema for receipt allocation
 const receiptAllocationSchema = z.object({
@@ -69,7 +70,7 @@ export async function GET(
       )
     }
 
-    // Calculate totals
+    // Calculate totals (allocations stored in Satang)
     const totalAllocated = receipt.allocations.reduce((sum, alloc) => sum + alloc.amount, 0)
     const totalWht = receipt.allocations.reduce((sum, alloc) => sum + alloc.whtAmount, 0)
 
@@ -77,9 +78,21 @@ export async function GET(
       success: true,
       data: {
         ...receipt,
-        totalAllocated,
-        totalWht,
-        remaining: receipt.amount - totalAllocated,
+        amount: satangToBaht(receipt.amount),
+        whtAmount: satangToBaht(receipt.whtAmount),
+        unallocated: satangToBaht(receipt.unallocated),
+        totalAllocated: satangToBaht(totalAllocated),
+        totalWht: satangToBaht(totalWht),
+        remaining: satangToBaht(receipt.amount - totalAllocated),
+        allocations: receipt.allocations.map(alloc => ({
+          ...alloc,
+          amount: satangToBaht(alloc.amount),
+          whtAmount: satangToBaht(alloc.whtAmount),
+          invoice: alloc.invoice ? {
+            ...alloc.invoice,
+            totalAmount: satangToBaht(alloc.invoice.totalAmount),
+          } : alloc.invoice,
+        })),
       }
     })
   } catch (error: any) {
@@ -145,8 +158,8 @@ export async function PUT(
       )
     }
 
-    // Calculate unallocated amount
-    const unallocated = validatedData.amount - totalAllocation
+    // Calculate unallocated amount — convert to Satang
+    const unallocated = bahtToSatang(validatedData.amount - totalAllocation)
 
     // Delete existing allocations
     await prisma.receiptAllocation.deleteMany({
@@ -163,16 +176,16 @@ export async function PUT(
         bankAccountId: validatedData.bankAccountId,
         chequeNo: validatedData.chequeNo,
         chequeDate: validatedData.chequeDate,
-        amount: validatedData.amount,
-        whtAmount: totalWht,
+        amount: bahtToSatang(validatedData.amount),
+        whtAmount: bahtToSatang(totalWht),
         unallocated,
         notes: validatedData.notes,
         allocations: {
           create: validatedData.allocations.map(alloc => ({
             invoiceId: alloc.invoiceId,
-            amount: alloc.amount,
+            amount: bahtToSatang(alloc.amount),
             whtRate: alloc.whtRate,
-            whtAmount: alloc.whtAmount,
+            whtAmount: bahtToSatang(alloc.whtAmount),
           }))
         }
       },

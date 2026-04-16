@@ -423,7 +423,7 @@ export function ReceiptList() {
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">ลงบัญชีแล้ว (เดือนนี้)</p>
             <p className="text-2xl font-bold text-green-600">
-              ฿{(safeReceipts?.filter(r => r.status === 'POSTED').reduce((sum, r) => sum + (r.amount || 0), 0) / 100).toLocaleString() ?? '0'}
+              ฿{(safeReceipts?.filter(r => r.status === 'POSTED').reduce((sum, r) => sum + (r.amount || 0), 0)).toLocaleString() ?? '0'}
             </p>
             <p className="text-xs text-gray-400">{safeReceipts?.filter(r => r.status === 'POSTED').length ?? 0} รายการ</p>
           </CardContent>
@@ -432,7 +432,7 @@ export function ReceiptList() {
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">หัก ณ ที่จ่ายรวม</p>
             <p className="text-2xl font-bold text-purple-600">
-              ฿{(safeReceipts?.reduce((sum, r) => sum + (r.whtAmount || 0), 0) / 100).toLocaleString() ?? '0'}
+              ฿{(safeReceipts?.reduce((sum, r) => sum + (r.whtAmount || 0), 0)).toLocaleString() ?? '0'}
             </p>
             <p className="text-xs text-gray-400">เดือนนี้</p>
           </CardContent>
@@ -441,7 +441,7 @@ export function ReceiptList() {
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">ยอดค้างจ่าย</p>
             <p className="text-2xl font-bold text-orange-600">
-              ฿{(safeReceipts?.reduce((sum, r) => sum + (r.remaining || 0), 0) / 100).toLocaleString() ?? '0'}
+              ฿{(safeReceipts?.reduce((sum, r) => sum + (r.remaining || 0), 0)).toLocaleString() ?? '0'}
             </p>
             <p className="text-xs text-gray-400">เครดิตลูกค้า</p>
           </CardContent>

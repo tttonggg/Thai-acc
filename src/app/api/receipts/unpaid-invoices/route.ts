@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { requireAuth } from '@/lib/api-utils'
+import { satangToBaht } from '@/lib/currency'
 
 // GET - Get unpaid invoices for a customer
 export async function GET(request: NextRequest) {
@@ -32,13 +33,13 @@ export async function GET(request: NextRequest) {
 
     // Calculate balance for each invoice
     const invoicesWithBalance = invoices.map(invoice => {
-      const balance = invoice.totalAmount - invoice.paidAmount
+      const balance = satangToBaht(invoice.totalAmount) - satangToBaht(invoice.paidAmount)
       return {
         id: invoice.id,
         invoiceNo: invoice.invoiceNo,
         invoiceDate: invoice.invoiceDate,
-        totalAmount: invoice.totalAmount,
-        paidAmount: invoice.paidAmount,
+        totalAmount: satangToBaht(invoice.totalAmount),
+        paidAmount: satangToBaht(invoice.paidAmount),
         balance: Math.max(0, balance),
         status: invoice.status,
       }

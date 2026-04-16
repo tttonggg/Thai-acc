@@ -183,8 +183,8 @@ export function ReceiptViewDialog({
         ` : ''}
 
         <div class="section">
-          <p class="total">ยอดรับเงินรวม: ${(receipt.amount / 100).toLocaleString('th-TH')} บาท</p>
-          ${receipt.totalWht > 0 ? `<p>ภาษีหัก ณ ที่จ่าย: ${(receipt.totalWht / 100).toLocaleString('th-TH')} บาท</p>` : ''}
+          <p class="total">ยอดรับเงินรวม: ${receipt.amount.toLocaleString('th-TH')} บาท</p>
+          ${receipt.totalWht > 0 ? `<p>ภาษีหัก ณ ที่จ่าย: ${receipt.totalWht.toLocaleString('th-TH')} บาท</p>` : ''}
         </div>
 
         <script>window.onload = () => { setTimeout(() => window.print(), 500); }</script>
@@ -552,29 +552,29 @@ export function ReceiptViewDialog({
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>ยอดรับเงินรวม</span>
-                <span className="font-semibold">฿{(receipt.amount / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                <span className="font-semibold">฿{receipt.amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
               </div>
               {receipt.totalAllocated > 0 && (
                 <div className="flex justify-between">
                   <span>จัดจ่ายใบกำกับภาษี</span>
-                  <span>฿{(receipt.totalAllocated / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                  <span>฿{receipt.totalAllocated.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
                 </div>
               )}
               {receipt.totalWht > 0 && (
                 <div className="flex justify-between">
                   <span>ภาษีหัก ณ ที่จ่าย</span>
-                  <span>฿{(receipt.totalWht / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                  <span>฿{receipt.totalWht.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
                 </div>
               )}
               {receipt.unallocated > 0 && (
                 <div className="flex justify-between text-orange-600">
                   <span>เครดิตคงเหลือ</span>
-                  <span>฿{(receipt.unallocated / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                  <span>฿{receipt.unallocated.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
                 </div>
               )}
               <div className="flex justify-between text-lg font-bold border-t pt-2">
                 <span>ยอดสุทธิ</span>
-                <span>฿{(receipt.amount / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span>฿{receipt.amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>

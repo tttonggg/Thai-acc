@@ -116,6 +116,8 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
   const [loading, setLoading] = useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('')
+  const [quickFillInvoiceId, setQuickFillInvoiceId] = useState<string>('')
+  const [customAmount, setCustomAmount] = useState<string>('')
   const { toast } = useToast()
 
   const form = useForm<ReceiptFormValues>({
@@ -232,11 +234,11 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
 
       if ('amount' in updates) {
         newAmount = updates.amount!
-        newWhtAmount = newAmount * (newRate / 100)
+        newWhtAmount = (newAmount * newRate) / 100
       }
       if ('whtRate' in updates) {
         newRate = updates.whtRate!
-        newWhtAmount = newAmount * (newRate / 100)
+        newWhtAmount = (newAmount * newRate) / 100
       }
       if ('whtAmount' in updates) {
         newWhtAmount = updates.whtAmount!
@@ -335,6 +337,88 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
     })
   }
 
+  // Quick-Fill Handler: Pay Full - Sum all unpaid invoices
+  const handlePayFull = () => {
+    if (unpaidInvoices.length === 0) {
+      toast({
+        title: 'ไม่มีใบกำกับภาษีค้างจ่าย',
+        description: 'กรุณาเลือกลูกค้าที่มียอดค้างจ่าย',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    const totalUnpaid = unpaidInvoices.reduce((sum: number, inv: any) => sum + inv.balance, 0)
+    form.setValue('amount', totalUnpaid)
+    setCustomAmount('')
+
+    // Auto-allocate to all unpaid invoices
+    const newAllocations = unpaidInvoices.map((invoice: any) => ({
+      invoiceId: invoice.id,
+      invoiceNo: invoice.invoiceNo,
+      amount: invoice.balance,
+      whtRate: 0,
+      whtAmount: 0,
+      balance: invoice.balance,
+    }))
+    form.setValue('allocations', newAllocations)
+
+    toast({
+      title: 'เลือกจ่ายเต็มจำนวน',
+      description: `ยอดรวมทั้งหมด ${unpaidInvoices.length} ใบ = ฿${totalUnpaid.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    })
+  }
+
+  // Quick-Fill Handler: Select Invoice - Fill that invoice's balance
+  const handleSelectInvoice = (invoiceId: string) => {
+    setQuickFillInvoiceId(invoiceId)
+    setCustomAmount('')
+
+    if (!invoiceId) return
+
+    const invoice = unpaidInvoices.find((inv: any) => inv.id === invoiceId)
+    if (invoice) {
+      form.setValue('amount', invoice.balance)
+
+      // Create allocation for just this invoice
+      const allocation = {
+        invoiceId: invoice.id,
+        invoiceNo: invoice.invoiceNo,
+        amount: invoice.balance,
+        whtRate: 0,
+        whtAmount: 0,
+        balance: invoice.balance,
+      }
+      form.setValue('allocations', [allocation])
+      setSelectedInvoiceId(invoiceId)
+
+      toast({
+        title: `เลือก ${invoice.invoiceNo}`,
+        description: `ยอดค้างจ่าย ฿${invoice.balance.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      })
+    }
+  }
+
+  // Quick-Fill Handler: Custom Amount
+  const handleCustomAmount = (amountStr: string) => {
+    setCustomAmount(amountStr)
+    setQuickFillInvoiceId('')
+
+    if (!amountStr) {
+      form.setValue('amount', 0)
+      form.setValue('allocations', [])
+      setSelectedInvoiceId('')
+      return
+    }
+
+    const amountInSatang = Math.round(parseFloat(amountStr) * 100) || 0
+    form.setValue('amount', amountInSatang)
+
+    // Don't pre-fill allocations - let user manually allocate
+    form.setValue('allocations', [])
+    setSelectedInvoiceId('')
+  }
+
   const validateForm = (values: ReceiptFormValues): boolean => {
     if (!values.customerId) {
       toast({
@@ -364,7 +448,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
     if (totalAllocated > values.amount) {
       toast({
         title: 'ยอดจัดจ่ายเกินกว่ายอดรับเงิน',
-        description: `จัดจ่ายรวม: ฿${(totalAllocated / 100).toLocaleString()} เกินกว่ายอดรับ: ฿${(values.amount / 100).toLocaleString()}`,
+        description: `จัดจ่ายรวม: ฿${totalAllocated.toLocaleString()} เกินกว่ายอดรับ: ฿${values.amount.toLocaleString()}`,
         variant: 'destructive',
       })
       return false
@@ -626,21 +710,84 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                 </div>
               )}
 
+              {/* Amount Quick-Fill Helper Section */}
+              <Card className="bg-blue-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-base">จำนวนเงินที่ต้องการชำระเงิน</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {/* Option 1: Pay Full */}
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="sm"
+                      onClick={handlePayFull}
+                      disabled={unpaidInvoices.length === 0}
+                      className="flex-1 min-w-[200px]"
+                    >
+                      จ่ายเต็มจำนวน ({unpaidInvoices.length} ใบ)
+                    </Button>
+
+                    {/* Option 2: Select Invoice */}
+                    <Select onValueChange={handleSelectInvoice} value={quickFillInvoiceId}>
+                      <SelectTrigger className="flex-[2] min-w-[250px]">
+                        <SelectValue placeholder="เลือกใบแจ้ง/ใบวาซื้อ..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {unpaidInvoices.map((invoice: any) => (
+                          <SelectItem key={invoice.id} value={invoice.id}>
+                            {invoice.invoiceNo} - ค้างจ่าย ฿{invoice.balance.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {/* Option 3: Custom Amount */}
+                    <Input
+                      type="number"
+                      placeholder="ระบุจำนวน"
+                      value={customAmount}
+                      onChange={(e) => handleCustomAmount(e.target.value)}
+                      className="flex-[2] min-w-[200px]"
+                    />
+                  </div>
+
+                  {/* Show total summary */}
+                  <div className="flex justify-between items-center text-sm p-3 bg-white rounded-lg border">
+                    <span className="text-muted-foreground">ยอดรวมที่จะจ่าย:</span>
+                    <span className="font-semibold text-lg text-primary">
+                      ฿{amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+
+                  {/* Show quick-fill hint */}
+                  {amount > 0 && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      จะถูกนำไปจัดจ่ายอัตโนมัติหลังจากกดบันทึก
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
               <FormField
                 control={form.control}
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>จำนวนเงินรับโดยสิ้นเชิง</FormLabel>
+                    <FormLabel>จำนวนเงินรับโดยสิ้นเชิง (คำนวณอัตโนมัติ)</FormLabel>
                     <FormControl>
-                      <Input className="!h-11 text-base"
+                      <Input className="!h-11 text-base bg-gray-100"
                         type="number"
                         step="0.01"
                         {...field}
-                        value={field.value ? (field.value / 100).toFixed(2) : ''}
-                        onChange={(e) => field.onChange(Math.round(parseFloat(e.target.value) * 100) || 0)}
+                        value={field.value ?? ''}
+                        readOnly
                       />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ใช้ปุ่มด้านบนเพื่อเลือกยอดที่ต้องการชำระ
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -670,7 +817,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                   <div>
                     <CardTitle>การจัดจ่ายใบกำกับภาษี</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
-                      ยอดรับ: ฿{(amount / 100).toLocaleString()} | จัดจ่าย: ฿{(totalAllocated / 100).toLocaleString()} | WHT: ฿{(totalWht / 100).toLocaleString()} | คงเหลือ: ฿{(unallocated / 100).toLocaleString()}
+                      ยอดรับ: ฿{amount.toLocaleString()} | จัดจ่าย: ฿{totalAllocated.toLocaleString()} | WHT: ฿{totalWht.toLocaleString()} | คงเหลือ: ฿{unallocated.toLocaleString()}
                     </p>
                   </div>
                   <Button
@@ -781,7 +928,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                             <div className="space-y-4">
                               <div className="text-center py-4">
                                 <p className="text-sm text-muted-foreground mb-1">ยอดค้างรับ</p>
-                                <p className="text-2xl font-bold">฿{(selectedInvoice.balance / 100).toLocaleString()}</p>
+                                <p className="text-2xl font-bold">฿{selectedInvoice.balance.toLocaleString()}</p>
                               </div>
 
                               <Button
@@ -794,7 +941,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                               </Button>
 
                               <div className="text-xs text-center text-muted-foreground">
-                                ยอดคงเหลือที่จัดจ่ายได้: ฿{(Math.min(unallocated, selectedInvoice.balance) / 100).toLocaleString()}
+                                ยอดคงเหลือที่จัดจ่ายได้: ฿{Math.min(unallocated, selectedInvoice.balance).toLocaleString()}
                               </div>
                             </div>
                           ) : (
@@ -803,7 +950,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                               <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
                                   <span className="text-muted-foreground">ยอดค้างรับ:</span>
-                                  <p className="font-semibold">฿{(selectedInvoice.balance / 100).toLocaleString()}</p>
+                                  <p className="font-semibold">฿{selectedInvoice.balance.toLocaleString()}</p>
                                 </div>
                                 <div>
                                   <span className="text-muted-foreground">ครบกำหนด:</span>
@@ -820,16 +967,16 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                                     type="number"
                                     step="0.01"
                                     className="!h-11 text-base"
-                                    value={(selectedAllocation.amount / 100).toFixed(2)}
+                                    value={selectedAllocation.amount.toString()}
                                     onChange={(e) => {
                                       const newAmount = Math.round(parseFloat(e.target.value) * 100) || 0
                                       updateSelectedAllocation({ amount: newAmount })
                                     }}
-                                    max={selectedInvoice.balance / 100}
+                                    max={selectedInvoice.balance}
                                     aria-label="จำนวนเงินจัดจ่าย"
                                   />
                                   <p className="text-xs text-muted-foreground mt-1">
-                                    สูงสุด: ฿{(selectedInvoice.balance / 100).toLocaleString()}
+                                    สูงสุด: ฿{selectedInvoice.balance.toLocaleString()}
                                   </p>
                                 </div>
 
@@ -854,12 +1001,12 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                                 <div className="grid grid-cols-2 gap-4 pt-2 border-t">
                                   <div>
                                     <span className="text-xs text-muted-foreground">WHT:</span>
-                                    <p className="font-semibold text-sm">฿{(selectedAllocation.whtAmount / 100).toLocaleString()}</p>
+                                    <p className="font-semibold text-sm">฿{selectedAllocation.whtAmount.toLocaleString()}</p>
                                   </div>
                                   <div>
                                     <span className="text-xs text-muted-foreground">ยอดสุทธิ:</span>
                                     <p className="font-semibold text-sm text-primary">
-                                      ฿{((selectedAllocation.amount - selectedAllocation.whtAmount) / 100).toLocaleString()}
+                                      ฿{(selectedAllocation.amount - selectedAllocation.whtAmount).toLocaleString()}
                                     </p>
                                   </div>
                                 </div>
@@ -895,20 +1042,20 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">ยอดรับ</p>
-                    <p className="text-lg font-bold">฿{(amount / 100).toLocaleString()}</p>
+                    <p className="text-lg font-bold">฿{amount.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">จัดจ่าย</p>
-                    <p className="text-lg font-bold text-primary">฿{(totalAllocated / 100).toLocaleString()}</p>
+                    <p className="text-lg font-bold text-primary">฿{totalAllocated.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">WHT</p>
-                    <p className="text-lg font-bold text-orange-600">฿{(totalWht / 100).toLocaleString()}</p>
+                    <p className="text-lg font-bold text-orange-600">฿{totalWht.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">คงเหลือ</p>
                     <p className={`text-lg font-bold ${unallocated > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
-                      ฿{(unallocated / 100).toLocaleString()}
+                      ฿{unallocated.toLocaleString()}
                     </p>
                   </div>
                 </div>
