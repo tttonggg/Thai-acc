@@ -727,13 +727,15 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                                       <Badge variant="default" className="text-xs">จัดจ่ายแล้ว</Badge>
                                     )}
                                   </div>
-                                  <div className="text-xs text-muted-foreground mb-2">
-                                    ครบกำหนด: {format(new Date(invoice.dueDate), 'dd/MM/yyyy', { locale: th })}
-                                  </div>
+                                  {invoice.dueDate && (
+                                    <div className="text-xs text-muted-foreground mb-2">
+                                      ครบกำหนด: {format(new Date(invoice.dueDate), 'dd/MM/yyyy', { locale: th })}
+                                    </div>
+                                  )}
                                   <div className="flex items-center gap-2 text-sm">
                                     <span className="text-muted-foreground">ยอด:</span>
-                                    <span className="font-medium">฿{(invoice.balance / 100).toLocaleString()}</span>
-                                    <span className="text-muted-foreground">/ ฿{(invoice.totalAmount / 100).toLocaleString()}</span>
+                                    <span className="font-medium">฿{invoice.balance.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <span className="text-muted-foreground">/ ฿{invoice.totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                   </div>
                                 </div>
                                 <Badge variant={aging.color} className="shrink-0">
