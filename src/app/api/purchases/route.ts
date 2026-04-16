@@ -1,16 +1,15 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
-import { requireAuth, apiResponse, apiError, unauthorizedError } from "@/lib/api-utils"
-import { generateDocNumber, calculateInvoiceTotals } from "@/lib/api-utils"
+import { requireAuth as requireAuthApi } from "@/lib/api-auth"
+import { apiResponse, apiError, unauthorizedError, generateDocNumber, calculateInvoiceTotals } from "@/lib/api-utils"
 import { purchaseInvoiceSchema } from "@/lib/validations"
 import { recordStockMovement } from "@/lib/inventory-service"
-import { AuthError } from "@/lib/api-auth"
 import { bahtToSatang, satangToBaht } from "@/lib/currency"
 
 // GET /api/purchases - List purchase invoices
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth()
+    await requireAuthApi()
     
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get("page") || "1")
@@ -170,7 +169,7 @@ export async function GET(request: NextRequest) {
 // POST /api/purchases - Create purchase invoice
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth()
+    const user = await requireAuthApi()
     
     if (user.role === "VIEWER") {
       return apiError("ไม่มีสิทธิ์สร้างใบซื้อ", 403)
