@@ -1,0 +1,119 @@
+# ============================================
+# Thai Accounting ERP - VPS Auto-Deployment
+# Automatically deploys to production VPS after successful CI/CD
+# ============================================
+
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  # ============================================
+  # Job: Deploy to Production VPS
+  # ============================================
+  deploy-vps:
+    name: 🚀 Deploy to Production VPS
+    runs-on: ubuntu-latest
+    # Only run after CI/CD pipeline succeeds
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          script: |
+            #!/bin/bash
+            set -e
+
+            echo "🔄 Starting deployment to VPS..."
+
+            # Navigate to project directory
+            cd /root/thai-acc
+
+            # Pull latest code
+            echo "📥 Pulling latest code from GitHub..."
+            git fetch origin
+            git reset --hard origin/master
+            git clean -fd
+
+            # Install dependencies
+            echo "📦 Installing dependencies..."
+            bun install
+
+            # Generate Prisma client
+            echo "🗄️  Generating Prisma client..."
+            bun run db:generate
+
+            # Build application
+            echo "🔨 Building application..."
+            bun run build
+
+            # Restart production server
+            echo "🔄 Restarting production server..."
+            pkill -f "node.*standalone/thai-acc/server.js" || true
+            sleep 2
+
+            # Start server in background with logging
+            nohup node .next/standalone/thai-acc/server.js > /root/thai-acc/server.log 2>&1 &
+
+            # Wait for server to start
+            echo "⏳ Waiting for server to start..."
+            sleep 5
+
+            # Health check
+            echo "🏥 Running health check..."
+            HEALTH_STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/health || echo "000")
+            if [ "$HEALTH_STATUS" = "200" ]; then
+              echo "✅ Health check passed (HTTP $HEALTH_STATUS)"
+            else
+              echo "❌ Health check failed (HTTP $HEALTH_STATUS)"
+              exit 1
+            fi
+
+            # Check cloudflared tunnel
+            echo "🌐 Checking cloudflared tunnel..."
+            if pgrep -f "cloudflared tunnel run" > /dev/null; then
+              echo "✅ Cloudflared tunnel is running"
+            else
+              echo "⚠️  Cloudflared tunnel not running, starting..."
+              nohup cloudflared tunnel run --token ${{ secrets.CLOUDFLARED_TUNNEL_TOKEN }} > /tmp/cloudflared.log 2>&1 &
+              sleep 3
+            fi
+
+            # Verify tunnel is running
+            if pgrep -f "cloudflared tunnel run" > /dev/null; then
+              echo "✅ Cloudflared tunnel is active"
+            else
+              echo "❌ Failed to start cloudflared tunnel"
+              exit 1
+            fi
+
+            echo "🎉 Deployment completed successfully!"
+            echo "📍 Application: https://acc.k56mm.uk"
+            echo "📊 Health check: https://acc.k56mm.uk/api/health"
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Author: ${{ github.actor }}"
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "Please check the logs above for details"
+          exit 1
