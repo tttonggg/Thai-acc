@@ -10,7 +10,7 @@ import { bahtToSatang, satangToBaht } from "@/lib/currency"
 // GET /api/purchases - List purchase invoices
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth(request)
+    await requireAuth()
     
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get("page") || "1")
@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
 // POST /api/purchases - Create purchase invoice
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     
     if (user.role === "VIEWER") {
       return apiError("ไม่มีสิทธิ์สร้างใบซื้อ", 403)
