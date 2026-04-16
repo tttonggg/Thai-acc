@@ -2,6 +2,36 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Core Principles
+
+### 1. Think Before Coding
+Don't assume. Don't hide confusion. Surface tradeoffs.
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+### 2. Simplicity First
+Minimum code that solves the problem. Nothing speculative.
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+### 3. Surgical Changes
+Touch only what you must. Clean up only your own mess.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+- Every changed line should trace directly to the user's request.
+- When your changes create orphans, remove unused imports/variables/functions.
+
+### 4. Goal-Driven Execution
+Define success criteria. Loop until verified.
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- For multi-step tasks, state a brief plan before executing
+- Strong success criteria let you loop independently.
+
 ## Project Overview
 
 **Thai Accounting ERP System** (โปรแกรมบัญชีมาตรฐานไทย) - comprehensive accounting for Thai SME businesses, complying with TFRS and Thai Revenue Department regulations.
@@ -29,6 +59,8 @@ bun run db:migrate   # Create and run migrations
 bun run db:reset     # Reset database (WARNING: destroys all data)
 npx prisma db seed   # Seed Thai chart of accounts (181 accounts)
 ```
+
+**⚠️ CRITICAL**: After `db:reset`, ALWAYS verify data uses correct Satang format. See "Monetary Storage" section below.
 
 **Important**: Always run `bun run db:generate` after modifying `prisma/schema.prisma`. The `db:select-schema` script runs automatically before Prisma commands to choose between SQLite (dev) and PostgreSQL (prod) schemas.
 
@@ -73,13 +105,78 @@ This app uses a **hybrid SPA pattern**, NOT standard Next.js file-based routing.
 
 `invoice-detail` is the only sub-route (pattern `/invoices/:id`). All other modules map 1:1 to a top-level path.
 
-### Monetary Storage: Integer Satang (CRITICAL)
+### 🔴 Monetary Storage: Integer Satang (CRITICAL - READ THIS FIRST!)
 
-All monetary values in the database are stored as **integers in Satang** (1/100 Baht), not floats. Example: `subtotal Int @default(0) // มูลค่าก่อน VAT (สตางค์)`. Float is used only for rates/percentages (`vatRate Float`, `discountPercent Float`).
+**⚠️ CRITICAL RULE**: ALL monetary values in the database MUST be stored as **integers in Satang** (1/100 Baht).
 
-- Divide by 100 to display Baht to users
-- Multiply by 100 when storing user-entered Baht values
-- Mixing Baht/Satang causes factor-of-100 bugs
+**Example**:
+- User enters: `฿1,234.56` (Baht)
+- Database stores: `123456` (Satang as integer)
+- Display shows: `฿1,234.56` (after ÷100 conversion)
+
+**🚨 COMMON BUG - Mixed Data Formats**:
+- Legacy bug: Some old data stored Baht directly (NOT converted to Satang)
+- This causes 100x display errors when new code correctly converts
+- **Solution**: Database reset + clean seed required
+
+**✅ CORRECT Pattern** (from `src/lib/currency.ts`):
+```typescript
+// User input → Database (POST routes)
+import { bahtToSatang } from '@/lib/currency'
+
+const invoice = await prisma.invoice.create({
+  data: {
+    totalAmount: bahtToSatang(userEnteredAmount), // 1234.56 → 123456
+    // ...
+  }
+})
+
+// Database → Display (GET routes)
+import { satangToBaht } from '@/lib/currency'
+
+const invoice = await prisma.invoice.findUnique({ where: { id } })
+return {
+  ...invoice,
+  totalAmount: satangToBaht(invoice.totalAmount), // 123456 → 1234.56
+}
+```
+
+**❌ WRONG - Don't do this**:
+```typescript
+// WRONG: Storing Baht directly
+totalAmount: userEnteredAmount  // ❌ Stores 1234.56 as float (wrong!)
+
+// WRONG: Not converting on GET
+totalAmount: invoice.totalAmount  // ❌ Returns Satang as if it's Baht (100x bug!)
+```
+
+**📋 Modules Using Monetary Values** (ALL must follow Satang pattern):
+- ✅ Invoices (`/api/invoices/route.ts`)
+- ✅ Receipts (`/api/receipts/route.ts`)
+- ✅ Payments (`/api/payments/route.ts`)
+- ✅ Purchase Invoices (`/api/purchases/route.ts`)
+- ✅ Purchase Orders (`/api/purchase-orders/route.ts`)
+- ✅ Quotations (`/api/quotations/route.ts`)
+- ✅ Credit Notes (`/api/credit-notes/route.ts`)
+- ✅ Debit Notes (`/api/debit-notes/route.ts`)
+- ✅ Journal Entries (`/api/journal/route.ts`)
+- ✅ Petty Cash (`/api/petty-cash/vouchers/route.ts`)
+- ✅ Assets (`/api/assets/route.ts`)
+- ✅ Payroll (`/api/payroll/route.ts`)
+
+**🔍 Verification**:
+```bash
+# Check database values (should be large integers)
+sqlite3 prisma/dev.db "SELECT totalAmount FROM Invoice LIMIT 5;"
+# Correct: 123456, 987654 (Satang)
+# Wrong: 1234.56, 9876.54 (Baht - needs fix)
+```
+
+**⚠️ If you see wrong values**:
+1. DO NOT use format detection hacks
+2. DO reset database: `bun run db:reset`
+3. DO re-seed: `npx prisma db seed`
+4. DO verify: Run `bun run test:verify-db`
 
 ### Key Patterns
 
@@ -99,211 +196,46 @@ All monetary values in the database are stored as **integers in Satang** (1/100 
 4. **Validation** — ALL API inputs must use Zod schemas (v4 — breaking API vs v3); never trust client-side validation
 5. **SQL** — Always use Prisma parameterized queries; never raw SQL with user input
 
-### API Route Convention
+## Deployment
 
-**Typical route pattern**:
-```typescript
-export async function POST(request: NextRequest) {
-  const user = await requireAuth()           // or requireRole(['ADMIN'])
-  const body = await request.json()
-  const validated = schema.parse(body)       // Zod, throws on failure
-  // ... call service layer ...
-  await logCreate(user.id, 'MODULE', id, {}) // activity log
-  return apiResponse(result, 201)
-}
+### VPS Tunnel Configuration (IMPORTANT - DO NOT TOUCH OTHER TUNNELS)
+
+**🚨 CRITICAL RULE**: This project uses ONLY `acc.k56mm.uk` via tunnel `e4880092-554d-471c-aa65-ec8c25b7e6bd`. Other tunnels on the VPS belong to different projects — **never touch them**.
+
+**Tunnel details**:
+- Tunnel ID: `e4880092-554d-471c-aa65-ec8c25b7e6bd`
+- Credentials: `/root/.cloudflared/e4880092-554d-471c-aa65-ec8c25b7e6bd.json`
+- Domain: `acc.k56mm.uk`
+- Target: `http://localhost:3000`
+
+**⚠️ NEVER run commands that affect tunnels** (including but not limited to):
+- `cloudflared tunnel list`, `cloudflared tunnel run`, `cloudflared tunnel route`, `cloudflared tunnel delete`, `killall cloudflared`
+- Any `cloudflared` commands unless specifically for `acc.k56mm.uk` and tunnel `e4880092`
+- `killall cloudflared` (kills ALL tunnels, not just this project's)
+
+**To restart the production server only** (not the tunnel):
+```bash
+ssh root@VPS "pkill -f 'node.*standalone'; cd /root/thai-acc && nohup node .next/standalone/thai-acc/server.js > /root/thai-acc/server.log 2>&1 &"
 ```
 
-- Path: `src/app/api/[resource]/route.ts`
-- Response: `{ success: true, data: {...} }` or `{ success: false, error: "message" }`
-- Helpers from `api-utils.ts`: `apiResponse()`, `apiError()`, `unauthorizedError()`, `forbiddenError()`, `notFoundError()`, `serverError()`
-
-### Client vs Server Code
-
-- **Never** import `src/lib/db.ts` in client components — causes PrismaClient browser bundle error
-- `src/lib/thai-accounting.ts` is the only lib file safe for client import (no Prisma dependency)
-- `src/lib/csrf-service.ts` is Edge-safe (no Prisma); actual token validation uses `csrf-service-server.ts`
-
-## Thai-Specific Features
-
-### Key Functions (`src/lib/thai-accounting.ts`)
-
-- `formatThaiDate()` — Thai Buddhist era (พ.ศ.) DD/MM/YYYY (adds 543 to CE year)
-- `formatCurrency()` — Thai Baht with Satang
-- `numberToThaiText()` — Numbers to Thai words (for cheques)
-- `calculateVAT()` — Inclusive/exclusive VAT
-- `calculateWHT()` — Withholding tax
-- `calculateAging()` — AR/AP aging (current, 30, 60, 90, 90+ days)
-
-### Tax Rates
-
-```
-VAT: 7%
-WHT PND3: progressive [0, 5, 10, 15, 20, 25, 30, 35]%
-WHT PND53: service 3%, rent 5%, professional 3%, contract 1%, advertising 2%
-SSC: 5% capped at ฿750/month
+**To check server status** (without touching tunnel):
+```bash
+ssh root@VPS "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/"
 ```
 
-### Account Codes (Thai Standard)
-
-`1xxx` Assets · `2xxx` Liabilities · `3xxx` Equity · `4xxx` Revenue · `5xxx` Expenses
-
-## Database
-
-### Core Models
-
-`Company`/`SystemSettings` (1:1, tax rate config), `ChartOfAccount` (181 seeded, self-referential hierarchy), `JournalEntry`/`JournalLine`, `Customer`/`Vendor`, `Product`, `Invoice`/`InvoiceLine`, `PurchaseInvoice`, `Receipt`/`ReceiptAllocation`, `Payment`, `CreditNote`/`DebitNote`, `Quotation`/`QuotationLine`, `BankAccount`/`Cheque`, `Asset`/`Depreciation`, `Employee`/`PayrollRun`/`PayrollItem`, `PettyCashFund`/`PettyCashVoucher`, `StockMovement`/`StockBalance`/`StockTake`/`StockTransfer`/`Warehouse`, `DocumentNumber`, `WithholdingTax`/`VatRecord`, `User`, `ActivityLog`/`SecurityAuditLog`/`UserSession`, `Currency`, `WebhookConfig`/`WebhookDelivery`
-
-### Document Status Flow
-
+**Current VPS .env** (`/root/thai-acc/.env`):
 ```
-DRAFT → ISSUED/POSTED → PAID → CANCELLED/REVERSED
+DATABASE_URL=file:/root/thai-acc/prisma/dev.db
+NEXTAUTH_URL=https://acc.k56mm.uk
+NEXTAUTH_SECRET=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY=
+NODE_ENV=production
+BYPASS_CSRF=true
 ```
 
-Documents **must be posted** to generate journal entries (`journalEntryId` becomes non-null on post).
-
-## Environment Variables
-
-```env
-DATABASE_URL=file:./dev.db
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-secret-key-change-this
-```
-
-## Test Accounts
-
-| Email | Password | Role |
-|-------|----------|------|
-| admin@thaiaccounting.com | admin123 | ADMIN |
-| accountant@thaiaccounting.com | acc123 | ACCOUNTANT |
-| user@thaiaccounting.com | user123 | USER |
-| viewer@thaiaccounting.com | viewer123 | VIEWER |
-
-## Production Build
+### Production Build
 
 ```bash
-bun run build
+bun run build        # Creates standalone output in .next/standalone/
+# Upload .next/standalone/ to VPS at /root/thai-acc/
+# Server entry: .next/standalone/thai-acc/server.js
 ```
-
-**CRITICAL**: After build, update `DATABASE_URL` in `.next/standalone/.env` to an **absolute path**:
-```env
-DATABASE_URL=file:/absolute/path/to/.next/standalone/dev.db
-```
-Relative paths cause Prisma to connect to the wrong database (empty), resulting in login failures.
-
-### Deployment Checklist
-
-1. `bun run db:generate` → `bun run db:push` → `npx prisma db seed`
-2. Set `DATABASE_URL` (absolute), `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `NODE_ENV=production`
-3. `bun run build` → update `.next/standalone/.env` → `bun run start`
-4. `./scripts/health-check.sh` to verify
-
-## Troubleshooting
-
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| URL doesn't change on navigation | Missing route mapping | Add to both `moduleToPath` + `pathToModule` in `page.tsx` |
-| API 403 Forbidden | Missing CSRF token or auth | Check `src/middleware.ts`; add `x-playwright-test: true` for tests |
-| "table does not exist" | Wrong DATABASE_URL | Use absolute path in `.next/standalone/.env` |
-| Prisma browser bundle error | Importing `db.ts` in client component | Keep Prisma server-side only |
-| Tests rate-limited | Missing bypass header | Verify `x-playwright-test: true` in `src/middleware.ts` |
-| Journal entries don't balance | Debit ≠ Credit | Check service layer; all `prisma.$transaction()` must balance |
-| Thai fonts missing in PDF | Missing font registration | Check `public/fonts/THSarabunNew.ttf` exists |
-| Login fails (standalone) | Relative DATABASE_URL | Absolute path in `.next/standalone/.env` |
-| Wrong monetary amounts | Satang/Baht mismatch | Check division/multiplication by 100 at API boundary |
-| Deleted records appearing | Missing soft-delete filter | Add `where: { deletedAt: null }` to Prisma queries |
-
-## Mobile Responsiveness & Theming
-
-### Mobile-First Design
-
-The app is fully responsive with mobile-optimized patterns:
-
-- **Mobile Navigation**: Hamburger menu (<768px) via `Sheet` component, sidebar on desktop
-- **Responsive Grids**: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` pattern throughout
-- **Touch Targets**: Minimum 44×44px for all interactive elements (iOS/Android standard)
-- **Table Scrolling**: `overflow-x-auto` wrapper for horizontal scroll on mobile
-- **Dialog Sizing**: `max-w-[95vw] md:max-w-2xl` pattern (full-width mobile, fixed desktop)
-
-**Key Files**:
-- `/src/app/page.tsx` - Mobile hamburger implementation (lines 452-474)
-- `/src/components/layout/keerati-sidebar.tsx` - Responsive sidebar
-- `/src/app/globals.css` - Theme CSS variables
-
-### Theme System
-
-8 built-in color themes with dark mode support:
-
-| Theme | Name (TH) | Gradient |
-|-------|-----------|----------|
-| default | ชมพูพาสเทล | #ffb6c1 → #ffd1dc |
-| mint | มิ้นท์สดชื่น | #98ddca → #b5eadd |
-| lavender | ลาเวนเดอร์ | #dcd0ff → #e6e6fa |
-| peach | พีชหวาน | #ffdab9 → #ffe4d6 |
-| sky | ฟ้าสดใส | #87ceeb → #b5eaff |
-| lemon | เลมอนสด | #fff68f → #fffacd |
-| coral | คอรัลพีช | #ff9e8d → #ffb6b0 |
-| professional | อาชีพแอมเบอร์ | #F59E0B → #FBBF24 |
-
-**Theme Customization**:
-- Access via sidebar: "ปรับแต่งธีม" button
-- Options: Color theme, dark mode, animations, border radius, accent intensity
-- Stored in localStorage (`keerati-theme-storage`)
-- Zustand store: `/src/stores/theme-store.ts`
-
-**CSS Variables**:
-- `--primary`, `--foreground`, `--background`, etc.
-- Dark mode: `.dark` class on `<html>`
-- Theme variants: `[data-theme="mint"]` attribute
-
-**Usage**:
-```typescript
-import { useThemeStore } from '@/stores/theme-store'
-const { theme, setTheme, toggleDarkMode } = useThemeStore()
-```
-
-**Documentation**:
-- `/MOBILE_FEATURES.md` - User-facing mobile guide
-- `/DEVELOPER_MOBILE_GUIDE.md` - Developer mobile patterns
-- `/THEME_CUSTOMIZATION.md` - Theme system documentation
-- `/TESTING_CHECKLIST.md` - QA checklist for mobile/themes
-
-## Active Work: UI/UX Redesign
-
-**Status**: Phase 1 ✅ Complete — Phase 2 & 3 Pending
-
-A comprehensive UI/UX redesign improving user workflow and empathy. Original components backed up to `src/components.invoices.backup-20260414/`.
-
-### Backup & Rollback
-```bash
-# Rollback invoice changes: cp src/components.invoices.backup-20260414/* src/components/invoices/
-git tag ui-redesign-invoice-done    # after invoice module
-git tag ui-redesign-grn-done        # after GRN module
-```
-
-### Phase 1: Invoice Redesign ✅ (Complete)
-- ✅ Quick filter buttons (ทั้งหมด/รอดำเนินการ/เร่งด่วน/เสร็จสิ้น)
-- ✅ Aging color badge (🔴 overdue/🟡 approaching/🟢 paid)
-- ✅ Outstanding amount column (ยอดค้างรับ)
-- ✅ Explicit "Post" button in row actions
-- ✅ Invoice edit: 3 tabs (Details | Comments & Audit | Related)
-- ✅ Invoice creation: WHT guidance tooltip with PND.53 rates
-
-### Phase 2: GRN + Three-Way Match (Pending)
-- New GRN components (list, form, detail)
-- Three-way match validation in purchase invoices
-- Variance report UI
-
-### Phase 3: Receipt/Payment + Navigation (Pending)
-- Receipt: 2-panel allocation layout
-- Payment: WHT category dropdown with PND.53 rate guidance
-- Sidebar: workflow-grouped (Sell → Buy → Accounting → Reports)
-
-## Important Notes
-
-- **Never** import `src/lib/db.ts` in client components — server-side only
-- **Never** disable rate limiting in production
-- **Always** use `prisma.$transaction()` for multi-step financial operations
-- **Always** verify database integrity after schema changes: `bun run test:verify-db`
-- Currency: always THB (฿) with 2 decimal places; stored as Satang integers in DB
-- Dates: always Thai Buddhist era format for user-facing display
-- See `FUTURE_WORK.md` for planned features roadmap

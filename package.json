@@ -33,6 +33,7 @@
     "test:percy": "percy exec -- playwright test e2e/visual-regression.spec.ts",
     "test:smoke": "./scripts/test-automation.sh smoke",
     "test:automated": "./scripts/test-automation.sh",
+    "test:currency": "./scripts/run-automation-tests.sh",
     "test:schedule": "./scripts/test-scheduler.sh",
     "test:clean": "./scripts/test-automation.sh clean",
     "test:report": "./scripts/test-automation.sh report",

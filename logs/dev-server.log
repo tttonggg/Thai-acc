@@ -4,10 +4,164 @@
 
 ▲ Next.js 16.1.6 (Turbopack)
 - Local:         http://localhost:3000
-- Network:       http://192.168.1.229:3000
+- Network:       http://192.168.1.182:3000
 - Environments: .env
 
 ✓ Starting...
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1483ms
- GET / 200 in 2.3s (compile: 1882ms, proxy.ts: 35ms, render: 383ms)
+✓ Ready in 1968ms
+○ Compiling / ...
+ GET /api/auth/session 200 in 1809ms (compile: 1767ms, proxy.ts: 12ms, render: 31ms)
+ GET /invoices 200 in 3.9s (compile: 3.2s, proxy.ts: 64ms, render: 586ms)
+ GET /api/quotations?limit=1000 200 in 157ms (compile: 82ms, proxy.ts: 14ms, render: 60ms)
+ GET /api/dashboard 200 in 370ms (compile: 134ms, proxy.ts: 45ms, render: 190ms)
+ GET /api/invoices?limit=1000 200 in 152ms (compile: 57ms, proxy.ts: 5ms, render: 90ms)
+ GET /api/receipts?limit=1000 200 in 71ms (compile: 47ms, proxy.ts: 8ms, render: 15ms)
+ GET /api/credit-notes?limit=1000 200 in 61ms (compile: 43ms, proxy.ts: 5ms, render: 13ms)
+ GET /api/debit-notes?limit=1000 200 in 45ms (compile: 36ms, proxy.ts: 1545µs, render: 8ms)
+ GET /api/purchase-orders?limit=1000 200 in 61ms (compile: 42ms, proxy.ts: 3ms, render: 15ms)
+ GET /api/payments?limit=1000 200 in 71ms (compile: 50ms, proxy.ts: 12ms, render: 10ms)
+ GET /invoices 200 in 85ms (compile: 26ms, proxy.ts: 7ms, render: 53ms)
+ GET /invoices 200 in 33ms (compile: 1905µs, proxy.ts: 1656µs, render: 29ms)
+ GET / 200 in 33ms (compile: 3ms, proxy.ts: 3ms, render: 27ms)
+ GET /api/auth/session 200 in 29ms (compile: 11ms, proxy.ts: 5ms, render: 13ms)
+ GET /api/quotations?limit=1000 200 in 30ms (compile: 11ms, proxy.ts: 3ms, render: 16ms)
+ GET /api/dashboard 200 in 45ms (compile: 6ms, proxy.ts: 4ms, render: 35ms)
+ GET /api/invoices?limit=1000 200 in 32ms (compile: 2ms, proxy.ts: 1550µs, render: 28ms)
+ GET /api/receipts?limit=1000 200 in 13ms (compile: 2ms, proxy.ts: 3ms, render: 8ms)
+ GET /api/credit-notes?limit=1000 200 in 15ms (compile: 4ms, proxy.ts: 3ms, render: 9ms)
+ GET /api/debit-notes?limit=1000 200 in 14ms (compile: 5ms, proxy.ts: 1661µs, render: 7ms)
+ GET /api/purchase-orders?limit=1000 200 in 15ms (compile: 1173µs, proxy.ts: 1324µs, render: 13ms)
+ GET /api/payments?limit=1000 200 in 19ms (compile: 1889µs, proxy.ts: 1984µs, render: 16ms)
+○ Compiling /api/csrf/token ...
+CSRF token error: Error: ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ
+    at requireAuth (src/lib/api-utils.ts:15:11)
+    at async GET (src/app/api/csrf/token/route.ts:12:18)
+  13 |   const user = await getCurrentUser()
+  14 |   if (!user) {
+> 15 |     throw new Error("ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ")
+     |           ^
+  16 |   }
+  17 |   return user
+  18 | }
+ GET /api/csrf/token 500 in 4.4s (compile: 4.2s, proxy.ts: 6ms, render: 129ms)
+✓ Compiled in 1187ms
+ GET / 200 in 670ms (compile: 129ms, proxy.ts: 21ms, render: 520ms)
+ GET / 200 in 131ms (compile: 47ms, proxy.ts: 21ms, render: 62ms)
+ GET / 200 in 79ms (compile: 28ms, proxy.ts: 5ms, render: 45ms)
+ GET /api/auth/session 200 in 88ms (compile: 46ms, proxy.ts: 24ms, render: 19ms)
+ GET /api/auth/providers 200 in 56ms (compile: 16ms, proxy.ts: 20ms, render: 21ms)
+ GET /api/auth/csrf 200 in 14ms (compile: 6ms, proxy.ts: 2ms, render: 6ms)
+ POST /api/auth/callback/credentials 200 in 208ms (compile: 4ms, proxy.ts: 8ms, render: 195ms)
+ GET /api/auth/session 200 in 8ms (compile: 1884µs, proxy.ts: 1285µs, render: 5ms)
+ GET /api/auth/session 200 in 13ms (compile: 5ms, proxy.ts: 2ms, render: 6ms)
+ GET /api/quotations?limit=1000 200 in 25ms (compile: 3ms, proxy.ts: 7ms, render: 15ms)
+ GET /api/dashboard 200 in 88ms (compile: 4ms, proxy.ts: 2ms, render: 81ms)
+ GET / 200 in 96ms (compile: 65ms, proxy.ts: 4ms, render: 27ms)
+ GET / 200 in 107ms (compile: 12ms, proxy.ts: 6ms, render: 89ms)
+ GET /api/invoices?limit=1000 200 in 53ms (compile: 19ms, proxy.ts: 3ms, render: 31ms)
+ GET /api/receipts?limit=1000 200 in 24ms (compile: 8ms, proxy.ts: 2ms, render: 14ms)
+ GET /api/credit-notes?limit=1000 200 in 21ms (compile: 3ms, proxy.ts: 6ms, render: 12ms)
+ GET /api/debit-notes?limit=1000 200 in 12ms (compile: 2ms, proxy.ts: 1811µs, render: 8ms)
+ GET /api/purchase-orders?limit=1000 200 in 15ms (compile: 2ms, proxy.ts: 5ms, render: 8ms)
+ GET /api/payments?limit=1000 200 in 12ms (compile: 2ms, proxy.ts: 2ms, render: 7ms)
+ GET /api/invoices 200 in 57ms (compile: 6ms, proxy.ts: 15ms, render: 37ms)
+ GET /api/invoices/next-number?type=TAX_INVOICE 200 in 172ms (compile: 137ms, proxy.ts: 3ms, render: 31ms)
+ GET /api/customers 200 in 179ms (compile: 109ms, proxy.ts: 5ms, render: 65ms)
+ GET /api/products 200 in 178ms (compile: 159ms, proxy.ts: 6ms, render: 13ms)
+[DEV] CSRF check bypassed for: /api/invoices
+ POST /api/invoices 500 in 75ms (compile: 10ms, proxy.ts: 42ms, render: 23ms)
+ GET /api/auth/session 200 in 57ms (compile: 28ms, proxy.ts: 13ms, render: 16ms)
+ GET /api/auth/session 200 in 28ms (compile: 8ms, proxy.ts: 11ms, render: 9ms)
+ GET /api/auth/session 200 in 64ms (compile: 39ms, proxy.ts: 10ms, render: 15ms)
+ GET / 200 in 126ms (compile: 38ms, proxy.ts: 17ms, render: 71ms)
+ GET / 200 in 287ms (compile: 27ms, proxy.ts: 17ms, render: 243ms)
+ GET /api/auth/providers 200 in 22ms (compile: 13ms, proxy.ts: 2ms, render: 7ms)
+ GET / 200 in 105ms (compile: 38ms, proxy.ts: 10ms, render: 57ms)
+ GET /api/auth/session 200 in 214ms (compile: 114ms, proxy.ts: 33ms, render: 67ms)
+ GET / 200 in 145ms (compile: 45ms, proxy.ts: 30ms, render: 70ms)
+ GET /api/auth/session 200 in 558ms (compile: 360ms, proxy.ts: 77ms, render: 120ms)
+ GET /api/auth/session 200 in 66ms (compile: 30ms, proxy.ts: 9ms, render: 27ms)
+⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.31.47:3000
+- Environments: .env
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 1245ms
+○ Compiling / ...
+ GET /api/auth/session 200 in 1811ms (compile: 1768ms, proxy.ts: 10ms, render: 33ms)
+ GET / 200 in 4.0s (compile: 3.2s, proxy.ts: 40ms, render: 724ms)
+ GET /invoices 200 in 112ms (compile: 14ms, proxy.ts: 6ms, render: 91ms)
+ GET /invoices 200 in 53ms (compile: 4ms, proxy.ts: 2ms, render: 46ms)
+ GET /api/auth/session 200 in 88ms (compile: 45ms, proxy.ts: 13ms, render: 30ms)
+ GET /api/quotations?limit=1000 200 in 162ms (compile: 107ms, proxy.ts: 12ms, render: 43ms)
+ GET /api/dashboard 200 in 283ms (compile: 148ms, proxy.ts: 7ms, render: 128ms)
+ GET /api/invoices?limit=1000 200 in 101ms (compile: 37ms, proxy.ts: 1812µs, render: 62ms)
+ GET /api/receipts?limit=1000 200 in 59ms (compile: 47ms, proxy.ts: 1842µs, render: 10ms)
+ GET /api/credit-notes?limit=1000 200 in 64ms (compile: 39ms, proxy.ts: 7ms, render: 18ms)
+ GET /api/debit-notes?limit=1000 200 in 89ms (compile: 57ms, proxy.ts: 3ms, render: 30ms)
+ GET /api/purchase-orders?limit=1000 200 in 48ms (compile: 33ms, proxy.ts: 3ms, render: 12ms)
+ GET /api/payments?limit=1000 200 in 55ms (compile: 44ms, proxy.ts: 2ms, render: 9ms)
+✓ Finished filesystem cache database compaction in 10.6s
+⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.31.47:3000
+- Environments: .env
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 1597ms
+○ Compiling / ...
+ GET /api/auth/session 200 in 3.2s (compile: 3.1s, proxy.ts: 45ms, render: 61ms)
+ GET / 200 in 6.6s (compile: 3.9s, proxy.ts: 62ms, render: 2.6s)
+ GET / 200 in 73ms (compile: 10ms, proxy.ts: 9ms, render: 54ms)
+ GET / 200 in 29ms (compile: 1580µs, proxy.ts: 2ms, render: 26ms)
+ GET /apple-touch-icon-precomposed.png 404 in 258ms (compile: 149ms, render: 109ms)
+ GET /apple-touch-icon.png 404 in 249ms (compile: 163ms, render: 86ms)
+ GET /api/auth/session 200 in 194ms (compile: 44ms, proxy.ts: 129ms, render: 21ms)
+ GET /api/quotations?limit=1000 200 in 158ms (compile: 87ms, proxy.ts: 4ms, render: 67ms)
+ GET /api/dashboard 200 in 345ms (compile: 119ms, proxy.ts: 5ms, render: 221ms)
+ GET /api/invoices?limit=1000 200 in 166ms (compile: 45ms, proxy.ts: 28ms, render: 92ms)
+ GET /api/receipts?limit=1000 200 in 60ms (compile: 44ms, proxy.ts: 3ms, render: 13ms)
+ GET /api/credit-notes?limit=1000 200 in 72ms (compile: 46ms, proxy.ts: 5ms, render: 21ms)
+ GET /api/debit-notes?limit=1000 200 in 57ms (compile: 42ms, proxy.ts: 6ms, render: 9ms)
+ GET /api/purchase-orders?limit=1000 200 in 52ms (compile: 38ms, proxy.ts: 4ms, render: 11ms)
+ GET /api/payments?limit=1000 200 in 64ms (compile: 51ms, proxy.ts: 4ms, render: 9ms)
+⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.31.47:3000
+- Environments: .env
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 1490ms
+ GET /api/auth/session 200 in 3.0s (compile: 2.9s, proxy.ts: 13ms, render: 29ms)
+ GET / 200 in 4.8s (compile: 4.2s, proxy.ts: 63ms, render: 586ms)
+ GET / 200 in 93ms (compile: 26ms, proxy.ts: 14ms, render: 52ms)
+ GET /api/auth/session 200 in 456ms (compile: 150ms, proxy.ts: 152ms, render: 154ms)
+ GET /api/quotations?limit=1000 200 in 2.8s (compile: 2.4s, proxy.ts: 27ms, render: 440ms)
+[Slow Query] 163ms - SELECT SUM(`main`.`VatRecord`.`vatAmount`) AS `_sum$vatAmount`, `main`.`VatRecord`.`taxMonth` FROM `main`.`VatRecord` WHERE (`main`.`VatRecord`.`taxYear` = ? AND `main`.`VatRecord`.`type` = ?) GROUP BY `main`.`VatRecord`.`taxMonth` LIMIT ? OFFSET ?
+[Slow Query] 163ms - SELECT SUM(`whtAmount`) AS `_sum$whtAmount` FROM (SELECT `main`.`WithholdingTax`.`whtAmount` FROM `main`.`WithholdingTax` WHERE (`main`.`WithholdingTax`.`taxYear` = ? AND `main`.`WithholdingTax`.`type` = ?) LIMIT ? OFFSET ?) AS `sub`
+[Slow Query] 163ms - SELECT SUM(`whtAmount`) AS `_sum$whtAmount` FROM (SELECT `main`.`WithholdingTax`.`whtAmount` FROM `main`.`WithholdingTax` WHERE (`main`.`WithholdingTax`.`taxYear` = ? AND `main`.`WithholdingTax`.`type` = ?) LIMIT ? OFFSET ?) AS `sub`
+[Slow Query] 163ms - SELECT `main`.`PurchaseInvoice`.`id`, `main`.`PurchaseInvoice`.`dueDate`, `main`.`PurchaseInvoice`.`totalAmount`, `main`.`PurchaseInvoice`.`paidAmount` FROM `main`.`PurchaseInvoice` WHERE (`main`.`PurchaseInvoice`.`status` IN (?,?) AND `main`.`PurchaseInvoice`.`deletedAt` IS NULL) LIMIT ? OFFSET ?
+[Slow Query] 170ms - SELECT `main`.`JournalEntry`.`id`, `main`.`JournalEntry`.`entryNo`, `main`.`JournalEntry`.`date`, `main`.`JournalEntry`.`description`, `main`.`JournalEntry`.`reference`, `main`.`JournalEntry`.`documentType`, `main`.`JournalEntry`.`documentId`, `main`.`JournalEntry`.`totalDebit`, `main`.`JournalEntry`.`totalCredit`, `main`.`JournalEntry`.`status`, `main`.`JournalEntry`.`isAdjustment`, `main`.`JournalEntry`.`isReversing`, `main`.`JournalEntry`.`reversingId`, `main`.`JournalEntry`.`createdById`, `main`.`JournalEntry`.`approvedById`, `main`.`JournalEntry`.`approvedAt`, `main`.`JournalEntry`.`idempotencyKey`, `main`.`JournalEntry`.`notes`, `main`.`JournalEntry`.`isActive`, `main`.`JournalEntry`.`deletedAt`, `main`.`JournalEntry`.`deletedBy`, `main`.`JournalEntry`.`createdAt`, `main`.`JournalEntry`.`updatedAt` FROM `main`.`JournalEntry` WHERE (`main`.`JournalEntry`.`date` >= ? AND `main`.`JournalEntry`.`date` <= ? AND `main`.`JournalEntry`.`status` = ?) LIMIT ? OFFSET ?
+[Slow Query] 170ms - SELECT `main`.`JournalEntry`.`id`, `main`.`JournalEntry`.`entryNo`, `main`.`JournalEntry`.`date`, `main`.`JournalEntry`.`description`, `main`.`JournalEntry`.`reference`, `main`.`JournalEntry`.`documentType`, `main`.`JournalEntry`.`documentId`, `main`.`JournalEntry`.`totalDebit`, `main`.`JournalEntry`.`totalCredit`, `main`.`JournalEntry`.`status`, `main`.`JournalEntry`.`isAdjustment`, `main`.`JournalEntry`.`isReversing`, `main`.`JournalEntry`.`reversingId`, `main`.`JournalEntry`.`createdById`, `main`.`JournalEntry`.`approvedById`, `main`.`JournalEntry`.`approvedAt`, `main`.`JournalEntry`.`idempotencyKey`, `main`.`JournalEntry`.`notes`, `main`.`JournalEntry`.`isActive`, `main`.`JournalEntry`.`deletedAt`, `main`.`JournalEntry`.`deletedBy`, `main`.`JournalEntry`.`createdAt`, `main`.`JournalEntry`.`updatedAt` FROM `main`.`JournalEntry` WHERE (`main`.`JournalEntry`.`date` >= ? AND `main`.`JournalEntry`.`date` <= ? AND `main`.`JournalEntry`.`status` = ?) LIMIT ? OFFSET ?
+[Slow Query] 170ms - SELECT `main`.`Invoice`.`id`, `main`.`Invoice`.`dueDate`, `main`.`Invoice`.`totalAmount`, `main`.`Invoice`.`paidAmount` FROM `main`.`Invoice` WHERE (`main`.`Invoice`.`status` IN (?,?) AND `main`.`Invoice`.`deletedAt` IS NULL) LIMIT ? OFFSET ?
+[Slow Query] 170ms - SELECT SUM(`totalAmount`) AS `_sum$totalAmount`, SUM(`paidAmount`) AS `_sum$paidAmount` FROM (SELECT `main`.`Invoice`.`totalAmount`, `main`.`Invoice`.`paidAmount` FROM `main`.`Invoice` WHERE (`main`.`Invoice`.`status` IN (?,?) AND `main`.`Invoice`.`deletedAt` IS NULL) LIMIT ? OFFSET ?) AS `sub`
+ GET /api/dashboard 200 in 3.4s (compile: 2.7s, proxy.ts: 23ms, render: 704ms)
+ GET /api/invoices?limit=1000 200 in 1669ms (compile: 1587ms, proxy.ts: 7ms, render: 74ms)
+ GET /api/receipts?limit=1000 200 in 322ms (compile: 287ms, proxy.ts: 16ms, render: 18ms)
+ GET /api/credit-notes?limit=1000 200 in 188ms (compile: 163ms, proxy.ts: 1686µs, render: 24ms)
+ GET /api/debit-notes?limit=1000 200 in 147ms (compile: 137ms, proxy.ts: 3ms, render: 7ms)
+ GET /api/purchase-orders?limit=1000 200 in 136ms (compile: 115ms, proxy.ts: 4ms, render: 17ms)
+ GET /api/payments?limit=1000 200 in 107ms (compile: 97ms, proxy.ts: 2ms, render: 8ms)
+ GET / 200 in 373ms (compile: 85ms, proxy.ts: 97ms, render: 191ms)
+✓ Compiled in 699ms
+CSRF token request - unauthenticated: ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ
+ GET /api/csrf/token 401 in 534ms (compile: 493ms, proxy.ts: 9ms, render: 32ms)
+✓ Finished filesystem cache database compaction in 14.1s

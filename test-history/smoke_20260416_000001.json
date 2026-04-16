@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-04-15T17:00:02Z",
+  "date": "2026-04-16",
+  "test_type": "smoke",
+  "exit_code": 127,
+  "branch": "master",
+  "commit": "f60e51c62b2b588bd05f310c6e6801b8135503f8",
+  "author": "Thai Acc Backup",
+  "message": "🐛 Fix purchase view dialog JSON parse error on non-OK responses"
+}

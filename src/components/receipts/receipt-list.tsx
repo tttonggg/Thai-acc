@@ -527,11 +527,11 @@ export function ReceiptList() {
                     <TableCell>{receipt.customer?.name}</TableCell>
                     <TableCell className="text-right">
                       <span className={outstanding > 0 ? 'font-semibold text-red-600' : 'text-green-600'}>
-                        ฿{(outstanding / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ฿{outstanding.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </TableCell>
                     <TableCell className="text-right font-semibold">
-                      ฿{((receipt.amount ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ฿{(receipt.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">

@@ -1,0 +1,52 @@
+<testsuites id="" name="" tests="4" failures="4" skipped="0" errors="0" time="212.543725">
+<testsuite name="invoice-creation.spec.ts" timestamp="2026-04-15T14:09:45.648Z" hostname="chromium" tests="4" failures="4" skipped="0" time="0.022" errors="0">
+<testcase name="Invoice Creation › should create a new tax invoice successfully" classname="invoice-creation.spec.ts" time="0.007">
+<failure message="invoice-creation.spec.ts:16:7 should create a new tax invoice successfully" type="FAILURE">
+<![CDATA[  [chromium] › invoice-creation.spec.ts:16:7 › Invoice Creation › should create a new tax invoice successfully 
+
+    TimeoutError: browserType.launch: Timeout 180000ms exceeded.
+    Call log:
+      - <launching> /Users/tong/Library/Caches/ms-playwright/chromium-1208/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --no-sandbox --user-data-dir=/var/folders/j_/d2xtn90d6xj4dj29dfjv0fb80000gn/T/playwright_chromiumdev_profile-6AGBol --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37423
+
+]]>
+</failure>
+</testcase>
+<testcase name="Invoice Creation › should display dashboard with correct currency format" classname="invoice-creation.spec.ts" time="0.003">
+<failure message="invoice-creation.spec.ts:74:7 should display dashboard with correct currency format" type="FAILURE">
+<![CDATA[  [chromium] › invoice-creation.spec.ts:74:7 › Invoice Creation › should display dashboard with correct currency format 
+
+    TimeoutError: browserType.launch: Timeout 180000ms exceeded.
+    Call log:
+      - <launching> /Users/tong/Library/Caches/ms-playwright/chromium-1208/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --no-sandbox --user-data-dir=/var/folders/j_/d2xtn90d6xj4dj29dfjv0fb80000gn/T/playwright_chromiumdev_profile-5BYJuA --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37422
+
+]]>
+</failure>
+</testcase>
+<testcase name="Invoice Creation › should list invoices with correct amounts" classname="invoice-creation.spec.ts" time="0.007">
+<failure message="invoice-creation.spec.ts:96:7 should list invoices with correct amounts" type="FAILURE">
+<![CDATA[  [chromium] › invoice-creation.spec.ts:96:7 › Invoice Creation › should list invoices with correct amounts 
+
+    TimeoutError: browserType.launch: Timeout 180000ms exceeded.
+    Call log:
+      - <launching> /Users/tong/Library/Caches/ms-playwright/chromium-1208/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --no-sandbox --user-data-dir=/var/folders/j_/d2xtn90d6xj4dj29dfjv0fb80000gn/T/playwright_chromiumdev_profile-cRP3Qz --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37420
+
+]]>
+</failure>
+</testcase>
+<testcase name="CSRF Protection › should bypass CSRF in development mode" classname="invoice-creation.spec.ts" time="0.005">
+<failure message="invoice-creation.spec.ts:121:7 should bypass CSRF in development mode" type="FAILURE">
+<![CDATA[  [chromium] › invoice-creation.spec.ts:121:7 › CSRF Protection › should bypass CSRF in development mode 
+
+    TimeoutError: browserType.launch: Timeout 180000ms exceeded.
+    Call log:
+      - <launching> /Users/tong/Library/Caches/ms-playwright/chromium-1208/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --no-sandbox --user-data-dir=/var/folders/j_/d2xtn90d6xj4dj29dfjv0fb80000gn/T/playwright_chromiumdev_profile-qZdSJC --remote-debugging-pipe --no-startup-window
+      - <launched> pid=37421
+
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { purchaseInvoiceSchema } from "@/lib/validations"
+import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError } from "@/lib/api-utils"
+import { AuthError } from "@/lib/api-auth"
 
 // GET /api/purchases/[id] - Get single purchase invoice
 export async function GET(

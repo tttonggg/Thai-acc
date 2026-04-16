@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { requireAuth } from '@/lib/api-utils'
+import { satangToBaht } from '@/lib/currency'
 
 // GET - Dashboard summary (requires authentication)
 export async function GET(request: NextRequest) {
@@ -144,25 +145,38 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         summary: {
-          revenue: { amount: revenue, change: 0 },
-          expenses: { amount: expenses, change: 0 },
-          ar: { amount: accountsReceivable, change: 0 },
-          ap: { amount: accountsPayable, change: 0 },
+          revenue: { amount: satangToBaht(revenue), change: 0 },
+          expenses: { amount: satangToBaht(expenses), change: 0 },
+          ar: { amount: satangToBaht(accountsReceivable), change: 0 },
+          ap: { amount: satangToBaht(accountsPayable), change: 0 },
         },
-        monthlyData,
-        vatData,
-        whtData: whtSummary,
+        monthlyData: monthlyData.map(m => ({
+          ...m,
+          revenue: satangToBaht(m.revenue),
+          expense: satangToBaht(m.expense),
+          profit: satangToBaht(m.profit),
+        })),
+        vatData: vatData.map(v => ({
+          ...v,
+          vatOutput: satangToBaht(v.vatOutput),
+          vatInput: satangToBaht(v.vatInput),
+        })),
+        whtData: {
+          pnd3: satangToBaht(whtSummary.pnd3),
+          pnd53: satangToBaht(whtSummary.pnd53),
+          total: satangToBaht(whtSummary.total),
+        },
         arAging: [
-          { name: 'ปัจจุบัน', value: arAging.current || 0, color: '#22c55e' },
-          { name: '31-60 วัน', value: arAging.days31to60 || 0, color: '#eab308' },
-          { name: '61-90 วัน', value: arAging.days61to90 || 0, color: '#f97316' },
-          { name: '90+ วัน', value: arAging.over90 || 0, color: '#ef4444' },
+          { name: 'ปัจจุบัน', value: satangToBaht(arAging.current || 0), color: '#22c55e' },
+          { name: '31-60 วัน', value: satangToBaht(arAging.days31to60 || 0), color: '#eab308' },
+          { name: '61-90 วัน', value: satangToBaht(arAging.days61to90 || 0), color: '#f97316' },
+          { name: '90+ วัน', value: satangToBaht(arAging.over90 || 0), color: '#ef4444' },
         ],
         apAging: [
-          { name: 'ปัจจุบัน', value: apAging.current || 0, color: '#22c55e' },
-          { name: '31-60 วัน', value: apAging.days31to60 || 0, color: '#eab308' },
-          { name: '61-90 วัน', value: apAging.days61to90 || 0, color: '#f97316' },
-          { name: '90+ วัน', value: apAging.over90 || 0, color: '#ef4444' },
+          { name: 'ปัจจุบัน', value: satangToBaht(apAging.current || 0), color: '#22c55e' },
+          { name: '31-60 วัน', value: satangToBaht(apAging.days31to60 || 0), color: '#eab308' },
+          { name: '61-90 วัน', value: satangToBaht(apAging.days61to90 || 0), color: '#f97316' },
+          { name: '90+ วัน', value: satangToBaht(apAging.over90 || 0), color: '#ef4444' },
         ],
         quickActions: {
           draftInvoices: {

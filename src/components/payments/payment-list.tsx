@@ -574,10 +574,10 @@ export function PaymentList() {
                     <TableCell>{payment.vendorName}</TableCell>
                     <TableCell className="text-right">
                       <span className={outstanding > 0 ? 'font-semibold text-red-600' : 'text-green-600'}>
-                        ฿{(outstanding / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ฿{outstanding.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right font-semibold">฿{(payment.amount / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                    <TableCell className="text-right font-semibold">฿{payment.amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         {getStatusBadge(payment.status)}

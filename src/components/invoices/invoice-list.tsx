@@ -882,14 +882,14 @@ export function InvoiceList() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">รับชำระแล้ว (เดือนนี้)</p>
-            <p className="text-2xl font-bold text-green-600">฿{(safeInvoices?.filter(i => i.status === 'PAID' || i.status === 'PARTIAL').reduce((sum, i) => sum + (i.paidAmount || 0), 0) / 100).toLocaleString() ?? '0'}</p>
+            <p className="text-2xl font-bold text-green-600">฿{(safeInvoices?.filter(i => i.status === 'PAID' || i.status === 'PARTIAL').reduce((sum, i) => sum + (i.paidAmount || 0), 0)).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) ?? '0'}</p>
             <p className="text-xs text-gray-400">{safeInvoices?.filter(i => i.status === 'PAID' || i.status === 'PARTIAL').length ?? 0} รายการ</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">ภาษีขายรวม</p>
-            <p className="text-2xl font-bold text-purple-600">฿{(safeInvoices?.reduce((sum, i) => sum + (i.vatAmount || 0), 0) / 100).toLocaleString() ?? '0'}</p>
+            <p className="text-2xl font-bold text-purple-600">฿{(safeInvoices?.reduce((sum, i) => sum + (i.vatAmount || 0), 0)).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) ?? '0'}</p>
             <p className="text-xs text-gray-400">เดือนนี้</p>
           </CardContent>
         </Card>
@@ -980,10 +980,10 @@ export function InvoiceList() {
                     <TableCell>{invoice.customerName}</TableCell>
                     <TableCell className="text-right">
                       <span className={outstanding > 0 ? 'font-semibold text-red-600' : 'text-green-600'}>
-                        ฿{(outstanding / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ฿{outstanding.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right font-semibold">฿{((invoice.totalAmount ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                    <TableCell className="text-right font-semibold">฿{(invoice.totalAmount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         {getStatusBadge(invoice.status)}

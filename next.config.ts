@@ -1,42 +1,35 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Disable standalone mode to fix static file serving
+  // output: "standalone",
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
   async rewrites() {
+    const modulePaths = [
+      '/accounts', '/journal', '/invoices', '/vat', '/wht',
+      '/customers', '/vendors', '/purchase-requests', '/purchase-orders',
+      '/purchases', '/payments', '/credit-notes', '/debit-notes',
+      '/inventory', '/products', '/warehouses', '/stock-takes',
+      '/banking', '/assets', '/payroll', '/employees',
+      '/petty-cash', '/reports', '/settings', '/users',
+    ];
+
     return [
-      // SPA Routing - rewrite all module paths to root
-      { source: '/accounts', destination: '/' },
-      { source: '/journal', destination: '/' },
-      { source: '/invoices', destination: '/' },
-      { source: '/vat', destination: '/' },
-      { source: '/wht', destination: '/' },
-      { source: '/customers', destination: '/' },
-      { source: '/vendors', destination: '/' },
-      { source: '/purchase-requests', destination: '/' },
-      { source: '/purchase-orders', destination: '/' },
-      { source: '/purchases', destination: '/' },
-      { source: '/payments', destination: '/' },
-      { source: '/credit-notes', destination: '/' },
-      { source: '/debit-notes', destination: '/' },
-      { source: '/inventory', destination: '/' },
-      { source: '/products', destination: '/' },
-      { source: '/warehouses', destination: '/' },
-      { source: '/stock-takes', destination: '/' },
-      { source: '/banking', destination: '/' },
-      { source: '/assets', destination: '/' },
-      { source: '/payroll', destination: '/' },
-      { source: '/employees', destination: '/' },
-      { source: '/petty-cash', destination: '/' },
-      { source: '/reports', destination: '/' },
-      { source: '/settings', destination: '/' },
-      { source: '/users', destination: '/' },
+      // SPA Routing - rewrite module paths to root
+      // CRITICAL: Do not rewrite _next/static, _next/image, or static assets
+      ...modulePaths.map(path => ({
+        source: path,
+        destination: '/',
+      })),
     ];
   },
+  // Ensure static files are served correctly
+  generateEtags: true,
+  compress: true,
 };
 
 export default nextConfig;
