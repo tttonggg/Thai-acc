@@ -248,14 +248,14 @@ export function CreditNoteList() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">มูลค่าใบลดหนี้รวม</p>
-            <p className="text-2xl font-bold text-red-600">฿{(totalCreditAmount / 100).toLocaleString()}</p>
+            <p className="text-2xl font-bold text-red-600">฿{totalCreditAmount.toLocaleString()}</p>
             <p className="text-xs text-gray-400">ทั้งหมด</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">มูลค่าใบลดหนี้ (เดือนนี้)</p>
-            <p className="text-2xl font-bold text-orange-600">฿{(thisMonthCreditAmount / 100).toLocaleString()}</p>
+            <p className="text-2xl font-bold text-orange-600">฿{thisMonthCreditAmount.toLocaleString()}</p>
             <p className="text-xs text-gray-400">เดือนนี้</p>
           </CardContent>
         </Card>
@@ -315,10 +315,10 @@ export function CreditNoteList() {
                     <TableCell>{cn.customerName || '-'}</TableCell>
                     <TableCell className="font-mono">{cn.invoice?.invoiceNo || '-'}</TableCell>
                     <TableCell>{reasonLabels[cn.reason] || cn.reason}</TableCell>
-                    <TableCell className="text-right">฿{((cn.subtotal ?? 0) / 100).toLocaleString()}</TableCell>
-                    <TableCell className="text-right">฿{((cn.vatAmount ?? 0) / 100).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">฿{(cn.subtotal ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">฿{(cn.vatAmount ?? 0).toLocaleString()}</TableCell>
                     <TableCell className="text-right font-semibold text-red-600">
-                      -฿{((cn.totalAmount ?? 0) / 100).toLocaleString()}
+                      -฿{(cn.totalAmount ?? 0).toLocaleString()}
                     </TableCell>
                     <TableCell>
                       {getStatusBadge(cn.status)}

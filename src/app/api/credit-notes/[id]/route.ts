@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError } from '@/lib/api-utils'
 import { db } from '@/lib/db'
+import { satangToBaht } from '@/lib/currency'
 
 // GET /api/credit-notes/[id] - Get single credit note
 export async function GET(
@@ -32,7 +33,24 @@ export async function GET(
       return notFoundError('ไม่พบใบลดหนี้')
     }
 
-    return apiResponse(creditNote)
+    // Convert Satang to Baht for all monetary fields
+    const creditNoteInBaht = {
+      ...creditNote,
+      subtotal: satangToBaht(creditNote.subtotal),
+      vatAmount: satangToBaht(creditNote.vatAmount),
+      totalAmount: satangToBaht(creditNote.totalAmount),
+      // Convert journal entry lines if present
+      journalEntry: creditNote.journalEntry ? {
+        ...creditNote.journalEntry,
+        lines: creditNote.journalEntry.lines.map(line => ({
+          ...line,
+          debit: satangToBaht(line.debit),
+          credit: satangToBaht(line.credit),
+        }))
+      } : null,
+    }
+
+    return apiResponse(creditNoteInBaht)
   } catch (error) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError()

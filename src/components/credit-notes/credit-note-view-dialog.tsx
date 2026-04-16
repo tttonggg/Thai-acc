@@ -162,7 +162,7 @@ export function CreditNoteViewDialog({ creditNoteId, open, onOpenChange }: Credi
                 </div>
                 <div className="text-right">
                   <p className="text-3xl font-bold text-red-600">
-                    -฿{(creditNote.totalAmount / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    -฿{creditNote.totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">ยอดรวม</p>
                 </div>
@@ -233,7 +233,7 @@ export function CreditNoteViewDialog({ creditNoteId, open, onOpenChange }: Credi
             <CardContent className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-gray-600">มูลค่าก่อน VAT:</span>
-                <span className="font-medium">฿{(creditNote.subtotal / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="font-medium">฿{creditNote.subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">อัตรา VAT:</span>
@@ -241,12 +241,12 @@ export function CreditNoteViewDialog({ creditNoteId, open, onOpenChange }: Credi
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">VAT:</span>
-                <span className="font-medium">฿{(creditNote.vatAmount / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="font-medium">฿{creditNote.vatAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>ยอดรวม:</span>
-                <span className="text-red-600">-฿{(creditNote.totalAmount / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="text-red-600">-฿{creditNote.totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </CardContent>
           </Card>
@@ -283,10 +283,10 @@ export function CreditNoteViewDialog({ creditNoteId, open, onOpenChange }: Credi
                           </td>
                           <td className="px-4 py-2 text-sm">{line.description}</td>
                           <td className="px-4 py-2 text-sm text-right">
-                            {line.debit > 0 ? `฿${(line.debit / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
+                            {line.debit > 0 ? `฿${line.debit.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
                           </td>
                           <td className="px-4 py-2 text-sm text-right">
-                            {line.credit > 0 ? `฿${(line.credit / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
+                            {line.credit > 0 ? `฿${line.credit.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
                           </td>
                         </tr>
                       ))}
@@ -297,10 +297,10 @@ export function CreditNoteViewDialog({ creditNoteId, open, onOpenChange }: Credi
                           รวม:
                         </td>
                         <td className="px-4 py-2 text-sm text-right font-medium">
-                          ฿{(creditNote.journalEntry.lines.reduce((sum, l) => sum + l.debit, 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ฿{creditNote.journalEntry.lines.reduce((sum, l) => sum + l.debit, 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                         <td className="px-4 py-2 text-sm text-right font-medium">
-                          ฿{(creditNote.journalEntry.lines.reduce((sum, l) => sum + l.credit, 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ฿{creditNote.journalEntry.lines.reduce((sum, l) => sum + l.credit, 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                       </tr>
                     </tfoot>
