@@ -54,6 +54,49 @@ export async function GET(
   }
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await requireAuth(request)
+    const { id } = await params
+    const body = await request.json()
+    const { action } = body
+
+    // Find invoice
+    const invoice = await db.invoice.findUnique({
+      where: { id }
+    })
+
+    if (!invoice) {
+      return notFoundError("ไม่พบใบกำกับภาษี")
+    }
+
+    // Handle different actions
+    if (action === 'post') {
+      // Issue invoice (DRAFT → ISSUED)
+      if (invoice.status !== 'DRAFT') {
+        return apiError("สามารถออกเฉพาะใบกำกับภาษีสถานะร่างเท่านั้น", 400)
+      }
+
+      const updatedInvoice = await db.invoice.update({
+        where: { id },
+        data: { status: 'ISSUED' }
+      })
+
+      return apiResponse(updatedInvoice)
+    }
+
+    return apiError("ไม่รองรับ action ที่ร้องขอ", 400)
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("unauthorized")) {
+      return unauthorizedError()
+    }
+    return apiError("เกิดข้อผิดพลาดในการอัปเดตสถานะใบกำกับภาษี")
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
