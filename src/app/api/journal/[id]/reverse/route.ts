@@ -16,7 +16,7 @@ export async function POST(
   try {
     const user = await requireRole(['ACCOUNTANT', 'ADMIN'])
     const { id } = await params
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
     const body = await request.json()
     const { reason } = body
 

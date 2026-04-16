@@ -159,7 +159,7 @@ export async function POST(
     }
 
     // Get client IP for audit log
-    const clientIp = getClientIp(request)
+    const clientIp = getClientIp(request.headers)
 
     // Create comment with transaction
     const comment = await db.$transaction(async (tx) => {

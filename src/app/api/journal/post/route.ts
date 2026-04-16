@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
   try {
     // Require authentication
     const user = await requireAuth()
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
 
     // Parse and validate request body
     const body = await request.json()

@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       const result = await changePassword(user.id, oldPassword, newPassword)
       
       if (result.success) {
-        const ipAddress = getClientIp(request)
+        const ipAddress = getClientIp(request.headers)
         const userAgent = request.headers.get('user-agent') || 'unknown'
         
         await logSecurityEvent(
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       const result = await resetPassword(userId, newPassword)
       
       if (result.success) {
-        const ipAddress = getClientIp(request)
+        const ipAddress = getClientIp(request.headers)
         const userAgent = request.headers.get('user-agent') || 'unknown'
         
         await logSecurityEvent(

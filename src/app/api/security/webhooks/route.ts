@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action, id } = body
     
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
     
     if (action === 'create') {
@@ -199,7 +199,7 @@ export async function PUT(request: NextRequest) {
       },
     })
     
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
     
     await logSecurityEvent(
@@ -244,7 +244,7 @@ export async function DELETE(request: NextRequest) {
       where: { id },
     })
     
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
     
     await logSecurityEvent(

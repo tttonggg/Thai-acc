@@ -16,7 +16,7 @@ import { getClientIp } from '@/lib/api-utils'
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request)
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
     
     const body = await request.json()

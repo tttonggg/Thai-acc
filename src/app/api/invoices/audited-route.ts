@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
   
   try {
     const user = await requireAuth(request)
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
 
     const body = await request.json()
@@ -252,7 +252,7 @@ export async function POST(request: NextRequest) {
           'CREATE',
           null,
           { error: error.message },
-          getClientIp(request),
+          getClientIp(request.headers),
           request.headers.get('user-agent') || 'unknown'
         )
       }
@@ -275,7 +275,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const user = await requireAuth(request)
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
     
     const url = new URL(request.url)
@@ -335,7 +335,7 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const user = await requireAuth(request)
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
     
     const url = new URL(request.url)

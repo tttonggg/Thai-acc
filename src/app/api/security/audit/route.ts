@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     })
     
     // Log access to audit logs
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
     
     await logSecurityEvent(
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     if (action === 'verify') {
       const result = await verifyAuditIntegrity()
       
-      const ipAddress = getClientIp(request)
+      const ipAddress = getClientIp(request.headers)
       const userAgent = request.headers.get('user-agent') || 'unknown'
       
       await logSecurityEvent(

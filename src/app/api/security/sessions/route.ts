@@ -46,7 +46,7 @@ export async function DELETE(request: NextRequest) {
     const sessionId = url.searchParams.get('id')
     const revokeAll = url.searchParams.get('all') === 'true'
     
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
     
     if (revokeAll) {
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     if (action === 'revoke-others') {
       // This would need the current session token which we don't have in JWT session
       // For now, just log the attempt
-      const ipAddress = getClientIp(request)
+      const ipAddress = getClientIp(request.headers)
       const userAgent = request.headers.get('user-agent') || 'unknown'
       
       await logSecurityEvent(

@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const ipAddress = getClientIp(request)
+    const ipAddress = getClientIp(request.headers)
 
     const body = await request.json()
     const validatedData = invoiceSchema.parse(body)
