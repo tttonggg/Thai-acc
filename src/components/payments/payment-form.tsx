@@ -572,7 +572,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                                 </span>
                               </div>
                               <Badge variant="outline">
-ค้างจ่าย ฿{(invoice.balance / 100).toLocaleString()}                              </Badge>
+ค้างจ่าย ฿{invoice.balance.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}                              </Badge>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
@@ -583,7 +583,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                                   type="number"
                                   step="0.01"
                                   placeholder="0.00"
-                                  value={allocations.find(a => a.invoiceId === invoice.id)?.amount ? (allocations.find(a => a.invoiceId === invoice.id)!.amount / 100) : ''}
+                                  value={allocations.find(a => a.invoiceId === invoice.id)?.amount || ''}
                                   onChange={(e) => {
                                     const value = Math.round(parseFloat(e.target.value) * 100) || 0
                                     const index = allocations.findIndex(a => a.invoiceId === invoice.id)
