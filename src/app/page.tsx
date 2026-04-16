@@ -116,6 +116,7 @@ export type Module =
   | 'activity-log'
   | 'webhooks'
   | 'api-analytics'
+  | 'invoice-detail'
 
 export default function Home() {
   const { data: session, status } = useSession()
