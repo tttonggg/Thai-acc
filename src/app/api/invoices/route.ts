@@ -132,6 +132,8 @@ export async function GET(request: NextRequest) {
     // Database stores Satang (integers), API returns Baht (decimals)
     const invoicesInBaht = invoices.map(invoice => ({
       ...invoice,
+      customerName: invoice.customer?.name || '',
+      customerName: invoice.customer?.name || '',  // Extract customer name for list view
       subtotal: satangToBaht(invoice.subtotal),
       vatAmount: satangToBaht(invoice.vatAmount),
       totalAmount: satangToBaht(invoice.totalAmount),
