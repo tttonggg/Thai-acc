@@ -60,13 +60,15 @@ jobs:
             echo "🔨 Building application..."
             npm run build
 
-            # Restart production server
+            # Restart production server (use more specific pattern to avoid killing SSH)
             echo "🔄 Restarting production server..."
-            pkill -f "node.*standalone/server.js" || true
+            pkill -9 -f "standalone/server.js" 2>/dev/null || true
             sleep 2
 
             # Start server in background with logging
-            nohup node .next/standalone/server.js > /root/thai-acc/server.log 2>&1 &
+            cd /root/thai-acc
+            nohup node .next/standalone/server.js > server.log 2>&1 &
+            disown
 
             # Wait for server to start
             echo "⏳ Waiting for server to start..."
