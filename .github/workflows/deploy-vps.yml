@@ -66,16 +66,16 @@ jobs:
             echo "🔨 Building application..."
             npm run build
 
-            # Use screen to persist the server
-            echo "🔄 Starting server in screen session..."
+            # Use screen to persist the server (if available)
+            echo "🔄 Starting server..."
 
             # Kill any existing node server on port 3000 (safer approach)
             fuser -k 3000/tcp 2>/dev/null || true
             sleep 2
 
-            # Start server in a detached screen session
+            # Start server - use nohup with full path
             cd /root/thai-acc
-            screen -dmS thai-acc bash -c "node .next/standalone/server.js >> server.log 2>&1"
+            nohup node .next/standalone/server.js > server.log 2>&1 &
             sleep 5
 
             # Health check
