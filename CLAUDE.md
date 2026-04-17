@@ -228,6 +228,11 @@ sqlite3 prisma/dev.db "SELECT totalAmount FROM Invoice LIMIT 5;"
 
 **🚨 CRITICAL RULE**: This project uses ONLY `acc.k56mm.uk` via tunnel `e4880092-554d-471c-aa65-ec8c25b7e6bd`. Other tunnels on the VPS belong to different projects — **never touch them**.
 
+**SSH Connection**:
+```bash
+ssh -i ~/.ssh/test root@135.181.107.76
+```
+
 **Tunnel details**:
 - Tunnel ID: `e4880092-554d-471c-aa65-ec8c25b7e6bd`
 - Credentials: `/root/.cloudflared/e4880092-554d-471c-aa65-ec8c25b7e6bd.json`
@@ -241,12 +246,12 @@ sqlite3 prisma/dev.db "SELECT totalAmount FROM Invoice LIMIT 5;"
 
 **To restart the production server only** (not the tunnel):
 ```bash
-ssh root@VPS "pkill -f 'node.*standalone'; cd /root/thai-acc && nohup node .next/standalone/thai-acc/server.js > /root/thai-acc/server.log 2>&1 &"
+ssh -i ~/.ssh/test root@135.181.107.76 "cd /root/thai-acc && fuser -k 3000/tcp 2>/dev/null; sleep 1; nohup node .next/standalone/thai-acc/server.js > server.log 2>&1 &"
 ```
 
 **To check server status** (without touching tunnel):
 ```bash
-ssh root@VPS "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/"
+ssh -i ~/.ssh/test root@135.181.107.76 "curl -s http://localhost:3000/api/health"
 ```
 
 **Current VPS .env** (`/root/thai-acc/.env`):
