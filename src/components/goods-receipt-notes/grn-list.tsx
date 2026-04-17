@@ -73,8 +73,6 @@ const quickFilters: { value: QuickFilter; label: string; activeClass: string }[]
 ]
 
 export function GoodsReceiptNotesList() {
-  // Component alias for backward compatibility
-  const GrnList = GoodsReceiptNotesList
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
