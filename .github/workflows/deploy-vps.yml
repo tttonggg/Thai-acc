@@ -49,15 +49,15 @@ jobs:
 
             # Install dependencies
             echo "📦 Installing dependencies..."
-            bun install
+            npm install
 
             # Generate Prisma client
             echo "🗄️  Generating Prisma client..."
-            bun run db:generate
+            npm run db:generate
 
             # Build application
             echo "🔨 Building application..."
-            bun run build
+            npm run build
 
             # Restart production server
             echo "🔄 Restarting production server..."
