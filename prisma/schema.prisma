@@ -126,6 +126,7 @@ model JournalEntry {
   cheques           Cheque[]           @relation("ChequeJournal")
   pettyCashVouchers PettyCashVoucher[] @relation("PettyCashVoucherJournal")
   stockTakes        StockTake[]        @relation("StockTakeJournal")
+  goodsReceiptNotes GoodsReceiptNote[] @relation("GoodsReceiptNoteJournal")
 
   @@index([createdById])
   @@index([approvedById])
@@ -233,6 +234,7 @@ model Vendor {
   payments         Payment[]
   debitNotes       DebitNote[]
   purchaseOrders   PurchaseOrder[]   @relation("POVendor")
+  goodsReceiptNotes GoodsReceiptNote[]
 
   @@index([deletedAt])
 }
@@ -274,6 +276,7 @@ model Product {
   productCostHistories ProductCostHistory[]
   prRequestLines       PurchaseRequestLine[] @relation("PRLineProduct")
   poOrderLines         PurchaseOrderLine[] @relation("POLineProduct")
+  goodsReceiptNoteLines GoodsReceiptNoteLine[]
 
   @@index([deletedAt])
 }
@@ -657,6 +660,45 @@ model Payment {
   @@index([currencyId])
 }
 
+// ============================================
+// เอกสารประจำ / Recurring Document
+// ============================================
+model RecurringDocument {
+  id          String      @id @default(cuid())
+  type        String // INVOICE, EXPENSE, RECEIPT
+  referenceId String? // ID ของเอกสารต้นฉบับ
+  title       String // ชื่อเอกสาร
+  description String? // รายละเอียด
+  frequency   String // MONTHLY, QUARTERLY, YEARLY
+  dayOfMonth  Int // วันที่ในเดือน (1-31)
+  startDate   DateTime // วันที่เริ่ม
+  endDate     DateTime? // วันที่สิ้นสุด
+  nextRunAt   DateTime? // วันที่จะรันครั้งต่อไป
+  lastRunAt   DateTime? // วันที่รันล่าสุด
+  isActive    Boolean     @default(true) // เปิด/ปิด
+  createdBy   String? // ผู้สร้าง
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  runs        RecurringDocumentRun[]
+
+  @@index([isActive])
+  @@index([nextRunAt])
+}
+
+model RecurringDocumentRun {
+  id          String            @id @default(cuid())
+  recurringId String
+  recurring   RecurringDocument @relation(fields: [recurringId], references: [id], onDelete: Cascade)
+  runAt       DateTime // วันที่รัน
+  status      String // PENDING, COMPLETED, FAILED
+  documentId  String? // ID ของเอกสารที่สร้าง
+  error       String? // ข้อผิดพลาด
+  createdAt   DateTime          @default(now())
+
+  @@index([recurringId])
+  @@index([runAt])
+}
+
 model PaymentAllocation {
   id        String          @id @default(cuid())
   paymentId String
@@ -817,6 +859,7 @@ model User {
   approvedPRs         PurchaseRequest[] @relation("PRApprover")
   createdPOs          PurchaseOrder[]   @relation("POCreator")
   updatedPOs          PurchaseOrder[]   @relation("POUpdater")
+  receivedGRNs        GoodsReceiptNote[] @relation("GRNReceiver")
 }
 
 enum UserRole {
@@ -915,6 +958,7 @@ model Warehouse {
   balances       StockBalance[]
   stockMovements StockMovement[]
   stockTakes     StockTake[]
+  goodsReceiptNotes GoodsReceiptNote[]
 }
 
 model WarehouseZone {
@@ -2113,6 +2157,10 @@ model PurchaseOrder {
   purchaseInvoiceId String?            @unique // อ้างอิงใบซื้อ
   purchaseInvoice   PurchaseInvoice?    @relation("POInvoice", fields: [purchaseInvoiceId], references: [id])
 
+  // เชื่อมโยงกับใบรับสินค้า
+  grnId             String?            // อ้างอิงใบรับสินค้า
+  grn               GoodsReceiptNote?  @relation("POGRN")
+
   // รายการสินค้า
   lines             PurchaseOrderLine[]
 
@@ -2166,7 +2214,103 @@ model PurchaseOrderLine {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
+  goodsReceiptNoteLines GoodsReceiptNoteLine[]
+
   @@index([orderId])
+  @@index([productId])
+}
+
+// ============================================
+// Goods Receipt Note (GRN) - Three-way match
+// ============================================
+
+model GoodsReceiptNote {
+  id                String              @id @default(cuid())
+  grnNo             String              @unique // เลขที่ใบรับสินค้า GRN202603-001
+
+  // วันที่และสถานะ
+  date              DateTime            @default(now()) // วันที่รับสินค้า
+  status            GoodsReceiptStatus  @default(DRAFT)
+
+  // ผู้ขาย
+  vendorId          String?
+  vendor            Vendor?             @relation(fields: [vendorId], references: [id])
+
+  // คลังสินค้า
+  warehouseId       String?
+  warehouse         Warehouse?         @relation(fields: [warehouseId], references: [id])
+
+  // อ้างอิงใบสั่งซื้อ
+  poId              String?            @unique
+  purchaseOrder     PurchaseOrder?      @relation("POGRN", fields: [poId], references: [id])
+
+  // ผู้รับสินค้า
+  receivedById      String?
+  receivedBy        User?               @relation("GRNReceiver", fields: [receivedById], references: [id])
+
+  // บันทึกบัญชี
+  journalEntryId    String?
+  journalEntry      JournalEntry?       @relation("GoodsReceiptNoteJournal", fields: [journalEntryId], references: [id])
+
+  // หมายเหตุ
+  notes             String?
+
+  // Audit
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+
+  // Relations
+  lines             GoodsReceiptNoteLine[]
+
+  @@index([vendorId])
+  @@index([warehouseId])
+  @@index([poId])
+  @@index([status])
+  @@index([date])
+  @@index([journalEntryId])
+}
+
+enum GoodsReceiptStatus {
+  DRAFT       // ร่าง
+  RECEIVED    // รับสินค้าแล้ว
+  INSPECTED   // ตรวจสอบแล้ว
+  CANCELLED   // ยกเลิก
+}
+
+// Goods Receipt Note Line
+model GoodsReceiptNoteLine {
+  id              String    @id @default(cuid())
+  grnId           String
+  grn             GoodsReceiptNote @relation(fields: [grnId], references: [id], onDelete: Cascade)
+
+  // อ้างอิง PO Line
+  poLineId        String?
+  poLine          PurchaseOrderLine? @relation(fields: [poLineId], references: [id])
+
+  // สินค้า
+  productId       String?
+  product         Product?  @relation(fields: [productId], references: [id])
+  description     String    // รายละเอียดสินค้า/บริการ
+  unit            String?   // หน่วย
+
+  // จำนวน
+  qtyOrdered      Float     @default(0) // จำนวนที่สั่งซื้อ
+  qtyReceived     Float     @default(0) // จำนวนที่รับ
+  qtyRejected     Float     @default(0) // จำนวนที่ปฏิเสธ
+
+  // มูลค่า (สตางค์)
+  unitCost        Int       @default(0) // ต้นทุนต่อหน่วย (สตางค์)
+  amount          Int       @default(0) // จำนวนเงิน (สตางค์)
+
+  // หมายเหตุ
+  notes           String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([grnId])
+  @@index([poLineId])
   @@index([productId])
 }
 

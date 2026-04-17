@@ -439,6 +439,8 @@ export default function Home() {
         )
       case 'recurring':
         return <RecurringDocuments />
+      case 'cash-flow':
+        return <CashFlowReport />
       default:
         return <Dashboard />
     }

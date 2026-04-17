@@ -75,7 +75,7 @@ jobs:
 
             # Start server - use nohup with full path
             cd /root/thai-acc
-            nohup node .next/standalone/server.js > server.log 2>&1 &
+            cd .next/standalone/thai-acc && nohup node server.js > /root/thai-acc/server.log 2>&1 &
             sleep 5
 
             # Health check

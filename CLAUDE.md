@@ -246,8 +246,10 @@ ssh -i ~/.ssh/test root@135.181.107.76
 
 **To restart the production server only** (not the tunnel):
 ```bash
-ssh -i ~/.ssh/test root@135.181.107.76 "cd /root/thai-acc && fuser -k 3000/tcp 2>/dev/null; sleep 1; nohup node .next/standalone/thai-acc/server.js > server.log 2>&1 &"
+ssh -i ~/.ssh/test root@135.181.107.76 "fuser -k 3000/tcp 2>/dev/null; sleep 2; cd /root/thai-acc/.next/standalone/thai-acc && nohup node server.js > /root/thai-acc/server.log 2>&1 &"
 ```
+
+**⚠️ CRITICAL - Server Path**: The standalone server MUST run from `.next/standalone/thai-acc/` directory. Static files (manifest.json, icons, JS chunks) will 404 if running from wrong directory.
 
 **To check server status** (without touching tunnel):
 ```bash
@@ -269,4 +271,5 @@ BYPASS_CSRF=true
 bun run build        # Creates standalone output in .next/standalone/
 # Upload .next/standalone/ to VPS at /root/thai-acc/
 # Server entry: .next/standalone/thai-acc/server.js
+# MUST run from: cd .next/standalone/thai-acc && node server.js
 ```

@@ -204,10 +204,22 @@ export function GoodsReceiptNotesList() {
       const result = await grnRes.json()
       const grn = result.data
 
-      let company = null
+      interface CompanyInfo {
+        name?: string
+        address?: string
+        subDistrict?: string
+        district?: string
+        province?: string
+        postalCode?: string
+        taxId?: string
+        phone?: string
+        email?: string
+      }
+
+      let company: CompanyInfo | null = null
       if (companyRes.ok) {
         const companyResult = await companyRes.json()
-        company = companyResult.data
+        company = companyResult.data as CompanyInfo | null
       }
 
       if (!grn) {
