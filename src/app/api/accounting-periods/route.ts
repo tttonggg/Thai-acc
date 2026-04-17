@@ -14,6 +14,9 @@ import {
   initializeYearPeriods,
 } from "@/lib/period-service"
 import { z } from "zod"
+import { AccountingPeriodStatus } from "@prisma/client"
+
+const periodStatusEnum = z.nativeEnum(AccountingPeriodStatus)
 
 // GET /api/accounting-periods - List all periods
 export async function GET(req: NextRequest) {
@@ -30,7 +33,7 @@ export async function GET(req: NextRequest) {
     const periods = await prisma.accountingPeriod.findMany({
       where: {
         ...(year && { year }),
-        ...(status && { status }),
+        ...(status && { status: status as AccountingPeriodStatus }),
       },
       orderBy: [{ year: "desc" }, { month: "desc" }],
     })
@@ -98,7 +101,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error processing period action:", error)
     if (error instanceof z.ZodError) {
-      return errorResponse(error.errors[0].message, 400)
+      return errorResponse(error.issues[0].message, 400)
     }
     return errorResponse("Failed to process request", 500)
   }

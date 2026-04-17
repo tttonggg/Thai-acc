@@ -296,7 +296,7 @@ function handlePrismaError(
 function formatZodErrors(zodError: ZodError): Record<string, string> {
   const fields: Record<string, string> = {};
 
-  zodError.errors.forEach((err) => {
+  zodError.issues.forEach((err) => {
     const path = err.path.join('.');
     fields[path] = err.message || 'Invalid value';
   });

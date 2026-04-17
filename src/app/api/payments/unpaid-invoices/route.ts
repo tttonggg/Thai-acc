@@ -6,7 +6,7 @@ import { AuthError } from "@/lib/api-auth"
 // GET /api/payments/unpaid-invoices?vendorId=xxx - Get unpaid purchase invoices for allocation
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth(request)
+    await requireAuth()
 
     const { searchParams } = new URL(request.url)
     const vendorId = searchParams.get("vendorId")

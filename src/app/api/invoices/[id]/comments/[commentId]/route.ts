@@ -8,7 +8,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string; commentId: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id, commentId } = await params
 
     // Check if invoice exists
@@ -230,7 +230,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; commentId: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id, commentId } = await params
 
     // Check if invoice exists

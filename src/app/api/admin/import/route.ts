@@ -7,7 +7,7 @@ import { z } from 'zod'
 // GET - Import history
 export async function GET(request: NextRequest) {
   try {
-    await requireRole('ADMIN', request)
+    await requireRole(['ADMIN'])
 
     const searchParams = request.nextUrl.searchParams
     const dataType = searchParams.get('dataType')
@@ -248,7 +248,7 @@ function validateData(dataType: DataType, record: any): { valid: boolean; errors
     return { valid: true, errors: [], data: validatedData }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         errors.push(`${err.path.join('.')}: ${err.message}`)
       })
     } else {
@@ -287,7 +287,7 @@ async function importData(
             error: validation.errors.join(', '),
             data: record,
           })
-          result.preview.push({
+          result.preview?.push({
             action: 'error',
             error: validation.errors.join(', '),
           })
@@ -324,7 +324,7 @@ async function importData(
 
           if (existingRecord) {
             if (options.skipDuplicates) {
-              result.preview.push({
+              result.preview?.push({
                 action: 'error',
                 error: 'รหัสนี้มีอยู่แล้ว (ข้ามไป)',
               })
@@ -359,12 +359,12 @@ async function importData(
                   break
               }
               result.updated++
-              result.preview.push({
+              result.preview?.push({
                 action: 'update',
                 data,
               })
             } else {
-              result.preview.push({
+              result.preview?.push({
                 action: 'error',
                 error: 'รหัสนี้มีอยู่แล้ว (เลือกทับข้อมูลเดิมเพื่ออัปเดต)',
               })
@@ -385,7 +385,7 @@ async function importData(
                 break
             }
             result.created++
-            result.preview.push({
+            result.preview?.push({
               action: 'create',
               data,
             })
@@ -397,7 +397,7 @@ async function importData(
             error: error.message || 'เกิดข้อผิดพลาด',
             data: record,
           })
-          result.preview.push({
+          result.preview?.push({
             action: 'error',
             error: error.message || 'เกิดข้อผิดพลาด',
           })
@@ -424,7 +424,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Check admin role
-    const user = await requireRole('ADMIN', request)
+    const user = await requireRole(['ADMIN'])
 
     const formData = await request.formData()
     const file = formData.get('file') as File

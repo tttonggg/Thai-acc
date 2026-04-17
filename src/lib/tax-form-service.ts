@@ -3,7 +3,7 @@
 
 import { prisma } from "@/lib/db"
 import type { TaxForm, TaxFormLine, TaxFormType, TaxFormStatus } from "@prisma/client"
-import { generatePDF } from "./pdf-generator"
+import { generatePDF, generatePP30PDF, generatePND3PDF, generatePND53PDF } from "./pdf-generator"
 import { generateExcelBuffer } from "./excel-export"
 
 // PND3 Income Types (ประเภทเงินได้ ภงด.3)
@@ -320,6 +320,74 @@ export async function exportTaxFormToPDF(taxFormId: string): Promise<Uint8Array>
 
   const company = await prisma.company.findFirst()
 
+  // PND3 uses dedicated PDF generator
+  if (taxForm.formType === "PND3") {
+    return generatePND3PDF({
+      companyName: company?.name || "",
+      companyTaxId: company?.taxId || "",
+      companyBranch: (company as any)?.branchCode,
+      companyAddress: company?.address,
+      month: taxForm.month,
+      year: taxForm.year,
+      totalAmount: taxForm.totalAmount,
+      totalTax: taxForm.totalTax,
+      lines: taxForm.lines.map((line) => ({
+        payeeName: line.payeeName,
+        payeeTaxId: line.payeeTaxId,
+        description: line.description,
+        incomeType: line.incomeType,
+        incomeAmount: line.incomeAmount,
+        taxRate: line.taxRate,
+        taxAmount: line.taxAmount,
+      })),
+    })
+  }
+
+  // PND53 uses dedicated PDF generator
+  if (taxForm.formType === "PND53") {
+    return generatePND53PDF({
+      companyName: company?.name || "",
+      companyTaxId: company?.taxId || "",
+      companyBranch: (company as any)?.branchCode,
+      companyAddress: company?.address,
+      month: taxForm.month,
+      year: taxForm.year,
+      totalAmount: taxForm.totalAmount,
+      totalTax: taxForm.totalTax,
+      lines: taxForm.lines.map((line) => ({
+        payeeName: line.payeeName,
+        payeeTaxId: line.payeeTaxId,
+        description: line.description,
+        incomeType: line.incomeType,
+        incomeAmount: line.incomeAmount,
+        taxRate: line.taxRate,
+        taxAmount: line.taxAmount,
+      })),
+    })
+  }
+
+  // PP30 uses dedicated PDF generator
+  if (taxForm.formType === "PP30") {
+    const outputLine = taxForm.lines.find(l => l.incomeType === "OUTPUT")
+    const inputLine = taxForm.lines.find(l => l.incomeType === "INPUT")
+    const netLine = taxForm.lines.find(l => l.incomeType === "NET")
+
+    return generatePP30PDF({
+      companyName: company?.name || "",
+      companyTaxId: company?.taxId || "",
+      companyBranch: (company as any)?.branchCode,
+      companyAddress: company?.address,
+      month: taxForm.month,
+      year: taxForm.year,
+      outputVat: outputLine?.taxAmount || 0,
+      inputVat: inputLine?.taxAmount || 0,
+      netVat: netLine?.taxAmount || taxForm.totalTax,
+      outputAmount: outputLine?.incomeAmount || 0,
+      inputAmount: inputLine?.incomeAmount || 0,
+    })
+  }
+
+  // Fallback generic generator
   const formTypeNames: Record<string, string> = {
     PND3: "ภ.ง.ด. 3",
     PND53: "ภ.ง.ด. 53",

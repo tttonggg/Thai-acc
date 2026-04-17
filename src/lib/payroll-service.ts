@@ -231,3 +231,57 @@ export async function createPayrollJournalEntry(
     return journalEntry
   })
 }
+
+/**
+ * Add provident fund contributions to a payroll run
+ * Called automatically when processing payroll with a provident fund
+ */
+export async function addProvidentFundContributions(
+  payrollRunId: string,
+  providentFundId: string
+) {
+  const prisma = (await import('@/lib/db')).default
+
+  return await prisma.$transaction(async (tx) => {
+    const payrollRun = await tx.payrollRun.findUnique({
+      where: { id: payrollRunId },
+      include: { payrolls: true }
+    })
+
+    if (!payrollRun) {
+      throw new Error(`Payroll run ${payrollRunId} not found`)
+    }
+
+    const fund = await tx.providentFund.findUnique({
+      where: { id: providentFundId }
+    })
+
+    if (!fund) {
+      throw new Error(`Provident fund ${providentFundId} not found`)
+    }
+
+    // Create contributions for each employee
+    const contributions = await Promise.all(
+      payrollRun.payrolls.map(async (payroll) => {
+        const { employeePortion, employerPortion } = calculateContribution(
+          payroll.baseSalary,
+          fund.employeeRate,
+          fund.employerRate,
+          fund.maxMonthly
+        )
+
+        return await tx.providentFundContribution.create({
+          data: {
+            providentFundId,
+            employeeId: payroll.employeeId,
+            payrollRunId,
+            employeePortion,
+            employerPortion,
+          },
+        })
+      })
+    )
+
+    return contributions
+  })
+}

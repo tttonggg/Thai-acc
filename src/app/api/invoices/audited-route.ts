@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
   let createdInvoice: any = null
   
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
 
@@ -244,7 +244,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     // Log failed creation attempt
     if (error.name !== 'ZodError') {
-      const user = await requireAuth(request).catch(() => null)
+      const user = await requireAuth().catch(() => null)
       if (user) {
         await logInvoiceMutation(
           user.id,
@@ -274,7 +274,7 @@ export async function POST(request: NextRequest) {
 // PUT - Update invoice with audit logging
 export async function PUT(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
     
@@ -334,7 +334,7 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete/void invoice with audit logging
 export async function DELETE(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
     

@@ -38,7 +38,7 @@ interface ImportResult {
   updated?: number
   errors?: number
   preview?: ImportPreview[]
-  errors?: Array<{ row: number; error: string; data?: any }>
+  importErrors?: Array<{ row: number; error: string; data?: any }>
 }
 
 interface ImportHistory {

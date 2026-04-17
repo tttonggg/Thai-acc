@@ -691,7 +691,7 @@ export function GRNForm({ open, onClose, onSuccess }: GRNFormProps) {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>บัญชี</TableTableHead>
+                            <TableHead>บัญชี</TableHead>
                             <TableHead className="text-right">เดบิต (Dr)</TableHead>
                             <TableHead className="text-right">เครดิต (Cr)</TableHead>
                           </TableRow>

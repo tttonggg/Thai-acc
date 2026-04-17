@@ -9,6 +9,7 @@ export async function GET(
 ) {
   try {
     await requireAuth()
+    const { id } = await params
     const account = await prisma.bankAccount.findUnique({
       where: { id: id },
     })
@@ -35,6 +36,7 @@ export async function PATCH(
 ) {
   try {
     await requireAuth()
+    const { id } = await params
     const body = await request.json()
     const { code, bankName, branchName, accountNumber, accountName, glAccountId, isActive } = body
 
@@ -95,6 +97,7 @@ export async function DELETE(
 ) {
   try {
     await requireAuth()
+    const { id } = await params
 
     // Check if cheques exist
     const chequeCount = await prisma.cheque.count({

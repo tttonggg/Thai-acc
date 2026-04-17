@@ -9,7 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request)
+    await requireAuth()
     const { id } = await params
 
     const creditNote = await db.creditNote.findUnique({
@@ -65,7 +65,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
 
     if (user.role === 'VIEWER') {
       return forbiddenError()
@@ -119,7 +119,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
 
     if (user.role !== 'ADMIN') {
       return forbiddenError()

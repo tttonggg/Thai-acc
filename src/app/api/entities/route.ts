@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error creating entity:", error)
     if (error instanceof z.ZodError) {
-      return errorResponse(error.errors[0].message, 400)
+      return errorResponse(error.issues[0].message, 400)
     }
     return errorResponse("Failed to create entity", 500)
   }

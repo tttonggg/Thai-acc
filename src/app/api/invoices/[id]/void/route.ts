@@ -160,12 +160,19 @@ export async function POST(
     }, { maxWait: 5000, timeout: 10000 })
 
     // Log activity
-    await logActivity(user.id, 'INVOICE_VOID', id, {
-      invoiceNo: invoice.invoiceNo,
-      customerId: invoice.customerId,
-      totalAmount: invoice.totalAmount,
-      reason,
-    }, ipAddress)
+    await logActivity({
+      userId: user.id,
+      action: 'INVOICE_VOID',
+      module: 'invoices',
+      recordId: id,
+      details: {
+        invoiceNo: invoice.invoiceNo,
+        customerId: invoice.customerId,
+        totalAmount: invoice.totalAmount,
+        reason,
+      },
+      ipAddress,
+    })
 
     return NextResponse.json({
       success: true,

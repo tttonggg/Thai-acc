@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Disable standalone mode to fix static file serving
-  // output: "standalone",
+  // Enable standalone mode for production deployment
+  output: "standalone",
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,

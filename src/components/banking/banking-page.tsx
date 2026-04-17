@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { Landmark, CreditCard, Plus, RefreshCw, CheckCircle, Clock, AlertCircle, XCircle, Scale, Pencil, Trash2, ArrowRight, X } from 'lucide-react'
+import { Landmark, CreditCard, Plus, RefreshCw, CheckCircle, Clock, AlertCircle, XCircle, Scale, Pencil, Trash2, ArrowRight, X, Upload, Link2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +15,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { BankAccountEditDialog } from './bank-account-edit-dialog'
 import { ChequeEditDialog } from './cheque-edit-dialog'
+import { BankStatementImport } from './bank-statement-import'
+import { BankMatching } from './bank-matching'
 
 const fc = (n: number) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(n)
 const fd = (d: string) => new Date(d).toLocaleDateString('th-TH', { dateStyle: 'medium' })
@@ -578,20 +580,30 @@ function ReconciliationTab() {
 }
 
 export function BankingPage() {
-  const [tab, setTab] = useState<'accounts' | 'cheques' | 'reconciliation'>('accounts')
+  const [tab, setTab] = useState<'accounts' | 'cheques' | 'reconciliation' | 'import' | 'matching'>('accounts')
   return (
     <div className="space-y-0">
       <div className="mb-4"><h1 className="text-2xl font-bold text-gray-800">บัญชีธนาคาร & เช็ค</h1><p className="text-sm text-gray-500">จัดการบัญชีธนาคาร เช็ครับ-จ่าย และกระทบยอด</p></div>
       <div className="border-b mb-6">
         <nav className="flex gap-1">
-          {[{ id: 'accounts' as const, label: 'บัญชีธนาคาร', icon: Landmark }, { id: 'cheques' as const, label: 'ทะเบียนเช็ค', icon: CreditCard }, { id: 'reconciliation' as const, label: 'กระทบยอด', icon: Scale }].map(t => (
+          {[
+            { id: 'accounts' as const, label: 'บัญชีธนาคาร', icon: Landmark },
+            { id: 'cheques' as const, label: 'ทะเบียนเช็ค', icon: CreditCard },
+            { id: 'import' as const, label: 'นำเข้า Bank', icon: Upload },
+            { id: 'matching' as const, label: 'จับคู่', icon: Link2 },
+            { id: 'reconciliation' as const, label: 'กระทบยอด', icon: Scale },
+          ].map(t => (
             <button key={t.id} onClick={() => setTab(t.id)} className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === t.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
               <t.icon className="h-4 w-4" />{t.label}
             </button>
           ))}
         </nav>
       </div>
-      {tab === 'accounts' ? <BankAccountsTab /> : tab === 'cheques' ? <ChequeRegisterTab /> : <ReconciliationTab />}
+      {tab === 'accounts' ? <BankAccountsTab /> :
+       tab === 'cheques' ? <ChequeRegisterTab /> :
+       tab === 'import' ? <BankStatementImport /> :
+       tab === 'matching' ? <BankMatching /> :
+       <ReconciliationTab />}
     </div>
   )
 }

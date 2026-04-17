@@ -7,7 +7,7 @@ import { AuthError } from "@/lib/api-auth"
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth(request)
+    await requireAuth()
     const { searchParams } = request.nextUrl
     const isActive = searchParams.get('active')
     const where: any = {}
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth(request)
+    await requireAuth()
     const body = await request.json()
     const {
       employeeCode, firstName, lastName, idCardNumber, position, department,

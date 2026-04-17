@@ -19,7 +19,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id } = await params
 
     // Check if invoice exists and user has access
@@ -257,7 +257,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id } = await params
 
     // Check permissions
@@ -401,7 +401,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id } = await params
 
     // Check permissions

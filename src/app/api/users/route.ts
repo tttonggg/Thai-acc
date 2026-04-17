@@ -18,7 +18,7 @@ const userSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole('ADMIN')
+    await requireRole(['ADMIN'])
 
     const users = await prisma.user.findMany({
       select: {
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole('ADMIN')
+    await requireRole(['ADMIN'])
 
     const body = await request.json()
     const validatedData = userSchema.parse(body)

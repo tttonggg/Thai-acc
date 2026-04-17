@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'change') {
       // Change password (auth required)
-      const user = await requireAuth(request)
+      const user = await requireAuth()
       const { oldPassword, newPassword } = body
       
       if (!oldPassword || !newPassword) {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'reset') {
       // Reset password (admin only)
-      const admin = await requireRole('ADMIN', request)
+      const admin = await requireRole(['ADMIN'])
       const { userId, newPassword } = body
       
       if (!userId || !newPassword) {

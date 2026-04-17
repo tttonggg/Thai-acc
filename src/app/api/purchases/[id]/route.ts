@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request)
+    await requireAuth()
     const { id } = await params
     
     const purchase = await db.purchaseInvoice.findUnique({
@@ -62,7 +62,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id } = await params
 
     if (user.role === "VIEWER") {
@@ -172,7 +172,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id } = await params
     
     if (user.role !== "ADMIN") {

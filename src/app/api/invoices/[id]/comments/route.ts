@@ -11,7 +11,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id } = await params
 
     // Check if invoice exists
@@ -116,7 +116,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id } = await params
 
     // Check if invoice exists
@@ -267,7 +267,7 @@ export async function POST(
       return unauthorizedError()
     }
     if (error instanceof z.ZodError) {
-      return apiError("ข้อมูลไม่ถูกต้อง: " + error.errors[0].message)
+      return apiError("ข้อมูลไม่ถูกต้อง: " + error.issues[0].message)
     }
     return apiError("เกิดข้อผิดพลาดในการเพิ่มคอมเมนต์")
   }

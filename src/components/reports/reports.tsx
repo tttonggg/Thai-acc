@@ -33,6 +33,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { format, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, subMonths, subQuarters, subYears } from 'date-fns'
 import { th } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
+import { CashFlowReport } from './cash-flow-report'
 
 interface DateRange {
   from: Date
@@ -44,6 +45,7 @@ const reports = [
   { id: 'trial_balance', name: 'งบทดลอง', icon: BarChart3, description: 'แสดงยอดเดบิตและเครดิตของแต่ละบัญชี', supportsDateRange: true },
   { id: 'balance_sheet', name: 'งบดุล', icon: PieChart, description: 'แสดงสินทรัพย์ หนี้สิน และทุน', supportsDateRange: true },
   { id: 'income_statement', name: 'งบกำไรขาดทุน', icon: TrendingUp, description: 'แสดงรายได้และค่าใช้จ่าย', supportsDateRange: true },
+  { id: 'cash_flow', name: 'งบกระแสเงินสด', icon: TrendingUp, description: 'แสดงกระแสเงินสดจากกิจกรรมดำเนินงาน ลงทุน และจัดหาเงิน', supportsDateRange: true },
   { id: 'general_ledger', name: 'สมุดบัญชีแยกประเภท', icon: FileText, description: 'รายการบัญชีแยกตามบัญชี', supportsDateRange: true },
   { id: 'aging_ar', name: 'รายงานลูกหนี้ตามอายุหนี้', icon: PieChart, description: 'จำแนกลูกหนี้ตามอายุหนี้', supportsDateRange: false },
   { id: 'aging_ap', name: 'รายงานเจ้าหนี้ตามอายุหนี้', icon: PieChart, description: 'จำแนกเจ้าหนี้ตามอายุหนี้', supportsDateRange: false },
@@ -294,6 +296,7 @@ export function Reports() {
       'trial_balance': { name: 'งบทดลอง', apiPath: '/api/reports/trial-balance' },
       'balance_sheet': { name: 'งบดุล', apiPath: '/api/reports/balance-sheet' },
       'income_statement': { name: 'งบกำไรขาดทุน', apiPath: '/api/reports/income-statement' },
+      'cash_flow': { name: 'งบกระแสเงินสด', apiPath: '/api/reports/cash-flow' },
       'general_ledger': { name: 'สมุดบัญชีแยกประเภท', apiPath: '/api/reports/general-ledger' },
       'aging_ar': { name: 'รายงานลูกหนี้ตามอายุหนี้', apiPath: '/api/reports/aging-ar' },
       'aging_ap': { name: 'รายงานเจ้าหนี้ตามอายุหนี้', apiPath: '/api/reports/aging-ap' },
@@ -392,6 +395,27 @@ export function Reports() {
 
           <h2>ผลการดำเนินงาน</h2>
           <p style="font-weight: bold; font-size: 18px;">กำไร(ขาดทุน)สุทธิ: ${formatBaht(data.netIncome || 0)} บาท</p>
+        `
+      } else if (reportId === 'cash_flow') {
+        const cf = data.data || {}
+        contentHtml = `
+          <h2>สรุป</h2>
+          <p>กระแสเงินสดสุทธิ: ${formatBaht(cf.summary?.netChange || 0)} บาท</p>
+          <p>เงินสดยกมา: ${formatBaht(cf.summary?.beginningCash || 0)} บาท</p>
+          <p>เงินสดคงเหลือ: ${formatBaht(cf.summary?.endingCash || 0)} บาท</p>
+
+          <h2>กิจกรรมดำเนินงาน</h2>
+          <p>กระแสเงินสดจากกิจกรรมดำเนินงาน: ${formatBaht(cf.operating?.netCash || 0)} บาท</p>
+
+          <h2>กิจกรรมลงทุน</h2>
+          <p>เงินสดเข้า: ${formatBaht(cf.investing?.inflows || 0)} บาท</p>
+          <p>เงินสดออก: ${formatBaht(cf.investing?.outflows || 0)} บาท</p>
+          <p>รวม: ${formatBaht(cf.investing?.netCash || 0)} บาท</p>
+
+          <h2>กิจกรรมจัดหาเงิน</h2>
+          <p>เงินสดเข้า: ${formatBaht(cf.financing?.inflows || 0)} บาท</p>
+          <p>เงินสดออก: ${formatBaht(cf.financing?.outflows || 0)} บาท</p>
+          <p>รวม: ${formatBaht(cf.financing?.netCash || 0)} บาท</p>
         `
       } else {
         contentHtml = `<p>รายงานนี้แสดงในรูปแบบของหน้าเว็บเท่านั้น</p>`
@@ -653,6 +677,9 @@ export function Reports() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Cash Flow Report Preview */}
+      <CashFlowReport dateRange={dateRange} />
     </div>
   )
 }

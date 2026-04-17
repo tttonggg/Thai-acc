@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request)
+    await requireAuth()
     const { id } = await params
     
     const vendor = await db.vendor.findUnique({
@@ -51,7 +51,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id } = await params
     
     // IDOR Protection: Only ADMIN and ACCOUNTANT can update vendors
@@ -103,7 +103,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id } = await params
     
     // IDOR Protection: Only ADMIN can delete vendors

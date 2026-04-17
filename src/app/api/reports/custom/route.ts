@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'ข้อมูลไม่ถูกต้อง: ' + error.errors.map((e) => e.message).join(', '),
+          error: 'ข้อมูลไม่ถูกต้อง: ' + error.issues.map((e) => e.message).join(', '),
         },
         { status: 400 }
       )

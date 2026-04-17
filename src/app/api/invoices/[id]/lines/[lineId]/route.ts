@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string; lineId: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id, lineId } = await params
 
     const line = await db.invoiceLine.findUnique({
@@ -61,7 +61,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string; lineId: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id, lineId } = await params
 
     // Role-based access control
@@ -366,7 +366,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; lineId: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id, lineId } = await params
 
     // Role-based access control

@@ -15,7 +15,7 @@ import { getClientIp } from '@/lib/api-utils'
 // POST - Setup MFA (generate secret and QR code)
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const ipAddress = getClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') || 'unknown'
     
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 // GET - Check MFA status
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     
     const enabled = await isMFAEnabled(user.id)
     

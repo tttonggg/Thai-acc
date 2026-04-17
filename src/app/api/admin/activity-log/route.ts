@@ -21,7 +21,7 @@ const querySchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole('ADMIN')
+    await requireRole(['ADMIN'])
 
     const { searchParams } = new URL(request.url)
     const query = querySchema.parse(Object.fromEntries(searchParams))
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
   try {
     // This endpoint is for internal use - called by other services
     // We still require authentication but not necessarily ADMIN role
-    const user = await requireRole('ADMIN', request)
+    const user = await requireRole(['ADMIN'])
 
     const body = await request.json()
 

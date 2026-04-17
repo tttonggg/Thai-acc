@@ -7,7 +7,7 @@ import { generateDepreciationSchedule, getAssetNetBookValue } from '@/lib/asset-
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth(request)
+    await requireAuth()
     const assets = await prisma.asset.findMany({
       where: { isActive: true },
       orderBy: { code: 'asc' },
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth(request)
+    await requireAuth()
     const body = await request.json()
 
     const {

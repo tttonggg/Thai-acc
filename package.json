@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
     "build": "npm run db:select-schema && next build && npm run build:standalone",
-    "build:standalone": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && node scripts/build-production.js && cd .next/standalone && npm install --production --legacy-peer-deps && cd ../.. && echo 'Build complete! Standalone directory ready.' && echo 'IMPORTANT: Update .next/standalone/.env with absolute DATABASE_URL path'",
+    "build:standalone": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && node scripts/build-production.js && cd .next/standalone && npm install --production --legacy-peer-deps --ignore-scripts && cd ../.. && echo 'Build complete! Standalone directory ready.' && echo 'IMPORTANT: Update .next/standalone/.env with absolute DATABASE_URL path'",
     "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
     "start:node": "NODE_ENV=production node .next/standalone/server.js 2>&1 | tee server.log",
     "lint": "eslint .",

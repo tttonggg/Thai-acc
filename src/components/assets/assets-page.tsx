@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { Building2, Calendar, Plus, TrendingDown, Edit, Trash2, Eye, Power } from 'lucide-react'
+import { Building2, Calendar, Plus, TrendingDown, Edit, Trash2, Eye, Power, RefreshCw } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { AssetEditDialog } from './asset-edit-dialog'
 import { DepreciationScheduleViewer } from './depreciation-schedule-viewer'
+import { AssetRevaluationDialog } from './asset-revaluation-dialog'
 
 const fc = (n: number) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(n)
 const fd = (d: string) => new Date(d).toLocaleDateString('th-TH', { dateStyle: 'short' })
@@ -42,6 +43,7 @@ function AssetListTab() {
   const [selectedAsset, setSelectedAsset] = useState<AssetWithSchedules | null>(null)
   const [showSchedule, setShowSchedule] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showRevalue, setShowRevalue] = useState(false)
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null)
   const [form, setForm] = useState({
     code: '', name: '', purchaseDate: '', purchaseCost: '', salvageValue: '1',
@@ -153,6 +155,23 @@ function AssetListTab() {
     }
   }
 
+  const handleRevalueAsset = async (asset: Asset) => {
+    // Fetch full asset details with schedules for revaluation
+    try {
+      const res = await window.fetch(`/api/assets/${asset.id}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success) {
+          setSelectedAsset(data.data)
+          setShowRevalue(true)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching asset for revaluation:', error)
+      toast({ title: 'ข้อผิดพลาด', description: 'ไม่สามารถดึงข้อมูลสินทรัพย์ได้', variant: 'destructive' })
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -252,7 +271,7 @@ function AssetListTab() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 cursor-pointer"
                             onClick={() => handleViewSchedule(a)}
                             title="ดูตารางค่าเสื่อมราคา"
                           >
@@ -261,7 +280,16 @@ function AssetListTab() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 cursor-pointer"
+                            onClick={() => handleRevalueAsset(a)}
+                            title="ตีราคาสินทรัพย์"
+                          >
+                            <RefreshCw className="h-4 w-4 text-purple-600" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 cursor-pointer"
                             onClick={() => handleEditAsset(a)}
                             title="แก้ไข"
                           >
@@ -270,7 +298,7 @@ function AssetListTab() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 cursor-pointer"
                             onClick={() => handleDeleteAsset(a)}
                             title="ลบ"
                           >
@@ -335,6 +363,14 @@ function AssetListTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Revaluation Dialog */}
+      <AssetRevaluationDialog
+        asset={selectedAsset as any}
+        open={showRevalue}
+        onOpenChange={setShowRevalue}
+        onSuccess={fetch}
+      />
     </div>
   )
 }

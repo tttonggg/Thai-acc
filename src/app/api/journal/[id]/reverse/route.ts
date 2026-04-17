@@ -134,12 +134,19 @@ export async function POST(
     }, { maxWait: 5000, timeout: 10000 })
 
     // Log activity
-    await logActivity(user.id, 'JOURNAL_REVERSE', id, {
-      originalEntryNo: originalEntry.entryNo,
-      reversalEntryNo: reversalEntry.entryNo,
-      totalAmount: originalEntry.totalDebit,
-      reason,
-    }, ipAddress)
+    await logActivity({
+      userId: user.id,
+      action: 'JOURNAL_REVERSE',
+      module: 'journal',
+      recordId: id,
+      details: {
+        originalEntryNo: originalEntry.entryNo,
+        reversalEntryNo: reversalEntry.entryNo,
+        totalAmount: originalEntry.totalDebit,
+        reason,
+      },
+      ipAddress,
+    })
 
     return NextResponse.json({
       success: true,

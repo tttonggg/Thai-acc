@@ -5,7 +5,7 @@ import { requireRole } from '@/lib/api-utils'
 // GET - Export activity logs to CSV (ADMIN only)
 export async function GET(request: NextRequest) {
   try {
-    await requireRole('ADMIN', request)
+    await requireRole(['ADMIN'])
 
     const { searchParams } = new URL(request.url)
     const dateFrom = searchParams.get('dateFrom')

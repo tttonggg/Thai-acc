@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireRole(['ADMIN', 'ACCOUNTANT'], request)
+    const user = await requireRole(['ADMIN', 'ACCOUNTANT'])
 
     const body = await request.json()
     const { dataTypes, format, dateFrom, dateTo, includeDeleted } = body
@@ -103,7 +103,6 @@ export async function POST(request: NextRequest) {
         where: receiptWhere,
         include: {
           customer: true,
-          invoice: true,
         },
         orderBy: { createdAt: 'desc' },
       })

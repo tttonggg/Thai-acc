@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
 
     // Test database connection
     const creditNoteCount = await db.creditNote.count()

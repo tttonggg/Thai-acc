@@ -13,7 +13,7 @@ import { logSecurityEvent } from '@/lib/audit-service'
 // GET - Get active sessions
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     
     const sessions = await getUserSessions(user.id)
     
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 // DELETE - Revoke specific or all sessions
 export async function DELETE(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const url = new URL(request.url)
     const sessionId = url.searchParams.get('id')
     const revokeAll = url.searchParams.get('all') === 'true'
@@ -74,7 +74,7 @@ export async function DELETE(request: NextRequest) {
       
       if (targetUserId && targetUserId !== user.id) {
         // Check if admin
-        await requireRole('ADMIN', request)
+        await requireRole(['ADMIN'])
         
         await invalidateAllUserSessions(targetUserId)
         
@@ -109,7 +109,7 @@ export async function DELETE(request: NextRequest) {
 // POST - Revoke all other sessions (keep current)
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const body = await request.json()
     const { action } = body
     

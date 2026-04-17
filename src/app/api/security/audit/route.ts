@@ -13,7 +13,7 @@ import { logSecurityEvent } from '@/lib/audit-service'
 // GET - Get audit logs
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireRole(['ADMIN', 'ACCOUNTANT'], request)
+    const user = await requireRole(['ADMIN', 'ACCOUNTANT'])
     
     const url = new URL(request.url)
     const userId = url.searchParams.get('userId') || undefined
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
 // POST - Verify audit integrity or other actions
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireRole('ADMIN', request)
+    const user = await requireRole(['ADMIN'])
     const body = await request.json()
     const { action } = body
     

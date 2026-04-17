@@ -256,7 +256,7 @@ export async function POST(
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return apiError('ข้อมูลไม่ถูกต้อง: ' + error.errors.map(e => e.message).join(', '), 400)
+      return apiError('ข้อมูลไม่ถูกต้อง: ' + error.issues.map(e => e.message).join(', '), 400)
     }
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError()

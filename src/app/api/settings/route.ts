@@ -31,7 +31,7 @@ const settingsUpdateSchema = z.object({
 export async function GET(req: NextRequest) {
   try {
     // Require authentication for settings
-    await requireAuth(req)
+    await requireAuth()
     
     // Get company with system settings
     const company = await db.company.findFirst({
@@ -118,7 +118,7 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     // Require ADMIN role for settings updates
-    await requireRole('ADMIN')
+    await requireRole(['ADMIN'])
 
     const body = await req.json()
     const validated = settingsUpdateSchema.parse(body)
@@ -192,7 +192,7 @@ export async function PUT(req: NextRequest) {
     console.error('Error updating settings:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'รูปแบบข้อมูลไม่ถูกต้อง', details: error.errors },
+        { success: false, error: 'รูปแบบข้อมูลไม่ถูกต้อง', details: error.issues },
         { status: 400 }
       )
     }

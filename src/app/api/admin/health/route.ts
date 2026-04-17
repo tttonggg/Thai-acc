@@ -8,7 +8,7 @@ import { join } from 'path'
 export async function GET(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole('ADMIN', request)
+    await requireRole(['ADMIN'])
 
     const startTime = Date.now()
 
@@ -260,7 +260,7 @@ function formatUptime(seconds: number): string {
   const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60))
   const minutes = Math.floor((seconds % (60 * 60)) / 60)
 
-  const parts = []
+  const parts: string[] = []
   if (days > 0) parts.push(`${days} วัน`)
   if (hours > 0) parts.push(`${hours} ชั่วโมง`)
   if (minutes > 0 || parts.length === 0) parts.push(`${minutes} นาที`)

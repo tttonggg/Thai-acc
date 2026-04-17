@@ -30,7 +30,7 @@ const customerSchema = z.object({
 // GET - List customers (requires authentication)
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth(request)
+    await requireAuth()
 
     const searchParams = request.nextUrl.searchParams
     const page = parseInt(searchParams.get('page') || '1')
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
 // POST - Create customer (requires authentication)
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth(request)
+    await requireAuth()
 
     const body = await request.json()
     const validatedData = customerSchema.parse(body)

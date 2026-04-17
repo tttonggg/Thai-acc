@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
-import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError } from '@/lib/api-utils'
+import { requireAuth, apiError, unauthorizedError, notFoundError, forbiddenError } from '@/lib/api-auth'
+import { apiResponse } from '@/lib/api-utils'
 import { db } from '@/lib/db'
 import { logActivity } from '@/lib/activity-logger'
 
@@ -9,7 +10,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     const { id } = await params
 
     // Only ADMIN or ACCOUNTANT can confirm POs

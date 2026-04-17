@@ -1431,6 +1431,701 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
   return doc.output('arraybuffer') as Uint8Array
 }
 
+/**
+ * Generate PP30 (VAT Return) PDF
+ * สร้างแบบฟอร์ม ภ.พ.30 (ภาษีมูลค่าเพิ่ม)
+ */
+export async function generatePP30PDF(data: {
+  companyName: string
+  companyTaxId: string
+  companyBranch?: string
+  companyAddress?: string
+  month: number
+  year: number
+  outputVat: number  // in Satang
+  inputVat: number   // in Satang
+  netVat: number     // in Satang
+  outputAmount: number // in Satang
+  inputAmount: number // in Satang
+  vatRecords?: Array<{
+    docNo: string
+    docDate: string
+    name: string
+    taxId?: string
+    amount: number
+    vatAmount: number
+  }>
+}): Promise<Uint8Array> {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  })
+
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const margin = 15
+  const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+                       'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
+
+  const formatCurrencySatang = (amount: number) => {
+    return (amount / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  }
+
+  let yPos = margin
+
+  // Header - RD Logo area and Form number
+  doc.setFontSize(12)
+  doc.setFont('helvetica', 'bold')
+  doc.text('แบบฟอร์ม ภ.พ. 30', margin, yPos)
+  doc.text('VOLUNTARY TAX', pageWidth - margin, yPos, { align: 'right' })
+  yPos += 8
+
+  // Form Title
+  doc.setFontSize(18)
+  doc.setFont('helvetica', 'bold')
+  doc.text('VALUE ADDED TAX RETURN', pageWidth / 2, yPos, { align: 'center' })
+  yPos += 7
+  doc.setFontSize(14)
+  doc.text('แบบแสดงรายการภาษีมูลค่าเพิ่ม', pageWidth / 2, yPos, { align: 'center' })
+  yPos += 10
+
+  // Company Info Box
+  doc.setDrawColor(100, 100, 100)
+  doc.setLineWidth(0.5)
+  doc.rect(margin, yPos, pageWidth - margin * 2, 25)
+
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'normal')
+  yPos += 5
+
+  doc.text(`ชื่อบริษัท / ผู้ประกอบการ: ${data.companyName || 'N/A'}`, margin + 3, yPos)
+  yPos += 6
+
+  const taxIdLine = `เลขประจำตัวผู้เสียภาษี: ${data.companyTaxId || 'N/A'}`
+  const branchLine = data.companyBranch ? `สาขาที่: ${data.companyBranch}` : 'สาขาที่: 00000'
+  doc.text(taxIdLine, margin + 3, yPos)
+  doc.text(branchLine, pageWidth / 2 + 10, yPos)
+  yPos += 6
+
+  if (data.companyAddress) {
+    doc.text(`ที่อยู่: ${data.companyAddress}`, margin + 3, yPos)
+    yPos += 6
+  }
+
+  // Tax Period
+  const periodText = `ประจำเดือน ${THAI_MONTHS[data.month - 1]} พ.ศ. ${data.year + 543}`
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(12)
+  doc.text(periodText, pageWidth / 2, yPos, { align: 'center' })
+  yPos += 15
+
+  // Summary Section
+  doc.setFontSize(11)
+  doc.setFont('helvetica', 'bold')
+  doc.text('SUMMARY / สรุปยอด', margin, yPos)
+  yPos += 8
+
+  // VAT Summary Box
+  doc.setDrawColor(66, 66, 66)
+  doc.setLineWidth(0.3)
+
+  const summaryData = [
+    ['รายการ', 'มูลค่า (บาท)', 'ภาษี (บาท)'],
+    ['ภาษีขาย Output VAT', formatCurrencySatang(data.outputAmount), formatCurrencySatang(data.outputVat)],
+    ['ภาษีซื้อ Input VAT', formatCurrencySatang(data.inputAmount), formatCurrencySatang(data.inputVat)],
+    ['ภาษีสุทธิ Net VAT Payable', '', formatCurrencySatang(data.netVat)],
+  ]
+
+  doc.autoTable({
+    startY: yPos,
+    head: [summaryData[0]],
+    body: summaryData.slice(1),
+    theme: 'grid',
+    headStyles: {
+      fillColor: [66, 66, 66],
+      textColor: 255,
+      fontSize: 10,
+      fontStyle: 'bold',
+      halign: 'center',
+    },
+    bodyStyles: {
+      fontSize: 10,
+      cellPadding: 3,
+    },
+    columnStyles: {
+      0: { cellWidth: 70 },
+      1: { halign: 'right', cellWidth: 50 },
+      2: { halign: 'right', cellWidth: 50 },
+    },
+    didParseCell: (cellData: any) => {
+      if (cellData.row.index === 2) { // Net VAT row
+        cellData.cell.styles.fontStyle = 'bold'
+        cellData.cell.styles.fillColor = [240, 240, 240]
+      }
+    },
+    margin: { left: margin, right: margin },
+  })
+
+  yPos = (doc.lastAutoTable as any).finalY + 10
+
+  // VAT Records Table (if provided)
+  if (data.vatRecords && data.vatRecords.length > 0) {
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'bold')
+    doc.text('VAT RECORDS / รายละเอียด VAT', margin, yPos)
+    yPos += 5
+
+    const vatTableData = data.vatRecords.map((r, i) => [
+      (i + 1).toString(),
+      r.docNo,
+      r.docDate,
+      r.name.length > 20 ? r.name.substring(0, 20) + '...' : r.name,
+      formatCurrencySatang(r.amount),
+      formatCurrencySatang(r.vatAmount),
+    ])
+
+    doc.autoTable({
+      startY: yPos,
+      head: [['No.', 'Doc No', 'Date', 'Name', 'Amount', 'VAT']],
+      body: vatTableData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [66, 66, 66],
+        textColor: 255,
+        fontSize: 8,
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      bodyStyles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      columnStyles: {
+        0: { cellWidth: 10, halign: 'center' },
+        1: { cellWidth: 30, halign: 'center' },
+        2: { cellWidth: 25, halign: 'center' },
+        3: { cellWidth: 55 },
+        4: { halign: 'right', cellWidth: 30 },
+        5: { halign: 'right', cellWidth: 25 },
+      },
+      margin: { left: margin, right: margin },
+    })
+
+    yPos = (doc.lastAutoTable as any).finalY + 10
+  }
+
+  // Declaration Section
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+  doc.text('DECLARATION / คำขอ', margin, yPos)
+  yPos += 6
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9)
+  const declaration = [
+    'ข้าพเจ้าขอรับรองว่าข้อความในแบบแสดงรายการนี้ถูกต้องและครบถ้วนทุกประการ',
+    'I hereby certify that the information in this return is true and complete.',
+  ]
+  for (const line of declaration) {
+    doc.text(line, margin, yPos)
+    yPos += 5
+  }
+  yPos += 5
+
+  // Signature Area
+  const sigBoxWidth = (pageWidth - margin * 2) / 2 - 10
+  doc.setDrawColor(100, 100, 100)
+  doc.rect(margin, yPos, sigBoxWidth, 25)
+  doc.rect(pageWidth / 2 + 5, yPos, sigBoxWidth, 25)
+
+  doc.setFontSize(9)
+  doc.text('ผู้ลงนาม / Signatory', margin + 3, yPos + 5)
+  doc.text('วันที่ / Date: _____________', margin + 3, yPos + 12)
+  doc.text('ตำแหน่ง / Position: _________', margin + 3, yPos + 19)
+
+  doc.text('ผู้ลงนาม / Signatory', pageWidth / 2 + 8, yPos + 5)
+  doc.text('วันที่ / Date: _____________', pageWidth / 2 + 8, yPos + 12)
+  doc.text('ตำแหน่ง / Position: _________', pageWidth / 2 + 8, yPos + 19)
+
+  // Footer
+  const footerY = doc.internal.pageSize.getHeight() - 12
+  doc.setFontSize(8)
+  doc.setFont('helvetica', 'normal')
+  doc.text(
+    `Generated by Thai Accounting ERP | ${formatDateThai(new Date())}`,
+    pageWidth / 2,
+    footerY,
+    { align: 'center' }
+  )
+
+  return doc.output('arraybuffer') as Uint8Array
+}
+
+// PND3 Income Type names
+const PND3_INCOME_TYPE_NAMES: Record<string, string> = {
+  "1": "เงินเดือน ค่าจ้าง เบี้ยเลี้ยง โบนัส",
+  "2": "ค่านายหน้า ค่าแห่งกำไร",
+  "3": "ค่าดอกเบี้ย",
+  "4": "ค่าปันผล เงินส่วนแบ่งกำไร",
+  "5": "ค่าเช่าทรัพย์สิน",
+}
+
+// PND53 Income Type names
+const PND53_INCOME_TYPE_NAMES: Record<string, string> = {
+  "1": "ค่าบริการ",
+  "2": "ค่าเช่าอาคาร ที่ดิน สิ่งปลูกสร้าง",
+  "3": "ค่าส่งออกสินค้า",
+  "4": "ค่าจ้างทำของ จ้างเหมา",
+  "5": "ค่าโฆษณา",
+  "6": "ค่าบริการวิชาชีพอิสระ",
+}
+
+/**
+ * Generate PND3 (Employee Withholding) PDF
+ * สร้างแบบฟอร์ม ภงด.3 (ภาษีเงินได้หัก ณ ที่จ่าย ประเภทเงินเดือน)
+ */
+export async function generatePND3PDF(data: {
+  companyName: string
+  companyTaxId: string
+  companyBranch?: string
+  companyAddress?: string
+  month: number
+  year: number
+  totalAmount: number  // in Satang
+  totalTax: number     // in Satang
+  lines: Array<{
+    payeeName: string
+    payeeTaxId?: string
+    description: string
+    incomeType: string
+    incomeAmount: number
+    taxRate: number
+    taxAmount: number
+  }>
+}): Promise<Uint8Array> {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  })
+
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const margin = 15
+  const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+                       'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
+
+  const formatCurrencySatang = (amount: number) => {
+    return (amount / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  }
+
+  let yPos = margin
+
+  // Header - Form number
+  doc.setFontSize(12)
+  doc.setFont('helvetica', 'bold')
+  doc.text('แบบฟอร์ม ภ.ง.ด. 3', margin, yPos)
+  doc.text('WITHHOLDING TAX', pageWidth - margin, yPos, { align: 'right' })
+  yPos += 8
+
+  // Form Title
+  doc.setFontSize(18)
+  doc.setFont('helvetica', 'bold')
+  doc.text('WITHHOLDING TAX RETURN (SALARY)', pageWidth / 2, yPos, { align: 'center' })
+  yPos += 7
+  doc.setFontSize(14)
+  doc.text('แบบแสดงรายการภาษีหัก ณ ที่จ่าย (เงินเดือน)', pageWidth / 2, yPos, { align: 'center' })
+  yPos += 10
+
+  // Company Info Box
+  doc.setDrawColor(100, 100, 100)
+  doc.setLineWidth(0.5)
+  doc.rect(margin, yPos, pageWidth - margin * 2, 25)
+
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'normal')
+  yPos += 5
+
+  doc.text(`ชื่อบริษัท / ผู้ประกอบการ: ${data.companyName || 'N/A'}`, margin + 3, yPos)
+  yPos += 6
+
+  const taxIdLine = `เลขประจำตัวผู้เสียภาษี: ${data.companyTaxId || 'N/A'}`
+  const branchLine = data.companyBranch ? `สาขาที่: ${data.companyBranch}` : 'สาขาที่: 00000'
+  doc.text(taxIdLine, margin + 3, yPos)
+  doc.text(branchLine, pageWidth / 2 + 10, yPos)
+  yPos += 6
+
+  if (data.companyAddress) {
+    doc.text(`ที่อยู่: ${data.companyAddress}`, margin + 3, yPos)
+    yPos += 6
+  }
+
+  // Tax Period
+  const periodText = `ประจำเดือน ${THAI_MONTHS[data.month - 1]} พ.ศ. ${data.year + 543}`
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(12)
+  doc.text(periodText, pageWidth / 2, yPos, { align: 'center' })
+  yPos += 15
+
+  // Summary Section
+  doc.setFontSize(11)
+  doc.setFont('helvetica', 'bold')
+  doc.text('SUMMARY / สรุปยอด', margin, yPos)
+  yPos += 8
+
+  // Summary Box
+  doc.setDrawColor(66, 66, 66)
+  doc.setLineWidth(0.3)
+
+  const summaryData = [
+    ['รายการ', 'มูลค่า (บาท)', 'ภาษี (บาท)'],
+    ['รวมเงินได้ Total Income', formatCurrencySatang(data.totalAmount), ''],
+    ['รวมภาษีหัก Total Tax', '', formatCurrencySatang(data.totalTax)],
+  ]
+
+  doc.autoTable({
+    startY: yPos,
+    head: [summaryData[0]],
+    body: summaryData.slice(1),
+    theme: 'grid',
+    headStyles: {
+      fillColor: [66, 66, 66],
+      textColor: 255,
+      fontSize: 10,
+      fontStyle: 'bold',
+      halign: 'center',
+    },
+    bodyStyles: {
+      fontSize: 10,
+      cellPadding: 3,
+    },
+    columnStyles: {
+      0: { cellWidth: 70 },
+      1: { halign: 'right', cellWidth: 50 },
+      2: { halign: 'right', cellWidth: 50 },
+    },
+    margin: { left: margin, right: margin },
+  })
+
+  yPos = (doc.lastAutoTable as any).finalY + 10
+
+  // Withholding Records Table
+  if (data.lines.length > 0) {
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'bold')
+    doc.text('WITHHOLDING RECORDS / รายละเอียดการหักภาษี', margin, yPos)
+    yPos += 5
+
+    const pnd3TableData = data.lines.map((line, i) => [
+      (i + 1).toString(),
+      line.payeeName.length > 25 ? line.payeeName.substring(0, 25) + '...' : line.payeeName,
+      line.payeeTaxId || '',
+      PND3_INCOME_TYPE_NAMES[line.incomeType] || line.incomeType,
+      formatCurrencySatang(line.incomeAmount),
+      line.taxRate.toString() + '%',
+      formatCurrencySatang(line.taxAmount),
+    ])
+
+    doc.autoTable({
+      startY: yPos,
+      head: [['No.', 'ผู้ถูกหักภาษี', 'เลขผู้เสียภาษี', 'ประเภทเงินได้', 'มูลค่า', 'อัตรา', 'ภาษี']],
+      body: pnd3TableData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [66, 66, 66],
+        textColor: 255,
+        fontSize: 8,
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      bodyStyles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      columnStyles: {
+        0: { cellWidth: 10, halign: 'center' },
+        1: { cellWidth: 45 },
+        2: { cellWidth: 25, halign: 'center' },
+        3: { cellWidth: 35 },
+        4: { halign: 'right', cellWidth: 25 },
+        5: { halign: 'center', cellWidth: 15 },
+        6: { halign: 'right', cellWidth: 25 },
+      },
+      margin: { left: margin, right: margin },
+    })
+
+    yPos = (doc.lastAutoTable as any).finalY + 10
+  }
+
+  // Declaration Section
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+  doc.text('DECLARATION / คำขอ', margin, yPos)
+  yPos += 6
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9)
+  const declaration = [
+    'ข้าพเจ้าขอรับรองว่าข้อความในแบบแสดงรายการนี้ถูกต้องและครบถ้วนทุกประการ',
+    'I hereby certify that the information in this return is true and complete.',
+  ]
+  for (const line of declaration) {
+    doc.text(line, margin, yPos)
+    yPos += 5
+  }
+  yPos += 5
+
+  // Signature Area
+  const sigBoxWidth = (pageWidth - margin * 2) / 2 - 10
+  doc.setDrawColor(100, 100, 100)
+  doc.rect(margin, yPos, sigBoxWidth, 25)
+  doc.rect(pageWidth / 2 + 5, yPos, sigBoxWidth, 25)
+
+  doc.setFontSize(9)
+  doc.text('ผู้ลงนาม / Signatory', margin + 3, yPos + 5)
+  doc.text('วันที่ / Date: _____________', margin + 3, yPos + 12)
+  doc.text('ตำแหน่ง / Position: _________', margin + 3, yPos + 19)
+
+  doc.text('ผู้ลงนาม / Signatory', pageWidth / 2 + 8, yPos + 5)
+  doc.text('วันที่ / Date: _____________', pageWidth / 2 + 8, yPos + 12)
+  doc.text('ตำแหน่ง / Position: _________', pageWidth / 2 + 8, yPos + 19)
+
+  // Footer
+  const footerY = doc.internal.pageSize.getHeight() - 12
+  doc.setFontSize(8)
+  doc.setFont('helvetica', 'normal')
+  doc.text(
+    `Generated by Thai Accounting ERP | ${formatDateThai(new Date())}`,
+    pageWidth / 2,
+    footerY,
+    { align: 'center' }
+  )
+
+  return doc.output('arraybuffer') as Uint8Array
+}
+
+/**
+ * Generate PND53 (Professional Services Withholding) PDF
+ * สร้างแบบฟอร์ม ภงด.53 (ภาษีเงินได้หัก ณ ที่จ่าย ค่าบริการ)
+ */
+export async function generatePND53PDF(data: {
+  companyName: string
+  companyTaxId: string
+  companyBranch?: string
+  companyAddress?: string
+  month: number
+  year: number
+  totalAmount: number  // in Satang
+  totalTax: number     // in Satang
+  lines: Array<{
+    payeeName: string
+    payeeTaxId?: string
+    description: string
+    incomeType: string
+    incomeAmount: number
+    taxRate: number
+    taxAmount: number
+  }>
+}): Promise<Uint8Array> {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  })
+
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const margin = 15
+  const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+                       'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
+
+  const formatCurrencySatang = (amount: number) => {
+    return (amount / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  }
+
+  let yPos = margin
+
+  // Header - Form number
+  doc.setFontSize(12)
+  doc.setFont('helvetica', 'bold')
+  doc.text('แบบฟอร์ม ภ.ง.ด. 53', margin, yPos)
+  doc.text('WITHHOLDING TAX', pageWidth - margin, yPos, { align: 'right' })
+  yPos += 8
+
+  // Form Title
+  doc.setFontSize(18)
+  doc.setFont('helvetica', 'bold')
+  doc.text('WITHHOLDING TAX RETURN (SERVICES)', pageWidth / 2, yPos, { align: 'center' })
+  yPos += 7
+  doc.setFontSize(14)
+  doc.text('แบบแสดงรายการภาษีหัก ณ ที่จ่าย (ค่าบริการ)', pageWidth / 2, yPos, { align: 'center' })
+  yPos += 10
+
+  // Company Info Box
+  doc.setDrawColor(100, 100, 100)
+  doc.setLineWidth(0.5)
+  doc.rect(margin, yPos, pageWidth - margin * 2, 25)
+
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'normal')
+  yPos += 5
+
+  doc.text(`ชื่อบริษัท / ผู้ประกอบการ: ${data.companyName || 'N/A'}`, margin + 3, yPos)
+  yPos += 6
+
+  const taxIdLine = `เลขประจำตัวผู้เสียภาษี: ${data.companyTaxId || 'N/A'}`
+  const branchLine = data.companyBranch ? `สาขาที่: ${data.companyBranch}` : 'สาขาที่: 00000'
+  doc.text(taxIdLine, margin + 3, yPos)
+  doc.text(branchLine, pageWidth / 2 + 10, yPos)
+  yPos += 6
+
+  if (data.companyAddress) {
+    doc.text(`ที่อยู่: ${data.companyAddress}`, margin + 3, yPos)
+    yPos += 6
+  }
+
+  // Tax Period
+  const periodText = `ประจำเดือน ${THAI_MONTHS[data.month - 1]} พ.ศ. ${data.year + 543}`
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(12)
+  doc.text(periodText, pageWidth / 2, yPos, { align: 'center' })
+  yPos += 15
+
+  // Summary Section
+  doc.setFontSize(11)
+  doc.setFont('helvetica', 'bold')
+  doc.text('SUMMARY / สรุปยอด', margin, yPos)
+  yPos += 8
+
+  // Summary Box
+  doc.setDrawColor(66, 66, 66)
+  doc.setLineWidth(0.3)
+
+  const summaryData = [
+    ['รายการ', 'มูลค่า (บาท)', 'ภาษี (บาท)'],
+    ['รวมเงินได้ Total Income', formatCurrencySatang(data.totalAmount), ''],
+    ['รวมภาษีหัก Total Tax', '', formatCurrencySatang(data.totalTax)],
+  ]
+
+  doc.autoTable({
+    startY: yPos,
+    head: [summaryData[0]],
+    body: summaryData.slice(1),
+    theme: 'grid',
+    headStyles: {
+      fillColor: [66, 66, 66],
+      textColor: 255,
+      fontSize: 10,
+      fontStyle: 'bold',
+      halign: 'center',
+    },
+    bodyStyles: {
+      fontSize: 10,
+      cellPadding: 3,
+    },
+    columnStyles: {
+      0: { cellWidth: 70 },
+      1: { halign: 'right', cellWidth: 50 },
+      2: { halign: 'right', cellWidth: 50 },
+    },
+    margin: { left: margin, right: margin },
+  })
+
+  yPos = (doc.lastAutoTable as any).finalY + 10
+
+  // Withholding Records Table
+  if (data.lines.length > 0) {
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'bold')
+    doc.text('WITHHOLDING RECORDS / รายละเอียดการหักภาษี', margin, yPos)
+    yPos += 5
+
+    const pnd53TableData = data.lines.map((line, i) => [
+      (i + 1).toString(),
+      line.payeeName.length > 25 ? line.payeeName.substring(0, 25) + '...' : line.payeeName,
+      line.payeeTaxId || '',
+      PND53_INCOME_TYPE_NAMES[line.incomeType] || line.incomeType,
+      formatCurrencySatang(line.incomeAmount),
+      line.taxRate.toString() + '%',
+      formatCurrencySatang(line.taxAmount),
+    ])
+
+    doc.autoTable({
+      startY: yPos,
+      head: [['No.', 'ผู้ถูกหักภาษี', 'เลขผู้เสียภาษี', 'ประเภทเงินได้', 'มูลค่า', 'อัตรา', 'ภาษี']],
+      body: pnd53TableData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [66, 66, 66],
+        textColor: 255,
+        fontSize: 8,
+        fontStyle: 'bold',
+        halign: 'center',
+      },
+      bodyStyles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      columnStyles: {
+        0: { cellWidth: 10, halign: 'center' },
+        1: { cellWidth: 45 },
+        2: { cellWidth: 25, halign: 'center' },
+        3: { cellWidth: 35 },
+        4: { halign: 'right', cellWidth: 25 },
+        5: { halign: 'center', cellWidth: 15 },
+        6: { halign: 'right', cellWidth: 25 },
+      },
+      margin: { left: margin, right: margin },
+    })
+
+    yPos = (doc.lastAutoTable as any).finalY + 10
+  }
+
+  // Declaration Section
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+  doc.text('DECLARATION / คำขอ', margin, yPos)
+  yPos += 6
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9)
+  const declaration = [
+    'ข้าพเจ้าขอรับรองว่าข้อความในแบบแสดงรายการนี้ถูกต้องและครบถ้วนทุกประการ',
+    'I hereby certify that the information in this return is true and complete.',
+  ]
+  for (const line of declaration) {
+    doc.text(line, margin, yPos)
+    yPos += 5
+  }
+  yPos += 5
+
+  // Signature Area
+  const sigBoxWidth = (pageWidth - margin * 2) / 2 - 10
+  doc.setDrawColor(100, 100, 100)
+  doc.rect(margin, yPos, sigBoxWidth, 25)
+  doc.rect(pageWidth / 2 + 5, yPos, sigBoxWidth, 25)
+
+  doc.setFontSize(9)
+  doc.text('ผู้ลงนาม / Signatory', margin + 3, yPos + 5)
+  doc.text('วันที่ / Date: _____________', margin + 3, yPos + 12)
+  doc.text('ตำแหน่ง / Position: _________', margin + 3, yPos + 19)
+
+  doc.text('ผู้ลงนาม / Signatory', pageWidth / 2 + 8, yPos + 5)
+  doc.text('วันที่ / Date: _____________', pageWidth / 2 + 8, yPos + 12)
+  doc.text('ตำแหน่ง / Position: _________', pageWidth / 2 + 8, yPos + 19)
+
+  // Footer
+  const footerY = doc.internal.pageSize.getHeight() - 12
+  doc.setFontSize(8)
+  doc.setFont('helvetica', 'normal')
+  doc.text(
+    `Generated by Thai Accounting ERP | ${formatDateThai(new Date())}`,
+    pageWidth / 2,
+    footerY,
+    { align: 'center' }
+  )
+
+  return doc.output('arraybuffer') as Uint8Array
+}
+
 // Stub function for tax form PDF generation
 export async function generatePDF(params: {
   type: string

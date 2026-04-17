@@ -17,8 +17,8 @@ jobs:
   deploy-vps:
     name: 🚀 Deploy to Production VPS
     runs-on: ubuntu-latest
-    # Only run after CI/CD pipeline succeeds
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    # Run on push to master or manual trigger
+    if: github.ref == 'refs/heads/master'
 
     steps:
       - name: Checkout code

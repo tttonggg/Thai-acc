@@ -31,7 +31,7 @@ export async function GET(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     const webhook = await getWebhookWithHistory(id);
 
     if (!webhook) {
@@ -62,7 +62,7 @@ export async function GET(
           duration: d.duration,
           responseStatus: d.responseStatus,
           deliveredAt: d.deliveredAt,
-          error: d.errorMessage,
+          error: d.error,
         })),
       },
     });
@@ -89,7 +89,7 @@ export async function PUT(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
 
     // Validate URL if provided
@@ -147,7 +147,7 @@ export async function DELETE(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     await deleteWebhook(id);
 
     return NextResponse.json({

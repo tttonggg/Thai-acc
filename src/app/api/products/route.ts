@@ -5,7 +5,7 @@ import { requireAuth } from '@/lib/api-utils'
 // GET - List products (requires authentication)
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth(request)
+    await requireAuth()
 
     const searchParams = request.nextUrl.searchParams
     const search = searchParams.get('search')
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 // POST - Create new product
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth(request)
+    await requireAuth()
 
     const body = await request.json()
 

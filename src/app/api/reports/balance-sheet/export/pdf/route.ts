@@ -11,7 +11,7 @@ import { generateBalanceSheetPDF } from '@/lib/pdf-generator'
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

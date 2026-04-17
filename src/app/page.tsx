@@ -22,6 +22,8 @@ import { InventoryPage } from '@/components/inventory/inventory-page'
 import { BankingPage } from '@/components/banking/banking-page'
 import { AssetsPage } from '@/components/assets/assets-page'
 import { PayrollPage } from '@/components/payroll/payroll-page'
+import { ProvidentFundManagement } from '@/components/payroll/provident-fund-management'
+import { LeaveManagement } from '@/components/leave/leave-management'
 import { PettyCashPage } from '@/components/petty-cash/petty-cash-page'
 import { ProductsPage } from '@/components/products/products-page'
 import { StockTakePage } from '@/components/stock-takes/stock-take-page'
@@ -32,6 +34,7 @@ import { QuotationList } from '@/components/quotations/quotation-list'
 import { GoodsReceiptNotesList } from '@/components/goods-receipt-notes'
 import { ReceiptList } from '@/components/receipts/receipt-list'
 import { Reports } from '@/components/reports/reports'
+import { CashFlowReport } from '@/components/reports/cash-flow-report'
 import { PeriodManagement } from '@/components/accounting-periods/period-management'
 import { BudgetManagement } from '@/components/budgets/budget-management'
 import { Settings } from '@/components/settings/settings'
@@ -48,6 +51,8 @@ import { BackupRestorePage } from '@/components/admin/backup-restore-page'
 import { DataImportPage } from '@/components/admin/data-import-page'
 import { ActivityLogPage } from '@/components/admin/activity-log-page'
 import { WebhookManagement, ApiAnalytics } from '@/components/admin'
+import { RecurringDocuments } from '@/components/recurring/recurring-documents'
+import { SSOFiling } from '@/components/payroll/sso-filing'
 import {
   Loader2,
   LayoutDashboard,
@@ -77,6 +82,7 @@ import {
   Webhook,
   BarChart,
   Menu,
+  Shield,
 } from 'lucide-react'
 
 export type Module =
@@ -105,8 +111,11 @@ export type Module =
   | 'banking'
   | 'assets'
   | 'payroll'
+  | 'leave'
+  | 'provident-fund'
   | 'employees'
   | 'petty-cash'
+  | 'sso-filing'
   | 'reports'
   | 'settings'
   | 'users'
@@ -116,7 +125,8 @@ export type Module =
   | 'activity-log'
   | 'webhooks'
   | 'api-analytics'
-  | 'invoice-detail'
+  | 'cash-flow'
+  | 'recurring'
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -153,8 +163,11 @@ export default function Home() {
         'banking': '/banking',
         'assets': '/assets',
         'payroll': '/payroll',
+        'leave': '/leave',
+        'provident-fund': '/provident-fund',
         'employees': '/employees',
         'petty-cash': '/petty-cash',
+        'sso-filing': '/sso-filing',
         'reports': '/reports',
         'settings': '/settings',
         'users': '/users',
@@ -164,6 +177,9 @@ export default function Home() {
         'activity-log': '/activity-log',
         'webhooks': '/webhooks',
         'api-analytics': '/api-analytics',
+        'recurring': '/recurring',
+        'cash-flow': '/cash-flow',
+        'invoice-detail': '/invoices',
       }
 
       // Update URL when activeModule changes (using history API to avoid Next.js routing)
@@ -202,8 +218,11 @@ export default function Home() {
         '/banking': 'banking',
         '/assets': 'assets',
         '/payroll': 'payroll',
+        '/leave': 'leave',
+        '/provident-fund': 'provident-fund',
         '/employees': 'employees',
         '/petty-cash': 'petty-cash',
+        '/sso-filing': 'sso-filing',
         '/reports': 'reports',
         '/settings': 'settings',
         '/users': 'users',
@@ -213,6 +232,8 @@ export default function Home() {
         '/activity-log': 'activity-log',
         '/webhooks': 'webhooks',
         '/api-analytics': 'api-analytics',
+        '/recurring': 'recurring',
+        '/cash-flow': 'cash-flow',
       }
 
       const handlePopState = () => {
@@ -332,10 +353,16 @@ export default function Home() {
         return <AssetsPage />
       case 'payroll':
         return <PayrollPage key="payroll" initialTab="runs" />
+      case 'leave':
+        return <LeaveManagement />
+      case 'provident-fund':
+        return <ProvidentFundManagement />
       case 'employees':
         return <PayrollPage key="employees" initialTab="employees" />
       case 'petty-cash':
         return <PettyCashPage />
+      case 'sso-filing':
+        return <SSOFiling />
       case 'reports':
         return <Reports />
       case 'settings':
@@ -410,6 +437,8 @@ export default function Home() {
             <BudgetManagement />
           </PermissionGuard>
         )
+      case 'recurring':
+        return <RecurringDocuments />
       default:
         return <Dashboard />
     }

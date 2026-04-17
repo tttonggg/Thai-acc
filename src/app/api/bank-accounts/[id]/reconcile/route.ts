@@ -21,7 +21,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request)
+    await requireAuth()
     const { id } = await params
 
     const bankAccountId = id
@@ -142,7 +142,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request)
+    await requireAuth()
     const { id } = await params
 
     const bankAccountId = id

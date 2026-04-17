@@ -10,7 +10,7 @@ import { generateTrialBalanceExcel } from '@/lib/excel-export'
 export async function GET(request: NextRequest) {
   try {
     // Require authentication
-    await requireAuth(request)
+    await requireAuth()
 
     // Get query parameters for filtering
     const searchParams = request.nextUrl.searchParams

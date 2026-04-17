@@ -7,7 +7,7 @@ import { satangToBaht } from '@/lib/currency'
 export async function GET(request: NextRequest) {
   try {
     // Require authentication - pass request context
-    await requireAuth(request)
+    await requireAuth()
 
     const searchParams = request.nextUrl.searchParams
     const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString())

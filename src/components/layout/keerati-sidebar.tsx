@@ -45,6 +45,8 @@ import {
   Car,
   ShoppingCart,
   Quote,
+  RefreshCw,
+  Shield,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Module } from '@/app/page'
@@ -147,7 +149,9 @@ const menuGroups: MenuGroup[] = [
       { id: 'vat', label: 'VAT Report', icon: Percent },
       { id: 'wht', label: 'WHT Report', icon: Landmark },
       { id: 'reports', label: 'Variance Report', icon: Activity },
+      { id: 'cash-flow', label: 'งบกระแสเงินสด (Cash Flow)', icon: BarChart3 },
       { id: 'accounting-periods', label: 'งวดบัญชี (Accounting Periods)', icon: Calendar },
+      { id: 'recurring', label: 'เอกสารประจำ (Recurring)', icon: RefreshCw },
     ],
   },
   {
@@ -171,6 +175,9 @@ const menuGroups: MenuGroup[] = [
     items: [
       { id: 'employees', label: 'พนักงาน (Employees)', icon: UserCog },
       { id: 'payroll', label: 'ค่าจ้าง (Payroll)', icon: Users },
+      { id: 'provident-fund', label: 'กองทุนสำรองเลี้ยงชีพ (Provident)', icon: PiggyBank },
+      { id: 'leave', label: 'ลางาน (Leave)', icon: Calendar },
+      { id: 'sso-filing', label: 'ประกันสังคม (SSC)', icon: Shield },
     ],
   },
   {

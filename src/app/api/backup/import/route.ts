@@ -89,7 +89,7 @@ const companyImportSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole('ADMIN')
+    await requireRole(['ADMIN'])
 
     const backup = await request.json()
 
@@ -339,7 +339,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: 'รูปแบบข้อมูลไม่ถูกต้อง',
-        details: error.errors
+        details: error.issues
       }, { status: 400 })
     }
 

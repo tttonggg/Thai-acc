@@ -7,7 +7,7 @@ import { vendorSchema } from "@/lib/validations"
 // GET /api/vendors - List vendors
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth(request)
+    await requireAuth()
 
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get("page") || "1")
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
 // POST /api/vendors - Create vendor
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    const user = await requireAuth()
     
     if (user.role === "VIEWER") {
       return apiError("ไม่มีสิทธิ์สร้างผู้ขาย", 403)

@@ -188,6 +188,32 @@ sqlite3 prisma/dev.db "SELECT totalAmount FROM Invoice LIMIT 5;"
 - **Soft Deletes**: Most entities have `deletedAt DateTime?`. Always add `where: { deletedAt: null }` in queries.
 - **Idempotency**: `JournalEntry` and `Receipt` have `idempotencyKey String? @unique` to prevent duplicate records from network retries.
 
+### Gap Closure Status (vs PEAK Manual)
+
+**Completed (Backend + UI)**:
+- ✅ Cash Flow Statement - API + UI (`src/app/api/reports/cash-flow/`, `cash-flow-report.tsx`)
+- ✅ PP30 Form PDF - API + UI (`src/lib/pdf-generator.ts` - `generatePP30PDF`, `tax-form-management.tsx`)
+- ✅ WHT Form PDF - API + UI (`generatePND3PDF`, `generatePND53PDF`)
+- ✅ Bank Statement Import - API + UI (`bank-statement-import.tsx`, `bank-matching.tsx`)
+- ✅ Provident Fund - API + UI (`provident-fund-service.ts`, `provident-fund-management.tsx`)
+- ✅ Leave Management - API + UI (`leave-service.ts`, `leave-management.tsx`)
+- ✅ Asset Revaluation - API + UI (`asset-revaluation-dialog.tsx`)
+- ✅ Recurring Documents - API + UI (`recurring-documents.tsx`, `scheduler.ts`)
+- ✅ SSO Filing - API + UI (`sso-filing.tsx` with 50 ทวิ export)
+
+**Sidebar Navigation Added**:
+- ลางาน (Leave) - under PEOPLE
+- กองทุนสำรองเลี้ยงชีพ (Provident) - under PEOPLE
+- เอกสารประจำ (Recurring) - under REPORTS
+- งบกระแสเงินสด (Cash Flow) - under REPORTS
+- ประกันสังคม (SSC) - under PEOPLE
+- นำเข้า Bank (Import) - under BANKING tabs
+
+**Pending/New Infrastructure Needed**:
+- ⏳ Multi-instance background jobs (BullMQ + Redis) - single-instance scheduler running
+- ⏳ Full DBD e-Filing integration (RD gateway)
+- ⏳ Multi-company consolidation
+
 ### Security
 
 1. **Rate Limiting** (`src/middleware.ts`) — bypass with `x-playwright-test: true` or localhost; `strict` preset for auth endpoints, `moderate` for general API

@@ -25,7 +25,7 @@ const companyInfoSchema = z.object({
 // GET /api/company - Fetch company info
 export async function GET(req: NextRequest) {
   try {
-    await requireAuth(req)
+    await requireAuth()
 
     const company = await db.company.findFirst()
 
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     // Require ADMIN role for company updates
-    await requireRole('ADMIN')
+    await requireRole(['ADMIN'])
 
     const body = await req.json()
     const validated = companyInfoSchema.parse(body)
@@ -150,7 +150,7 @@ export async function PUT(req: NextRequest) {
     console.error('Error updating company:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'รูปแบบข้อมูลไม่ถูกต้อง', details: error.errors },
+        { success: false, error: 'รูปแบบข้อมูลไม่ถูกต้อง', details: error.issues },
         { status: 400 }
       )
     }

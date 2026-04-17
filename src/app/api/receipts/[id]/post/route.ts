@@ -12,7 +12,7 @@ export async function POST(
 ) {
   try {
     // Require ACCOUNTANT or ADMIN role
-    const user = await requireRole(['ADMIN', 'ACCOUNTANT'], request)
+    const user = await requireRole(['ADMIN', 'ACCOUNTANT'])
 
     const { id } = await params
 

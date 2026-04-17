@@ -63,7 +63,7 @@ export function WebSocketProvider({
   const [socket, setSocket] = useState<WebSocket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null)
-  const reconnectTimerRef = useRef<NodeJS.Timeout>()
+  const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null)
   const subscriptionsRef = useRef<Map<string, Set<(data: unknown) => void>>>(new Map())
   const socketRef = useRef<WebSocket | null>(null)
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, requireRole, apiResponse, apiError, notFoundError, unauthorizedError, forbiddenError } from '@/lib/api-utils'
+import { requireAuth, requireRole, apiError, notFoundError, unauthorizedError, forbiddenError } from '@/lib/api-auth'
+import { apiResponse } from '@/lib/api-utils'
 import { db } from '@/lib/db'
 import { recordStockMovement } from '@/lib/inventory-service'
 
