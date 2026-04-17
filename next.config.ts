@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
       '/inventory', '/products', '/warehouses', '/stock-takes',
       '/banking', '/assets', '/payroll', '/employees',
       '/petty-cash', '/reports', '/settings', '/users',
+      '/cash-flow', '/recurring',
     ];
 
     return [
