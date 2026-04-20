@@ -18,6 +18,9 @@ export async function middleware(request: NextRequest) {
     (request.headers.get('host')?.includes('localhost:3000') ||
       request.headers.get('host')?.includes('127.0.0.1:3000'));
 
+  // Bypass CSRF for testing (set BYPASS_CSRF=true in production for testing)
+  const bypassCsrf = process.env.BYPASS_CSRF === 'true';
+
   // Bypass for automated tests
   const isTest =
     request.headers.get('x-playwright-test') === 'true' ||
@@ -39,7 +42,7 @@ export async function middleware(request: NextRequest) {
     const wsUrl = process.env.NODE_ENV === 'development' ? ' ws://localhost:3001' : '';
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-eval
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-eval for dev
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self'",
@@ -49,6 +52,23 @@ export async function middleware(request: NextRequest) {
       "form-action 'self'",
     ].join('; ');
     response.headers.set('Content-Security-Policy', csp);
+
+    // SPA Route handling - rewrite known SPA routes to the main page
+    const spaRoutes = [
+      '/receipts', '/vendors', '/customers', '/invoices',
+      '/dashboard', '/accounts', '/journal', '/vat', '/wht',
+      '/purchase-orders', '/purchases', '/payments', '/credit-notes',
+      '/debit-notes', '/inventory', '/products', '/banking', '/assets',
+      '/payroll', '/leave', '/provident-fund', '/employees', '/petty-cash',
+      '/settings', '/admin', '/quotations', '/goods-receipt-notes',
+      '/purchase-requests', '/recurring', '/cash-flow', '/bank-statement-import'
+    ]
+    if (spaRoutes.includes(pathname)) {
+      // Rewrite to root page, preserving the original URL in browser
+      const url = new URL('/', request.url)
+      url.search = request.nextUrl.search
+      return NextResponse.rewrite(url)
+    }
 
     // Rate limiting for authentication endpoints
     if (
@@ -88,8 +108,8 @@ export async function middleware(request: NextRequest) {
       if (!isCsrfExemptPath(pathname)) {
         // DEV ONLY: Allow requests without CSRF token for easier testing
         // WARNING: Remove or disable this in production!
-        if (isLocalDev) {
-          // In local dev, allow requests without CSRF token but log a warning
+        if (isLocalDev || bypassCsrf) {
+          // In local dev or when BYPASS_CSRF=true, allow requests without CSRF token but log a warning
           console.warn('[DEV] CSRF check bypassed for:', pathname);
         } else {
           const csrfToken = getCsrfTokenFromHeaders(request.headers);
@@ -173,4 +193,26 @@ export const config = {
     // Skip static files and _next
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
+}
+
+// SPA routes that should be handled by the React SPA
+const spaRoutes = [
+  '/receipts', '/vendors', '/customers', '/invoices',
+  '/dashboard', '/accounts', '/journal', '/vat', '/wht',
+  '/purchase-orders', '/purchases', '/payments', '/credit-notes',
+  '/debit-notes', '/inventory', '/products', '/banking', '/assets',
+  '/payroll', '/leave', '/provident-fund', '/employees', '/petty-cash',
+  '/settings', '/admin', '/quotations', '/goods-receipt-notes',
+  '/purchase-requests', '/recurring', '/cash-flow', '/bank-statement-import'
+]
+
+// Intercept unknown paths and let the SPA handle them
+async function handleSPARoute(request: NextRequest, pathname: string) {
+  // If it's a known SPA route but doesn't have a physical page
+  if (spaRoutes.includes(pathname)) {
+    // Rewrite to root page - the SPA will handle the routing based on URL
+    const url = new URL('/', request.url)
+    url.search = request.nextUrl.search
+    return NextResponse.rewrite(url)
+  }
 }

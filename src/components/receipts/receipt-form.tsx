@@ -411,8 +411,8 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
       return
     }
 
-    const amountInSatang = Math.round(parseFloat(amountStr) * 100) || 0
-    form.setValue('amount', amountInSatang)
+    const parsed = parseFloat(amountStr) || 0
+    form.setValue('amount', parsed)
 
     // Don't pre-fill allocations - let user manually allocate
     form.setValue('allocations', [])
@@ -955,7 +955,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                                 <div>
                                   <span className="text-muted-foreground">ครบกำหนด:</span>
                                   <p className="font-semibold">
-                                    {format(new Date(selectedInvoice.dueDate), 'dd/MM/yyyy', { locale: th })}
+                                    {selectedInvoice.dueDate ? format(new Date(selectedInvoice.dueDate), 'dd/MM/yyyy', { locale: th }) : '-'}
                                   </p>
                                 </div>
                               </div>
@@ -969,7 +969,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                                     className="!h-11 text-base"
                                     value={selectedAllocation.amount.toString()}
                                     onChange={(e) => {
-                                      const newAmount = Math.round(parseFloat(e.target.value) * 100) || 0
+                                      const newAmount = parseFloat(e.target.value) || 0
                                       updateSelectedAllocation({ amount: newAmount })
                                     }}
                                     max={selectedInvoice.balance}

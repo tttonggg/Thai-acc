@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { z } from 'zod'
-import { requireAuth } from '@/lib/api-utils'
+import { requireAuth, generateDocNumber } from '@/lib/api-utils'
 import { logCreate } from '@/lib/activity-logger'
 import { getClientIp } from '@/lib/api-utils'
 import { bahtToSatang, satangToBaht } from '@/lib/currency'
@@ -132,7 +132,6 @@ export async function GET(request: NextRequest) {
     // Database stores Satang (integers), API returns Baht (decimals)
     const invoicesInBaht = invoices.map(invoice => ({
       ...invoice,
-      customerName: invoice.customer?.name || '',
       customerName: invoice.customer?.name || '',  // Extract customer name for list view
       subtotal: satangToBaht(invoice.subtotal),
       vatAmount: satangToBaht(invoice.vatAmount),
@@ -235,8 +234,17 @@ export async function POST(request: NextRequest) {
     const totalAmount = subtotal + vatAmount - validatedData.discountAmount
     const netAmount = totalAmount - withholdingAmount
     
-    // Generate invoice number
-    const invoiceNo = await generateInvoiceNumber(validatedData.type)
+    // Generate invoice number (C-03: use transaction-safe generateDocNumber)
+    // Map document types to prefixes - must be unique per type
+    const typeToPrefix: Record<string, string> = {
+      'TAX_INVOICE': 'INV',
+      'RECEIPT': 'RC',
+      'DELIVERY_NOTE': 'DN',
+      'CREDIT_NOTE': 'CN',
+      'DEBIT_NOTE': 'DN2',  // C-03: DN2 to avoid collision with DELIVERY_NOTE
+    }
+    const prefix = typeToPrefix[validatedData.type] || 'INV'
+    const invoiceNo = await generateDocNumber(validatedData.type, prefix)
     
     const invoice = await prisma.invoice.create({
       data: {

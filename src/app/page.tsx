@@ -285,7 +285,7 @@ export default function Home() {
   const renderModule = () => {
     switch (activeModule) {
       case 'dashboard':
-        return <Dashboard />
+        return <Dashboard setActiveModule={setActiveModule} />
       case 'accounts':
         return <ChartOfAccounts />
       case 'journal':
@@ -486,7 +486,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-slate-950">
       {/* Mobile Hamburger Menu */}
       <div className="md:hidden fixed top-4 left-4 z-50">
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>

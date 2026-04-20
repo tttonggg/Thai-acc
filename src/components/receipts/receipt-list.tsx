@@ -1,19 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Eye,
-  Download,
-  Printer,
-  FileText,
-  Loader2,
-  CheckCircle2,
-  Send
-} from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Eye, Download, Printer, FileText, Loader2, CheckCircle2, Send } from 'lucide-react'
+import { eventBus, EVENTS } from '@/lib/events'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -45,6 +34,7 @@ import {
 } from '@/components/ui/dialog'
 import { ReceiptForm } from './receipt-form'
 import { ReceiptViewDialog } from './receipt-view-dialog'
+import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { getStatusBadgeProps } from '@/lib/status-badge'
@@ -133,6 +123,9 @@ export function ReceiptList() {
   const [error, setError] = useState<string | null>(null)
   const [downloadingReceipt, setDownloadingReceipt] = useState<string | null>(null)
   const [postingReceipt, setPostingReceipt] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [receiptToDelete, setReceiptToDelete] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -197,6 +190,7 @@ export function ReceiptList() {
     setRefreshKey(prev => prev + 1)
     setIsAddDialogOpen(false)
     setIsViewDialogOpen(false)
+    eventBus.emit(EVENTS.RECEIPT_CREATED)
   }
 
   const handleView = (receiptId: string) => {
@@ -343,6 +337,41 @@ export function ReceiptList() {
     } finally {
       setDownloadingReceipt(null)
     }
+  }
+
+  const handleDelete = async () => {
+    if (!receiptToDelete) return
+    setDeleteLoading(true)
+    try {
+      const res = await fetch(`/api/receipts/${receiptToDelete}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'ไม่สามารถลบได้')
+      }
+      toast({
+        title: 'สำเร็จ',
+        description: 'ลบใบเสร็จรับเงินเรียบร้อยแล้ว',
+      })
+      eventBus.emit(EVENTS.RECEIPT_DELETED, { receiptId: receiptToDelete })
+      setDeleteDialogOpen(false)
+      setReceiptToDelete(null)
+      setRefreshKey(prev => prev + 1)
+    } catch (error) {
+      toast({
+        title: 'ผิดพลาด',
+        description: error instanceof Error ? error.message : 'ไม่สามารถลบได้',
+        variant: 'destructive',
+      })
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
+
+  const openDeleteDialog = (receiptId: string) => {
+    setReceiptToDelete(receiptId)
+    setDeleteDialogOpen(true)
   }
 
   if (loading) {
@@ -597,6 +626,16 @@ export function ReceiptList() {
                             <Download className="h-4 w-4 text-purple-600" />
                           )}
                         </Button>
+                        {receipt.status === 'DRAFT' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => openDeleteDialog(receipt.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -616,6 +655,16 @@ export function ReceiptList() {
           onSuccess={handleReceiptSuccess}
         />
       )}
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="ยืนยันการลบใบเสร็จรับเงิน"
+        message="คุณต้องการลบใบเสร็จรับเงินนี้ใช่หรือไม่? การดำเนินการนี้ไม่สามารถยกเลิกได้"
+        confirmLabel="ลบ"
+        onConfirm={handleDelete}
+        loading={deleteLoading}
+      />
     </div>
   )
 }

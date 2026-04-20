@@ -70,6 +70,11 @@ export async function POST(
           throw new Error('ไม่พบใบเสร็จรับเงิน')
         }
 
+        // C-02: Re-check status inside transaction to prevent double-post race
+        if (receipt.status !== 'DRAFT') {
+          throw new Error('ใบเสร็จรับเงินถูกลงบัญชีแล้ว')
+        }
+
         // Get GL accounts
         // Cash (1110) or Bank based on payment method
         let cashAccountId: string | null = null
@@ -221,7 +226,7 @@ export async function POST(
             const balance = updatedInvoice.totalAmount - updatedInvoice.paidAmount
             let newStatus = updatedInvoice.status
 
-            if (balance <= 0.01) {
+            if (balance <= 1) {
               newStatus = 'PAID'
             } else if (updatedInvoice.paidAmount > 0) {
               newStatus = 'PARTIAL'

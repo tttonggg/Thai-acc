@@ -147,8 +147,11 @@ export async function POST(request: Request) {
       return apiError("ไม่พบผู้ขาย")
     }
 
-    // Verify bank account if transfer/cheque
-    if ((validatedData.paymentMethod === "TRANSFER" || validatedData.paymentMethod === "CHEQUE") && validatedData.bankAccountId) {
+    // B-03: Require bank account for transfer/cheque payments
+    if ((validatedData.paymentMethod === "TRANSFER" || validatedData.paymentMethod === "CHEQUE") && !validatedData.bankAccountId) {
+      return apiError("กรุณาระบุบัญชีธนาคาร", 400)
+    }
+    if (validatedData.bankAccountId) {
       const bankAccount = await db.bankAccount.findUnique({
         where: { id: validatedData.bankAccountId }
       })

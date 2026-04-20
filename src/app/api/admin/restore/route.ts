@@ -25,6 +25,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Validate filename - reject path traversal attempts
+    if (filename.includes('..') || !/^[a-zA-Z0-9_\-.]+$/.test(filename)) {
+      return NextResponse.json({ error: 'Invalid filename' }, { status: 400 })
+    }
+
     const backupsDir = path.join(process.cwd(), 'backups')
     const backupPath = path.join(backupsDir, filename)
 

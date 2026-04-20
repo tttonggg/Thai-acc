@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { eventBus, EVENTS } from '@/lib/events'
 import {
   TrendingUp,
   TrendingDown,
@@ -20,7 +21,6 @@ import {
   ShoppingCart,
   ChevronRight
 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -90,115 +90,94 @@ interface SummaryCardProps {
   changeLabel: string
   icon: React.ReactNode
   iconBg: string
+  onClick?: () => void
+  navigateTo?: (path: string) => void
 }
 
-function SummaryCard({ title, value, change, changeLabel, icon, iconBg }: SummaryCardProps) {
+function SummaryCard({ title, value, change, changeLabel, icon, iconBg, onClick }: SummaryCardProps) {
   const isPositive = change >= 0
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">{title}</p>
-            <p className="text-2xl font-bold text-foreground">{value}</p>
-            <div className={`flex items-center gap-1 mt-2 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {isPositive ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-              <span className="text-sm font-medium">{Math.abs(change)}%</span>
-              <span className="text-xs text-muted-foreground">{changeLabel}</span>
-            </div>
-          </div>
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${iconBg}`}>
-            {icon}
+    <div
+      className="bg-slate-800/90 border border-slate-700 rounded-xl p-5 hover:shadow-lg hover:border-slate-600 transition-all cursor-pointer"
+      onClick={onClick}
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-slate-400 text-sm">{title}</p>
+          <p className="text-2xl font-bold text-white mt-1">{value}</p>
+          <div className={`flex items-center gap-1 mt-2 ${isPositive ? 'text-teal-400' : 'text-red-400'}`}>
+            {isPositive ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+            <span className="text-sm font-medium">{Math.abs(change)}%</span>
+            <span className="text-xs text-slate-400">{changeLabel}</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${iconBg}`}>
+          {icon}
+        </div>
+      </div>
+    </div>
   )
 }
 
-// Helper function to get icon component by name
-function getIconComponent(iconName: string, className: string) {
-  switch (iconName) {
-    case 'FileText':
-      return <FileText className={className} />
-    case 'Users':
-      return <Users className={className} />
-    case 'DollarSign':
-      return <DollarSign className={className} />
-    case 'Receipt':
-      return <Receipt className={className} />
-    default:
-      return <Receipt className={className} />
-  }
-}
-
-// Helper function to get color classes
+// Helper function to get dark color classes
 function getColorClasses(color: string) {
   switch (color) {
     case 'yellow':
       return {
-        bg: 'bg-yellow-50',
-        border: 'border-yellow-200',
-        iconBg: 'bg-yellow-100',
-        iconColor: 'text-yellow-600',
-        hover: 'hover:bg-yellow-100'
+        bg: 'bg-slate-800/80 border border-slate-700/50',
+        iconBg: 'bg-amber-500/20',
+        iconColor: 'text-amber-400',
+        hover: 'hover:bg-slate-700/50'
       }
     case 'red':
       return {
-        bg: 'bg-red-50',
-        border: 'border-red-200',
-        iconBg: 'bg-red-100',
-        iconColor: 'text-red-600',
-        hover: 'hover:bg-red-100'
+        bg: 'bg-slate-800/80 border border-slate-700/50',
+        iconBg: 'bg-red-500/20',
+        iconColor: 'text-red-400',
+        hover: 'hover:bg-slate-700/50'
       }
     case 'blue':
       return {
-        bg: 'bg-blue-50',
-        border: 'border-blue-200',
-        iconBg: 'bg-blue-100',
-        iconColor: 'text-blue-600',
-        hover: 'hover:bg-blue-100'
+        bg: 'bg-slate-800/80 border border-slate-700/50',
+        iconBg: 'bg-blue-500/20',
+        iconColor: 'text-blue-400',
+        hover: 'hover:bg-slate-700/50'
       }
     case 'purple':
       return {
-        bg: 'bg-purple-50',
-        border: 'border-purple-200',
-        iconBg: 'bg-purple-100',
-        iconColor: 'text-purple-600',
-        hover: 'hover:bg-purple-100'
+        bg: 'bg-slate-800/80 border border-slate-700/50',
+        iconBg: 'bg-purple-500/20',
+        iconColor: 'text-purple-400',
+        hover: 'hover:bg-slate-700/50'
       }
     case 'green':
       return {
-        bg: 'bg-green-50',
-        border: 'border-green-200',
-        iconBg: 'bg-green-100',
-        iconColor: 'text-green-600',
-        hover: 'hover:bg-green-100'
+        bg: 'bg-slate-800/80 border border-slate-700/50',
+        iconBg: 'bg-teal-500/20',
+        iconColor: 'text-teal-400',
+        hover: 'hover:bg-slate-700/50'
       }
     case 'indigo':
       return {
-        bg: 'bg-indigo-50',
-        border: 'border-indigo-200',
-        iconBg: 'bg-indigo-100',
-        iconColor: 'text-indigo-600',
-        hover: 'hover:bg-indigo-100'
+        bg: 'bg-slate-800/80 border border-slate-700/50',
+        iconBg: 'bg-indigo-500/20',
+        iconColor: 'text-indigo-400',
+        hover: 'hover:bg-slate-700/50'
       }
     case 'orange':
       return {
-        bg: 'bg-orange-50',
-        border: 'border-orange-200',
-        iconBg: 'bg-orange-100',
-        iconColor: 'text-orange-600',
-        hover: 'hover:bg-orange-100'
+        bg: 'bg-slate-800/80 border border-slate-700/50',
+        iconBg: 'bg-orange-500/20',
+        iconColor: 'text-orange-400',
+        hover: 'hover:bg-slate-700/50'
       }
     default:
       return {
-        bg: 'bg-gray-50',
-        border: 'border-gray-200',
-        iconBg: 'bg-gray-100',
-        iconColor: 'text-gray-600',
-        hover: 'hover:bg-gray-100'
+        bg: 'bg-slate-800/80 border border-slate-700/50',
+        iconBg: 'bg-slate-600/50',
+        iconColor: 'text-slate-400',
+        hover: 'hover:bg-slate-700/50'
       }
   }
 }
@@ -218,63 +197,61 @@ function ShortcutCard({ title, description, icon, stats, color, onClick, loading
   const colors = getColorClasses(color)
 
   return (
-    <Card
-      className={`cursor-pointer transition-all hover:shadow-lg ${colors.hover} border-2 ${colors.border}`}
+    <div
+      className={`cursor-pointer transition-all rounded-xl p-5 ${colors.bg} ${colors.hover}`}
       onClick={onClick}
     >
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between mb-3">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colors.iconBg}`}>
-            {icon}
-          </div>
-          <ChevronRight className={`h-5 w-5 ${colors.iconColor} opacity-50`} />
+      <div className="flex items-start justify-between mb-3">
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colors.iconBg}`}>
+          {icon}
         </div>
-        <h3 className="font-semibold text-foreground mb-1">{title}</h3>
-        <p className="text-sm text-muted-foreground mb-3">{description}</p>
-        {!loading && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant="secondary" className="text-xs">
-              ทั้งหมด {stats.total}
+        <ChevronRight className={`h-5 w-5 ${colors.iconColor} opacity-50`} />
+      </div>
+      <h3 className="font-semibold text-white mb-1">{title}</h3>
+      <p className="text-sm text-slate-400 mb-3">{description}</p>
+      {!loading && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge variant="secondary" className="text-xs bg-slate-700 text-slate-300 border-slate-600">
+            ทั้งหมด {stats.total}
+          </Badge>
+          {stats.draft !== undefined && stats.draft > 0 && (
+            <Badge variant="outline" className="text-xs border-amber-600/50 text-amber-400">
+              ร่าง {stats.draft}
             </Badge>
-            {stats.draft !== undefined && stats.draft > 0 && (
-              <Badge variant="outline" className="text-xs border-yellow-300 text-yellow-700">
-                ร่าง {stats.draft}
-              </Badge>
-            )}
-            {stats.pending !== undefined && stats.pending > 0 && (
-              <Badge variant="outline" className="text-xs border-orange-300 text-orange-700">
-                รออนุมัติ {stats.pending}
-              </Badge>
-            )}
-            {stats.sent !== undefined && stats.sent > 0 && (
-              <Badge variant="outline" className="text-xs border-blue-300 text-blue-700">
-                ส่งแล้ว {stats.sent}
-              </Badge>
-            )}
-            {stats.approved !== undefined && stats.approved > 0 && (
-              <Badge variant="outline" className="text-xs border-green-300 text-green-700">
-                อนุมัติแล้ว {stats.approved}
-              </Badge>
-            )}
-            {stats.overdue !== undefined && stats.overdue > 0 && (
-              <Badge variant="destructive" className="text-xs">
-                เกินกำหนด {stats.overdue}
-              </Badge>
-            )}
-          </div>
-        )}
-        {loading && (
-          <div className="flex gap-2">
-            <Skeleton className="h-5 w-16" />
-            <Skeleton className="h-5 w-16" />
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+          {stats.pending !== undefined && stats.pending > 0 && (
+            <Badge variant="outline" className="text-xs border-orange-600/50 text-orange-400">
+              รออนุมัติ {stats.pending}
+            </Badge>
+          )}
+          {stats.sent !== undefined && stats.sent > 0 && (
+            <Badge variant="outline" className="text-xs border-blue-600/50 text-blue-400">
+              ส่งแล้ว {stats.sent}
+            </Badge>
+          )}
+          {stats.approved !== undefined && stats.approved > 0 && (
+            <Badge variant="outline" className="text-xs border-teal-600/50 text-teal-400">
+              อนุมัติแล้ว {stats.approved}
+            </Badge>
+          )}
+          {stats.overdue !== undefined && stats.overdue > 0 && (
+            <Badge variant="destructive" className="text-xs bg-red-500/20 text-red-400 border-red-500/50">
+              เกินกำหนด {stats.overdue}
+            </Badge>
+          )}
+        </div>
+      )}
+      {loading && (
+        <div className="flex gap-2">
+          <Skeleton className="h-5 w-16" />
+          <Skeleton className="h-5 w-16" />
+        </div>
+      )}
+    </div>
   )
 }
 
-export function Dashboard() {
+export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'invoices' | 'purchases' | 'customers' | 'vendors' | 'quotations' | 'receipts' | 'credit-notes' | 'debit-notes' | 'purchase-orders' | 'payments' | 'inventory' | 'assets' | 'banking' | 'petty-cash' | 'payroll' | 'wht') => void }) {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -312,7 +289,24 @@ export function Dashboard() {
         setLoading(false)
       }
     }
+
+    // Listen for data changes to refresh dashboard
+    const handleChange = () => fetchDashboard()
+    eventBus.on(EVENTS.INVOICE_CREATED, handleChange)
+    eventBus.on(EVENTS.INVOICE_UPDATED, handleChange)
+    eventBus.on(EVENTS.INVOICE_DELETED, handleChange)
+    eventBus.on(EVENTS.RECEIPT_CREATED, handleChange)
+    eventBus.on(EVENTS.RECEIPT_UPDATED, handleChange)
+
     fetchDashboard()
+
+    return () => {
+      eventBus.off(EVENTS.INVOICE_CREATED, handleChange)
+      eventBus.off(EVENTS.INVOICE_UPDATED, handleChange)
+      eventBus.off(EVENTS.INVOICE_DELETED, handleChange)
+      eventBus.off(EVENTS.RECEIPT_CREATED, handleChange)
+      eventBus.off(EVENTS.RECEIPT_UPDATED, handleChange)
+    }
   }, [toast])
 
   // Fetch module statistics
@@ -427,13 +421,22 @@ export function Dashboard() {
         setStatsLoading(false)
       }
     }
-    fetchModuleStats()
-  }, [])
 
-  // Navigation handler
-  const navigateTo = (path: string) => {
-    router.push(path)
-  }
+    // Listen for data changes from other modules
+    const handleInvoiceChange = () => fetchModuleStats()
+    eventBus.on(EVENTS.INVOICE_CREATED, handleInvoiceChange)
+    eventBus.on(EVENTS.INVOICE_UPDATED, handleInvoiceChange)
+    eventBus.on(EVENTS.INVOICE_DELETED, handleInvoiceChange)
+
+    // Initial fetch
+    fetchModuleStats()
+
+    return () => {
+      eventBus.off(EVENTS.INVOICE_CREATED, handleInvoiceChange)
+      eventBus.off(EVENTS.INVOICE_UPDATED, handleInvoiceChange)
+      eventBus.off(EVENTS.INVOICE_DELETED, handleInvoiceChange)
+    }
+  }, [])
 
   // Loading UI
   if (loading) {
@@ -445,24 +448,18 @@ export function Dashboard() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <Skeleton className="h-20 w-full" />
-              </CardContent>
-            </Card>
+            <div key={i} className="bg-slate-800/90 border border-slate-700 rounded-xl p-5">
+              <Skeleton className="h-20 w-full" />
+            </div>
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardContent className="p-6">
-              <Skeleton className="h-[300px] w-full" />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <Skeleton className="h-[300px] w-full" />
-            </CardContent>
-          </Card>
+          <div className="bg-slate-800/80 border border-slate-700/50 rounded-xl p-6">
+            <Skeleton className="h-[300px] w-full" />
+          </div>
+          <div className="bg-slate-800/80 border border-slate-700/50 rounded-xl p-6">
+            <Skeleton className="h-[300px] w-full" />
+          </div>
         </div>
       </div>
     )
@@ -471,8 +468,8 @@ export function Dashboard() {
   // Error UI
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>{error}</AlertDescription>
+      <Alert variant="destructive" className="bg-red-900/20 border-red-800/50">
+        <AlertDescription className="text-red-300">{error}</AlertDescription>
       </Alert>
     )
   }
@@ -480,8 +477,8 @@ export function Dashboard() {
   // Empty UI
   if (!data) {
     return (
-      <Alert>
-        <AlertDescription>ไม่พบข้อมูล</AlertDescription>
+      <Alert className="bg-slate-800/80 border-slate-700/50">
+        <AlertDescription className="text-slate-300">ไม่พบข้อมูล</AlertDescription>
       </Alert>
     )
   }
@@ -490,8 +487,8 @@ export function Dashboard() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">ภาพรวมธุรกิจ</h1>
-        <p className="text-muted-foreground mt-1">ภาพรวมสถานะทางการเงินและบัญชี</p>
+        <h1 className="text-2xl font-bold text-white">ภาพรวมธุรกิจ</h1>
+        <p className="text-slate-400 mt-1">ภาพรวมสถานะทางการเงินและบัญชี</p>
       </div>
 
       {/* Summary Cards */}
@@ -502,7 +499,8 @@ export function Dashboard() {
           change={data?.summary?.revenue?.change ?? 0}
           changeLabel="จากเดือนก่อน"
           icon={<TrendingUp className="h-6 w-6 text-white" />}
-          iconBg="bg-green-500"
+          iconBg="bg-teal-500"
+          onClick={() => setActiveModule?.('invoices')}
         />
         <SummaryCard
           title="ค่าใช้จ่ายรวม (เดือนนี้)"
@@ -511,6 +509,7 @@ export function Dashboard() {
           changeLabel="จากเดือนก่อน"
           icon={<TrendingDown className="h-6 w-6 text-white" />}
           iconBg="bg-red-500"
+          onClick={() => setActiveModule?.('purchases')}
         />
         <SummaryCard
           title="ลูกหนี้การค้า"
@@ -519,6 +518,7 @@ export function Dashboard() {
           changeLabel="จากเดือนก่อน"
           icon={<Users className="h-6 w-6 text-white" />}
           iconBg="bg-blue-500"
+          onClick={() => setActiveModule?.('customers')}
         />
         <SummaryCard
           title="เจ้าหนี้การค้า"
@@ -527,192 +527,196 @@ export function Dashboard() {
           changeLabel="จากเดือนก่อน"
           icon={<Truck className="h-6 w-6 text-white" />}
           iconBg="bg-orange-500"
+          onClick={() => setActiveModule?.('vendors')}
         />
       </div>
 
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue vs Expense Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">รายได้ vs ค่าใช้จ่าย</CardTitle>
-            <CardDescription>เปรียบเทียบรายได้และค่าใช้จ่ายรายเดือน</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data?.monthlyData ?? []}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `${v/1000}K`} />
-                <Tooltip
-                  formatter={(value: number) => [`฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`, '']}
-                  labelStyle={{ color: '#374151' }}
-                />
-                <Legend />
-                <Bar dataKey="revenue" name="รายได้" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="expense" name="ค่าใช้จ่าย" fill="#ef4444" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <div className="bg-slate-800/80 border border-slate-700/50 rounded-xl p-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-white">รายได้ vs ค่าใช้จ่าย</h3>
+            <p className="text-sm text-slate-400">เปรียบเทียบรายได้และค่าใช้จ่ายรายเดือน</p>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={data?.monthlyData ?? []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} />
+              <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(v) => `${v/1000}K`} />
+              <Tooltip
+                formatter={(value: number) => [`฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`, '']}
+                labelStyle={{ color: '#e2e8f0' }}
+                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
+              />
+              <Legend wrapperStyle={{ color: '#e2e8f0' }} />
+              <Bar dataKey="revenue" name="รายได้" fill="#14b8a6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expense" name="ค่าใช้จ่าย" fill="#f87171" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
 
         {/* VAT Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">ภาษีมูลค่าเพิ่ม</CardTitle>
-            <CardDescription>ภาษีขายและภาษีซื้อรายเดือน</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={data?.vatData ?? []}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `${v/1000}K`} />
-                <Tooltip
-                  formatter={(value: number) => [`฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`, '']}
-                />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="vatOutput"
-                  name="ภาษีขาย"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  dot={{ fill: '#3b82f6' }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="vatInput"
-                  name="ภาษีซื้อ"
-                  stroke="#f59e0b"
-                  strokeWidth={2}
-                  dot={{ fill: '#f59e0b' }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <div className="bg-slate-800/80 border border-slate-700/50 rounded-xl p-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-white">ภาษีมูลค่าเพิ่ม</h3>
+            <p className="text-sm text-slate-400">ภาษีขายและภาษีซื้อรายเดือน</p>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={data?.vatData ?? []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} />
+              <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(v) => `${v/1000}K`} />
+              <Tooltip
+                formatter={(value: number) => [`฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`, '']}
+                labelStyle={{ color: '#e2e8f0' }}
+                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
+              />
+              <Legend wrapperStyle={{ color: '#e2e8f0' }} />
+              <Line
+                type="monotone"
+                dataKey="vatOutput"
+                name="ภาษีขาย"
+                stroke="#818cf8"
+                strokeWidth={2}
+                dot={{ fill: '#818cf8' }}
+              />
+              <Line
+                type="monotone"
+                dataKey="vatInput"
+                name="ภาษีซื้อ"
+                stroke="#fbbf24"
+                strokeWidth={2}
+                dot={{ fill: '#fbbf24' }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* AR Aging */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">ลูกหนี้ตามอายุหนี้</CardTitle>
-            <CardDescription>จำแนกตามระยะเวลาครบกำหนด</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={data?.arAging ?? []}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {data?.arAging?.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => `฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="grid grid-cols-2 gap-2 mt-4">
-              {data?.arAging?.map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-muted-foreground">{item.name}: ฿{(item?.value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="bg-slate-800/80 border border-slate-700/50 rounded-xl p-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-white">ลูกหนี้ตามอายุหนี้</h3>
+            <p className="text-sm text-slate-400">จำแนกตามระยะเวลาครบกำหนด</p>
+          </div>
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie
+                data={data?.arAging ?? []}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={100}
+                paddingAngle={2}
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                labelLine={false}
+              >
+                {data?.arAging?.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value: number) => `฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
+                labelStyle={{ color: '#e2e8f0' }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="grid grid-cols-2 gap-2 mt-4">
+            {data?.arAging?.map((item, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                <span className="text-xs text-slate-400">{item.name}: ฿{(item?.value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* AP Aging */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">เจ้าหนี้ตามอายุหนี้</CardTitle>
-            <CardDescription>จำแนกตามระยะเวลาครบกำหนด</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={data?.apAging ?? []}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {data?.apAging?.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => `฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="grid grid-cols-2 gap-2 mt-4">
-              {data?.apAging?.map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-muted-foreground">{item.name}: ฿{(item?.value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="bg-slate-800/80 border border-slate-700/50 rounded-xl p-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-white">เจ้าหนี้ตามอายุหนี้</h3>
+            <p className="text-sm text-slate-400">จำแนกตามระยะเวลาครบกำหนด</p>
+          </div>
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie
+                data={data?.apAging ?? []}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={100}
+                paddingAngle={2}
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                labelLine={false}
+              >
+                {data?.apAging?.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value: number) => `฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
+                labelStyle={{ color: '#e2e8f0' }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="grid grid-cols-2 gap-2 mt-4">
+            {data?.apAging?.map((item, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                <span className="text-xs text-slate-400">{item.name}: ฿{(item?.value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Module Shortcuts */}
       <div className="space-y-6">
         {/* Sales & Revenue */}
         <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">การขายและรายได้</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">การขายและรายได้</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <ShortcutCard
               title="ใบเสนอราคา"
               description="สร้างและจัดการใบเสนอราคา"
-              icon={<FileText className="h-6 w-6 text-purple-600" />}
+              icon={<FileText className="h-6 w-6 text-purple-400" />}
               stats={moduleStats.quotations || { total: 0, draft: 0, sent: 0, approved: 0 }}
               color="purple"
-              onClick={() => navigateTo('/quotations')}
+              onClick={() => setActiveModule?.('quotations')}
               loading={statsLoading}
             />
             <ShortcutCard
               title="ใบกำกับภาษี"
               description="ออกใบกำกับภาษีและใบเสร็จ"
-              icon={<Receipt className="h-6 w-6 text-blue-600" />}
+              icon={<Receipt className="h-6 w-6 text-blue-400" />}
               stats={moduleStats.invoices || { total: 0, draft: 0, overdue: 0 }}
               color="blue"
-              onClick={() => navigateTo('/invoices')}
+              onClick={() => setActiveModule?.('invoices')}
               loading={statsLoading}
             />
             <ShortcutCard
               title="ใบเสร็จรับเงิน"
               description="บันทึกการรับชำระเงิน"
-              icon={<DollarSign className="h-6 w-6 text-green-600" />}
+              icon={<DollarSign className="h-6 w-6 text-teal-400" />}
               stats={moduleStats.receipts || { total: 0, draft: 0 }}
               color="green"
-              onClick={() => navigateTo('/receipts')}
+              onClick={() => setActiveModule?.('receipts')}
               loading={statsLoading}
             />
             <ShortcutCard
               title="ใบลดหนี้"
               description="ออกใบลดหนี้และคืนเงิน"
-              icon={<FileCheck className="h-6 w-6 text-orange-600" />}
+              icon={<FileCheck className="h-6 w-6 text-orange-400" />}
               stats={moduleStats.creditNotes || { total: 0 }}
               color="orange"
-              onClick={() => navigateTo('/credit-notes')}
+              onClick={() => setActiveModule?.('credit-notes')}
               loading={statsLoading}
             />
           </div>
@@ -720,33 +724,33 @@ export function Dashboard() {
 
         {/* Purchases & Expenses */}
         <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">การซื้อและค่าใช้จ่าย</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">การซื้อและค่าใช้จ่าย</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <ShortcutCard
               title="ใบสั่งซื้อ"
               description="ขออนุมัติและสั่งซื้อสินค้า"
-              icon={<ShoppingCart className="h-6 w-6 text-indigo-600" />}
+              icon={<ShoppingCart className="h-6 w-6 text-indigo-400" />}
               stats={moduleStats.purchaseOrders || { total: 0, draft: 0, pending: 0 }}
               color="indigo"
-              onClick={() => navigateTo('/purchase-orders')}
+              onClick={() => setActiveModule?.('purchase-orders')}
               loading={statsLoading}
             />
             <ShortcutCard
               title="ใบจ่ายเงิน"
               description="บันทึกการจ่ายชำระเงิน"
-              icon={<CreditCard className="h-6 w-6 text-red-600" />}
+              icon={<CreditCard className="h-6 w-6 text-red-400" />}
               stats={moduleStats.payments || { total: 0 }}
               color="red"
-              onClick={() => navigateTo('/payments')}
+              onClick={() => setActiveModule?.('payments')}
               loading={statsLoading}
             />
             <ShortcutCard
               title="ใบเพิ่มหนี้"
               description="ออกใบเพิ่มหนี้และปรับปรุง"
-              icon={<FileCheck className="h-6 w-6 text-orange-600" />}
+              icon={<FileCheck className="h-6 w-6 text-orange-400" />}
               stats={moduleStats.debitNotes || { total: 0 }}
               color="orange"
-              onClick={() => navigateTo('/debit-notes')}
+              onClick={() => setActiveModule?.('debit-notes')}
               loading={statsLoading}
             />
           </div>
@@ -754,33 +758,33 @@ export function Dashboard() {
 
         {/* Inventory & Assets */}
         <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">สินค้าและทรัพย์สิน</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">สินค้าและทรัพย์สิน</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <ShortcutCard
               title="สินค้าคงคลัง"
               description="จัดการสต็อกและคลังสินค้า"
-              icon={<Package className="h-6 w-6 text-teal-600" />}
+              icon={<Package className="h-6 w-6 text-teal-400" />}
               stats={{ total: 0 }}
               color="green"
-              onClick={() => navigateTo('/inventory')}
+              onClick={() => setActiveModule?.('inventory')}
               loading={statsLoading}
             />
             <ShortcutCard
               title="ทรัพย์สินถาวร"
               description="บันทึกทรัพย์สินและค่าเสื่อม"
-              icon={<Building className="h-6 w-6 text-slate-600" />}
+              icon={<Building className="h-6 w-6 text-slate-400" />}
               stats={{ total: 0 }}
               color="blue"
-              onClick={() => navigateTo('/fixed-assets')}
+              onClick={() => setActiveModule?.('assets')}
               loading={statsLoading}
             />
             <ShortcutCard
               title="ธนาคาร"
               description="บัญชีธนาคารและเช็ค"
-              icon={<Wallet className="h-6 w-6 text-blue-600" />}
+              icon={<Wallet className="h-6 w-6 text-blue-400" />}
               stats={{ total: 0 }}
               color="blue"
-              onClick={() => navigateTo('/banking')}
+              onClick={() => setActiveModule?.('banking')}
               loading={statsLoading}
             />
           </div>
@@ -788,33 +792,33 @@ export function Dashboard() {
 
         {/* HR & Finance */}
         <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">บุคคลและการเงิน</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">บุคคลและการเงิน</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <ShortcutCard
               title="เงินสดย่อย"
               description="กองทุนและเบิกจ่าย"
-              icon={<Wallet className="h-6 w-6 text-amber-600" />}
+              icon={<Wallet className="h-6 w-6 text-amber-400" />}
               stats={{ total: 0 }}
               color="yellow"
-              onClick={() => navigateTo('/petty-cash')}
+              onClick={() => setActiveModule?.('petty-cash')}
               loading={statsLoading}
             />
             <ShortcutCard
               title="เงินเดือน"
               description="คำนวณเงินเดือนและภาษี"
-              icon={<Users className="h-6 w-6 text-purple-600" />}
+              icon={<Users className="h-6 w-6 text-purple-400" />}
               stats={{ total: 0 }}
               color="purple"
-              onClick={() => navigateTo('/payroll')}
+              onClick={() => setActiveModule?.('payroll')}
               loading={statsLoading}
             />
             <ShortcutCard
               title="หัก ณ ที่จ่าย"
               description="ภงด.3 และ ภงด.53"
-              icon={<FileText className="h-6 w-6 text-red-600" />}
+              icon={<FileText className="h-6 w-6 text-red-400" />}
               stats={{ total: 0 }}
               color="red"
-              onClick={() => navigateTo('/wht')}
+              onClick={() => setActiveModule?.('wht')}
               loading={statsLoading}
             />
           </div>

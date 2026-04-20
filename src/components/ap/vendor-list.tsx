@@ -482,7 +482,7 @@ export function VendorList() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">เจ้าหนี้รวม</p>
-            <p className="text-2xl font-bold text-orange-600">฿{totalBalance?.toLocaleString() ?? '0'}</p>
+            <p className="text-2xl font-bold text-orange-600">฿{((totalBalance || 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</p>
           </CardContent>
         </Card>
         <Card>
@@ -544,7 +544,7 @@ export function VendorList() {
                       </div>
                     </TableCell>
                     <TableCell className="text-center">{vendor.creditDays} วัน</TableCell>
-                    <TableCell className="text-right font-semibold text-orange-600">฿{vendor?.balance?.toLocaleString() ?? '0'}</TableCell>
+                    <TableCell className="text-right font-semibold text-orange-600">฿{((vendor?.balance || 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</TableCell>
                     <TableCell>
                       <Badge className={vendor.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
                         {vendor.status === 'active' ? 'ใช้งาน' : 'ไม่ใช้งาน'}

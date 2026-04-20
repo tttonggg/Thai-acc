@@ -31,24 +31,40 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    const [vendors, total] = await Promise.all([
-      db.vendor.findMany({
-        where,
-        orderBy: { code: "asc" },
-        skip,
-        take: limit,
-        include: {
-          _count: {
-            select: { purchaseInvoices: true }
+    // Get vendors with their purchase invoice balances
+    const vendors = await db.vendor.findMany({
+      where,
+      orderBy: { code: "asc" },
+      skip,
+      take: limit,
+      include: {
+        _count: {
+          select: { purchaseInvoices: true }
+        },
+        purchaseInvoices: {
+          where: {
+            status: { in: ['ISSUED', 'PARTIAL'] },
+            deletedAt: null,
+          },
+          select: {
+            totalAmount: true,
+            paidAmount: true,
           }
         }
-      }),
-      db.vendor.count({ where }),
-    ])
+      }
+    })
+
+    // Calculate balance for each vendor
+    const vendorsWithBalance = vendors.map(vendor => ({
+      ...vendor,
+      balance: vendor.purchaseInvoices.reduce((sum, inv) => sum + (inv.totalAmount || 0) - (inv.paidAmount || 0), 0),
+    }))
+
+    const total = await db.vendor.count({ where })
 
     return Response.json({
       success: true,
-      data: vendors,
+      data: vendorsWithBalance,
       pagination: {
         page,
         limit,

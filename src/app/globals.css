@@ -133,6 +133,61 @@
 }
 
 /* ============================================
+   🌙 KEERATI DARK OLED THEME - Default
+   Deep charcoal + pastel accents
+   Professional, easy-to-read, non-accountant friendly
+   ============================================ */
+.dark,
+[data-theme="keerati-dark"] {
+  --background: #0F1117;
+  --foreground: #F1F5F9;
+
+  --card: #1A1D26;
+  --card-foreground: #F1F5F9;
+
+  --popover: #1A1D26;
+  --popover-foreground: #F1F5F9;
+
+  /* Primary - Indigo */
+  --primary: #6366F1;
+  --primary-foreground: #ffffff;
+
+  --secondary: #242836;
+  --secondary-foreground: #F1F5F9;
+
+  --muted: #242836;
+  --muted-foreground: #94A3B8;
+
+  /* Accent - Teal (money, success) */
+  --accent: #14B8A6;
+  --accent-foreground: #ffffff;
+
+  --destructive: #F87171;
+  --destructive-foreground: #ffffff;
+
+  --border: #2D3348;
+  --input: #242836;
+  --ring: #6366F1;
+
+  /* Charts - Pastel palette */
+  --chart-1: #6366F1;
+  --chart-2: #14B8A6;
+  --chart-3: #F87171;
+  --chart-4: #FBBF24;
+  --chart-5: #34D399;
+
+  /* Sidebar - Deep dark */
+  --sidebar: #13151C;
+  --sidebar-foreground: #F1F5F9;
+  --sidebar-primary: #6366F1;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1E2128;
+  --sidebar-accent-foreground: #14B8A6;
+  --sidebar-border: #2D3348;
+  --sidebar-ring: #6366F1;
+}
+
+/* ============================================
    🌙 PASTEL THEME - DARK MODE
    FIXED: Light text on dark backgrounds
    ============================================ */

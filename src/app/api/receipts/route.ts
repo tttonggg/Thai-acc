@@ -158,6 +158,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = receiptSchema.parse(body)
 
+    // Normalize empty string bankAccountId to null
+    if (validatedData.bankAccountId === '') {
+      validatedData.bankAccountId = null
+    }
+
     // Validate that total allocations don't exceed amount
     const totalAllocation = validatedData.allocations.reduce((sum, alloc) => sum + alloc.amount, 0)
     const totalWht = validatedData.allocations.reduce((sum, alloc) => sum + alloc.whtAmount, 0)
@@ -183,6 +188,66 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'กรุณาระบุเลขที่เช็ค' },
         { status: 400 }
       )
+    }
+
+    // Validate customer exists and get organization for IDOR check
+    const customer = await prisma.customer.findUnique({
+      where: { id: validatedData.customerId },
+      select: { id: true, organizationId: true }
+    })
+    if (!customer) {
+      return NextResponse.json(
+        { success: false, error: 'ไม่พบข้อมูลลูกค้า' },
+        { status: 400 }
+      )
+    }
+
+    // Validate all invoiceIds exist and belong to this customer
+    if (validatedData.allocations.length > 0) {
+      const invoiceIds = validatedData.allocations.map(a => a.invoiceId)
+      const invoices = await prisma.invoice.findMany({
+        where: { id: { in: invoiceIds }, customerId: validatedData.customerId },
+        select: { id: true, customerId: true, status: true }
+      })
+
+      if (invoices.length !== invoiceIds.length) {
+        return NextResponse.json(
+          { success: false, error: 'ใบกำกับภาษีที่เลือกไม่ถูกต้อง' },
+          { status: 400 }
+        )
+      }
+
+      // Check all invoices belong to the same customer
+      const mismatchedCustomer = invoices.find(inv => inv.customerId !== validatedData.customerId)
+      if (mismatchedCustomer) {
+        return NextResponse.json(
+          { success: false, error: 'ใบกำกับภาษีไม่ได้เป็นของลูกค้าที่เลือก' },
+          { status: 400 }
+        )
+      }
+
+      // Check invoices are still open (ISSUED or PARTIAL)
+      const closedInvoice = invoices.find(inv => inv.status === 'PAID' || inv.status === 'CANCELLED')
+      if (closedInvoice) {
+        return NextResponse.json(
+          { success: false, error: `ใบกำกับภาษี ${closedInvoice.id} ถูกปิดไปแล้ว ไม่สามารถจัดจ่ายได้` },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Validate bank account exists if provided
+    if (validatedData.bankAccountId) {
+      const bankAccount = await prisma.bankAccount.findUnique({
+        where: { id: validatedData.bankAccountId },
+        select: { id: true }
+      })
+      if (!bankAccount) {
+        return NextResponse.json(
+          { success: false, error: 'ไม่พบข้อมูลบัญชีธนาคาร' },
+          { status: 400 }
+        )
+      }
     }
 
     // Generate receipt number (transaction-safe via DocumentNumber table)
@@ -241,15 +306,23 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: receiptInBaht })
   } catch (error: any) {
-    console.error('Error creating receipt:', error)
+    console.error('Error creating receipt:', error.message)
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
         { status: 400 }
       )
     }
+    // Prisma P2003: Foreign key constraint violation
+    if (error.code === 'P2003') {
+      return NextResponse.json(
+        { success: false, error: 'ข้อมูลใบกำกับภาษีหรือลูกค้าไม่ถูกต้อง' },
+        { status: 400 }
+      )
+    }
+    console.error('Error creating receipt:', error.message)
     return NextResponse.json(
-      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการสร้างใบเสร็จรับเงิน' },
+      { success: false, error: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
       { status: 500 }
     )
   }
