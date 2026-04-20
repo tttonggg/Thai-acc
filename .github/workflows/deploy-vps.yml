@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.0
@@ -39,14 +41,27 @@ jobs:
 
             echo "🔄 Starting deployment to VPS..."
 
-            # Navigate to project directory
-            cd /root/thai-acc
+            # Fresh clone - VPS has no git repo
+            echo "📥 Cloning fresh repository..."
+            cd /root
+            if [ -d "thai-acc-new" ]; then
+              rm -rf thai-acc-new
+            fi
+            git clone https://github.com/tongztang/thai-acc.git thai-acc-new
+            cd thai-acc-new
+            git checkout ${{ github.sha }}
 
-            # Pull latest code
-            echo "📥 Pulling latest code from GitHub..."
-            git fetch origin
-            git reset --hard origin/master
-            git clean -fd
+            # Copy to thai-acc (keep existing database)
+            cd /root
+            if [ -d "thai-acc" ]; then
+              # Backup existing .env and database
+              cp thai-acc/.env thai-acc-new/.env 2>/dev/null || true
+              cp thai-acc/prisma/dev.db thai-acc-new/prisma/dev.db 2>/dev/null || true
+              # Remove old and rename new
+              rm -rf thai-acc
+            fi
+            mv thai-acc-new thai-acc
+            cd /root/thai-acc
 
             # Kill any existing server (use port 3000 check instead of pkill to avoid killing SSH)
             echo "🔄 Checking for existing server..."
