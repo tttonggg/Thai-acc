@@ -1,3 +1,0 @@
-{
-  "/api/journal-entries/[id]/export/pdf/route": "app/api/journal-entries/[id]/export/pdf/route.js"
-}
