@@ -844,6 +844,10 @@ model User {
   maxSessions    Int             @default(3) // Maximum concurrent sessions
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  // RBAC: Link to Employee
+  userEmployee   UserEmployee?
+
   pettyCashFunds PettyCashFund[]
   dataImports    DataImport[]    @relation("DataImportUser")
   activityLogs   ActivityLog[]
@@ -1339,6 +1343,11 @@ model Employee {
   metadata         Json?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+
+  // RBAC: Link to User and Roles
+  userEmployee   UserEmployee?
+  employeeRoles  EmployeeRole[]
+
   payrolls         Payroll[]
 
   @@index([deletedAt])
@@ -1973,6 +1982,7 @@ model Department {
   // Relations
   purchaseRequests PurchaseRequest[] @relation("PRDepartment")
   budgets         DepartmentBudget[]
+  employeeRoles   EmployeeRole[]      // RBAC: department-scoped roles
 
   createdById     String
   createdBy       User                @relation("DeptCreator", fields: [createdById], references: [id])
@@ -2490,6 +2500,118 @@ model RelatedDocument {
   @@index([sourceModule, sourceId])
   @@index([relatedModule, relatedId])
   @@index([relationType])
+}
+
+// ============================================
+// RBAC - Role Based Access Control
+// ============================================
+
+enum RoleType {
+  SYSTEM // Admin/Accountant - cannot be deleted
+  CUSTOM // Custom roles created by admins
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  module      String   // e.g., "invoice", "purchase_request", "department"
+  action      String   // e.g., "create", "read", "update", "delete", "approve"
+  description String?   // Thai description
+  code        String   @unique // e.g., "invoice.create", "pr.approve"
+  rolePermissions RolePermission[]
+  createdAt   DateTime @default(now())
+
+  @@index([module, action])
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  type        RoleType @default(CUSTOM)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  permissions RolePermission[]
+  employeeRoles EmployeeRole[]
+
+  @@index([type, isActive])
+}
+
+model RolePermission {
+  id           String   @id @default(cuid())
+  roleId       String
+  role         Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@unique([roleId, permissionId])
+}
+
+model EmployeeRole {
+  id           String   @id @default(cuid())
+  employeeId   String
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  roleId       String
+  role         Role     @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  isPrimary    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@unique([employeeId, departmentId, roleId])
+  @@index([employeeId, departmentId])
+}
+
+model UserEmployee {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId String   @unique
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([employeeId])
+}
+
+// Document Approver Configuration
+enum ApproverType {
+  ROLE
+  USER
+  DEPARTMENT_HEAD
+  CHAIN
+}
+
+model DocumentApproverConfig {
+  id                  String   @id @default(cuid())
+  documentType        String   // "PURCHASE_REQUEST", "INVOICE", "RECEIPT"
+  condition           String?  // JSON e.g., { "amount_greater_than": 100000 }
+  approverType        ApproverType
+  approverId          String?  // roleId or userId
+  approverDepartmentId String?  // for dept-scoped approvers
+  approvalOrder       Int      @default(1)
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([documentType, isActive])
+}
+
+// Approval Audit Trail
+model ApprovalAudit {
+  id           String   @id @default(cuid())
+  documentType String
+  documentId   String
+  approverId   String
+  approverRole String
+  action       String   // APPROVED, REJECTED, ESCALATED
+  comments     String?
+  metadata     String?  // JSON
+  createdAt    DateTime @default(now())
+
+  @@index([documentType, documentId])
+  @@index([approverId])
+  @@index([createdAt])
 }
 
 // ============================================
