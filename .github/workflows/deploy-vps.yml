@@ -42,7 +42,7 @@ jobs:
             if [ -d "thai-acc-new" ]; then
               rm -rf thai-acc-new
             fi
-            git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/tongztang/thai-acc.git thai-acc-new
+            git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/tttonggg/Thai-acc.git thai-acc-new
             cd thai-acc-new
             git checkout ${{ github.sha }}
 
