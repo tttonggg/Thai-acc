@@ -324,6 +324,14 @@ The project uses relaxed ESLint rules for development efficiency:
 
 ## Testing Strategy
 
+### CRITICAL: No Hardcoded Mock Data (User Rule)
+**ALL test data must come from REAL database (Prisma seed). Hardcoded mock data is NOT acceptable because:**
+- It hides real data relationships between forms → calculations → database
+- Bugs can exist in the relationships between UI forms, calculation logic, and DB schema without being caught
+- Phase 2 must replace ALL mocks with real seed data and retest the entire project end-to-end
+
+Every service test should use real Prisma queries to verify the complete form→calc→DB chain works correctly.
+
 ### Unit Tests (Vitest)
 - **Location**: `src/lib/__tests__/` or co-located with source files
 - **Setup**: `src/test/setup.ts`

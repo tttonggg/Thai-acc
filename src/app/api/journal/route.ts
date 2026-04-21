@@ -3,6 +3,7 @@ import prisma from '@/lib/db'
 import { z } from 'zod'
 import { requireAuth, requireRole } from '@/lib/api-utils'
 import { bahtToSatang, satangToBaht } from '@/lib/currency'
+import { checkPeriodStatus } from '@/lib/period-service'
 
 // Validation schema for journal entry
 const journalLineSchema = z.object({
@@ -161,6 +162,15 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const validatedData = journalEntrySchema.parse(body)
+
+    // B1. Period Locking - Check if period is open for journal entry date
+    const periodCheck = await checkPeriodStatus(validatedData.date)
+    if (!periodCheck.isValid) {
+      return NextResponse.json(
+        { success: false, error: periodCheck.error || "ไม่สามารถสร้างบันทึกบัญชีในงวดที่ปิดแล้ว" },
+        { status: 400 }
+      )
+    }
 
     // Convert Baht to Satang for debit/credit amounts
     const dataInSatang = {

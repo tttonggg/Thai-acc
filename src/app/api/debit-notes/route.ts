@@ -3,6 +3,7 @@ import { requireAuth, apiResponse, apiError, unauthorizedError, forbiddenError, 
 import { AuthError } from '@/lib/api-auth'
 import { db } from '@/lib/db'
 import { z } from 'zod'
+import { checkPeriodStatus } from '@/lib/period-service'
 import { bahtToSatang, satangToBaht } from '@/lib/currency'
 
 // Wrapper that properly handles auth with request context
@@ -204,6 +205,12 @@ export async function POST(request: NextRequest) {
       if (purchaseInvoice.vendorId !== validatedData.vendorId) {
         return apiError('ใบซื้อไม่ตรงกับผู้ขาย')
       }
+    }
+
+    // B1. Period Locking - Check if period is open for debit note date
+    const periodCheck = await checkPeriodStatus(validatedData.debitNoteDate)
+    if (!periodCheck.isValid) {
+      return apiError(periodCheck.error || "ไม่สามารถออกใบเพิ่มหนี้ในงวดที่ปิดแล้ว")
     }
 
     // Generate debit note number

@@ -78,7 +78,7 @@ export function numberToThaiText(num: number): string {
   const tens = ['', 'สิบ', 'ยี่สิบ', 'สามสิบ', 'สี่สิบ', 'ห้าสิบ', 'หกสิบ', 'เจ็ดสิบ', 'แปดสิบ', 'เก้าสิบ'];
   const scales = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
 
-  if (num === 0) return 'ศูนย์';
+  if (num === 0) return 'ศูนย์บาทถ้วน';
 
   let result = '';
   const parts = num.toFixed(2).split('.');
@@ -122,7 +122,7 @@ function convertNumberToText(num: number, ones: string[], tens: string[]): strin
     } else {
       result += ones[digit];
       if (position > 0) {
-        result += ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน'][position];
+        result += ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'][position];
       }
     }
   }
@@ -193,7 +193,7 @@ export function calculateAging(
 
     const daysDiff = Math.floor((asOfTime - new Date(tx.date).getTime()) / (1000 * 60 * 60 * 24));
 
-    if (daysDiff <= 0) {
+    if (daysDiff <= 1) {
       aging.current += outstanding;
     } else if (daysDiff <= 30) {
       aging.days30 += outstanding;

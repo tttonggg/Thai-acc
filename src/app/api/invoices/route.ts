@@ -6,6 +6,7 @@ import { logCreate } from '@/lib/activity-logger'
 import { getClientIp } from '@/lib/api-utils'
 import { bahtToSatang, satangToBaht } from '@/lib/currency'
 import { validateCsrfToken, getCsrfTokenFromHeaders } from '@/lib/csrf-service-server'
+import { checkPeriodStatus } from '@/lib/period-service'
 
 // Validation schema
 const invoiceLineSchema = z.object({
@@ -203,7 +204,16 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const validatedData = invoiceSchema.parse(body)
-    
+
+    // B1. Period Locking - Check if period is open for invoice date
+    const periodCheck = await checkPeriodStatus(validatedData.invoiceDate)
+    if (!periodCheck.isValid) {
+      return NextResponse.json(
+        { success: false, error: periodCheck.error || "ไม่สามารถสร้างใบกำกับภาษีในงวดที่ปิดแล้ว" },
+        { status: 400 }
+      )
+    }
+
     // Calculate totals
     const subtotal = validatedData.lines.reduce((sum, line) => sum + line.amount, 0)
     const vatAmount = validatedData.lines.reduce((sum, line) => sum + line.vatAmount, 0)
