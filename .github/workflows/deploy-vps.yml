@@ -60,13 +60,13 @@ jobs:
             git checkout ${{ github.sha }}
             echo "✅ Repository cloned and checked out"
 
-            # Create .env from backup OR create minimal one
+            # Restore .env from backup (now we're inside thai-acc/)
             if [ -f /tmp/thai-acc-backup/.env ]; then
-              cp /tmp/thai-acc-backup/.env thai-acc/.env
+              cp /tmp/thai-acc-backup/.env ./.env
               echo "✅ .env restored from backup"
             else
               # Create minimal .env with required vars
-              printf 'DATABASE_URL=file:/root/thai-acc/prisma/dev.db\nNEXTAUTH_URL=https://acc.k56mm.uk\nNEXTAUTH_SECRET=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY=\nNODE_ENV=production\n' > thai-acc/.env
+              printf 'DATABASE_URL=file:/root/thai-acc/prisma/dev.db\nNEXTAUTH_URL=https://acc.k56mm.uk\nNEXTAUTH_SECRET=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY=\nNODE_ENV=production\n' > ./.env
               echo "✅ Created minimal .env"
             fi
 
@@ -76,9 +76,9 @@ jobs:
 
             # Restore database (if backup exists)
             if [ -f /tmp/thai-acc-backup/dev.db ]; then
-              mkdir -p thai-acc/prisma
-              cp /tmp/thai-acc-backup/dev.db thai-acc/prisma/dev.db
-              echo "✅ Database restored ($(ls -lh thai-acc/prisma/dev.db | awk '{print $5}'))"
+              mkdir -p prisma
+              cp /tmp/thai-acc-backup/dev.db prisma/dev.db
+              echo "✅ Database restored ($(ls -lh prisma/dev.db | awk '{print $5}'))"
             fi
 
             # Generate Prisma client
