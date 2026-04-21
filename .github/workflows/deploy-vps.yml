@@ -68,15 +68,27 @@ jobs:
             echo "🗄️  Generating Prisma client..."
             npm run db:generate
 
-            # Now restore database
+            # Restore database (if backup exists)
             if [ -f /tmp/thai-acc-backup/dev.db ]; then
               mkdir -p thai-acc/prisma
               cp /tmp/thai-acc-backup/dev.db thai-acc/prisma/dev.db
               echo "✅ Database restored ($(ls -lh thai-acc/prisma/dev.db | awk '{print $5}'))"
             fi
+
+            # Ensure NEXTAUTH_SECRET is set (required for build)
+            if ! grep -q "NEXTAUTH_SECRET=" thai-acc/.env 2>/dev/null; then
+              echo "NEXTAUTH_SECRET=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY=" >> thai-acc/.env
+              echo "✅ NEXTAUTH_SECRET added to .env"
+            fi
+            if ! grep -q "ENCRYPTION_KEY=" thai-acc/.env 2>/dev/null; then
+              echo "ENCRYPTION_KEY=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY=" >> thai-acc/.env
+              echo "✅ ENCRYPTION_KEY added to .env"
+            fi
+
+            # Copy rest of .env from backup if it exists
             if [ -f /tmp/thai-acc-backup/.env ]; then
-              cp /tmp/thai-acc-backup/.env thai-acc/.env
-              echo "✅ .env restored"
+              # Merge backup .env but keep any new vars we just added
+              cat /tmp/thai-acc-backup/.env >> thai-acc/.env 2>/dev/null || true
             fi
 
             # Build application
