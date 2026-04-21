@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { signOut } from 'next-auth/react'
 import { useAuthStore } from '@/stores/auth-store'
-import { getUserPermissions } from '@/lib/api-utils'
 import { KeeratiSidebar } from '@/components/layout/keerati-sidebar'
 import { Dashboard } from '@/components/dashboard/dashboard'
 import { EntityManagement } from '@/components/entities/entity-management'
@@ -52,6 +51,7 @@ import { DataExportPage } from '@/components/admin/data-export-page'
 import { BackupRestorePage } from '@/components/admin/backup-restore-page'
 import { DataImportPage } from '@/components/admin/data-import-page'
 import { ActivityLogPage } from '@/components/admin/activity-log-page'
+import { RoleManagement } from '@/components/admin/role-management/role-management'
 import { WebhookManagement, ApiAnalytics } from '@/components/admin'
 import { RecurringDocuments } from '@/components/recurring/recurring-documents'
 import { SSOFiling } from '@/components/payroll/sso-filing'
@@ -100,6 +100,7 @@ export type Module =
   | 'customers'
   | 'vendors'
   | 'purchase-requests'
+  | 'role-management'
   | 'purchase-orders'
   | 'purchases'
   | 'goods-receipt-notes'
@@ -179,6 +180,7 @@ export default function Home() {
         'activity-log': '/activity-log',
         'webhooks': '/webhooks',
         'api-analytics': '/api-analytics',
+        'role-management': '/role-management',
         'recurring': '/recurring',
         'cash-flow': '/cash-flow',
         'invoice-detail': '/invoices',
@@ -289,7 +291,9 @@ export default function Home() {
   useEffect(() => {
     async function loadPermissions() {
       try {
-        const perms = await getUserPermissions()
+        const permsRes = await fetch('/api/admin/permissions/my')
+        const permsData = await permsRes.json()
+        const perms = permsData.data?.permissions || []
         setPermissions(perms)
       } catch (e) {
         console.error('Failed to load permissions', e)
@@ -437,6 +441,10 @@ export default function Home() {
           <PermissionGuard permission="SETTINGS_VIEW">
             <ApiAnalytics />
           </PermissionGuard>
+        )
+      case 'role-management':
+        return (
+          <RoleManagement />
         )
       case 'entities':
         return (
