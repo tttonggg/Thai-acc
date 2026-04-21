@@ -88,7 +88,7 @@ jobs:
             fuser -k 3000/tcp 2>/dev/null || true
             sleep 3
 
-            # Start server - use nohup with full path
+            # Start server from correct path (server.js is at .next/standalone/server.js)
             cd /root/thai-acc
             nohup node .next/standalone/server.js > /root/thai-acc/server.log 2>&1 &
             SERVER_PID=$!
