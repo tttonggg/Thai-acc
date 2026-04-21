@@ -1,6 +1,6 @@
 # ============================================
 # Thai Accounting ERP - VPS Auto-Deployment
-# Automatically deploys to production VPS after successful CI/CD
+# Auto-deploys to production VPS after CI passes
 # ============================================
 
 name: Deploy to VPS
