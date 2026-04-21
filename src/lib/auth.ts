@@ -224,12 +224,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 8 * 60 * 60, // 8 hours
   },
-  secret: process.env.NEXTAUTH_SECRET || (() => {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('NEXTAUTH_SECRET must be set in production environment')
-    }
-    return 'dev-only-secret-change-in-production'
-  })(),
+  secret: process.env.NEXTAUTH_SECRET || 'dev-only-secret-change-in-production',
   events: {
     async signOut({ token }) {
       // Invalidate session when user signs out
