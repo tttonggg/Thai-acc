@@ -60,20 +60,22 @@ jobs:
             git checkout ${{ github.sha }}
             echo "✅ Repository cloned and checked out"
 
-            # Restore .env from backup FIRST (before any commands that need env vars)
+            # Create .env from backup OR create minimal one
             if [ -f /tmp/thai-acc-backup/.env ]; then
               cp /tmp/thai-acc-backup/.env thai-acc/.env
               echo "✅ .env restored from backup"
             else
               # Create minimal .env with required vars
-              echo "DATABASE_URL=file:/root/thai-acc/prisma/dev.db" > thai-acc/.env
-              echo "NEXTAUTH_URL=https://acc.k56mm.uk" >> thai-acc/.env
-              echo "NEXTAUTH_SECRET=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY=" >> thai-acc/.env
-              echo "NODE_ENV=production" >> thai-acc/.env
+              cat > thai-acc/.env << 'EOF'
+DATABASE_URL=file:/root/thai-acc/prisma/dev.db
+NEXTAUTH_URL=https://acc.k56mm.uk
+NEXTAUTH_SECRET=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY=
+NODE_ENV=production
+EOF
               echo "✅ Created minimal .env"
             fi
 
-            # Install dependencies FIRST (creates prisma/ directory)
+            # Install dependencies
             echo "📦 Installing dependencies..."
             npm install --legacy-peer-deps --ignore-scripts
 
@@ -84,7 +86,7 @@ jobs:
               echo "✅ Database restored ($(ls -lh thai-acc/prisma/dev.db | awk '{print $5}'))"
             fi
 
-            # Generate Prisma client (creates prisma/schema.prisma and node_modules/@prisma/client)
+            # Generate Prisma client
             echo "🗄️  Generating Prisma client..."
             npm run db:generate
 
