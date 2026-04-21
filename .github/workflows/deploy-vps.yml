@@ -66,12 +66,7 @@ jobs:
               echo "✅ .env restored from backup"
             else
               # Create minimal .env with required vars
-              cat > thai-acc/.env << 'EOF'
-DATABASE_URL=file:/root/thai-acc/prisma/dev.db
-NEXTAUTH_URL=https://acc.k56mm.uk
-NEXTAUTH_SECRET=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY=
-NODE_ENV=production
-EOF
+              printf 'DATABASE_URL=file:/root/thai-acc/prisma/dev.db\nNEXTAUTH_URL=https://acc.k56mm.uk\nNEXTAUTH_SECRET=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY=\nNODE_ENV=production\n' > thai-acc/.env
               echo "✅ Created minimal .env"
             fi
 
