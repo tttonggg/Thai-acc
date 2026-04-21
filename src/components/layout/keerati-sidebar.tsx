@@ -61,6 +61,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useThemeStore, themeColors, ThemeVariant } from '@/stores/theme-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { useTheme } from 'next-themes'
 import {
   Dialog,
@@ -88,7 +89,7 @@ interface MenuItem {
   id: Module
   label: string
   icon: React.ComponentType<{ size?: number; className?: string }>
-  adminOnly?: boolean
+  requiredPermission?: { module: string; action: string } // RBAC: required permission to show item
 }
 
 const menuGroups: MenuGroup[] = [
@@ -107,12 +108,12 @@ const menuGroups: MenuGroup[] = [
     icon: Store,
     color: 'text-blue-600',
     items: [
-      { id: 'customers', label: 'ลูกค้า (Customers)', icon: Users },
-      { id: 'quotations', label: 'ใบเสนอราคา (Quotation)', icon: Quote },
-      { id: 'invoices', label: 'ใบกำกับภาษี (Tax Invoice)', icon: Receipt },
-      { id: 'credit-notes', label: 'ใบลดหนี้ (Credit Note)', icon: FileText },
-      { id: 'debit-notes', label: 'ใบเพิ่มหนี้ (Debit Note)', icon: FileText },
-      { id: 'receipts', label: 'รับเงิน (Receipt)', icon: Receipt },
+      { id: 'customers', label: 'ลูกค้า (Customers)', icon: Users, requiredPermission: { module: 'customer', action: 'read' } },
+      { id: 'quotations', label: 'ใบเสนอราคา (Quotation)', icon: Quote, requiredPermission: { module: 'quotation', action: 'read' } },
+      { id: 'invoices', label: 'ใบกำกับภาษี (Tax Invoice)', icon: Receipt, requiredPermission: { module: 'invoice', action: 'read' } },
+      { id: 'credit-notes', label: 'ใบลดหนี้ (Credit Note)', icon: FileText, requiredPermission: { module: 'credit_note', action: 'read' } },
+      { id: 'debit-notes', label: 'ใบเพิ่มหนี้ (Debit Note)', icon: FileText, requiredPermission: { module: 'debit_note', action: 'read' } },
+      { id: 'receipts', label: 'รับเงิน (Receipt)', icon: Receipt, requiredPermission: { module: 'receipt', action: 'read' } },
     ],
   },
   {
@@ -121,12 +122,12 @@ const menuGroups: MenuGroup[] = [
     icon: ShoppingCart,
     color: 'text-amber-600',
     items: [
-      { id: 'vendors', label: 'ผู้ขาย (Vendors)', icon: Truck },
-      { id: 'purchase-requests', label: 'ใบขอซื้อ (PR)', icon: FileText },
-      { id: 'purchase-orders', label: 'ใบสั่งซื้อ (PO)', icon: ShoppingCart },
-      { id: 'goods-receipt-notes', label: 'รับสินค้า (GRN)', icon: Package },
-      { id: 'purchases', label: 'บันทึกราคา (Purchase Invoice)', icon: Receipt },
-      { id: 'payments', label: 'จ่ายเงิน (Payment)', icon: CreditCard },
+      { id: 'vendors', label: 'ผู้ขาย (Vendors)', icon: Truck, requiredPermission: { module: 'vendor', action: 'read' } },
+      { id: 'purchase-requests', label: 'ใบขอซื้อ (PR)', icon: FileText, requiredPermission: { module: 'pr', action: 'read' } },
+      { id: 'purchase-orders', label: 'ใบสั่งซื้อ (PO)', icon: ShoppingCart, requiredPermission: { module: 'po', action: 'read' } },
+      { id: 'goods-receipt-notes', label: 'รับสินค้า (GRN)', icon: Package, requiredPermission: { module: 'grn', action: 'read' } },
+      { id: 'purchases', label: 'บันทึกราคา (Purchase Invoice)', icon: Receipt, requiredPermission: { module: 'purchase_invoice', action: 'read' } },
+      { id: 'payments', label: 'จ่ายเงิน (Payment)', icon: CreditCard, requiredPermission: { module: 'payment', action: 'read' } },
     ],
   },
   {
@@ -135,9 +136,9 @@ const menuGroups: MenuGroup[] = [
     icon: BookOpen,
     color: 'text-emerald-600',
     items: [
-      { id: 'accounts', label: 'ผังบัญชี (Chart of Accounts)', icon: BookOpen },
-      { id: 'journal', label: 'รายวัน (Journal Entry)', icon: FileText },
-      { id: 'banking', label: 'ธนาคาร (Banking)', icon: Building2 },
+      { id: 'accounts', label: 'ผังบัญชี (Chart of Accounts)', icon: BookOpen, requiredPermission: { module: 'account', action: 'read' } },
+      { id: 'journal', label: 'รายวัน (Journal Entry)', icon: FileText, requiredPermission: { module: 'journal', action: 'read' } },
+      { id: 'banking', label: 'ธนาคาร (Banking)', icon: Building2, requiredPermission: { module: 'banking', action: 'read' } },
     ],
   },
   {
@@ -146,12 +147,12 @@ const menuGroups: MenuGroup[] = [
     icon: BarChart3,
     color: 'text-violet-600',
     items: [
-      { id: 'vat', label: 'VAT Report', icon: Percent },
-      { id: 'wht', label: 'WHT Report', icon: Landmark },
-      { id: 'reports', label: 'Variance Report', icon: Activity },
-      { id: 'cash-flow', label: 'งบกระแสเงินสด (Cash Flow)', icon: BarChart3 },
-      { id: 'accounting-periods', label: 'งวดบัญชี (Accounting Periods)', icon: Calendar },
-      { id: 'recurring', label: 'เอกสารประจำ (Recurring)', icon: RefreshCw },
+      { id: 'vat', label: 'VAT Report', icon: Percent, requiredPermission: { module: 'report', action: 'read' } },
+      { id: 'wht', label: 'WHT Report', icon: Landmark, requiredPermission: { module: 'report', action: 'read' } },
+      { id: 'reports', label: 'Variance Report', icon: Activity, requiredPermission: { module: 'report', action: 'read' } },
+      { id: 'cash-flow', label: 'งบกระแสเงินสด (Cash Flow)', icon: BarChart3, requiredPermission: { module: 'report', action: 'read' } },
+      { id: 'accounting-periods', label: 'งวดบัญชี (Accounting Periods)', icon: Calendar, requiredPermission: { module: 'accounting_period', action: 'read' } },
+      { id: 'recurring', label: 'เอกสารประจำ (Recurring)', icon: RefreshCw, requiredPermission: { module: 'recurring', action: 'read' } },
     ],
   },
   {
@@ -160,11 +161,11 @@ const menuGroups: MenuGroup[] = [
     icon: Package,
     color: 'text-cyan-600',
     items: [
-      { id: 'assets', label: 'สินทรัพย์ถาวร (Fixed Assets)', icon: Hammer },
-      { id: 'inventory', label: 'สินค้าคงคลัง (Inventory)', icon: Package },
-      { id: 'products', label: 'สินค้า (Products)', icon: Package },
-      { id: 'warehouses', label: 'คลังสินค้า (Warehouses)', icon: Building2 },
-      { id: 'petty-cash', label: 'กระเป๋าเงินสด (Petty Cash)', icon: Wallet },
+      { id: 'assets', label: 'สินทรัพย์ถาวร (Fixed Assets)', icon: Hammer, requiredPermission: { module: 'asset', action: 'read' } },
+      { id: 'inventory', label: 'สินค้าคงคลัง (Inventory)', icon: Package, requiredPermission: { module: 'inventory', action: 'read' } },
+      { id: 'products', label: 'สินค้า (Products)', icon: Package, requiredPermission: { module: 'product', action: 'read' } },
+      { id: 'warehouses', label: 'คลังสินค้า (Warehouses)', icon: Building2, requiredPermission: { module: 'warehouse', action: 'read' } },
+      { id: 'petty-cash', label: 'กระเป๋าเงินสด (Petty Cash)', icon: Wallet, requiredPermission: { module: 'petty_cash', action: 'read' } },
     ],
   },
   {
@@ -173,9 +174,9 @@ const menuGroups: MenuGroup[] = [
     icon: Users,
     color: 'text-rose-600',
     items: [
-      { id: 'employees', label: 'พนักงาน (Employees)', icon: UserCog },
-      { id: 'payroll', label: 'ค่าจ้าง (Payroll)', icon: Users },
-      { id: 'provident-fund', label: 'กองทุนสำรองเลี้ยงชีพ (Provident)', icon: PiggyBank },
+      { id: 'employees', label: 'พนักงาน (Employees)', icon: UserCog, requiredPermission: { module: 'employee', action: 'read' } },
+      { id: 'payroll', label: 'ค่าจ้าง (Payroll)', icon: Users, requiredPermission: { module: 'payroll', action: 'read' } },
+      { id: 'provident-fund', label: 'กองทุนสำรองเลี้ยงชีพ (Provident)', icon: PiggyBank, requiredPermission: { module: 'provident_fund', action: 'read' } },
       { id: 'leave', label: 'ลางาน (Leave)', icon: Calendar },
       { id: 'sso-filing', label: 'ประกันสังคม (SSC)', icon: Shield },
     ],
@@ -186,11 +187,11 @@ const menuGroups: MenuGroup[] = [
     icon: Settings,
     color: 'text-slate-500',
     items: [
-      { id: 'settings', label: 'ตั้งค่าระบบ (System Settings)', icon: Settings, adminOnly: true },
-      { id: 'users', label: 'จัดการผู้ใช้ (User Management)', icon: UserCog, adminOnly: true },
-      { id: 'entities', label: 'บริษัทในเครือ (Entities)', icon: Building, adminOnly: true },
-      { id: 'currencies', label: 'สกุลเงิน (Currencies)', icon: DollarSign, adminOnly: true },
-      { id: 'budgets', label: 'งบประมาณ (Budgets)', icon: PiggyBank, adminOnly: true },
+      { id: 'settings', label: 'ตั้งค่าระบบ (System Settings)', icon: Settings, requiredPermission: { module: 'admin', action: 'manage' } },
+      { id: 'users', label: 'จัดการผู้ใช้ (User Management)', icon: UserCog, requiredPermission: { module: 'admin', action: 'users' } },
+      { id: 'entities', label: 'บริษัทในเครือ (Entities)', icon: Building, requiredPermission: { module: 'company', action: 'read' } },
+      { id: 'currencies', label: 'สกุลเงิน (Currencies)', icon: DollarSign, requiredPermission: { module: 'currency', action: 'read' } },
+      { id: 'budgets', label: 'งบประมาณ (Budgets)', icon: PiggyBank, requiredPermission: { module: 'budget', action: 'read' } },
     ],
   },
 ]
@@ -199,6 +200,7 @@ interface SidebarProps {
   activeModule: Module
   setActiveModule: (module: Module) => void
   userRole?: string
+  permissions?: string[]
   userName?: string
   onLogout?: () => void
   onCloseMobile?: () => void
@@ -355,14 +357,33 @@ export function KeeratiSidebar({
   activeModule,
   setActiveModule,
   userRole = 'VIEWER',
+  permissions = [],
   userName = 'ผู้ใช้',
   onLogout,
   onCloseMobile,
 }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
   const { expandedGroups, toggleGroup, isSidebarCollapsed, toggleSidebar } = useThemeStore()
+  const authStore = useAuthStore()
 
   const isCollapsed = isSidebarCollapsed
+
+  // Permission check helper
+  const hasPermission = (module: string, action: string): boolean => {
+    // ADMIN has all permissions
+    if (userRole === 'ADMIN') return true
+    // Use passed permissions or fallback to auth store
+    const perms = permissions.length > 0 ? permissions : authStore.permissions
+    const code = `${module}.${action}`
+    return perms.includes(code)
+  }
+
+  // Filter items by permission
+  const filterByPermission = (item: MenuItem): boolean => {
+    if (!item.requiredPermission) return true
+    const { module, action } = item.requiredPermission
+    return hasPermission(module, action)
+  }
 
   return (
     <aside
@@ -406,10 +427,9 @@ export function KeeratiSidebar({
       <nav className="flex-1 overflow-y-auto p-3 space-y-2">
         {isCollapsed ? (
           // Collapsed view - flat list with tooltips
-          menuGroups.flatMap(g => g.items).map((item) => {
+          menuGroups.flatMap(g => g.items).filter(filterByPermission).map((item) => {
             const Icon = item.icon
             const isActive = activeModule === item.id
-            if (item.adminOnly && userRole !== 'ADMIN') return null
 
             return (
               <button
@@ -437,8 +457,8 @@ export function KeeratiSidebar({
             const isExpanded = expandedGroups.includes(group.id)
             const hasActiveItem = group.items.some(item => item.id === activeModule)
             
-            // Check if group has visible items
-            const visibleItems = group.items.filter(item => !item.adminOnly || userRole === 'ADMIN')
+            // Check if group has visible items (based on permissions)
+            const visibleItems = group.items.filter(filterByPermission)
             if (visibleItems.length === 0) return null
 
             return (

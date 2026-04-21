@@ -8,10 +8,6 @@ import * as CryptoJS from 'crypto-js';
 // Get encryption key from environment
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || process.env.NEXTAUTH_SECRET || '';
 
-if (!ENCRYPTION_KEY && process.env.NODE_ENV === 'production') {
-  console.warn('⚠️ ENCRYPTION_KEY not set. Using fallback key. Set ENCRYPTION_KEY in production!');
-}
-
 // Use a derived key for encryption (SHA-256 for key derivation)
 const deriveKey = (key: string): string => {
   return CryptoJS.SHA256(key).toString();

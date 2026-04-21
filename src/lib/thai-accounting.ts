@@ -76,9 +76,9 @@ export function formatNumber(amount: number, decimals: number = 2): string {
 export function numberToThaiText(num: number): string {
   const ones = ['', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
   const tens = ['', 'สิบ', 'ยี่สิบ', 'สามสิบ', 'สี่สิบ', 'ห้าสิบ', 'หกสิบ', 'เจ็ดสิบ', 'แปดสิบ', 'เก้าสิบ'];
-  const scales = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
+  const scales = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน', 'สิบล้าน', 'ร้อยล้าน', 'พันล้าน', 'หมื่นล้าน'];
 
-  if (num === 0) return 'ศูนย์';
+  if (num === 0) return 'ศูนย์บาทถ้วน';
 
   let result = '';
   const parts = num.toFixed(2).split('.');
@@ -87,12 +87,12 @@ export function numberToThaiText(num: number): string {
 
   // แปลงส่วนบาท
   if (baht > 0) {
-    result = convertNumberToText(baht, ones, tens) + 'บาท';
+    result = convertNumberToText(baht, ones, tens, scales) + 'บาท';
   }
 
   // แปลงส่วนสตางค์
   if (satang > 0) {
-    result += convertNumberToText(satang, ones, tens) + 'สตางค์';
+    result += convertNumberToText(satang, ones, tens, scales) + 'สตางค์';
   } else if (baht > 0) {
     result += 'ถ้วน';
   }
@@ -100,7 +100,7 @@ export function numberToThaiText(num: number): string {
   return result;
 }
 
-function convertNumberToText(num: number, ones: string[], tens: string[]): string {
+function convertNumberToText(num: number, ones: string[], tens: string[], scales: string[]): string {
   if (num === 0) return '';
   
   let result = '';
@@ -122,7 +122,7 @@ function convertNumberToText(num: number, ones: string[], tens: string[]): strin
     } else {
       result += ones[digit];
       if (position > 0) {
-        result += ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน'][position];
+        result += scales[position] ?? '';
       }
     }
   }
@@ -149,7 +149,7 @@ export function calculateVAT(amount: number, rate: number = VAT_RATE, isInclusiv
 
 // คำนวณภาษีหัก ณ ที่จ่าย
 export function calculateWHT(amount: number, rate: number): number {
-  return amount * (rate / 100);
+  return Math.round(amount * (rate * 10) / 100) / 10;
 }
 
 // NOTE: Server-only functions moved to thai-accounting-server.ts:
@@ -193,7 +193,7 @@ export function calculateAging(
 
     const daysDiff = Math.floor((asOfTime - new Date(tx.date).getTime()) / (1000 * 60 * 60 * 24));
 
-    if (daysDiff <= 0) {
+    if (daysDiff <= 1) {
       aging.current += outstanding;
     } else if (daysDiff <= 30) {
       aging.days30 += outstanding;

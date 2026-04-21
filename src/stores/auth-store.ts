@@ -13,41 +13,58 @@ export interface User {
 
 interface AuthState {
   user: User | null
+  permissions: string[] // RBAC permissions from database
   isLoading: boolean
   isAuthenticated: boolean
-  
+
   // Actions
   setUser: (user: User | null) => void
+  setPermissions: (permissions: string[]) => void
   setLoading: (loading: boolean) => void
   logout: () => void
+  hasPermission: (module: string, action: string) => boolean
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
+      permissions: [],
       isLoading: true,
       isAuthenticated: false,
 
-      setUser: (user) => set({ 
-        user, 
+      setUser: (user) => set({
+        user,
         isAuthenticated: !!user,
-        isLoading: false 
+        isLoading: false
       }),
+
+      setPermissions: (permissions) => set({ permissions }),
 
       setLoading: (loading) => set({ isLoading: loading }),
 
       logout: () => {
-        set({ 
-          user: null, 
+        set({
+          user: null,
+          permissions: [],
           isAuthenticated: false,
-          isLoading: false 
+          isLoading: false
         })
+      },
+
+      // Check if user has a specific permission
+      hasPermission: (module: string, action: string) => {
+        const state = get()
+        // ADMIN has all permissions
+        if (state.user?.role === 'ADMIN') return true
+        // Check permission code format: module.action
+        const code = `${module}.${action}`
+        return state.permissions.includes(code)
       },
     }),
     {
       name: 'thai-accounting-auth',
-      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({ user: state.user, permissions: state.permissions, isAuthenticated: state.isAuthenticated }),
     }
   )
 )

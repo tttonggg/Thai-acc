@@ -18,9 +18,9 @@ import {
   initializeDefaultCurrencies,
 } from '../currency-service'
 
-// Mock the prisma client
-vi.mock('@/lib/db', () => ({
-  default: {
+// Mock the prisma client - use vi.hoisted to avoid hoisting issues
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
     exchangeRate: {
       findFirst: vi.fn(),
       create: vi.fn(),
@@ -41,6 +41,11 @@ vi.mock('@/lib/db', () => ({
     },
     $queryRaw: vi.fn(),
   },
+}))
+
+vi.mock('@/lib/db', () => ({
+  prisma: mockPrisma,
+  default: mockPrisma,
 }))
 
 // Mock fetch for API calls

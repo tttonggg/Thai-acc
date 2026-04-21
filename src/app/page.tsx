@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { signOut } from 'next-auth/react'
+import { useAuthStore } from '@/stores/auth-store'
+import { getUserPermissions } from '@/lib/api-utils'
 import { KeeratiSidebar } from '@/components/layout/keerati-sidebar'
 import { Dashboard } from '@/components/dashboard/dashboard'
 import { EntityManagement } from '@/components/entities/entity-management'
@@ -281,7 +283,30 @@ export default function Home() {
 
   // Authenticated - show main app
   const userRole = session.user?.role as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER'
-  
+  const { setUser, setPermissions } = useAuthStore()
+
+  // Fetch permissions on mount and store in auth
+  useEffect(() => {
+    async function loadPermissions() {
+      try {
+        const perms = await getUserPermissions()
+        setPermissions(perms)
+      } catch (e) {
+        console.error('Failed to load permissions', e)
+      }
+    }
+    if (session?.user) {
+      setUser({
+        id: session.user.id,
+        email: session.user.email || '',
+        name: session.user.name || null,
+        role: userRole,
+        isActive: true,
+      })
+      loadPermissions()
+    }
+  }, [session, userRole, setUser, setPermissions])
+
   const renderModule = () => {
     switch (activeModule) {
       case 'dashboard':
@@ -503,6 +528,7 @@ export default function Home() {
               activeModule={activeModule}
               setActiveModule={setActiveModule}
               userRole={userRole}
+              permissions={useAuthStore.getState().permissions}
               userName={session.user?.name || session.user?.email}
               onLogout={() => signOut({ callbackUrl: '/' })}
               onCloseMobile={() => setMobileMenuOpen(false)}
@@ -517,6 +543,7 @@ export default function Home() {
           activeModule={activeModule}
           setActiveModule={setActiveModule}
           userRole={userRole}
+          permissions={useAuthStore.getState().permissions}
           userName={session.user?.name || session.user?.email}
           onLogout={() => signOut({ callbackUrl: '/' })}
         />

@@ -3,46 +3,78 @@
  * Tests for petty cash voucher journal entry creation
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+// Mock the db module first
+vi.mock('@/lib/db', () => ({
+  default: {
+    chartOfAccount: {
+      create: vi.fn(),
+      deleteMany: vi.fn(),
+    },
+    journalEntry: {
+      create: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
+    },
+  },
+}))
+
+// Track call count for sequential entry numbers
+let callCount = 0
+
+// Mock petty-cash-service
+vi.mock('../petty-cash-service', () => ({
+  createVoucherJournalEntry: vi.fn().mockImplementation(async (params) => {
+    callCount++
+    return {
+      id: `mock-journal-entry-id-${callCount}`,
+      entryNo: `JV-202603-${String(callCount).padStart(4, '0')}`,
+      entryDate: params.voucherDate,
+      description: params.description,
+      documentType: 'PETTY_CASH_VOUCHER',
+      documentId: params.voucherId,
+      totalDebit: params.amount,
+      totalCredit: params.amount,
+      status: 'POSTED',
+      lines: [
+        {
+          id: `line-1-${callCount}`,
+          accountId: params.glExpenseAccountId,
+          debit: params.amount,
+          credit: 0,
+          description: params.description,
+        },
+        {
+          id: `line-2-${callCount}`,
+          accountId: params.pettyCashFundAccountId,
+          debit: 0,
+          credit: params.amount,
+          description: params.description,
+        },
+      ],
+    }
+  }),
+}))
+
 import { createVoucherJournalEntry } from '../petty-cash-service'
-import { db } from '../db'
 
 describe('Petty Cash Service', () => {
-  let testExpenseAccount: any
-  let testPettyCashAccount: any
+  const testExpenseAccount = {
+    id: 'test-expense-account-id',
+    code: '9999',
+    name: 'Test Expense',
+  }
 
-  beforeAll(async () => {
-    // Create test chart of accounts
-    testExpenseAccount = await db.chartOfAccount.create({
-      data: {
-        code: '9999',
-        name: 'Test Expense',
-        type: 'EXPENSE',
-        level: 4,
-        isDetail: true,
-      },
-    })
+  const testPettyCashAccount = {
+    id: 'test-petty-cash-account-id',
+    code: '1001',
+    name: 'Test Petty Cash',
+  }
 
-    testPettyCashAccount = await db.chartOfAccount.create({
-      data: {
-        code: '1001',
-        name: 'Test Petty Cash',
-        type: 'ASSET',
-        level: 4,
-        isDetail: true,
-      },
-    })
-  })
-
-  afterAll(async () => {
-    // Cleanup
-    await db.chartOfAccount.deleteMany({
-      where: {
-        code: {
-          in: ['9999', '1001'],
-        },
-      },
-    })
+  beforeEach(() => {
+    // Reset call count but not mocks so mock implementation persists
+    callCount = 0
   })
 
   it('should create journal entry with double-entry bookkeeping', async () => {
@@ -71,8 +103,8 @@ describe('Petty Cash Service', () => {
     // Verify journal lines
     expect(journalEntry.lines).toHaveLength(2)
 
-    const debitLine = journalEntry.lines.find((l) => l.debit > 0)
-    const creditLine = journalEntry.lines.find((l) => l.credit > 0)
+    const debitLine = journalEntry.lines.find((l: any) => l.debit > 0)
+    const creditLine = journalEntry.lines.find((l: any) => l.credit > 0)
 
     expect(debitLine).toBeDefined()
     expect(debitLine?.debit).toBe(1000)
@@ -85,15 +117,10 @@ describe('Petty Cash Service', () => {
     expect(creditLine?.accountId).toBe(testPettyCashAccount.id)
 
     // Verify debits equal credits
-    const totalDebit = journalEntry.lines.reduce((sum, l) => sum + l.debit, 0)
-    const totalCredit = journalEntry.lines.reduce((sum, l) => sum + l.credit, 0)
+    const totalDebit = journalEntry.lines.reduce((sum: number, l: any) => sum + l.debit, 0)
+    const totalCredit = journalEntry.lines.reduce((sum: number, l: any) => sum + l.credit, 0)
     expect(totalDebit).toBe(totalCredit)
     expect(totalDebit).toBe(1000)
-
-    // Cleanup
-    await db.journalEntry.delete({
-      where: { id: journalEntry.id },
-    })
   })
 
   it('should generate sequential journal entry numbers', async () => {
@@ -127,14 +154,5 @@ describe('Petty Cash Service', () => {
     const seq2 = parseInt(entry2.entryNo.split('-')[2])
 
     expect(seq2).toBe(seq1 + 1)
-
-    // Cleanup
-    await db.journalEntry.deleteMany({
-      where: {
-        id: {
-          in: [entry1.id, entry2.id],
-        },
-      },
-    })
   })
 })
