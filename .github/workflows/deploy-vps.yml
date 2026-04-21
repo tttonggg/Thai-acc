@@ -86,12 +86,23 @@ jobs:
 
             # Kill any existing node server on port 3000 (safer approach)
             fuser -k 3000/tcp 2>/dev/null || true
-            sleep 2
+            sleep 3
 
             # Start server - use nohup with full path
             cd /root/thai-acc
-            cd .next/standalone/thai-acc && nohup node server.js > /root/thai-acc/server.log 2>&1 &
-            sleep 5
+            nohup node .next/standalone/server.js > /root/thai-acc/server.log 2>&1 &
+            SERVER_PID=$!
+            echo "Server started with PID: $SERVER_PID"
+
+            # Wait for server to be ready (up to 30 seconds)
+            echo "⏳ Waiting for server to start..."
+            for i in {1..30}; do
+              if curl -sf http://localhost:3000/api/health > /dev/null 2>&1; then
+                echo "✅ Server responded after ${i}s"
+                break
+              fi
+              sleep 1
+            done
 
             # Health check
             echo "🏥 Running health check..."
