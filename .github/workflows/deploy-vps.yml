@@ -69,7 +69,7 @@ jobs:
 
             # Start server
             echo "🔄 Starting server..."
-            nohup node .next/standalone/server.js > /root/thai-acc/server.log 2>&1 &
+            nohup node .next/standalone/thai-acc/server.js > /root/thai-acc/server.log 2>&1 &
             SERVER_PID=$!
             echo "Server PID: $SERVER_PID"
 
