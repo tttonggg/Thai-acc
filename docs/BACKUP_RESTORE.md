@@ -1,362 +1,320 @@
-# Backup and Restore Guide
-
-## Thai Accounting ERP - Data Protection and Recovery
-
-This guide covers comprehensive backup and restore procedures for the Thai Accounting ERP system.
-
----
+# Thai Accounting ERP - Backup and Restore Guide
 
 ## Table of Contents
 
 1. [Backup Strategy Overview](#backup-strategy-overview)
 2. [Automated Backup Setup](#automated-backup-setup)
 3. [Manual Backup Procedures](#manual-backup-procedures)
-4. [Point-in-Time Recovery](#point-in-time-recovery)
+4. [Restore Procedures](#restore-procedures)
 5. [Disaster Recovery Plan](#disaster-recovery-plan)
 6. [Backup Verification](#backup-verification)
-7. [Cloud Backup Storage](#cloud-backup-storage)
-8. [Restore Procedures](#restore-procedures)
-9. [Troubleshooting](#troubleshooting)
+7. [Cloud Backup Options](#cloud-backup-options)
+8. [Retention Policies](#retention-policies)
 
 ---
 
 ## Backup Strategy Overview
 
-### Backup Types
-
-| Type | Frequency | Retention | Description |
-|------|-----------|-----------|-------------|
-| **Full Backup** | Daily | 30 days | Complete database + files |
-| **Incremental** | Hourly | 7 days | Changes since last backup |
-| **Transaction Log** | Continuous | 24 hours | All database transactions |
-| **Config Backup** | On change | 90 days | Configuration files |
-
 ### 3-2-1 Backup Rule
 
-- **3** copies of your data
+- **3** copies of data
 - **2** different storage media
-- **1** copy offsite
+- **1** offsite copy
 
-### Backup Components
+### What to Backup
 
-1. **Database** - All transactional data
-2. **Application Files** - Code and configuration
-3. **Uploads** - User-uploaded files
-4. **Logs** - System and audit logs
+| Component | Type | Frequency | Retention |
+|-----------|------|-----------|-----------|
+| Database | SQLite/PostgreSQL | Daily | 30 days |
+| Uploads | Files | Daily | 30 days |
+| Configuration | Environment files | Weekly | 90 days |
+| Logs | System logs | Weekly | 90 days |
+
+### Backup Types
+
+1. **Full Backup**: Complete copy of all data
+2. **Incremental**: Changes since last backup
+3. **Differential**: Changes since last full backup
 
 ---
 
 ## Automated Backup Setup
 
-### Using systemd Timers (Linux)
-
-#### 1. Create Backup Script
-
-```bash
-sudo mkdir -p /opt/thai-accounting/scripts
-sudo nano /opt/thai-accounting/scripts/backup.sh
-```
+### Daily Automated Backup Script
 
 ```bash
 #!/bin/bash
+# /opt/backup/scripts/backup-daily.sh
 
-# Thai Accounting ERP Backup Script
-set -euo pipefail
+set -e
 
 # Configuration
-APP_DIR="/var/www/thai-accounting"
-BACKUP_DIR="/var/backups/thai-accounting"
+APP_DIR="/home/thaiacc/erp"
+BACKUP_DIR="/backup/daily"
+DB_PATH="$APP_DIR/data/prod.db"
+UPLOADS_DIR="$APP_DIR/uploads"
 DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_NAME="thai-acc-backup-$DATE"
 RETENTION_DAYS=30
-DB_TYPE="postgresql"  # or "sqlite"
-DB_NAME="thai_accounting"
-DB_USER="thaiacc"
 
-# Create backup directories
-mkdir -p "$BACKUP_DIR"/{database,files,uploads,logs}
+# Create backup directory
+mkdir -p "$BACKUP_DIR/$BACKUP_NAME"
 
-# Logging
-exec 1> >(tee -a "$BACKUP_DIR/backup_$DATE.log")
-exec 2>&1
+# Function to log messages
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$BACKUP_DIR/backup.log"
+}
 
-echo "=== Backup Started: $(date) ==="
+log "Starting backup: $BACKUP_NAME"
 
-# Database Backup
-if [ "$DB_TYPE" == "postgresql" ]; then
-    echo "Backing up PostgreSQL database..."
-    pg_dump -U "$DB_USER" -d "$DB_NAME" | gzip > "$BACKUP_DIR/database/db_$DATE.sql.gz"
+# Backup database
+log "Backing up database..."
+sqlite3 "$DB_PATH" ".backup '$BACKUP_DIR/$BACKUP_NAME/database.db'"
+if [ $? -eq 0 ]; then
+    log "Database backup successful"
 else
-    echo "Backing up SQLite database..."
-    sqlite3 "$APP_DIR/prisma/prod.db" ".backup '$BACKUP_DIR/database/db_$DATE.sqlite'"
-    gzip "$BACKUP_DIR/database/db_$DATE.sqlite"
+    log "ERROR: Database backup failed"
+    exit 1
 fi
 
-# Application Files Backup
-echo "Backing up application files..."
-tar -czf "$BACKUP_DIR/files/app_$DATE.tar.gz" \
-    --exclude='node_modules' \
-    --exclude='.next' \
-    --exclude='uploads' \
-    --exclude='*.log' \
-    -C "$APP_DIR" .
+# Backup uploads
+log "Backing up uploads..."
+tar -czf "$BACKUP_DIR/$BACKUP_NAME/uploads.tar.gz" -C "$APP_DIR" uploads/
+if [ $? -eq 0 ]; then
+    log "Uploads backup successful"
+else
+    log "ERROR: Uploads backup failed"
+    exit 1
+fi
 
-# Uploads Backup
-echo "Backing up uploads..."
-tar -czf "$BACKUP_DIR/uploads/uploads_$DATE.tar.gz" -C "$APP_DIR" upload
+# Backup configuration
+log "Backing up configuration..."
+cp "$APP_DIR/.env.production" "$BACKUP_DIR/$BACKUP_NAME/"
+cp -r "$APP_DIR/prisma" "$BACKUP_DIR/$BACKUP_NAME/"
 
-# Configuration Backup
-echo "Backing up configuration..."
-tar -czf "$BACKUP_DIR/files/config_$DATE.tar.gz" \
-    -C "$APP_DIR" \
-    .env* \
-    package.json \
-    next.config.* \
-    prisma/schema.prisma
-
-# Logs Backup
-echo "Backing up logs..."
-tar -czf "$BACKUP_DIR/logs/logs_$DATE.tar.gz" -C /var/log thai-accounting 2>/dev/null || true
-
-# Create backup manifest
-cat > "$BACKUP_DIR/backup_$DATE.manifest" << EOF
-Backup Date: $(date)
-Database: $DB_NAME
-Backup Type: Full
-Components:
-  - Database: database/db_$DATE.sql.gz
-  - Application: files/app_$DATE.tar.gz
-  - Uploads: uploads/uploads_$DATE.tar.gz
-  - Config: files/config_$DATE.tar.gz
-  - Logs: logs/logs_$DATE.tar.gz
+# Create metadata
+cat > "$BACKUP_DIR/$BACKUP_NAME/metadata.json" << EOF
+{
+    "backup_name": "$BACKUP_NAME",
+    "created_at": "$(date -Iseconds)",
+    "version": "$(cat $APP_DIR/package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d ' ')",
+    "database_size": "$(du -h $BACKUP_DIR/$BACKUP_NAME/database.db | cut -f1)",
+    "uploads_size": "$(du -h $BACKUP_DIR/$BACKUP_NAME/uploads.tar.gz | cut -f1)"
+}
 EOF
 
-# Calculate checksums
-echo "Generating checksums..."
-cd "$BACKUP_DIR"
-find . -name "*$DATE*" -type f -exec sha256sum {} \; > "checksums_$DATE.sha256"
+# Compress entire backup
+tar -czf "$BACKUP_DIR/${BACKUP_NAME}.tar.gz" -C "$BACKUP_DIR" "$BACKUP_NAME"
+rm -rf "$BACKUP_DIR/$BACKUP_NAME"
+
+# Calculate checksum
+sha256sum "$BACKUP_DIR/${BACKUP_NAME}.tar.gz" > "$BACKUP_DIR/${BACKUP_NAME}.tar.gz.sha256"
+
+log "Backup completed: ${BACKUP_NAME}.tar.gz"
 
 # Cleanup old backups
-echo "Cleaning up old backups (older than $RETENTION_DAYS days)..."
-find "$BACKUP_DIR" -name "*.gz" -mtime +$RETENTION_DAYS -delete
-find "$BACKUP_DIR" -name "*.log" -mtime +$RETENTION_DAYS -delete
-find "$BACKUP_DIR" -name "*.manifest" -mtime +$RETENTION_DAYS -delete
-find "$BACKUP_DIR" -name "*.sha256" -mtime +$RETENTION_DAYS -delete
+log "Cleaning up backups older than $RETENTION_DAYS days..."
+find "$BACKUP_DIR" -name "thai-acc-backup-*.tar.gz" -mtime +$RETENTION_DAYS -delete
+find "$BACKUP_DIR" -name "thai-acc-backup-*.tar.gz.sha256" -mtime +$RETENTION_DAYS -delete
 
-# Sync to cloud storage (optional)
-if command -v aws &> /dev/null; then
-    echo "Syncing to S3..."
-    aws s3 sync "$BACKUP_DIR" s3://your-backup-bucket/thai-accounting/ \
-        --exclude "*.log" \
-        --storage-class STANDARD_IA
+# Sync to remote storage (optional)
+if [ -f "/opt/backup/scripts/sync-remote.sh" ]; then
+    log "Syncing to remote storage..."
+    /opt/backup/scripts/sync-remote.sh "$BACKUP_DIR/${BACKUP_NAME}.tar.gz"
 fi
 
-# Send notification
-echo "=== Backup Completed: $(date) ==="
-echo "Backup size: $(du -sh $BACKUP_DIR | cut -f1)"
-
-# Optional: Send email notification
-if [ -f /usr/bin/mail ]; then
-    echo "Backup completed successfully on $(hostname)" | \
-        mail -s "Backup Notification - $(date +%Y-%m-%d)" admin@yourdomain.com
-fi
-
-exit 0
+log "Backup process completed successfully"
 ```
 
-Make executable:
-```bash
-sudo chmod +x /opt/thai-accounting/scripts/backup.sh
-```
-
-#### 2. Create systemd Service
+### Cron Setup
 
 ```bash
-sudo nano /etc/systemd/system/thai-accounting-backup.service
-```
+# Make script executable
+chmod +x /opt/backup/scripts/backup-daily.sh
 
-```ini
-[Unit]
-Description=Thai Accounting ERP Backup
-After=network.target postgresql.service
-
-[Service]
-Type=oneshot
-User=thaiacc
-Group=thaiacc
-ExecStart=/opt/thai-accounting/scripts/backup.sh
-StandardOutput=journal
-StandardError=journal
-```
-
-#### 3. Create systemd Timer
-
-```bash
-sudo nano /etc/systemd/system/thai-accounting-backup.timer
-```
-
-```ini
-[Unit]
-Description=Run Thai Accounting ERP Backup Daily
-
-[Timer]
-OnCalendar=daily
-OnCalendar=*-*-* 02:00:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-```
-
-#### 4. Enable Timer
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable thai-accounting-backup.timer
-sudo systemctl start thai-accounting-backup.timer
-
-# Check status
-sudo systemctl list-timers thai-accounting-backup.timer
-sudo systemctl status thai-accounting-backup.timer
-```
-
-### Using Cron (Alternative)
-
-```bash
 # Edit crontab
 sudo crontab -e
 
 # Add daily backup at 2 AM
-0 2 * * * /opt/thai-accounting/scripts/backup.sh >> /var/log/thai-accounting/backup.log 2>&1
+0 2 * * * /opt/backup/scripts/backup-daily.sh >> /var/log/backup.log 2>&1
 
-# Add hourly incremental backup
-0 * * * * /opt/thai-accounting/scripts/backup-incremental.sh >> /var/log/thai-accounting/backup-incr.log 2>&1
+# Add weekly full backup at 3 AM on Sundays
+0 3 * * 0 /opt/backup/scripts/backup-weekly.sh >> /var/log/backup.log 2>&1
+
+# Verify cron jobs
+sudo crontab -l
+```
+
+### Systemd Timer (Alternative)
+
+```bash
+# Create backup service
+sudo tee /etc/systemd/system/thai-acc-backup.service << 'EOF'
+[Unit]
+Description=Thai Accounting ERP Backup
+After=network.target
+
+[Service]
+Type=oneshot
+User=thaiacc
+ExecStart=/opt/backup/scripts/backup-daily.sh
+EOF
+
+# Create timer
+sudo tee /etc/systemd/system/thai-acc-backup.timer << 'EOF'
+[Unit]
+Description=Run Thai Accounting ERP backup daily
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+# Enable timer
+sudo systemctl daemon-reload
+sudo systemctl enable thai-acc-backup.timer
+sudo systemctl start thai-acc-backup.timer
+
+# Check status
+sudo systemctl list-timers thai-acc-backup.timer
 ```
 
 ---
 
 ## Manual Backup Procedures
 
-### Database-Only Backup
-
-#### PostgreSQL
+### In-Application Backup
 
 ```bash
-# Full database backup
-pg_dump -U thaiacc thai_accounting > backup_$(date +%Y%m%d).sql
-
-# Compressed backup
-pg_dump -U thaiacc thai_accounting | gzip > backup_$(date +%Y%m%d).sql.gz
-
-# Custom format (allows selective restore)
-pg_dump -U thaiacc -Fc thai_accounting > backup_$(date +%Y%m%d).dump
-
-# Parallel backup (faster for large databases)
-pg_dump -U thaiacc -Fd -j 4 thai_accounting -f backup_$(date +%Y%m%d)_dir
+# Via application UI
+# Settings → Backup & Restore → Create Backup
 ```
 
-#### SQLite
+### Command Line Backup
 
 ```bash
-# Online backup (doesn't lock database)
-sqlite3 /var/www/thai-accounting/prisma/prod.db ".backup '/tmp/backup_$(date +%Y%m%d).db'"
+# 1. Stop application (optional but recommended)
+pm2 stop thai-accounting-erp
 
-# Export to SQL
-sqlite3 /var/www/thai-accounting/prisma/prod.db ".dump" > backup_$(date +%Y%m%d).sql
+# 2. Backup database
+cp /home/thaiacc/erp/data/prod.db /backup/manual/prod-$(date +%Y%m%d).db
+
+# 3. Backup uploads
+tar -czf /backup/manual/uploads-$(date +%Y%m%d).tar.gz /home/thaiacc/erp/uploads/
+
+# 4. Backup configuration
+cp /home/thaiacc/erp/.env.production /backup/manual/env-$(date +%Y%m%d)
+
+# 5. Restart application
+pm2 start thai-accounting-erp
 ```
 
-### File System Backup
+### Hot Backup (No Downtime)
 
 ```bash
-# Application files (excluding large directories)
-tar -czf app_backup_$(date +%Y%m%d).tar.gz \
-    --exclude='node_modules' \
-    --exclude='.next' \
-    --exclude='uploads' \
-    --exclude='*.log' \
-    -C /var/www/thai-accounting .
+# For SQLite - use backup API
+sqlite3 /home/thaiacc/erp/data/prod.db ".backup /backup/hot/backup-$(date +%Y%m%d).db"
 
-# Uploads directory
-tar -czf uploads_backup_$(date +%Y%m%d).tar.gz \
-    -C /var/www/thai-accounting upload
-
-# Complete system backup
-tar -czf full_backup_$(date +%Y%m%d).tar.gz \
-    --exclude='node_modules' \
-    --exclude='.next' \
-    /var/www/thai-accounting \
-    /var/log/thai-accounting \
-    /etc/nginx/sites-available/thai-accounting
-```
-
-### Configuration Backup
-
-```bash
-# Backup all configuration
-CONFIG_BACKUP="config_$(date +%Y%m%d).tar.gz"
-
-tar -czf "$CONFIG_BACKUP" \
-    /var/www/thai-accounting/.env* \
-    /var/www/thai-accounting/prisma/schema.prisma \
-    /etc/nginx/sites-available/thai-accounting \
-    /etc/systemd/system/thai-accounting*.service \
-    /etc/systemd/system/thai-accounting*.timer \
-    /opt/thai-accounting/scripts/
+# For PostgreSQL
+pg_dump -h localhost -U thaiacc thaiacc > /backup/hot/backup-$(date +%Y%m%d).sql
 ```
 
 ---
 
-## Point-in-Time Recovery
+## Restore Procedures
 
-### PostgreSQL PITR Setup
-
-#### 1. Enable WAL Archiving
+### Full Restore
 
 ```bash
-sudo nano /etc/postgresql/14/main/postgresql.conf
+#!/bin/bash
+# restore.sh - Full system restore
+
+set -e
+
+BACKUP_FILE=$1
+RESTORE_DIR="/tmp/restore-$(date +%s)"
+APP_DIR="/home/thaiacc/erp"
+
+if [ -z "$BACKUP_FILE" ]; then
+    echo "Usage: $0 <backup-file.tar.gz>"
+    exit 1
+fi
+
+if [ ! -f "$BACKUP_FILE" ]; then
+    echo "Backup file not found: $BACKUP_FILE"
+    exit 1
+fi
+
+# Verify checksum
+echo "Verifying backup integrity..."
+if ! sha256sum -c "${BACKUP_FILE}.sha256"; then
+    echo "ERROR: Backup checksum verification failed!"
+    exit 1
+fi
+
+# Extract backup
+mkdir -p "$RESTORE_DIR"
+echo "Extracting backup..."
+tar -xzf "$BACKUP_FILE" -C "$RESTORE_DIR"
+
+# Find extracted directory
+EXTRACTED_DIR=$(find "$RESTORE_DIR" -maxdepth 1 -type d | tail -1)
+
+echo "Stopping application..."
+pm2 stop thai-accounting-erp
+
+echo "Creating safety backup of current data..."
+cp "$APP_DIR/data/prod.db" "$APP_DIR/data/prod.db.pre-restore-$(date +%Y%m%d%H%M%S)"
+
+echo "Restoring database..."
+cp "$EXTRACTED_DIR/database.db" "$APP_DIR/data/prod.db"
+
+echo "Restoring uploads..."
+tar -xzf "$EXTRACTED_DIR/uploads.tar.gz" -C "$APP_DIR"
+
+echo "Restoring configuration..."
+cp "$EXTRACTED_DIR/.env.production" "$APP_DIR/.env.production.restored"
+
+echo "Setting permissions..."
+chown -R thaiacc:thaiacc "$APP_DIR/data"
+chown -R thaiacc:thaiacc "$APP_DIR/uploads"
+chmod 600 "$APP_DIR/data/prod.db"
+
+echo "Starting application..."
+pm2 start thai-accounting-erp
+
+echo "Verifying restore..."
+sleep 5
+curl -s http://localhost:3000/api/health | grep -q "ok" && echo "Restore successful!" || echo "Warning: Health check failed"
+
+# Cleanup
+rm -rf "$RESTORE_DIR"
+
+echo "Restore completed. Check logs for any issues."
+echo "Previous database saved as: $APP_DIR/data/prod.db.pre-restore-*"
 ```
 
-```ini
-# WAL Archiving
-wal_level = replica
-archive_mode = on
-archive_command = 'test ! -f /var/lib/postgresql/backups/wal/%f && cp %p /var/lib/postgresql/backups/wal/%f'
-max_wal_sizers = 1GB
-wal_keep_size = 512MB
-```
-
-#### 2. Create WAL Archive Directory
+### Point-in-Time Recovery (PostgreSQL)
 
 ```bash
-sudo mkdir -p /var/lib/postgresql/backups/wal
-sudo chown postgres:postgres /var/lib/postgresql/backups/wal
+# Restore from base backup
+pg_restore -h localhost -U thaiacc -d thaiacc base-backup.dump
+
+# Apply WAL files for point-in-time recovery
+pg_waldump /var/lib/postgresql/wal/...
 ```
 
-#### 3. Base Backup for PITR
+### Selective Restore
 
 ```bash
-# Create base backup
-pg_basebackup -D /var/lib/postgresql/backups/base/$(date +%Y%m%d) \
-    -Ft -z -P -X stream -c fast
-```
+# Restore only database
+cp backup/database.db /home/thaiacc/erp/data/prod.db
 
-#### 4. Recovery Procedure
-
-```bash
-# Stop PostgreSQL
-sudo systemctl stop postgresql
-
-# Restore base backup
-tar -xzf /var/lib/postgresql/backups/base/20260316/base.tar.gz -C /var/lib/postgresql/14/main/
-
-# Create recovery.conf
-cat > /var/lib/postgresql/14/main/recovery.conf << EOF
-restore_command = 'cp /var/lib/postgresql/backups/wal/%f %p'
-recovery_target_time = '2026-03-16 14:30:00'
-recovery_target_action = 'promote'
-EOF
-
-# Start PostgreSQL
-sudo systemctl start postgresql
+# Restore only specific uploads
+tar -xzf backup/uploads.tar.gz -C /home/thaiacc/erp uploads/2024/
 ```
 
 ---
@@ -367,69 +325,68 @@ sudo systemctl start postgresql
 
 | Scenario | RTO | RPO |
 |----------|-----|-----|
-| Database corruption | 2 hours | 1 hour |
+| Database corruption | 1 hour | 24 hours |
 | Server failure | 4 hours | 24 hours |
-| Data center loss | 24 hours | 24 hours |
-| Ransomware attack | 8 hours | 24 hours |
+| Data center failure | 8 hours | 24 hours |
+| Catastrophic event | 24 hours | 48 hours |
 
-### DR Procedures
+### Recovery Procedures
 
 #### Scenario 1: Database Corruption
 
 ```bash
-# 1. Stop application
-sudo systemctl stop thai-accounting
+# 1. Identify last good backup
+ls -lt /backup/daily/*.tar.gz | head -5
 
-# 2. Restore database from last good backup
-pg_restore -U thaiacc -d thai_accounting --clean backup_20260316.dump
+# 2. Stop application
+pm2 stop thai-accounting-erp
 
-# 3. Verify data integrity
-psql -U thaiacc -d thai_accounting -c "SELECT COUNT(*) FROM invoices;"
+# 3. Restore from backup
+./restore.sh /backup/daily/thai-acc-backup-YYYYMMDD_HHMMSS.tar.gz
 
-# 4. Restart application
-sudo systemctl start thai-accounting
+# 4. Verify data integrity
+sqlite3 /home/thaiacc/erp/data/prod.db "PRAGMA integrity_check;"
+
+# 5. Start application
+pm2 start thai-accounting-erp
 ```
 
-#### Scenario 2: Complete Server Failure
+#### Scenario 2: Server Failure
 
 ```bash
 # On new server:
+# 1. Install dependencies (see DEPLOYMENT_GUIDE.md)
 
-# 1. Install dependencies (see DEPLOYMENT.md)
+# 2. Download latest backup from remote storage
+aws s3 cp s3://backup-bucket/thai-acc/latest.tar.gz /backup/
 
-# 2. Restore application
-tar -xzf app_backup_20260316.tar.gz -C /var/www/thai-accounting
+# 3. Restore
+./restore.sh /backup/latest.tar.gz
 
-# 3. Restore database
-pg_restore -U thaiacc -d thai_accounting backup_20260316.dump
-
-# 4. Restore uploads
-tar -xzf uploads_backup_20260316.tar.gz -C /var/www/thai-accounting
-
-# 5. Restore configuration
-tar -xzf config_backup_20260316.tar.gz -C /
-
-# 6. Set permissions
-sudo chown -R thaiacc:thaiacc /var/www/thai-accounting
-
-# 7. Start services
-sudo systemctl start thai-accounting
-sudo systemctl start nginx
+# 4. Update DNS or configure load balancer
 ```
 
-#### Scenario 3: Ransomware Recovery
+#### Scenario 3: Complete Data Loss
 
 ```bash
-# 1. Isolate affected systems immediately
-# 2. DO NOT pay ransom
-# 3. Rebuild server from scratch with latest OS
-# 4. Restore from clean backups (verify backup date is before infection)
-# 5. Update all passwords and secrets
-# 6. Apply all security patches
-# 7. Restore data
-# 8. Verify data integrity
-# 9. Monitor for any signs of reinfection
+# Emergency recovery procedure
+# 1. Provision new server
+# 2. Install application
+# 3. Restore from offsite backup
+# 4. Notify users of downtime
+# 5. Post-incident review
 ```
+
+### Disaster Recovery Checklist
+
+- [ ] Activate incident response team
+- [ ] Assess damage and scope
+- [ ] Notify stakeholders
+- [ ] Execute recovery procedures
+- [ ] Verify data integrity
+- [ ] Resume operations
+- [ ] Document incident
+- [ ] Post-mortem analysis
 
 ---
 
@@ -438,345 +395,193 @@ sudo systemctl start nginx
 ### Automated Verification Script
 
 ```bash
-sudo nano /opt/thai-accounting/scripts/verify-backup.sh
-```
-
-```bash
 #!/bin/bash
+# verify-backup.sh
 
-BACKUP_DIR="/var/backups/thai-accounting"
-LATEST_BACKUP=$(ls -t $BACKUP_DIR/database/*.gz | head -1)
-VERIFY_DIR="/tmp/backup-verify-$(date +%s)"
+BACKUP_FILE=$1
+TEMP_DIR=$(mktemp -d)
 
-echo "Verifying backup: $LATEST_BACKUP"
+echo "Verifying backup: $BACKUP_FILE"
 
-# Create temp directory
-mkdir -p "$VERIFY_DIR"
-
-# Extract backup
-gunzip -c "$LATEST_BACKUP" > "$VERIFY_DIR/verify.sql"
-
-# Check SQL syntax
-if head -20 "$VERIFY_DIR/verify.sql" | grep -q "PostgreSQL database dump\|SQLite format"; then
-    echo "✓ Backup format is valid"
-else
-    echo "✗ Backup format is invalid!"
+# Check file exists and readable
+if [ ! -r "$BACKUP_FILE" ]; then
+    echo "FAIL: Cannot read backup file"
     exit 1
 fi
 
-# Check for key tables (PostgreSQL)
-if grep -q "CREATE TABLE.*Invoice" "$VERIFY_DIR/verify.sql"; then
-    echo "✓ Invoice table found"
+# Verify checksum
+if [ -f "${BACKUP_FILE}.sha256" ]; then
+    if sha256sum -c "${BACKUP_FILE}.sha256"; then
+        echo "PASS: Checksum verification"
+    else
+        echo "FAIL: Checksum mismatch"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+fi
+
+# Extract and verify contents
+tar -xzf "$BACKUP_FILE" -C "$TEMP_DIR"
+EXTRACTED_DIR=$(find "$TEMP_DIR" -maxdepth 1 -type d | tail -1)
+
+# Check required files exist
+for file in "database.db" "uploads.tar.gz" "metadata.json"; do
+    if [ -f "$EXTRACTED_DIR/$file" ]; then
+        echo "PASS: $file exists"
+    else
+        echo "FAIL: $file missing"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+done
+
+# Verify database integrity
+if sqlite3 "$EXTRACTED_DIR/database.db" "PRAGMA integrity_check;" | grep -q "ok"; then
+    echo "PASS: Database integrity check"
 else
-    echo "✗ Invoice table missing!"
+    echo "FAIL: Database corruption detected"
+    rm -rf "$TEMP_DIR"
     exit 1
 fi
 
-if grep -q "CREATE TABLE.*JournalEntry" "$VERIFY_DIR/verify.sql"; then
-    echo "✓ JournalEntry table found"
-else
-    echo "✗ JournalEntry table missing!"
-    exit 1
+# Check metadata
+if [ -f "$EXTRACTED_DIR/metadata.json" ]; then
+    cat "$EXTRACTED_DIR/metadata.json"
 fi
 
 # Cleanup
-rm -rf "$VERIFY_DIR"
+rm -rf "$TEMP_DIR"
 
-# Verify checksums
-cd "$BACKUP_DIR"
-if sha256sum -c checksums_*.sha256 > /dev/null 2>&1; then
-    echo "✓ Checksums verified"
-else
-    echo "✗ Checksum mismatch!"
-    exit 1
-fi
-
-echo "Backup verification completed successfully!"
+echo "Backup verification completed successfully"
 ```
 
 ### Monthly Restore Test
 
 ```bash
-# Schedule monthly test restore
-0 3 1 * * /opt/thai-accounting/scripts/test-restore.sh
-```
-
-Test restore script:
-
-```bash
 #!/bin/bash
-# Creates a temporary database and restores backup to verify
+# monthly-restore-test.sh
 
-TEST_DB="test_restore_$(date +%s)"
-LATEST_DUMP="/var/backups/thai-accounting/database/$(ls -t /var/backups/thai-accounting/database/*.gz | head -1)"
+# This should run on a separate test server
 
-# Create test database
-sudo -u postgres createdb "$TEST_DB"
+LATEST_BACKUP=$(ls -t /backup/daily/*.tar.gz | head -1)
+TEST_DIR="/tmp/restore-test-$(date +%Y%m%d)"
 
-# Restore backup
-gunzip -c "$LATEST_DUMP" | sudo -u postgres psql "$TEST_DB"
+echo "Testing restore of: $LATEST_BACKUP"
 
-# Run integrity checks
-sudo -u postgres psql "$TEST_DB" -c "
-    SELECT 
-        (SELECT COUNT(*) FROM invoices) as invoice_count,
-        (SELECT COUNT(*) FROM journal_entries) as je_count,
-        (SELECT COUNT(*) FROM accounts) as account_count;
-"
+# Perform restore test
+./restore.sh "$LATEST_BACKUP"
 
-# Cleanup
-sudo -u postgres dropdb "$TEST_DB"
+# Run health checks
+curl -s http://localhost:3000/api/health | grep -q "ok" || exit 1
 
-echo "Test restore completed successfully!"
+# Run basic tests
+bun run test:smoke
+
+# Report results
+echo "Restore test completed at $(date)"
+echo "Backup tested: $LATEST_BACKUP"
 ```
 
 ---
 
-## Cloud Backup Storage
+## Cloud Backup Options
 
 ### AWS S3 Backup
 
 ```bash
 # Install AWS CLI
-sudo apt-get install -y awscli
+sudo apt install awscli
 
-# Configure AWS
+# Configure
 aws configure
 
-# Sync backups to S3
-aws s3 sync /var/backups/thai-accounting s3://your-backup-bucket/thai-accounting/ \
-    --storage-class STANDARD_IA \
-    --sse AES256
+# Backup script
+#!/bin/bash
+BACKUP_FILE=$1
+BUCKET="thai-acc-backups"
 
-# Set lifecycle policy (move to Glacier after 90 days)
+# Upload with encryption
+aws s3 cp "$BACKUP_FILE" "s3://$BUCKET/daily/" --sse AES256
+
+# Set lifecycle policy
 aws s3api put-bucket-lifecycle-configuration \
-    --bucket your-backup-bucket \
+    --bucket $BUCKET \
     --lifecycle-configuration file://lifecycle.json
-```
-
-Lifecycle policy:
-
-```json
-{
-  "Rules": [
-    {
-      "ID": "Move old backups to Glacier",
-      "Status": "Enabled",
-      "Filter": {
-        "Prefix": "thai-accounting/"
-      },
-      "Transitions": [
-        {
-          "Days": 90,
-          "StorageClass": "GLACIER"
-        }
-      ],
-      "Expiration": {
-        "Days": 2555
-      }
-    }
-  ]
-}
 ```
 
 ### Google Cloud Storage
 
 ```bash
-# Install gsutil
-sudo apt-get install -y google-cloud-sdk
+# Upload backup
+gsutil cp backup.tar.gz gs://thai-acc-backups/daily/
 
-# Authenticate
-gcloud auth login
-
-# Create bucket
-gsutil mb -l asia-southeast1 gs://thai-accounting-backups
-
-# Sync backups
-gsutil -m rsync -r /var/backups/thai-accounting gs://thai-accounting-backups/
+# Enable versioning
+gsutil versioning set on gs://thai-acc-backups
 ```
 
 ### Azure Blob Storage
 
 ```bash
-# Install Azure CLI
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-
-# Login
-az login
-
-# Upload backups
-az storage blob upload-batch \
-    --destination thai-accounting-backups \
-    --source /var/backups/thai-accounting
+# Upload backup
+az storage blob upload \
+    --container-name backups \
+    --file backup.tar.gz \
+    --name daily/backup.tar.gz \
+    --account-name thaiaccstorage
 ```
 
 ---
 
-## Restore Procedures
+## Retention Policies
 
-### Full System Restore
+### Local Backup Retention
 
 ```bash
-#!/bin/bash
-# Full system restore script
+# Daily backups: 30 days
+find /backup/daily -name "*.tar.gz" -mtime +30 -delete
 
-BACKUP_DATE="$1"  # Pass date as argument: 20260316
-BACKUP_DIR="/var/backups/thai-accounting"
+# Weekly backups: 12 weeks
+find /backup/weekly -name "*.tar.gz" -mtime +84 -delete
 
-if [ -z "$BACKUP_DATE" ]; then
-    echo "Usage: $0 <YYYYMMDD>"
-    exit 1
-fi
-
-echo "Starting full restore from $BACKUP_DATE..."
-
-# Stop services
-sudo systemctl stop thai-accounting
-sudo systemctl stop nginx
-
-# Restore database
-echo "Restoring database..."
-if [ -f "$BACKUP_DIR/database/db_$BACKUP_DATE.sql.gz" ]; then
-    gunzip -c "$BACKUP_DIR/database/db_$BACKUP_DATE.sql.gz" | \
-        sudo -u postgres psql thai_accounting
-elif [ -f "$BACKUP_DIR/database/db_$BACKUP_DATE.dump" ]; then
-    pg_restore -U thaiacc -d thai_accounting --clean "$BACKUP_DIR/database/db_$BACKUP_DATE.dump"
-else
-    echo "Database backup not found!"
-    exit 1
-fi
-
-# Restore application files
-echo "Restoring application files..."
-tar -xzf "$BACKUP_DIR/files/app_$BACKUP_DATE.tar.gz" -C /var/www/thai-accounting
-
-# Restore uploads
-echo "Restoring uploads..."
-tar -xzf "$BACKUP_DIR/uploads/uploads_$BACKUP_DATE.tar.gz" -C /var/www/thai-accounting
-
-# Restore configuration
-echo "Restoring configuration..."
-tar -xzf "$BACKUP_DIR/files/config_$BACKUP_DATE.tar.gz" -C /
-
-# Fix permissions
-sudo chown -R thaiacc:thaiacc /var/www/thai-accounting
-
-# Start services
-sudo systemctl start thai-accounting
-sudo systemctl start nginx
-
-echo "Restore completed!"
-echo "Please verify the application is working correctly."
+# Monthly backups: 12 months
+find /backup/monthly -name "*.tar.gz" -mtime +365 -delete
 ```
 
-### Selective Restore
+### Cloud Retention Policy
 
-#### Restore Single Table
-
-```bash
-# Extract specific table from backup
-gunzip -c backup_20260316.sql.gz | \
-    grep -A 1000 "CREATE TABLE.*invoices" | \
-    head -1000 > invoices_restore.sql
-
-# Restore to database
-psql -U thaiacc thai_accounting < invoices_restore.sql
-```
-
-#### Restore to Different Database
-
-```bash
-# Create new database
-sudo -u postgres createdb thai_accounting_test
-
-# Restore backup
-gunzip -c backup_20260316.sql.gz | sudo -u postgres psql thai_accounting_test
+```json
+// lifecycle.json for S3
+{
+    "Rules": [
+        {
+            "ID": "DailyBackupRetention",
+            "Status": "Enabled",
+            "Filter": {
+                "Prefix": "daily/"
+            },
+            "Expiration": {
+                "Days": 30
+            }
+        },
+        {
+            "ID": "MonthlyBackupTransition",
+            "Status": "Enabled",
+            "Filter": {
+                "Prefix": "monthly/"
+            },
+            "Transitions": [
+                {
+                    "Days": 90,
+                    "StorageClass": "GLACIER"
+                }
+            ]
+        }
+    ]
+}
 ```
 
 ---
 
-## Troubleshooting
-
-### Common Issues
-
-#### Backup Fails Due to Permissions
-
-```bash
-# Fix permissions
-sudo chown -R thaiacc:thaiacc /var/backups/thai-accounting
-sudo chmod 755 /var/backups/thai-accounting
-
-# If using PostgreSQL, ensure pg_dump access
-sudo usermod -aG postgres thaiacc
-```
-
-#### Insufficient Disk Space
-
-```bash
-# Check disk usage
-df -h
-
-# Find large files
-find /var/backups/thai-accounting -size +100M
-
-# Clean old backups manually
-find /var/backups/thai-accounting -mtime +7 -delete
-
-# Compress old backups further
-find /var/backups/thai-accounting -name "*.tar.gz" -mtime +3 -exec gzip -9 {} \;
-```
-
-#### Database Locked During Backup
-
-```bash
-# For SQLite, use online backup
-sqlite3 /var/www/thai-accounting/prisma/prod.db ".backup '/tmp/backup.db'"
-
-# For PostgreSQL, use concurrent backup
-pg_dump -U thaiacc --lock-wait-timeout=5000 thai_accounting > backup.sql
-```
-
-#### Corrupted Backup
-
-```bash
-# Test archive integrity
-tar -tzf backup_file.tar.gz > /dev/null
-
-# If corrupted, try to recover
-gzip -t backup_file.sql.gz  # Test gzip integrity
-
-# Restore from alternative location (S3)
-aws s3 cp s3://your-backup-bucket/thai-accounting/backup_file.sql.gz /tmp/
-```
-
----
-
-## Backup Checklist
-
-### Daily
-- [ ] Automated backup completed
-- [ ] Backup logs reviewed for errors
-- [ ] Backup size is reasonable
-
-### Weekly
-- [ ] Verify backup files exist
-- [ ] Check backup integrity
-- [ ] Review backup retention
-
-### Monthly
-- [ ] Test restore procedure
-- [ ] Verify cloud backup sync
-- [ ] Update backup scripts if needed
-- [ ] Review RTO/RPO compliance
-
-### Annually
-- [ ] Full disaster recovery drill
-- [ ] Update DR documentation
-- [ ] Review backup strategy
-- [ ] Test offsite restoration
-
----
-
-*Last Updated: March 16, 2026*
-
-**Remember:** A backup is only as good as your ability to restore from it. Test your restores regularly!
+**Last Updated:** March 16, 2026  
+**Backup Frequency:** Daily at 02:00  
+**Next Review:** April 16, 2026

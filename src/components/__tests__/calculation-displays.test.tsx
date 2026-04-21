@@ -11,12 +11,15 @@ import React from 'react'
 import {
   calculateVAT,
   calculateWHT,
-  calculateSSC,
-  calculatePND1,
   formatCurrency,
   formatThaiDate,
   numberToThaiText,
 } from '@/lib/thai-accounting'
+
+import {
+  calculateSSC,
+  calculatePND1,
+} from '@/lib/payroll-service'
 
 import {
   generateDepreciationSchedule,

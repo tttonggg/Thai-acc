@@ -11,13 +11,9 @@ on:
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
-  # ============================================
-  # Job: Deploy to Production VPS
-  # ============================================
   deploy-vps:
     name: 🚀 Deploy to Production VPS
     runs-on: ubuntu-latest
-    # Run on push to master or manual trigger
     if: github.ref == 'refs/heads/master'
 
     steps:
@@ -40,62 +36,45 @@ jobs:
             set -e
 
             echo "🔄 Starting deployment to VPS..."
-
-            # Fresh clone - VPS has no git repo
-            echo "📥 Cloning fresh repository..."
             cd /root
+
+            # Fresh clone
             if [ -d "thai-acc-new" ]; then
               rm -rf thai-acc-new
             fi
-            git clone https://github.com/tongztang/thai-acc.git thai-acc-new
+            git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/tongztang/thai-acc.git thai-acc-new
             cd thai-acc-new
             git checkout ${{ github.sha }}
 
-            # Copy to thai-acc (keep existing database)
+            # Copy existing .env and database
             cd /root
             if [ -d "thai-acc" ]; then
-              # Backup existing .env and database
               cp thai-acc/.env thai-acc-new/.env 2>/dev/null || true
               cp thai-acc/prisma/dev.db thai-acc-new/prisma/dev.db 2>/dev/null || true
-              # Remove old and rename new
               rm -rf thai-acc
             fi
             mv thai-acc-new thai-acc
             cd /root/thai-acc
 
-            # Kill any existing server (use port 3000 check instead of pkill to avoid killing SSH)
-            echo "🔄 Checking for existing server..."
-            if lsof -i:3000 > /dev/null 2>&1; then
-              echo "Port 3000 in use, will restart after build"
-            fi
+            # Kill existing server
+            fuser -k 3000/tcp 2>/dev/null || true
+            sleep 2
 
-            # Install dependencies
+            # Install & build
             echo "📦 Installing dependencies..."
             npm install --legacy-peer-deps --ignore-scripts
-
-            # Generate Prisma client
-            echo "🗄️  Generating Prisma client..."
             npm run db:generate
-
-            # Build application
-            echo "🔨 Building application..."
+            echo "🔨 Building..."
             npm run build
 
-            # Use screen to persist the server (if available)
+            # Start server
             echo "🔄 Starting server..."
-
-            # Kill any existing node server on port 3000 (safer approach)
-            fuser -k 3000/tcp 2>/dev/null || true
-            sleep 3
-
-            # Start server from correct path (server.js is at .next/standalone/server.js)
-            cd /root/thai-acc
             nohup node .next/standalone/server.js > /root/thai-acc/server.log 2>&1 &
             SERVER_PID=$!
-            echo "Server started with PID: $SERVER_PID"
+            echo "Server PID: $SERVER_PID"
 
-            # Wait for server to be ready (up to 30 seconds)
-            echo "⏳ Waiting for server to start..."
+            # Wait for server
+            echo "⏳ Waiting for server..."
             for i in {1..30}; do
               if curl -sf http://localhost:3000/api/health > /dev/null 2>&1; then
                 echo "✅ Server responded after ${i}s"
@@ -105,7 +84,6 @@ jobs:
             done
 
             # Health check
-            echo "🏥 Running health check..."
             HEALTH_STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/health || echo "000")
             if [ "$HEALTH_STATUS" = "200" ]; then
               echo "✅ Health check passed (HTTP $HEALTH_STATUS)"
@@ -115,31 +93,26 @@ jobs:
               exit 1
             fi
 
-            # Check cloudflared tunnel
+            # Check tunnel
             echo "🌐 Checking cloudflared tunnel..."
             if pgrep -f "cloudflared tunnel run" > /dev/null; then
-              echo "✅ Cloudflared tunnel is running"
+              echo "✅ Tunnel running"
             else
-              echo "⚠️  Cloudflared tunnel not running, starting..."
+              echo "⚠️  Starting tunnel..."
               nohup cloudflared tunnel run --token ${{ secrets.CLOUDFLARED_TUNNEL_TOKEN }} > /tmp/cloudflared.log 2>&1 &
               sleep 3
             fi
 
-            echo "🎉 Deployment completed successfully!"
-            echo "📍 Application: https://acc.k56mm.uk"
-            echo "📊 Health check: https://acc.k56mm.uk/api/health"
+            echo "🎉 Deployment complete!"
+            echo "📍 https://acc.k56mm.uk"
 
-      - name: Notify deployment success
+      - name: Notify success
         if: success()
         run: |
-          echo "✅ Deployment successful!"
-          echo "Commit: ${{ github.sha }}"
-          echo "Branch: ${{ github.ref }}"
-          echo "Author: ${{ github.actor }}"
+          echo "✅ Deployment successful! Commit: ${{ github.sha }}"
 
-      - name: Notify deployment failure
+      - name: Notify failure
         if: failure()
         run: |
           echo "❌ Deployment failed!"
-          echo "Please check the logs above for details"
           exit 1

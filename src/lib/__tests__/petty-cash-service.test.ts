@@ -3,7 +3,7 @@
  * Tests for petty cash voucher journal entry creation
  */
 
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { createVoucherJournalEntry } from '../petty-cash-service'
 import { db } from '../db'
 

@@ -1,536 +1,475 @@
-# Frequently Asked Questions (FAQ)
+# Thai Accounting ERP - Frequently Asked Questions (FAQ)
 
-## Thai Accounting ERP - Quick Answers
-
-**Version:** 1.0.0  
-**Questions:** 50+  
-**Categories:** 12
+> รวมคำถามที่พบบ่อย พร้อมคำตอบอย่างละเอียด
 
 ---
 
-## 🔍 Search Guide
+## 📋 Table of Contents
 
-Quick find by category:
-- [General](#general) - Questions 1-5
-- [Authentication & Security](#authentication--security) - Questions 6-10
-- [Getting Started](#getting-started) - Questions 11-15
-- [Invoices & Sales](#invoices--sales) - Questions 16-22
-- [Receipts & Payments](#receipts--payments) - Questions 23-27
-- [Chart of Accounts](#chart-of-accounts) - Questions 28-32
-- [Journal Entries](#journal-entries) - Questions 33-36
-- [Inventory](#inventory) - Questions 37-40
-- [Tax & VAT](#tax--vat) - Questions 41-45
-- [Reports](#reports) - Questions 46-48
-- [Payroll](#payroll) - Questions 49-52
-- [Technical](#technical) - Questions 53-58
-
----
-
-## General
-
-### Q1: What is Thai Accounting ERP?
-**A:** Thai Accounting ERP is a comprehensive accounting software designed specifically for Thai SME businesses. It complies with Thai Financial Reporting Standards (TFRS) and supports Thai tax requirements including VAT (7%), Withholding Tax (PND3/PND53), and Social Security calculations.
-
-### Q2: Is this software suitable for my business size?
-**A:** Yes! The system is designed for:
-- Small businesses (1-10 employees)
-- Medium businesses (11-50 employees)
-- Growing businesses needing multi-user access
-
-### Q3: Do I need accounting knowledge to use this software?
-**A:** Basic accounting knowledge is helpful but not required. The system includes:
-- Pre-configured Thai chart of accounts (181 accounts)
-- Automated double-entry bookkeeping
-- Built-in validation and error checking
-- Comprehensive documentation and tutorials
-
-### Q4: Can I use this for multiple companies?
-**A:** The current version supports single-company deployment. For multiple companies, you can:
-- Deploy separate instances
-- Use the entity management feature (if available)
-- Contact us for enterprise multi-company licensing
-
-### Q5: What languages are supported?
-**A:** The interface supports:
-- Thai (fully localized)
-- English
-- Mixed Thai-English for reports and documents
+- [General Questions](#general-questions) - คำถามทั่วไป
+- [Getting Started](#getting-started) - การเริ่มต้นใช้งาน
+- [Authentication & Security](#authentication--security) - การเข้าสู่ระบบและความปลอดภัย
+- [Invoices & Billing](#invoices--billing) - ใบกำกับภาษีและการวางบิล
+- [Receipts & Payments](#receipts--payments) - ใบเสร็จและการชำระเงิน
+- [Accounting & Journal](#accounting--journal) - บัญชีและสมุดรายวัน
+- [Inventory](#inventory) - สินค้าคงคลัง
+- [Reports](#reports) - รายงาน
+- [Tax](#tax) - ภาษี
+- [Payroll](#payroll) - เงินเดือน
+- [Settings](#settings) - การตั้งค่า
+- [Technical Issues](#technical-issues) - ปัญหาด้านเทคนิค
+- [Data Management](#data-management) - การจัดการข้อมูล
 
 ---
 
-## Authentication & Security
+## General Questions
 
-### Q6: I forgot my password. What should I do?
-**A:** 
-1. Contact your system administrator
-2. Admin can reset password in Settings → Users
-3. If you're the admin, you may need database access or contact support
+### Q1: Thai Accounting ERP คืออะไร?
+**A:** Thai Accounting ERP คือโปรแกรมบัญชีบนคลาวด์ที่ออกแบบมาสำหรับธุรกิจ SME ไทย รองรับมาตรฐานบัญชีไทย (TFRS) และกฎหมายภาษีไทยทั้งหมด รวมถึง VAT 7%, ภาษีหัก ณ ที่จ่าย และประกันสังคม
 
-### Q7: Can I change my password?
-**A:** Yes:
-1. Click your profile icon (top right)
-2. Select "เปลี่ยนรหัสผ่าน" (Change Password)
-3. Enter current password
-4. Enter new password (minimum 8 characters)
-5. Confirm new password
+### Q2: ใครเหมาะกับการใช้งานระบบนี้?
+**A:** เหมาะสำหรับ:
+- ธุรกิจ SME ทุกประเภท
+- ร้านค้าปลีก-ส่ง
+- บริษัทบริการ
+- โรงงานผลิต
+- นักบัญชีอิสระ
 
-### Q8: What are the different user roles?
-**A:**
-| Role | Permissions |
-|------|-------------|
-| ADMIN | Full system access, user management, settings |
-| ACCOUNTANT | All accounting functions, no user management |
-| USER | Create/view documents, limited settings access |
-| VIEWER | Read-only access to reports and documents |
+### Q3: ระบบรองรับกี่ผู้ใช้งาน?
+**A:** ระบบรองรับผู้ใช้งานไม่จำกัดจำนวน โดยสามารถกำหนดสิทธิ์แต่ละผู้ใช้ได้ (ADMIN, ACCOUNTANT, USER, VIEWER)
 
-### Q9: Is my data secure?
-**A:** Yes, the system implements:
-- bcrypt password hashing
-- Session-based authentication
-- CSRF protection
-- Rate limiting on API endpoints
-- Role-based access control
+### Q4: ข้อมูลจะปลอดภัยหรือไม่?
+**A:** ระบบมีมาตรการรักษาความปลอดภัย:
+- เข้ารหัส SSL/TLS
+- การยืนยันตัวตนแบบสองชั้น (2FA)
+- การสำรองข้อมูลอัตโนมัติ
+- การควบคุมสิทธิ์การเข้าถึง
+- บันทึกประวัติการใช้งาน (Audit Log)
 
-### Q10: Can I set up two-factor authentication (2FA)?
-**A:** The current version uses session-based authentication. 2FA can be added via:
-- NextAuth.js configuration
-- Third-party MFA providers
-- Enterprise SSO integration
+### Q5: มีค่าใช้จ่ายเท่าไร?
+**A:** ระบบมีให้ใช้งานฟรีสำหรับการทดลอง สำหรับการใช้งานจริงมีแพ็กเกจหลายระดับเริ่มต้นที่ 499 บาท/เดือน
 
 ---
 
 ## Getting Started
 
-### Q11: What are the system requirements?
-**A:**
-- **Browser:** Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
-- **Screen:** 1366x768 minimum (1920x1080 recommended)
-- **Internet:** Stable connection required
-- **Server:** Node.js 18+ or Bun runtime
+### Q6: เริ่มต้นใช้งานอย่างไร?
+**A:** ขั้นตอนการเริ่มต้น:
+1. สมัครบัญชีผู้ใช้
+2. ตั้งค่าข้อมูลบริษัท
+3. ตั้งค่าผังบัญชี
+4. เพิ่มข้อมูลลูกค้าและผู้ขาย
+5. เพิ่มข้อมูลสินค้า
+6. เริ่มใช้งาน
 
-### Q12: How do I set up the system for the first time?
-**A:** Follow these steps:
-1. Log in with default admin credentials
-2. Go to Settings → Company and enter your details
-3. Review the chart of accounts
-4. Add your bank accounts
-5. Set up users and roles
-6. Enter opening balances (if migrating)
+### Q7: ต้องติดตั้งโปรแกรมหรือไม่?
+**A:** ไม่ต้องติดตั้ง ระบบทำงานผ่านเว็บเบราว์เซอร์ รองรับ Chrome, Firefox, Safari, Edge
 
-### Q13: Can I import data from my old system?
-**A:** Yes, data import is supported for:
-- Chart of accounts
-- Customers and vendors
-- Products
-- Opening balances
+### Q8: รองรับมือถือหรือไม่?
+**A:** รองรับการใช้งานผ่านมือถือและแท็บเล็ต แต่แนะนำใช้คอมพิวเตอร์สำหรับงานที่ซับซ้อน
 
-Use the Import feature in each module or contact support for bulk migration.
+### Q9: ต้องการความรู้ด้านบัญชีหรือไม่?
+**A:** มีความรู้พื้นฐานด้านบัญชีจะช่วยให้ใช้งานได้เต็มประสิทธิภาพ แต่ระบบมีคู่มือและตัวอย่างให้ติดตาม
 
-### Q14: What is the default fiscal year?
-**A:** The default fiscal year is January-December. You can change this in:
-Settings → Company → Fiscal Year Start
-
-### Q15: How do I back up my data?
-**A:**
-1. Go to Settings → Backup
-2. Click "Create Backup"
-3. Download the backup file
-4. Store securely
-
-Automatic backups can be configured via scheduled tasks.
+### Q10: มีการอบรมการใช้งานหรือไม่?
+**A:** มีวิดีโอสอนการใช้งานครบทุกฟีเจอร์ นอกจากนี้ยังมีการอบรมออนไลน์สำหรับองค์กร
 
 ---
 
-## Invoices & Sales
+## Authentication & Security
 
-### Q16: What's the difference between Draft and Issued invoices?
-**A:**
-- **DRAFT:** Can be edited, no accounting impact
-- **ISSUED:** Posted to GL, creates AR entry, generates invoice number
+### Q11: ลืมรหัสผ่านทำอย่างไร?
+**A:** 
+1. คลิก "ลืมรหัสผ่าน" ที่หน้าเข้าสู่ระบบ
+2. ใส่อีเมลที่ลงทะเบียนไว้
+3. ตรวจสอบอีเมลและคลิกลิงก์รีเซ็ต
+4. ตั้งรหัสผ่านใหม่
 
-### Q17: Can I edit an issued invoice?
-**A:** No, issued invoices cannot be edited to maintain audit integrity. Options:
-1. Create a credit note for adjustments
-2. Void the invoice and create a new one
-3. Create a debit note for additional charges
+### Q12: เปลี่ยนรหัสผ่านอย่างไร?
+**A:** เข้าไปที่ โปรไฟล์ → เปลี่ยนรหัสผ่าน → ใส่รหัสผ่านเดิมและใหม่ → บันทึก
 
-### Q18: How do I void an invoice?
-**A:**
-1. Open the invoice
-2. Click "ยกเลิก" (Void)
-3. Enter reason for voiding
-4. Confirm
+### Q13: ออกจากระบบทุกอุปกรณ์ได้หรือไม่?
+**A:** ได้ เข้าไปที่ โปรไฟล์ → ความปลอดภัย → ออกจากระบบทุกอุปกรณ์
 
-Note: This creates reversing journal entries.
+### Q14: เซสชันหมดอายุเมื่อไร?
+**A:** เซสชันหมดอายุหลังจาก 8 ชั่วโมงของการไม่ใช้งาน หรือสามารถตั้งค่าได้ในระบบ
 
-### Q19: Can I customize the invoice format?
-**A:** Yes, you can:
-- Upload company logo
-- Customize header/footer text
-- Select paper size (A4, A5)
-- Choose language (Thai/English)
+### Q15: บัญชีถูกล็อกทำอย่างไร?
+**A:** ติดต่อผู้ดูแลระบบเพื่อปลดล็อก หรือรอ 30 นาทีหลังจากพยายามเข้าระบบผิดหลายครั้ง
 
-Go to Settings → Document Templates
+---
 
-### Q20: What invoice numbering formats are supported?
-**A:** You can customize using placeholders:
-- `{YYYY}` - Year (2026)
-- `{MM}` - Month (03)
-- `{DD}` - Day (16)
-- `{0000}` - Sequential number
+## Invoices & Billing
 
-Example: `INV-{YYYY}{MM}-{0000}` → `INV-202603-0001`
+### Q16: สร้างใบกำกับภาษีอย่างไร?
+**A:** 
+1. ไปที่เมนู ใบกำกับภาษีขาย
+2. คลิก สร้างใบกำกับภาษีใหม่
+3. เลือกลูกค้า
+4. ใส่วันที่และรายการสินค้า
+5. บันทึก
 
-### Q21: Can I add multiple line items to an invoice?
-**A:** Yes, there's no limit to line items. Each line can have:
-- Product or description
-- Quantity
-- Unit price
-- Discount %
-- VAT rate
+### Q17: ใบกำกับภาษีกับใบเสร็จต่างกันอย่างไร?
+**A:** 
+- **ใบกำกับภาษี**: เอกสารขายที่แสดง VAT 7% สำหรับลูกค้าที่ขอภาษี
+- **ใบเสร็จรับเงิน**: เอกสารรับเงินจากลูกค้า ไม่จำเป็นต้องมี VAT แยก
 
-### Q22: How do I handle deposits or advance payments?
-**A:**
-1. Create a receipt without invoice allocation (on-account)
-2. Apply to invoice when ready
-3. Or create a separate "Customer Deposits" liability account
+### Q18: แก้ไขใบกำกับภาษีที่ออกแล้วได้หรือไม่?
+**A:** ไม่ได้โดยตรง ต้อง:
+1. สร้างใบลดหนี้ (Credit Note) เพื่อยกเลิกใบเดิม
+2. สร้างใบกำกับภาษีใหม่ที่ถูกต้อง
+
+### Q19: ยกเลิกใบกำกับภาษีอย่างไร?
+**A:** 
+1. เปิดใบกำกับภาษีที่ต้องการยกเลิก
+2. คลิก ยกเลิก (Void)
+3. ระบบจะสร้างรายการบัญชีย้อนกลับโดยอัตโนมัติ
+
+### Q20: ใบกำกับภาษีเลขที่ซ้ำได้หรือไม่?
+**A:** ไม่ได้ ระบบจะตรวจสอบเลขที่ไม่ให้ซ้ำกันโดยอัตโนมัติ
+
+### Q21: แก้ไข VAT เป็น 0% ได้หรือไม่?
+**A:** ได้ สำหรับ:
+- การส่งออก (Export)
+- สินค้า/บริการที่ได้รับยกเว้น
+ต้องมีเอกสารประกอบตามกฎหมาย
+
+### Q22: ใส่ส่วนลดหลังรายการได้หรือไม่?
+**A:** ได้ สามารถใส่ส่วนลดได้ทั้ง:
+- ส่วนลดต่อรายการ (% หรือจำนวนเงิน)
+- ส่วนลดท้ายบิล
+
+### Q23: ใบกำกับภาษีมีกี่สำเนา?
+**A:** ปกติ 2 สำเนา:
+- ต้นฉบับ (Original) - ให้ลูกค้า
+- สำเนา (Copy) - เก็บบริษัท
+
+### Q24: พิมพ์ใบกำกับภาษีภาษาอังกฤษได้หรือไม่?
+**A:** ได้ ระบบรองรับทั้งภาษาไทยและภาษาอังกฤษ
+
+### Q25: ส่งใบกำกับภาษีทางอีเมลได้หรือไม่?
+**A:** ได้ คลิก ส่งอีเมล จากหน้าใบกำกับภาษี ระบบจะส่ง PDF แนบไปให้
 
 ---
 
 ## Receipts & Payments
 
-### Q23: How do I record a customer payment?
-**A:**
-1. Go to Sales → Receipts
-2. Click "+ New Receipt"
-3. Select customer
-4. Enter amount and payment method
-5. Allocate to invoices
-6. Save and post
+### Q26: ใบเสร็จรับเงินกับใบกำกับภาษีต้องต่างกันหรือไม่?
+**A:** ไม่จำเป็นต้องต่างกันเสมอไป กรณีได้รับเงินพร้อมออกใบกำกับภาษี ใบกำกับภาษีนั้นเองก็เป็นใบเสร็จได้
 
-### Q24: Can I split a payment across multiple invoices?
-**A:** Yes, in the receipt form:
-1. System shows all unpaid invoices
-2. Enter allocation amount for each invoice
-3. Total allocations must equal receipt amount
+### Q27: รับชำระหลายใบกำกับภาษีในครั้งเดียวได้หรือไม่?
+**A:** ได้ ในใบเสร็จรับเงินสามารถจัดสรรกับใบกำกับภาษีได้หลายใบ
 
-### Q25: How do I handle withholding tax (WHT)?
-**A:**
-1. When creating receipt, enter WHT amount
-2. Select WHT type (PND3 for individuals, PND53 for companies)
-3. System generates WHT certificate
-4. Track in Tax → WHT Certificates
+### Q28: หักภาษี ณ ที่จ่ายในใบเสร็จอย่างไร?
+**A:** 
+1. เปิดใบเสร็จรับเงิน
+2. เปิดใช้งาน "หัก ณ ที่จ่าย"
+3. เลือกประเภท (PND3/PND53)
+4. เลือกรายได้และอัตรา
+5. ระบบคำนวณภาษีอัตโนมัติ
 
-### Q26: What payment methods are supported?
-**A:**
-- เงินสด (Cash)
-- โอนเงิน (Bank Transfer)
-- เช็ค (Cheque)
-- บัตรเครดิต (Credit Card)
-- อื่นๆ (Other)
+### Q29: รับเงินล่วงหน้า (Advance) บันทึกอย่างไร?
+**A:** 
+1. สร้างใบเสร็จรับเงิน
+2. ไม่เลือกใบกำกับภาษี
+3. ระบุว่าเป็น "รับเงินล่วงหน้า"
+4. ภายหลังนำไปหักกับใบกำกับภาษี
 
-### Q27: Can I print a receipt?
-**A:** Yes:
-1. Open the receipt
-2. Click "พิมพ์" (Print)
-3. Choose format
-4. Print or save as PDF
+### Q30: ชำระเงินให้ผู้ขายด้วยเช็คบันทึกอย่างไร?
+**A:** 
+1. สร้างใบสำคัญจ่าย
+2. เลือกวิธีการชำระเงิน: เช็ค
+3. เลือกเช็คจากบัญชีที่ลงทะเบียนไว้
+4. กรอกเลขที่เช็ค
 
 ---
 
-## Chart of Accounts
+## Accounting & Journal
 
-### Q28: Can I add my own accounts?
-**A:** Yes:
-1. Go to General Ledger → Chart of Accounts
-2. Click "+ New Account"
-3. Enter code (must be unique)
-4. Enter Thai and English names
-5. Select account type
-6. Save
+### Q31: บัญชี Double Entry คืออะไร?
+**A:** หลักการบัญชีที่ทุกรายการต้องมีเดบิตและเครดิตเท่ากัน เช่น ขายสินค้า:
+- เดบิต ลูกหนี้การค้า
+- เครดิต รายได้ขาย
+- เครดิต ภาษีขาย
 
-### Q29: What account code format should I use?
-**A:** Follow Thai accounting standards:
-- 1000-1999: Assets (สินทรัพย์)
-- 2000-2999: Liabilities (หนี้สิน)
-- 3000-3999: Equity (ทุน)
-- 4000-4999: Revenue (รายได้)
-- 5000-5999: Expenses (ค่าใช้จ่าย)
+### Q32: ผังบัญชีมีกี่หลัก?
+**A:** ผังบัญชีไทยมาตรฐานมี 4 หลัก:
+- หลักที่ 1: ประเภทบัญชี (1-5)
+- หลักที่ 2: กลุ่มบัญชี
+- หลักที่ 3: ลักษณะบัญชี
+- หลักที่ 4: บัญชีย่อย
 
-### Q30: What's the difference between summary and detail accounts?
-**A:**
-- **Summary Account:** Groups multiple accounts, cannot post transactions
-- **Detail Account:** Actual posting account for transactions
+### Q33: บันทึกรายการบัญชีอย่างไร?
+**A:** 
+1. ไปที่ สมุดรายวัน
+2. คลิก สร้างรายการใหม่
+3. ใส่วันที่และคำอธิบาย
+4. เพิ่มรายการ เดบิต และ เครดิต ให้เท่ากัน
+5. บันทึกและโพสต์
 
-Example:
-- 1200 ลูกหนี้การค้า (Summary)
-  - 1201 ลูกหนี้การค้า-ลูกค้าในประเทศ (Detail - can post)
-  - 1202 ลูกหนี้การค้า-ลูกค้าต่างประเทศ (Detail - can post)
+### Q34: แก้ไขรายการบัญชีที่โพสต์แล้วได้หรือไม่?
+**A:** ไม่ได้โดยตรง ต้อง:
+1. ยกเลิกรายการเดิม (Reverse)
+2. บันทึกรายการใหม่ที่ถูกต้อง
 
-### Q31: Can I delete an account?
-**A:** Only if:
-- No transactions posted to it
-- No sub-accounts under it
-- Not a system-required account
+### Q35: ยอดเดบิตไม่เท่ากับเครดิตทำอย่างไร?
+**A:** ตรวจสอบ:
+- แต่ละรายการใส่เดบิตหรือเครดิตถูกต้องหรือไม่
+- ยอดรวมแต่ละรายการถูกต้องหรือไม่
+- ไม่มีช่องว่างหรือตัวอักษรผิดปกติ
 
-If transactions exist, you should make it inactive instead.
+### Q36: ปิดบัญชีสิ้นปีทำอย่างไร?
+**A:** 
+1. ตรวจสอบว่าบัญชีทุกบัญชีมีความถูกต้อง
+2. บันทึกรายการปรับปรุงต่างๆ
+3. โอนกำไรขาดทุนไปบัญชีกำไรสะสม
+4. ล็อกงวดบัญชีที่ผ่านมา
 
-### Q32: How do I set opening balances?
-**A:**
-1. Create a journal entry dated day before go-live
-2. Debit asset accounts
-3. Credit liability and equity accounts
-4. Reference as "Opening Balances"
-5. Post the entry
+### Q37: ผังบัญชีสำเร็จรูปมีอะไรบ้าง?
+**A:** ระบบมีผังบัญชีมาตรฐานไทย 181 บัญชี แบ่งเป็น:
+- สินทรัพย์ (1xxx)
+- หนี้สิน (2xxx)
+- ทุน (3xxx)
+- รายได้ (4xxx)
+- ค่าใช้จ่าย (5xxx)
 
----
-
-## Journal Entries
-
-### Q33: When should I use manual journal entries?
-**A:** Use for:
-- Adjustments and corrections
-- Accruals and deferrals
-- Depreciation
-- Year-end closing
-- Opening balances
-- Reclassification entries
-
-### Q34: Why won't my journal entry balance?
-**A:** Common reasons:
-- Debit and credit totals don't match
-- Missing amounts in some lines
-- Sign errors (negative amounts)
-
-Check: Total Debits must exactly equal Total Credits
-
-### Q35: Can I edit a posted journal entry?
-**A:** No, posted entries cannot be edited. To correct:
-1. Create a reversing entry
-2. Post the reversal
-3. Create a new correct entry
-
-This maintains audit trail integrity.
-
-### Q36: What's the difference between Draft and Posted JE?
-**A:**
-- **Draft:** Can be edited, no GL impact, no JE number assigned
-- **Posted:** Immutable, affects GL balances, has JE number
+### Q38: สร้างบัญชีใหม่ได้หรือไม่?
+**A:** ได้ แต่ควรใช้รหัสที่ไม่ซ้ำกับระบบ และอยู่ในกลุ่มที่เหมาะสม
 
 ---
 
 ## Inventory
 
-### Q37: What inventory costing method is used?
-**A:** Weighted Average Cost (WAC):
-```
-Average Cost = Total Inventory Value / Total Quantity
-```
+### Q39: วิธีคิดต้นทุนมีกี่แบบ?
+**A:** ระบบรองรับ 2 วิธี:
+- **FIFO** (First In, First Out): ขายของที่เข้าก่อนก่อน
+- **Weighted Average** (ค่าเฉลี่ยถ่วงน้ำหนัก): ใช้ต้นทุนเฉลี่ย
 
-This method is accepted by Thai Revenue Department.
+### Q40: เปลี่ยนวิธีคิดต้นทุนได้หรือไม่?
+**A:** ได้ แต่ควรทำตอนต้นงวดบัญชี และปรึกษานักบัญชีก่อน เพราะมีผลต่องบการเงิน
 
-### Q38: How do I adjust inventory quantities?
-**A:**
-1. Go to Inventory → Stock Adjustments
-2. Select product and warehouse
-3. Enter actual quantity
-4. System calculates variance
-5. Provide reason for adjustment
-6. Post adjustment
+### Q41: สินค้าติดลบได้หรือไม่?
+**A:** ไม่ได้ ระบบไม่อนุญาตให้ขายสินค้าที่ไม่มีในสต็อก
 
-### Q39: Can I track inventory by warehouse?
-**A:** Yes, the system supports:
-- Multiple warehouses/locations
-- Stock transfers between warehouses
-- Warehouse-specific stock reports
-- Location-level stock tracking
+### Q42: นับสต็อกแล้วไม่ตรงทำอย่างไร?
+**A:** 
+1. ใช้ฟังก์ชัน "ปรับปรุงสต็อก"
+2. ใส่จำนวนที่นับได้จริง
+3. ใส่เหตุผลการปรับปรุง
+4. ระบบจะบันทึกการปรับปรุงและสร้างรายการบัญชี
 
-### Q40: How do I handle damaged or obsolete stock?
-**A:**
-1. Create stock adjustment
-2. Set adjustment type to "Damage" or "Obsolete"
-3. Enter quantity to write off
-4. System creates expense entry
-5. Requires approval before posting
+### Q43: สินค้าแบบ Serial Number รองรับหรือไม่?
+**A:** รองรับ สามารถบันทึก Serial Number แยกต่อหน่วยได้
 
----
-
-## Tax & VAT
-
-### Q41: What VAT rate should I use?
-**A:** Default is 7% (Thai standard rate). Can be set to:
-- 7% - Standard rate
-- 0% - Zero-rated (exports)
-- Exempt - VAT not applicable
-
-Configure in Settings → Accounting → Default VAT Rate
-
-### Q42: How do I file VAT (P.P.30)?
-**A:**
-1. Go to Tax → VAT Reports
-2. Select month and year
-3. Choose report type:
-   - OUTPUT (ภาษีขาย) - VAT collected
-   - INPUT (ภาษีซื้อ) - VAT paid
-4. Review the report
-5. Export to file or print
-6. Submit to Revenue Department by 15th of following month
-
-### Q43: What's the difference between PND3 and PND53?
-**A:**
-| Form | For | Common Rates |
-|------|-----|--------------|
-| PND3 | Individuals | Services 3%, Rent 5% |
-| PND53 | Companies | Services 3%, Rent 5%, Advertising 2% |
-
-### Q44: How do I generate WHT certificates?
-**A:**
-1. Go to Tax → WHT Certificates
-2. Click "New Certificate"
-3. Select vendor
-4. Enter tax details
-5. Generate PDF (50 Tawi form)
-6. Print and sign
-
-### Q45: When is WHT not required?
-**A:** WHT is not required when:
-- Payment is less than 1,000 THB
-- Payment to exempt entities
-- Certain exempt income types
-- Payments to government agencies
-
-Always consult your accountant for specific cases.
+### Q44: สินค้าหลายหน่วยนับรองรับหรือไม่?
+**A:** รองรับ เช่น ซื้อเป็นลัง ขายเป็นชิ้น โดยกำหนดอัตราส่วนแปลงหน่วย
 
 ---
 
 ## Reports
 
-### Q46: Why does my report show no data?
-**A:** Check:
-- Date range is correct
-- Transactions are posted (not draft)
-- Fiscal period is open
-- Correct filters applied
+### Q45: มีรายงานอะไรบ้าง?
+**A:** รายงานหลัก:
+- งบดุล (Balance Sheet)
+- งบกำไรขาดทุน (Income Statement)
+- งบกระแสเงินสด (Cash Flow)
+- งบทดลอง (Trial Balance)
+- สมุดบัญชีแยกประเภท (GL)
+- รายงานภาษี
 
-### Q47: Can I export reports to Excel?
-**A:** Yes, all reports support export to:
-- PDF (for printing/sharing)
-- Excel (for analysis)
-- CSV (for data import)
+### Q46: ส่งออกรายงานเป็น Excel ได้หรือไม่?
+**A:** ได้ ทุกรายงานสามารถส่งออกเป็น Excel (.xlsx), PDF, หรือ CSV
 
-Click the export button in the report view.
+### Q47: รายงานแสดงผลช้าทำอย่างไร?
+**A:** 
+- ลดช่วงวันที่ (แทน 1 ปี ใช้ 3 เดือน)
+- ล้างแคชเบราว์เซอร์
+- ตรวจสอบความเร็วอินเทอร์เน็ต
 
-### Q48: How often should I run financial reports?
-**A:** Recommended schedule:
-- **Daily:** Cash position, sales summary
-- **Weekly:** AR aging, AP aging
-- **Monthly:** P&L, Balance Sheet, Trial Balance
-- **Quarterly:** Detailed analysis, budgets vs actual
-- **Annually:** Year-end reports, tax filings
+### Q48: ตั้งค่ารายงานประจำได้หรือไม่?
+**A:** ได้ สามารถบันทึกรายงานที่ตั้งค่าไว้และเปิดใช้ซ้ำได้
+
+### Q49: รายงานเทียบปีก่อนหน้าได้หรือไม่?
+**A:** ได้ ระบบรองรับการเปรียบเทียบข้อมูลระหว่างงวด
+
+---
+
+## Tax
+
+### Q50: VAT 7% คำนวณอย่างไร?
+**A:** 
+- **ราคาไม่รวม VAT**: ราคาสินค้า × 1.07
+- **ราคารวม VAT**: ราคารวม ÷ 1.07 = ราคาสินค้า, ที่เหลือเป็น VAT
+
+### Q51: ยื่นภาษี VAT อย่างไร?
+**A:** ใช้รายงาน VAT จากระบบ:
+1. ไปที่ รายงาน → ภาษีมูลค่าเพิ่ม
+2. เลือกเดือนที่ต้องการ
+3. ส่งออกเป็น Excel หรือ PDF
+4. นำข้อมูลไปยื่นผ่านระบบของกรมสรรพากร
+
+### Q52: ภาษีหัก ณ ที่จ่าย อัตราเท่าไร?
+**A:** อัตราหลัก:
+- ค่าบริการ: 3%
+- ค่าเช่า: 5%
+- ค่าจ้างทำของ: 1% (นิติบุคคล), 3% (บุคคลธรรมดา)
+- ค่าโฆษณา: 2%
+
+### Q53: ออก ภ.ง.ด.3 และ ภ.ง.ด.53 ได้หรือไม่?
+**A:** ได้ ระบบมีรายงานและแบบฟอร์มสำหรับออกใบหัก ณ ที่จ่าย
+
+### Q54: ภาษีเงินได้หัก ณ ที่จ่ายคืนได้หรือไม่?
+**A:** ได้ หากมีการยกเลิกหรือแก้ไขเอกสาร ระบบจะสร้างรายการคืนภาษีให้
 
 ---
 
 ## Payroll
 
-### Q49: How do I calculate social security?
-**A:** Both employee and employer contribute 5%:
-- Maximum contribution: 750 THB/month each
-- Based on wages up to 15,000 THB
-- System auto-calculates based on salary
+### Q55: คำนวณประกันสังคมอย่างไร?
+**A:** คำนวณจากเงินเดือน 5% แต่ไม่เกิน 750 บาท/เดือน (เพดาน 15,000 บาท)
 
-### Q50: What's included in gross salary?
-**A:** Gross salary typically includes:
-- Base salary
-- Fixed allowances
-- Overtime
-- Commissions
-- Bonuses
+### Q56: คำนวณภาษีเงินได้หัก ณ ที่จ่ายอย่างไร?
+**A:** ระบบคำนวณตามตารางอัตราภาษีก้าวหน้า พร้อมค่าลดหย่อนต่างๆ:
+- ตนเอง: 60,000
+- คู่สมรส: 60,000
+- บุตร: 30,000 ต่อคน
+- ประกันสังคม: ตามจริง
 
-Excludes: Reimbursements, non-cash benefits
+### Q57: โบนัสคำนวณภาษีอย่างไร?
+**A:** โบนัสรวมเข้ากับเงินได้ทั้งปี หักภาษีตามอัตราก้าวหน้า
 
-### Q51: How do I process monthly payroll?
-**A:**
-1. Go to Payroll → Process Payroll
-2. Select month/year
-3. Review all employees
-4. Enter variables (OT, deductions)
-5. Calculate
-6. Review payslips
-7. Post to GL
-8. Generate bank transfer file
+### Q58: เงินเดือนย้อนหลังทำอย่างไร?
+**A:** ระบบรองรับการประมวลผลเงินเดือนย้อนหลัง โดยเลือกเดือนที่ต้องการ
 
-### Q52: Can I adjust payroll after posting?
-**A:** Best practice is to:
-1. Create adjustment in next period
-2. Or reverse and reprocess (with proper documentation)
-
-Never edit posted payroll directly.
+### Q59: พนักงานลาออกคำนวณอย่างไร?
+**A:** 
+1. บันทึกวันลาออก
+2. คำนวณเงินเดือนตามวันทำงานจริง
+3. คำนวณค่าชดเชย (ถ้ามี)
+4. ออก ภ.ง.ด.1 ก สำหรับพนักงานลาออก
 
 ---
 
-## Technical
+## Settings
 
-### Q53: What browsers are supported?
-**A:**
-- Chrome 90+ ✅
-- Firefox 88+ ✅
-- Safari 14+ ✅
-- Edge 90+ ✅
-- Internet Explorer: Not supported ❌
+### Q60: เปลี่ยนข้อมูลบริษัทอย่างไร?
+**A:** เข้าไปที่ ตั้งค่า → ข้อมูลบริษัท → แก้ไข → บันทึก
 
-### Q54: Can I use this offline?
-**A:** The system requires internet connection for:
-- Multi-user collaboration
-- Cloud backup
-- Tax rate updates
+### Q61: เพิ่มผู้ใช้งานใหม่อย่างไร?
+**A:** 
+1. ตั้งค่า → ผู้ใช้งาน
+2. คลิก สร้างผู้ใช้ใหม่
+3. ใส่ชื่อ อีเมล กำหนดรหัสผ่าน
+4. เลือกบทบาท (Role)
+5. บันทึก
 
-Offline mode is not currently supported.
+### Q62: เปลี่ยนรูปแบบเลขที่เอกสารได้หรือไม่?
+**A:** ได้ ที่ ตั้งค่า → รูปแบบเลขที่เอกสาร แต่ควรทำตอนต้นงวด
 
-### Q55: How do I update the system?
-**A:**
-1. Backup your database
-2. Download latest version
-3. Run database migrations
-4. Restart server
+### Q63: เปลี่ยนปีงบประมาณได้หรือไม่?
+**A:** ได้ ที่ ตั้งค่า → การตั้งค่าบัญชี แต่ควรทำตอนเริ่มใช้งาน
 
-Always test updates in staging environment first.
-
-### Q56: What database does it use?
-**A:** Default is SQLite for single-user/small deployments.
-For production/multi-user, we recommend PostgreSQL.
-
-### Q57: Can I integrate with other software?
-**A:** Yes, via:
-- REST API (for custom integrations)
-- Webhooks (for real-time events)
-- Import/Export (CSV, Excel)
-
-### Q58: How do I report a bug?
-**A:**
-1. Go to Help → Report Issue
-2. Describe the problem
-3. Include steps to reproduce
-4. Attach screenshots if possible
-5. Submit
-
-Or email: support@thaiaccounting.com
+### Q64: ตั้งค่าอีเมลส่งเอกสารอย่างไร?
+**A:** ตั้งค่า SMTP ที่ ตั้งค่า → การตั้งค่าอีเมล หรือใช้บริการส่งอีเมลของระบบ
 
 ---
 
-## Still Need Help?
+## Technical Issues
 
-### Contact Support
-- 📧 Email: support@thaiaccounting.com
-- 📞 Phone: 02-XXX-XXXX (Mon-Fri 9:00-18:00)
-- 💬 Live Chat: Available on website
-- 📚 Documentation: https://docs.thaiaccounting.com
+### Q65: ระบบทำงานช้าทำอย่างไร?
+**A:** 
+1. ล้างแคชเบราว์เซอร์ (Ctrl+Shift+Delete)
+2. ปิดแท็บที่ไม่ใช้
+3. รีเฟรชหน้า (F5)
+4. ลดช่วงวันที่ในรายงาน
+5. ตรวจสอบความเร็วอินเทอร์เน็ต
 
-### Community Resources
-- 🎥 Video Tutorials: YouTube channel
-- 📖 User Manual: Download PDF
-- 👥 Community Forum: Ask other users
-- 🎓 Training: Online courses available
+### Q66: หน้าจอขาว/ไม่แสดงผลทำอย่างไร?
+**A:** 
+1. รีเฟรชหน้า (F5)
+2. ล้างแคชและคุกกี้
+3. ลองใช้เบราว์เซอร์อื่น
+4. ปิดส่วนขยายเบราว์เซอร์ (Extensions)
+
+### Q67: ข้อมูลไม่อัปเดตทำอย่างไร?
+**A:** 
+1. รีเฟรชหน้า
+2. ออกจากระบบและเข้าใหม่
+3. ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต
+
+### Q68: ไฟล์อัปโหลดไม่ได้ทำอย่างไร?
+**A:** 
+1. ตรวจสอบขนาดไฟล์ (ไม่เกิน 10 MB)
+2. ตรวจสอบรูปแบบไฟล์
+3. ลองเปลี่ยนเบราว์เซอร์
 
 ---
 
-*Last Updated: March 16, 2026*
+## Data Management
+
+### Q69: สำรองข้อมูลอย่างไร?
+**A:** 
+1. ตั้งค่า → สำรองและกู้คืนข้อมูล
+2. คลิก สร้างการสำรองข้อมูล
+3. เลือกประเภทข้อมูล
+4. ดาวน์โหลดไฟล์สำรอง
+
+### Q70: กู้คืนข้อมูลอย่างไร?
+**A:** 
+1. ตั้งค่า → สำรองและกู้คืนข้อมูล
+2. เลือกไฟล์สำรอง
+3. ยืนยันการกู้คืน
+⚠️ **คำเตือน**: การกู้คืนจะแทนที่ข้อมูลปัจจุบัน
+
+### Q71: ส่งออกข้อมูลเป็น Excel ได้หรือไม่?
+**A:** ได้ ทุกหน้ารายการมีปุ่ม "ส่งออก" สามารถเลือกส่งออกทั้งหมดหรือเฉพาะที่เลือก
+
+### Q72: นำเข้าข้อมูลจาก Excel ได้หรือไม่?
+**A:** ได้ ที่เมนู ตั้งค่า → นำเข้าข้อมูล รองรับ CSV และ Excel
+
+### Q73: ลบข้อมูลถาวรได้หรือไม่?
+**A:** ไม่แนะนำ แต่ถ้าจำเป็นต้องติดต่อผู้ดูแลระบบระดับสูง
+
+---
+
+## Additional Questions
+
+### Q74: มี API สำหรับเชื่อมต่อระบบอื่นหรือไม่?
+**A:** มี ระบบมี REST API ครบถ้วน ดูรายละเอียดที่ API_DOCUMENTATION.md
+
+### Q75: รองรับ Multi-Currency หรือไม่?
+**A:** รองรับ สามารถบันทึกธุรกรรมต่างประเทศและคำนวณอัตราแลกเปลี่ยน
+
+### Q76: มี Mobile App หรือไม่?
+**A:** ขณะนี้ใช้ผ่านเว็บบราว์เซอร์บนมือถือได้ แอปพลิเคชัน Native กำลังพัฒนา
+
+### Q77: อัปเดตระบบบ่อยแค่ไหน?
+**A:** อัปเดตฟีเจอร์ใหม่ทุกเดือน และแก้ไขบั๊กทันทีที่พบ
+
+### Q78: มีการสอนใช้งานหรือไม่?
+**A:** มีวิดีโอสอนการใช้งานครบทุกฟีเจอร์ที่ docs/tutorials/
+
+### Q79: สามารถ Custom รายงานได้หรือไม่?
+**A:** ได้ ระบบมี Custom Report Builder ให้สร้างรายงานตามต้องการ
+
+### Q80: มีการรองรับหลายบริษัทหรือไม่?
+**A:** รองรับ สามารถจัดการหลายบริษัทในบัญชีเดียวกันได้
+
+---
+
+## Contact Support
+
+หากมีคำถามเพิ่มเติม ติดต่อเราได้ที่:
+
+| ช่องทาง | รายละเอียด |
+|---------|-------------|
+| 📧 อีเมล | support@thaiaccounting.com |
+| 📞 โทรศัพท์ | 02-123-4567 |
+| 💬 แชท | จันทร์-ศุกร์ 9:00-18:00 |
+| 🌐 เว็บไซต์ | https://thaiaccounting.com |
+| 📚 คู่มือ | https://docs.thaiaccounting.com |
+
+---
+
+**Last Updated:** March 16, 2026  
+**Version:** 1.0.0
