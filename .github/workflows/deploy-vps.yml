@@ -38,11 +38,11 @@ jobs:
             echo "🔄 Starting deployment to VPS..."
             cd /root
 
-            # Backup existing database and .env from old deployment (if exists)
+            # Backup existing database and .env from old deployment
             mkdir -p /tmp/thai-acc-backup
-            if [ -f "thai-acc/prisma/dev.db" ]; then
+            if [ -d "thai-acc/prisma" ] && [ -f "thai-acc/prisma/dev.db" ]; then
               cp thai-acc/prisma/dev.db /tmp/thai-acc-backup/dev.db
-              echo "✅ Database backed up"
+              echo "✅ Database backed up ($(ls -lh /tmp/thai-acc-backup/dev.db | awk '{print $5}'))"
             fi
             if [ -f "thai-acc/.env" ]; then
               cp thai-acc/.env /tmp/thai-acc-backup/.env
@@ -51,33 +51,41 @@ jobs:
 
             # Remove old deployment
             rm -rf thai-acc thai-acc-new
+            echo "✅ Old deployment removed"
 
             # Clone fresh repo
             echo "📥 Cloning repository..."
             git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/tttonggg/Thai-acc.git thai-acc
             cd thai-acc
             git checkout ${{ github.sha }}
+            echo "✅ Repository cloned and checked out"
 
-            # Restore database and .env from backup
+            # Install dependencies FIRST (creates prisma/ directory)
+            echo "📦 Installing dependencies..."
+            npm install --legacy-peer-deps --ignore-scripts
+
+            # Generate Prisma client (creates prisma/schema.prisma and node_modules/@prisma/client)
+            echo "🗄️  Generating Prisma client..."
+            npm run db:generate
+
+            # Now restore database
             if [ -f /tmp/thai-acc-backup/dev.db ]; then
+              mkdir -p thai-acc/prisma
               cp /tmp/thai-acc-backup/dev.db thai-acc/prisma/dev.db
-              echo "✅ Database restored"
+              echo "✅ Database restored ($(ls -lh thai-acc/prisma/dev.db | awk '{print $5}'))"
             fi
             if [ -f /tmp/thai-acc-backup/.env ]; then
               cp /tmp/thai-acc-backup/.env thai-acc/.env
               echo "✅ .env restored"
             fi
 
+            # Build application
+            echo "🔨 Building..."
+            npm run build
+
             # Kill existing server
             fuser -k 3000/tcp 2>/dev/null || true
             sleep 2
-
-            # Install & build
-            echo "📦 Installing dependencies..."
-            npm install --legacy-peer-deps --ignore-scripts
-            npm run db:generate
-            echo "🔨 Building..."
-            npm run build
 
             # Start server
             echo "🔄 Starting server..."
