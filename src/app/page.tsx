@@ -52,6 +52,7 @@ import { BackupRestorePage } from '@/components/admin/backup-restore-page'
 import { DataImportPage } from '@/components/admin/data-import-page'
 import { ActivityLogPage } from '@/components/admin/activity-log-page'
 import { RoleManagement } from '@/components/admin/role-management/role-management'
+import { ApproverConfig } from '@/components/admin/approver-config/approver-config'
 import { WebhookManagement, ApiAnalytics } from '@/components/admin'
 import { RecurringDocuments } from '@/components/recurring/recurring-documents'
 import { SSOFiling } from '@/components/payroll/sso-filing'
@@ -130,6 +131,7 @@ export type Module =
   | 'api-analytics'
   | 'cash-flow'
   | 'recurring'
+  | 'approver-config'
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -445,6 +447,10 @@ export default function Home() {
       case 'role-management':
         return (
           <RoleManagement />
+        )
+      case 'approver-config':
+        return (
+          <ApproverConfig />
         )
       case 'entities':
         return (
