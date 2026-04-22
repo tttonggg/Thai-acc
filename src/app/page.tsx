@@ -135,6 +135,7 @@ export type Module =
 
 export default function Home() {
   const { data: session, status } = useSession()
+  const { setUser, setPermissions } = useAuthStore()
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -287,7 +288,6 @@ export default function Home() {
 
   // Authenticated - show main app
   const userRole = session.user?.role as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER'
-  const { setUser, setPermissions } = useAuthStore()
 
   // Fetch permissions on mount and store in auth
   useEffect(() => {
