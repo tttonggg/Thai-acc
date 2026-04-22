@@ -140,6 +140,31 @@ export default function Home() {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  // Fetch permissions on mount and store in auth - MUST be at top level
+  useEffect(() => {
+    async function loadPermissions() {
+      try {
+        const permsRes = await fetch('/api/admin/permissions/my')
+        const permsData = await permsRes.json()
+        const perms = permsData.data?.permissions || []
+        store.setPermissions(perms)
+      } catch (e) {
+        console.error('Failed to load permissions', e)
+      }
+    }
+    if (session?.user) {
+      const userRole = session.user.role as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER'
+      store.setUser({
+        id: session.user.id,
+        email: session.user.email || '',
+        name: session.user.name || null,
+        role: userRole,
+        isActive: true,
+      })
+      loadPermissions()
+    }
+  }, [session, store])
+
   // Sync URL with activeModule using history API (doesn't trigger Next.js routing)
   useEffect(() => {
     if (status === 'authenticated') {
