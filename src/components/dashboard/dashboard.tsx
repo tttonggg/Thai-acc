@@ -266,7 +266,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('/api/dashboard')
+        const res = await fetch('/api/dashboard', { credentials: 'include' })
         // Handle 401 - let the auth system handle redirect
         if (res.status === 401) {
           setLoading(false)
@@ -315,7 +315,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
       setStatsLoading(true)
       try {
         // Fetch quotations
-        const quotRes = await fetch('/api/quotations?limit=1000')
+        const quotRes = await fetch('/api/quotations?limit=1000', { credentials: 'include' })
         if (quotRes.ok) {
           const quotJson = await quotRes.json()
           if (quotJson.success) {
@@ -331,7 +331,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
         }
 
         // Fetch invoices
-        const invRes = await fetch('/api/invoices?limit=1000')
+        const invRes = await fetch('/api/invoices?limit=1000', { credentials: 'include' })
         if (invRes.ok) {
           const invJson = await invRes.json()
           if (invJson.success) {
@@ -348,7 +348,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
         }
 
         // Fetch receipts
-        const recRes = await fetch('/api/receipts?limit=1000')
+        const recRes = await fetch('/api/receipts?limit=1000', { credentials: 'include' })
         if (recRes.ok) {
           const recJson = await recRes.json()
           if (recJson.success) {
@@ -362,7 +362,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
         }
 
         // Fetch credit notes
-        const cnRes = await fetch('/api/credit-notes?limit=1000')
+        const cnRes = await fetch('/api/credit-notes?limit=1000', { credentials: 'include' })
         if (cnRes.ok) {
           const cnJson = await cnRes.json()
           if (cnJson.success) {
@@ -375,7 +375,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
         }
 
         // Fetch debit notes
-        const dnRes = await fetch('/api/debit-notes?limit=1000')
+        const dnRes = await fetch('/api/debit-notes?limit=1000', { credentials: 'include' })
         if (dnRes.ok) {
           const dnJson = await dnRes.json()
           if (dnJson.success) {
@@ -388,7 +388,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
         }
 
         // Fetch purchase orders
-        const poRes = await fetch('/api/purchase-orders?limit=1000')
+        const poRes = await fetch('/api/purchase-orders?limit=1000', { credentials: 'include' })
         if (poRes.ok) {
           const poJson = await poRes.json()
           if (poJson.success) {
@@ -403,7 +403,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
         }
 
         // Fetch payments
-        const payRes = await fetch('/api/payments?limit=1000')
+        const payRes = await fetch('/api/payments?limit=1000', { credentials: 'include' })
         if (payRes.ok) {
           const payJson = await payRes.json()
           if (payJson.success) {
