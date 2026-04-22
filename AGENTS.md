@@ -637,6 +637,25 @@ Status check (`cheque.status === 'CLEARED'`) done OUTSIDE transaction. Two concu
 
 If `templateInvoice.dueDate` is null: `new Date(now.getTime() + NaN)` → Invalid Date.
 
+### ✅ DRAFT-Only Delete/Edit Protection (Implemented Apr 2026)
+**Files:** `src/app/api/invoices/[id]/route.ts`, `receipts/[id]/route.ts`, `credit-notes/[id]/route.ts`, `debit-notes/[id]/route.ts`, `purchase-orders/[id]/route.ts`, `purchases/[id]/route.ts`, `goods-receipt-notes/[id]/route.ts`
+
+All document DELETE/EDIT endpoints now enforce:
+- **Status gate:** Only DRAFT documents can be deleted or edited
+- **Role gate:** Creator (`createdById`) OR `ADMIN` role required (ACCOUNTANT allowed for receipts/credit-notes/debit-notes/purchase-invoices)
+- **Soft-delete:** Parent marked `deletedAt` + `isActive: false`; children hard-deleted in `$transaction`
+- **Frontend:** Edit/Delete buttons only shown for DRAFT + (creator or ADMIN) — `invoice-detail-page.tsx`
+
+| Document | Role Gate | Cascade |
+|---|---|---|
+| Invoice | creator OR ADMIN | InvoiceLine, InvoiceComment |
+| Receipt | ACCOUNTANT OR ADMIN | ReceiptAllocation |
+| CreditNote | ACCOUNTANT OR ADMIN | — |
+| DebitNote | ACCOUNTANT OR ADMIN | — |
+| PurchaseInvoice | creator OR ADMIN | PurchaseInvoiceLine, PaymentAllocation, VatRecord |
+| PurchaseOrder | creator OR ADMIN | PurchaseOrderLine |
+| GoodsReceiptNote | ADMIN only (DRAFT); ADMIN+ACCOUNTANT (RECEIVED→CANCELLED) | GoodsReceiptNoteLine |
+
 ## Tech Debt (High-Priority)
 
 | Issue | File | Fix |
@@ -653,13 +672,23 @@ If `templateInvoice.dueDate` is null: `new Date(now.getTime() + NaN)` → Invali
 
 ## Transaction Atomicity Map
 
-| Operation | Uses `$transaction` | Risk |
+|| Operation | Uses `$transaction` | Risk |
 |---|---|---|
 | Journal create/post | ❌ No | 🔴 |
 | Payroll JE create | ✅ Yes | Low |
 | Cheque create | ✅ Yes | Low |
 | Cheque bounce | ❌ No | 🔴 |
 | Asset depreciation | ❌ No | 🟠 |
+| Invoice delete (DRAFT) | ✅ Yes | Low |
+| Receipt delete (DRAFT) | ✅ Yes | Low |
+| CreditNote delete (DRAFT) | ❌ No | 🟡 (single model, safe) |
+| DebitNote delete (DRAFT) | ❌ No | 🟡 (single model, safe) |
+| PurchaseInvoice delete (DRAFT) | ✅ Yes | Low |
+| PurchaseOrder delete (DRAFT) | ✅ Yes | Low |
+| GoodsReceiptNote delete (DRAFT) | ✅ Yes | Low |
+| GRN RECEIVED→CANCELLED | ✅ Yes | Low |
+| Invoice PATCH `update` action | ❌ No | 🟡 (single model update) |
+| Invoice PATCH `post` action | ❌ No | 🟡 (single field update) |
 | WHT generation | ❌ No | 🟠 |
 | Tax form generate | ❌ No | 🟠 |
 | Recurring doc process | ❌ No | 🟠 |
