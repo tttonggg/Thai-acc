@@ -314,30 +314,6 @@ export default function Home() {
   // Authenticated - show main app
   const userRole = session.user?.role as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER'
 
-  // Fetch permissions on mount and store in auth
-  useEffect(() => {
-    async function loadPermissions() {
-      try {
-        const permsRes = await fetch('/api/admin/permissions/my')
-        const permsData = await permsRes.json()
-        const perms = permsData.data?.permissions || []
-        store.setPermissions(perms)
-      } catch (e) {
-        console.error('Failed to load permissions', e)
-      }
-    }
-    if (session?.user) {
-      store.setUser({
-        id: session.user.id,
-        email: session.user.email || '',
-        name: session.user.name || null,
-        role: userRole,
-        isActive: true,
-      })
-      loadPermissions()
-    }
-  }, [session, userRole, store])
-
   const renderModule = () => {
     switch (activeModule) {
       case 'dashboard':
