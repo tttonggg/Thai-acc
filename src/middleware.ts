@@ -16,7 +16,11 @@ export async function middleware(request: NextRequest) {
   const isLocalDev =
     process.env.NODE_ENV === 'development' &&
     (request.headers.get('host')?.includes('localhost:3000') ||
-      request.headers.get('host')?.includes('127.0.0.1:3000'));
+      request.headers.get('host')?.includes('localhost:3001') ||
+      request.headers.get('host')?.includes('localhost:3002') ||
+      request.headers.get('host')?.includes('127.0.0.1:3000') ||
+      request.headers.get('host')?.includes('127.0.0.1:3001') ||
+      request.headers.get('host')?.includes('127.0.0.1:3002'));
 
   // Bypass CSRF for testing (set BYPASS_CSRF=true in production for testing)
   const bypassCsrf = process.env.BYPASS_CSRF === 'true';
