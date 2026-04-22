@@ -166,7 +166,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/purchases/[id] - Delete purchase invoice
+// DELETE /api/purchases/[id] - Delete purchase invoice (DRAFT only, creator or admin)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -174,44 +174,59 @@ export async function DELETE(
   try {
     const user = await requireAuth()
     const { id } = await params
-    
-    if (user.role !== "ADMIN") {
-      return apiError("เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถลบใบซื้อได้", 403)
-    }
-    
+
     const existing = await db.purchaseInvoice.findUnique({
       where: { id },
       include: {
-        payments: true
+        payments: true,
+        lines: true
       }
     })
-    
+
     if (!existing) {
-      return notFoundError("ไม่พบใบซื้อ")
+      return notFoundError('ไม่พบใบซื้อ')
     }
-    
+
+    // Only creator or ADMIN can delete
+    if (user.role !== 'ADMIN' && existing.createdById !== user.id) {
+      return apiError('เฉพาะผู้สร้างเอกสารหรือผู้ดูแลระบบเท่านั้นที่สามารถลบใบซื้อได้', 403)
+    }
+
+    // Only allow deleting DRAFT status
+    if (existing.status !== 'DRAFT') {
+      return apiError('สามารถลบได้เฉพาะใบซื้อที่เป็นสถานะร่างเท่านั้น', 403)
+    }
+
+    // Cannot delete if has payments
     if (existing.payments.length > 0) {
-      return apiError("ไม่สามารถลบใบซื้อที่มีการจ่ายเงินแล้วได้")
+      return apiError('ไม่สามารถลบใบซื้อที่มีการจ่ายเงินแล้วได้')
     }
-    
-    // Delete related VAT record
-    await db.vatRecord.deleteMany({
-      where: {
-        referenceId: id,
-        documentType: "PURCHASE"
+
+    // Soft-delete purchase invoice + cascade children
+    await db.purchaseInvoice.update({
+      where: { id },
+      data: {
+        isActive: false,
+        deletedAt: new Date(),
+        deletedBy: user.id
       }
     })
-    
-    // Delete purchase invoice
-    await db.purchaseInvoice.delete({
-      where: { id }
+
+    // Cascade PurchaseInvoiceLine (using deleteMany - parent soft-deleted so FK still valid)
+    await db.purchaseInvoiceLine.deleteMany({
+      where: { purchaseId: id }
     })
-    
-    return apiResponse({ message: "ลบใบซื้อสำเร็จ" })
+
+    // Cascade PaymentAllocation (using deleteMany - parent soft-deleted so FK still valid)
+    await db.paymentAllocation.deleteMany({
+      where: { invoiceId: id }
+    })
+
+    return apiResponse({ message: 'ลบใบซื้อสำเร็จ' })
   } catch (error) {
-    if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
+    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError()
     }
-    return apiError("เกิดข้อผิดพลาดในการลบใบซื้อ")
+    return apiError('เกิดข้อผิดพลาดในการลบใบซื้อ')
   }
 }
