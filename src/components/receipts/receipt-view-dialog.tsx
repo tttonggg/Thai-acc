@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
+import { useSession } from 'next-auth/react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
 interface ReceiptAllocation {
@@ -77,6 +78,7 @@ export function ReceiptViewDialog({
   const [receipt, setReceipt] = useState<Receipt | null>(null)
   const [loading, setLoading] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const { data: session } = useSession()
   const [posting, setPosting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const { toast } = useToast()
@@ -393,7 +395,7 @@ export function ReceiptViewDialog({
               {statusLabels[receipt.status]}
             </Badge>
             <div className="flex gap-2">
-              {receipt.status === 'DRAFT' && (
+              {receipt.status === 'DRAFT' && (session?.user?.role === 'ACCOUNTANT' || session?.user?.role === 'ADMIN') && (
                 <>
                   <Button
                     size="sm"
