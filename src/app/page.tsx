@@ -41,6 +41,7 @@ import { Settings } from '@/components/settings/settings'
 import { LoginPage } from '@/components/auth/login-page'
 import { UserManagement } from '@/components/auth/user-management'
 import { PermissionGuard } from '@/components/auth/permission-guard'
+import { eventBus, EVENTS } from '@/lib/events'
 import {
   Sheet,
   SheetContent,
@@ -261,6 +262,17 @@ export default function Home() {
       return () => window.removeEventListener('popstate', handlePopState)
     }
   }, [status])
+
+  // Listen for invoice detail view events from child components
+  useEffect(() => {
+    const handleViewDetail = (invoiceId: string) => {
+      setActiveModule('invoice-detail')
+      setSelectedInvoiceId(invoiceId)
+      window.history.pushState({ path: `/invoices/${invoiceId}` }, '', `/invoices/${invoiceId}`)
+    }
+    eventBus.on(EVENTS.INVOICE_VIEW_DETAIL, handleViewDetail)
+    return () => eventBus.off(EVENTS.INVOICE_VIEW_DETAIL, handleViewDetail)
+  }, [])
 
   // Loading state
   if (status === 'loading') {

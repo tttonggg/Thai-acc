@@ -220,8 +220,7 @@ export function InvoiceList() {
   }
 
   const handleViewDetail = (invoiceId: string) => {
-    window.history.pushState({ path: `/invoices/${invoiceId}` }, '', `/invoices/${invoiceId}`)
-    window.dispatchEvent(new PopStateEvent('popstate', { state: { path: `/invoices/${invoiceId}` } }))
+    eventBus.emit(EVENTS.INVOICE_VIEW_DETAIL, invoiceId)
   }
 
   const handlePrint = async (invoiceId: string) => {

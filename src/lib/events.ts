@@ -41,6 +41,7 @@ export const EVENTS = {
   INVOICE_CREATED: 'invoice:created',
   INVOICE_UPDATED: 'invoice:updated',
   INVOICE_DELETED: 'invoice:deleted',
+  INVOICE_VIEW_DETAIL: 'invoice:view-detail',
   RECEIPT_CREATED: 'receipt:created',
   RECEIPT_UPDATED: 'receipt:updated',
   RECEIPT_DELETED: 'receipt:deleted',
