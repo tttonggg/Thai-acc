@@ -124,7 +124,7 @@ jobs:
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
             "cd ${{ secrets.VPS_APP_PATH }} && \
              echo 'DATABASE_URL=${{ secrets.DATABASE_URL }}' > .env && \
-             echo 'NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}' >> .env && \
+             echo 'NEXTAUTH_URL=https://acc.k56mm.uk' >> .env && \
              echo 'NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}' >> .env && \
              echo 'NODE_ENV=production' >> .env"
 
@@ -142,7 +142,7 @@ jobs:
       - name: Health Check
         run: |
           sleep 10
-          curl -f ${{ secrets.NEXTAUTH_URL }}/api/health || exit 1
+          curl -f https://acc.k56mm.uk/api/health || exit 1
 
       - name: Notify Deployment Success
         if: success()
