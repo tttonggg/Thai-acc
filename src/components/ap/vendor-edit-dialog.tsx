@@ -100,7 +100,7 @@ export function VendorEditDialog({
   const checkVendorTransactions = async (vendorId: string) => {
     try {
       // API call to check if vendor has transactions
-      const response = await fetch(`/api/vendors/${vendorId}/has-transactions`)
+      const response = await fetch(`/api/vendors/${vendorId}/has-transactions`, { credentials: 'include' })
       if (response.ok) {
         const data = await response.json()
         setHasTransactions(data.hasTransactions)
@@ -155,7 +155,7 @@ export function VendorEditDialog({
     setIsSubmitting(true)
 
     try {
-      const response = await fetch(`/api/vendors/${vendor.id}`, {
+      const response = await fetch(`/api/vendors/${vendor.id}`, { credentials: 'include', 
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

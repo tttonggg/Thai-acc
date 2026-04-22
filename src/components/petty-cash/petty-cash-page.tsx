@@ -54,7 +54,7 @@ function FundsTab({ onFundsLoaded }: { onFundsLoaded: (funds: Fund[]) => void })
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
-    const fRes = await window.fetch('/api/petty-cash/funds').then(r => r.json())
+    const fRes = await window.fetch(`/api/petty-cash/funds`, { credentials: 'include' }).then(r => r.json())
     if (fRes.success) { setFunds(fRes.data); onFundsLoaded(fRes.data) }
     setLoading(false)
   }, [onFundsLoaded])
@@ -76,7 +76,7 @@ function FundsTab({ onFundsLoaded }: { onFundsLoaded: (funds: Fund[]) => void })
     if (!deleteConfirm) return
 
     try {
-      const res = await fetch(`/api/petty-cash/funds/${deleteConfirm.id}`, {
+      const res = await fetch(`/api/petty-cash/funds/${deleteConfirm.id}`, { credentials: 'include', 
         method: 'DELETE'
       }).then(r => r.json())
 
@@ -247,7 +247,7 @@ function VouchersTab({ funds }: { funds: Fund[] }) {
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
-    const res = await window.fetch('/api/petty-cash/vouchers').then(r => r.json())
+    const res = await window.fetch(`/api/petty-cash/vouchers`, { credentials: 'include' }).then(r => r.json())
     if (res.success) setVouchers(res.data)
     setLoading(false)
   }, [])
@@ -256,7 +256,7 @@ function VouchersTab({ funds }: { funds: Fund[] }) {
   const selectedFund = funds.find(f => f.id === form.fundId)
 
   const handleSubmit = async () => {
-    const res = await window.fetch('/api/petty-cash/vouchers', {
+    const res = await window.fetch(`/api/petty-cash/vouchers`, { credentials: 'include', 
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
     }).then(r => r.json())
     if (res.success) {
@@ -278,7 +278,7 @@ function VouchersTab({ funds }: { funds: Fund[] }) {
     if (!deleteConfirm) return
 
     try {
-      const res = await fetch(`/api/petty-cash/vouchers/${deleteConfirm.id}`, {
+      const res = await fetch(`/api/petty-cash/vouchers/${deleteConfirm.id}`, { credentials: 'include', 
         method: 'DELETE'
       }).then(r => r.json())
 
@@ -296,7 +296,7 @@ function VouchersTab({ funds }: { funds: Fund[] }) {
 
   const handleApprove = async (voucher: Voucher) => {
     try {
-      const res = await fetch(`/api/petty-cash/vouchers/${voucher.id}/approve`, {
+      const res = await fetch(`/api/petty-cash/vouchers/${voucher.id}/approve`, { credentials: 'include', 
         method: 'POST'
       }).then(r => r.json())
 
@@ -318,7 +318,7 @@ function VouchersTab({ funds }: { funds: Fund[] }) {
     }
 
     try {
-      const res = await fetch(`/api/petty-cash/vouchers/${reimburseDialog.id}/reimburse`, {
+      const res = await fetch(`/api/petty-cash/vouchers/${reimburseDialog.id}/reimburse`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cashBankAccountId })

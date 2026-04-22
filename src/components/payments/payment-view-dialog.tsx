@@ -53,7 +53,7 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
 
       setLoading(true)
       try {
-        const res = await fetch(`/api/payments/${paymentId}`)
+        const res = await fetch(`/api/payments/${paymentId}`, { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
 
         const data = await res.json()

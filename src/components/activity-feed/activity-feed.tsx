@@ -333,7 +333,7 @@ export function useActivityFeed(userId?: string) {
 
   const loadActivities = async () => {
     try {
-      const response = await fetch('/api/activities')
+      const response = await fetch(`/api/activities`, { credentials: 'include' })
       if (response.ok) {
         const data = await response.json()
         setActivities(
@@ -359,7 +359,7 @@ export function useActivityFeed(userId?: string) {
       if (!userId) return
 
       try {
-        await fetch('/api/activities', {
+        await fetch(`/api/activities`, { credentials: 'include', 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(activity),

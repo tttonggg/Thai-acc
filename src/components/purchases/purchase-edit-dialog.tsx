@@ -165,9 +165,9 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
     setFetchingPurchase(true)
     try {
       const [vendorsRes, productsRes, purchaseRes] = await Promise.all([
-        fetch('/api/vendors'),
-        fetch('/api/products').catch(() => ({ ok: false, json: async () => ({ data: [] }) })),
-        fetch(`/api/purchases/${purchaseId}`),
+        fetch(`/api/vendors`, { credentials: 'include' }),
+        fetch(`/api/products`, { credentials: 'include' }).catch(() => ({ ok: false, json: async () => ({ data: [] }) })),
+        fetch(`/api/purchases/${purchaseId}`, { credentials: 'include' }),
       ])
 
       if (vendorsRes.ok) {
@@ -425,7 +425,7 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
         })),
       }
 
-      const response = await fetch(`/api/purchases/${purchaseId}`, {
+      const response = await fetch(`/api/purchases/${purchaseId}`, { credentials: 'include', 
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

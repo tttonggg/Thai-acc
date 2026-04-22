@@ -144,8 +144,8 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
     const fetchData = async () => {
       try {
         const [customersRes, bankAccountsRes] = await Promise.all([
-          fetch('/api/customers'),
-          fetch('/api/bank-accounts'),
+          fetch(`/api/customers`, { credentials: 'include' }),
+          fetch(`/api/bank-accounts`, { credentials: 'include' }),
         ])
 
         if (customersRes.ok) {
@@ -184,7 +184,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
     if (selectedCustomerId) {
       const fetchUnpaidInvoices = async () => {
         try {
-          const res = await fetch(`/api/receipts/unpaid-invoices?customerId=${selectedCustomerId}`)
+          const res = await fetch(`/api/receipts/unpaid-invoices?customerId=${selectedCustomerId}`, { credentials: 'include' })
           if (res.ok) {
             const data = await res.json()
             // Sort by due date (oldest first)

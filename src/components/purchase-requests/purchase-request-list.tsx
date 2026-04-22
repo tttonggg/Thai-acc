@@ -178,7 +178,7 @@ export function PurchaseRequestList() {
       if (filterPriority !== 'all') params.append('priority', filterPriority)
       if (searchTerm) params.append('search', searchTerm)
 
-      const res = await fetch(`/api/purchase-requests?${params}`)
+      const res = await fetch(`/api/purchase-requests?${params}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Fetch failed')
 
       const result = await res.json()
@@ -242,7 +242,7 @@ export function PurchaseRequestList() {
 
     setDeletingPR(prId)
     try {
-      const res = await fetch(`/api/purchase-requests/${prId}`, {
+      const res = await fetch(`/api/purchase-requests/${prId}`, { credentials: 'include', 
         method: 'DELETE',
       })
 
@@ -271,7 +271,7 @@ export function PurchaseRequestList() {
   const handleAction = async (prId: string, action: 'submit' | 'approve' | 'reject') => {
     setProcessingAction(`${prId}-${action}`)
     try {
-      const res = await fetch(`/api/purchase-requests/${prId}`, {
+      const res = await fetch(`/api/purchase-requests/${prId}`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
@@ -309,7 +309,7 @@ export function PurchaseRequestList() {
   const handleConvertToPO = async (prId: string) => {
     setProcessingAction(`${prId}-convert`)
     try {
-      const res = await fetch(`/api/purchase-orders`, {
+      const res = await fetch(`/api/purchase-orders`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ purchaseRequestId: prId }),

@@ -38,7 +38,7 @@ export function CurrencyManagement() {
 
   const fetchCurrencies = async () => {
     try {
-      const res = await fetch("/api/currencies")
+      const res = await fetch(`/api/currencies`, { credentials: 'include' })
       const data = await res.json()
       if (data.currencies) {
         setCurrencies(data.currencies)
@@ -51,7 +51,7 @@ export function CurrencyManagement() {
   const handleInitialize = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/currencies", {
+      const res = await fetch(`/api/currencies`, { credentials: 'include', 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "initialize" }),
@@ -74,7 +74,7 @@ export function CurrencyManagement() {
   const handleUpdateRates = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/exchange-rates", {
+      const res = await fetch(`/api/exchange-rates`, { credentials: 'include', 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "update-from-api" }),
@@ -97,7 +97,7 @@ export function CurrencyManagement() {
   const handleMultiCurrencyReport = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/exchange-rates?report=multi-currency")
+      const res = await fetch(`/api/exchange-rates?report=multi-currency`, { credentials: 'include' })
       const data = await res.json()
       
       if (res.ok) {

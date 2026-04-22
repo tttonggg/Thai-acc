@@ -35,7 +35,7 @@ export function EntityManagement() {
 
   const fetchEntities = async () => {
     try {
-      const res = await fetch("/api/entities")
+      const res = await fetch(`/api/entities`, { credentials: 'include' })
       const data = await res.json()
       if (data.entities) {
         setEntities(data.entities)
@@ -48,7 +48,7 @@ export function EntityManagement() {
   const handleInitialize = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/entities", {
+      const res = await fetch(`/api/entities`, { credentials: 'include', 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "initialize" }),
@@ -71,7 +71,7 @@ export function EntityManagement() {
   const handleCreate = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/entities", {
+      const res = await fetch(`/api/entities`, { credentials: 'include', 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newEntity),
@@ -96,7 +96,7 @@ export function EntityManagement() {
   const handleAutoEliminate = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/entities", {
+      const res = await fetch(`/api/entities`, { credentials: 'include', 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "auto-eliminate" }),
@@ -118,7 +118,7 @@ export function EntityManagement() {
   const handleReconciliationReport = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/entities?report=reconciliation")
+      const res = await fetch(`/api/entities?report=reconciliation`, { credentials: 'include' })
       const data = await res.json()
       
       if (res.ok) {

@@ -71,7 +71,7 @@ export function StockTakeCreateDialog({
     const fetchWarehouses = async () => {
       setIsLoadingWarehouses(true)
       try {
-        const res = await fetch('/api/warehouses')
+        const res = await fetch(`/api/warehouses`, { credentials: 'include' })
         if (res.ok) {
           const data = await res.json()
           if (data.success) {
@@ -113,7 +113,7 @@ export function StockTakeCreateDialog({
 
     setIsLoadingProducts(true)
     try {
-      const res = await fetch(`/api/stock-balances?warehouseId=${formData.warehouseId}`)
+      const res = await fetch(`/api/stock-balances?warehouseId=${formData.warehouseId}`, { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         if (data.success && data.data.balances) {
@@ -213,7 +213,7 @@ export function StockTakeCreateDialog({
         })),
       }
 
-      const response = await fetch('/api/stock-takes', {
+      const response = await fetch(`/api/stock-takes`, { credentials: 'include', 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -88,7 +88,7 @@ export function GoodsReceiptNotesList() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('/api/goods-receipt-notes')
+        const res = await fetch(`/api/goods-receipt-notes`, { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const result = await res.json()
         // API returns { success: true, data: [...], pagination: {...} }
@@ -140,7 +140,7 @@ export function GoodsReceiptNotesList() {
     if (!confirm('ต้องการลงบัญชีใบรับสินค้าฉบับนี้หรือไม่? การดำเนินการนี้จะสร้างรายการบัญชีโดยอัตโนมัติ')) return
     setPostingGrn(grnId)
     try {
-      const res = await fetch(`/api/goods-receipt-notes/${grnId}`, {
+      const res = await fetch(`/api/goods-receipt-notes/${grnId}`, { credentials: 'include', 
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': '' },
         body: JSON.stringify({ action: 'post' }),
@@ -162,7 +162,7 @@ export function GoodsReceiptNotesList() {
     e.stopPropagation()
     setPostingGrn(grnId)
     try {
-      const res = await fetch(`/api/goods-receipt-notes/${grnId}`, {
+      const res = await fetch(`/api/goods-receipt-notes/${grnId}`, { credentials: 'include', 
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': '' },
         body: JSON.stringify({ action: 'inspect' }),
@@ -194,8 +194,8 @@ export function GoodsReceiptNotesList() {
     try {
       // Fetch GRN details and company info
       const [grnRes, companyRes] = await Promise.all([
-        fetch(`/api/goods-receipt-notes/${grnId}`),
-        fetch('/api/company')
+        fetch(`/api/goods-receipt-notes/${grnId}`, { credentials: 'include' }),
+        fetch(`/api/company`, { credentials: 'include' })
       ])
 
       if (!grnRes.ok) throw new Error('Fetch failed')

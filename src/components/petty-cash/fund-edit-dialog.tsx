@@ -57,7 +57,7 @@ export function PettyCashFundEditDialog({
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch('/api/users')
+        const res = await fetch(`/api/users`, { credentials: 'include' })
         const data = await res.json()
         if (data.success || Array.isArray(data)) {
           setUsers(Array.isArray(data) ? data : data.data || [])

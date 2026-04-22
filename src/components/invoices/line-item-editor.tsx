@@ -390,7 +390,7 @@ export function LineItemEditor({
   const fetchAuditHistory = async () => {
     setLoadingAudit(true)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/lines/${line.id}`)
+      const response = await fetch(`/api/invoices/${invoiceId}/lines/${line.id}`, { credentials: 'include' })
       const result = await response.json()
 
       if (response.ok) {

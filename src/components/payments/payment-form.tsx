@@ -116,8 +116,8 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
       setLoading(true)
       try {
         const [vendorsRes, banksRes] = await Promise.all([
-          fetch('/api/vendors?isActive=true'),
-          fetch('/api/bank-accounts'),
+          fetch(`/api/vendors?isActive=true`, { credentials: 'include' }),
+          fetch(`/api/bank-accounts`, { credentials: 'include' }),
         ])
 
         if (vendorsRes.ok) {
@@ -148,7 +148,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
       }
 
       try {
-        const res = await fetch(`/api/payments/unpaid-invoices?vendorId=${selectedVendor}`)
+        const res = await fetch(`/api/payments/unpaid-invoices?vendorId=${selectedVendor}`, { credentials: 'include' })
         if (res.ok) {
           const response = await res.json()
           // API returns { success: true, data: { invoices: [...], totalAPBalance: ..., vendorId: ... } }
@@ -301,7 +301,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
 
     setSubmitting(true)
     try {
-      const res = await fetch('/api/payments', {
+      const res = await fetch(`/api/payments`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),

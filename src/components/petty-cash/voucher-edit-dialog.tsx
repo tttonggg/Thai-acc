@@ -124,7 +124,7 @@ export function PettyCashVoucherEditDialog({
     setLoading(true)
 
     try {
-      const res = await fetch(`/api/petty-cash/vouchers/${voucher?.id}`, {
+      const res = await fetch(`/api/petty-cash/vouchers/${voucher?.id}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

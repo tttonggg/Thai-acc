@@ -107,8 +107,8 @@ function StockBalanceTab() {
     setLoading(true)
     try {
       const [res, whRes] = await Promise.all([
-        window.fetch('/api/stock-balances').then(r => r.json()),
-        window.fetch('/api/warehouses').then(r => r.json()),
+        window.fetch(`/api/stock-balances`, { credentials: 'include' }).then(r => r.json()),
+        window.fetch(`/api/warehouses`, { credentials: 'include' }).then(r => r.json()),
       ])
       if (res.success) {
         setBalances(res.data.balances || [])
@@ -237,9 +237,9 @@ function StockMovementsTab() {
     try {
       const params = typeFilter !== 'ALL' ? `?type=${typeFilter}` : ''
       const [movRes, whRes, prodRes] = await Promise.all([
-        window.fetch(`/api/stock-movements${params}`).then(r => r.json()),
-        window.fetch('/api/warehouses').then(r => r.json()),
-        window.fetch('/api/products').then(r => r.json()),
+        window.fetch(`/api/stock-movements${params}`, { credentials: 'include' }).then(r => r.json()),
+        window.fetch(`/api/warehouses`, { credentials: 'include' }).then(r => r.json()),
+        window.fetch(`/api/products`, { credentials: 'include' }).then(r => r.json()),
       ])
       if (movRes.success) setMovements(movRes.data)
       if (whRes.success) setWarehouses(whRes.data)
@@ -251,7 +251,7 @@ function StockMovementsTab() {
 
   const handleViewMovement = async (movementId: string) => {
     try {
-      const res = await window.fetch(`/api/stock-movements/${movementId}`).then(r => r.json())
+      const res = await window.fetch(`/api/stock-movements/${movementId}`, { credentials: 'include' }).then(r => r.json())
       if (res.success) {
         setSelectedMovement(res.data)
         setShowEdit(true)
@@ -266,7 +266,7 @@ function StockMovementsTab() {
   }
 
   const handleSubmit = async () => {
-    const res = await window.fetch('/api/stock-movements', {
+    const res = await window.fetch(`/api/stock-movements`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...formData, quantity: parseFloat(formData.quantity), unitCost: parseFloat(formData.unitCost) }),
@@ -432,7 +432,7 @@ function WarehousesTab() {
   const fetch = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await window.fetch('/api/warehouses').then(r => r.json())
+      const res = await window.fetch(`/api/warehouses`, { credentials: 'include' }).then(r => r.json())
       if (res.success) setWarehouses(res.data)
     } finally { setLoading(false) }
   }, [])
@@ -450,7 +450,7 @@ function WarehousesTab() {
     }
 
     try {
-      const res = await window.fetch(`/api/warehouses/${warehouse.id}`, {
+      const res = await window.fetch(`/api/warehouses/${warehouse.id}`, { credentials: 'include', 
         method: 'DELETE',
       }).then(r => r.json())
 
@@ -570,9 +570,9 @@ function StockTransfersTab() {
     setLoading(true)
     try {
       const [transRes, whRes, prodRes] = await Promise.all([
-        window.fetch('/api/stock/transfers').then(r => r.json()),
-        window.fetch('/api/warehouses').then(r => r.json()),
-        window.fetch('/api/products').then(r => r.json()),
+        window.fetch(`/api/stock/transfers`, { credentials: 'include' }).then(r => r.json()),
+        window.fetch(`/api/warehouses`, { credentials: 'include' }).then(r => r.json()),
+        window.fetch(`/api/products`, { credentials: 'include' }).then(r => r.json()),
       ])
       if (transRes.success) setTransfers(transRes.data)
       if (whRes.success) setWarehouses(whRes.data)
@@ -593,7 +593,7 @@ function StockTransfersTab() {
       return
     }
 
-    const res = await window.fetch('/api/stock/transfers', {
+    const res = await window.fetch(`/api/stock/transfers`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

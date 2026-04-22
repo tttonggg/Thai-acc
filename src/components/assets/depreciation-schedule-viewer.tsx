@@ -51,7 +51,7 @@ export function DepreciationScheduleViewer({
 
     setLoading(true)
     try {
-      const res = await fetch(`/api/assets/${asset.id}`)
+      const res = await fetch(`/api/assets/${asset.id}`, { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         if (data.success && data.data.schedules) {

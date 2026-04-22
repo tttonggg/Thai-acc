@@ -86,7 +86,7 @@ export function CreditNoteList() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('/api/credit-notes')
+        const res = await fetch(`/api/credit-notes`, { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const result = await res.json()
         // API returns { success: true, data: [...], pagination: {...} }

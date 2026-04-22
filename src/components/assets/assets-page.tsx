@@ -53,14 +53,14 @@ function AssetListTab() {
 
   const fetch = useCallback(async () => {
     setLoading(true)
-    const res = await window.fetch('/api/assets').then(r => r.json())
+    const res = await window.fetch(`/api/assets`, { credentials: 'include' }).then(r => r.json())
     if (res.success) setAssets(res.data)
     setLoading(false)
   }, [])
   useEffect(() => { fetch() }, [fetch])
 
   const handleSubmit = async () => {
-    const res = await window.fetch('/api/assets', {
+    const res = await window.fetch(`/api/assets`, { credentials: 'include', 
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
     }).then(r => r.json())
     if (res.success) {
@@ -74,7 +74,7 @@ function AssetListTab() {
   const handleEditAsset = async (asset: Asset) => {
     // Fetch full asset details with schedules
     try {
-      const res = await window.fetch(`/api/assets/${asset.id}`)
+      const res = await window.fetch(`/api/assets/${asset.id}`, { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         if (data.success) {
@@ -97,7 +97,7 @@ function AssetListTab() {
     if (!assetToDelete) return
 
     try {
-      const res = await window.fetch(`/api/assets/${assetToDelete.id}`, {
+      const res = await window.fetch(`/api/assets/${assetToDelete.id}`, { credentials: 'include', 
         method: 'DELETE'
       }).then(r => r.json())
 
@@ -117,7 +117,7 @@ function AssetListTab() {
 
   const handleToggleStatus = async (asset: Asset) => {
     try {
-      const res = await window.fetch(`/api/assets/${asset.id}`, {
+      const res = await window.fetch(`/api/assets/${asset.id}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: !asset.isActive })
@@ -141,7 +141,7 @@ function AssetListTab() {
   const handleViewSchedule = async (asset: Asset) => {
     // Fetch full asset details with schedules
     try {
-      const res = await window.fetch(`/api/assets/${asset.id}`)
+      const res = await window.fetch(`/api/assets/${asset.id}`, { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         if (data.success) {
@@ -158,7 +158,7 @@ function AssetListTab() {
   const handleRevalueAsset = async (asset: Asset) => {
     // Fetch full asset details with schedules for revaluation
     try {
-      const res = await window.fetch(`/api/assets/${asset.id}`)
+      const res = await window.fetch(`/api/assets/${asset.id}`, { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         if (data.success) {

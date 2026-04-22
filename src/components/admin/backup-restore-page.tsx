@@ -73,7 +73,7 @@ export function BackupRestorePage() {
   const fetchBackups = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/backups')
+      const response = await fetch(`/api/admin/backups`, { credentials: 'include' })
       const result = await response.json()
 
       if (result.success) {
@@ -103,7 +103,7 @@ export function BackupRestorePage() {
   const handleCreateBackup = async () => {
     try {
       setCreatingBackup(true)
-      const response = await fetch('/api/admin/backup', {
+      const response = await fetch(`/api/admin/backup`, { credentials: 'include', 
         method: 'POST'
       })
       const result = await response.json()
@@ -137,7 +137,7 @@ export function BackupRestorePage() {
 
     try {
       setRestoring(true)
-      const response = await fetch('/api/admin/restore', {
+      const response = await fetch(`/api/admin/restore`, { credentials: 'include', 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -176,7 +176,7 @@ export function BackupRestorePage() {
     if (!selectedBackup) return
 
     try {
-      const response = await fetch('/api/admin/backups', {
+      const response = await fetch(`/api/admin/backups`, { credentials: 'include', 
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -212,7 +212,7 @@ export function BackupRestorePage() {
 
   const handleDownload = async (backup: Backup) => {
     try {
-      const response = await fetch(`/api/admin/backups/download/${backup.filename}`)
+      const response = await fetch(`/api/admin/backups/download/${backup.filename}`, { credentials: 'include' })
 
       if (!response.ok) {
         throw new Error('ไม่สามารถดาวน์โหลดไฟล์ได้')
@@ -248,7 +248,7 @@ export function BackupRestorePage() {
       const formData = new FormData()
       formData.append('file', uploadFile)
 
-      const response = await fetch('/api/admin/backups/upload', {
+      const response = await fetch(`/api/admin/backups/upload`, { credentials: 'include', 
         method: 'POST',
         body: formData
       })

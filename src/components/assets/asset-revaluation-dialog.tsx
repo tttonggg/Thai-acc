@@ -141,7 +141,7 @@ export function AssetRevaluationDialog({
     if (!asset) return
     setLoadingHistory(true)
     try {
-      const res = await fetch(`/api/assets/${asset.id}/revaluations`)
+      const res = await fetch(`/api/assets/${asset.id}/revaluations`, { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         if (data.success) {
@@ -160,7 +160,7 @@ export function AssetRevaluationDialog({
 
     setIsSubmitting(true)
     try {
-      const res = await fetch(`/api/assets/${asset.id}/revaluation`, {
+      const res = await fetch(`/api/assets/${asset.id}/revaluation`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

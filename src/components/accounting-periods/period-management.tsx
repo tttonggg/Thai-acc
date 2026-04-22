@@ -38,7 +38,7 @@ export function PeriodManagement() {
 
   const fetchPeriods = async () => {
     try {
-      const res = await fetch(`/api/accounting-periods?year=${selectedYear}`)
+      const res = await fetch(`/api/accounting-periods?year=${selectedYear}`, { credentials: 'include' })
       const data = await res.json()
       if (data.periods) {
         setPeriods(data.periods)
@@ -51,7 +51,7 @@ export function PeriodManagement() {
   const handleAction = async (action: string, year: number, month: number) => {
     setLoading(true)
     try {
-      const res = await fetch("/api/accounting-periods", {
+      const res = await fetch(`/api/accounting-periods`, { credentials: 'include', 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, year, month }),
@@ -79,7 +79,7 @@ export function PeriodManagement() {
   const handleInitYear = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/accounting-periods", {
+      const res = await fetch(`/api/accounting-periods`, { credentials: 'include', 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "init-year", year: selectedYear }),

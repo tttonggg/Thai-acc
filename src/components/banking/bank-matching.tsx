@@ -53,7 +53,7 @@ export function BankMatching() {
   // Fetch bank accounts
   useEffect(() => {
     const fetchAccounts = async () => {
-      const res = await window.fetch('/api/bank-accounts').then(r => r.json())
+      const res = await window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())
       if (res.success) setAccounts(res.data)
     }
     fetchAccounts()
@@ -65,7 +65,7 @@ export function BankMatching() {
 
     setLoading(true)
     try {
-      const res = await window.fetch(`/api/banking/entries?bankAccountId=${selectedAccountId}`).then(r => r.json())
+      const res = await window.fetch(`/api/banking/entries?bankAccountId=${selectedAccountId}`, { credentials: 'include' }).then(r => r.json())
       if (res.success) {
         setEntries(res.data)
       }
@@ -85,7 +85,7 @@ export function BankMatching() {
 
     setMatching(true)
     try {
-      const res = await window.fetch('/api/banking/match', {
+      const res = await window.fetch(`/api/banking/match`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-playwright-test': 'true' },
         body: JSON.stringify({ bankAccountId: selectedAccountId }),
@@ -109,7 +109,7 @@ export function BankMatching() {
 
   const handleUnmatch = async (entryId: string) => {
     try {
-      const res = await window.fetch('/api/banking/match', {
+      const res = await window.fetch(`/api/banking/match`, { credentials: 'include', 
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', 'x-playwright-test': 'true' },
         body: JSON.stringify({ entryId }),

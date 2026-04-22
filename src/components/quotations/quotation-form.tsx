@@ -111,8 +111,8 @@ export function QuotationForm({
   // Fetch data
   useEffect(() => {
     Promise.all([
-      fetch('/api/products').then(r => r.json()).then(d => setProducts(d.data || [])),
-      fetch('/api/customers').then(r => r.json()).then(d => setCustomers(d.data || [])),
+      fetch(`/api/products`, { credentials: 'include' }).then(r => r.json()).then(d => setProducts(d.data || [])),
+      fetch(`/api/customers`, { credentials: 'include' }).then(r => r.json()).then(d => setCustomers(d.data || [])),
     ])
   }, [])
 
@@ -247,7 +247,7 @@ export function QuotationForm({
 
       // Send quotation if requested
       if (submitType === 'send' && result.data?.id) {
-        const sendRes = await fetch(`/api/quotations/${result.data.id}/send`, {
+        const sendRes = await fetch(`/api/quotations/${result.data.id}/send`, { credentials: 'include', 
           method: 'POST',
         })
 

@@ -140,7 +140,7 @@ export function GRNForm({ open, onClose, onSuccess }: GRNFormProps) {
   const fetchOpenPOs = async () => {
     setFetchingData(true)
     try {
-      const res = await fetch('/api/purchase-orders?status=OPEN')
+      const res = await fetch(`/api/purchase-orders?status=OPEN`, { credentials: 'include' })
       if (res.ok) {
         const result = await res.json()
         setPurchaseOrders(result.data || [])
@@ -159,7 +159,7 @@ export function GRNForm({ open, onClose, onSuccess }: GRNFormProps) {
 
   const generateGRNNumber = async () => {
     try {
-      const res = await fetch('/api/document-numbers/GRN/next')
+      const res = await fetch(`/api/document-numbers/GRN/next`, { credentials: 'include' })
       if (res.ok) {
         const result = await res.json()
         setGrnNumber(result.data || '')
@@ -334,7 +334,7 @@ export function GRNForm({ open, onClose, onSuccess }: GRNFormProps) {
         })),
       }
 
-      const response = await fetch('/api/goods-receipt-notes', {
+      const response = await fetch(`/api/goods-receipt-notes`, { credentials: 'include', 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

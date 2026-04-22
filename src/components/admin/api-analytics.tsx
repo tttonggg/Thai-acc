@@ -85,28 +85,28 @@ export function ApiAnalytics() {
     setLoading(true);
     try {
       // Fetch overview metrics
-      const metricsRes = await fetch(`/api/admin/analytics?range=${timeRange}&type=overview`);
+      const metricsRes = await fetch(`/api/admin/analytics?range=${timeRange}&type=overview`, { credentials: 'include' });
       const metricsData = await metricsRes.json();
       if (metricsData.success) {
         setMetrics(metricsData.data);
       }
 
       // Fetch recent requests
-      const recentRes = await fetch(`/api/admin/analytics?type=recent&limit=50`);
+      const recentRes = await fetch(`/api/admin/analytics?type=recent&limit=50`, { credentials: 'include' });
       const recentData = await recentRes.json();
       if (recentData.success) {
         setRecentRequests(recentData.data);
       }
 
       // Fetch slow requests
-      const slowRes = await fetch(`/api/admin/analytics?type=slow&threshold=1000&limit=20`);
+      const slowRes = await fetch(`/api/admin/analytics?type=slow&threshold=1000&limit=20`, { credentials: 'include' });
       const slowData = await slowRes.json();
       if (slowData.success) {
         setSlowRequests(slowData.data);
       }
 
       // Fetch error requests
-      const errorRes = await fetch(`/api/admin/analytics?type=errors&limit=20`);
+      const errorRes = await fetch(`/api/admin/analytics?type=errors&limit=20`, { credentials: 'include' });
       const errorData = await errorRes.json();
       if (errorData.success) {
         setErrorRequests(errorData.data);

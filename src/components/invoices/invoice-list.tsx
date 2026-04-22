@@ -142,7 +142,7 @@ export function InvoiceList() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('/api/invoices', { credentials: 'include' })
+        const res = await fetch(`/api/invoices', { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const result = await res.json()
         const invoicesData = result.data || []
@@ -232,7 +232,7 @@ export function InvoiceList() {
     if (!confirm('ต้องการออกใบกำกับภาษีฉบับนี้หรือไม่? การดำเนินการนี้จะสร้างรายการบัญชีโดยอัตโนมัติ')) return
     setPostingInvoice(invoiceId)
     try {
-      const res = await fetch(`/api/invoices/${invoiceId}`, {
+      const res = await fetch(`/api/invoices/${invoiceId}`, { credentials: 'include', 
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': '' },
         body: JSON.stringify({ action: 'post' }),
@@ -251,8 +251,8 @@ export function InvoiceList() {
     setPrintingInvoice(invoiceId)
     try {
       const [invoiceRes, companyRes] = await Promise.all([
-        fetch(`/api/invoices/${invoiceId}`),
-        fetch('/api/company')
+        fetch(`/api/invoices/${invoiceId}`, { credentials: 'include' }),
+        fetch(`/api/company`, { credentials: 'include' })
       ])
 
       if (!invoiceRes.ok) throw new Error('Fetch failed')
@@ -661,7 +661,7 @@ export function InvoiceList() {
   const handleDownload = async (invoiceId: string, invoiceNo: string) => {
     setDownloadingInvoice(invoiceId)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/export/pdf`)
+      const response = await fetch(`/api/invoices/${invoiceId}/export/pdf`, { credentials: 'include' })
       if (!response.ok) throw new Error('Download failed')
 
       const blob = await response.blob()

@@ -93,7 +93,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}`)
+      const response = await fetch(`/api/invoices/${invoiceId}`, { credentials: 'include' })
       const result = await response.json()
 
       if (response.ok) {
@@ -116,7 +116,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
   const handleDownload = async () => {
     setDownloading(true)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/export/pdf`)
+      const response = await fetch(`/api/invoices/${invoiceId}/export/pdf`, { credentials: 'include' })
       if (!response.ok) throw new Error('Download failed')
 
       const blob = await response.blob()
@@ -154,7 +154,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
     }
 
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}`, {
+      const response = await fetch(`/api/invoices/${invoiceId}`, { credentials: 'include', 
         method: 'DELETE'
       })
 

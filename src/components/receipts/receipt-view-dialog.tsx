@@ -92,7 +92,7 @@ export function ReceiptViewDialog({
   const fetchReceipt = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/receipts/${receiptId}`)
+      const res = await fetch(`/api/receipts/${receiptId}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Fetch failed')
       const result = await res.json()
       setReceipt(result.data)
@@ -269,7 +269,7 @@ export function ReceiptViewDialog({
   const handlePost = async () => {
     setPosting(true)
     try {
-      const res = await fetch(`/api/receipts/${receiptId}/post`, {
+      const res = await fetch(`/api/receipts/${receiptId}/post`, { credentials: 'include', 
         method: 'POST',
       })
 
@@ -302,7 +302,7 @@ export function ReceiptViewDialog({
 
     setDeleting(true)
     try {
-      const res = await fetch(`/api/receipts/${receiptId}`, {
+      const res = await fetch(`/api/receipts/${receiptId}`, { credentials: 'include', 
         method: 'DELETE',
       })
 

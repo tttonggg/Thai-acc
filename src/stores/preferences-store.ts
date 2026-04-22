@@ -229,7 +229,7 @@ export function useUserPreferences(userId?: string) {
     const loadPreferences = async () => {
       setIsLoading(true)
       try {
-        const response = await fetch('/api/user/preferences')
+        const response = await fetch(`/api/user/preferences`, { credentials: 'include' })
         if (response.ok) {
           const data = await response.json()
           preferences.setPreferences(data.preferences)
@@ -250,7 +250,7 @@ export function useUserPreferences(userId?: string) {
 
     if (userId) {
       try {
-        await fetch('/api/user/preferences', {
+        await fetch(`/api/user/preferences`, { credentials: 'include', 
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newPreferences),

@@ -49,7 +49,7 @@ export function EmployeeList() {
   const fetchAll = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await window.fetch('/api/employees').then(r => r.json())
+      const res = await window.fetch(`/api/employees`, { credentials: 'include' }).then(r => r.json())
       if (res.success) {
         const employeesData = res.data || []
         setEmployees(Array.isArray(employeesData) ? employeesData : [])
@@ -81,7 +81,7 @@ export function EmployeeList() {
   const confirmDelete = async () => {
     if (!deleteEmployeeId) return
 
-    const res = await window.fetch(`/api/employees/${deleteEmployeeId}`, {
+    const res = await window.fetch(`/api/employees/${deleteEmployeeId}`, { credentials: 'include', 
       method: 'DELETE',
     }).then(r => r.json())
 

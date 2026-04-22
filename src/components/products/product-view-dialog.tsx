@@ -111,7 +111,7 @@ export function ProductViewDialog({
 
     setLoadingStock(true)
     try {
-      const res = await fetch(`/api/stock-balances?productId=${product.id}`)
+      const res = await fetch(`/api/stock-balances?productId=${product.id}`, { credentials: 'include' })
       if (res.ok) {
         const json = await res.json()
         const data = json?.data ?? json ?? []

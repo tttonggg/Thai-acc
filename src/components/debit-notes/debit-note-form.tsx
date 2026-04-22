@@ -54,8 +54,8 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
       if (!open) return
       try {
         const [vendorsRes, productsRes] = await Promise.all([
-          fetch('/api/vendors'),
-          fetch('/api/products')
+          fetch(`/api/vendors`, { credentials: 'include' }),
+          fetch(`/api/products`, { credentials: 'include' })
         ])
         const vendorsData = await vendorsRes.json()
         const productsData = await productsRes.json()
@@ -76,7 +76,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
         return
       }
       try {
-        const res = await fetch(`/api/purchases?vendorId=${selectedVendorId}&status=ISSUED,PAID`)
+        const res = await fetch(`/api/purchases?vendorId=${selectedVendorId}&status=ISSUED,PAID`, { credentials: 'include' })
         const response = await res.json()
         const purchaseData = response.data || response.purchases || []
         setPurchaseInvoices(purchaseData.filter((inv: PurchaseInvoice) => inv.status !== 'CANCELLED'))
@@ -203,7 +203,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
         totalAmount: totals.totalAmount,
       }
 
-      const res = await fetch('/api/debit-notes', {
+      const res = await fetch(`/api/debit-notes`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

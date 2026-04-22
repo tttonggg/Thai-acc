@@ -91,7 +91,7 @@ export function CustomerEditDialog({
   const checkCustomerTransactions = async (customerId: string) => {
     try {
       // API call to check if customer has transactions
-      const response = await fetch(`/api/customers/${customerId}/has-transactions`)
+      const response = await fetch(`/api/customers/${customerId}/has-transactions`, { credentials: 'include' })
       if (response.ok) {
         const data = await response.json()
         setHasTransactions(data.hasTransactions)
@@ -151,7 +151,7 @@ export function CustomerEditDialog({
     setIsSubmitting(true)
 
     try {
-      const response = await fetch(`/api/customers/${customer.id}`, {
+      const response = await fetch(`/api/customers/${customer.id}`, { credentials: 'include', 
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

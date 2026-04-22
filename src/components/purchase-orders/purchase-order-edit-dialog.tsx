@@ -162,7 +162,7 @@ export function PurchaseOrderEditDialog({ po, open, onOpenChange, onSuccess }: P
 
   const fetchVendors = async () => {
     try {
-      const res = await fetch('/api/vendors')
+      const res = await fetch(`/api/vendors`, { credentials: 'include' })
       if (res.ok) {
         const result = await res.json()
         setVendors(result.data || [])
@@ -178,7 +178,7 @@ export function PurchaseOrderEditDialog({ po, open, onOpenChange, onSuccess }: P
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/products')
+      const res = await fetch(`/api/products`, { credentials: 'include' })
       if (res.ok) {
         const result = await res.json()
         setProducts(result.data || [])
@@ -319,7 +319,7 @@ export function PurchaseOrderEditDialog({ po, open, onOpenChange, onSuccess }: P
         lines: formData.lines,
       }
 
-      const res = await fetch(`/api/purchase-orders/${po.id}`, {
+      const res = await fetch(`/api/purchase-orders/${po.id}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

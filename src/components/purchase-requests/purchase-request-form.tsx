@@ -148,16 +148,16 @@ export function PurchaseRequestForm({
   // Fetch data
   useEffect(() => {
     Promise.all([
-      fetch('/api/products').then(r => r.json()).then(d => setProducts(d.data || [])),
-      fetch('/api/departments').then(r => r.json()).then(d => setDepartments(d.data || [])),
-      fetch('/api/vendors').then(r => r.json()).then(d => setVendors(d.data || [])),
+      fetch(`/api/products`, { credentials: 'include' }).then(r => r.json()).then(d => setProducts(d.data || [])),
+      fetch(`/api/departments`, { credentials: 'include' }).then(r => r.json()).then(d => setDepartments(d.data || [])),
+      fetch(`/api/vendors`, { credentials: 'include' }).then(r => r.json()).then(d => setVendors(d.data || [])),
     ])
   }, [])
 
   // Fetch budgets when department changes
   useEffect(() => {
     if (selectedDepartment) {
-      fetch(`/api/departments/${selectedDepartment}/budgets`)
+      fetch(`/api/departments/${selectedDepartment}/budgets`, { credentials: 'include' })
         .then(r => r.json())
         .then(d => setBudgets(d.data || []))
         .catch(() => setBudgets([]))
@@ -244,7 +244,7 @@ export function PurchaseRequestForm({
         estimatedAmount: Math.round(calculateTotal() * 100), // Convert to Satang
       }
 
-      const res = await fetch('/api/purchase-requests', {
+      const res = await fetch(`/api/purchase-requests`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

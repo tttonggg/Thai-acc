@@ -96,7 +96,7 @@ export function VatReport() {
         const startDateStr = startDate.toISOString().split('T')[0]
         const endDateStr = endDate.toISOString().split('T')[0]
         
-        const res = await fetch(`/api/reports/vat?startDate=${startDateStr}&endDate=${endDateStr}`)
+        const res = await fetch(`/api/reports/vat?startDate=${startDateStr}&endDate=${endDateStr}`, { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const json = await res.json()
         setData(json)

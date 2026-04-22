@@ -98,7 +98,7 @@ export function CustomerList() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('/api/customers')
+        const res = await fetch(`/api/customers`, { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const json = await res.json()
         // Ensure we always set an array, even if API returns unexpected format
@@ -184,7 +184,7 @@ export function CustomerList() {
     }
 
     try {
-      const res = await fetch('/api/customers', {
+      const res = await fetch(`/api/customers`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -230,7 +230,7 @@ export function CustomerList() {
     if (!deleteDialog?.id) return
     
     try {
-      const res = await fetch(`/api/customers/${deleteDialog.id}`, {
+      const res = await fetch(`/api/customers/${deleteDialog.id}`, { credentials: 'include', 
         method: 'DELETE'
       })
 

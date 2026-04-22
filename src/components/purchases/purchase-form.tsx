@@ -197,8 +197,8 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
     setFetchingData(true)
     try {
       const [vendorsRes, productsRes] = await Promise.all([
-        fetch('/api/vendors'),
-        fetch('/api/products'),
+        fetch(`/api/vendors`, { credentials: 'include' }),
+        fetch(`/api/products`, { credentials: 'include' }),
       ])
 
       if (vendorsRes.ok) {
@@ -224,7 +224,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
 
   const fetchPODetails = async (poNumber: string) => {
     try {
-      const res = await fetch(`/api/purchase-orders?orderNo=${poNumber}`)
+      const res = await fetch(`/api/purchase-orders?orderNo=${poNumber}`, { credentials: 'include' })
       if (res.ok) {
         const result = await res.json()
         if (result.data && result.data.length > 0) {
@@ -530,7 +530,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
         },
       }
 
-      const response = await fetch('/api/purchases', {
+      const response = await fetch(`/api/purchases`, { credentials: 'include', 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

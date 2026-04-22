@@ -156,7 +156,7 @@ export function PurchaseOrderForm({ open, onOpenChange, onSuccess, purchaseReque
 
   const fetchVendors = async () => {
     try {
-      const res = await fetch('/api/vendors')
+      const res = await fetch(`/api/vendors`, { credentials: 'include' })
       if (res.ok) {
         const result = await res.json()
         setVendors(result.data || [])
@@ -172,7 +172,7 @@ export function PurchaseOrderForm({ open, onOpenChange, onSuccess, purchaseReque
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/products')
+      const res = await fetch(`/api/products`, { credentials: 'include' })
       if (res.ok) {
         const result = await res.json()
         setProducts(result.data || [])
@@ -188,7 +188,7 @@ export function PurchaseOrderForm({ open, onOpenChange, onSuccess, purchaseReque
 
   const generateOrderNo = async () => {
     try {
-      const res = await fetch('/api/document-numbers/PO/next')
+      const res = await fetch(`/api/document-numbers/PO/next`, { credentials: 'include' })
       if (res.ok) {
         const result = await res.json()
         setFormData(prev => ({ ...prev, orderNo: result.data }))
@@ -204,7 +204,7 @@ export function PurchaseOrderForm({ open, onOpenChange, onSuccess, purchaseReque
 
   const loadFromPR = async (prId: string) => {
     try {
-      const res = await fetch(`/api/purchase-requests/${prId}`)
+      const res = await fetch(`/api/purchase-requests/${prId}`, { credentials: 'include' })
       if (res.ok) {
         const result = await res.json()
         const pr = result.data
@@ -358,7 +358,7 @@ export function PurchaseOrderForm({ open, onOpenChange, onSuccess, purchaseReque
         purchaseRequestId,
       }
 
-      const res = await fetch('/api/purchase-orders', {
+      const res = await fetch(`/api/purchase-orders`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

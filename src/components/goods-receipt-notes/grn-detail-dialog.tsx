@@ -122,7 +122,7 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/grn/${grnId}`)
+      const res = await fetch(`/api/grn/${grnId}`, { credentials: 'include' })
       const result = await res.json()
 
       if (!res.ok) {

@@ -182,7 +182,7 @@ export function RecurringDocuments() {
       if (filterType !== 'all') params.append('type', filterType)
       if (filterActive !== 'all') params.append('isActive', filterActive)
 
-      const res = await fetch(`/api/recurring?${params}`)
+      const res = await fetch(`/api/recurring?${params}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Fetch failed')
 
       const result = await res.json()
@@ -214,7 +214,7 @@ export function RecurringDocuments() {
   const fetchRunHistory = async (documentId: string) => {
     setLoadingHistory(true)
     try {
-      const res = await fetch(`/api/recurring/${documentId}`)
+      const res = await fetch(`/api/recurring/${documentId}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Fetch failed')
 
       const result = await res.json()
@@ -271,7 +271,7 @@ export function RecurringDocuments() {
   const handleToggleActive = async (document: RecurringDocument) => {
     setProcessingAction(`toggle-${document.id}`)
     try {
-      const res = await fetch(`/api/recurring/${document.id}`, {
+      const res = await fetch(`/api/recurring/${document.id}`, { credentials: 'include', 
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: !document.isActive }),
@@ -306,7 +306,7 @@ export function RecurringDocuments() {
 
     setProcessingAction(`run-${document.id}`)
     try {
-      const res = await fetch('/api/recurring/process', {
+      const res = await fetch(`/api/recurring/process`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       })
@@ -341,7 +341,7 @@ export function RecurringDocuments() {
 
     setProcessingAction(`delete-${documentId}`)
     try {
-      const res = await fetch(`/api/recurring/${documentId}`, {
+      const res = await fetch(`/api/recurring/${documentId}`, { credentials: 'include', 
         method: 'DELETE',
       })
 

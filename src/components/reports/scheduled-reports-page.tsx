@@ -140,7 +140,7 @@ export function ScheduledReportsPage() {
 
   const fetchReports = async () => {
     try {
-      const response = await fetch('/api/reports/scheduled')
+      const response = await fetch(`/api/reports/scheduled`, { credentials: 'include' })
       const result = await response.json()
 
       if (result.success) {
@@ -165,7 +165,7 @@ export function ScheduledReportsPage() {
 
   const fetchRunHistory = async (reportId: string) => {
     try {
-      const response = await fetch(`/api/reports/scheduled/${reportId}/runs`)
+      const response = await fetch(`/api/reports/scheduled/${reportId}/runs`, { credentials: 'include' })
       const result = await response.json()
 
       if (result.success) {
@@ -265,7 +265,7 @@ export function ScheduledReportsPage() {
     }
 
     try {
-      const response = await fetch(`/api/reports/scheduled/${id}`, {
+      const response = await fetch(`/api/reports/scheduled/${id}`, { credentials: 'include', 
         method: 'DELETE',
       })
 
@@ -297,7 +297,7 @@ export function ScheduledReportsPage() {
     setRunningReport(id)
 
     try {
-      const response = await fetch(`/api/reports/scheduled/${id}/run`, {
+      const response = await fetch(`/api/reports/scheduled/${id}/run`, { credentials: 'include', 
         method: 'POST',
       })
 
@@ -329,7 +329,7 @@ export function ScheduledReportsPage() {
 
   const handleToggleEnabled = async (report: ScheduledReport) => {
     try {
-      const response = await fetch(`/api/reports/scheduled/${report.id}`, {
+      const response = await fetch(`/api/reports/scheduled/${report.id}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: !report.enabled }),

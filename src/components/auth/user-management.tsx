@@ -101,7 +101,7 @@ export function UserManagement() {
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/users')
+      const response = await fetch(`/api/users`, { credentials: 'include' })
       if (!response.ok) throw new Error('Failed to fetch users')
       const data = await response.json()
       setUsers(data)
@@ -148,7 +148,7 @@ export function UserManagement() {
 
     try {
       setFormLoading(true)
-      const response = await fetch('/api/users', {
+      const response = await fetch(`/api/users`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -192,7 +192,7 @@ export function UserManagement() {
         updateData.password = formData.password
       }
 
-      const response = await fetch(`/api/users/${selectedUser.id}`, {
+      const response = await fetch(`/api/users/${selectedUser.id}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData),
@@ -221,7 +221,7 @@ export function UserManagement() {
 
     try {
       setFormLoading(true)
-      const response = await fetch(`/api/users/${selectedUser.id}`, {
+      const response = await fetch(`/api/users/${selectedUser.id}`, { credentials: 'include', 
         method: 'DELETE',
       })
 

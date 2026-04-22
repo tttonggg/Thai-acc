@@ -261,7 +261,7 @@ export function EnhancedDashboard({ userId, onNavigate }: EnhancedDashboardProps
     // Save to API
     if (userId) {
       try {
-        await fetch('/api/user/preferences', {
+        await fetch(`/api/user/preferences`, { credentials: 'include', 
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

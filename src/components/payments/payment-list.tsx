@@ -126,7 +126,7 @@ export function PaymentList() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('/api/payments')
+        const res = await fetch(`/api/payments`, { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const result = await res.json()
 
@@ -204,7 +204,7 @@ export function PaymentList() {
   const handlePrint = async (payment: Payment) => {
     try {
       // Fetch full payment details
-      const res = await fetch(`/api/payments/${payment.id}`)
+      const res = await fetch(`/api/payments/${payment.id}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Fetch failed')
       const result = await res.json()
       const fullPayment = result.data || result
@@ -323,7 +323,7 @@ export function PaymentList() {
     if (!confirm('ต้องการลงบัญชีใบจ่ายเงินนี้หรือไม่? การดำเนินการนี้จะสร้างรายการบัญชีโดยอัตโนมัติ')) return
     setPostingPayment(paymentId)
     try {
-      const res = await fetch(`/api/payments/${paymentId}`, {
+      const res = await fetch(`/api/payments/${paymentId}`, { credentials: 'include', 
         method: 'POST'
       })
       if (!res.ok) throw new Error('Post failed')
@@ -349,7 +349,7 @@ export function PaymentList() {
     if (!confirm('ต้องการลบใบจ่ายเงินนี้ใช่หรือไม่?')) return
 
     try {
-      const res = await fetch(`/api/payments/${paymentId}`, {
+      const res = await fetch(`/api/payments/${paymentId}`, { credentials: 'include', 
         method: 'DELETE'
       })
       if (!res.ok) throw new Error('Delete failed')

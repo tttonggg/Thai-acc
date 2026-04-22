@@ -71,7 +71,7 @@ export function PayrollRunList() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
-    const res = await window.fetch('/api/payroll').then(r => r.json())
+    const res = await window.fetch(`/api/payroll`, { credentials: 'include' }).then(r => r.json())
     if (res.success) setRuns(res.data)
     setLoading(false)
   }, [])
@@ -79,7 +79,7 @@ export function PayrollRunList() {
 
   const handleCreateRun = async () => {
     if (!form.paymentDate) { toast({ title: 'กรุณาระบุวันที่จ่าย', variant: 'destructive' }); return }
-    const res = await window.fetch('/api/payroll', {
+    const res = await window.fetch(`/api/payroll`, { credentials: 'include', 
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     }).then(r => r.json())
@@ -97,7 +97,7 @@ export function PayrollRunList() {
     setShowDetails(true)
 
     try {
-      const res = await window.fetch(`/api/payroll/${runId}`).then(r => r.json())
+      const res = await window.fetch(`/api/payroll/${runId}`, { credentials: 'include' }).then(r => r.json())
       if (res.success) {
         setPayrollDetails(res.data.payrolls)
       } else {
@@ -117,7 +117,7 @@ export function PayrollRunList() {
     setDownloadingPayslip(payrollId)
 
     try {
-      const response = await window.fetch(`/api/payroll/${payrollId}/payslip`)
+      const response = await window.fetch(`/api/payroll/${payrollId}/payslip`, { credentials: 'include' })
 
       if (!response.ok) {
         throw new Error('ไม่สามารถสร้างสลิปเงินเดือนได้')

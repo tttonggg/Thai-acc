@@ -574,6 +574,7 @@ function ReplyForm({ invoiceId, parentId, currentUser, onCancel, onSubmit }: Rep
     setLoading(true)
     try {
       const response = await fetch(`/api/invoices/${invoiceId}/comments`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -681,7 +682,7 @@ export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) 
         params.append('includeResolved', filterResolved.toString())
       }
 
-      const response = await fetch(`/api/invoices/${invoiceId}/comments?${params}`)
+      const response = await fetch(`/api/invoices/${invoiceId}/comments?${params}`, { credentials: 'include' })
       const result = await response.json()
 
       if (response.ok) {
@@ -718,6 +719,7 @@ export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) 
     setSubmitting(true)
     try {
       const response = await fetch(`/api/invoices/${invoiceId}/comments`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

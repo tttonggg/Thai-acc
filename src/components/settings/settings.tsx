@@ -121,7 +121,7 @@ export function Settings() {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/settings')
+      const response = await fetch(`/api/settings`, { credentials: 'include' })
       if (response.ok) {
         const result = await response.json()
         if (result.success && result.data) {
@@ -180,7 +180,7 @@ export function Settings() {
   const handleSaveCompanyInfo = async () => {
     setSaving(true)
     try {
-      const response = await fetch('/api/company', {
+      const response = await fetch(`/api/company`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(companyInfo)
@@ -209,7 +209,7 @@ export function Settings() {
   const handleSaveTaxRates = async () => {
     setSaving(true)
     try {
-      const response = await fetch('/api/settings', {
+      const response = await fetch(`/api/settings`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ taxRates })
@@ -238,7 +238,7 @@ export function Settings() {
   const handleSaveDocumentNumbers = async () => {
     setSaving(true)
     try {
-      const response = await fetch('/api/settings', {
+      const response = await fetch(`/api/settings`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ documentNumbers })
@@ -300,7 +300,7 @@ export function Settings() {
     formData.append('type', 'logo')
 
     try {
-      const response = await fetch('/api/upload', {
+      const response = await fetch(`/api/upload`, { credentials: 'include', 
         method: 'POST',
         body: formData
       })
@@ -327,7 +327,7 @@ export function Settings() {
 
   const handleExportData = async () => {
     try {
-      const response = await fetch('/api/backup/export')
+      const response = await fetch(`/api/backup/export`, { credentials: 'include' })
       if (response.ok) {
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
@@ -355,7 +355,7 @@ export function Settings() {
       const fileContent = await importFile.text()
       const data = JSON.parse(fileContent)
 
-      const response = await fetch('/api/backup/import', {
+      const response = await fetch(`/api/backup/import`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

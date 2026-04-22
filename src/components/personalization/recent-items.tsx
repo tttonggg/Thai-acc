@@ -145,7 +145,7 @@ export function RecentItemsSidebar({
 
   const loadRecentItems = async () => {
     try {
-      const response = await fetch('/api/user/recent-items')
+      const response = await fetch(`/api/user/recent-items`, { credentials: 'include' })
       if (response.ok) {
         const data = await response.json()
         setItems(data.items.map((item: RecentItem) => ({
@@ -166,7 +166,7 @@ export function RecentItemsSidebar({
 
   const handleClear = async () => {
     try {
-      await fetch('/api/user/recent-items', { method: 'DELETE' })
+      await fetch(`/api/user/recent-items`, { credentials: 'include',  method: 'DELETE' })
       setItems([])
     } catch (error) {
       console.error('Failed to clear recent items:', error)
@@ -217,7 +217,7 @@ export function useRecentItems(userId?: string) {
 
   const loadRecentItems = async () => {
     try {
-      const response = await fetch('/api/user/recent-items')
+      const response = await fetch(`/api/user/recent-items`, { credentials: 'include' })
       if (response.ok) {
         const data = await response.json()
         setRecentItems(data.items.map((item: RecentItem) => ({
@@ -260,7 +260,7 @@ export function useRecentItems(userId?: string) {
 
       // Send to server
       try {
-        await fetch('/api/user/recent-items', {
+        await fetch(`/api/user/recent-items`, { credentials: 'include', 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -282,7 +282,7 @@ export function useRecentItems(userId?: string) {
     if (!userId) return
 
     try {
-      await fetch('/api/user/recent-items', { method: 'DELETE' })
+      await fetch(`/api/user/recent-items`, { credentials: 'include',  method: 'DELETE' })
       setRecentItems([])
     } catch (error) {
       console.error('Failed to clear recent items:', error)

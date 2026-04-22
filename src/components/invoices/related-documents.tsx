@@ -185,7 +185,7 @@ export function RelatedDocuments({
   const fetchRelatedDocuments = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/related`)
+      const response = await fetch(`/api/invoices/${invoiceId}/related`, { credentials: 'include' })
       if (!response.ok) {
         throw new Error('Failed to fetch related documents')
       }
@@ -265,7 +265,7 @@ export function RelatedDocuments({
 
     setAddLoading(true)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/related`, {
+      const response = await fetch(`/api/invoices/${invoiceId}/related`, { credentials: 'include', 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

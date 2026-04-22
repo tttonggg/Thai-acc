@@ -46,7 +46,7 @@ export function InvoicePreviewDialog({
   const loadPreview = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/preview`)
+      const response = await fetch(`/api/invoices/${invoiceId}/preview`, { credentials: 'include' })
       if (response.ok) {
         const html = await response.text()
         // Create blob URL
