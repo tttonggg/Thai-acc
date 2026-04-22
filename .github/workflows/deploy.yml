@@ -39,12 +39,14 @@ jobs:
         continue-on-error: true
 
       - name: Run lint
-        run: bun run lint:fix
+        run: bun run lint:fix --max-warnings 100
         continue-on-error: true
+        timeout-minutes: 15
 
       - name: Run smoke tests
         run: bun run test:quick
         continue-on-error: true
+        timeout-minutes: 15
 
   # Job 2: Build Application
   build:
