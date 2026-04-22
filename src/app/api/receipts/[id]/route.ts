@@ -243,14 +243,18 @@ export async function DELETE(
     if (receipt.status !== 'DRAFT') {
       return NextResponse.json(
         { success: false, error: 'สามารถลบได้เฉพาะสถานะร่างเท่านั้น' },
-        { status: 400 }
+        { status: 403 }
       )
     }
 
-    // Delete receipt (allocations will be cascade deleted)
-    await prisma.receipt.delete({
-      where: { id }
-    })
+    // Soft-delete + cascade children
+    await prisma.$transaction([
+      prisma.receiptAllocation.deleteMany({ where: { receiptId: id } }),
+      prisma.receipt.update({
+        where: { id },
+        data: { deletedAt: new Date(), isActive: false }
+      }),
+    ])
 
     return NextResponse.json({ success: true, message: 'ลบใบเสร็จรับเงินเรียบร้อยแล้ว' })
   } catch (error: any) {

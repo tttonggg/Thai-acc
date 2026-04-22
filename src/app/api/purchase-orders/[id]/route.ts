@@ -184,14 +184,22 @@ export async function DELETE(
       return apiError('ไม่สามารถลบใบสั่งซื้อที่ไม่อยู่ในสถานะร่าง', 403)
     }
 
-    // Soft delete
-    await db.purchaseOrder.update({
-      where: { id },
-      data: {
-        deletedAt: new Date(),
-        deletedBy: user.id,
-      },
-    })
+    // Creator or ADMIN only
+    if (user.role !== 'ADMIN' && existing.createdById !== user.id) {
+      return forbiddenError('ไม่มีสิทธิ์ลบใบสั่งซื้อนี้')
+    }
+
+    // Soft delete + cascade
+    await db.$transaction([
+      db.purchaseOrderLine.deleteMany({ where: { orderId: id } }),
+      db.purchaseOrder.update({
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+          deletedBy: user.id,
+        },
+      }),
+    ])
 
     return apiResponse({ success: true, message: 'ลบใบสั่งซื้อเรียบร้อยแล้ว' })
   } catch (error) {

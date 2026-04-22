@@ -121,7 +121,7 @@ export async function DELETE(
   try {
     const user = await requireAuth()
 
-    if (user.role !== 'ADMIN') {
+    if (user.role !== 'ADMIN' && user.role !== 'ACCOUNTANT') {
       return forbiddenError()
     }
 
@@ -138,14 +138,20 @@ export async function DELETE(
       return notFoundError('ไม่พบใบลดหนี้')
     }
 
+    // Only DRAFT status can be deleted
+    if (existing.status !== 'DRAFT') {
+      return forbiddenError('สามารถลบได้เฉพาะใบลดหนี้สถานะร่างเท่านั้น')
+    }
+
     // Cannot delete if journal entry exists
     if (existing.journalEntryId) {
       return apiError('ไม่สามารถลบใบลดหนี้ที่มีการลงบัญชีแล้ว', 403)
     }
 
-    // Delete credit note
-    await db.creditNote.delete({
-      where: { id }
+    // Soft-delete
+    await db.creditNote.update({
+      where: { id },
+      data: { deletedAt: new Date(), isActive: false, deletedBy: user.id }
     })
 
     return apiResponse({ message: 'ลบใบลดหนี้เรียบร้อยแล้ว' })

@@ -120,14 +120,20 @@ export async function DELETE(
       return notFoundError('ไม่พบใบเพิ่มหนี้')
     }
 
+    // Only DRAFT status can be deleted
+    if (existing.status !== 'DRAFT') {
+      return forbiddenError('สามารถลบได้เฉพาะใบเพิ่มหนี้สถานะร่างเท่านั้น')
+    }
+
     // Cannot delete if journal entry exists
     if (existing.journalEntryId) {
       return apiError('ไม่สามารถลบใบเพิ่มหนี้ที่มีการลงบัญชีแล้ว', 403)
     }
 
-    // Delete debit note
-    await db.debitNote.delete({
-      where: { id }
+    // Soft-delete
+    await db.debitNote.update({
+      where: { id },
+      data: { deletedAt: new Date(), isActive: false, deletedBy: user.id }
     })
 
     return apiResponse({ message: 'ลบใบเพิ่มหนี้เรียบร้อยแล้ว' })

@@ -67,6 +67,7 @@ interface InvoiceDetail {
   }
   createdAt: string
   updatedAt: string
+  createdById?: string
 }
 
 interface InvoiceDetailPageProps {
@@ -260,12 +261,13 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
             <Printer className="h-4 w-4 mr-2" />
             พิมพ์
           </Button>
-          <Button onClick={() => onEdit(invoiceId)}>
-            <Edit className="h-4 w-4 mr-2" />
-            แก้ไข
-          </Button>
-          {(session?.user?.role === 'ADMIN' || session?.user?.role === 'ACCOUNTANT') &&
-           invoice.status === 'DRAFT' && (
+          {invoice.status === 'DRAFT' && (session?.user?.role === 'ADMIN' || invoice.createdById === session?.user?.id) && (
+            <Button onClick={() => onEdit(invoiceId)}>
+              <Edit className="h-4 w-4 mr-2" />
+              แก้ไข
+            </Button>
+          )}
+          {invoice.status === 'DRAFT' && (session?.user?.role === 'ADMIN' || invoice.createdById === session?.user?.id) && (
             <Button variant="destructive" onClick={handleDelete}>
               <Trash2 className="h-4 w-4 mr-2" />
               ลบ

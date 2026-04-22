@@ -88,6 +88,43 @@ export async function PATCH(
       return apiResponse(updatedInvoice)
     }
 
+    if (action === 'update') {
+      // Update DRAFT invoice
+      if (invoice.status !== 'DRAFT') {
+        return forbiddenError("สามารถแก้ไขได้เฉพาะใบกำกับภาษีสถานะร่างเท่านั้น")
+      }
+
+      // Permission: only creator or ADMIN
+      const isAdmin = user.role === 'ADMIN'
+      const isCreator = invoice.createdById === user.id
+      if (!isCreator && !isAdmin) {
+        return forbiddenError("ไม่มีสิทธิ์แก้ไขใบกำกับภาษีนี้")
+      }
+
+      const { data } = body
+
+      // Update allowed fields
+      const updatedInvoice = await db.invoice.update({
+        where: { id },
+        data: {
+          invoiceDate: data.invoiceDate ? new Date(data.invoiceDate) : undefined,
+          dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+          customerId: data.customerId,
+          type: data.type,
+          reference: data.reference,
+          poNumber: data.poNumber,
+          discountAmount: data.discountAmount,
+          discountPercent: data.discountPercent,
+          withholdingRate: data.withholdingRate,
+          notes: data.notes,
+          internalNotes: data.internalNotes,
+          terms: data.terms,
+        }
+      })
+
+      return apiResponse(updatedInvoice)
+    }
+
     return apiError("ไม่รองรับ action ที่ร้องขอ", 400)
   } catch (error) {
     if (error instanceof Error && error.message.includes("unauthorized")) {
@@ -109,6 +146,48 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Basic DELETE implementation
-  return apiResponse({ message: "DELETE endpoint working" })
+  try {
+    const user = await requireAuth()
+    const { id } = await params
+
+    // Find invoice
+    const invoice = await db.invoice.findUnique({
+      where: { id }
+    })
+
+    if (!invoice) {
+      return notFoundError("ไม่พบใบกำกับภาษี")
+    }
+
+    // Permission: only DRAFT status
+    if (invoice.status !== 'DRAFT') {
+      return forbiddenError("สามารถลบได้เฉพาะใบกำกับภาษีสถานะร่างเท่านั้น")
+    }
+
+    // Permission: only creator or ADMIN
+    const isAdmin = user.role === 'ADMIN'
+    const isCreator = invoice.createdById === user.id
+    if (!isCreator && !isAdmin) {
+      return forbiddenError("ไม่มีสิทธิ์ลบใบกำกับภาษีนี้")
+    }
+
+    // Soft-delete invoice + hard-delete cascade children
+    await db.$transaction([
+      // Soft-delete parent
+      db.invoice.update({
+        where: { id },
+        data: { deletedAt: new Date(), deletedBy: user.id }
+      }),
+      // Hard-delete cascade children (audit trail not meaningful for orphaned children)
+      db.invoiceLine.deleteMany({ where: { invoiceId: id } }),
+      db.invoiceComment.deleteMany({ where: { invoiceId: id } }),
+    ])
+
+    return apiResponse({ message: "ลบใบกำกับภาษีเรียบร้อยแล้ว" })
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("unauthorized")) {
+      return unauthorizedError()
+    }
+    return apiError("เกิดข้อผิดพลาดในการลบใบกำกับภาษี")
+  }
 }

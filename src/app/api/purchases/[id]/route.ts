@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { purchaseInvoiceSchema } from "@/lib/validations"
-import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError } from "@/lib/api-utils"
+import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError } from "@/lib/api-utils"
 import { AuthError } from "@/lib/api-auth"
 
 // GET /api/purchases/[id] - Get single purchase invoice
@@ -174,39 +174,47 @@ export async function DELETE(
   try {
     const user = await requireAuth()
     const { id } = await params
-    
-    if (user.role !== "ADMIN") {
-      return apiError("เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถลบใบซื้อได้", 403)
+
+    if (user.role !== "ADMIN" && user.role !== "ACCOUNTANT") {
+      return apiError("เฉพาะผู้ดูแลระบบหรือนักบัญชีเท่านั้นที่สามารถลบใบซื้อได้", 403)
     }
-    
+
     const existing = await db.purchaseInvoice.findUnique({
       where: { id },
       include: {
         payments: true
       }
     })
-    
+
     if (!existing) {
       return notFoundError("ไม่พบใบซื้อ")
     }
-    
+
+    // Only DRAFT status
+    if (existing.status !== 'DRAFT') {
+      return forbiddenError('สามารถลบได้เฉพาะใบซื้อสถานะร่างเท่านั้น')
+    }
+
+    // Creator or ADMIN only
+    if (user.role !== 'ADMIN' && existing.createdById !== user.id) {
+      return forbiddenError('ไม่มีสิทธิ์ลบใบซื้อนี้')
+    }
+
     if (existing.payments.length > 0) {
       return apiError("ไม่สามารถลบใบซื้อที่มีการจ่ายเงินแล้วได้")
     }
-    
-    // Delete related VAT record
-    await db.vatRecord.deleteMany({
-      where: {
-        referenceId: id,
-        documentType: "PURCHASE"
-      }
-    })
-    
-    // Delete purchase invoice
-    await db.purchaseInvoice.delete({
-      where: { id }
-    })
-    
+
+    // Soft-delete + cascade children
+    await db.$transaction([
+      db.purchaseInvoiceLine.deleteMany({ where: { purchaseId: id } }),
+      db.paymentAllocation.deleteMany({ where: { invoiceId: id } }),
+      db.vatRecord.deleteMany({ where: { referenceId: id, documentType: "PURCHASE" } }),
+      db.purchaseInvoice.update({
+        where: { id },
+        data: { deletedAt: new Date(), isActive: false, deletedBy: user.id }
+      }),
+    ])
+
     return apiResponse({ message: "ลบใบซื้อสำเร็จ" })
   } catch (error) {
     if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
