@@ -142,7 +142,7 @@ export function InvoiceList() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('/api/invoices')
+        const res = await fetch('/api/invoices', { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const result = await res.json()
         const invoicesData = result.data || []
