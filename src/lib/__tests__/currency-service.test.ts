@@ -630,5 +630,22 @@ describe('Currency Service', () => {
       const jpyCall = upsertCalls.find(c => c.where.code === 'JPY')
       expect(jpyCall.update.decimalPlaces).toBe(0)
     })
+
+    it('should include USD in currencies list', async () => {
+      const upsertCalls: any[] = []
+      mockCurrencyUpsert.mockImplementation((args: any) => {
+        upsertCalls.push(args)
+        return Promise.resolve({ id: 'curr-1' })
+      })
+
+      await initializeDefaultCurrencies()
+
+      const usdCall = upsertCalls.find(c => c.where.code === 'USD')
+      expect(usdCall).toBeDefined()
+      expect(usdCall.update.name).toBe('US Dollar')
+      expect(usdCall.update.symbol).toBe('$')
+      expect(usdCall.update.decimalPlaces).toBe(2)
+      expect(usdCall.update.isBase).toBe(false)
+    })
   })
 })
