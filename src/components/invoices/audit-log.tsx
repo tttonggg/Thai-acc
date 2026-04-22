@@ -461,7 +461,8 @@ export function AuditLog({
       }
 
       const response = await fetch(
-        `/api/invoices/${invoiceId}/audit?${params.toString()}`
+        `/api/invoices/${invoiceId}/audit?${params.toString()}`,
+        { credentials: 'include' }
       )
       const result = await response.json()
 
