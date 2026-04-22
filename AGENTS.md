@@ -438,7 +438,7 @@ The application uses a Single Page Application architecture:
 - `calculateVAT()` - 7% VAT inclusive/exclusive calculations
 - `calculateWHT()` - Withholding tax calculation
 - `calculateAging()` - AR/AP aging (current, 30, 60, 90, 90+ days)
-- `calculateSSC()` - Social Security contributions (5% capped at ฿750)
+- `calculateSSC()` - Social Security contributions (5%, employee ceiling ฿9,900 → max ฿495; employer ceiling ฿15,000 → max ฿750)
 
 ### Tax Structures
 ```typescript
@@ -458,7 +458,7 @@ PND53_RATES = {
 }
 
 // Social Security (2024)
-SSC_RATE = 5% (max ฿750/month for employee)
+SSC_RATE = 5% (employee: max ฿495/month, ceiling ฿9,900; employer: max ฿750/month, ceiling ฿15,000)
 ```
 
 ### Thai Language Support
@@ -579,6 +579,93 @@ bun run db:migrate
 3. Implement CRUD operations
 4. Add to service layer if complex logic needed
 5. Follow existing response format: `{ success: boolean, data/error }`
+
+## Critical Bugs (Must Fix Before Production)
+
+### 🔴 Journal Number Race Condition
+**File:** `src/app/api/journal/route.ts:41-56`, `src/app/api/journal/post/route.ts:47-69`
+
+Journal entry number generation uses non-atomic `findFirst` + increment pattern. Concurrent requests can generate **duplicate entry numbers**. Fix: use a dedicated `DocumentNumber` table with atomic increment, or wrap in `prisma.$transaction` with row locking.
+
+### 🔴 Journal Creation Not Atomic
+**File:** `src/app/api/journal/route.ts`, `src/app/api/journal/post/route.ts`
+
+Journal entry + lines creation is **NOT wrapped in `prisma.$transaction`**. If process crashes after header insert but before lines, you get orphaned header with no lines — breaks the debit=credit invariant. Compare: `payroll-service.ts` ✅ uses `$transaction` but journal API ❌ does not.
+
+### 🔴 PP30 Tax Form Validation Always Fails
+**File:** `src/lib/tax-form-service.ts:598-600`
+
+`validateTaxForm()` rejects lines where `taxRate <= 0`, but PP30 NET summary lines have `taxRate: 0`. All PP30 forms fail validation.
+
+### 🟠 FIFO Costing Is a Stub
+**File:** `src/lib/inventory-service.ts:47-49`
+
+FIFO case just accumulates cost like WAC — no per-batch tracking. Current implementation does not actually consume oldest batches first.
+
+### 🟠 WAC COGS Uses Stale Unit Cost
+**File:** `src/lib/inventory-service.ts:56`
+
+For ISSUE movements, `newQty * newUnitCost` uses the pre-transaction unit cost instead of recalculating WAC after the receive.
+
+### 🟠 Asset Depreciation — No Transaction
+**File:** `src/lib/asset-service.ts:66-97`
+
+Journal entry created (line 66), then schedule updated separately (line 94). If update fails, JE exists but schedule shows unposted — orphaned JE.
+
+### 🟠 Cheque Bounce — No Transaction
+**File:** `src/lib/cheque-service.ts:200-269`
+
+No `$transaction` wrapper. Crash between `create` reversing JE and `update` original JE → inconsistent state.
+
+### 🟠 Cheque Clear Race Condition (TOCTOU)
+**File:** `src/lib/cheque-service.ts:178-195`
+
+Status check (`cheque.status === 'CLEARED'`) done OUTSIDE transaction. Two concurrent requests both pass the check and create duplicate JEs.
+
+### 🟠 WHT Income Base May Exclude VAT
+**File:** `src/lib/wht-service.ts:69`
+
+`incomeAmount` computed as `subtotal - discountAmount`. Thai WHT is on income BEFORE VAT. If `subtotal` already includes VAT, WHT base is understated.
+
+### 🟠 Recurring Receipt — Lines Not Copied
+**File:** `src/lib/recurring-document-service.ts:339`
+
+`createReceiptFromRecurring` fetches template with lines/allocations but **never copies them** to the new receipt. Recurring receipts have empty line items.
+
+### 🟠 Recurring Due Date Can Be Invalid Date
+**File:** `src/lib/recurring-document-service.ts:192, 270`
+
+If `templateInvoice.dueDate` is null: `new Date(now.getTime() + NaN)` → Invalid Date.
+
+## Tech Debt (High-Priority)
+
+| Issue | File | Fix |
+|---|---|---|
+| Hardcoded VAT 7% | `tax-form-service.ts:240-250` | Read from `vatRate` field |
+| dayOfMonth restricted to 1-28 | `recurring-document-service.ts:354` | Support 29/30/31 |
+| No auth on tax form filing | `tax-form-service.ts` | Add role checks |
+| WHT number race condition | `wht-service.ts:38-39` | Use atomic sequence |
+| Division by zero | `purchase-service.ts:1152` | Guard `quantity === 0` |
+| No pagination in tax forms | `tax-form-service.ts` | Add `take/skip` |
+| Provident Fund duplicate | `payroll-service.ts:266-271` | Add duplicate check |
+| Bank matching wrong entry | `bank-match-service.ts:291-295` | Match `totalDebit`, not line `amount` |
+| `any` type overuse | `recurring-document-service.ts` | Add proper types |
+
+## Transaction Atomicity Map
+
+| Operation | Uses `$transaction` | Risk |
+|---|---|---|
+| Journal create/post | ❌ No | 🔴 |
+| Payroll JE create | ✅ Yes | Low |
+| Cheque create | ✅ Yes | Low |
+| Cheque bounce | ❌ No | 🔴 |
+| Asset depreciation | ❌ No | 🟠 |
+| WHT generation | ❌ No | 🟠 |
+| Tax form generate | ❌ No | 🟠 |
+| Recurring doc process | ❌ No | 🟠 |
+| Inventory movements | ✅ Yes | Low |
+| Petty cash vouchers | ✅ Yes | Low |
+| Purchase PO/PR workflow | ✅ Yes | Low |
 
 ## Troubleshooting
 
