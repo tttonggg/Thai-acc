@@ -135,7 +135,7 @@ export type Module =
 
 export default function Home() {
   const { data: session, status } = useSession()
-  const { setUser, setPermissions } = useAuthStore()
+  const store = useAuthStore()
   const [activeModule, setActiveModule] = useState<Module>('dashboard')
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -296,13 +296,13 @@ export default function Home() {
         const permsRes = await fetch('/api/admin/permissions/my')
         const permsData = await permsRes.json()
         const perms = permsData.data?.permissions || []
-        setPermissions(perms)
+        store.setPermissions(perms)
       } catch (e) {
         console.error('Failed to load permissions', e)
       }
     }
     if (session?.user) {
-      setUser({
+      store.setUser({
         id: session.user.id,
         email: session.user.email || '',
         name: session.user.name || null,
@@ -311,7 +311,7 @@ export default function Home() {
       })
       loadPermissions()
     }
-  }, [session, userRole, setUser, setPermissions])
+  }, [session, userRole, store])
 
   const renderModule = () => {
     switch (activeModule) {
