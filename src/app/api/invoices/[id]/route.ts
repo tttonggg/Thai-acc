@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError } from "@/lib/api-utils"
-import { AuthError } from "@/lib/api-auth"
+import { requireAuth, apiError, unauthorizedError, notFoundError, forbiddenError, AuthError } from "@/lib/api-auth"
+import { apiResponse } from "@/lib/api-utils"
 import { db } from "@/lib/db"
 import { satangToBaht } from "@/lib/currency"
 
@@ -47,6 +47,12 @@ export async function GET(
 
     return apiResponse(invoiceInBaht)
   } catch (error) {
+    if (error instanceof AuthError) {
+      return unauthorizedError()
+    }
+    if (error instanceof Response) {
+      return error
+    }
     if (error instanceof Error && error.message.includes("unauthorized")) {
       return unauthorizedError()
     }
@@ -90,6 +96,12 @@ export async function PATCH(
 
     return apiError("ไม่รองรับ action ที่ร้องขอ", 400)
   } catch (error) {
+    if (error instanceof AuthError) {
+      return unauthorizedError()
+    }
+    if (error instanceof Response) {
+      return error
+    }
     if (error instanceof Error && error.message.includes("unauthorized")) {
       return unauthorizedError()
     }
