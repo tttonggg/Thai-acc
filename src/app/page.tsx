@@ -142,19 +142,20 @@ export default function Home() {
 
   // Fetch permissions on mount and store in auth - MUST be at top level
   useEffect(() => {
+    const { setUser, setPermissions } = useAuthStore.getState()
     async function loadPermissions() {
       try {
         const permsRes = await fetch('/api/admin/permissions/my')
         const permsData = await permsRes.json()
         const perms = permsData.data?.permissions || []
-        store.setPermissions(perms)
+        setPermissions(perms)
       } catch (e) {
         console.error('Failed to load permissions', e)
       }
     }
     if (session?.user) {
       const userRole = session.user.role as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER'
-      store.setUser({
+      setUser({
         id: session.user.id,
         email: session.user.email || '',
         name: session.user.name || null,
@@ -163,7 +164,7 @@ export default function Home() {
       })
       loadPermissions()
     }
-  }, [session, store])
+  }, [session])
 
   // Sync URL with activeModule using history API (doesn't trigger Next.js routing)
   useEffect(() => {
@@ -543,7 +544,7 @@ export default function Home() {
               activeModule={activeModule}
               setActiveModule={setActiveModule}
               userRole={userRole}
-              permissions={useAuthStore.getState().permissions}
+              permissions={store.permissions}
               userName={session.user?.name || session.user?.email}
               onLogout={() => signOut({ callbackUrl: '/' })}
               onCloseMobile={() => setMobileMenuOpen(false)}
@@ -558,7 +559,7 @@ export default function Home() {
           activeModule={activeModule}
           setActiveModule={setActiveModule}
           userRole={userRole}
-          permissions={useAuthStore.getState().permissions}
+          permissions={store.permissions}
           userName={session.user?.name || session.user?.email}
           onLogout={() => signOut({ callbackUrl: '/' })}
         />
