@@ -64,7 +64,8 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'thai-accounting-auth',
-      partialize: (state) => ({ user: state.user, permissions: state.permissions, isAuthenticated: state.isAuthenticated }),
+      // Only persist user/auth state, NOT permissions - permissions come from API on each session
+      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
     }
   )
 )
