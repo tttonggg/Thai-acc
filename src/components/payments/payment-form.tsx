@@ -94,6 +94,8 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
   const [apBalance, setApBalance] = useState(0)
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [quickFillInvoiceId, setQuickFillInvoiceId] = useState<string>('')
+  const [customAmount, setCustomAmount] = useState<string>('')
   const { toast } = useToast()
 
   const form = useForm<FormValues>({
@@ -492,20 +494,86 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                       <FormItem>
                         <FormLabel htmlFor="amount">จำนวนเงินรวม</FormLabel>
                         <FormControl>
-                          <Input className="!h-11 text-base"
+                          <Input className="!h-11 text-base bg-gray-100"
                             id="amount"
                             type="number"
                             step="0.01"
                             {...field}
                             value={field.value ? (field.value / 100).toFixed(2) : ''}
-                            onChange={(e) => field.onChange(Math.round(parseFloat(e.target.value) * 100) || 0)}
+                            readOnly
                             aria-label="จำนวนเงินรวม"
                           />
                         </FormControl>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          ใช้ปุ่มด้านบนเพื่อเลือกยอดที่ต้องการชำระ
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  {/* Quick-Fill Helper Section */}
+                  {selectedVendor && unpaidInvoices.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <span className="text-sm text-blue-800 self-center">จำนวนเงินที่ต้องการชำระ:</span>
+
+                      {/* Option 1: Pay Full */}
+                      <Button
+                        type="button"
+                        variant="default"
+                        size="sm"
+                        onClick={() => {
+                          const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + inv.balance, 0)
+                          form.setValue('amount', totalUnpaid)
+                          setQuickFillInvoiceId('')
+                          setCustomAmount('')
+                        }}
+                        className="flex-1 min-w-[150px]"
+                      >
+                        จ่ายเต็มจำนวน ({unpaidInvoices.length} ใบ)
+                      </Button>
+
+                      {/* Option 2: Select Invoice */}
+                      <Select
+                        onValueChange={(invoiceId) => {
+                          setQuickFillInvoiceId(invoiceId)
+                          setCustomAmount('')
+                          if (invoiceId) {
+                            const invoice = unpaidInvoices.find((inv: any) => inv.id === invoiceId)
+                            if (invoice) {
+                              form.setValue('amount', invoice.balance)
+                            }
+                          }
+                        }}
+                        value={quickFillInvoiceId}
+                      >
+                        <SelectTrigger className="flex-[2] min-w-[200px]">
+                          <SelectValue placeholder="เลือกใบแจ้ง/ใบวาซื้อ..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {unpaidInvoices.map((invoice: any) => (
+                            <SelectItem key={invoice.id} value={invoice.id}>
+                              {invoice.invoiceNo} - ค้างจ่าย ฿{(invoice.balance / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Option 3: Custom Amount */}
+                      <Input
+                        type="number"
+                        placeholder="ระบุจำนวน"
+                        value={customAmount}
+                        onChange={(e) => {
+                          setCustomAmount(e.target.value)
+                          setQuickFillInvoiceId('')
+                          const parsed = parseFloat(e.target.value) || 0
+                          form.setValue('amount', Math.round(parsed * 100))
+                        }}
+                        className="flex-[2] min-w-[150px]"
+                      />
+                    </div>
+                  )}
 
                   {selectedVendor && apBalance > 0 && (
                     <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
