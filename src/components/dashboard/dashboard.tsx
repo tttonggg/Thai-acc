@@ -403,7 +403,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
         }
 
         // Fetch payments
-        const payRes = await fetch(`/api/payments?limit=1000', { credentials: 'include' })
+        const payRes = await fetch(`/api/payments?limit=1000`, { credentials: 'include' })
         if (payRes.ok) {
           const payJson = await payRes.json()
           if (payJson.success) {
@@ -416,7 +416,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
         }
 
       } catch (err) {
-        console.error('Error fetching module stats:`, err)
+        console.error('Error fetching module stats:', err)
       } finally {
         setStatsLoading(false)
       }
@@ -495,7 +495,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <SummaryCard
           title="รายได้รวม (เดือนนี้)"
-          value={`฿${(data?.summary?.revenue?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
+          value={'฿' + (data?.summary?.revenue?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
           change={data?.summary?.revenue?.change ?? 0}
           changeLabel="จากเดือนก่อน"
           icon={<TrendingUp className="h-6 w-6 text-white" />}
@@ -504,7 +504,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
         />
         <SummaryCard
           title="ค่าใช้จ่ายรวม (เดือนนี้)"
-          value={`฿${(data?.summary?.expenses?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
+          value={'฿' + (data?.summary?.expenses?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
           change={data?.summary?.expenses?.change ?? 0}
           changeLabel="จากเดือนก่อน"
           icon={<TrendingDown className="h-6 w-6 text-white" />}
@@ -513,7 +513,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
         />
         <SummaryCard
           title="ลูกหนี้การค้า"
-          value={`฿${(data?.summary?.ar?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
+          value={'฿' + (data?.summary?.ar?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
           change={data?.summary?.ar?.change ?? 0}
           changeLabel="จากเดือนก่อน"
           icon={<Users className="h-6 w-6 text-white" />}
@@ -522,7 +522,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
         />
         <SummaryCard
           title="เจ้าหนี้การค้า"
-          value={`฿${(data?.summary?.ap?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
+          value={'฿' + (data?.summary?.ap?.amount ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
           change={data?.summary?.ap?.change ?? 0}
           changeLabel="จากเดือนก่อน"
           icon={<Truck className="h-6 w-6 text-white" />}
@@ -543,9 +543,9 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
             <BarChart data={data?.monthlyData ?? []}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} />
-              <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(v) => `${v/1000}K`} />
+              <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(v) => (v/1000).toString() + 'K'} />
               <Tooltip
-                formatter={(value: number) => [`฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`, '']}
+                formatter={(value: number) => ['฿' + (value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 }), '']}
                 labelStyle={{ color: '#e2e8f0' }}
                 contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
               />
@@ -566,9 +566,9 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
             <LineChart data={data?.vatData ?? []}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} />
-              <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(v) => `${v/1000}K`} />
+              <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(v) => (v/1000).toString() + 'K'} />
               <Tooltip
-                formatter={(value: number) => [`฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`, '']}
+                formatter={(value: number) => ['฿' + (value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 }), '']}
                 labelStyle={{ color: '#e2e8f0' }}
                 contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
               />
@@ -612,15 +612,15 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
                 outerRadius={100}
                 paddingAngle={2}
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) => name + ' ' + (percent * 100).toFixed(0) + '%'}
                 labelLine={false}
               >
                 {data?.arAging?.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                  <Cell key={'cell-' + index} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number) => `฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                formatter={(value: number) => '฿' + (value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
                 labelStyle={{ color: '#e2e8f0' }}
               />
@@ -630,7 +630,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
             {data?.arAging?.map((item, index) => (
               <div key={index} className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                <span className="text-xs text-slate-400">{item.name}: ฿{(item?.value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                <span className="text-xs text-slate-400">{item.name}: {'฿' + (item?.value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
               </div>
             ))}
           </div>
@@ -652,15 +652,15 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
                 outerRadius={100}
                 paddingAngle={2}
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) => name + ' ' + (percent * 100).toFixed(0) + '%'}
                 labelLine={false}
               >
                 {data?.apAging?.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                  <Cell key={'cell-' + index} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number) => `฿${(value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                formatter={(value: number) => '฿' + (value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
                 labelStyle={{ color: '#e2e8f0' }}
               />
@@ -670,7 +670,7 @@ export function Dashboard({ setActiveModule }: { setActiveModule?: (module: 'inv
             {data?.apAging?.map((item, index) => (
               <div key={index} className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                <span className="text-xs text-slate-400">{item.name}: ฿{(item?.value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                <span className="text-xs text-slate-400">{item.name}: {'฿' + (item?.value ?? 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
               </div>
             ))}
           </div>

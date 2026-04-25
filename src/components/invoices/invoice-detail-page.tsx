@@ -30,7 +30,8 @@ import { formatThaiDate, formatCurrency } from '@/lib/thai-accounting'
 interface InvoiceDetail {
   id: string
   invoiceNo: string
-  date: string
+  invoiceDate: string
+  dueDate?: string
   customerId: string
   customer: {
     id: string
@@ -244,7 +245,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
             </h1>
             <div className="flex items-center gap-2 mt-1">
               <p className="text-gray-500">
-                {formatThaiDate(invoice.date)}
+                {formatThaiDate(invoice.invoiceDate)}
               </p>
               <Badge className={statusColors[invoice.status]}>
                 {statusLabels[invoice.status]}

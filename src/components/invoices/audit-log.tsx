@@ -468,7 +468,7 @@ export function AuditLog({
 
       if (response.ok) {
         // Transform API response to our format
-        const transformedEntries = (result.data || []).map((entry: any) => ({
+        const transformedEntries = (result.data?.entries || []).map((entry: any) => ({
           id: entry.id,
           timestamp: new Date(entry.timestamp || entry.createdAt),
           userId: entry.changedById || entry.userId,
@@ -652,10 +652,9 @@ export function AuditLog({
             {/* Start Date Filter */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
+                <div
                   className={cn(
-                    'w-[140px] justify-start text-left font-normal',
+                    'inline-flex items-center justify-start gap-2 rounded-md text-sm font-normal border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground h-11 px-4 py-2 w-[140px] cursor-pointer',
                     !filters.startDate && 'text-muted-foreground'
                   )}
                 >
@@ -665,7 +664,7 @@ export function AuditLog({
                   ) : (
                     <span>จากวันที่</span>
                   )}
-                </Button>
+                </div>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
@@ -682,10 +681,9 @@ export function AuditLog({
             {/* End Date Filter */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
+                <div
                   className={cn(
-                    'w-[140px] justify-start text-left font-normal',
+                    'inline-flex items-center justify-start gap-2 rounded-md text-sm font-normal border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground h-11 px-4 py-2 w-[140px] cursor-pointer',
                     !filters.endDate && 'text-muted-foreground'
                   )}
                 >
@@ -695,7 +693,7 @@ export function AuditLog({
                   ) : (
                     <span>ถึงวันที่</span>
                   )}
-                </Button>
+                </div>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar

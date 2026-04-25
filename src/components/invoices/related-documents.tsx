@@ -192,7 +192,14 @@ export function RelatedDocuments({
 
       const data: RelatedDocumentsResponse = await response.json()
       setRelatedDocs(data.relatedDocuments)
-      setSummary(data.summary)
+      setSummary(data.summary ?? {
+        total: 0,
+        links: 0,
+        cancels: 0,
+        replaces: 0,
+        refunds: 0,
+        adjusts: 0,
+      })
     } catch (error) {
       console.error('Error fetching related documents:', error)
       toast({

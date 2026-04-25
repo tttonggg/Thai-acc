@@ -142,7 +142,7 @@ export function InvoiceList() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch(`/api/invoices', { credentials: 'include' })
+        const res = await fetch(`/api/invoices`, { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const result = await res.json()
         const invoicesData = result.data || []
@@ -168,7 +168,7 @@ export function InvoiceList() {
   const filteredInvoices = (invoices || []).filter(invoice => {
     if (!invoice || typeof invoice !== 'object') return false
 
-    const allowedTypes = ['TAX_INVOICE', 'RECEIPT`, 'DELIVERY_NOTE']
+    const allowedTypes = ['TAX_INVOICE', 'RECEIPT', 'DELIVERY_NOTE']
     if (!allowedTypes.includes(invoice.type)) return false
 
     const matchesSearch = invoice.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||

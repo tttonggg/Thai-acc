@@ -158,7 +158,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return
-      console.error('Error fetching initial data:`, error)
+      console.error('Error fetching initial data:', error)
     } finally {
       setFetchingData(false)
     }
