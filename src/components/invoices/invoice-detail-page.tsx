@@ -30,7 +30,8 @@ import { formatThaiDate, formatCurrency } from '@/lib/thai-accounting'
 interface InvoiceDetail {
   id: string
   invoiceNo: string
-  date: string
+  invoiceDate: string
+  dueDate?: string
   customerId: string
   customer: {
     id: string
@@ -67,6 +68,7 @@ interface InvoiceDetail {
   }
   createdAt: string
   updatedAt: string
+  createdById?: string
 }
 
 interface InvoiceDetailPageProps {
@@ -92,7 +94,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}`)
+      const response = await fetch(`/api/invoices/${invoiceId}`, { credentials: 'include' })
       const result = await response.json()
 
       if (response.ok) {
@@ -115,7 +117,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
   const handleDownload = async () => {
     setDownloading(true)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/export/pdf`)
+      const response = await fetch(`/api/invoices/${invoiceId}/export/pdf`, { credentials: 'include' })
       if (!response.ok) throw new Error('Download failed')
 
       const blob = await response.blob()
@@ -153,7 +155,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
     }
 
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}`, {
+      const response = await fetch(`/api/invoices/${invoiceId}`, { credentials: 'include', 
         method: 'DELETE'
       })
 
@@ -243,7 +245,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
             </h1>
             <div className="flex items-center gap-2 mt-1">
               <p className="text-gray-500">
-                {formatThaiDate(invoice.date)}
+                {formatThaiDate(invoice.invoiceDate)}
               </p>
               <Badge className={statusColors[invoice.status]}>
                 {statusLabels[invoice.status]}
@@ -260,12 +262,13 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
             <Printer className="h-4 w-4 mr-2" />
             พิมพ์
           </Button>
-          <Button onClick={() => onEdit(invoiceId)}>
-            <Edit className="h-4 w-4 mr-2" />
-            แก้ไข
-          </Button>
-          {(session?.user?.role === 'ADMIN' || session?.user?.role === 'ACCOUNTANT') &&
-           invoice.status === 'DRAFT' && (
+          {invoice.status === 'DRAFT' && (session?.user?.role === 'ADMIN' || invoice.createdById === session?.user?.id) && (
+            <Button onClick={() => onEdit(invoiceId)}>
+              <Edit className="h-4 w-4 mr-2" />
+              แก้ไข
+            </Button>
+          )}
+          {invoice.status === 'DRAFT' && (session?.user?.role === 'ADMIN' || invoice.createdById === session?.user?.id) && (
             <Button variant="destructive" onClick={handleDelete}>
               <Trash2 className="h-4 w-4 mr-2" />
               ลบ

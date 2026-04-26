@@ -110,7 +110,7 @@ export function DataExportPage() {
 
     setExporting(true)
     try {
-      const response = await fetch('/api/admin/export', {
+      const response = await fetch(`/api/admin/export`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

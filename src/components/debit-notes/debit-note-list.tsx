@@ -82,7 +82,7 @@ export function DebitNoteList() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('/api/debit-notes')
+        const res = await fetch(`/api/debit-notes`, { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const result = await res.json()
         // API returns { success: true, data: [...], pagination: {...} }

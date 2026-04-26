@@ -193,6 +193,8 @@ model Customer {
   invoices      Invoice[]
   receipts      Receipt[]
   creditNotes   CreditNote[]
+  quotations    Quotation[]
+  salesOrders   SalesOrder[]
 
   @@index([deletedAt])
 }
@@ -277,6 +279,8 @@ model Product {
   prRequestLines       PurchaseRequestLine[] @relation("PRLineProduct")
   poOrderLines         PurchaseOrderLine[] @relation("POLineProduct")
   goodsReceiptNoteLines GoodsReceiptNoteLine[]
+  quotationLines       QuotationLine[]
+  salesOrderLines      SalesOrderLine[]
 
   @@index([deletedAt])
 }
@@ -315,6 +319,8 @@ model Invoice {
   dueDate            DateTime? // วันครบกำหนด - CHECK: dueDate >= invoiceDate
   customerId         String
   customer           Customer            @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  salesOrderId       String?             @unique // ใบสั่งขายที่อ้างอิง
+  salesOrder         SalesOrder?        @relation("InvoiceSalesOrder", fields: [salesOrderId], references: [id])
   type               InvoiceType         @default(TAX_INVOICE)
   reference          String? // เอกสารอ้างอิง
   poNumber           String? // เลขที่ใบสั่งซื้อ
@@ -343,6 +349,7 @@ model Invoice {
   updatedAt          DateTime            @updatedAt
   lines              InvoiceLine[]
   receiptAllocations ReceiptAllocation[]
+  receiptLines       ReceiptLine[]
   journalEntryId     String? // ID บันทึกบัญชี
   journalEntry       JournalEntry?       @relation("InvoiceJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
   creditNotes        CreditNote[] // ใบลดหนี้ที่อ้างอิงใบกำกับภาษีนี้
@@ -401,6 +408,117 @@ enum InvoiceStatus {
   CANCELLED // ยกเลิก
 }
 
+enum SalesOrderStatus {
+  DRAFT           // ร่าง
+  PENDING         // รออนุมัติ
+  APPROVED        // อนุมัติแล้ว
+  SENT            // ส่งให้ลูกค้าแล้ว
+  CONFIRMED       // ลูกค้ายืนยันแล้ว
+  PROCESSING      // กำลังดำเนินการ
+  SHIPPED         // จัดส่งแล้ว
+  DELIVERED       // ส่งมอบแล้ว
+  CANCELLED       // ยกเลิก
+  COMPLETED       // เสร็จสิ้น
+}
+
+// ============================================
+// ใบสั่งขาย / Sales Order
+// ============================================
+model SalesOrder {
+  id                String              @id @default(cuid())
+  orderNo           String              @unique // เลขที่ใบสั่งขาย SO202603-001
+  orderDate         DateTime            @default(now()) // วันที่สั่งขาย
+  expectedDate      DateTime?           // วันที่คาดว่าจะส่งมอบ
+
+  // ข้อมูลลูกค้า
+  customerId        String
+  customer          Customer            @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  customerContact   String?             // ผู้ติดต่อ
+  customerEmail     String?             // อีเมลลูกค้า
+  customerPhone     String?             // โทรศัพท์ลูกค้า
+  shippingAddress   String?             // ที่อยู่จัดส่ง
+
+  // รายละเอียดการสั่งขาย
+  shippingTerms     String?             // เงื่อนไขการจัดส่ง
+  paymentTerms      String?             // เงื่อนไขการชำระเงิน
+
+  // ยอดรวม
+  subtotal          Int                 @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate           Float               @default(7) // อัตรา VAT %
+  vatAmount         Int                 @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount       Int                 @default(0) // ยอดรวม (สตางค์)
+  discountAmount    Int                 @default(0) // ส่วนลด (สตางค์)
+
+  // สถานะ
+  status            SalesOrderStatus    @default(DRAFT)
+  approvedAt        DateTime?           // วันที่อนุมัติ
+  sentAt            DateTime?           // วันที่ส่งให้ลูกค้า
+  confirmedAt       DateTime?           // วันที่ลูกค้ายืนยัน
+  shippedAt         DateTime?           // วันที่จัดส่ง
+  deliveredAt       DateTime?           // วันที่ส่งมอบ
+
+  // เชื่อมโยงกับ Invoice — Invoice มี salesOrderId FK อยู่แล้ว (one-to-one)
+  // SalesOrder ไม่ต้องมี invoiceId/invoice
+  // แต่ต้องมี reverse relation สำหรับ named relation
+  invoices    Invoice[]  @relation("InvoiceSalesOrder")
+
+  // รายการสินค้า
+  lines             SalesOrderLine[]
+
+  // เอกสารและบันทึก
+  notes             String?             // หมายเหตุ
+  internalNotes     String?             // บันทึกภายใน
+  attachments       Json?               // เอกสารแนบ
+
+  // Audit
+  createdById       String
+  createdBy         User                @relation("SOCreator", fields: [createdById], references: [id])
+  updatedById       String?
+  updatedBy         User?               @relation("SOUpdater", fields: [updatedById], references: [id])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+  deletedBy         String?
+
+  @@index([customerId])
+  @@index([status])
+  @@index([orderDate])
+  @@index([createdById])
+  @@index([sentAt])
+  @@index([deliveredAt])
+}
+
+// ============================================
+// ใบสั่งขาย รายการ / Sales Order Line
+// ============================================
+model SalesOrderLine {
+  id              String         @id @default(cuid())
+  orderId         String
+  order           SalesOrder     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  lineNo          Int            // ลำดับรายการ
+  productId       String?        // สินค้า
+  product         Product?       @relation(fields: [productId], references: [id])
+  description     String         // รายการสินค้า
+  quantity        Float          // จำนวนสั่งซื้อ
+  shippedQty      Float          @default(0) // จำนวนที่ส่งแล้ว
+  unit            String         @default("ชิ้น") // หน่วย
+  unitPrice       Int            @default(0) // ราคาต่อหน่วย (สตางค์)
+  discount        Int             @default(0) // ส่วนลด (สตางค์)
+  vatRate         Float          @default(7) // อัตรา VAT %
+  amount          Int            @default(0) // จำนวนเงิน (สตางค์)
+
+  // ข้อมูลเพิ่มเติม
+  specUrl         String?        // URL รายละเอียดสินค้า
+  notes           String?        // หมายเหตุ
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([orderId])
+  @@index([productId])
+}
+
 // ============================================
 // ใบเสร็จรับเงิน / Receipt
 // ============================================
@@ -425,8 +543,12 @@ model Receipt {
   isActive       Boolean             @default(true)
   deletedAt      DateTime?
   deletedBy      String?
+  createdById    String?
+  updatedById    String?
+  versionNo      Int                 @default(0)
   journalEntry   JournalEntry?       @relation("ReceiptJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
   allocations    ReceiptAllocation[]
+  lines          ReceiptLine[]
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
 
@@ -441,6 +563,25 @@ model Receipt {
   @@index([journalEntryId])
   @@index([deletedAt])
   @@index([currencyId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model ReceiptLine {
+  id        String   @id @default(cuid())
+  receiptId String
+  receipt   Receipt  @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  lineNo    Int
+  invoiceId String?
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  amount    Int      @default(0) // จำนวนเงิน (สตางค์)
+  whtRate   Float    @default(0) // อัตราหัก ณ ที่จ่าย (%)
+  whtAmount Int      @default(0) // ภาษีหัก ณ ที่จ่าย (สตางค์)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([receiptId])
+  @@index([invoiceId])
 }
 
 model ReceiptAllocation {
@@ -493,6 +634,9 @@ model CreditNote {
   isActive       Boolean          @default(true)
   deletedAt      DateTime?
   deletedBy      String?
+  createdById    String?
+  updatedById    String?
+  versionNo      Int              @default(0)
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   journalEntryId String? // ID บันทึกบัญชี
@@ -502,6 +646,8 @@ model CreditNote {
   @@index([invoiceId])
   @@index([journalEntryId])
   @@index([deletedAt])
+  @@index([createdById])
+  @@index([updatedById])
 }
 
 enum CreditNoteStatus {
@@ -530,6 +676,9 @@ model DebitNote {
   isActive        Boolean          @default(true)
   deletedAt       DateTime?
   deletedBy       String?
+  createdById     String?
+  updatedById     String?
+  versionNo       Int              @default(0)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   journalEntryId  String? // ID บันทึกบัญชี
@@ -539,6 +688,8 @@ model DebitNote {
   @@index([invoiceId])
   @@index([journalEntryId])
   @@index([deletedAt])
+  @@index([createdById])
+  @@index([updatedById])
 }
 
 enum DebitNoteStatus {
@@ -583,6 +734,7 @@ model PurchaseInvoice {
   updatedAt          DateTime              @updatedAt
   lines              PurchaseInvoiceLine[]
   paymentAllocations PaymentAllocation[]   @relation("PaymentAllocations")
+  paymentLines       PaymentLine[]         @relation("PaymentLineInvoices")
   journalEntryId     String? // ID บันทึกบัญชี
   journalEntry       JournalEntry?         @relation("PurchaseInvoiceJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
   debitNotes         DebitNote[] // ใบเพิ่มหนี้ที่อ้างอิงใบซื้อนี้
@@ -636,6 +788,8 @@ model Payment {
   notes          String? // หมายเหตุ
   status         PaymentStatus       @default(DRAFT)
   createdById    String?
+  updatedById    String?
+  versionNo      Int                 @default(0)
   idempotencyKey String?             @unique // ✅ FIXED: Prevent duplicate payments
   isActive       Boolean             @default(true)
   deletedAt      DateTime?
@@ -645,6 +799,7 @@ model Payment {
   journalEntryId String? // ID บันทึกบัญชี
   journalEntry   JournalEntry?       @relation("PaymentJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
   allocations    PaymentAllocation[]
+  lines          PaymentLine[]
   cheques        Cheque[]            @relation("PaymentCheque")
 
   // Multi-currency fields
@@ -658,6 +813,25 @@ model Payment {
   @@index([journalEntryId])
   @@index([deletedAt])
   @@index([currencyId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model PaymentLine {
+  id              String          @id @default(cuid())
+  paymentId       String
+  payment         Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  lineNo          Int
+  purchaseInvoiceId String?
+  purchaseInvoice PurchaseInvoice? @relation("PaymentLineInvoices", fields: [purchaseInvoiceId], references: [id])
+  amount          Int             @default(0) // จำนวนเงิน (สตางค์)
+  whtRate         Float           @default(0) // อัตราหัก ณ ที่จ่าย (%)
+  whtAmount       Int             @default(0) // ภาษีหัก ณ ที่จ่าย (สตางค์)
+  notes           String?
+  createdAt       DateTime        @default(now())
+
+  @@index([paymentId])
+  @@index([purchaseInvoiceId])
 }
 
 model PaymentAllocation {
@@ -706,10 +880,15 @@ model VatRecord {
   taxMonth      Int // เดือนที่ยื่นภาษี
   taxYear       Int // ปีที่ยื่นภาษี
   reportStatus  VatReportStatus @default(PENDING)
+  createdById   String?
+  updatedById   String?
+  versionNo     Int             @default(0)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
   @@index([type, taxMonth, taxYear])
+  @@index([createdById])
+  @@index([updatedById])
 }
 
 enum VatRecordType {
@@ -744,11 +923,16 @@ model WithholdingTax {
   taxMonth     Int // เดือนที่ยื่นภาษี
   taxYear      Int // ปีที่ยื่นภาษี
   reportStatus WhtReportStatus @default(PENDING)
+  createdById  String?
+  updatedById  String?
+  versionNo    Int             @default(0)
   notes        String? // หมายเหตุ
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 
   @@index([type, taxMonth, taxYear])
+  @@index([createdById])
+  @@index([updatedById])
 }
 
 enum WhtType {
@@ -821,6 +1005,8 @@ model User {
   createdPOs          PurchaseOrder[]   @relation("POCreator")
   updatedPOs          PurchaseOrder[]   @relation("POUpdater")
   receivedGRNs        GoodsReceiptNote[] @relation("GRNReceiver")
+  createdSOs          SalesOrder[]       @relation("SOCreator")
+  updatedSOs          SalesOrder[]       @relation("SOUpdater")
 }
 
 enum UserRole {
@@ -1013,11 +1199,13 @@ model StockTake {
   warehouse       Warehouse       @relation(fields: [warehouseId], references: [id])
   status          StockTakeStatus @default(DRAFT)
   takeDate        DateTime
-  createdBy       String
+  createdById     String?
   createdByName   String?
+  updatedById     String?
   approvedBy      String?
   approvedByName  String?
   approvedAt      DateTime?
+  versionNo       Int             @default(0)
   lines           StockTakeLine[]
   journalEntryId  String?         @unique
   journalEntry    JournalEntry?   @relation("StockTakeJournal", fields: [journalEntryId], references: [id])
@@ -1028,6 +1216,8 @@ model StockTake {
   @@index([warehouseId])
   @@index([status])
   @@index([takeDate])
+  @@index([createdById])
+  @@index([updatedById])
 }
 
 model StockTakeLine {
@@ -1113,6 +1303,9 @@ model Asset {
   isActive            Boolean                @default(true)
   deletedAt           DateTime?
   deletedBy           String?
+  createdById         String?
+  updatedById         String?
+  versionNo           Int                   @default(0)
   metadata            Json?
   createdAt           DateTime               @default(now())
   updatedAt           DateTime               @updatedAt
@@ -1122,6 +1315,8 @@ model Asset {
   @@index([accumDepAccountId])
   @@index([depExpenseAccountId])
   @@index([deletedAt])
+  @@index([createdById])
+  @@index([updatedById])
 }
 
 model DepreciationSchedule {
@@ -1301,11 +1496,16 @@ model PayrollRun {
   status          PayrollStatus // DRAFT, APPROVED, PAID
   journalEntryId  String? // Linked to GL Posting
   journalEntry    JournalEntry? @relation("PayrollRunJournal", fields: [journalEntryId], references: [id], onDelete: Restrict)
+  createdById     String?
+  updatedById     String?
+  versionNo       Int           @default(0)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   payrolls        Payroll[]
 
   @@index([journalEntryId])
+  @@index([createdById])
+  @@index([updatedById])
 }
 
 model Payroll {
@@ -1321,7 +1521,16 @@ model Payroll {
   withholdingTax Int // ภาษี ภงด.1 (สตางค์)
   netPay         Int // จ่ายสุทธิ (สตางค์)
   payslipUrl     String?
+  createdById    String?
+  updatedById    String?
+  versionNo      Int        @default(0)
   createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([payrollRunId])
+  @@index([employeeId])
+  @@index([createdById])
+  @@index([updatedById])
 }
 
 enum PayrollStatus {
@@ -2432,6 +2641,71 @@ model RelatedDocument {
   @@index([sourceModule, sourceId])
   @@index([relatedModule, relatedId])
   @@index([relationType])
+}
+
+// ============================================
+// ใบเสนอราคา / Quotation
+// ============================================
+model Quotation {
+  id              String           @id @default(cuid())
+  quotationNo     String           @unique // เลขที่ใบเสนอราคา
+  quotationDate   DateTime // วันที่ใบเสนอราคา
+  customerId      String
+  customer        Customer         @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  validUntil      DateTime // วันที่หมดอายุ
+  subtotal        Int              @default(0) // มูลค่าก่อน VAT (สตางค์)
+  vatRate         Float            @default(7) // อัตรา VAT (%)
+  vatAmount       Int              @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  totalAmount     Int              @default(0) // ยอดรวม (สตางค์)
+  discountAmount  Int              @default(0) // ส่วนลด (สตางค์)
+  status          QuotationStatus  @default(DRAFT)
+  notes           String? // หมายเหตุ
+  terms           String? // เงื่อนไข
+  salesOrderId    String? // ID ใบสั่งขาย (ถ้าแปลงแล้ว)
+  createdById      String?
+  isActive        Boolean          @default(true)
+  deletedAt       DateTime?
+  deletedBy       String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  lines           QuotationLine[]
+
+  @@index([customerId])
+  @@index([salesOrderId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model QuotationLine {
+  id            String   @id @default(cuid())
+  quotationId   String
+  quotation     Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  lineNo        Int // ลำดับ
+  productId     String?
+  product       Product? @relation(fields: [productId], references: [id])
+  description   String // รายการ
+  quantity      Float    @default(1) // จำนวน (หน่วย)
+  unit          String   @default("ชิ้น") // หน่วย
+  unitPrice     Int      @default(0) // ราคาต่อหน่วย (สตางค์)
+  discount      Int      @default(0) // ส่วนลด (สตางค์)
+  amount        Int      @default(0) // จำนวนเงิน (สตางค์)
+  vatRate       Float    @default(7) // อัตรา VAT (%)
+  vatAmount     Int      @default(0) // ภาษีมูลค่าเพิ่ม (สตางค์)
+  notes         String? // หมายเหตุ
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([quotationId])
+  @@index([productId])
+}
+
+enum QuotationStatus {
+  DRAFT // ร่าง
+  SENT // ส่งให้ลูกค้าแล้ว
+  APPROVED // อนุมัติ
+  REJECTED // ปฏิเสธ
+  EXPIRED // หมดอายุ
+  CONVERTED // แปลงเป็นใบสั่งขายแล้ว
 }
 
 // ============================================

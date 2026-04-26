@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { requireAuth, apiResponse, apiError, unauthorizedError, generateDocNumber } from "@/lib/api-utils"
 import { recordStockMovement } from "@/lib/inventory-service"
+import { checkPeriodStatus } from "@/lib/period-service"
 
 // POST /api/purchases/[id]/post - Post purchase invoice (receive from supplier)
 export async function POST(
@@ -34,6 +35,12 @@ export async function POST(
 
     if (existing.lines.length === 0) {
       return apiError("ใบซื้อต้องมีอย่างน้อย 1 รายการ")
+    }
+
+    // B1. Period Locking - Check if period is open for purchase invoice date
+    const periodCheck = await checkPeriodStatus(existing.invoiceDate)
+    if (!periodCheck.isValid) {
+      return apiError(periodCheck.error || "ไม่สามารถรับใบซื้อในงวดที่ปิดแล้ว")
     }
 
     // Cache line data before transaction (needed for transaction closure)

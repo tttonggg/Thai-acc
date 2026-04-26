@@ -80,7 +80,7 @@ export function WebhookManagement() {
 
   const fetchWebhooks = async () => {
     try {
-      const response = await fetch('/api/admin/webhooks');
+      const response = await fetch(`/api/admin/webhooks`, { credentials: 'include' });
       const result = await response.json();
       if (result.success) {
         setWebhooks(result.data);
@@ -98,7 +98,7 @@ export function WebhookManagement() {
 
   const handleCreate = async () => {
     try {
-      const response = await fetch('/api/admin/webhooks', {
+      const response = await fetch(`/api/admin/webhooks`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -133,7 +133,7 @@ export function WebhookManagement() {
     if (!editingWebhook) return;
 
     try {
-      const response = await fetch(`/api/admin/webhooks/${editingWebhook.id}`, {
+      const response = await fetch(`/api/admin/webhooks/${editingWebhook.id}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -169,7 +169,7 @@ export function WebhookManagement() {
     if (!confirm('Are you sure you want to delete this webhook?')) return;
 
     try {
-      const response = await fetch(`/api/admin/webhooks/${id}`, {
+      const response = await fetch(`/api/admin/webhooks/${id}`, { credentials: 'include', 
         method: 'DELETE',
       });
 
@@ -201,7 +201,7 @@ export function WebhookManagement() {
     setTestResult(null);
 
     try {
-      const response = await fetch(`/api/admin/webhooks/${id}/test`, {
+      const response = await fetch(`/api/admin/webhooks/${id}/test`, { credentials: 'include', 
         method: 'POST',
       });
 

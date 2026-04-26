@@ -166,7 +166,7 @@ export function QuotationViewDialog({
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/quotations/${quotationId}`)
+      const res = await fetch(`/api/quotations/${quotationId}`, { credentials: 'include' })
       const result = await res.json()
 
       if (!res.ok) {
@@ -226,7 +226,7 @@ export function QuotationViewDialog({
 
     setActionLoading(true)
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/send`, {
+      const res = await fetch(`/api/quotations/${quotationId}/send`, { credentials: 'include', 
         method: 'POST',
       })
 
@@ -259,7 +259,7 @@ export function QuotationViewDialog({
 
     setActionLoading(true)
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/approve`, {
+      const res = await fetch(`/api/quotations/${quotationId}/approve`, { credentials: 'include', 
         method: 'POST',
       })
 
@@ -303,7 +303,7 @@ export function QuotationViewDialog({
 
     setActionLoading(true)
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/reject`, {
+      const res = await fetch(`/api/quotations/${quotationId}/reject`, { credentials: 'include', 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -344,7 +344,7 @@ export function QuotationViewDialog({
 
     setActionLoading(true)
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/convert-to-invoice`, {
+      const res = await fetch(`/api/quotations/${quotationId}/convert-to-invoice`, { credentials: 'include', 
         method: 'POST',
       })
 
@@ -381,7 +381,7 @@ export function QuotationViewDialog({
 
     setActionLoading(true)
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/cancel`, {
+      const res = await fetch(`/api/quotations/${quotationId}/cancel`, { credentials: 'include', 
         method: 'POST',
       })
 
@@ -414,7 +414,7 @@ export function QuotationViewDialog({
 
     setActionLoading(true)
     try {
-      const res = await fetch(`/api/quotations/${quotationId}`, {
+      const res = await fetch(`/api/quotations/${quotationId}`, { credentials: 'include', 
         method: 'DELETE',
       })
 

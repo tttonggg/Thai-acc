@@ -113,7 +113,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/credit-notes/[id] - Soft-delete credit note (admin/accountant only, draft only)
+// DELETE /api/credit-notes/[id] - Delete credit note (admin only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -138,26 +138,20 @@ export async function DELETE(
       return notFoundError('ไม่พบใบลดหนี้')
     }
 
-    // Cannot delete if journal entry exists (already posted)
+    // Only DRAFT status can be deleted
+    if (existing.status !== 'DRAFT') {
+      return forbiddenError('สามารถลบได้เฉพาะใบลดหนี้สถานะร่างเท่านั้น')
+    }
+
+    // Cannot delete if journal entry exists
     if (existing.journalEntryId) {
       return apiError('ไม่สามารถลบใบลดหนี้ที่มีการลงบัญชีแล้ว', 403)
     }
 
-    // Only CANCELLED credit notes can be deleted (draft-like state)
-    if (existing.status !== 'CANCELLED') {
-      return apiError('สามารถลบได้เฉพาะสถานะยกเลิกเท่านั้น', 400)
-    }
-
-    const userId = user.id || user.userId || user.sub || id
-
-    // Soft-delete credit note
+    // Soft-delete
     await db.creditNote.update({
       where: { id },
-      data: {
-        deletedAt: new Date(),
-        deletedBy: userId,
-        isActive: false,
-      }
+      data: { deletedAt: new Date(), isActive: false, deletedBy: user.id }
     })
 
     return apiResponse({ message: 'ลบใบลดหนี้เรียบร้อยแล้ว' })

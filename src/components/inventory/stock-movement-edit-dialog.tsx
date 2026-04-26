@@ -66,7 +66,7 @@ export function StockMovementEditDialog({
   const handleSaveNotes = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/stock-movements/${movement.id}`, {
+      const res = await fetch(`/api/stock-movements/${movement.id}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notes }),
@@ -104,7 +104,7 @@ export function StockMovementEditDialog({
 
     setReversing(true)
     try {
-      const res = await fetch(`/api/stock-movements/${movement.id}`, {
+      const res = await fetch(`/api/stock-movements/${movement.id}`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'reverse' }),

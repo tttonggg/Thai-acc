@@ -107,7 +107,7 @@ export function StockAdjustmentDialog({
 
     setLoading(true)
     try {
-      const res = await fetch('/api/stock-movements', {
+      const res = await fetch(`/api/stock-movements`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

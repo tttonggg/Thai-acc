@@ -131,7 +131,7 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/purchases/${purchaseId}`)
+      const res = await fetch(`/api/purchases/${purchaseId}`, { credentials: 'include' })
 
       // Handle non-OK responses with error JSON
       if (!res.ok) {

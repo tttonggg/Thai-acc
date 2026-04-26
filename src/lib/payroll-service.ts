@@ -5,12 +5,12 @@
 
 /**
  * Calculates Social Security Contribution (ประกันสังคม)
- * Rate: 5% of salary, capped at ฿750/month
- * (per Thai Social Security Act, max insurable salary = ฿15,000)
+ * Rate: 5% of salary, capped at ฿495/month (per Thai Social Security Act, ceiling = ฿9,900)
  */
 export function calculateSSC(baseSalary: number): number {
   const sscRate = 0.05
-  const maxSSC = 750 // บาท
+  const sscCeiling = 9900 // ฿9,900 per month (correct Thai SSC ceiling)
+  const maxSSC = sscCeiling * sscRate // ฿495
   return Math.min(baseSalary * sscRate, maxSSC)
 }
 

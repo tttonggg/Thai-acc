@@ -93,7 +93,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const res = await fetch('/api/customers')
+        const res = await fetch(`/api/customers`, { credentials: 'include' })
         const data = await res.json()
         // API returns { success: true, data: [...] }
         setCustomers(Array.isArray(data.data) ? data.data : [])
@@ -107,7 +107,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch('/api/products')
+        const res = await fetch(`/api/products`, { credentials: 'include' })
         const data = await res.json()
         // API returns { success: true, data: [...] }
         setProducts(Array.isArray(data.data) ? data.data : [])
@@ -125,7 +125,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
         return
       }
       try {
-        const res = await fetch(`/api/invoices?customerId=${selectedCustomerId}&status=ISSUED,PAID`)
+        const res = await fetch(`/api/invoices?customerId=${selectedCustomerId}&status=ISSUED,PAID`, { credentials: 'include' })
         const data = await res.json()
         setInvoices((data.data || data).filter((inv: Invoice) => inv.status !== 'CANCELLED'))
       } catch (error) {
@@ -274,7 +274,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
         totalAmount: totals.totalAmount,
       }
 
-      const res = await fetch('/api/credit-notes', {
+      const res = await fetch(`/api/credit-notes`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

@@ -143,7 +143,7 @@ export function QuotationList() {
       if (filterCustomer !== 'all') params.append('customerId', filterCustomer)
       if (searchTerm) params.append('search', searchTerm)
 
-      const res = await fetch(`/api/quotations?${params}`)
+      const res = await fetch(`/api/quotations?${params}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Fetch failed')
 
       const result = await res.json()
@@ -223,7 +223,7 @@ export function QuotationList() {
 
     setDeletingQuotation(quotationId)
     try {
-      const res = await fetch(`/api/quotations/${quotationId}`, {
+      const res = await fetch(`/api/quotations/${quotationId}`, { credentials: 'include', 
         method: 'DELETE',
       })
 
@@ -255,7 +255,7 @@ export function QuotationList() {
   ) => {
     setProcessingAction(`${quotationId}-${action}`)
     try {
-      const res = await fetch(`/api/quotations/${quotationId}`, {
+      const res = await fetch(`/api/quotations/${quotationId}`, { credentials: 'include', 
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
@@ -294,7 +294,7 @@ export function QuotationList() {
   const handleConvertToInvoice = async (quotationId: string) => {
     setProcessingAction(`${quotationId}-convert`)
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/convert-to-invoice`, {
+      const res = await fetch(`/api/quotations/${quotationId}/convert-to-invoice`, { credentials: 'include', 
         method: 'POST',
       })
 

@@ -57,7 +57,7 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
     setLoading(true)
 
     try {
-      const response = await window.fetch(`/api/payroll/${payrollRun.id}`, {
+      const response = await window.fetch(`/api/payroll/${payrollRun.id}`, { credentials: 'include', 
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'approve' }),
@@ -90,7 +90,7 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
     setLoading(true)
 
     try {
-      const response = await window.fetch(`/api/payroll/${payrollRun.id}`, {
+      const response = await window.fetch(`/api/payroll/${payrollRun.id}`, { credentials: 'include', 
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'markPaid' }),

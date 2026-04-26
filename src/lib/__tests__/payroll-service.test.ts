@@ -34,19 +34,19 @@ vi.mock('@/lib/db', () => ({
 describe('Payroll Service', () => {
   describe('calculateSSC', () => {
     it('should calculate 5% of salary', () => {
-      expect(calculateSSC(15000)).toBe(750) // 5% of 15000
-      expect(calculateSSC(10000)).toBe(500) // 5% of 10000
+      expect(calculateSSC(9900)).toBe(495) // 5% of 9900 (at ceiling)
+      expect(calculateSSC(10000)).toBe(495) // Capped at 495
     })
 
-    it('should cap SSC at 750 THB (max base 15000)', () => {
-      expect(calculateSSC(20000)).toBe(750) // Capped
-      expect(calculateSSC(50000)).toBe(750) // Capped
-      expect(calculateSSC(100000)).toBe(750) // Capped
+    it('should cap SSC at 495 THB (max base 9900 per Thai SSC Act)', () => {
+      expect(calculateSSC(9900)).toBe(495) // At ceiling
+      expect(calculateSSC(15000)).toBe(495) // Capped
+      expect(calculateSSC(50000)).toBe(495) // Capped
     })
 
-    it('should handle salary below 15000 correctly', () => {
-      expect(calculateSSC(15000)).toBe(750) // At max
-      expect(calculateSSC(14999)).toBe(749.95) // Just below max
+    it('should handle salary below ceiling correctly', () => {
+      expect(calculateSSC(9900)).toBe(495) // At max
+      expect(calculateSSC(9899)).toBeCloseTo(494.95, 2) // Just below max
     })
 
     it('should handle zero salary', () => {
@@ -54,8 +54,8 @@ describe('Payroll Service', () => {
     })
 
     it('should handle minimum wage scenarios', () => {
-      expect(calculateSSC(10000)).toBe(500) // Approximate minimum wage
-      expect(calculateSSC(12000)).toBe(600)
+      expect(calculateSSC(10000)).toBe(495) // Capped at 495
+      expect(calculateSSC(12000)).toBe(495) // Capped at 495
     })
   })
 
@@ -68,9 +68,10 @@ describe('Payroll Service', () => {
 
     it('should calculate 5% for 150,001-300,000 bracket', () => {
       // Annual 300,000 - 60,000 allowance = 240,000 taxable
-      // 240,000 * 5% = 12,000 annual tax
-      // 12,000 / 12 = 1,000 monthly
-      expect(calculatePND1(300000)).toBe(1000)
+      // Only the amount ABOVE 150,000 is taxed at 5%
+      // (240,000 - 150,000) * 5% = 4,500 annual tax
+      // 4,500 / 12 = 375 monthly
+      expect(calculatePND1(300000)).toBe(375)
     })
 
     it('should calculate 10% for 300,001-500,000 bracket', () => {
@@ -84,7 +85,14 @@ describe('Payroll Service', () => {
 
     it('should calculate progressive tax for higher brackets', () => {
       // Annual 1,000,000 - 60,000 = 940,000 taxable
-      expect(calculatePND1(1000000)).toBeGreaterThan(10000)
+      // Progressive tax on 940,000:
+      // 150,000 * 0% = 0
+      // 150,000 * 5% = 7,500
+      // 200,000 * 10% = 20,000
+      // 250,000 * 15% = 37,500
+      // 190,000 * 20% = 38,000
+      // Total annual: 103,000, monthly: 8583
+      expect(calculatePND1(1000000)).toBe(8583)
     })
 
     it('should calculate maximum tax for top bracket', () => {
@@ -101,7 +109,7 @@ describe('Payroll Service', () => {
 
       expect(result.baseSalary).toBe(20000)
       expect(result.grossSalary).toBe(20000)
-      expect(result.socialSecurity).toBe(750) // Capped
+      expect(result.socialSecurity).toBe(495) // Capped at 495
       expect(result.netPay).toBeLessThan(result.grossSalary)
     })
 
@@ -112,7 +120,7 @@ describe('Payroll Service', () => {
       })
 
       expect(result.grossSalary).toBe(25000)
-      expect(result.socialSecurity).toBe(750) // Based on base only
+      expect(result.socialSecurity).toBe(495) // Based on base only, capped
     })
 
     it('should deduct deductions from gross salary', () => {
@@ -164,13 +172,19 @@ describe('Payroll Service', () => {
       expect(calculateEmployerSSC(10000)).toBe(calculateSSC(10000))
     })
 
-    it('should also be capped at 750 THB', () => {
-      expect(calculateEmployerSSC(50000)).toBe(750)
+    it('should also be capped at 495 THB', () => {
+      expect(calculateEmployerSSC(50000)).toBe(495)
     })
   })
 
   describe('createPayrollJournalEntry', () => {
     it('should create journal entry with correct structure', async () => {
+      // Calculate expected values to ensure balance:
+      // gross = 100000 + 10000 - 5000 = 105000
+      // employer SSC = 495 * 3 = 1485 (each payroll capped at 495)
+      // totalDebit = 105000 + 1485 = 106485
+      // For balance: employee SSC (1485) + WHT (5000) + netPay = 106485
+      // Therefore: netPay = 106485 - 1485 - 5000 = 100000
       const mockTx = {
         payrollRun: {
           findUnique: vi.fn().mockResolvedValue({
@@ -181,9 +195,10 @@ describe('Payroll Service', () => {
             totalBaseSalary: 100000,
             totalAdditions: 10000,
             totalDeductions: 5000,
-            totalSsc: 3000,
+            // 3 employees at 495 each = 1485 total employee SSC
+            totalSsc: 1485,
             totalTax: 5000,
-            totalNetPay: 97000,
+            totalNetPay: 100000, // Must be 100000 to balance: 1485+5000+100000=106485
             payrolls: [
               { baseSalary: 20000 },
               { baseSalary: 30000 },
@@ -285,7 +300,13 @@ describe('Payroll Service', () => {
         .rejects.toThrow('Required payroll accounts not found')
     })
 
-    it('should verify double-entry balance', async () => {
+it('should verify double-entry balance', async () => {
+      // Single employee at 100000 base:
+      // gross = 100000 (no additions/deductions)
+      // employer SSC = 495 (capped at 495)
+      // totalDebit = 100000 + 495 = 100495
+      // For balance: employee SSC (495) + WHT (0) + netPay = 100495
+      // Therefore: netPay = 100495 - 495 - 0 = 100000
       const mockTx = {
         payrollRun: {
           findUnique: vi.fn().mockResolvedValue({
@@ -296,12 +317,14 @@ describe('Payroll Service', () => {
             totalBaseSalary: 100000,
             totalAdditions: 0,
             totalDeductions: 0,
-            totalSsc: 0,
+            // Single employee SSC = 495
+            totalSsc: 495,
             totalTax: 0,
-            totalNetPay: 100000,
+            totalNetPay: 100000, // Must be 100000 to balance: 495+0+100000=100495
             payrolls: [{ baseSalary: 100000 }],
             journalEntryId: null,
           }),
+          update: vi.fn(),
         },
         chartOfAccount: {
           findUnique: vi.fn().mockImplementation((args: any) => ({
@@ -335,17 +358,17 @@ describe('Payroll Service', () => {
         baseSalary: 500000, // 500k monthly = 6M annual
       })
 
-      expect(result.socialSecurity).toBe(750) // Still capped
+      expect(result.socialSecurity).toBe(495) // Still capped at 495
       expect(result.withholdingTax).toBeGreaterThan(0)
       expect(result.netPay).toBeLessThan(result.grossSalary)
     })
 
     it('should handle minimum wage', () => {
       const result = calculateEmployeePayroll({
-        baseSalary: 10000, // Approximate minimum wage
+        baseSalary: 10000, // Minimum wage scenario
       })
 
-      expect(result.socialSecurity).toBe(500) // 5% of 10000
+      expect(result.socialSecurity).toBe(495) // Capped at 495
       expect(result.withholdingTax).toBe(0) // Below threshold
     })
   })

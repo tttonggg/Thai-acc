@@ -55,7 +55,7 @@ export function BankStatementImport() {
   // Fetch bank accounts on mount
   useState(() => {
     const fetchAccounts = async () => {
-      const res = await window.fetch('/api/bank-accounts').then(r => r.json())
+      const res = await window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())
       if (res.success) setBankAccounts(res.data)
     }
     fetchAccounts()
@@ -211,7 +211,7 @@ export function BankStatementImport() {
       formData.append('file', files[0])
       formData.append('bankAccountId', selectedBankAccountId)
 
-      const res = await fetch('/api/banking/import', {
+      const res = await fetch(`/api/banking/import`, { credentials: 'include', 
         method: 'POST',
         headers: {
           'x-playwright-test': 'true',

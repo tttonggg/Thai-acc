@@ -53,7 +53,7 @@ export function TaxFormManagement() {
 
   const fetchTaxForms = async () => {
     try {
-      const res = await fetch(`/api/tax-forms?year=${selectedYear}`)
+      const res = await fetch(`/api/tax-forms?year=${selectedYear}`, { credentials: 'include' })
       const data = await res.json()
       if (data.taxForms) {
         setTaxForms(data.taxForms)
@@ -66,7 +66,7 @@ export function TaxFormManagement() {
   const handleGenerate = async (formType: string, month: number, year: number) => {
     setLoading(true)
     try {
-      const res = await fetch("/api/tax-forms", {
+      const res = await fetch(`/api/tax-forms`, { credentials: 'include', 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ formType, month, year }),
@@ -89,7 +89,7 @@ export function TaxFormManagement() {
   const handleSubmit = async (taxFormId: string) => {
     setLoading(true)
     try {
-      const res = await fetch("/api/tax-forms", {
+      const res = await fetch(`/api/tax-forms`, { credentials: 'include', 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "submit", taxFormId }),
@@ -112,7 +112,7 @@ export function TaxFormManagement() {
 
   const handleExport = async (taxFormId: string, format: "pdf" | "excel") => {
     try {
-      const res = await fetch(`/api/tax-forms/${taxFormId}/export?format=${format}`)
+      const res = await fetch(`/api/tax-forms/${taxFormId}/export?format=${format}`, { credentials: 'include' })
       if (res.ok) {
         const blob = await res.blob()
         const url = window.URL.createObjectURL(blob)

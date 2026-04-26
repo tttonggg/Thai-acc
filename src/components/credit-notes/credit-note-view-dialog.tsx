@@ -81,7 +81,7 @@ export function CreditNoteViewDialog({ creditNoteId, open, onOpenChange }: Credi
 
       setLoading(true)
       try {
-        const res = await fetch(`/api/credit-notes/${creditNoteId}`)
+        const res = await fetch(`/api/credit-notes/${creditNoteId}`, { credentials: 'include' })
         if (!res.ok) throw new Error('Failed to fetch')
         const data = await res.json()
         setCreditNote(data.data || data)

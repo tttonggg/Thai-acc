@@ -122,7 +122,7 @@ export function ChartOfAccounts() {
 
   const fetchAccounts = async () => {
     try {
-      const response = await fetch('/api/accounts')
+      const response = await fetch(`/api/accounts`, { credentials: 'include' })
       if (response.ok) {
         const data = await response.json()
         setAccounts(data)
@@ -136,7 +136,7 @@ export function ChartOfAccounts() {
 
   const handleAddAccount = async () => {
     try {
-      const response = await fetch('/api/accounts', {
+      const response = await fetch(`/api/accounts`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -184,7 +184,7 @@ export function ChartOfAccounts() {
     setIsDeleting(true)
 
     try {
-      const response = await fetch(`/api/accounts/${accountToDelete.id}`, {
+      const response = await fetch(`/api/accounts/${accountToDelete.id}`, { credentials: 'include', 
         method: 'DELETE',
       })
 
@@ -236,7 +236,7 @@ export function ChartOfAccounts() {
 
   const handleExport = async () => {
     try {
-      const response = await fetch('/api/accounts/export')
+      const response = await fetch(`/api/accounts/export`, { credentials: 'include' })
       if (response.ok) {
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
@@ -286,7 +286,7 @@ export function ChartOfAccounts() {
       
       // Import accounts
       for (const account of accountsToImport) {
-        await fetch('/api/accounts', {
+        await fetch(`/api/accounts`, { credentials: 'include', 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(account)

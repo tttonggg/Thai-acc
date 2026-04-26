@@ -1,5 +1,7 @@
 import { db } from "@/lib/db"
 import { formatThaiDate } from "@/lib/thai-accounting"
+import { apiResponse, notFoundError } from "@/lib/api-utils"
+import { requireAuth } from "@/lib/api-utils"
 
 interface AuditEntry {
   id: string

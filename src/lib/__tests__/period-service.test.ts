@@ -14,33 +14,62 @@ import {
   initializeYearPeriods,
 } from '../period-service'
 
-// Mock the prisma client - use vi.hoisted to avoid hoisting issues
-const { mockPrisma } = vi.hoisted(() => ({
-  mockPrisma: {
-    accountingPeriod: {
-      findUnique: vi.fn(),
-      findMany: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      upsert: vi.fn(),
-    },
-    journalEntry: {
-      findMany: vi.fn(),
-      count: vi.fn(),
-    },
-    journalLine: {
-      findMany: vi.fn(),
-    },
-    chartOfAccount: {
-      findMany: vi.fn(),
-    },
-  },
+// Create mock functions using vi.hoisted so they can be referenced in vi.mock
+const { mockFindUnique, mockFindMany, mockCreate, mockUpdate, mockUpsert, mockJournalEntryFindMany, mockJournalEntryCount, mockChartOfAccountFindMany, mockJournalLineFindMany } = vi.hoisted(() => ({
+  mockFindUnique: vi.fn(),
+  mockFindMany: vi.fn(),
+  mockCreate: vi.fn(),
+  mockUpdate: vi.fn(),
+  mockUpsert: vi.fn(),
+  mockJournalEntryFindMany: vi.fn(),
+  mockJournalEntryCount: vi.fn(),
+  mockChartOfAccountFindMany: vi.fn(),
+  mockJournalLineFindMany: vi.fn(),
 }))
 
-vi.mock('@/lib/db', () => ({
-  prisma: mockPrisma,
-  default: mockPrisma,
-}))
+// Mock the prisma client with proper structure for both default and named exports
+vi.mock('@/lib/db', async () => {
+  return {
+    prisma: {
+      accountingPeriod: {
+        findUnique: mockFindUnique,
+        findMany: mockFindMany,
+        create: mockCreate,
+        update: mockUpdate,
+        upsert: mockUpsert,
+      },
+      journalEntry: {
+        findMany: mockJournalEntryFindMany,
+        count: mockJournalEntryCount,
+      },
+      journalLine: {
+        findMany: mockJournalLineFindMany,
+      },
+      chartOfAccount: {
+        findMany: mockChartOfAccountFindMany,
+      },
+    },
+    default: {
+      accountingPeriod: {
+        findUnique: mockFindUnique,
+        findMany: mockFindMany,
+        create: mockCreate,
+        update: mockUpdate,
+        upsert: mockUpsert,
+      },
+      journalEntry: {
+        findMany: mockJournalEntryFindMany,
+        count: mockJournalEntryCount,
+      },
+      journalLine: {
+        findMany: mockJournalLineFindMany,
+      },
+      chartOfAccount: {
+        findMany: mockChartOfAccountFindMany,
+      },
+    },
+  }
+})
 
 describe('Period Service', () => {
   beforeEach(() => {
@@ -49,10 +78,13 @@ describe('Period Service', () => {
 
   describe('checkPeriodStatus', () => {
     it('should return valid for open period', async () => {
-      mockPrisma.accountingPeriod.findUnique.mockResolvedValue({
+      mockFindUnique.mockResolvedValue({
+        id: 'period-1',
         year: 2024,
         month: 3,
         status: 'OPEN',
+        isLocked: false,
+        companyId: 'company-1',
       })
 
       const result = await checkPeriodStatus(new Date('2024-03-15'))
@@ -63,26 +95,32 @@ describe('Period Service', () => {
     })
 
     it('should create new period if not exists', async () => {
-      mockPrisma.accountingPeriod.findUnique.mockResolvedValue(null)
-      mockPrisma.accountingPeriod.create.mockResolvedValue({
+      mockFindUnique.mockResolvedValue(null)
+      mockCreate.mockResolvedValue({
+        id: 'new-period',
         year: 2024,
         month: 3,
         status: 'OPEN',
+        isLocked: false,
+        companyId: 'company-1',
       })
 
       const result = await checkPeriodStatus(new Date('2024-03-15'))
 
       expect(result.isValid).toBe(true)
-      expect(mockPrisma.accountingPeriod.create).toHaveBeenCalledWith({
+      expect(mockCreate).toHaveBeenCalledWith({
         data: { year: 2024, month: 3, status: 'OPEN' },
       })
     })
 
     it('should return invalid for closed period', async () => {
-      mockPrisma.accountingPeriod.findUnique.mockResolvedValue({
+      mockFindUnique.mockResolvedValue({
+        id: 'period-1',
         year: 2024,
         month: 2,
         status: 'CLOSED',
+        isLocked: false,
+        companyId: 'company-1',
       })
 
       const result = await checkPeriodStatus(new Date('2024-02-15'))
@@ -92,10 +130,13 @@ describe('Period Service', () => {
     })
 
     it('should return invalid for locked period', async () => {
-      mockPrisma.accountingPeriod.findUnique.mockResolvedValue({
+      mockFindUnique.mockResolvedValue({
+        id: 'period-1',
         year: 2024,
         month: 1,
         status: 'LOCKED',
+        isLocked: true,
+        companyId: 'company-1',
       })
 
       const result = await checkPeriodStatus(new Date('2024-01-15'))
@@ -105,15 +146,18 @@ describe('Period Service', () => {
     })
 
     it('should extract correct year and month from date', async () => {
-      mockPrisma.accountingPeriod.findUnique.mockResolvedValue({
+      mockFindUnique.mockResolvedValue({
+        id: 'period-1',
         year: 2024,
         month: 12,
         status: 'OPEN',
+        isLocked: false,
+        companyId: 'company-1',
       })
 
-      const result = await checkPeriodStatus(new Date('2024-12-31'))
+      await checkPeriodStatus(new Date('2024-12-31'))
 
-      expect(mockPrisma.accountingPeriod.findUnique).toHaveBeenCalledWith({
+      expect(mockFindUnique).toHaveBeenCalledWith({
         where: { year_month: { year: 2024, month: 12 } },
       })
     })
@@ -121,7 +165,7 @@ describe('Period Service', () => {
 
   describe('validatePeriodRange', () => {
     it('should return valid for all open periods in range', async () => {
-      mockPrisma.accountingPeriod.findMany.mockResolvedValue([
+      mockFindMany.mockResolvedValue([
         { year: 2024, month: 1, status: 'OPEN' },
         { year: 2024, month: 2, status: 'OPEN' },
         { year: 2024, month: 3, status: 'OPEN' },
@@ -136,25 +180,25 @@ describe('Period Service', () => {
     })
 
     it('should auto-create missing periods', async () => {
-      mockPrisma.accountingPeriod.findMany.mockResolvedValue([
+      mockFindMany.mockResolvedValue([
         { year: 2024, month: 1, status: 'OPEN' },
         { year: 2024, month: 3, status: 'OPEN' },
       ])
-      mockPrisma.accountingPeriod.create.mockResolvedValue({})
+      mockCreate.mockResolvedValue({})
 
       const result = await validatePeriodRange(
         new Date('2024-01-01'),
         new Date('2024-03-31')
       )
 
-      expect(mockPrisma.accountingPeriod.create).toHaveBeenCalledWith({
+      expect(mockCreate).toHaveBeenCalledWith({
         data: { year: 2024, month: 2, status: 'OPEN' },
       })
       expect(result.isValid).toBe(true)
     })
 
     it('should return invalid if any period is closed', async () => {
-      mockPrisma.accountingPeriod.findMany.mockResolvedValue([
+      mockFindMany.mockResolvedValue([
         { year: 2024, month: 1, status: 'OPEN' },
         { year: 2024, month: 2, status: 'CLOSED' },
       ])
@@ -169,7 +213,7 @@ describe('Period Service', () => {
     })
 
     it('should handle year boundaries', async () => {
-      mockPrisma.accountingPeriod.findMany.mockResolvedValue([
+      mockFindMany.mockResolvedValue([
         { year: 2023, month: 12, status: 'OPEN' },
         { year: 2024, month: 1, status: 'OPEN' },
       ])
@@ -183,7 +227,7 @@ describe('Period Service', () => {
     })
 
     it('should handle multi-year ranges', async () => {
-      mockPrisma.accountingPeriod.findMany.mockResolvedValue(
+      mockFindMany.mockResolvedValue(
         Array.from({ length: 12 }, (_, i) => ({
           year: i < 3 ? 2024 : 2025,
           month: (i % 12) + 1,
@@ -202,7 +246,7 @@ describe('Period Service', () => {
 
   describe('closePeriod', () => {
     it('should close an open period', async () => {
-      mockPrisma.accountingPeriod.upsert.mockResolvedValue({
+      mockUpsert.mockResolvedValue({
         year: 2024,
         month: 3,
         status: 'CLOSED',
@@ -217,7 +261,7 @@ describe('Period Service', () => {
     })
 
     it('should clear reopen fields when closing', async () => {
-      mockPrisma.accountingPeriod.upsert.mockImplementation((args: any) => {
+      mockUpsert.mockImplementation((args: any) => {
         expect(args.update).toHaveProperty('reopenedBy', null)
         expect(args.update).toHaveProperty('reopenedAt', null)
         return Promise.resolve({ status: 'CLOSED' })
@@ -227,7 +271,7 @@ describe('Period Service', () => {
     })
 
     it('should create period if not exists when closing', async () => {
-      mockPrisma.accountingPeriod.upsert.mockResolvedValue({
+      mockUpsert.mockResolvedValue({
         year: 2024,
         month: 6,
         status: 'CLOSED',
@@ -235,7 +279,7 @@ describe('Period Service', () => {
 
       const result = await closePeriod(2024, 6, 'user-1')
 
-      expect(mockPrisma.accountingPeriod.upsert).toHaveBeenCalledWith(
+      expect(mockUpsert).toHaveBeenCalledWith(
         expect.objectContaining({
           create: expect.objectContaining({
             year: 2024,
@@ -249,7 +293,7 @@ describe('Period Service', () => {
 
   describe('reopenPeriod', () => {
     it('should reopen a closed period', async () => {
-      mockPrisma.accountingPeriod.update.mockResolvedValue({
+      mockUpdate.mockResolvedValue({
         year: 2024,
         month: 3,
         status: 'OPEN',
@@ -264,7 +308,7 @@ describe('Period Service', () => {
     })
 
     it('should use correct composite key', async () => {
-      mockPrisma.accountingPeriod.update.mockImplementation((args: any) => {
+      mockUpdate.mockImplementation((args: any) => {
         expect(args.where).toEqual({ year_month: { year: 2024, month: 3 } })
         return Promise.resolve({ status: 'OPEN' })
       })
@@ -275,7 +319,7 @@ describe('Period Service', () => {
 
   describe('lockPeriod', () => {
     it('should lock a period permanently', async () => {
-      mockPrisma.accountingPeriod.upsert.mockResolvedValue({
+      mockUpsert.mockResolvedValue({
         year: 2024,
         month: 1,
         status: 'LOCKED',
@@ -289,9 +333,16 @@ describe('Period Service', () => {
     })
 
     it('should require admin privileges to lock', async () => {
+      mockUpsert.mockResolvedValue({
+        year: 2024,
+        month: 1,
+        status: 'LOCKED',
+        closedBy: 'admin-user',
+      })
+
       await lockPeriod(2024, 1, 'admin-user')
 
-      expect(mockPrisma.accountingPeriod.upsert).toHaveBeenCalledWith(
+      expect(mockUpsert).toHaveBeenCalledWith(
         expect.objectContaining({
           update: expect.objectContaining({
             status: 'LOCKED',
@@ -304,12 +355,12 @@ describe('Period Service', () => {
 
   describe('generatePeriodReconciliationReport', () => {
     it('should generate report with all key metrics', async () => {
-      mockPrisma.accountingPeriod.findUnique.mockResolvedValue({
+      mockFindUnique.mockResolvedValue({
         year: 2024,
         month: 3,
         status: 'CLOSED',
       })
-      mockPrisma.journalEntry.findMany.mockResolvedValue([
+      mockJournalEntryFindMany.mockResolvedValue([
         {
           lines: [
             { debit: 1000, credit: 0 },
@@ -317,8 +368,8 @@ describe('Period Service', () => {
           ],
         },
       ])
-      mockPrisma.journalEntry.count.mockResolvedValue(5)
-      mockPrisma.chartOfAccount.findMany.mockResolvedValue([])
+      mockJournalEntryCount.mockResolvedValue(5)
+      mockChartOfAccountFindMany.mockResolvedValue([])
 
       const report = await generatePeriodReconciliationReport(2024, 3)
 
@@ -332,12 +383,12 @@ describe('Period Service', () => {
     })
 
     it('should identify balance discrepancies', async () => {
-      mockPrisma.accountingPeriod.findUnique.mockResolvedValue({
+      mockFindUnique.mockResolvedValue({
         year: 2024,
         month: 3,
         status: 'OPEN',
       })
-      mockPrisma.journalEntry.findMany.mockResolvedValue([
+      mockJournalEntryFindMany.mockResolvedValue([
         {
           lines: [
             { debit: 1000, credit: 0 },
@@ -345,11 +396,11 @@ describe('Period Service', () => {
           ],
         },
       ])
-      mockPrisma.journalEntry.count.mockResolvedValue(0)
-      mockPrisma.chartOfAccount.findMany.mockResolvedValue([
+      mockJournalEntryCount.mockResolvedValue(0)
+      mockChartOfAccountFindMany.mockResolvedValue([
         { id: 'acc-1', code: '1100', name: 'Cash', isActive: true, isDetail: true },
       ])
-      mockPrisma.journalLine.findMany.mockResolvedValue([])
+      mockJournalLineFindMany.mockResolvedValue([])
 
       const report = await generatePeriodReconciliationReport(2024, 3)
 
@@ -357,44 +408,44 @@ describe('Period Service', () => {
     })
 
     it('should calculate correct date range', async () => {
-      mockPrisma.accountingPeriod.findUnique.mockResolvedValue({ status: 'OPEN' })
-      mockPrisma.journalEntry.findMany.mockImplementation((args: any) => {
+      mockFindUnique.mockResolvedValue({ status: 'OPEN' })
+      mockJournalEntryFindMany.mockImplementation((args: any) => {
         const startDate = args.where.date.gte
         const endDate = args.where.date.lte
-        
+
         expect(startDate.getDate()).toBe(1)
         expect(startDate.getMonth()).toBe(2)
         expect(endDate.getDate()).toBeGreaterThanOrEqual(28)
-        
+
         return Promise.resolve([])
       })
-      mockPrisma.journalEntry.count.mockResolvedValue(0)
-      mockPrisma.chartOfAccount.findMany.mockResolvedValue([])
+      mockJournalEntryCount.mockResolvedValue(0)
+      mockChartOfAccountFindMany.mockResolvedValue([])
 
       await generatePeriodReconciliationReport(2024, 3)
     })
 
     it('should only include posted entries', async () => {
-      mockPrisma.accountingPeriod.findUnique.mockResolvedValue({ status: 'OPEN' })
-      mockPrisma.journalEntry.findMany.mockImplementation((args: any) => {
+      mockFindUnique.mockResolvedValue({ status: 'OPEN' })
+      mockJournalEntryFindMany.mockImplementation((args: any) => {
         expect(args.where.status).toBe('POSTED')
         expect(args.where.deletedAt).toBeNull()
         return Promise.resolve([])
       })
-      mockPrisma.journalEntry.count.mockResolvedValue(0)
-      mockPrisma.chartOfAccount.findMany.mockResolvedValue([])
+      mockJournalEntryCount.mockResolvedValue(0)
+      mockChartOfAccountFindMany.mockResolvedValue([])
 
       await generatePeriodReconciliationReport(2024, 3)
     })
 
     it('should count pending draft entries', async () => {
-      mockPrisma.accountingPeriod.findUnique.mockResolvedValue({ status: 'OPEN' })
-      mockPrisma.journalEntry.findMany.mockResolvedValue([])
-      mockPrisma.journalEntry.count.mockImplementation((args: any) => {
+      mockFindUnique.mockResolvedValue({ status: 'OPEN' })
+      mockJournalEntryFindMany.mockResolvedValue([])
+      mockJournalEntryCount.mockImplementation((args: any) => {
         expect(args.where.status).toBe('DRAFT')
         return Promise.resolve(3)
       })
-      mockPrisma.chartOfAccount.findMany.mockResolvedValue([])
+      mockChartOfAccountFindMany.mockResolvedValue([])
 
       const report = await generatePeriodReconciliationReport(2024, 3)
 
@@ -404,30 +455,30 @@ describe('Period Service', () => {
 
   describe('initializeYearPeriods', () => {
     it('should create all 12 months for a year', async () => {
-      mockPrisma.accountingPeriod.findMany.mockResolvedValue([])
-      mockPrisma.accountingPeriod.create.mockResolvedValue({})
+      mockFindMany.mockResolvedValue([])
+      mockCreate.mockResolvedValue({})
 
       await initializeYearPeriods(2024)
 
-      expect(mockPrisma.accountingPeriod.create).toHaveBeenCalledTimes(12)
+      expect(mockCreate).toHaveBeenCalledTimes(12)
     })
 
     it('should skip existing periods', async () => {
-      mockPrisma.accountingPeriod.findMany.mockResolvedValue([
+      mockFindMany.mockResolvedValue([
         { year: 2024, month: 1, status: 'OPEN' },
         { year: 2024, month: 2, status: 'OPEN' },
         { year: 2024, month: 3, status: 'OPEN' },
       ])
-      mockPrisma.accountingPeriod.create.mockResolvedValue({})
+      mockCreate.mockResolvedValue({})
 
       await initializeYearPeriods(2024)
 
-      expect(mockPrisma.accountingPeriod.create).toHaveBeenCalledTimes(9)
+      expect(mockCreate).toHaveBeenCalledTimes(9)
     })
 
     it('should create periods with OPEN status', async () => {
-      mockPrisma.accountingPeriod.findMany.mockResolvedValue([])
-      mockPrisma.accountingPeriod.create.mockImplementation((args: any) => {
+      mockFindMany.mockResolvedValue([])
+      mockCreate.mockImplementation((args: any) => {
         expect(args.data.status).toBe('OPEN')
         return Promise.resolve({})
       })
@@ -436,10 +487,10 @@ describe('Period Service', () => {
     })
 
     it('should handle leap year correctly', async () => {
-      mockPrisma.accountingPeriod.findMany.mockResolvedValue([])
+      mockFindMany.mockResolvedValue([])
       const createdMonths: number[] = []
-      
-      mockPrisma.accountingPeriod.create.mockImplementation((args: any) => {
+
+      mockCreate.mockImplementation((args: any) => {
         createdMonths.push(args.data.month)
         return Promise.resolve({})
       })

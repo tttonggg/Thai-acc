@@ -136,7 +136,7 @@ export function ActivityLogPage() {
         ...(dateTo && { dateTo }),
       })
 
-      const response = await fetch(`/api/admin/activity-log?${params}`)
+      const response = await fetch(`/api/admin/activity-log?${params}`, { credentials: 'include' })
       const data: ActivityLogResponse = await response.json()
 
       if (data.success) {
@@ -184,7 +184,7 @@ export function ActivityLogPage() {
         ...(dateTo && { dateTo }),
       })
 
-      const response = await fetch(`/api/admin/activity-log/export?${params}`)
+      const response = await fetch(`/api/admin/activity-log/export?${params}`, { credentials: 'include' })
 
       if (response.ok) {
         const blob = await response.blob()

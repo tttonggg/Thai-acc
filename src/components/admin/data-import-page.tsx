@@ -92,7 +92,7 @@ export function DataImportPage() {
     setLoadingHistory(true)
     setError(null)
     try {
-      const response = await fetch('/api/admin/import')
+      const response = await fetch(`/api/admin/import`, { credentials: 'include' })
       const result = await response.json()
 
       if (result.success) {
@@ -138,7 +138,7 @@ export function DataImportPage() {
       formData.append('updateExisting', updateExisting.toString())
       formData.append('dryRun', 'true')
 
-      const response = await fetch('/api/admin/import', {
+      const response = await fetch(`/api/admin/import`, { credentials: 'include', 
         method: 'POST',
         body: formData,
       })
@@ -177,7 +177,7 @@ export function DataImportPage() {
       formData.append('updateExisting', updateExisting.toString())
       formData.append('dryRun', 'false')
 
-      const response = await fetch('/api/admin/import', {
+      const response = await fetch(`/api/admin/import`, { credentials: 'include', 
         method: 'POST',
         body: formData,
       })

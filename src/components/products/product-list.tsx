@@ -124,7 +124,7 @@ export function ProductList() {
       if (searchTerm) params.append('search', searchTerm)
       if (filterStatus !== 'all') params.append('isActive', filterStatus === 'active' ? 'true' : 'false')
 
-      const res = await fetch(`/api/products?${params.toString()}`)
+      const res = await fetch(`/api/products?${params.toString()}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Fetch failed')
       const json = await res.json()
       const data = json?.data ?? json ?? []
@@ -191,7 +191,7 @@ export function ProductList() {
 
   const handleDeleteConfirm = async () => {
     try {
-      const res = await fetch(`/api/products/${deleteDialog.id}`, {
+      const res = await fetch(`/api/products/${deleteDialog.id}`, { credentials: 'include', 
         method: 'DELETE'
       })
 

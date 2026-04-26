@@ -119,7 +119,7 @@ export function StockTakePage() {
       if (warehouseFilter !== 'ALL') params.append('warehouseId', warehouseFilter)
       if (searchTerm) params.append('search', searchTerm)
 
-      const response = await fetch(`/api/stock-takes?${params}`)
+      const response = await fetch(`/api/stock-takes?${params}`, { credentials: 'include' })
       const json = await response.json()
 
       if (json.success && json.data) {
@@ -147,7 +147,7 @@ export function StockTakePage() {
   // Fetch warehouses
   const fetchWarehouses = async () => {
     try {
-      const response = await fetch('/api/warehouses')
+      const response = await fetch(`/api/warehouses`, { credentials: 'include' })
       const json = await response.json()
 
       if (json.success) {
@@ -178,7 +178,7 @@ export function StockTakePage() {
     }
 
     try {
-      const response = await fetch('/api/stock-takes', {
+      const response = await fetch(`/api/stock-takes`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newStockTake),
@@ -228,7 +228,7 @@ export function StockTakePage() {
           : { productId: line.productId, actualQuantity: line.actualQuantity, notes: line.notes || '' }
       )
 
-      const response = await fetch(`/api/stock-takes/${selectedStockTake.id}`, {
+      const response = await fetch(`/api/stock-takes/${selectedStockTake.id}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lines: updatedLines }),
@@ -263,7 +263,7 @@ export function StockTakePage() {
     if (!selectedStockTake) return
 
     try {
-      const response = await fetch(`/api/stock-takes/${selectedStockTake.id}/approve`, {
+      const response = await fetch(`/api/stock-takes/${selectedStockTake.id}/approve`, { credentials: 'include', 
         method: 'POST',
       })
 

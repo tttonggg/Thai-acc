@@ -108,7 +108,7 @@ export function SystemHealthPage() {
       setRefreshing(true)
       setError(null)
 
-      const response = await fetch('/api/admin/health')
+      const response = await fetch(`/api/admin/health`, { credentials: 'include' })
 
       if (!response.ok) {
         if (response.status === 401) {

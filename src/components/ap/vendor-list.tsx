@@ -98,7 +98,7 @@ export function VendorList() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('/api/vendors')
+        const res = await fetch(`/api/vendors`, { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const json = await res.json()
         setVendors(json.data || json)
@@ -174,7 +174,7 @@ export function VendorList() {
     }
 
     try {
-      const res = await fetch('/api/vendors', {
+      const res = await fetch(`/api/vendors`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -220,7 +220,7 @@ export function VendorList() {
     if (!deleteDialog?.id) return
 
     try {
-      const res = await fetch(`/api/vendors/${deleteDialog.id}`, {
+      const res = await fetch(`/api/vendors/${deleteDialog.id}`, { credentials: 'include', 
         method: 'DELETE'
       })
 

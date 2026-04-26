@@ -51,7 +51,7 @@ export function BudgetManagement() {
 
   const fetchBudgets = async () => {
     try {
-      const res = await fetch(`/api/budgets?year=${selectedYear}`)
+      const res = await fetch(`/api/budgets?year=${selectedYear}`, { credentials: 'include' })
       const data = await res.json()
       if (data.budgets) {
         setBudgets(data.budgets)
@@ -63,7 +63,7 @@ export function BudgetManagement() {
 
   const fetchAlerts = async () => {
     try {
-      const res = await fetch("/api/budgets?alerts=true")
+      const res = await fetch(`/api/budgets?alerts=true`, { credentials: 'include' })
       const data = await res.json()
       if (data.alerts) {
         setAlerts(data.alerts)
@@ -76,7 +76,7 @@ export function BudgetManagement() {
   const handleUpdateActuals = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/api/budgets", {
+      const res = await fetch(`/api/budgets`, { credentials: 'include', 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "update-actuals", year: selectedYear }),
@@ -99,7 +99,7 @@ export function BudgetManagement() {
   const handleReport = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/budgets?report=vs-actual&year=${selectedYear}`)
+      const res = await fetch(`/api/budgets?report=vs-actual&year=${selectedYear}`, { credentials: 'include' })
       const data = await res.json()
       
       if (res.ok) {
@@ -117,7 +117,7 @@ export function BudgetManagement() {
 
   const acknowledgeAlert = async (alertId: string) => {
     try {
-      const res = await fetch("/api/budgets", {
+      const res = await fetch(`/api/budgets`, { credentials: 'include', 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "acknowledge-alert", alertId }),

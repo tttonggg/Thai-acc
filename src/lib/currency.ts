@@ -38,9 +38,9 @@ export function bahtToSatang(baht: number): number {
  * @returns Baht (e.g., 100.50)
  * @throws Error if satang is negative or NaN
  */
-export function satangToBaht(satang: number): number {
-  if (isNaN(satang)) {
-    throw new Error('Cannot convert NaN to Baht')
+export function satangToBaht(satang: number | null | undefined): number {
+  if (satang === null || satang === undefined || isNaN(satang)) {
+    return 0
   }
   // Allow negative values (for credit balances, etc) - just convert
   return satang / 100

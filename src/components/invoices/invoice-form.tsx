@@ -137,9 +137,9 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
     
     try {
       const [customersRes, productsRes, invoiceNumRes] = await Promise.all([
-        fetch('/api/customers', { signal: controller.signal }),
-        fetch('/api/products', { signal: controller.signal }).catch(() => ({ ok: false, json: async () => ({ data: [] }) })),
-        fetch('/api/invoices/next-number?type=' + formData.type, { signal: controller.signal }).catch(() => ({ ok: false, json: async () => ({ data: '' }) })),
+        fetch('/api/customers', { credentials: 'include', signal: controller.signal }),
+        fetch('/api/products', { credentials: 'include', signal: controller.signal }).catch(() => ({ ok: false, json: async () => ({ data: [] }) })),
+        fetch('/api/invoices/next-number?type=' + formData.type, { credentials: 'include', signal: controller.signal }).catch(() => ({ ok: false, json: async () => ({ data: '' }) })),
       ])
 
       if (customersRes.ok) {
@@ -347,7 +347,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
         // Fetch CSRF token first for production
         let csrfToken = ''
         try {
-          const csrfRes = await fetch('/api/csrf/token')
+          const csrfRes = await fetch(`/api/csrf/token`, { credentials: 'include' })
           if (csrfRes.ok) {
             const csrfData = await csrfRes.json()
             csrfToken = csrfData.token || ''
@@ -360,7 +360,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
         }
       }
 
-      const response = await fetch('/api/invoices', {
+      const response = await fetch(`/api/invoices`, { credentials: 'include', 
         method: 'POST',
         headers,
         body: JSON.stringify(payload),

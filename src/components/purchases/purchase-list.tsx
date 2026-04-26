@@ -99,7 +99,7 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
       try {
         // Add cache-busting timestamp to prevent stale responses
         const cacheBuster = new Date().getTime()
-        const res = await fetch(`/api/purchases?_=${cacheBuster}`)
+        const res = await fetch(`/api/purchases?_=${cacheBuster}`, { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const result = await res.json()
 
@@ -187,7 +187,7 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
     if (!confirm('ยืนยันที่จะลบใบซื้อนี้?')) return
 
     try {
-      const res = await fetch(`/api/purchases/${purchaseId}`, {
+      const res = await fetch(`/api/purchases/${purchaseId}`, { credentials: 'include', 
         method: 'DELETE'
       })
       const result = await res.json()

@@ -118,8 +118,8 @@ function StockTakesListTab() {
       if (searchQuery) params.append('search', searchQuery)
 
       const [takesRes, whRes] = await Promise.all([
-        window.fetch(`/api/stock-takes?${params.toString()}`).then(r => r.json()),
-        window.fetch('/api/warehouses').then(r => r.json()),
+        window.fetch(`/api/stock-takes?${params.toString()}`, { credentials: 'include' }).then(r => r.json()),
+        window.fetch(`/api/warehouses`, { credentials: 'include' }).then(r => r.json()),
       ])
 
       if (takesRes.success) {
@@ -149,7 +149,7 @@ function StockTakesListTab() {
     }
 
     try {
-      const res = await window.fetch(`/api/stock-takes/${stockTake.id}/approve`, {
+      const res = await window.fetch(`/api/stock-takes/${stockTake.id}/approve`, { credentials: 'include', 
         method: 'POST',
       }).then(r => r.json())
 
@@ -181,7 +181,7 @@ function StockTakesListTab() {
     }
 
     try {
-      const res = await window.fetch(`/api/stock-takes/${stockTake.id}/post`, {
+      const res = await window.fetch(`/api/stock-takes/${stockTake.id}/post`, { credentials: 'include', 
         method: 'POST',
       }).then(r => r.json())
 
@@ -213,7 +213,7 @@ function StockTakesListTab() {
     }
 
     try {
-      const res = await window.fetch(`/api/stock-takes/${stockTake.id}`, {
+      const res = await window.fetch(`/api/stock-takes/${stockTake.id}`, { credentials: 'include', 
         method: 'DELETE',
       }).then(r => r.json())
 
@@ -484,7 +484,7 @@ function VarianceReportTab() {
       const params = new URLSearchParams()
       if (warehouseFilter !== 'ALL') params.append('warehouseId', warehouseFilter)
 
-      const res = await window.fetch(`/api/stock-takes?${params.toString()}`).then(r => r.json())
+      const res = await window.fetch(`/api/stock-takes?${params.toString()}`, { credentials: 'include' }).then(r => r.json())
       if (res.success) {
         const data = res.data.data || res.data
         // Flatten all lines from all stock takes
@@ -500,7 +500,7 @@ function VarianceReportTab() {
         setVariances(allLines)
       }
 
-      const whRes = await window.fetch('/api/warehouses').then(r => r.json())
+      const whRes = await window.fetch(`/api/warehouses`, { credentials: 'include' }).then(r => r.json())
       if (whRes.success) {
         setWarehouses(whRes.data)
       }

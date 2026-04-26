@@ -216,13 +216,13 @@ export async function PUT(
   }
 }
 
-// DELETE - Soft-delete receipt (admin/accountant only, draft only)
+// DELETE - Delete receipt (admin only, draft only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth()
+    await requireAuth()
     await requireRole(['ACCOUNTANT', 'ADMIN'])
 
     const { id } = await params
@@ -230,7 +230,6 @@ export async function DELETE(
     // Check if receipt exists
     const receipt = await prisma.receipt.findUnique({
       where: { id },
-      include: { allocations: true },
     })
 
     if (!receipt) {
@@ -244,26 +243,18 @@ export async function DELETE(
     if (receipt.status !== 'DRAFT') {
       return NextResponse.json(
         { success: false, error: 'สามารถลบได้เฉพาะสถานะร่างเท่านั้น' },
-        { status: 400 }
+        { status: 403 }
       )
     }
 
-    const userId = user.id || user.userId || user.sub || id
-
-    // Cascade delete ReceiptAllocation children first
-    await prisma.receiptAllocation.deleteMany({
-      where: { receiptId: id }
-    })
-
-    // Soft-delete receipt
-    await prisma.receipt.update({
-      where: { id },
-      data: {
-        deletedAt: new Date(),
-        deletedBy: userId,
-        isActive: false,
-      }
-    })
+    // Soft-delete + cascade children
+    await prisma.$transaction([
+      prisma.receiptAllocation.deleteMany({ where: { receiptId: id } }),
+      prisma.receipt.update({
+        where: { id },
+        data: { deletedAt: new Date(), isActive: false }
+      }),
+    ])
 
     return NextResponse.json({ success: true, message: 'ลบใบเสร็จรับเงินเรียบร้อยแล้ว' })
   } catch (error: any) {

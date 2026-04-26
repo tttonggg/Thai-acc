@@ -68,7 +68,7 @@ export function CashFlowReport({ dateRange }: { dateRange: DateRange }) {
         startDate: dateRange.from.toISOString(),
         endDate: dateRange.to.toISOString(),
       })
-      const res = await fetch(`/api/reports/cash-flow?${params}`)
+      const res = await fetch(`/api/reports/cash-flow?${params}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch cash flow data')
       return res.json()
     },

@@ -82,7 +82,7 @@ export function AssetEditDialog({
     // Fetch chart of accounts
     const fetchAccounts = async () => {
       try {
-        const res = await fetch('/api/accounts')
+        const res = await fetch(`/api/accounts`, { credentials: 'include' })
         if (res.ok) {
           const data = await res.json()
           if (data.success) {
@@ -135,7 +135,7 @@ export function AssetEditDialog({
 
   const checkPostedDepreciation = async (assetId: string) => {
     try {
-      const res = await fetch(`/api/assets/${assetId}`)
+      const res = await fetch(`/api/assets/${assetId}`, { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         if (data.success && data.data.schedules) {

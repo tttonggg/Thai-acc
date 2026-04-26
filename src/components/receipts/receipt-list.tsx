@@ -133,7 +133,7 @@ export function ReceiptList() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('/api/receipts')
+        const res = await fetch(`/api/receipts`, { credentials: 'include' })
         if (!res.ok) throw new Error('Fetch failed')
         const result = await res.json()
         // API returns { success: true, data: [...], pagination: {...} }
@@ -282,7 +282,7 @@ export function ReceiptList() {
   const handlePost = async (receiptId: string) => {
     setPostingReceipt(receiptId)
     try {
-      const res = await fetch(`/api/receipts/${receiptId}/post`, {
+      const res = await fetch(`/api/receipts/${receiptId}/post`, { credentials: 'include', 
         method: 'POST',
       })
 
@@ -311,7 +311,7 @@ export function ReceiptList() {
   const handleDownload = async (receiptId: string, receiptNo: string) => {
     setDownloadingReceipt(receiptId)
     try {
-      const response = await fetch(`/api/receipts/${receiptId}/export/pdf`)
+      const response = await fetch(`/api/receipts/${receiptId}/export/pdf`, { credentials: 'include' })
       if (!response.ok) throw new Error('Download failed')
 
       const blob = await response.blob()
@@ -343,7 +343,7 @@ export function ReceiptList() {
     if (!receiptToDelete) return
     setDeleteLoading(true)
     try {
-      const res = await fetch(`/api/receipts/${receiptToDelete}`, {
+      const res = await fetch(`/api/receipts/${receiptToDelete}`, { credentials: 'include', 
         method: 'DELETE',
       })
       if (!res.ok) {

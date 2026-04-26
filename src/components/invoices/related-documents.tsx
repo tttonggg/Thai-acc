@@ -185,14 +185,21 @@ export function RelatedDocuments({
   const fetchRelatedDocuments = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/related`)
+      const response = await fetch(`/api/invoices/${invoiceId}/related`, { credentials: 'include' })
       if (!response.ok) {
         throw new Error('Failed to fetch related documents')
       }
 
       const data: RelatedDocumentsResponse = await response.json()
       setRelatedDocs(data.relatedDocuments)
-      setSummary(data.summary)
+      setSummary(data.summary ?? {
+        total: 0,
+        links: 0,
+        cancels: 0,
+        replaces: 0,
+        refunds: 0,
+        adjusts: 0,
+      })
     } catch (error) {
       console.error('Error fetching related documents:', error)
       toast({
@@ -265,7 +272,7 @@ export function RelatedDocuments({
 
     setAddLoading(true)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/related`, {
+      const response = await fetch(`/api/invoices/${invoiceId}/related`, { credentials: 'include', 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

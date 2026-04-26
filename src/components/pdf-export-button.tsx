@@ -247,7 +247,7 @@ export function ExportDropdown({ invoiceId, invoiceNo }: ExportDropdownProps) {
       switch (type) {
         case 'pdf':
           // Export as PDF
-          const pdfResponse = await fetch(`/api/invoices/${invoiceId}/export/pdf`)
+          const pdfResponse = await fetch(`/api/invoices/${invoiceId}/export/pdf`, { credentials: 'include' })
           if (!pdfResponse.ok) throw new Error('Failed to generate PDF')
 
           const pdfBlob = await pdfResponse.blob()
@@ -263,7 +263,7 @@ export function ExportDropdown({ invoiceId, invoiceNo }: ExportDropdownProps) {
 
         case 'excel':
           // Export as Excel (if you have that endpoint)
-          const excelResponse = await fetch(`/api/invoices/${invoiceId}/export/excel`)
+          const excelResponse = await fetch(`/api/invoices/${invoiceId}/export/excel`, { credentials: 'include' })
           if (!excelResponse.ok) throw new Error('Failed to generate Excel')
 
           const excelBlob = await excelResponse.blob()
@@ -279,7 +279,7 @@ export function ExportDropdown({ invoiceId, invoiceNo }: ExportDropdownProps) {
 
         case 'email':
           // Send via email (if you have that endpoint)
-          const emailResponse = await fetch(`/api/invoices/${invoiceId}/email`, {
+          const emailResponse = await fetch(`/api/invoices/${invoiceId}/email`, { credentials: 'include', 
             method: 'POST'
           })
           if (!emailResponse.ok) throw new Error('Failed to send email')

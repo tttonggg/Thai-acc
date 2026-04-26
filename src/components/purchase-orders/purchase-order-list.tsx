@@ -163,7 +163,7 @@ export function PurchaseOrderList() {
       if (filterPaymentStatus !== 'all') params.append('paymentStatus', filterPaymentStatus)
       if (searchTerm) params.append('search', searchTerm)
 
-      const res = await fetch(`/api/purchase-orders?${params}`)
+      const res = await fetch(`/api/purchase-orders?${params}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Fetch failed')
 
       const result = await res.json()
@@ -224,7 +224,7 @@ export function PurchaseOrderList() {
 
     setDeletingPO(poId)
     try {
-      const res = await fetch(`/api/purchase-orders/${poId}`, {
+      const res = await fetch(`/api/purchase-orders/${poId}`, { credentials: 'include', 
         method: 'DELETE',
       })
 
@@ -253,7 +253,7 @@ export function PurchaseOrderList() {
   const handleAction = async (poId: string, action: 'submit' | 'approve' | 'cancel') => {
     setProcessingAction(`${poId}-${action}`)
     try {
-      const res = await fetch(`/api/purchase-orders/${poId}`, {
+      const res = await fetch(`/api/purchase-orders/${poId}`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),

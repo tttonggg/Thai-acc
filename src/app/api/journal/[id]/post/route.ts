@@ -1,13 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { checkPeriodStatus } from '@/lib/period-service'
+import { requireRole } from '@/lib/api-utils'
 
 // POST - Post journal entry (change status from DRAFT to POSTED)
+// CRITICAL SECURITY: Requires ADMIN or ACCOUNTANT role
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // SECURITY: Require ADMIN or ACCOUNTANT role
+    const session = await requireRole(['ADMIN', 'ACCOUNTANT'])
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'ไม่ได้รับอนุญาต - ต้องเป็นผู้ดูแลระบบหรือนักบัญชี' },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
     
     const existing = await prisma.journalEntry.findUnique({

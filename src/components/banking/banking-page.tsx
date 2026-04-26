@@ -44,7 +44,7 @@ function BankAccountsTab() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
-    const res = await window.fetch('/api/bank-accounts').then(r => r.json())
+    const res = await window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())
     if (res.success) setAccounts(res.data)
     setLoading(false)
   }, [])
@@ -63,7 +63,7 @@ function BankAccountsTab() {
   const handleDelete = async () => {
     if (!accountToDelete) return
 
-    const res = await window.fetch(`/api/bank-accounts/${accountToDelete.id}`, { method: 'DELETE' }).then(r => r.json())
+    const res = await window.fetch(`/api/bank-accounts/${accountToDelete.id}`, { credentials: 'include',  method: 'DELETE' }).then(r => r.json())
     if (res.success) {
       toast({ title: 'ลบบัญชีธนาคารสำเร็จ' })
       setShowDeleteDialog(false)
@@ -172,7 +172,7 @@ function ChequeRegisterTab() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
-    const [chRes, accRes] = await Promise.all([window.fetch('/api/cheques').then(r => r.json()), window.fetch('/api/bank-accounts').then(r => r.json())])
+    const [chRes, accRes] = await Promise.all([window.fetch(`/api/cheques`, { credentials: 'include' }).then(r => r.json()), window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())])
     if (chRes.success) setCheques(chRes.data)
     if (accRes.success) setAccounts(accRes.data)
     setLoading(false)
@@ -192,7 +192,7 @@ function ChequeRegisterTab() {
   const handleDelete = async () => {
     if (!chequeToDelete) return
 
-    const res = await window.fetch(`/api/cheques/${chequeToDelete.id}`, { method: 'DELETE' }).then(r => r.json())
+    const res = await window.fetch(`/api/cheques/${chequeToDelete.id}`, { credentials: 'include',  method: 'DELETE' }).then(r => r.json())
     if (res.success) {
       toast({ title: 'ลบเช็คสำเร็จ' })
       setShowDeleteDialog(false)
@@ -209,7 +209,7 @@ function ChequeRegisterTab() {
   }
 
   const updateStatus = async (cheque: Cheque, newStatus: string) => {
-    const res = await window.fetch(`/api/cheques/${cheque.id}`, {
+    const res = await window.fetch(`/api/cheques/${cheque.id}`, { credentials: 'include', 
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus, clearedDate: new Date().toISOString() })
@@ -345,7 +345,7 @@ function ReconciliationTab() {
   // Fetch bank accounts
   useEffect(() => {
     const fetchAccounts = async () => {
-      const res = await window.fetch('/api/bank-accounts').then(r => r.json())
+      const res = await window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())
       if (res.success) setAccounts(res.data)
     }
     fetchAccounts()
@@ -356,7 +356,7 @@ function ReconciliationTab() {
     if (selectedAccountId) {
       const fetchItems = async () => {
         setLoading(true)
-        const res = await window.fetch(`/api/bank-accounts/${selectedAccountId}/reconcile`).then(r => r.json())
+        const res = await window.fetch(`/api/bank-accounts/${selectedAccountId}/reconcile`, { credentials: 'include' }).then(r => r.json())
         if (res.success) {
           setUnreconciledCheques(res.data.unreconciledCheques)
           // Calculate initial book balance
@@ -393,7 +393,7 @@ function ReconciliationTab() {
 
     const reconciledItems = Array.from(selectedCheques).map(id => ({ id, type: 'CHEQUE' as const }))
 
-    const res = await window.fetch(`/api/bank-accounts/${selectedAccountId}/reconcile`, {
+    const res = await window.fetch(`/api/bank-accounts/${selectedAccountId}/reconcile`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -412,7 +412,7 @@ function ReconciliationTab() {
       setSelectedCheques(new Set())
       setStatementBalance('')
       // Refresh unreconciled items
-      const refreshRes = await window.fetch(`/api/bank-accounts/${selectedAccountId}/reconcile`).then(r => r.json())
+      const refreshRes = await window.fetch(`/api/bank-accounts/${selectedAccountId}/reconcile`, { credentials: 'include' }).then(r => r.json())
       if (refreshRes.success) {
         setUnreconciledCheques(refreshRes.data.unreconciledCheques)
       }

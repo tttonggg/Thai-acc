@@ -273,7 +273,7 @@ export function useNotifications(userId?: string) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('/api/notifications')
+      const response = await fetch(`/api/notifications`, { credentials: 'include' })
       if (response.ok) {
         const data = await response.json()
         setNotifications(data.notifications)
@@ -285,7 +285,7 @@ export function useNotifications(userId?: string) {
 
   const markAsRead = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/notifications/${id}/read`, {
+      const response = await fetch(`/api/notifications/${id}/read`, { credentials: 'include', 
         method: 'POST',
       })
       if (response.ok) {
@@ -302,7 +302,7 @@ export function useNotifications(userId?: string) {
 
   const markAllAsRead = useCallback(async () => {
     try {
-      const response = await fetch('/api/notifications/read-all', {
+      const response = await fetch(`/api/notifications/read-all`, { credentials: 'include', 
         method: 'POST',
       })
       if (response.ok) {
@@ -317,7 +317,7 @@ export function useNotifications(userId?: string) {
 
   const deleteNotification = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/notifications/${id}`, {
+      const response = await fetch(`/api/notifications/${id}`, { credentials: 'include', 
         method: 'DELETE',
       })
       if (response.ok) {
@@ -330,7 +330,7 @@ export function useNotifications(userId?: string) {
 
   const clearAll = useCallback(async () => {
     try {
-      const response = await fetch('/api/notifications', {
+      const response = await fetch(`/api/notifications`, { credentials: 'include', 
         method: 'DELETE',
       })
       if (response.ok) {

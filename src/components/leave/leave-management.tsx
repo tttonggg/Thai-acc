@@ -75,7 +75,7 @@ export function LeaveManagement() {
     setLoading(true)
     try {
       // Fetch leave types
-      const typesRes = await fetch('/api/leave/types').then(r => r.json())
+      const typesRes = await fetch(`/api/leave/types`, { credentials: 'include' }).then(r => r.json())
       if (typesRes.success) {
         setLeaveTypes(typesRes.data || [])
       }
@@ -83,7 +83,7 @@ export function LeaveManagement() {
       // For demo, use first employee or prompt
       // In real app, get from session
       if (!currentEmployeeId) {
-        const employeesRes = await fetch('/api/employees').then(r => r.json())
+        const employeesRes = await fetch(`/api/employees`, { credentials: 'include' }).then(r => r.json())
         if (employeesRes.success && employeesRes.data?.length > 0) {
           setCurrentEmployeeId(employeesRes.data[0].id)
         }
@@ -98,7 +98,7 @@ export function LeaveManagement() {
   const fetchBalances = useCallback(async () => {
     if (!currentEmployeeId) return
     try {
-      const res = await fetch(`/api/leave/balance/${currentEmployeeId}?year=${currentYear}`).then(r => r.json())
+      const res = await fetch(`/api/leave/balance/${currentEmployeeId}?year=${currentYear}`, { credentials: 'include' }).then(r => r.json())
       if (res.success) {
         setBalances(res.data || [])
       }
@@ -110,7 +110,7 @@ export function LeaveManagement() {
   const fetchRequests = useCallback(async () => {
     if (!currentEmployeeId) return
     try {
-      const res = await fetch(`/api/leave/request?employeeId=${currentEmployeeId}&year=${currentYear}`).then(r => r.json())
+      const res = await fetch(`/api/leave/request?employeeId=${currentEmployeeId}&year=${currentYear}`, { credentials: 'include' }).then(r => r.json())
       if (res.success) {
         setRequests(res.data || [])
       }
@@ -151,7 +151,7 @@ export function LeaveManagement() {
 
     setSubmitting(true)
     try {
-      const res = await fetch('/api/leave/request', {
+      const res = await fetch(`/api/leave/request`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -185,7 +185,7 @@ export function LeaveManagement() {
 
   const handleApprove = async (requestId: string) => {
     try {
-      const res = await fetch(`/api/leave/request/${requestId}/approve`, {
+      const res = await fetch(`/api/leave/request/${requestId}/approve`, { credentials: 'include', 
         method: 'PATCH',
       }).then(r => r.json())
 
@@ -203,7 +203,7 @@ export function LeaveManagement() {
 
   const handleReject = async (requestId: string) => {
     try {
-      const res = await fetch(`/api/leave/request/${requestId}/reject`, {
+      const res = await fetch(`/api/leave/request/${requestId}/reject`, { credentials: 'include', 
         method: 'PATCH',
       }).then(r => r.json())
 
@@ -221,7 +221,7 @@ export function LeaveManagement() {
 
   const handleCancel = async (requestId: string) => {
     try {
-      const res = await fetch(`/api/leave/request/${requestId}/cancel`, {
+      const res = await fetch(`/api/leave/request/${requestId}/cancel`, { credentials: 'include', 
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ employeeId: currentEmployeeId }),

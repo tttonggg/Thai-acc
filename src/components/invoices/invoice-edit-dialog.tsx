@@ -164,9 +164,9 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
     setFetchingInvoice(true)
     try {
       const [customersRes, productsRes, invoiceRes] = await Promise.all([
-        fetch('/api/customers'),
-        fetch('/api/products').catch(() => ({ ok: false, json: async () => ({ data: [] }) })),
-        fetch(`/api/invoices/${invoiceId}`),
+        fetch(`/api/customers`, { credentials: 'include' }),
+        fetch(`/api/products`, { credentials: 'include' }).catch(() => ({ ok: false, json: async () => ({ data: [] }) })),
+        fetch(`/api/invoices/${invoiceId}`, { credentials: 'include' }),
       ])
 
       if (customersRes.ok) {
@@ -399,7 +399,7 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
     if (!invoice) return
     setPosting(true)
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/post`, {
+      const response = await fetch(`/api/invoices/${invoiceId}/post`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
@@ -444,7 +444,7 @@ export function InvoiceEditDialog({ invoiceId, open, onOpenChange, onSuccess }: 
         })),
       }
 
-      const response = await fetch(`/api/invoices/${invoiceId}`, {
+      const response = await fetch(`/api/invoices/${invoiceId}`, { credentials: 'include', 
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

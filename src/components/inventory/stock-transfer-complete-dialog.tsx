@@ -81,7 +81,7 @@ export function StockTransferCompleteDialog({
 
     setLoading(true)
     try {
-      const res = await fetch(`/api/stock/transfers/${transfer.transferNo}`, {
+      const res = await fetch(`/api/stock/transfers/${transfer.transferNo}`, { credentials: 'include', 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

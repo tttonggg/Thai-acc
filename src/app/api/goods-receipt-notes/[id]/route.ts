@@ -248,6 +248,19 @@ export async function DELETE(
       return apiError("สถานะ " + grn.status + " ไม่สามารถยกเลิกได้ ต้องเป็น DRAFT หรือ RECEIVED เท่านั้น", 400)
     }
 
+    // DRAFT: soft-delete + cascade children
+    if (grn.status === "DRAFT") {
+      await db.$transaction([
+        db.goodsReceiptNoteLine.deleteMany({ where: { grnId: id } }),
+        db.goodsReceiptNote.update({
+          where: { id },
+          data: { deletedAt: new Date() }
+        }),
+      ])
+      return apiResponse({ success: true, message: "ลบใบรับสินค้าเรียบร้อยแล้ว" })
+    }
+
+    // RECEIVED: journal reversal + restore PO quantities + cancel
     // Reverse journal entry if it exists (debit/credit swap)
     const journalEntryId = grn.journalEntryId
     if (grn.journalEntry && journalEntryId) {

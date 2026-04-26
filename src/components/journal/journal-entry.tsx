@@ -80,7 +80,7 @@ export function JournalEntry() {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const res = await fetch('/api/accounts')
+        const res = await fetch(`/api/accounts`, { credentials: 'include' })
         if (!res.ok) {
           console.error('Failed to fetch accounts:', res.status, res.statusText)
           throw new Error(`HTTP ${res.status}`)
@@ -108,7 +108,7 @@ export function JournalEntry() {
   useEffect(() => {
     const fetchRecentEntries = async () => {
       try {
-        const res = await fetch('/api/journal?limit=10')
+        const res = await fetch(`/api/journal?limit=10`, { credentials: 'include' })
         if (res.ok) {
           const result = await res.json()
           setRecentEntries(result.data || [])
@@ -219,7 +219,7 @@ export function JournalEntry() {
       }
 
       // POST to API
-      const res = await fetch('/api/journal', {
+      const res = await fetch(`/api/journal`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(journalData)
@@ -239,7 +239,7 @@ export function JournalEntry() {
         setLines(initialJournalLines)
 
         // Refresh recent entries
-        const entriesRes = await fetch('/api/journal?limit=10')
+        const entriesRes = await fetch(`/api/journal?limit=10`, { credentials: 'include' })
         if (entriesRes.ok) {
           const entriesResult = await entriesRes.json()
           setRecentEntries(entriesResult.data || [])

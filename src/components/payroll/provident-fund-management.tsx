@@ -99,7 +99,7 @@ export function ProvidentFundManagement() {
 
   const fetchFunds = useCallback(async () => {
     try {
-      const res = await fetch('/api/provident-fund')
+      const res = await fetch(`/api/provident-fund`, { credentials: 'include' })
       const data = await res.json()
       if (data.success) {
         setFunds(data.data)
@@ -111,7 +111,7 @@ export function ProvidentFundManagement() {
 
   const fetchEmployees = useCallback(async () => {
     try {
-      const res = await fetch('/api/employees')
+      const res = await fetch(`/api/employees`, { credentials: 'include' })
       const data = await res.json()
       if (data.success) {
         setEmployees(data.data.filter((e: Employee) => e.isActive))
@@ -123,7 +123,7 @@ export function ProvidentFundManagement() {
 
   const fetchPayrollRuns = useCallback(async () => {
     try {
-      const res = await fetch('/api/payroll')
+      const res = await fetch(`/api/payroll`, { credentials: 'include' })
       const data = await res.json()
       if (data.success) {
         setPayrollRuns(data.data.filter((r: PayrollRun) => r.status === 'PAID'))
@@ -135,7 +135,7 @@ export function ProvidentFundManagement() {
 
   const fetchContributions = useCallback(async (fundId: string) => {
     try {
-      const res = await fetch(`/api/provident-fund/${fundId}/contributions`)
+      const res = await fetch(`/api/provident-fund/${fundId}/contributions`, { credentials: 'include' })
       const data = await res.json()
       if (data.success) {
         setContributions(data.data)
@@ -161,7 +161,7 @@ export function ProvidentFundManagement() {
       return
     }
 
-    const res = await fetch('/api/provident-fund', {
+    const res = await fetch(`/api/provident-fund`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -216,7 +216,7 @@ export function ProvidentFundManagement() {
       return
     }
 
-    const res = await fetch(`/api/provident-fund/${contribForm.providentFundId}/contributions`, {
+    const res = await fetch(`/api/provident-fund/${contribForm.providentFundId}/contributions`, { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

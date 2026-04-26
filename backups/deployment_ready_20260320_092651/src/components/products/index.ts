@@ -1,5 +1,0 @@
-export { ProductListVirtual } from './product-list-virtual'
-export { ProductList } from './product-list'
-export { ProductForm } from './product-form'
-export { ProductEditDialog } from './product-edit-dialog'
-export { ProductViewDialog } from './product-view-dialog'

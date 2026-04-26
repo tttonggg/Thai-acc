@@ -139,7 +139,7 @@ export function CustomReportBuilder() {
   const handleGenerate = async (data: CustomReportForm) => {
     setIsGenerating(true)
     try {
-      const response = await fetch('/api/reports/custom', {
+      const response = await fetch(`/api/reports/custom`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -195,7 +195,7 @@ export function CustomReportBuilder() {
     setIsSaving(true)
     try {
       const config = form.getValues()
-      const response = await fetch('/api/reports/templates', {
+      const response = await fetch(`/api/reports/templates`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

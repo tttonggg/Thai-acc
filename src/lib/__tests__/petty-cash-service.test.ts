@@ -4,155 +4,113 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { createVoucherJournalEntry } from '../petty-cash-service'
 
-// Mock the db module first
-vi.mock('@/lib/db', () => ({
-  default: {
-    chartOfAccount: {
-      create: vi.fn(),
-      deleteMany: vi.fn(),
-    },
+// Mock the prisma client
+// Path must match production import: import { db } from './db'
+vi.mock('../db', () => ({
+  db: {
     journalEntry: {
       create: vi.fn(),
-      delete: vi.fn(),
-      deleteMany: vi.fn(),
+      findFirst: vi.fn(),
     },
+    $transaction: vi.fn(),
+  },
+  default: {
+    journalEntry: {
+      create: vi.fn(),
+      findFirst: vi.fn(),
+    },
+    $transaction: vi.fn(),
   },
 }))
 
-// Track call count for sequential entry numbers
-let callCount = 0
-
-// Mock petty-cash-service
-vi.mock('../petty-cash-service', () => ({
-  createVoucherJournalEntry: vi.fn().mockImplementation(async (params) => {
-    callCount++
-    return {
-      id: `mock-journal-entry-id-${callCount}`,
-      entryNo: `JV-202603-${String(callCount).padStart(4, '0')}`,
-      entryDate: params.voucherDate,
-      description: params.description,
-      documentType: 'PETTY_CASH_VOUCHER',
-      documentId: params.voucherId,
-      totalDebit: params.amount,
-      totalCredit: params.amount,
-      status: 'POSTED',
-      lines: [
-        {
-          id: `line-1-${callCount}`,
-          accountId: params.glExpenseAccountId,
-          debit: params.amount,
-          credit: 0,
-          description: params.description,
-        },
-        {
-          id: `line-2-${callCount}`,
-          accountId: params.pettyCashFundAccountId,
-          debit: 0,
-          credit: params.amount,
-          description: params.description,
-        },
-      ],
-    }
-  }),
-}))
-
-import { createVoucherJournalEntry } from '../petty-cash-service'
-
 describe('Petty Cash Service', () => {
-  const testExpenseAccount = {
-    id: 'test-expense-account-id',
-    code: '9999',
-    name: 'Test Expense',
-  }
-
-  const testPettyCashAccount = {
-    id: 'test-petty-cash-account-id',
-    code: '1001',
-    name: 'Test Petty Cash',
-  }
-
   beforeEach(() => {
-    // Reset call count but not mocks so mock implementation persists
-    callCount = 0
+    vi.clearAllMocks()
   })
 
   it('should create journal entry with double-entry bookkeeping', async () => {
-    const params = {
-      voucherId: 'test-voucher-1',
-      voucherNo: 'PCV-TEST-001',
-      voucherDate: new Date('2026-03-11'),
-      amount: 1000,
-      payee: 'Test Payee',
-      description: 'Test expense',
-      glExpenseAccountId: testExpenseAccount.id,
-      pettyCashFundAccountId: testPettyCashAccount.id,
-    }
+    const mockDb = (await import('../db')).db
 
-    const journalEntry = await createVoucherJournalEntry(params)
+    // Mock $transaction to execute the callback immediately
+    mockDb.$transaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => {
+      return callback(mockDb)
+    })
 
-    // Verify journal entry was created
-    expect(journalEntry).toBeDefined()
-    expect(journalEntry.entryNo).toMatch(/^JV-202603-\d{4}$/)
-    expect(journalEntry.totalDebit).toBe(1000)
-    expect(journalEntry.totalCredit).toBe(1000)
-    expect(journalEntry.status).toBe('POSTED')
-    expect(journalEntry.documentType).toBe('PETTY_CASH_VOUCHER')
-    expect(journalEntry.documentId).toBe('test-voucher-1')
+    // Mock journalEntry.findFirst (used in generateJournalEntryNumber)
+    mockDb.journalEntry.findFirst.mockResolvedValue(null) // first entry of the month
 
-    // Verify journal lines
-    expect(journalEntry.lines).toHaveLength(2)
+    // Mock journalEntry.create to return a complete entry
+    mockDb.journalEntry.create.mockResolvedValue({
+      id: 'je-1',
+      entryNo: 'JV-202401-0001',
+      date: new Date('2024-01-15'),
+      description: 'เบิกเงินสดย่อย PC-001 - Office supplies',
+      reference: 'เบียกเงินสดย่อย PC-001',
+      documentType: 'PETTY_CASH_VOUCHER',
+      documentId: 'vc-1',
+      totalDebit: 500,
+      totalCredit: 500,
+      status: 'POSTED',
+      lines: [
+        { id: 'line-1', lineNo: 1, accountId: 'acc-exp', description: 'Office supplies (ค่าใช้จ่าย)', debit: 500, credit: 0, reference: 'PC-001' },
+        { id: 'line-2', lineNo: 2, accountId: 'acc-cash', description: 'เงินสดย่อย (John Doe)', debit: 0, credit: 500, reference: 'PC-001' },
+      ],
+    })
 
-    const debitLine = journalEntry.lines.find((l: any) => l.debit > 0)
-    const creditLine = journalEntry.lines.find((l: any) => l.credit > 0)
+    const result = await createVoucherJournalEntry({
+      voucherId: 'vc-1',
+      voucherNo: 'PC-001',
+      voucherDate: new Date('2024-01-15'),
+      amount: 500,
+      payee: 'John Doe',
+      description: 'Office supplies',
+      glExpenseAccountId: 'acc-exp',
+      pettyCashFundAccountId: 'acc-cash',
+    })
 
-    expect(debitLine).toBeDefined()
-    expect(debitLine?.debit).toBe(1000)
-    expect(debitLine?.credit).toBe(0)
-    expect(debitLine?.accountId).toBe(testExpenseAccount.id)
+    // Verify journalEntry.create was called
+    expect(mockDb.journalEntry.create).toHaveBeenCalled()
 
-    expect(creditLine).toBeDefined()
-    expect(creditLine?.credit).toBe(1000)
-    expect(creditLine?.debit).toBe(0)
-    expect(creditLine?.accountId).toBe(testPettyCashAccount.id)
-
-    // Verify debits equal credits
-    const totalDebit = journalEntry.lines.reduce((sum: number, l: any) => sum + l.debit, 0)
-    const totalCredit = journalEntry.lines.reduce((sum: number, l: any) => sum + l.credit, 0)
-    expect(totalDebit).toBe(totalCredit)
-    expect(totalDebit).toBe(1000)
+    // Verify double-entry: debit === credit
+    const call = mockDb.journalEntry.create.mock.calls[0][0]
+    expect(call.data.totalDebit).toBe(500)
+    expect(call.data.totalCredit).toBe(500)
   })
 
-  it('should generate sequential journal entry numbers', async () => {
-    const params1 = {
-      voucherId: 'test-voucher-2',
-      voucherNo: 'PCV-TEST-002',
-      voucherDate: new Date('2026-03-11'),
-      amount: 500,
-      payee: 'Test Payee 2',
-      description: 'Test expense 2',
-      glExpenseAccountId: testExpenseAccount.id,
-      pettyCashFundAccountId: testPettyCashAccount.id,
-    }
+  it('should call journalEntry.create with correct data', async () => {
+    const mockDb = (await import('../db')).db
 
-    const params2 = {
-      voucherId: 'test-voucher-3',
-      voucherNo: 'PCV-TEST-003',
-      voucherDate: new Date('2026-03-11'),
-      amount: 750,
-      payee: 'Test Payee 3',
-      description: 'Test expense 3',
-      glExpenseAccountId: testExpenseAccount.id,
-      pettyCashFundAccountId: testPettyCashAccount.id,
-    }
+    mockDb.$transaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => {
+      return callback(mockDb)
+    })
 
-    const entry1 = await createVoucherJournalEntry(params1)
-    const entry2 = await createVoucherJournalEntry(params2)
+    mockDb.journalEntry.findFirst.mockResolvedValue(null)
 
-    // Extract sequence numbers
-    const seq1 = parseInt(entry1.entryNo.split('-')[2])
-    const seq2 = parseInt(entry2.entryNo.split('-')[2])
+    mockDb.journalEntry.create.mockResolvedValue({
+      id: 'je-2',
+      entryNo: 'JV-202401-0001',
+      totalDebit: 200,
+      totalCredit: 200,
+      lines: [],
+    })
 
-    expect(seq2).toBe(seq1 + 1)
+    await createVoucherJournalEntry({
+      voucherId: 'vc-2',
+      voucherNo: 'PC-002',
+      voucherDate: new Date('2024-01-15'),
+      amount: 200,
+      payee: 'Jane Doe',
+      description: 'Office supplies',
+      glExpenseAccountId: 'acc-exp',
+      pettyCashFundAccountId: 'acc-cash',
+    })
+
+    expect(mockDb.journalEntry.create).toHaveBeenCalledTimes(1)
+    const [[callArgs]] = mockDb.journalEntry.create.mock.calls
+    expect(callArgs.data.description).toBe('เบิกเงินสดย่อย PC-002 - Office supplies')
+    expect(callArgs.data.totalDebit).toBe(200)
+    expect(callArgs.data.totalCredit).toBe(200)
   })
 })

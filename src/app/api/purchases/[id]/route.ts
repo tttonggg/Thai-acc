@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { purchaseInvoiceSchema } from "@/lib/validations"
-import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError } from "@/lib/api-utils"
+import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError } from "@/lib/api-utils"
 import { AuthError } from "@/lib/api-auth"
 
 // GET /api/purchases/[id] - Get single purchase invoice
@@ -166,7 +166,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/purchases/[id] - Delete purchase invoice (DRAFT only, creator or admin)
+// DELETE /api/purchases/[id] - Delete purchase invoice
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -175,58 +175,51 @@ export async function DELETE(
     const user = await requireAuth()
     const { id } = await params
 
+    if (user.role !== "ADMIN" && user.role !== "ACCOUNTANT") {
+      return apiError("เฉพาะผู้ดูแลระบบหรือนักบัญชีเท่านั้นที่สามารถลบใบซื้อได้", 403)
+    }
+
     const existing = await db.purchaseInvoice.findUnique({
       where: { id },
       include: {
-        payments: true,
-        lines: true
+        payments: true
       }
     })
 
     if (!existing) {
-      return notFoundError('ไม่พบใบซื้อ')
+      return notFoundError("ไม่พบใบซื้อ")
     }
 
-    // Only creator or ADMIN can delete
-    if (user.role !== 'ADMIN' && existing.createdById !== user.id) {
-      return apiError('เฉพาะผู้สร้างเอกสารหรือผู้ดูแลระบบเท่านั้นที่สามารถลบใบซื้อได้', 403)
-    }
-
-    // Only allow deleting DRAFT status
+    // Only DRAFT status
     if (existing.status !== 'DRAFT') {
-      return apiError('สามารถลบได้เฉพาะใบซื้อที่เป็นสถานะร่างเท่านั้น', 403)
+      return forbiddenError('สามารถลบได้เฉพาะใบซื้อสถานะร่างเท่านั้น')
     }
 
-    // Cannot delete if has payments
+    // Creator or ADMIN only
+    if (user.role !== 'ADMIN' && existing.createdById !== user.id) {
+      return forbiddenError('ไม่มีสิทธิ์ลบใบซื้อนี้')
+    }
+
     if (existing.payments.length > 0) {
-      return apiError('ไม่สามารถลบใบซื้อที่มีการจ่ายเงินแล้วได้')
+      return apiError("ไม่สามารถลบใบซื้อที่มีการจ่ายเงินแล้วได้")
     }
 
-    // Soft-delete purchase invoice + cascade children
-    await db.purchaseInvoice.update({
-      where: { id },
-      data: {
-        isActive: false,
-        deletedAt: new Date(),
-        deletedBy: user.id
-      }
-    })
+    // Soft-delete + cascade children
+    await db.$transaction([
+      db.purchaseInvoiceLine.deleteMany({ where: { purchaseId: id } }),
+      db.paymentAllocation.deleteMany({ where: { invoiceId: id } }),
+      db.vatRecord.deleteMany({ where: { referenceId: id, documentType: "PURCHASE" } }),
+      db.purchaseInvoice.update({
+        where: { id },
+        data: { deletedAt: new Date(), isActive: false, deletedBy: user.id }
+      }),
+    ])
 
-    // Cascade PurchaseInvoiceLine (using deleteMany - parent soft-deleted so FK still valid)
-    await db.purchaseInvoiceLine.deleteMany({
-      where: { purchaseId: id }
-    })
-
-    // Cascade PaymentAllocation (using deleteMany - parent soft-deleted so FK still valid)
-    await db.paymentAllocation.deleteMany({
-      where: { invoiceId: id }
-    })
-
-    return apiResponse({ message: 'ลบใบซื้อสำเร็จ' })
+    return apiResponse({ message: "ลบใบซื้อสำเร็จ" })
   } catch (error) {
-    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+    if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
       return unauthorizedError()
     }
-    return apiError('เกิดข้อผิดพลาดในการลบใบซื้อ')
+    return apiError("เกิดข้อผิดพลาดในการลบใบซื้อ")
   }
 }

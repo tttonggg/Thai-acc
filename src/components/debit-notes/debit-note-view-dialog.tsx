@@ -76,7 +76,7 @@ export function DebitNoteViewDialog({ debitNoteId, open, onOpenChange }: DebitNo
       if (!open || !debitNoteId) return
       setLoading(true)
       try {
-        const res = await fetch(`/api/debit-notes/${debitNoteId}`)
+        const res = await fetch(`/api/debit-notes/${debitNoteId}`, { credentials: 'include' })
         if (!res.ok) throw new Error('Failed to fetch')
         const data = await res.json()
         setDebitNote(data.data || data)

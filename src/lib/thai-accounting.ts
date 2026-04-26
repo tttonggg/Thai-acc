@@ -76,7 +76,7 @@ export function formatNumber(amount: number, decimals: number = 2): string {
 export function numberToThaiText(num: number): string {
   const ones = ['', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
   const tens = ['', 'สิบ', 'ยี่สิบ', 'สามสิบ', 'สี่สิบ', 'ห้าสิบ', 'หกสิบ', 'เจ็ดสิบ', 'แปดสิบ', 'เก้าสิบ'];
-  const scales = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน', 'สิบล้าน', 'ร้อยล้าน', 'พันล้าน', 'หมื่นล้าน'];
+  const scales = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
 
   if (num === 0) return 'ศูนย์บาทถ้วน';
 
@@ -87,12 +87,12 @@ export function numberToThaiText(num: number): string {
 
   // แปลงส่วนบาท
   if (baht > 0) {
-    result = convertNumberToText(baht, ones, tens, scales) + 'บาท';
+    result = convertNumberToText(baht, ones, tens) + 'บาท';
   }
 
   // แปลงส่วนสตางค์
   if (satang > 0) {
-    result += convertNumberToText(satang, ones, tens, scales) + 'สตางค์';
+    result += convertNumberToText(satang, ones, tens) + 'สตางค์';
   } else if (baht > 0) {
     result += 'ถ้วน';
   }
@@ -100,7 +100,7 @@ export function numberToThaiText(num: number): string {
   return result;
 }
 
-function convertNumberToText(num: number, ones: string[], tens: string[], scales: string[]): string {
+function convertNumberToText(num: number, ones: string[], tens: string[]): string {
   if (num === 0) return '';
   
   let result = '';
@@ -122,7 +122,7 @@ function convertNumberToText(num: number, ones: string[], tens: string[], scales
     } else {
       result += ones[digit];
       if (position > 0) {
-        result += scales[position] ?? '';
+        result += ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'][position];
       }
     }
   }
@@ -149,7 +149,7 @@ export function calculateVAT(amount: number, rate: number = VAT_RATE, isInclusiv
 
 // คำนวณภาษีหัก ณ ที่จ่าย
 export function calculateWHT(amount: number, rate: number): number {
-  return Math.round(amount * (rate * 10) / 100) / 10;
+  return amount * (rate / 100);
 }
 
 // NOTE: Server-only functions moved to thai-accounting-server.ts:

@@ -37,7 +37,7 @@ export function LoginPage() {
 
       if (result?.ok) {
         // Fetch user data after successful login
-        const response = await fetch('/api/auth/session')
+        const response = await fetch(`/api/auth/session`, { credentials: 'include' })
         const data = await response.json()
         
         if (data?.user) {

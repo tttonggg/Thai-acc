@@ -128,7 +128,7 @@ export function StockTakeViewDialog({
   const fetchStockTake = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/stock-takes/${stockTakeId}`)
+      const res = await fetch(`/api/stock-takes/${stockTakeId}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Fetch failed')
       const result = await res.json()
       setStockTake(result.data)
@@ -150,7 +150,7 @@ export function StockTakeViewDialog({
 
     setApproving(true)
     try {
-      const res = await fetch(`/api/stock-takes/${stockTakeId}/approve`, {
+      const res = await fetch(`/api/stock-takes/${stockTakeId}/approve`, { credentials: 'include', 
         method: 'POST',
       })
 
@@ -184,7 +184,7 @@ export function StockTakeViewDialog({
 
     setPosting(true)
     try {
-      const res = await fetch(`/api/stock-takes/${stockTakeId}/post`, {
+      const res = await fetch(`/api/stock-takes/${stockTakeId}/post`, { credentials: 'include', 
         method: 'POST',
       })
 
@@ -218,7 +218,7 @@ export function StockTakeViewDialog({
 
     setDeleting(true)
     try {
-      const res = await fetch(`/api/stock-takes/${stockTakeId}`, {
+      const res = await fetch(`/api/stock-takes/${stockTakeId}`, { credentials: 'include', 
         method: 'DELETE',
       })
 

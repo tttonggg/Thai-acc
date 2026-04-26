@@ -73,7 +73,7 @@ export function WhtManagement() {
     try {
       const params = new URLSearchParams({ year: selectedYear })
       if (selectedType !== 'ALL') params.set('type', selectedType)
-      const res = await fetch(`/api/wht?${params}`)
+      const res = await fetch(`/api/wht?${params}`, { credentials: 'include' })
       const json = await res.json()
       if (json.success) {
         setRecords(json.data)
@@ -92,7 +92,7 @@ export function WhtManagement() {
   const handleDownload50Tawi = async (record: WhtRecord) => {
     setDownloading(record.id)
     try {
-      const res = await fetch(`/api/wht/${record.id}/pdf`)
+      const res = await fetch(`/api/wht/${record.id}/pdf`, { credentials: 'include' })
       if (!res.ok) {
         const err = await res.json()
         throw new Error(err.error || 'ไม่สามารถสร้าง PDF ได้')
@@ -123,7 +123,7 @@ export function WhtManagement() {
   // Mark as reported to Revenue Department
   const handleMarkReported = async (id: string) => {
     try {
-      await fetch(`/api/wht/${id}`, {
+      await fetch(`/api/wht/${id}`, { credentials: 'include', 
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reportStatus: 'REPORTED' })

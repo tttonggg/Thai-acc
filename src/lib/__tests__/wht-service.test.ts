@@ -9,9 +9,9 @@ import {
   generateWhtFromReceipt,
 } from '../wht-service'
 
-// Mock the prisma client - use vi.hoisted to avoid hoisting issues
-const { mockPrisma } = vi.hoisted(() => ({
-  mockPrisma: {
+// Mock the prisma client
+vi.mock('@/lib/db', () => ({
+  default: {
     payment: {
       findUnique: vi.fn(),
     },
@@ -25,14 +25,10 @@ const { mockPrisma } = vi.hoisted(() => ({
   },
 }))
 
-vi.mock('@/lib/db', () => ({
-  prisma: mockPrisma,
-  default: mockPrisma,
-}))
-
 describe('WHT Service', () => {
   describe('generateWhtFromPayment', () => {
     it('should create WHT record from payment with withholding', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
       mockPrisma.payment.findUnique.mockResolvedValue({
         id: 'pay-1',
         paymentNo: 'PMT-001',
@@ -75,6 +71,7 @@ describe('WHT Service', () => {
     })
 
     it('should determine PND3 for individuals', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
       mockPrisma.payment.findUnique.mockResolvedValue({
         id: 'pay-1',
         paymentNo: 'PMT-001',
@@ -112,6 +109,7 @@ describe('WHT Service', () => {
     })
 
     it('should return null when no withholding on invoice', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
       mockPrisma.payment.findUnique.mockResolvedValue({
         id: 'pay-1',
         allocations: [{
@@ -130,6 +128,7 @@ describe('WHT Service', () => {
     })
 
     it('should return null when payment has no allocations', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
       mockPrisma.payment.findUnique.mockResolvedValue({
         id: 'pay-1',
         allocations: [],
@@ -141,6 +140,7 @@ describe('WHT Service', () => {
     })
 
     it('should return null when payment not found', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
       mockPrisma.payment.findUnique.mockResolvedValue(null)
 
       const result = await generateWhtFromPayment('nonexistent')
@@ -149,6 +149,7 @@ describe('WHT Service', () => {
     })
 
     it('should determine PND53 for companies (name contains บริษัท)', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
       mockPrisma.payment.findUnique.mockResolvedValue({
         id: 'pay-1',
         paymentNo: 'PMT-001',
@@ -186,6 +187,7 @@ describe('WHT Service', () => {
     })
 
     it('should calculate income amount after discount', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
       mockPrisma.payment.findUnique.mockResolvedValue({
         id: 'pay-1',
         paymentNo: 'PMT-001',
@@ -223,6 +225,7 @@ describe('WHT Service', () => {
     })
 
     it('should handle missing product income type gracefully', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
       mockPrisma.payment.findUnique.mockResolvedValue({
         id: 'pay-1',
         paymentNo: 'PMT-001',
@@ -261,34 +264,41 @@ describe('WHT Service', () => {
   })
 
   describe('generateWhtFromReceipt', () => {
-    it('should create WHT record from receipt with withholding', async () => {
-      mockPrisma.receipt.findUnique.mockResolvedValue({
-        id: 'rcpt-1',
-        receiptNo: 'RCPT-001',
-        receiptDate: new Date('2024-03-15'),
-        allocations: [{
-          invoice: {
-            id: 'inv-1',
-            invoiceNo: 'INV-001',
-            subtotal: 100000,
-            discountAmount: 0,
-            withholdingAmount: 3000,
-            withholdingRate: 3,
-            customer: {
-              id: 'cust-1',
-              name: 'บริษัท ลูกค้า จำกัด',
-              taxId: '0123456789012',
-              address: '789 ถนนพระราม 9',
-            },
-            lines: [{
-              product: {
-                type: 'SERVICE',
-                incomeType: 'ค่าบริการ 3%',
-              },
-            }],
+    // Helper: create mock receipt with allocations (matching production code's actual structure)
+    const mockReceiptWithAllocations = (overrides: any = {}) => ({
+      id: 'rcpt-1',
+      receiptNo: 'RCPT-001',
+      receiptDate: new Date('2024-03-15'),
+      allocations: [{
+        invoice: {
+          id: 'inv-1',
+          invoiceNo: 'INV-001',
+          subtotal: 100000,
+          discountAmount: 0,
+          withholdingAmount: 3000,
+          withholdingRate: 3,
+          customer: {
+            id: 'cust-1',
+            name: 'บริษัท ลูกค้า จำกัด',
+            taxId: '0123456789012',
+            address: '789 ถนนพระราม 9',
           },
-        }],
-      })
+          lines: [{
+            product: {
+              type: 'SERVICE',
+              incomeType: 'ค่าบริการ 3%',
+            },
+          }],
+        },
+      }],
+      ...overrides,
+    })
+
+    it('should create WHT record from receipt with withholding', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
+      mockPrisma.receipt.findUnique.mockResolvedValue(
+        mockReceiptWithAllocations()
+      )
       mockPrisma.withholdingTax.count.mockResolvedValue(5)
       mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
@@ -296,64 +306,59 @@ describe('WHT Service', () => {
 
       const result = await generateWhtFromReceipt('rcpt-1')
 
-      // Result is an array since generateWhtFromReceipt loops over allocations
+      // generateWhtFromReceipt returns array (one WHT per allocation with withholding)
       expect(result).toBeDefined()
       expect(Array.isArray(result)).toBe(true)
-      expect(result[0].documentNo).toMatch(/^WHT-REC-/)
-      expect(result[0].type).toBe('PND53')
-      expect(result[0].whtAmount).toBe(3000)
+      expect(result!.length).toBeGreaterThan(0)
+      const wht = result![0]
+      expect(wht.documentNo).toMatch(/^WHT-REC-/)
+      expect(wht.type).toBe('PND53')
+      expect(wht.whtAmount).toBe(3000)
     })
 
-it('should determine PND3 for individual customers', async () => {
+    it('should determine PND3 for individual customers', async () => {
       const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.receipt.findUnique.mockResolvedValue({
-        id: 'rcpt-1',
-        receiptNo: 'RCPT-001',
-        receiptDate: new Date('2024-03-15'),
-        allocations: [{
-          invoice: {
-            id: 'inv-1',
-            subtotal: 50000,
-            discountAmount: 0,
-            withholdingAmount: 2500,
-            withholdingRate: 5,
-            customer: {
-              id: 'cust-1',
-              name: 'มานี มานะ',
-              taxId: '1234567890123',
-              address: '999 ถนนสีลม',
-            },
-            lines: [{
-              product: {
-                type: 'SERVICE',
-                incomeType: 'ค่าจ้าง 5%',
+      mockPrisma.receipt.findUnique.mockResolvedValue(
+        mockReceiptWithAllocations({
+          allocations: [{
+            invoice: {
+              id: 'inv-1',
+              subtotal: 50000,
+              discountAmount: 0,
+              withholdingAmount: 2500,
+              withholdingRate: 5,
+              customer: {
+                id: 'cust-1',
+                name: 'มานี มานะ',
+                taxId: '1234567890123',
+                address: '999 ถนนสีลม',
               },
-            }],
-          },
-        }],
-      })
+              lines: [{
+                product: {
+                  type: 'SERVICE',
+                  incomeType: 'ค่าจ้าง 5%',
+                },
+              }],
+            },
+          }],
+        })
+      )
       mockPrisma.withholdingTax.count.mockResolvedValue(0)
-      mockPrisma.withholdingTax.create.mockImplementation((data: any) => 
+      mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
       )
 
       const result = await generateWhtFromReceipt('rcpt-1')
 
-      expect(result).toBeDefined()
-      expect(Array.isArray(result)).toBe(true)
-      expect(result[0].type).toBe('PND3')
-    })
+      expect(result).not.toBeNull()
+      expect(result![0].type).toBe('PND3')
     })
 
-    it('should return null when no withholding on invoice', async () => {
+    it('should return null when no allocations', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
       mockPrisma.receipt.findUnique.mockResolvedValue({
         id: 'rcpt-1',
-        invoice: {
-          id: 'inv-1',
-          withholdingAmount: 0,
-          customer: { id: 'cust-1', name: 'Test' },
-          lines: [],
-        },
+        allocations: [],
       })
 
       const result = await generateWhtFromReceipt('rcpt-1')
@@ -362,6 +367,7 @@ it('should determine PND3 for individual customers', async () => {
     })
 
     it('should return null when receipt not found', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
       mockPrisma.receipt.findUnique.mockResolvedValue(null)
 
       const result = await generateWhtFromReceipt('nonexistent')
@@ -369,10 +375,11 @@ it('should determine PND3 for individual customers', async () => {
       expect(result).toBeNull()
     })
 
-    it('should return null when receipt has no invoice', async () => {
+    it('should return null when allocations is undefined', async () => {
+      const mockPrisma = (await import('@/lib/db')).default
       mockPrisma.receipt.findUnique.mockResolvedValue({
         id: 'rcpt-1',
-        invoice: null,
+        // allocations is missing entirely
       })
 
       const result = await generateWhtFromReceipt('rcpt-1')
@@ -381,32 +388,12 @@ it('should determine PND3 for individual customers', async () => {
     })
 
     it('should set correct tax month and year', async () => {
-      mockPrisma.receipt.findUnique.mockResolvedValue({
-        id: 'rcpt-1',
-        receiptNo: 'RCPT-001',
-        receiptDate: new Date('2024-03-15'), // March
-        allocations: [{
-          invoice: {
-            id: 'inv-1',
-            subtotal: 100000,
-            discountAmount: 0,
-            withholdingAmount: 3000,
-            withholdingRate: 3,
-            customer: {
-              id: 'cust-1',
-              name: 'บริษัท ลูกค้า จำกัด',
-              taxId: '0123456789012',
-              address: '789 ถนนพระราม 9',
-            },
-            lines: [{
-              product: {
-                type: 'SERVICE',
-                incomeType: 'ค่าบริการ 3%',
-              },
-            }],
-          },
-        }],
-      })
+      const mockPrisma = (await import('@/lib/db')).default
+      mockPrisma.receipt.findUnique.mockResolvedValue(
+        mockReceiptWithAllocations({
+          receiptDate: new Date('2024-03-15'), // March
+        })
+      )
       mockPrisma.withholdingTax.count.mockResolvedValue(0)
       mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
@@ -414,37 +401,16 @@ it('should determine PND3 for individual customers', async () => {
 
       const result = await generateWhtFromReceipt('rcpt-1')
 
-      expect(result[0].taxMonth).toBe(3)
-      expect(result[0].taxYear).toBe(2024)
+      expect(result).not.toBeNull()
+      expect(result![0].taxMonth).toBe(3)
+      expect(result![0].taxYear).toBe(2024)
     })
 
     it('should default to status PENDING', async () => {
-      mockPrisma.receipt.findUnique.mockResolvedValue({
-        id: 'rcpt-1',
-        receiptNo: 'RCPT-001',
-        receiptDate: new Date('2024-03-15'),
-        allocations: [{
-          invoice: {
-            id: 'inv-1',
-            subtotal: 100000,
-            discountAmount: 0,
-            withholdingAmount: 3000,
-            withholdingRate: 3,
-            customer: {
-              id: 'cust-1',
-              name: 'บริษัท ลูกค้า จำกัด',
-              taxId: '0123456789012',
-              address: '789 ถนนพระราม 9',
-            },
-            lines: [{
-              product: {
-                type: 'SERVICE',
-                incomeType: 'ค่าบริการ 3%',
-              },
-            }],
-          },
-        }],
-      })
+      const mockPrisma = (await import('@/lib/db')).default
+      mockPrisma.receipt.findUnique.mockResolvedValue(
+        mockReceiptWithAllocations()
+      )
       mockPrisma.withholdingTax.count.mockResolvedValue(0)
       mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
@@ -452,7 +418,8 @@ it('should determine PND3 for individual customers', async () => {
 
       const result = await generateWhtFromReceipt('rcpt-1')
 
-      expect(result[0].reportStatus).toBe('PENDING')
+      expect(result).not.toBeNull()
+      expect(result![0].reportStatus).toBe('PENDING')
     })
   })
 })

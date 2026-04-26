@@ -18,35 +18,52 @@ import {
   initializeDefaultCurrencies,
 } from '../currency-service'
 
-// Mock the prisma client - use vi.hoisted to avoid hoisting issues
-const { mockPrisma } = vi.hoisted(() => ({
-  mockPrisma: {
+// Use vi.hoisted to ensure mock functions are available when vi.mock is hoisted
+const { mockExchangeRateFindFirst, mockExchangeRateCreate, mockCurrencyFindUnique, mockCurrencyFindFirst, mockCurrencyFindMany, mockCurrencyUpsert, mockInvoiceFindMany, mockCurrencyGainLossCreate, mockCurrencyGainLossUpdate, mockCurrencyGainLossGroupBy, mockQueryRaw } = vi.hoisted(() => {
+  return {
+    mockExchangeRateFindFirst: vi.fn(),
+    mockExchangeRateCreate: vi.fn(),
+    mockCurrencyFindUnique: vi.fn(),
+    mockCurrencyFindFirst: vi.fn(),
+    mockCurrencyFindMany: vi.fn(),
+    mockCurrencyUpsert: vi.fn(),
+    mockInvoiceFindMany: vi.fn(),
+    mockCurrencyGainLossCreate: vi.fn(),
+    mockCurrencyGainLossUpdate: vi.fn(),
+    mockCurrencyGainLossGroupBy: vi.fn(),
+    mockQueryRaw: vi.fn(),
+  }
+})
+
+// Mock the prisma client with all three exports (prisma, db, default) pointing to same mock
+vi.mock('@/lib/db', () => {
+  const mockPrisma = {
     exchangeRate: {
-      findFirst: vi.fn(),
-      create: vi.fn(),
+      findFirst: mockExchangeRateFindFirst,
+      create: mockExchangeRateCreate,
     },
     currency: {
-      findUnique: vi.fn(),
-      findFirst: vi.fn(),
-      findMany: vi.fn(),
-      upsert: vi.fn(),
+      findUnique: mockCurrencyFindUnique,
+      findFirst: mockCurrencyFindFirst,
+      findMany: mockCurrencyFindMany,
+      upsert: mockCurrencyUpsert,
     },
     invoice: {
-      findMany: vi.fn(),
+      findMany: mockInvoiceFindMany,
     },
     currencyGainLoss: {
-      create: vi.fn(),
-      update: vi.fn(),
-      groupBy: vi.fn(),
+      create: mockCurrencyGainLossCreate,
+      update: mockCurrencyGainLossUpdate,
+      groupBy: mockCurrencyGainLossGroupBy,
     },
-    $queryRaw: vi.fn(),
-  },
-}))
-
-vi.mock('@/lib/db', () => ({
-  prisma: mockPrisma,
-  default: mockPrisma,
-}))
+    $queryRaw: mockQueryRaw,
+  }
+  return {
+    prisma: mockPrisma,
+    db: mockPrisma,
+    default: mockPrisma,
+  }
+})
 
 // Mock fetch for API calls
 global.fetch = vi.fn()
@@ -102,10 +119,13 @@ describe('Currency Service', () => {
     })
 
     it('should return rate for specific date', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.exchangeRate.findFirst.mockResolvedValue({
+      mockExchangeRateFindFirst.mockResolvedValue({
+        id: 'rate-1',
+        fromCurrency: 'USD',
+        toCurrency: 'THB',
         rate: 35.5,
         date: new Date('2024-03-15'),
+        source: 'MANUAL',
       })
 
       const rate = await getExchangeRate('USD', new Date('2024-03-15'))
@@ -113,10 +133,13 @@ describe('Currency Service', () => {
     })
 
     it('should return latest rate when no date specified', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.exchangeRate.findFirst.mockResolvedValue({
+      mockExchangeRateFindFirst.mockResolvedValue({
+        id: 'rate-2',
+        fromCurrency: 'EUR',
+        toCurrency: 'THB',
         rate: 36.0,
         date: new Date(),
+        source: 'API',
       })
 
       const rate = await getExchangeRate('EUR')
@@ -124,18 +147,32 @@ describe('Currency Service', () => {
     })
 
     it('should throw error when rate not found', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.exchangeRate.findFirst.mockResolvedValue(null)
-      mockPrisma.currency.findUnique.mockResolvedValue(null)
+      mockExchangeRateFindFirst.mockResolvedValue(null)
+      mockCurrencyFindUnique.mockResolvedValue(null)
 
       await expect(getExchangeRate('XYZ')).rejects.toThrow('ไม่พบอัตราแลกเปลี่ยนสำหรับ XYZ')
     })
 
     it('should fallback to currency default rate', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.exchangeRate.findFirst.mockResolvedValueOnce(null)
-      mockPrisma.currency.findUnique.mockResolvedValue({ id: 'curr-1', code: 'USD' })
-      mockPrisma.exchangeRate.findFirst.mockResolvedValueOnce({ rate: 35.0 })
+      mockExchangeRateFindFirst
+        .mockResolvedValueOnce(null)  // First call - no rate for date
+        .mockResolvedValueOnce({      // Second call - latest rate
+          id: 'rate-1',
+          fromCurrency: 'USD',
+          toCurrency: 'THB',
+          rate: 35.0,
+          date: new Date(),
+          source: 'MANUAL',
+        })
+      mockCurrencyFindUnique.mockResolvedValue({
+        id: 'curr-1',
+        code: 'USD',
+        name: 'US Dollar',
+        symbol: '$',
+        decimalPlaces: 2,
+        isBase: false,
+        isActive: true,
+      })
 
       const rate = await getExchangeRate('USD')
       expect(rate).toBe(35.0)
@@ -144,13 +181,20 @@ describe('Currency Service', () => {
 
   describe('setExchangeRate', () => {
     it('should create exchange rate record', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currency.findUnique.mockResolvedValue({ id: 'curr-1', code: 'USD' })
-      mockPrisma.exchangeRate.create.mockResolvedValue({
+      mockCurrencyFindUnique.mockResolvedValue({
+        id: 'curr-1',
+        code: 'USD',
+      })
+      mockExchangeRateCreate.mockResolvedValue({
         id: 'rate-1',
         fromCurrency: 'USD',
         toCurrency: 'THB',
         rate: 35.5,
+        currencyId: 'curr-1',
+        date: expect.any(Date),
+        source: 'MANUAL',
+        sourceRef: undefined,
+        createdBy: 'ref-1',
       })
 
       const result = await setExchangeRate('USD', 'THB', 35.5, new Date(), 'MANUAL', 'ref-1', 'user-1')
@@ -161,12 +205,20 @@ describe('Currency Service', () => {
     })
 
     it('should include source information', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currency.findUnique.mockResolvedValue({ id: 'curr-1' })
-      
+      mockCurrencyFindUnique.mockResolvedValue({ id: 'curr-1', code: 'EUR' })
+      mockExchangeRateCreate.mockResolvedValue({
+        id: 'rate-2',
+        fromCurrency: 'EUR',
+        toCurrency: 'THB',
+        rate: 38.0,
+        source: 'API',
+        sourceRef: 'api-ref',
+        createdBy: 'system',
+      })
+
       await setExchangeRate('EUR', 'THB', 38.0, new Date(), 'API', 'api-ref', 'system')
 
-      expect(mockPrisma.exchangeRate.create).toHaveBeenCalledWith(
+      expect(mockExchangeRateCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             source: 'API',
@@ -218,8 +270,7 @@ describe('Currency Service', () => {
 
   describe('updateExchangeRatesFromAPI', () => {
     it('should update rates for all active currencies', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currency.findMany.mockResolvedValue([
+      mockCurrencyFindMany.mockResolvedValue([
         { id: 'curr-1', code: 'USD' },
         { id: 'curr-2', code: 'EUR' },
       ])
@@ -236,8 +287,8 @@ describe('Currency Service', () => {
         json: () => Promise.resolve(mockResponse),
       })
 
-      mockPrisma.currency.findUnique.mockResolvedValue({ id: 'curr-1' })
-      mockPrisma.exchangeRate.create.mockResolvedValue({ id: 'rate-1' })
+      mockCurrencyFindUnique.mockResolvedValue({ id: 'curr-1', code: 'USD' })
+      mockExchangeRateCreate.mockResolvedValue({ id: 'rate-1' })
 
       const updatedCount = await updateExchangeRatesFromAPI('user-1')
 
@@ -247,8 +298,7 @@ describe('Currency Service', () => {
 
   describe('calculateRealizedGainLoss', () => {
     it('should calculate gain when rate increases', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currencyGainLoss.create.mockImplementation((data: any) => 
+      mockCurrencyGainLossCreate.mockImplementation((data: any) =>
         Promise.resolve({ id: 'gl-1', ...data.data })
       )
 
@@ -269,8 +319,7 @@ describe('Currency Service', () => {
     })
 
     it('should calculate loss when rate decreases', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currencyGainLoss.create.mockImplementation((data: any) => 
+      mockCurrencyGainLossCreate.mockImplementation((data: any) =>
         Promise.resolve({ id: 'gl-1', ...data.data })
       )
 
@@ -290,8 +339,7 @@ describe('Currency Service', () => {
     })
 
     it('should round gain/loss amount', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currencyGainLoss.create.mockImplementation((data: any) => 
+      mockCurrencyGainLossCreate.mockImplementation((data: any) =>
         Promise.resolve({ id: 'gl-1', ...data.data })
       )
 
@@ -309,8 +357,7 @@ describe('Currency Service', () => {
     })
 
     it('should set isPosted to false initially', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currencyGainLoss.create.mockImplementation((data: any) => 
+      mockCurrencyGainLossCreate.mockImplementation((data: any) =>
         Promise.resolve({ id: 'gl-1', ...data.data })
       )
 
@@ -330,17 +377,23 @@ describe('Currency Service', () => {
 
   describe('calculateUnrealizedGainLoss', () => {
     it('should calculate for all unpaid foreign currency invoices', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.invoice.findMany.mockResolvedValue([
+      mockInvoiceFindMany.mockResolvedValue([
         {
           id: 'inv-1',
           foreignAmount: 1000,
           exchangeRate: 35,
-          currency: { code: 'USD' },
+          currency: { id: 'curr-1', code: 'USD' },
         },
       ])
-      mockPrisma.exchangeRate.findFirst.mockResolvedValue({ rate: 36 })
-      mockPrisma.currencyGainLoss.create.mockImplementation((data: any) => 
+      mockExchangeRateFindFirst.mockResolvedValue({
+        id: 'rate-1',
+        rate: 36,
+        fromCurrency: 'USD',
+        toCurrency: 'THB',
+        date: new Date(),
+        source: 'MANUAL',
+      })
+      mockCurrencyGainLossCreate.mockImplementation((data: any) =>
         Promise.resolve({ id: 'gl-1', ...data.data })
       )
 
@@ -352,8 +405,7 @@ describe('Currency Service', () => {
     })
 
     it('should skip invoices with no currency', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.invoice.findMany.mockResolvedValue([
+      mockInvoiceFindMany.mockResolvedValue([
         {
           id: 'inv-1',
           foreignAmount: 1000,
@@ -368,13 +420,12 @@ describe('Currency Service', () => {
     })
 
     it('should skip THB invoices', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.invoice.findMany.mockResolvedValue([
+      mockInvoiceFindMany.mockResolvedValue([
         {
           id: 'inv-1',
           foreignAmount: 1000,
           exchangeRate: 1,
-          currency: { code: 'THB' },
+          currency: { id: 'curr-thb', code: 'THB' },
         },
       ])
 
@@ -384,16 +435,22 @@ describe('Currency Service', () => {
     })
 
     it('should skip zero gain/loss items', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.invoice.findMany.mockResolvedValue([
+      mockInvoiceFindMany.mockResolvedValue([
         {
           id: 'inv-1',
           foreignAmount: 1000,
           exchangeRate: 35,
-          currency: { code: 'USD' },
+          currency: { id: 'curr-1', code: 'USD' },
         },
       ])
-      mockPrisma.exchangeRate.findFirst.mockResolvedValue({ rate: 35 }) // Same rate = no gain/loss
+      mockExchangeRateFindFirst.mockResolvedValue({
+        id: 'rate-1',
+        rate: 35, // Same rate = no gain/loss
+        fromCurrency: 'USD',
+        toCurrency: 'THB',
+        date: new Date(),
+        source: 'MANUAL',
+      })
 
       const results = await calculateUnrealizedGainLoss()
 
@@ -403,18 +460,19 @@ describe('Currency Service', () => {
 
   describe('postGainLossToGL', () => {
     it('should mark gain/loss as posted and link to journal entry', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currencyGainLoss.update.mockResolvedValue({
+      mockCurrencyGainLossUpdate.mockResolvedValue({
         id: 'gl-1',
         isPosted: true,
         journalEntryId: 'je-1',
+        type: 'REALIZED',
+        gainLossAmount: 1000,
       })
 
       const result = await postGainLossToGL('gl-1', 'je-1')
 
       expect(result.isPosted).toBe(true)
       expect(result.journalEntryId).toBe('je-1')
-      expect(mockPrisma.currencyGainLoss.update).toHaveBeenCalledWith({
+      expect(mockCurrencyGainLossUpdate).toHaveBeenCalledWith({
         where: { id: 'gl-1' },
         data: { isPosted: true, journalEntryId: 'je-1' },
       })
@@ -461,20 +519,24 @@ describe('Currency Service', () => {
 
   describe('generateMultiCurrencyReport', () => {
     it('should generate report with all currencies', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currency.findFirst.mockResolvedValue({ code: 'THB', name: 'Thai Baht' })
-      mockPrisma.currency.findMany.mockResolvedValue([
+      mockCurrencyFindFirst.mockResolvedValue({
+        id: 'base-1',
+        code: 'THB',
+        name: 'Thai Baht',
+        isBase: true,
+      })
+      mockCurrencyFindMany.mockResolvedValue([
         {
           id: 'curr-1',
           code: 'USD',
           name: 'US Dollar',
           updatedAt: new Date(),
-          exchangeRates: [{ rate: 35, date: new Date() }],
+          exchangeRates: [{ id: 'er-1', rate: 35, date: new Date(), fromCurrency: 'USD', toCurrency: 'THB', source: 'MANUAL' }],
         },
       ])
-      mockPrisma.invoice.findMany.mockResolvedValue([])
-      mockPrisma.$queryRaw.mockResolvedValue([{ totalAmount: 0, foreignAmount: 0 }])
-      mockPrisma.currencyGainLoss.groupBy.mockResolvedValue([])
+      mockInvoiceFindMany.mockResolvedValue([])
+      mockQueryRaw.mockResolvedValue([{ totalAmount: 0, foreignAmount: 0 }])
+      mockCurrencyGainLossGroupBy.mockResolvedValue([])
 
       const report = await generateMultiCurrencyReport()
 
@@ -484,23 +546,22 @@ describe('Currency Service', () => {
     })
 
     it('should calculate receivables for each currency', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currency.findFirst.mockResolvedValue({ code: 'THB' })
-      mockPrisma.currency.findMany.mockResolvedValue([
+      mockCurrencyFindFirst.mockResolvedValue({ id: 'base-1', code: 'THB', isBase: true })
+      mockCurrencyFindMany.mockResolvedValue([
         {
           id: 'curr-1',
           code: 'USD',
           name: 'US Dollar',
           updatedAt: new Date(),
-          exchangeRates: [{ rate: 35, date: new Date() }],
+          exchangeRates: [{ id: 'er-1', rate: 35, date: new Date(), fromCurrency: 'USD', toCurrency: 'THB', source: 'MANUAL' }],
         },
       ])
-      mockPrisma.invoice.findMany.mockResolvedValue([
-        { foreignAmount: 1000, totalAmount: 35000 },
-        { foreignAmount: 500, totalAmount: 17500 },
+      mockInvoiceFindMany.mockResolvedValue([
+        { id: 'inv-1', foreignAmount: 1000, totalAmount: 35000 },
+        { id: 'inv-2', foreignAmount: 500, totalAmount: 17500 },
       ])
-      mockPrisma.$queryRaw.mockResolvedValue([{ totalAmount: 0, foreignAmount: 0 }])
-      mockPrisma.currencyGainLoss.groupBy.mockResolvedValue([])
+      mockQueryRaw.mockResolvedValue([{ totalAmount: 0, foreignAmount: 0 }])
+      mockCurrencyGainLossGroupBy.mockResolvedValue([])
 
       const report = await generateMultiCurrencyReport()
 
@@ -510,20 +571,19 @@ describe('Currency Service', () => {
     })
 
     it('should include realized and unrealized gain/loss', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currency.findFirst.mockResolvedValue({ code: 'THB' })
-      mockPrisma.currency.findMany.mockResolvedValue([
+      mockCurrencyFindFirst.mockResolvedValue({ id: 'base-1', code: 'THB', isBase: true })
+      mockCurrencyFindMany.mockResolvedValue([
         {
           id: 'curr-1',
           code: 'USD',
           name: 'US Dollar',
           updatedAt: new Date(),
-          exchangeRates: [{ rate: 35, date: new Date() }],
+          exchangeRates: [{ id: 'er-1', rate: 35, date: new Date(), fromCurrency: 'USD', toCurrency: 'THB', source: 'MANUAL' }],
         },
       ])
-      mockPrisma.invoice.findMany.mockResolvedValue([])
-      mockPrisma.$queryRaw.mockResolvedValue([{ totalAmount: 0, foreignAmount: 0 }])
-      mockPrisma.currencyGainLoss.groupBy.mockResolvedValue([
+      mockInvoiceFindMany.mockResolvedValue([])
+      mockQueryRaw.mockResolvedValue([{ totalAmount: 0, foreignAmount: 0 }])
+      mockCurrencyGainLossGroupBy.mockResolvedValue([
         { type: 'REALIZED', _sum: { gainLossAmount: 5000 } },
         { type: 'UNREALIZED', _sum: { gainLossAmount: -2000 } },
       ])
@@ -537,18 +597,16 @@ describe('Currency Service', () => {
 
   describe('initializeDefaultCurrencies', () => {
     it('should create default currencies', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
-      mockPrisma.currency.upsert.mockResolvedValue({ id: 'curr-1' })
+      mockCurrencyUpsert.mockResolvedValue({ id: 'curr-1' })
 
       await initializeDefaultCurrencies()
 
-      expect(mockPrisma.currency.upsert).toHaveBeenCalledTimes(8) // 8 default currencies
+      expect(mockCurrencyUpsert).toHaveBeenCalledTimes(8) // 8 default currencies
     })
 
     it('should set THB as base currency', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
       const upsertCalls: any[] = []
-      mockPrisma.currency.upsert.mockImplementation((args: any) => {
+      mockCurrencyUpsert.mockImplementation((args: any) => {
         upsertCalls.push(args)
         return Promise.resolve({ id: 'curr-1' })
       })
@@ -561,9 +619,8 @@ describe('Currency Service', () => {
     })
 
     it('should handle JPY with 0 decimal places', async () => {
-      const mockPrisma = (await import('@/lib/db')).default
       const upsertCalls: any[] = []
-      mockPrisma.currency.upsert.mockImplementation((args: any) => {
+      mockCurrencyUpsert.mockImplementation((args: any) => {
         upsertCalls.push(args)
         return Promise.resolve({ id: 'curr-1' })
       })
@@ -572,6 +629,23 @@ describe('Currency Service', () => {
 
       const jpyCall = upsertCalls.find(c => c.where.code === 'JPY')
       expect(jpyCall.update.decimalPlaces).toBe(0)
+    })
+
+    it('should include USD in currencies list', async () => {
+      const upsertCalls: any[] = []
+      mockCurrencyUpsert.mockImplementation((args: any) => {
+        upsertCalls.push(args)
+        return Promise.resolve({ id: 'curr-1' })
+      })
+
+      await initializeDefaultCurrencies()
+
+      const usdCall = upsertCalls.find(c => c.where.code === 'USD')
+      expect(usdCall).toBeDefined()
+      expect(usdCall.update.name).toBe('US Dollar')
+      expect(usdCall.update.symbol).toBe('$')
+      expect(usdCall.update.decimalPlaces).toBe(2)
+      expect(usdCall.update.isBase).toBe(false)
     })
   })
 })

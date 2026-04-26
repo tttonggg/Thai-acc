@@ -118,8 +118,8 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
       setLoading(true)
       try {
         const [vendorsRes, banksRes] = await Promise.all([
-          fetch('/api/vendors?isActive=true'),
-          fetch('/api/bank-accounts'),
+          fetch(`/api/vendors?isActive=true`, { credentials: 'include' }),
+          fetch(`/api/bank-accounts`, { credentials: 'include' }),
         ])
 
         if (vendorsRes.ok) {
@@ -150,7 +150,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
       }
 
       try {
-        const res = await fetch(`/api/payments/unpaid-invoices?vendorId=${selectedVendor}`)
+        const res = await fetch(`/api/payments/unpaid-invoices?vendorId=${selectedVendor}`, { credentials: 'include' })
         if (res.ok) {
           const response = await res.json()
           // API returns { success: true, data: { invoices: [...], totalAPBalance: ..., vendorId: ... } }
@@ -196,6 +196,36 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
     }
 
     form.setValue('allocations', allocations)
+  }
+
+  // Pay Full - Select all unpaid invoices with full balance
+  const handlePayFull = () => {
+    if (unpaidInvoices.length === 0) {
+      toast({
+        title: 'ไม่มีใบซื้อค้างจ่าย',
+        description: 'กรุณาเลือกผู้ขายที่มียอดค้างจ่าย',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + inv.balance, 0)
+    form.setValue('amount', totalUnpaid)
+
+    const newAllocations = unpaidInvoices.map((invoice) => ({
+      invoiceId: invoice.id,
+      invoiceNo: invoice.invoiceNo,
+      amount: invoice.balance,
+      whtCategory: 'SERVICE' as WHTCategory,
+      whtRate: 3,
+      whtAmount: Math.round((invoice.balance * 3) / 100),
+    }))
+    form.setValue('allocations', newAllocations)
+
+    toast({
+      title: 'เลือกจ่ายเต็มจำนวน',
+      description: 'ยอดรวม ' + unpaidInvoices.length + ' ใบ = ฿' + totalUnpaid.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    })
   }
 
   // Update allocation amount
@@ -303,7 +333,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
 
     setSubmitting(true)
     try {
-      const res = await fetch('/api/payments', {
+      const res = await fetch(`/api/payments`, { credentials: 'include', 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
@@ -613,6 +643,15 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                           </Tooltip>
                         </TooltipProvider>
                       </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handlePayFull}
+                        disabled={unpaidInvoices.length === 0}
+                      >
+                        จ่ายเต็มจำนวน ({unpaidInvoices.length} ใบ)
+                      </Button>
                       <Button
                         type="button"
                         variant="outline"

@@ -3,6 +3,7 @@ import { requireAuth, apiResponse, apiError, unauthorizedError, forbiddenError, 
 import { db } from '@/lib/db'
 import { z } from 'zod'
 import { bahtToSatang, satangToBaht } from '@/lib/currency'
+import { checkPeriodStatus } from '@/lib/period-service'
 
 // Wrapper that properly handles auth with request context
 async function requireAuthWithRequest(request: NextRequest): Promise<any> {
@@ -204,6 +205,12 @@ export async function POST(request: NextRequest) {
       if (invoice.customerId !== validatedData.customerId) {
         return apiError('ใบกำกับภาษีไม่ตรงกับลูกค้า')
       }
+    }
+
+    // B1. Period Locking - Check if period is open for credit note date
+    const periodCheck = await checkPeriodStatus(validatedData.creditNoteDate)
+    if (!periodCheck.isValid) {
+      return apiError(periodCheck.error || "ไม่สามารถออกใบลดหนี้ในงวดที่ปิดแล้ว")
     }
 
     // Generate credit note number

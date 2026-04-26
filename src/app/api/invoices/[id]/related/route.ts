@@ -1,6 +1,8 @@
 import { db } from "@/lib/db"
 import { relatedDocumentSchema } from "@/lib/validations"
 import type { RelationType } from "@prisma/client"
+import { apiResponse, notFoundError, apiError } from "@/lib/api-utils"
+import { requireAuth } from "@/lib/api-utils"
 
 interface RelatedDocumentDetails {
   id: string

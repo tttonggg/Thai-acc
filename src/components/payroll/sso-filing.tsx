@@ -53,7 +53,7 @@ export function SSOFiling() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/payroll/sso/${year}/${month}`)
+      const res = await fetch(`/api/payroll/sso/${year}/${month}`, { credentials: 'include' })
       const json = await res.json()
       if (json.success) {
         setData(json.data)
@@ -72,7 +72,7 @@ export function SSOFiling() {
   async function handleExport() {
     setExporting(true)
     try {
-      const res = await fetch(`/api/payroll/sso/${year}/${month}/export`)
+      const res = await fetch(`/api/payroll/sso/${year}/${month}/export`, { credentials: 'include' })
       if (res.ok) {
         const blob = await res.blob()
         const url = window.URL.createObjectURL(blob)

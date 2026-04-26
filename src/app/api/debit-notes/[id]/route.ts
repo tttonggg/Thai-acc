@@ -95,7 +95,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/debit-notes/[id] - Delete debit note (soft-delete, DRAFT only, accountant/admin)
+// DELETE /api/debit-notes/[id] - Delete debit note (admin only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -103,7 +103,7 @@ export async function DELETE(
   try {
     const user = await requireAuth()
 
-    if (user.role !== 'ACCOUNTANT' && user.role !== 'ADMIN') {
+    if (user.role !== 'ADMIN') {
       return forbiddenError()
     }
 
@@ -120,9 +120,9 @@ export async function DELETE(
       return notFoundError('ไม่พบใบเพิ่มหนี้')
     }
 
-    // Only allow deleting DRAFT status
+    // Only DRAFT status can be deleted
     if (existing.status !== 'DRAFT') {
-      return apiError('สามารถลบได้เฉพาะใบเพิ่มหนี้สถานะร่างเท่านั้น', 403)
+      return forbiddenError('สามารถลบได้เฉพาะใบเพิ่มหนี้สถานะร่างเท่านั้น')
     }
 
     // Cannot delete if journal entry exists
@@ -130,14 +130,10 @@ export async function DELETE(
       return apiError('ไม่สามารถลบใบเพิ่มหนี้ที่มีการลงบัญชีแล้ว', 403)
     }
 
-    // Soft-delete debit note + cascade any children
+    // Soft-delete
     await db.debitNote.update({
       where: { id },
-      data: {
-        isActive: false,
-        deletedAt: new Date(),
-        deletedBy: user.id
-      }
+      data: { deletedAt: new Date(), isActive: false, deletedBy: user.id }
     })
 
     return apiResponse({ message: 'ลบใบเพิ่มหนี้เรียบร้อยแล้ว' })
