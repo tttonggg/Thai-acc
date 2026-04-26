@@ -224,6 +224,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 8 * 60 * 60, // 8 hours
   },
+  trustHost: true,
   secret: process.env.NEXTAUTH_SECRET || 'dev-only-secret-change-in-production',
   events: {
     async signOut({ token }) {
@@ -356,6 +357,13 @@ export async function changePassword(
  * Use this in server components and API routes
  */
 export async function auth() {
-  const session = await getServerSession(authOptions)
-  return session
+  try {
+    const session = await getServerSession(authOptions)
+    return session
+  } catch (error) {
+    // getServerSession may throw if host/origin doesn't match NEXTAUTH_URL
+    // This can happen with reverse proxies or when NEXTAUTH_URL is misconfigured
+    console.error('getServerSession error:', error)
+    return null
+  }
 }
