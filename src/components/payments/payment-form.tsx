@@ -196,6 +196,36 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
     form.setValue('allocations', allocations)
   }
 
+  // Pay Full - Select all unpaid invoices with full balance
+  const handlePayFull = () => {
+    if (unpaidInvoices.length === 0) {
+      toast({
+        title: 'ไม่มีใบซื้อค้างจ่าย',
+        description: 'กรุณาเลือกผู้ขายที่มียอดค้างจ่าย',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + inv.balance, 0)
+    form.setValue('amount', totalUnpaid)
+
+    const newAllocations = unpaidInvoices.map((invoice) => ({
+      invoiceId: invoice.id,
+      invoiceNo: invoice.invoiceNo,
+      amount: invoice.balance,
+      whtCategory: 'SERVICE' as WHTCategory,
+      whtRate: 3,
+      whtAmount: Math.round((invoice.balance * 3) / 100),
+    }))
+    form.setValue('allocations', newAllocations)
+
+    toast({
+      title: 'เลือกจ่ายเต็มจำนวน',
+      description: 'ยอดรวม ' + unpaidInvoices.length + ' ใบ = ฿' + totalUnpaid.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    })
+  }
+
   // Update allocation amount
   const updateAllocationAmount = (index: number, value: number) => {
     const allocations = form.getValues('allocations')
@@ -545,6 +575,15 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                           </Tooltip>
                         </TooltipProvider>
                       </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handlePayFull}
+                        disabled={unpaidInvoices.length === 0}
+                      >
+                        จ่ายเต็มจำนวน ({unpaidInvoices.length} ใบ)
+                      </Button>
                       <Button
                         type="button"
                         variant="outline"

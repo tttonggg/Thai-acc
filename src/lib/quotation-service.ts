@@ -5,6 +5,7 @@
 
 import prisma from '@/lib/db'
 import { calculatePercent } from '@/lib/currency'
+import { Prisma } from '@prisma/client'
 
 // ============================================
 // Custom Error Classes
@@ -24,10 +25,10 @@ export class QuotationWorkflowError extends Error {
   }
 }
 
-export class QuotationExpiredError extends Error {
+export class QuotationNotFoundError extends Error {
   constructor(message: string) {
     super(message)
-    this.name = 'QuotationExpiredError'
+    this.name = 'QuotationNotFoundError'
   }
 }
 
@@ -35,32 +36,7 @@ export class QuotationExpiredError extends Error {
 // Type Definitions
 // ============================================
 
-export interface QuotationLineCalculation {
-  subtotal: number
-  discountAmount: number
-  afterDiscount: number
-  vatAmount: number
-  amount: number
-}
-
-export interface QuotationTotalCalculation {
-  subtotal: number
-  totalDiscount: number
-  afterDiscount: number
-  vatAmount: number
-  totalAmount: number
-}
-
-export interface QuotationStatusInfo {
-  canSend: boolean
-  canEdit: boolean
-  canDelete: boolean
-  canApprove: boolean
-  canReject: boolean
-  canConvert: boolean
-  canCancel: boolean
-  allowedTransitions: string[]
-}
+export type QuotationStatusType = 'DRAFT' | 'SENT' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | 'CONVERTED'
 
 export interface QuotationLineInput {
   lineNo: number
@@ -69,33 +45,72 @@ export interface QuotationLineInput {
   quantity: number
   unit: string
   unitPrice: number
-  discount: number
-  vatRate: number
+  discount?: number
+  vatRate?: number
   notes?: string
 }
 
-export interface QuotationInput {
-  customerId: string
+export interface QuotationCreateInput {
+  quotationNo?: string
   quotationDate?: Date
+  customerId: string
   validUntil: Date
-  contactPerson?: string
-  reference?: string
-  discountAmount?: number
-  discountPercent?: number
+  subtotal?: number
   vatRate?: number
-  terms?: string
+  vatAmount?: number
+  totalAmount?: number
+  discountAmount?: number
+  status?: QuotationStatusType
   notes?: string
-  internalNotes?: string
+  terms?: string
+  salesOrderId?: string
+  createdById?: string
   lines: QuotationLineInput[]
 }
 
+export interface QuotationUpdateInput {
+  quotationDate?: Date
+  customerId?: string
+  validUntil?: Date
+  subtotal?: number
+  vatRate?: number
+  vatAmount?: number
+  totalAmount?: number
+  discountAmount?: number
+  status?: QuotationStatusType
+  notes?: string
+  terms?: string
+  lines?: QuotationLineInput[]
+}
+
+export interface QuotationWhereInput {
+  id?: string
+  quotationNo?: string
+  customerId?: string
+  status?: QuotationStatusType
+  isActive?: boolean
+  deletedAt?: any
+}
+
 // ============================================
-// Number Generation Functions
+// Valid Status Transitions
+// ============================================
+
+const VALID_TRANSITIONS: Record<QuotationStatusType, QuotationStatusType[]> = {
+  DRAFT: ['SENT'],
+  SENT: ['APPROVED', 'REJECTED', 'EXPIRED'],
+  APPROVED: ['CONVERTED', 'EXPIRED'],
+  REJECTED: [],
+  EXPIRED: [],
+  CONVERTED: [],
+}
+
+// ============================================
+// Number Generation
 // ============================================
 
 /**
  * Generate Quotation Number
- * สร้างเลขที่ใบเสนอราคา
  * Format: QT{yyyy}{mm}-{sequence}
  * Example: QT202603-0001
  */
@@ -105,19 +120,10 @@ export async function generateQuotationNumber(): Promise<string> {
   const month = String(now.getMonth() + 1).padStart(2, '0')
   const prefix = `QT${year}${month}`
 
-  // Find the last quotation number for this month
   const lastQuotation = await prisma.quotation.findFirst({
-    where: {
-      quotationNo: {
-        startsWith: prefix,
-      },
-    },
-    orderBy: {
-      quotationNo: 'desc',
-    },
-    select: {
-      quotationNo: true,
-    },
+    where: { quotationNo: { startsWith: prefix } },
+    orderBy: { quotationNo: 'desc' },
+    select: { quotationNo: true },
   })
 
   let sequence = 1
@@ -136,641 +142,499 @@ export async function generateQuotationNumber(): Promise<string> {
 // ============================================
 
 /**
- * Calculate Quotation Line Amount
- * คำนวณยอดเงินรายการใบเสนอราคา
- *
- * CRITICAL: All inputs are in Satang, all outputs are in Satang
+ * Calculate line amounts in Satang
  */
-export function calculateQuotationLine(line: QuotationLineInput): QuotationLineCalculation {
-  // All inputs should be in Satang
-  const subtotal = line.quantity * line.unitPrice
-  const discountAmount = line.discount // Already in Satang
-  const afterDiscount = subtotal - discountAmount
-  const vatAmount = calculatePercent(afterDiscount, line.vatRate)
+export function calculateLineAmounts(line: QuotationLineInput): {
+  subtotal: number
+  discount: number
+  afterDiscount: number
+  vatAmount: number
+  amount: number
+} {
+  const subtotal = Math.round(line.quantity * line.unitPrice)
+  const discount = Math.round(line.discount || 0)
+  const afterDiscount = subtotal - discount
+  const vatRate = line.vatRate ?? 7
+  const vatAmount = Math.round(calculatePercent(afterDiscount, vatRate))
   const amount = afterDiscount + vatAmount
 
-  return {
-    subtotal: Math.round(subtotal),
-    discountAmount: Math.round(discountAmount),
-    afterDiscount: Math.round(afterDiscount),
-    vatAmount: Math.round(vatAmount),
-    amount: Math.round(amount),
-  }
+  return { subtotal, discount, afterDiscount, vatAmount, amount }
 }
 
 /**
- * Calculate Quotation Totals
- * คำนวณยอดรวมใบเสนอราคา
- *
- * CRITICAL: All inputs and outputs are in Satang
+ * Calculate quotation totals from lines
  */
 export function calculateQuotationTotals(
   lines: QuotationLineInput[],
-  discountAmount: number = 0,
-  discountPercent: number = 0,
-  vatRate: number = 7
-): QuotationTotalCalculation {
-  // Calculate subtotal from all lines (all in Satang)
-  const subtotal = lines.reduce((sum, line) => {
-    return sum + (line.quantity * line.unitPrice)
-  }, 0)
-
-  // Calculate total discount (using Satang throughout)
-  const totalDiscount = discountAmount + calculatePercent(subtotal, discountPercent)
-
-  // Calculate amount after discount
+  discountAmount: number = 0
+): {
+  subtotal: number
+  totalDiscount: number
+  afterDiscount: number
+  vatAmount: number
+  totalAmount: number
+} {
+  const subtotal = lines.reduce((sum, line) => sum + Math.round(line.quantity * line.unitPrice), 0)
+  const totalDiscount = discountAmount
   const afterDiscount = subtotal - totalDiscount
-
-  // Calculate VAT (using Satang throughout)
-  const vatAmount = calculatePercent(afterDiscount, vatRate)
-
-  // Calculate total amount
+  const vatAmount = Math.round(calculatePercent(afterDiscount, 7))
   const totalAmount = afterDiscount + vatAmount
 
-  return {
-    subtotal: Math.round(subtotal),
-    totalDiscount: Math.round(totalDiscount),
-    afterDiscount: Math.round(afterDiscount),
-    vatAmount: Math.round(vatAmount),
-    totalAmount: Math.round(totalAmount),
-  }
+  return { subtotal, totalDiscount, afterDiscount, vatAmount, totalAmount }
 }
 
 // ============================================
-// Validation Functions
+// CRUD Operations
 // ============================================
 
 /**
- * Validate Quotation Date Range
- * ตรวจสอบช่วงวันที่ใบเสนอราคา
+ * Create a new quotation with lines
  */
-export function validateQuotationDateRange(
-  quotationDate: Date,
-  validUntil: Date
-): { valid: boolean; error?: string } {
-  if (validUntil <= quotationDate) {
-    return {
-      valid: false,
-      error: 'วันหมดอายุต้องอยู่หลังวันที่ออกใบเสนอราคา',
-    }
-  }
-
-  // Check if valid until is at least 1 day in the future
-  const minValidDays = 1
-  const daysDiff = Math.ceil((validUntil.getTime() - quotationDate.getTime()) / (1000 * 60 * 60 * 24))
-
-  if (daysDiff < minValidDays) {
-    return {
-      valid: false,
-      error: 'วันหมดอายุต้องมีอย่างน้อย 1 วันนับจากวันที่ออกใบเสนอราคา',
-    }
-  }
-
-  return { valid: true }
-}
-
-/**
- * Validate Quotation Expiry
- * ตรวจสอบว่าใบเสนอราคาหมดอายุหรือไม่
- */
-export function validateQuotationExpiry(validUntil: Date): { valid: boolean; expired: boolean } {
-  const now = new Date()
-  const expired = validUntil < now
-
-  return {
-    valid: !expired,
-    expired,
-  }
-}
-
-/**
- * Validate Customer Credit Limit
- * ตรวจสอบวงเงินเครดิตลูกค้า
- */
-export async function validateCustomerCreditLimit(
-  customerId: string,
-  totalAmount: number
-): Promise<{ valid: boolean; error?: string; creditLimit?: number; currentBalance?: number }> {
+export async function createQuotation(data: QuotationCreateInput): Promise<any> {
+  // Validate customer exists
   const customer = await prisma.customer.findUnique({
-    where: { id: customerId },
-    select: {
-      creditLimit: true,
-    },
+    where: { id: data.customerId },
   })
-
   if (!customer) {
-    return {
-      valid: false,
-      error: 'ไม่พบข้อมูลลูกค้า',
-    }
+    throw new QuotationValidationError('ไม่พบข้อมูลลูกค้า')
   }
 
-  // If no credit limit set, skip validation
-  if (!customer.creditLimit || customer.creditLimit === 0) {
-    return { valid: true }
-  }
+  // Generate quotation number if not provided
+  const quotationNo = data.quotationNo || await generateQuotationNumber()
 
-  // Calculate current outstanding balance (unpaid invoices)
-  const outstandingBalance = await prisma.invoice.aggregate({
-    where: {
-      customerId,
-      status: {
-        in: ['POSTED', 'OVERDUE'],
-      },
-      paymentStatus: {
-        in: ['UNPAID', 'PARTIAL'],
-      },
-    },
-    _sum: {
-      totalAmount: true,
-    },
-  })
+  // Calculate totals from lines
+  const totals = calculateQuotationTotals(data.lines, data.discountAmount || 0)
 
-  const currentBalance = outstandingBalance._sum.totalAmount || 0
-  const newTotalBalance = currentBalance + totalAmount
-
-  if (newTotalBalance > customer.creditLimit) {
-    return {
-      valid: false,
-      error: `เกินวงเงินเครดิต (เครดิต: ฿${customer.creditLimit.toLocaleString()}, คงเหลือ: ฿${(customer.creditLimit - currentBalance).toLocaleString()})`,
-      creditLimit: customer.creditLimit,
-      currentBalance,
-    }
-  }
-
-  return {
-    valid: true,
-    creditLimit: customer.creditLimit,
-    currentBalance,
-  }
-}
-
-// ============================================
-// Status Management Functions
-// ============================================
-
-/**
- * Get Quotation Status Information
- * ดูข้อมูลสถานะใบเสนอราคา
- */
-export function getQuotationStatusInfo(status: string): QuotationStatusInfo {
-  const canSend = ['DRAFT', 'REVISED', 'REJECTED'].includes(status)
-  const canEdit = ['DRAFT', 'REVISED', 'REJECTED'].includes(status)
-  const canDelete = status === 'DRAFT'
-  const canApprove = status === 'SENT'
-  const canReject = status === 'SENT'
-  const canConvert = status === 'APPROVED'
-  const canCancel = ['DRAFT', 'SENT', 'REVISED'].includes(status)
-
-  const allowedTransitions: string[] = []
-
-  switch (status) {
-    case 'DRAFT':
-      allowedTransitions.push('SENT', 'CANCELLED')
-      break
-    case 'REVISED':
-      allowedTransitions.push('SENT', 'CANCELLED')
-      break
-    case 'REJECTED':
-      allowedTransitions.push('SENT', 'CANCELLED')
-      break
-    case 'SENT':
-      allowedTransitions.push('APPROVED', 'REJECTED', 'REVISED', 'EXPIRED')
-      break
-    case 'APPROVED':
-      allowedTransitions.push('CONVERTED', 'REVISED', 'EXPIRED')
-      break
-    default:
-      break
-  }
-
-  return {
-    canSend,
-    canEdit,
-    canDelete,
-    canApprove,
-    canReject,
-    canConvert,
-    canCancel,
-    allowedTransitions,
-  }
-}
-
-/**
- * Validate Status Transition
- * ตรวจสอบการเปลี่ยนสถานะใบเสนอราคา
- */
-export function validateStatusTransition(
-  currentStatus: string,
-  newStatus: string
-): { valid: boolean; error?: string } {
-  const statusInfo = getQuotationStatusInfo(currentStatus)
-
-  if (!statusInfo.allowedTransitions.includes(newStatus)) {
-    return {
-      valid: false,
-      error: `ไม่สามารถเปลี่ยนสถานะจาก ${currentStatus} เป็น ${newStatus} ได้`,
-    }
-  }
-
-  return { valid: true }
-}
-
-// ============================================
-// Workflow Functions
-// ============================================
-
-/**
- * Send Quotation to Customer
- * ส่งใบเสนอราคาถึงลูกค้า
- */
-export async function sendQuotation(
-  quotationId: string,
-  userId: string
-): Promise<{ success: boolean; quotation?: any; error?: string }> {
-  const quotation = await prisma.quotation.findUnique({
-    where: { id: quotationId },
-  })
-
-  if (!quotation) {
-    return {
-      success: false,
-      error: 'ไม่พบใบเสนอราคา',
-    }
-  }
-
-  // Validate status
-  const statusValidation = validateStatusTransition(quotation.status, 'SENT')
-  if (!statusValidation.valid) {
-    return {
-      success: false,
-      error: statusValidation.error,
-    }
-  }
-
-  // Validate expiry
-  const expiryValidation = validateQuotationExpiry(quotation.validUntil)
-  if (expiryValidation.expired) {
-    return {
-      success: false,
-      error: 'ใบเสนอราคาหมดอายุแล้ว กรุณาตรวจสอบวันหมดอายุ',
-    }
-  }
-
-  // Update status to SENT
-  const updatedQuotation = await prisma.quotation.update({
-    where: { id: quotationId },
+  return await prisma.quotation.create({
     data: {
-      status: 'SENT',
-      sentAt: new Date(),
-      updatedById: userId,
-    },
-  })
-
-  return {
-    success: true,
-    quotation: updatedQuotation,
-  }
-}
-
-/**
- * Approve Quotation
- * อนุมัติใบเสนอราคา (ลูกค้าอนุมัติ)
- */
-export async function approveQuotation(
-  quotationId: string,
-  userId: string
-): Promise<{ success: boolean; quotation?: any; error?: string }> {
-  const quotation = await prisma.quotation.findUnique({
-    where: { id: quotationId },
-  })
-
-  if (!quotation) {
-    return {
-      success: false,
-      error: 'ไม่พบใบเสนอราคา',
-    }
-  }
-
-  // Validate status
-  const statusValidation = validateStatusTransition(quotation.status, 'APPROVED')
-  if (!statusValidation.valid) {
-    return {
-      success: false,
-      error: statusValidation.error,
-    }
-  }
-
-  // Validate expiry
-  const expiryValidation = validateQuotationExpiry(quotation.validUntil)
-  if (expiryValidation.expired) {
-    return {
-      success: false,
-      error: 'ใบเสนอราคาหมดอายุแล้ว กรุณาตรวจสอบวันหมดอายุ',
-    }
-  }
-
-  // Update status to APPROVED
-  const updatedQuotation = await prisma.quotation.update({
-    where: { id: quotationId },
-    data: {
-      status: 'APPROVED',
-      approvedAt: new Date(),
-      approvedById: userId,
-      updatedById: userId,
-    },
-  })
-
-  return {
-    success: true,
-    quotation: updatedQuotation,
-  }
-}
-
-/**
- * Reject Quotation
- * ปฏิเสธใบเสนอราคา (ลูกค้าปฏิเสธ)
- */
-export async function rejectQuotation(
-  quotationId: string,
-  userId: string,
-  reason: string
-): Promise<{ success: boolean; quotation?: any; error?: string }> {
-  const quotation = await prisma.quotation.findUnique({
-    where: { id: quotationId },
-  })
-
-  if (!quotation) {
-    return {
-      success: false,
-      error: 'ไม่พบใบเสนอราคา',
-    }
-  }
-
-  // Validate status
-  const statusValidation = validateStatusTransition(quotation.status, 'REJECTED')
-  if (!statusValidation.valid) {
-    return {
-      success: false,
-      error: statusValidation.error,
-    }
-  }
-
-  // Update status to REJECTED
-  const updatedQuotation = await prisma.quotation.update({
-    where: { id: quotationId },
-    data: {
-      status: 'REJECTED',
-      rejectionReason: reason,
-      updatedById: userId,
-    },
-  })
-
-  return {
-    success: true,
-    quotation: updatedQuotation,
-  }
-}
-
-/**
- * Convert Quotation to Invoice
- * แปลงใบเสนอราคาเป็นใบกำกับภาษี
- */
-export async function convertQuotationToInvoice(
-  quotationId: string,
-  userId: string
-): Promise<{ success: boolean; invoice?: any; quotation?: any; error?: string }> {
-  const quotation = await prisma.quotation.findUnique({
-    where: { id: quotationId },
-    include: {
-      customer: true,
+      quotationNo,
+      quotationDate: data.quotationDate || new Date(),
+      customerId: data.customerId,
+      validUntil: data.validUntil,
+      subtotal: totals.subtotal,
+      vatRate: data.vatRate || 7,
+      vatAmount: totals.vatAmount,
+      totalAmount: totals.totalAmount,
+      discountAmount: totals.totalDiscount,
+      status: data.status || 'DRAFT',
+      notes: data.notes,
+      terms: data.terms,
+      salesOrderId: data.salesOrderId,
+      createdById: data.createdById,
+      isActive: true,
       lines: {
-        include: {
-          product: true,
-        },
-      },
-    },
-  })
-
-  if (!quotation) {
-    return {
-      success: false,
-      error: 'ไม่พบใบเสนอราคา',
-    }
-  }
-
-  // Validate status
-  const statusValidation = validateStatusTransition(quotation.status, 'CONVERTED')
-  if (!statusValidation.valid) {
-    return {
-      success: false,
-      error: statusValidation.error,
-    }
-  }
-
-  // Check if already converted
-  if (quotation.invoiceId) {
-    return {
-      success: false,
-      error: 'ใบเสนอราคานี้ถูกแปลงเป็นใบกำกับภาษีแล้ว',
-    }
-  }
-
-  // Validate expiry
-  const expiryValidation = validateQuotationExpiry(quotation.validUntil)
-  if (expiryValidation.expired) {
-    return {
-      success: false,
-      error: 'ใบเสนอราคาหมดอายุแล้ว กรุณาตรวจสอบวันหมดอายุ',
-    }
-  }
-
-  // Generate Invoice number
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-
-  const latestInvoice = await prisma.invoice.findFirst({
-    where: {
-      invoiceNo: {
-        startsWith: `INV${year}${month}`,
-      },
-    },
-    orderBy: {
-      invoiceNo: 'desc',
-    },
-  })
-
-  let sequence = 1
-  if (latestInvoice) {
-    const match = latestInvoice.invoiceNo.match(/INV\d{6}-(\d{4})/)
-    if (match) {
-      sequence = parseInt(match[1]) + 1
-    }
-  }
-
-  const invoiceNo = `INV${year}${month}-${String(sequence).padStart(4, '0')}`
-
-  // Create Invoice from Quotation using transaction
-  const result = await prisma.$transaction(async (tx) => {
-    // Create Invoice
-    const invoice = await tx.invoice.create({
-      data: {
-        invoiceNo,
-        invoiceDate: now,
-        customerId: quotation.customerId,
-        contactPerson: quotation.contactPerson,
-        reference: `ใบเสนอราคา ${quotation.quotationNo}`,
-        subtotal: quotation.subtotal,
-        discountAmount: quotation.discountAmount,
-        discountPercent: quotation.discountPercent,
-        vatRate: quotation.vatRate,
-        vatAmount: quotation.vatAmount,
-        totalAmount: quotation.totalAmount,
-        status: 'POSTED',
-        type: 'TAX_INVOICE',
-        terms: quotation.terms,
-        notes: quotation.notes,
-        internalNotes: quotation.internalNotes,
-        createdById: userId,
-        updatedById: userId,
-        lines: {
-          create: quotation.lines.map((line) => ({
-            lineNo: line.lineNo,
+        create: data.lines.map((line, index) => {
+          const amounts = calculateLineAmounts(line)
+          return {
+            lineNo: line.lineNo || index + 1,
             productId: line.productId,
             description: line.description,
             quantity: line.quantity,
-            unit: line.unit,
+            unit: line.unit || 'ชิ้น',
             unitPrice: line.unitPrice,
-            discount: line.discount,
-            vatRate: line.vatRate,
-            vatAmount: line.vatAmount,
-            amount: line.amount,
+            discount: amounts.discount,
+            amount: amounts.subtotal,
+            vatRate: line.vatRate || 7,
+            vatAmount: amounts.vatAmount,
             notes: line.notes,
-          })),
-        },
+          }
+        }),
       },
-    })
-
-    // Update Quotation status
-    const updatedQuotation = await tx.quotation.update({
-      where: { id: quotationId },
-      data: {
-        status: 'CONVERTED',
-        invoiceId: invoice.id,
-        updatedById: userId,
+    },
+    include: {
+      customer: true,
+      lines: {
+        orderBy: { lineNo: 'asc' },
       },
-    })
-
-    return { invoice, quotation: updatedQuotation }
+    },
   })
-
-  return {
-    success: true,
-    invoice: result.invoice,
-    quotation: result.quotation,
-  }
 }
 
 /**
- * Cancel Quotation
- * ยกเลิกใบเสนอราคา
+ * Find a quotation by ID
  */
-export async function cancelQuotation(
-  quotationId: string,
-  userId: string,
-  reason: string
-): Promise<{ success: boolean; quotation?: any; error?: string }> {
+export async function findQuotationById(id: string): Promise<any> {
   const quotation = await prisma.quotation.findUnique({
-    where: { id: quotationId },
-  })
-
-  if (!quotation) {
-    return {
-      success: false,
-      error: 'ไม่พบใบเสนอราคา',
-    }
-  }
-
-  // Can only cancel DRAFT, SENT, or REVISED quotations
-  if (!['DRAFT', 'SENT', 'REVISED'].includes(quotation.status)) {
-    return {
-      success: false,
-      error: 'สามารถยกเลิกเฉพาะใบเสนอราคาที่อยู่ในสถานะ ร่าง, ส่งแล้ว, หรือ แก้ไขแล้ว',
-    }
-  }
-
-  // Update status to CANCELLED
-  const updatedQuotation = await prisma.quotation.update({
-    where: { id: quotationId },
-    data: {
-      status: 'CANCELLED',
-      cancellationReason: reason,
-      updatedById: userId,
+    where: { id },
+    include: {
+      customer: true,
+      lines: {
+        orderBy: { lineNo: 'asc' },
+        include: { product: true },
+      },
     },
   })
 
-  return {
-    success: true,
-    quotation: updatedQuotation,
+  if (!quotation) {
+    throw new QuotationNotFoundError('ไม่พบใบเสนอราคา')
   }
+
+  return quotation
+}
+
+/**
+ * Find a quotation by quotation number
+ */
+export async function findQuotationByNo(quotationNo: string): Promise<any> {
+  const quotation = await prisma.quotation.findUnique({
+    where: { quotationNo },
+    include: {
+      customer: true,
+      lines: {
+        orderBy: { lineNo: 'asc' },
+        include: { product: true },
+      },
+    },
+  })
+
+  if (!quotation) {
+    throw new QuotationNotFoundError('ไม่พบใบเสนอราคา')
+  }
+
+  return quotation
+}
+
+/**
+ * Find many quotations with filters
+ */
+export async function findManyQuotations(params: {
+  where?: QuotationWhereInput
+  skip?: number
+  take?: number
+  orderBy?: any
+}): Promise<{ quotations: any[]; total: number }> {
+  const { where = {}, skip = 0, take = 20, orderBy = { quotationDate: 'desc' } } = params
+
+  // Default filter for active only
+  const filter = { ...where, deletedAt: null }
+
+  const [quotations, total] = await Promise.all([
+    prisma.quotation.findMany({
+      where: filter,
+      include: {
+        customer: true,
+        lines: { select: { id: true } },
+      },
+      skip,
+      take,
+      orderBy,
+    }),
+    prisma.quotation.count({ where: filter }),
+  ])
+
+  return { quotations, total }
+}
+
+/**
+ * Update a quotation
+ */
+export async function updateQuotation(
+  id: string,
+  data: QuotationUpdateInput
+): Promise<any> {
+  const existing = await prisma.quotation.findUnique({ where: { id } })
+  if (!existing) {
+    throw new QuotationNotFoundError('ไม่พบใบเสนอราคา')
+  }
+
+  // Build update data
+  const updateData: any = {}
+
+  if (data.quotationDate) updateData.quotationDate = data.quotationDate
+  if (data.customerId) updateData.customerId = data.customerId
+  if (data.validUntil) updateData.validUntil = data.validUntil
+  if (data.notes !== undefined) updateData.notes = data.notes
+  if (data.terms !== undefined) updateData.terms = data.terms
+  if (data.status) updateData.status = data.status
+
+  // Recalculate totals if lines provided
+  if (data.lines) {
+    const totals = calculateQuotationTotals(data.lines, data.discountAmount || 0)
+    updateData.subtotal = totals.subtotal
+    updateData.discountAmount = totals.totalDiscount
+    updateData.vatAmount = totals.vatAmount
+    updateData.totalAmount = totals.totalAmount
+    if (data.vatRate !== undefined) updateData.vatRate = data.vatRate
+
+    // Update lines
+    updateData.lines = {
+      deleteMany: { quotationId: id },
+      create: data.lines.map((line, index) => {
+        const amounts = calculateLineAmounts(line)
+        return {
+          lineNo: line.lineNo || index + 1,
+          productId: line.productId,
+          description: line.description,
+          quantity: line.quantity,
+          unit: line.unit || 'ชิ้น',
+          unitPrice: line.unitPrice,
+          discount: amounts.discount,
+          amount: amounts.subtotal,
+          vatRate: line.vatRate || 7,
+          vatAmount: amounts.vatAmount,
+          notes: line.notes,
+        }
+      }),
+    }
+  }
+
+  return await prisma.quotation.update({
+    where: { id },
+    data: updateData,
+    include: {
+      customer: true,
+      lines: { orderBy: { lineNo: 'asc' } },
+    },
+  })
+}
+
+/**
+ * Delete a quotation (soft delete - only DRAFT status)
+ */
+export async function deleteQuotation(
+  id: string,
+  deletedBy?: string
+): Promise<any> {
+  const quotation = await prisma.quotation.findUnique({ where: { id } })
+
+  if (!quotation) {
+    throw new QuotationNotFoundError('ไม่พบใบเสนอราคา')
+  }
+
+  // Only allow delete in DRAFT status
+  if (quotation.status !== 'DRAFT') {
+    throw new QuotationWorkflowError('สามารถลบได้เฉพาะใบเสนอราคาที่อยู่ในสถานะ ร่าง เท่านั้น')
+  }
+
+  return await prisma.quotation.update({
+    where: { id },
+    data: {
+      isActive: false,
+      deletedAt: new Date(),
+      deletedBy,
+    },
+  })
 }
 
 // ============================================
-// Dashboard & Statistics Functions
+// Status Transition Functions
 // ============================================
 
 /**
- * Get Quotation Statistics
- * ดูสถิติใบเสนอราคา
+ * Validate status transition
  */
-export async function getQuotationStatistics(
-  startDate?: Date,
-  endDate?: Date
-): Promise<{
-  total: number
-  draft: number
-  sent: number
-  approved: number
-  rejected: number
-  converted: number
-  conversionRate: number
-  totalValue: number
-}> {
-  const where: any = {}
+export function canTransition(
+  currentStatus: QuotationStatusType,
+  newStatus: QuotationStatusType
+): boolean {
+  return VALID_TRANSITIONS[currentStatus]?.includes(newStatus) || false
+}
 
-  if (startDate || endDate) {
-    where.quotationDate = {}
-    if (startDate) where.quotationDate.gte = startDate
-    if (endDate) where.quotationDate.lte = endDate
+/**
+ * Send quotation to customer (DRAFT -> SENT)
+ */
+export async function sendQuotation(id: string): Promise<any> {
+  const quotation = await prisma.quotation.findUnique({ where: { id } })
+
+  if (!quotation) {
+    throw new QuotationNotFoundError('ไม่พบใบเสนอราคา')
   }
 
-  const [total, draft, sent, approved, rejected, converted, valueResult] = await Promise.all([
-    prisma.quotation.count({ where }),
-    prisma.quotation.count({ where: { ...where, status: 'DRAFT' } }),
-    prisma.quotation.count({ where: { ...where, status: 'SENT' } }),
-    prisma.quotation.count({ where: { ...where, status: 'APPROVED' } }),
-    prisma.quotation.count({ where: { ...where, status: 'REJECTED' } }),
-    prisma.quotation.count({ where: { ...where, status: 'CONVERTED' } }),
+  if (!canTransition(quotation.status as QuotationStatusType, 'SENT')) {
+    throw new QuotationWorkflowError(
+      `ไม่สามารถส่งใบเสนอราคาได้: ไม่สามารถเปลี่ยนสถานะจาก ${quotation.status} เป็น SENT`
+    )
+  }
+
+  // Check if not expired
+  if (quotation.validUntil < new Date()) {
+    throw new QuotationWorkflowError('ใบเสนอราคาหมดอายุแล้ว')
+  }
+
+  return await prisma.quotation.update({
+    where: { id },
+    data: { status: 'SENT' },
+    include: { customer: true, lines: true },
+  })
+}
+
+/**
+ * Approve quotation (SENT -> APPROVED)
+ */
+export async function approveQuotation(id: string): Promise<any> {
+  const quotation = await prisma.quotation.findUnique({ where: { id } })
+
+  if (!quotation) {
+    throw new QuotationNotFoundError('ไม่พบใบเสนอราคา')
+  }
+
+  if (!canTransition(quotation.status as QuotationStatusType, 'APPROVED')) {
+    throw new QuotationWorkflowError(
+      `ไม่สามารถอนุมัติใบเสนอราคาได้: ไม่สามารถเปลี่ยนสถานะจาก ${quotation.status} เป็น APPROVED`
+    )
+  }
+
+  return await prisma.quotation.update({
+    where: { id },
+    data: { status: 'APPROVED' },
+    include: { customer: true, lines: true },
+  })
+}
+
+/**
+ * Reject quotation (SENT -> REJECTED)
+ */
+export async function rejectQuotation(id: string): Promise<any> {
+  const quotation = await prisma.quotation.findUnique({ where: { id } })
+
+  if (!quotation) {
+    throw new QuotationNotFoundError('ไม่พบใบเสนอราคา')
+  }
+
+  if (!canTransition(quotation.status as QuotationStatusType, 'REJECTED')) {
+    throw new QuotationWorkflowError(
+      `ไม่สามารถปฏิเสธใบเสนอราคาได้: ไม่สามารถเปลี่ยนสถานะจาก ${quotation.status} เป็น REJECTED`
+    )
+  }
+
+  return await prisma.quotation.update({
+    where: { id },
+    data: { status: 'REJECTED' },
+    include: { customer: true, lines: true },
+  })
+}
+
+/**
+ * Mark quotation as expired
+ */
+export async function expireQuotation(id: string): Promise<any> {
+  const quotation = await prisma.quotation.findUnique({ where: { id } })
+
+  if (!quotation) {
+    throw new QuotationNotFoundError('ไม่พบใบเสนอราคา')
+  }
+
+  if (!canTransition(quotation.status as QuotationStatusType, 'EXPIRED')) {
+    throw new QuotationWorkflowError(
+      `ไม่สามารถทำให้ใบเสนอราคาหมดอายุได้: ไม่สามารถเปลี่ยนสถานะจาก ${quotation.status} เป็น EXPIRED`
+    )
+  }
+
+  return await prisma.quotation.update({
+    where: { id },
+    data: { status: 'EXPIRED' },
+    include: { customer: true, lines: true },
+  })
+}
+
+/**
+ * Convert quotation to sales order (APPROVED -> CONVERTED)
+ * Sets the salesOrderId link
+ */
+export async function convertToSalesOrder(
+  id: string,
+  salesOrderId: string
+): Promise<any> {
+  const quotation = await prisma.quotation.findUnique({ where: { id } })
+
+  if (!quotation) {
+    throw new QuotationNotFoundError('ไม่พบใบเสนอราคา')
+  }
+
+  if (!canTransition(quotation.status as QuotationStatusType, 'CONVERTED')) {
+    throw new QuotationWorkflowError(
+      `ไม่สามารถแปลงใบเสนอราคาได้: ไม่สามารถเปลี่ยนสถานะจาก ${quotation.status} เป็น CONVERTED`
+    )
+  }
+
+  return await prisma.quotation.update({
+    where: { id },
+    data: {
+      status: 'CONVERTED',
+      salesOrderId,
+    },
+    include: { customer: true, lines: true },
+  })
+}
+
+// ============================================
+// Utility Functions
+// ============================================
+
+/**
+ * Get status info for UI
+ */
+export function getQuotationStatusInfo(status: QuotationStatusType): {
+  label: string
+  color: string
+  canEdit: boolean
+  canDelete: boolean
+  allowedTransitions: QuotationStatusType[]
+} {
+  const statusMap: Record<QuotationStatusType, { label: string; color: string }> = {
+    DRAFT: { label: 'ร่าง', color: 'gray' },
+    SENT: { label: 'ส่งแล้ว', color: 'blue' },
+    APPROVED: { label: 'อนุมัติ', color: 'green' },
+    REJECTED: { label: 'ปฏิเสธ', color: 'red' },
+    EXPIRED: { label: 'หมดอายุ', color: 'orange' },
+    CONVERTED: { label: 'แปลงแล้ว', color: 'purple' },
+  }
+
+  const info = statusMap[status]
+  const allowed = VALID_TRANSITIONS[status] || []
+
+  return {
+    label: info.label,
+    color: info.color,
+    canEdit: status === 'DRAFT' || status === 'SENT',
+    canDelete: status === 'DRAFT',
+    allowedTransitions: allowed,
+  }
+}
+
+/**
+ * Check and update expired quotations (batch job)
+ */
+export async function markExpiredQuotations(): Promise<number> {
+  const result = await prisma.quotation.updateMany({
+    where: {
+      status: { in: ['DRAFT', 'SENT'] },
+      validUntil: { lt: new Date() },
+      deletedAt: null,
+    },
+    data: { status: 'EXPIRED' },
+  })
+
+  return result.count
+}
+
+/**
+ * Get quotation summary for dashboard
+ */
+export async function getQuotationSummary(): Promise<{
+  total: number
+  byStatus: Record<QuotationStatusType, number>
+  totalValue: number
+}> {
+  const [quotations, stats] = await Promise.all([
+    prisma.quotation.findMany({
+      where: { deletedAt: null },
+      select: { status: true, totalAmount: true },
+    }),
     prisma.quotation.aggregate({
-      where,
-      _sum: {
-        totalAmount: true,
-      },
+      where: { deletedAt: null },
+      _sum: { totalAmount: true },
     }),
   ])
 
-  const conversionRate = sent > 0 ? (approved / sent) * 100 : 0
-  const totalValue = valueResult._sum.totalAmount || 0
+  const byStatus: Record<string, number> = {}
+  quotations.forEach((q) => {
+    byStatus[q.status] = (byStatus[q.status] || 0) + 1
+  })
 
   return {
-    total,
-    draft,
-    sent,
-    approved,
-    rejected,
-    converted,
-    conversionRate: Math.round(conversionRate * 10) / 10,
-    totalValue,
+    total: quotations.length,
+    byStatus: byStatus as Record<QuotationStatusType, number>,
+    totalValue: stats._sum.totalAmount || 0,
   }
 }

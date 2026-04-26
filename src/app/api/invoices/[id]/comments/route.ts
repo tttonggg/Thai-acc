@@ -4,6 +4,8 @@ import {
   invoiceCommentSchema,
   updateInvoiceCommentSchema,
 } from "@/lib/validations"
+import { apiResponse, notFoundError, apiError } from "@/lib/api-utils"
+import { requireAuth } from "@/lib/api-utils"
 
 // GET /api/invoices/[id]/comments - List comments with threading
 export async function GET(
