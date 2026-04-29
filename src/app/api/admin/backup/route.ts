@@ -5,16 +5,16 @@ import { promises as fs } from 'fs'
 import path from 'path'
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+
+  if (!session || session.user?.role !== 'ADMIN') {
+    return NextResponse.json(
+      { success: false, error: 'ไม่มีสิทธิ์ในการสร้างข้อมูลสำรอง' },
+      { status: 403 }
+    )
+  }
+
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session || session.user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์ในการสร้างข้อมูลสำรอง' },
-        { status: 403 }
-      )
-    }
-
     // Create backups directory if it doesn't exist
     const backupsDir = path.join(process.cwd(), 'backups')
     try {

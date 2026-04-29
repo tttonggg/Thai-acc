@@ -5,11 +5,12 @@ import { db } from '@/lib/db'
 
 // GET /api/admin/permissions/my - Get current user's permissions
 export async function GET() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-    }
 
     const userId = session.user.id
     const userRole = session.user.role

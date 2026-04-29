@@ -8,15 +8,16 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ filename: string }> }
 ) {
-  try {
-    const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions)
 
-    if (!session || session.user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์ในการดาวน์โหลดข้อมูลสำรอง' },
-        { status: 403 }
-      )
-    }
+  if (!session || session.user?.role !== 'ADMIN') {
+    return NextResponse.json(
+      { success: false, error: 'ไม่มีสิทธิ์ในการดาวน์โหลดข้อมูลสำรอง' },
+      { status: 403 }
+    )
+  }
+
+  try {
 
     const { filename } = await params
     const backupsDir = path.join(process.cwd(), 'backups')

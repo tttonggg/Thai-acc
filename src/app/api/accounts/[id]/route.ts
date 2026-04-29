@@ -18,11 +18,12 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await getServerSession(authOptions)
+  if (!session || session.user?.role !== 'ADMIN') {
+    return apiError('ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ', 401)
+  }
+
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user?.role !== 'ADMIN') {
-      return apiError('ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ', 401)
-    }
 
     const { id } = await params
 
@@ -60,11 +61,12 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await getServerSession(authOptions)
+  if (!session) {
+    return apiError('ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ', 401)
+  }
+
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return apiError('ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ', 401)
-    }
 
     const { id } = await params
     const data = await request.json()

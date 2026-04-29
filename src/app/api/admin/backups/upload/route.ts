@@ -5,15 +5,16 @@ import { promises as fs } from 'fs'
 import path from 'path'
 
 export async function POST(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions)
 
-    if (!session || session.user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์ในการอัปโหลดข้อมูลสำรอง' },
-        { status: 403 }
-      )
-    }
+  if (!session || session.user?.role !== 'ADMIN') {
+    return NextResponse.json(
+      { success: false, error: 'ไม่มีสิทธิ์ในการอัปโหลดข้อมูลสำรอง' },
+      { status: 403 }
+    )
+  }
+
+  try {
 
     const formData = await req.formData()
     const file = formData.get('file') as File

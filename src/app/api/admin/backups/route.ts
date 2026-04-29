@@ -5,15 +5,16 @@ import { promises as fs } from 'fs'
 import path from 'path'
 
 export async function GET(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions)
 
-    if (!session || session.user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์ในการดูข้อมูลสำรอง' },
-        { status: 403 }
-      )
-    }
+  if (!session || session.user?.role !== 'ADMIN') {
+    return NextResponse.json(
+      { success: false, error: 'ไม่มีสิทธิ์ในการดูข้อมูลสำรอง' },
+      { status: 403 }
+    )
+  }
+
+  try {
 
     const backupsDir = path.join(process.cwd(), 'backups')
 
@@ -90,15 +91,16 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions)
 
-    if (!session || session.user?.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์ในการลบข้อมูลสำรอง' },
-        { status: 403 }
-      )
-    }
+  if (!session || session.user?.role !== 'ADMIN') {
+    return NextResponse.json(
+      { success: false, error: 'ไม่มีสิทธิ์ในการลบข้อมูลสำรอง' },
+      { status: 403 }
+    )
+  }
+
+  try {
 
     const body = await req.json()
     const { filename } = body

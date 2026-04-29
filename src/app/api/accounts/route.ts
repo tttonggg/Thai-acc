@@ -6,11 +6,12 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 export async function GET() {
+  const session = await getServerSession(authOptions)
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
     const accounts = await prisma.chartOfAccount.findMany({
       where: { isActive: true },
@@ -40,11 +41,12 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
     const data = await request.json()
 
