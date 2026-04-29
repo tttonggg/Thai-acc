@@ -20,7 +20,7 @@ import { debitNoteSchema } from '@/lib/validations'
 import { useToast } from '@/hooks/use-toast'
 
 interface Vendor { id: string; code: string; name: string }
-interface PurchaseInvoice { id: string; invoiceNo: string; totalAmount: number; lines: Array<any> }
+interface PurchaseInvoice { id: string; invoiceNo: string; status: string; totalAmount: number; lines: Array<any> }
 interface Product { id: string; code: string; name: string; costPrice: number; vatRate: number }
 
 interface DebitNoteFormProps {
@@ -41,7 +41,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
     defaultValues: {
       debitNoteDate: new Date().toISOString().split('T')[0],
       reason: 'ADDITIONAL_CHARGES',
-      lines: [{ description: '', quantity: 1, unitPrice: 0, vatRate: 7 }],
+      lines: [{ description: '', quantity: 1, unit: 'ชิ้น', unitPrice: 0, discount: 0, vatRate: 7 }],
     },
   })
 
@@ -90,7 +90,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
   useEffect(() => {
     const loadPurchaseLines = async () => {
       if (!selectedPurchaseId) {
-        form.setValue('lines', [{ description: '', quantity: 1, unitPrice: 0, vatRate: 7 }])
+        form.setValue('lines', [{ description: '', quantity: 1, unit: 'ชิ้น', unitPrice: 0, discount: 0, vatRate: 7 }])
         return
       }
       const selectedPurchase = purchaseInvoices.find(inv => inv.id === selectedPurchaseId)
@@ -98,7 +98,9 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
         form.setValue('lines', selectedPurchase.lines.map((line: any) => ({
           description: line.description,
           quantity: line.quantity,
+          unit: line.unit || 'ชิ้น',
           unitPrice: line.unitPrice,
+          discount: line.discount || 0,
           vatRate: line.vatRate,
           productId: line.productId || undefined,
         })))
@@ -109,7 +111,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
 
   const addLine = () => {
     const currentLines = form.getValues('lines')
-    form.setValue('lines', [...currentLines, { description: '', quantity: 1, unitPrice: 0, vatRate: 7 }])
+    form.setValue('lines', [...currentLines, { description: '', quantity: 1, unit: 'ชิ้น', unitPrice: 0, discount: 0, vatRate: 7 }])
   }
 
   const removeLine = (index: number) => {

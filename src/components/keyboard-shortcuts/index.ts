@@ -1,10 +1,7 @@
 export {
   useKeyboardShortcuts,
-  useVimNavigation,
-  useSearchFocus,
-  useSaveShortcut,
-  useHelpModal,
-  useERPKeyboardShortcuts,
+  useTableNavigation,
+  KeyboardShortcutsHelp,
   commonShortcuts,
 } from './use-keyboard-shortcuts'
 

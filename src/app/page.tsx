@@ -133,6 +133,10 @@ export type Module =
   | 'cash-flow'
   | 'recurring'
   | 'approver-config'
+  | 'entities'
+  | 'currencies'
+  | 'accounting-periods'
+  | 'budgets'
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -214,6 +218,11 @@ export default function Home() {
         'recurring': '/recurring',
         'cash-flow': '/cash-flow',
         'invoice-detail': '/invoices',
+        'approver-config': '/approver-config',
+        'entities': '/entities',
+        'currencies': '/currencies',
+        'accounting-periods': '/accounting-periods',
+        'budgets': '/budgets',
       }
 
       // Update URL when activeModule changes (using history API to avoid Next.js routing)
@@ -268,6 +277,11 @@ export default function Home() {
         '/api-analytics': 'api-analytics',
         '/recurring': 'recurring',
         '/cash-flow': 'cash-flow',
+        '/approver-config': 'approver-config',
+        '/entities': 'entities',
+        '/currencies': 'currencies',
+        '/accounting-periods': 'accounting-periods',
+        '/budgets': 'budgets',
       }
 
       const handlePopState = () => {

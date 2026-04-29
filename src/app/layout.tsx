@@ -3,10 +3,11 @@ import { Quicksand, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { BuildInfo } from "@/components/build-info";
 
 const quicksand = Quicksand({
   variable: "--font-quicksand",
-  subsets: ["latin", "thai"],
+  subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
 });
 
@@ -76,6 +77,7 @@ export default function RootLayout({
             {children}
           </ErrorBoundary>
         </Providers>
+        <BuildInfo />
       </body>
     </html>
   );

@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
+const buildHash = require('child_process').execSync('git rev-parse --short HEAD').toString().trim()
+const buildTime = new Date().toISOString()
+
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_BUILD_HASH: buildHash,
+    NEXT_PUBLIC_BUILD_TIME: buildTime,
+  },
   // Enable standalone mode for production deployment
   output: "standalone",
   /* config options here */
@@ -8,6 +15,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
+  // Trust host header when behind reverse proxy (nginx/Caddy on VPS)
+  trustHostHeader: true,
+  serverExternalPackages: ['@prisma/client', 'prisma'],
   async rewrites() {
     const modulePaths = [
       '/accounts', '/journal', '/invoices', '/vat', '/wht',

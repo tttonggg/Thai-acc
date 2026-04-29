@@ -11,12 +11,30 @@ export async function GET() {
   }
 
   try {
-
     const userId = session.user.id
     const userRole = session.user.role
 
+    // Check if RBAC system exists by testing Permission.count()
+    // If this fails, RBAC tables don't exist
+    let hasRBAC = false
+    try {
+      await db.permission.count()
+      hasRBAC = true
+    } catch {
+      hasRBAC = false
+    }
+
     // ADMIN gets all permissions
     if (userRole === 'ADMIN') {
+      if (!hasRBAC) {
+        return NextResponse.json({
+          success: true,
+          data: {
+            permissions: ['admin'],
+            role: userRole,
+          }
+        })
+      }
       const allPerms = await db.permission.findMany()
       return NextResponse.json({
         success: true,
@@ -27,30 +45,8 @@ export async function GET() {
       })
     }
 
-    const userEmployee = await db.userEmployee.findUnique({
-      where: { userId },
-      include: {
-        employee: {
-          include: {
-            employeeRoles: {
-              include: {
-                role: {
-                  include: {
-                    permissions: {
-                      include: {
-                        permission: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    })
-
-    if (!userEmployee) {
+    // Non-ADMIN users
+    if (!hasRBAC) {
       return NextResponse.json({
         success: true,
         data: {
@@ -60,17 +56,62 @@ export async function GET() {
       })
     }
 
-    const perms = new Set<string>()
-    for (const er of userEmployee.employee.employeeRoles) {
-      for (const rp of er.role.permissions) {
-        perms.add(rp.permission.code)
+    // RBAC is active - check for userEmployee and permissions
+    let userPermissions: string[] = []
+    try {
+      // First check if userEmployee table exists
+      const employeeCount = await db.userEmployee.count().catch(() => 0)
+      if (employeeCount === 0) {
+        return NextResponse.json({
+          success: true,
+          data: {
+            permissions: [],
+            role: userRole,
+          }
+        })
       }
+
+      const userEmployee = await db.userEmployee.findUnique({
+        where: { userId },
+        include: {
+          employee: {
+            include: {
+              employeeRoles: {
+                include: {
+                  role: {
+                    include: {
+                      permissions: {
+                        include: {
+                          permission: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+
+      if (userEmployee) {
+        const perms = new Set<string>()
+        for (const er of userEmployee.employee.employeeRoles) {
+          for (const rp of er.role.permissions) {
+            perms.add(rp.permission.code)
+          }
+        }
+        userPermissions = Array.from(perms)
+      }
+    } catch {
+      // RBAC tables exist but user has no special permissions
+      userPermissions = []
     }
 
     return NextResponse.json({
       success: true,
       data: {
-        permissions: Array.from(perms),
+        permissions: userPermissions,
         role: userRole,
       }
     })

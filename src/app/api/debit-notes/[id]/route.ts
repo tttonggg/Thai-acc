@@ -120,9 +120,9 @@ export async function DELETE(
       return notFoundError('ไม่พบใบเพิ่มหนี้')
     }
 
-    // Only DRAFT status can be deleted
-    if (existing.status !== 'DRAFT') {
-      return forbiddenError('สามารถลบได้เฉพาะใบเพิ่มหนี้สถานะร่างเท่านั้น')
+    // Only ISSUED status without journal entry can be deleted
+    if (existing.status !== 'ISSUED') {
+      return forbiddenError()
     }
 
     // Cannot delete if journal entry exists

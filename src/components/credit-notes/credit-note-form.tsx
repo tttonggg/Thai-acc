@@ -42,12 +42,15 @@ interface Invoice {
   id: string
   invoiceNo: string
   invoiceDate: string
+  status: string
   totalAmount: number
   lines: Array<{
     id: string
     description: string
     quantity: number
+    unit: string
     unitPrice: number
+    discount: number
     vatRate: number
     productId?: string | null
   }>
@@ -82,7 +85,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
     defaultValues: {
       creditNoteDate: new Date().toISOString().split('T')[0],
       reason: 'RETURN',
-      lines: [{ description: '', quantity: 1, unitPrice: 0, vatRate: 7, returnStock: false }],
+      lines: [{ description: '', quantity: 1, unit: 'ชิ้น', unitPrice: 0, discount: 0, vatRate: 7, returnStock: false }],
     },
   })
 
@@ -138,7 +141,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
   useEffect(() => {
     const loadInvoiceLines = async () => {
       if (!selectedInvoiceId) {
-        form.setValue('lines', [{ description: '', quantity: 1, unitPrice: 0, vatRate: 7, returnStock: false }])
+        form.setValue('lines', [{ description: '', quantity: 1, unit: 'ชิ้น', unitPrice: 0, discount: 0, vatRate: 7, returnStock: false }])
         return
       }
 
@@ -147,7 +150,9 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
         form.setValue('lines', selectedInvoice.lines.map(line => ({
           description: line.description,
           quantity: line.quantity,
+          unit: line.unit,
           unitPrice: line.unitPrice,
+          discount: line.discount,
           vatRate: line.vatRate,
           productId: line.productId || undefined,
           returnStock: false,
@@ -161,7 +166,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
     const currentLines = form.getValues('lines')
     form.setValue('lines', [
       ...currentLines,
-      { description: '', quantity: 1, unitPrice: 0, vatRate: 7, returnStock: false },
+      { description: '', quantity: 1, unit: 'ชิ้น', unitPrice: 0, discount: 0, vatRate: 7, returnStock: false },
     ])
   }
 

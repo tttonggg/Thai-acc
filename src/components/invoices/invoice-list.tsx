@@ -54,6 +54,17 @@ interface Invoice {
   _count?: {
     comments: number
   }
+  customer?: {
+    name?: string
+    address?: string
+    subDistrict?: string
+    district?: string
+    province?: string
+    postalCode?: string
+    taxId?: string
+    phone?: string
+    email?: string
+  }
 }
 
 const statusLabels: Record<string, string> = {
@@ -259,7 +270,19 @@ export function InvoiceList() {
       const result = await invoiceRes.json()
       const invoice = result.data
 
-      let company = null
+      interface CompanyInfo {
+        name?: string
+        address?: string
+        subDistrict?: string
+        district?: string
+        province?: string
+        postalCode?: string
+        taxId?: string
+        phone?: string
+        email?: string
+        logo?: string
+      }
+      let company: CompanyInfo | null = null
       if (companyRes.ok) {
         const companyResult = await companyRes.json()
         company = companyResult.data

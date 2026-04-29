@@ -264,7 +264,7 @@ export async function generateInvoicePDFWithPDFKit(invoice: any): Promise<Buffer
 
       doc.font(regularFontPath)
 
-      const company = getCompanyInfo()
+      const company = await getCompanyInfo()
       const pageWidth = doc.page.width
       const margin = 50
       let yPos = 50
@@ -513,7 +513,7 @@ export async function generateReceiptPDFWithPDFKit(receipt: any): Promise<Buffer
 
       doc.font(regularFontPath)
 
-      const company = getCompanyInfo()
+      const company = await getCompanyInfo()
       const pageWidth = doc.page.width
       const margin = 50
       let yPos = 50
@@ -689,7 +689,7 @@ export async function generatePayslipPDFWithPDFKit(data: any): Promise<Buffer> {
 
       doc.font(regularFontPath)
 
-      const company = data.company || getCompanyInfo()
+      const company = data.company || await getCompanyInfo()
       const pageWidth = doc.page.width
       const margin = 50
       let yPos = 50

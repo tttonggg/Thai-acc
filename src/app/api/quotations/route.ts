@@ -108,13 +108,6 @@ export async function GET(request: NextRequest) {
               code: true,
             },
           },
-          invoice: {
-            select: {
-              id: true,
-              invoiceNo: true,
-              status: true,
-            },
-          },
           lines: {
             include: {
               product: {
