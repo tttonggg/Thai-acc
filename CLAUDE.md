@@ -256,6 +256,48 @@ ssh -i ~/.ssh/test root@135.181.107.76 "fuser -k 3000/tcp 2>/dev/null; sleep 2; 
 ssh -i ~/.ssh/test root@135.181.107.76 "curl -s http://localhost:3000/api/health"
 ```
 
+### Test Data — 11-Phase Plan
+
+**Full plan**: `/users/tong/Desktop/THAI-ERP-TEST-DATA-PLAN-FINAL.md`
+
+**Test data branch**: `test/test-data-phases` — all commits go here
+
+**Dev server**: `localhost:3002` (local dev, NOT VPS which uses port 3000)
+
+**Database path**: `prisma/prisma/dev.db` (nested path — server resolves `./prisma/dev.db` relative to project root as `prisma/prisma/dev.db`)
+
+**How to run phases**:
+```bash
+# Phase 1 + 2 done via:
+# 1. Browser login → UI/API to create PIs
+# 2. Direct SQLite for journal entries (UI /post API blocked by auth)
+# See: scripts/seed-phase1-phase2.mjs
+
+# Phase 3+: Continue via browser UI or API
+```
+
+**Completed phases**:
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 1 | AccountingPeriod (15 rows) + DocumentNumber cleanup | ✅ Done |
+| 2 | 3 Purchase Invoices → JE balanced + VatRecord | ✅ Done |
+| 3 | 3 Payments (PAY-001~003) | ⏳ Pending |
+| 4 | Debit Note DN-001 | ⏳ Pending |
+| 5 | 4 Sales Invoices (INV-001~004) | ⏳ Pending |
+| 6 | 3 Receipts (REC-001~003) | ⏳ Pending |
+| 7 | Credit Note CN-001 | ⏳ Pending |
+| 8 | VAT Report verification | ⏳ Pending |
+| 9 | WHT Report verification | ⏳ Pending |
+| 10 | Journal + Trial Balance | ⏳ Pending |
+| 11 | 3 Employees + Payroll | ⏳ Pending |
+
+**Phase 2 verification (DB Satang)**:
+```
+Input VAT Jan 2026: 21735000 (= ฿217,350) ✓
+WHT Jan 2026:       7950000 (= ฿79,500) ✓
+JEs: JE0569/0570/0571 — all DR=CR balanced ✓
+```
+
 **Current VPS .env** (`/root/thai-acc/.env`):
 ```
 DATABASE_URL=file:/root/thai-acc/prisma/dev.db
