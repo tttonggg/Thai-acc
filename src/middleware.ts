@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
   // WARNING: Remove or disable this in production!
   const isLocalDev =
     process.env.NODE_ENV === 'development' &&
-    (request.headers.get('host')?.includes('localhost:3000') ||
+    (request.headers.get('host')?.match(/localhost:300[012]/) ||
       request.headers.get('host')?.includes('127.0.0.1:3000'));
 
   // Bypass CSRF for testing (set BYPASS_CSRF=true in production for testing)

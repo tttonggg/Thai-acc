@@ -192,75 +192,93 @@ export default function Home() {
 
   // Initialize activeModule from URL on mount and handle browser navigation
   useEffect(() => {
-    if (status === 'authenticated') {
-      const pathToModule: Record<string, Module> = {
-        '/': 'dashboard',
-        '/accounts': 'accounts',
-        '/journal': 'journal',
-        '/invoices': 'invoices',
-        '/quotations': 'quotations',
-        '/receipts': 'receipts',
-        '/vat': 'vat',
-        '/wht': 'wht',
-        '/customers': 'customers',
-        '/vendors': 'vendors',
-        '/purchase-requests': 'purchase-requests',
-        '/purchase-orders': 'purchase-orders',
-        '/purchases': 'purchases',
-        '/goods-receipt-notes': 'goods-receipt-notes',
-        '/payments': 'payments',
-        '/credit-notes': 'credit-notes',
-        '/debit-notes': 'debit-notes',
-        '/inventory': 'inventory',
-        '/products': 'products',
-        '/warehouses': 'warehouses',
-        '/stock-takes': 'stock-takes',
-        '/banking': 'banking',
-        '/assets': 'assets',
-        '/payroll': 'payroll',
-        '/leave': 'leave',
-        '/provident-fund': 'provident-fund',
-        '/employees': 'employees',
-        '/petty-cash': 'petty-cash',
-        '/sso-filing': 'sso-filing',
-        '/reports': 'reports',
-        '/settings': 'settings',
-        '/users': 'users',
-        '/data-export': 'data-export',
-        '/data-import': 'data-import',
-        '/backup-restore': 'backup-restore',
-        '/activity-log': 'activity-log',
-        '/webhooks': 'webhooks',
-        '/api-analytics': 'api-analytics',
-        '/recurring': 'recurring',
-        '/cash-flow': 'cash-flow',
-      }
-
-      const handlePopState = () => {
-        const pathname = window.location.pathname
-
-        // Check if it's an invoice detail URL
-        const invoiceDetailMatch = pathname.match(/^\/invoices\/([^\/]+)$/)
-        if (invoiceDetailMatch) {
-          const invoiceId = invoiceDetailMatch[1]
-          setActiveModule('invoice-detail')
-          setSelectedInvoiceId(invoiceId)
-          return
-        }
-
-        const moduleFromPath = pathToModule[pathname] || 'dashboard'
-        setActiveModule(moduleFromPath)
-        setSelectedInvoiceId(null)
-      }
-
-      // Set initial module from current URL
-      handlePopState()
-
-      // Listen for browser back/forward navigation
-      window.addEventListener('popstate', handlePopState)
-      return () => window.removeEventListener('popstate', handlePopState)
+    const pathToModule: Record<string, Module> = {
+      '/': 'dashboard',
+      '/accounts': 'accounts',
+      '/journal': 'journal',
+      '/invoices': 'invoices',
+      '/quotations': 'quotations',
+      '/receipts': 'receipts',
+      '/vat': 'vat',
+      '/wht': 'wht',
+      '/customers': 'customers',
+      '/vendors': 'vendors',
+      '/purchase-requests': 'purchase-requests',
+      '/purchase-orders': 'purchase-orders',
+      '/purchases': 'purchases',
+      '/goods-receipt-notes': 'goods-receipt-notes',
+      '/payments': 'payments',
+      '/credit-notes': 'credit-notes',
+      '/debit-notes': 'debit-notes',
+      '/inventory': 'inventory',
+      '/products': 'products',
+      '/warehouses': 'warehouses',
+      '/stock-takes': 'stock-takes',
+      '/banking': 'banking',
+      '/assets': 'assets',
+      '/payroll': 'payroll',
+      '/leave': 'leave',
+      '/provident-fund': 'provident-fund',
+      '/employees': 'employees',
+      '/petty-cash': 'petty-cash',
+      '/sso-filing': 'sso-filing',
+      '/reports': 'reports',
+      '/settings': 'settings',
+      '/users': 'users',
+      '/data-export': 'data-export',
+      '/data-import': 'data-import',
+      '/backup-restore': 'backup-restore',
+      '/activity-log': 'activity-log',
+      '/webhooks': 'webhooks',
+      '/api-analytics': 'api-analytics',
+      '/recurring': 'recurring',
+      '/cash-flow': 'cash-flow',
     }
-  }, [status])
+
+    const handlePopState = () => {
+      const pathname = window.location.pathname
+
+      // Check if it's an invoice detail URL
+      const invoiceDetailMatch = pathname.match(/^\/invoices\/([^\/]+)$/)
+      if (invoiceDetailMatch) {
+        const invoiceId = invoiceDetailMatch[1]
+        setActiveModule('invoice-detail')
+        setSelectedInvoiceId(invoiceId)
+        return
+      }
+
+      const moduleFromPath = pathToModule[pathname] || 'dashboard'
+      setActiveModule(moduleFromPath)
+      setSelectedInvoiceId(null)
+    }
+
+    // Set initial module from current URL (runs on every mount, captures current browser URL)
+    handlePopState()
+
+    // Override pushState/replaceState so SPA navigations (sidebar clicks, etc.)
+    // also trigger URL → state sync (not just browser back/forward)
+    const originalPushState = window.history.pushState.bind(window.history)
+    const originalReplaceState = window.history.replaceState.bind(window.history)
+
+    window.history.pushState = (state, _, pathname$?) => {
+      originalPushState(state, _, pathname$)
+      window.dispatchEvent(new Event('__spa_push__'))
+    }
+    window.history.replaceState = (state, _, pathname$?) => {
+      originalReplaceState(state, _, pathname$)
+      window.dispatchEvent(new Event('__spa_push__'))
+    }
+
+    // Listen for both browser back/forward AND programmatic pushState navigations
+    window.addEventListener('popstate', handlePopState)
+    window.addEventListener('__spa_push__', handlePopState)
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+      window.removeEventListener('__spa_push__', handlePopState)
+      window.history.pushState = originalPushState
+      window.history.replaceState = originalReplaceState
+    }
+  }, []) // Empty deps = run once on mount, before NextAuth status is resolved
 
   // Loading state
   if (status === 'loading') {
