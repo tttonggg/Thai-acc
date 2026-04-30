@@ -2,6 +2,7 @@ import { db } from "@/lib/db"
 import { requireAuth, apiResponse, apiError, unauthorizedError, generateDocNumber } from "@/lib/api-utils"
 import { z } from "zod"
 import { bahtToSatang, satangToBaht } from "@/lib/currency"
+import { generateWhtFromPayment } from "@/lib/wht-service"
 
 // Validation schema
 const paymentAllocationSchema = z.object({
@@ -245,6 +246,12 @@ export async function POST(request: Request) {
     // If POSTED, create journal entry
     if (validatedData.status === "POSTED") {
       await postPaymentToGL(payment)
+
+      // Auto-generate WHT records for vendor-withheld amounts (PND3/PND53)
+      // Mirrors the pattern used in receipts/[id]/post/route.ts lines 266-311
+      if (payment.whtAmount > 0) {
+        await generateWhtFromPayment(payment.id)
+      }
     }
 
     // Convert Satang to Baht for response
