@@ -40,40 +40,8 @@ const invoiceSchema = z.object({
   lines: z.array(invoiceLineSchema).min(1, 'ต้องมีอย่างน้อย 1 รายการ'),
 });
 
-// Generate invoice number
-async function generateInvoiceNumber(type: string): Promise<string> {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-
-  const prefixes: Record<string, string> = {
-    TAX_INVOICE: 'INV',
-    RECEIPT: 'RC',
-    DELIVERY_NOTE: 'DN',
-    CREDIT_NOTE: 'CN',
-    DEBIT_NOTE: 'DN',
-  };
-
-  const prefix = `${prefixes[type] || 'INV'}-${year}${month}`;
-
-  const lastInvoice = await prisma.invoice.findFirst({
-    where: {
-      invoiceNo: {
-        startsWith: prefix,
-      },
-    },
-    orderBy: { invoiceNo: 'desc' },
-  });
-
-  let nextNum = 1;
-  if (lastInvoice) {
-    const parts = lastInvoice.invoiceNo.split('-');
-    const lastNum = parseInt(parts[parts.length - 1] || '0');
-    nextNum = lastNum + 1;
-  }
-
-  return `${prefix}-${String(nextNum).padStart(4, '0')}`;
-}
+// C-03: Invoice number generation uses generateDocNumber for transaction safety
+// Map document types to prefixes - must be unique per type
 
 // GET - List invoices (requires authentication)
 export async function GET(request: NextRequest) {
