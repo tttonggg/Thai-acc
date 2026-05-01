@@ -78,6 +78,8 @@ export async function matchBankEntries(
         data: {
           matched: true,
           matchedEntryId: matchResult.matchedEntryId,
+          matchedEntryType: matchResult.matchedEntryType,
+          matchConfidence: matchResult.matchConfidence,
         },
       })
     } else {
@@ -133,7 +135,8 @@ async function findMatch(entry: {
     entry.amount,
     entry.type,
     minDate,
-    maxDate
+    maxDate,
+    entry.valueDate
   )
   if (amountMatch) {
     return amountMatch
@@ -173,12 +176,12 @@ async function findMatchByReference(
   matchConfidence: number
   matchReason: string
 } | null> {
-  // For CREDIT entries, check Receipts
+  // For CREDIT entries, check Receipts by chequeNo
   if (type === 'CREDIT') {
     const receipt = await prisma.receipt.findFirst({
       where: {
-        reference,
-        totalAmount: amount,
+        chequeNo: reference,
+        amount: amount,
         deletedAt: null,
       },
     })
@@ -187,17 +190,17 @@ async function findMatchByReference(
         matchedEntryId: receipt.id,
         matchedEntryType: 'RECEIPT',
         matchConfidence: 100,
-        matchReason: `ตรงกันตามอ้างอิง ${reference}`,
+        matchReason: `ตรงกันตามเช็คเลขที่ ${reference}`,
       }
     }
   }
 
-  // For DEBIT entries, check Payments
+  // For DEBIT entries, check Payments by chequeNo
   if (type === 'DEBIT') {
     const payment = await prisma.payment.findFirst({
       where: {
-        reference,
-        totalAmount: amount,
+        chequeNo: reference,
+        amount: amount,
         deletedAt: null,
       },
     })
@@ -206,7 +209,7 @@ async function findMatchByReference(
         matchedEntryId: payment.id,
         matchedEntryType: 'PAYMENT',
         matchConfidence: 100,
-        matchReason: `ตรงกันตามอ้างอิง ${reference}`,
+        matchReason: `ตรงกันตามเช็คเลขที่ ${reference}`,
       }
     }
   }
@@ -221,7 +224,8 @@ async function findMatchByAmount(
   amount: number,
   type: string,
   minDate: Date,
-  maxDate: Date
+  maxDate: Date,
+  entryValueDate: Date
 ): Promise<{
   matchedEntryId: string
   matchedEntryType: 'JOURNAL_ENTRY' | 'PAYMENT' | 'RECEIPT'
@@ -232,7 +236,7 @@ async function findMatchByAmount(
   if (type === 'CREDIT') {
     const receipt = await prisma.receipt.findFirst({
       where: {
-        totalAmount: amount,
+        amount: amount,
         receiptDate: {
           gte: minDate,
           lte: maxDate,
@@ -242,14 +246,30 @@ async function findMatchByAmount(
       orderBy: { receiptDate: 'desc' },
     })
     if (receipt) {
+      // Calculate days difference between bank entry valueDate and receipt date
+      const entryDate = new Date(entryValueDate)
+      const receiptDate = new Date(receipt.receiptDate)
       const daysDiff = Math.abs(
-        new Date(receipt.receiptDate).getTime() - new Date().getTime()
+        receiptDate.getTime() - entryDate.getTime()
       ) / (1000 * 60 * 60 * 24)
+      
+      // Confidence: 100% if same day, 80% within 1 day, 60% within 3 days
+      let matchConfidence = 60
+      if (daysDiff === 0) {
+        matchConfidence = 100
+      } else if (daysDiff <= 1) {
+        matchConfidence = 80
+      } else if (daysDiff <= 3) {
+        matchConfidence = 60
+      }
+      
       return {
         matchedEntryId: receipt.id,
         matchedEntryType: 'RECEIPT',
-        matchConfidence: Math.max(70, 100 - daysDiff * 5),
-        matchReason: `ตรงกันตามจำนวนเงินและวันที่ (${Math.round(daysDiff)} วัน)`,
+        matchConfidence,
+        matchReason: daysDiff === 0 
+          ? 'ตรงกันตามจำนวนเงินและวันที่ (วันเดียวกัน)' 
+          : `ตรงกันตามจำนวนเงินและวันที่ (${Math.round(daysDiff)} วัน)`,
       }
     }
   }
@@ -258,7 +278,7 @@ async function findMatchByAmount(
   if (type === 'DEBIT') {
     const payment = await prisma.payment.findFirst({
       where: {
-        totalAmount: amount,
+        amount: amount,
         paymentDate: {
           gte: minDate,
           lte: maxDate,
@@ -268,14 +288,30 @@ async function findMatchByAmount(
       orderBy: { paymentDate: 'desc' },
     })
     if (payment) {
+      // Calculate days difference between bank entry valueDate and payment date
+      const entryDate = new Date(entryValueDate)
+      const paymentDate = new Date(payment.paymentDate)
       const daysDiff = Math.abs(
-        new Date(payment.paymentDate).getTime() - new Date().getTime()
+        paymentDate.getTime() - entryDate.getTime()
       ) / (1000 * 60 * 60 * 24)
+      
+      // Confidence: 100% if same day, 80% within 1 day, 60% within 3 days
+      let matchConfidence = 60
+      if (daysDiff === 0) {
+        matchConfidence = 100
+      } else if (daysDiff <= 1) {
+        matchConfidence = 80
+      } else if (daysDiff <= 3) {
+        matchConfidence = 60
+      }
+      
       return {
         matchedEntryId: payment.id,
         matchedEntryType: 'PAYMENT',
-        matchConfidence: Math.max(70, 100 - daysDiff * 5),
-        matchReason: `ตรงกันตามจำนวนเงินและวันที่ (${Math.round(daysDiff)} วัน)`,
+        matchConfidence,
+        matchReason: daysDiff === 0 
+          ? 'ตรงกันตามจำนวนเงินและวันที่ (วันเดียวกัน)' 
+          : `ตรงกันตามจำนวนเงินและวันที่ (${Math.round(daysDiff)} วัน)`,
       }
     }
   }
@@ -287,10 +323,13 @@ async function findMatchByAmount(
         gte: minDate,
         lte: maxDate,
       },
-      // Journal entries have line items with amounts
+      // Journal entries have line items with debit/credit amounts
       journalLines: {
         some: {
-          amount: amount,
+          OR: [
+            { debit: amount },
+            { credit: amount },
+          ],
         },
       },
     },
