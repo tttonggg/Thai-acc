@@ -292,34 +292,42 @@ export async function POST(request: Request) {
   }
 }
 
+// Account codes for payment GL posting
+const PAYMENT_ACCOUNT_CODES = {
+  AP: '2110',           // เจ้าหนี้การค้า
+  CASH: '1110',         // เงินสด
+  BANK_PREFIX: '112',   // เงินฝากธนาคาร (prefix match)
+  WHT_RECEIVABLE: '2130', // ภาษีหัก ณ ที่จ่าย
+} as const;
+
 // Post payment to General Ledger
 export async function postPaymentToGL(payment: any, tx: any = db) {
-  // Get AP account (2110 - เจ้าหนี้การค้า) — MUST match purchase invoice posting (2110)
+  // Get AP account - MUST match purchase invoice posting (2110)
   const apAccount = await tx.chartOfAccount.findUnique({
-    where: { code: '2110' },
+    where: { code: PAYMENT_ACCOUNT_CODES.AP },
   });
 
   // Get cash/bank account based on payment method
   let cashAccountId: string | null = null;
   if (payment.paymentMethod === 'CASH') {
     const cashAccount = await tx.chartOfAccount.findUnique({
-      where: { code: '1110' }, // เงินสด
+      where: { code: PAYMENT_ACCOUNT_CODES.CASH },
     });
     cashAccountId = cashAccount?.id || null;
   } else if (payment.bankAccountId) {
     const bankGlAccount = await tx.chartOfAccount.findFirst({
-      where: { code: { startsWith: '112' } }, // เงินฝากธนาคาร
+      where: { code: { startsWith: PAYMENT_ACCOUNT_CODES.BANK_PREFIX } },
     });
     cashAccountId = bankGlAccount?.id || null;
   }
 
   // Get WHT receivable account
   const whtAccount = await tx.chartOfAccount.findUnique({
-    where: { code: '2130' }, // ภาษีหัก ณ ที่จ่าย
+    where: { code: PAYMENT_ACCOUNT_CODES.WHT_RECEIVABLE },
   });
 
   if (!apAccount) {
-    throw new Error('ไม่พบบัญชีเจ้าหนี้การค้า (2110)');
+    throw new Error(`ไม่พบบัญชีเจ้าหนี้การค้า (${PAYMENT_ACCOUNT_CODES.AP})`);
   }
 
   // Create journal entry lines
