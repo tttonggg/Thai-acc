@@ -3,7 +3,7 @@
 import { SessionProvider } from 'next-auth/react';
 import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { PWAProvider } from '@/components/pwa/pwa-provider';
 import { OfflineSyncProvider } from '@/components/offline-sync/offline-sync-provider';
 import { Toaster } from 'sonner';
@@ -36,12 +36,33 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // 1 minute
-            refetchOnWindowFocus: false,
+            staleTime: 5 * 60 * 1000, // 5 minutes for lists
+            gcTime: 30 * 60 * 1000, // 30 min cache
+            refetchOnReconnect: true,
+            retry: (failureCount, error) => {
+              // Don't retry on 401 errors
+              if ((error as any).status === 401) return false;
+              return failureCount < 3;
+            },
+          },
+          mutations: {
+            onError: (error) => {
+              // Thai error toast for mutations
+              toast.error('เกิดข้อผิดพลาด', {
+                description: (error as Error).message || 'ไม่สามารถดำเนินการได้ กรุณาลองใหม่อีกครั้ง',
+              });
+            },
           },
         },
       })
   );
+
+  // Cleanup query client on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      queryClient.clear();
+    };
+  }, [queryClient]);
 
   return (
     <SessionProvider>

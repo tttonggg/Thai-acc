@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const buildHash = require('child_process').execSync('git rev-parse --short HEAD').toString().trim();
 const buildTime = new Date().toISOString();
@@ -14,7 +15,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  reactStrictMode: false,
+  reactStrictMode: true,
   // Trust host header when behind reverse proxy (nginx/Caddy on VPS)
   trustHostHeader: true,
   serverExternalPackages: ['@prisma/client', 'prisma'],
@@ -63,4 +64,4 @@ const nextConfig: NextConfig = {
   compress: true,
 };
 
-export default nextConfig;
+export default withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })(nextConfig);
