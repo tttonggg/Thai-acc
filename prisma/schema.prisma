@@ -1046,6 +1046,7 @@ model User {
   receivedGRNs        GoodsReceiptNote[] @relation("GRNReceiver")
   createdSOs          SalesOrder[]       @relation("SOCreator")
   updatedSOs          SalesOrder[]       @relation("SOUpdater")
+  documentAttachments DocumentAttachment[]
 }
 
 enum UserRole {
@@ -1068,6 +1069,28 @@ model DocumentNumber {
   resetYearly  Boolean  @default(false) // เริ่มใหม่ทุกปี
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+// ============================================
+// เอกสารแนบ / Document Attachments
+// ============================================
+model DocumentAttachment {
+  id              String    @id @default(cuid())
+  entityType     String    // ประเภท entity เช่น invoice, receipt, purchase_order
+  entityId        String    // ID ของ entity
+  fileName        String    // ชื่อไฟล์เดิม
+  storedFileName  String    // ชื่อไฟล์ที่เก็บ (UUID)
+  fileUrl         String    // URL สำหรับเข้าถึงไฟล์
+  fileSize        Int       // ขนาดไฟล์ (bytes)
+  mimeType        String    // MIME type
+  uploadedById    String
+  uploadedBy      User      @relation(fields: [uploadedById], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime? // Soft delete
+
+  @@index([entityType, entityId])
+  @@index([uploadedById])
 }
 
 // ============================================
