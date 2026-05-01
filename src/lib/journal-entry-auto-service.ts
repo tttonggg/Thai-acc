@@ -23,17 +23,20 @@ interface CreateJEResult {
   lines: Array<{ accountCode: string; accountName: string; debit: number; credit: number }>;
 }
 
-// Account codes (hard-coded per spec)
-const AC = {
-  CASH: '1100',
-  BANK: '1101',
-  AR: '1102',
-  INPUT_VAT: '1103',
-  AP: '2100',
-  WHT_PAYABLE: '2101',
-  REVENUE: '4100',
-  COGS: '5100',
+// Account codes - typed constant for consistency
+// NOTE: These should eventually be migrated to SystemSettings for tenant-level configuration
+const ACCOUNT_CODES = {
+  CASH: '1100',         // เงินสด
+  BANK: '1101',         // ธนาคาร
+  AR: '1102',           // ลูกหนี้
+  INPUT_VAT: '1103',    // VATรับคืน
+  AP: '2100',           // VATจ่าย/เจ้าหนี้
+  WHT_PAYABLE: '2101', // WHTจ่าย
+  REVENUE: '4100',      // รายได้
+  COGS: '5100',         // ต้นทุน
 } as const;
+
+type AccountCodeKey = keyof typeof ACCOUNT_CODES;
 
 async function getAccountId(tx: PrismaTx, code: string): Promise<string> {
   const a = await tx.chartOfAccount.findUnique({ where: { code }, select: { id: true } });

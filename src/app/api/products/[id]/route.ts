@@ -173,9 +173,10 @@ export async function DELETE(
       );
     }
 
-    // Delete product
-    await prisma.product.delete({
+    // Soft delete product - H-08: set deletedAt and isActive=false instead of hard delete
+    await prisma.product.update({
       where: { id },
+      data: { deletedAt: new Date(), isActive: false },
     });
 
     return NextResponse.json({ success: true, message: 'ลบสินค้าเรียบร้อยแล้ว' });
