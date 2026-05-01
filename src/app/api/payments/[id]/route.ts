@@ -168,9 +168,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           data: validatedData.allocations.map((allocation) => ({
             paymentId: id,
             invoiceId: allocation.invoiceId,
-            amount: allocation.amount,
+            amount: bahtToSatang(allocation.amount),
             whtRate: allocation.whtRate,
-            whtAmount: allocation.whtAmount,
+            whtAmount: bahtToSatang(allocation.whtAmount),
             notes: allocation.notes,
           })),
         }),
