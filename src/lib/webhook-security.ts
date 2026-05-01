@@ -4,7 +4,13 @@
  */
 
 import { prisma } from './db';
-import { encrypt, decrypt, createHmacSignature, verifyHmacSignature, generateSecureToken } from './encryption';
+import {
+  encrypt,
+  decrypt,
+  createHmacSignature,
+  verifyHmacSignature,
+  generateSecureToken,
+} from './encryption';
 
 export interface WebhookPayload {
   event: string;
@@ -58,7 +64,7 @@ export function signWebhookPayload(
 ): { signature: string; body: string } {
   const body = JSON.stringify(payload);
   const signature = createHmacSignature(body, secret);
-  
+
   return { signature, body };
 }
 
@@ -105,7 +111,7 @@ export async function deliverWebhook(
   // Attempt delivery with exponential backoff retries
   let lastError: string | undefined;
   let lastStatusCode: number | undefined;
-  
+
   for (let attempt = 0; attempt < webhook.retryCount; attempt++) {
     try {
       const response = await fetch(webhook.url, {
@@ -139,22 +145,22 @@ export async function deliverWebhook(
       });
 
       if (response.ok) {
-        return { 
-          success: true, 
+        return {
+          success: true,
           statusCode: response.status,
-          retryCount: attempt 
+          retryCount: attempt,
         };
       }
 
       lastError = `HTTP ${response.status}`;
-      
+
       // Don't retry 4xx errors (client errors)
       if (response.status >= 400 && response.status < 500) {
         break;
       }
     } catch (error) {
       lastError = error instanceof Error ? error.message : 'Unknown error';
-      
+
       // Record failed delivery attempt
       await prisma.webhookDelivery.create({
         data: {
@@ -171,15 +177,15 @@ export async function deliverWebhook(
     // Wait before retry (exponential backoff: 1s, 2s, 4s, ...)
     if (attempt < webhook.retryCount - 1) {
       const delay = Math.pow(2, attempt) * 1000;
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
-  return { 
-    success: false, 
+  return {
+    success: false,
     error: lastError,
     statusCode: lastStatusCode,
-    retryCount: webhook.retryCount 
+    retryCount: webhook.retryCount,
   };
 }
 
@@ -189,15 +195,17 @@ export async function deliverWebhook(
 export async function getWebhookDeliveries(
   webhookId: string,
   limit: number = 50
-): Promise<Array<{
-  id: string;
-  event: string;
-  success: boolean;
-  responseStatus: number | null;
-  deliveredAt: Date;
-  retryCount: number;
-  error: string | null;
-}>> {
+): Promise<
+  Array<{
+    id: string;
+    event: string;
+    success: boolean;
+    responseStatus: number | null;
+    deliveredAt: Date;
+    retryCount: number;
+    error: string | null;
+  }>
+> {
   const deliveries = await prisma.webhookDelivery.findMany({
     where: { webhookId },
     orderBy: { deliveredAt: 'desc' },
@@ -280,7 +288,7 @@ export function verifyTimestampedSignature(
   toleranceSeconds: number = 300 // 5 minute tolerance
 ): boolean {
   const { timestamp, signatures } = parseSignatureHeader(header);
-  
+
   // Check timestamp tolerance
   const now = Math.floor(Date.now() / 1000);
   if (Math.abs(now - timestamp) > toleranceSeconds) {
@@ -290,7 +298,7 @@ export function verifyTimestampedSignature(
   const signedPayload = `${timestamp}.${payload}`;
   const expectedSignature = createHmacSignature(signedPayload, secret);
 
-  return signatures.some(sig => sig === expectedSignature);
+  return signatures.some((sig) => sig === expectedSignature);
 }
 
 /**
@@ -368,12 +376,7 @@ export function validateIncomingWebhook(
   }
 ): boolean {
   if (options?.useTimestampedSignature) {
-    return verifyTimestampedSignature(
-      payload,
-      signature,
-      secret,
-      options.timestampTolerance
-    );
+    return verifyTimestampedSignature(payload, signature, secret, options.timestampTolerance);
   }
   return verifyWebhookSignature(payload, signature, secret);
 }

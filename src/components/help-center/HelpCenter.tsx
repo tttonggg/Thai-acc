@@ -2,12 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -41,11 +36,12 @@ const HELP_ARTICLES: HelpArticle[] = [
     id: 'getting-started',
     title: 'เริ่มต้นใช้งานระบบ',
     titleEn: 'Getting Started',
-    content: 'เรียนรู้พื้นฐานการใช้งาน Thai Accounting ERP ตั้งแต่การเข้าสู่ระบบ การตั้งค่าบริษัท ไปจนถึงการสร้างเอกสารแรกของคุณ',
+    content:
+      'เรียนรู้พื้นฐานการใช้งาน Thai Accounting ERP ตั้งแต่การเข้าสู่ระบบ การตั้งค่าบริษัท ไปจนถึงการสร้างเอกสารแรกของคุณ',
     category: 'general',
     tags: ['เริ่มต้น', 'login', 'ตั้งค่า', 'พื้นฐาน'],
     type: 'tutorial',
-    url: '/docs/tutorials/01-Getting-Started.md'
+    url: '/docs/tutorials/01-Getting-Started.md',
   },
   {
     id: 'create-invoice',
@@ -55,27 +51,29 @@ const HELP_ARTICLES: HelpArticle[] = [
     category: 'invoices',
     tags: ['ใบกำกับภาษี', 'invoice', 'VAT', 'ขาย', 'ลูกค้า'],
     type: 'tutorial',
-    url: '/docs/tutorials/02-Creating-Your-First-Invoice.md'
+    url: '/docs/tutorials/02-Creating-Your-First-Invoice.md',
   },
   {
     id: 'receipt-management',
     title: 'การรับชำระเงิน',
     titleEn: 'Managing Receipts',
-    content: 'บันทึกการรับเงินจากลูกค้า การจัดสรรกับใบกำกับภาษี การหักภาษี ณ ที่จ่าย และการรับชำระหลายใบ',
+    content:
+      'บันทึกการรับเงินจากลูกค้า การจัดสรรกับใบกำกับภาษี การหักภาษี ณ ที่จ่าย และการรับชำระหลายใบ',
     category: 'receipts',
     tags: ['ใบเสร็จ', 'receipt', 'ชำระเงิน', 'ลูกหนี้', 'WHT'],
     type: 'tutorial',
-    url: '/docs/tutorials/03-Managing-Receipts.md'
+    url: '/docs/tutorials/03-Managing-Receipts.md',
   },
   {
     id: 'journal-entries',
     title: 'การบันทึกรายการบัญชี',
     titleEn: 'Journal Entries',
-    content: 'เรียนรู้หลักการบัญชี Double Entry การบันทึกรายการประจำวัน รายการปรับปรุง และการยกเลิกรายการ',
+    content:
+      'เรียนรู้หลักการบัญชี Double Entry การบันทึกรายการประจำวัน รายการปรับปรุง และการยกเลิกรายการ',
     category: 'accounting',
     tags: ['สมุดรายวัน', 'journal', 'บัญชี', 'เดบิต', 'เครดิต'],
     type: 'tutorial',
-    url: '/docs/tutorials/04-Journal-Entries.md'
+    url: '/docs/tutorials/04-Journal-Entries.md',
   },
   {
     id: 'financial-reports',
@@ -85,7 +83,7 @@ const HELP_ARTICLES: HelpArticle[] = [
     category: 'reports',
     tags: ['รายงาน', 'reports', 'งบดุล', 'งบกำไร', 'ภาษี'],
     type: 'tutorial',
-    url: '/docs/tutorials/05-Financial-Reports.md'
+    url: '/docs/tutorials/05-Financial-Reports.md',
   },
   {
     id: 'inventory-management',
@@ -95,7 +93,7 @@ const HELP_ARTICLES: HelpArticle[] = [
     category: 'inventory',
     tags: ['สินค้า', 'inventory', 'สต็อก', 'ต้นทุน', 'FIFO'],
     type: 'tutorial',
-    url: '/docs/tutorials/06-Inventory-Management.md'
+    url: '/docs/tutorials/06-Inventory-Management.md',
   },
   {
     id: 'payroll',
@@ -105,17 +103,18 @@ const HELP_ARTICLES: HelpArticle[] = [
     category: 'payroll',
     tags: ['เงินเดือน', 'payroll', 'ประกันสังคม', 'ภาษี', 'PND1'],
     type: 'tutorial',
-    url: '/docs/tutorials/07-Payroll.md'
+    url: '/docs/tutorials/07-Payroll.md',
   },
   {
     id: 'system-settings',
     title: 'การตั้งค่าระบบ',
     titleEn: 'System Settings',
-    content: 'การตั้งค่าข้อมูลบริษัท การจัดการผู้ใช้งาน การกำหนดรูปแบบเลขที่เอกสาร และการตั้งค่าอื่นๆ',
+    content:
+      'การตั้งค่าข้อมูลบริษัท การจัดการผู้ใช้งาน การกำหนดรูปแบบเลขที่เอกสาร และการตั้งค่าอื่นๆ',
     category: 'settings',
     tags: ['ตั้งค่า', 'settings', 'ผู้ใช้', 'เลขที่เอกสาร', 'บริษัท'],
     type: 'tutorial',
-    url: '/docs/tutorials/08-Settings-and-Configuration.md'
+    url: '/docs/tutorials/08-Settings-and-Configuration.md',
   },
   {
     id: 'backup-restore',
@@ -125,7 +124,7 @@ const HELP_ARTICLES: HelpArticle[] = [
     category: 'settings',
     tags: ['สำรองข้อมูล', 'backup', 'กู้คืน', 'restore', 'ส่งออก'],
     type: 'tutorial',
-    url: '/docs/tutorials/09-Backup-and-Restore.md'
+    url: '/docs/tutorials/09-Backup-and-Restore.md',
   },
   {
     id: 'troubleshooting',
@@ -135,16 +134,17 @@ const HELP_ARTICLES: HelpArticle[] = [
     category: 'support',
     tags: ['แก้ไขปัญหา', 'troubleshooting', 'error', 'ข้อผิดพลาด', 'help'],
     type: 'tutorial',
-    url: '/docs/tutorials/10-Troubleshooting.md'
+    url: '/docs/tutorials/10-Troubleshooting.md',
   },
   {
     id: 'login-issues',
     title: 'ไม่สามารถเข้าสู่ระบบได้',
     titleEn: 'Cannot Login',
-    content: 'หากไม่สามารถเข้าสู่ระบบได้ ให้ตรวจสอบอีเมลและรหัสผ่าน ลองรีเซ็ตรหัสผ่าน หรือติดต่อผู้ดูแลระบบ',
+    content:
+      'หากไม่สามารถเข้าสู่ระบบได้ ให้ตรวจสอบอีเมลและรหัสผ่าน ลองรีเซ็ตรหัสผ่าน หรือติดต่อผู้ดูแลระบบ',
     category: 'support',
     tags: ['login', 'เข้าสู่ระบบ', 'ลืมรหัสผ่าน', 'password', 'error'],
-    type: 'article'
+    type: 'article',
   },
   {
     id: 'vat-calculation',
@@ -153,7 +153,7 @@ const HELP_ARTICLES: HelpArticle[] = [
     content: 'ระบบคำนวณ VAT 7% โดยอัตโนมัติ สามารถเลือกได้ว่าจะให้ราคารวม VAT หรือไม่รวม VAT',
     category: 'invoices',
     tags: ['VAT', 'ภาษีมูลค่าเพิ่ม', '7%', 'คำนวณ', 'ราคา'],
-    type: 'article'
+    type: 'article',
   },
   {
     id: 'wht-setup',
@@ -162,7 +162,7 @@ const HELP_ARTICLES: HelpArticle[] = [
     content: 'การหักภาษี ณ ที่จ่าย PND3 และ PND53 อัตราภาษีแต่ละประเภท และการออกใบหัก ณ ที่จ่าย',
     category: 'tax',
     tags: ['WHT', 'ภาษีหัก ณ ที่จ่าย', 'PND3', 'PND53', 'หักภาษี'],
-    type: 'article'
+    type: 'article',
   },
   {
     id: 'chart-of-accounts',
@@ -171,7 +171,7 @@ const HELP_ARTICLES: HelpArticle[] = [
     content: 'ผังบัญชีมาตรฐานไทย 181 บัญชี การสร้างบัญชีใหม่ และโครงสร้างบัญชี 4 หลัก',
     category: 'accounting',
     tags: ['ผังบัญชี', 'chart of accounts', 'บัญชี', 'COA', 'รหัสบัญชี'],
-    type: 'article'
+    type: 'article',
   },
   {
     id: 'user-roles',
@@ -180,7 +180,7 @@ const HELP_ARTICLES: HelpArticle[] = [
     content: 'การกำหนดสิทธิ์ผู้ใช้งาน ADMIN, ACCOUNTANT, USER, VIEWER และการจัดการผู้ใช้',
     category: 'settings',
     tags: ['ผู้ใช้', 'user', 'สิทธิ์', 'permissions', 'role', 'บทบาท'],
-    type: 'article'
+    type: 'article',
   },
   {
     id: 'inventory-costing',
@@ -189,7 +189,7 @@ const HELP_ARTICLES: HelpArticle[] = [
     content: 'การคำนวณต้นทุนสินค้าด้วยวิธี FIFO และ Weighted Average ข้อดีข้อเสียของแต่ละวิธี',
     category: 'inventory',
     tags: ['ต้นทุน', 'costing', 'FIFO', 'weighted average', 'ค่าเฉลี่ย'],
-    type: 'article'
+    type: 'article',
   },
   {
     id: 'balance-sheet',
@@ -198,7 +198,7 @@ const HELP_ARTICLES: HelpArticle[] = [
     content: 'งบดุลแสดงสภาพการเงินของบริษัท ณ วันใดวันหนึ่ง ประกอบด้วยสินทรัพย์ หนี้สิน และทุน',
     category: 'reports',
     tags: ['งบดุล', 'balance sheet', 'สินทรัพย์', 'หนี้สิน', 'ทุน'],
-    type: 'article'
+    type: 'article',
   },
   {
     id: 'income-statement',
@@ -207,7 +207,7 @@ const HELP_ARTICLES: HelpArticle[] = [
     content: 'งบกำไรขาดทุนแสดงผลการดำเนินงานในช่วงเวลาหนึ่ง รายได้ ค่าใช้จ่าย และกำไรสุทธิ',
     category: 'reports',
     tags: ['งบกำไร', 'income statement', 'รายได้', 'ค่าใช้จ่าย', 'กำไร'],
-    type: 'article'
+    type: 'article',
   },
   {
     id: 'api-docs',
@@ -217,7 +217,7 @@ const HELP_ARTICLES: HelpArticle[] = [
     category: 'developer',
     tags: ['API', 'developer', 'เอกสาร', 'documentation', 'integration'],
     type: 'article',
-    url: '/api/docs'
+    url: '/api/docs',
   },
   {
     id: 'faq',
@@ -227,8 +227,8 @@ const HELP_ARTICLES: HelpArticle[] = [
     category: 'support',
     tags: ['FAQ', 'คำถาม', 'help', 'ถามตอบ', 'ปัญหา'],
     type: 'article',
-    url: '/FAQ.md'
-  }
+    url: '/FAQ.md',
+  },
 ];
 
 const CATEGORIES = [
@@ -259,16 +259,17 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
     let articles = HELP_ARTICLES;
 
     if (selectedCategory !== 'all') {
-      articles = articles.filter(a => a.category === selectedCategory);
+      articles = articles.filter((a) => a.category === selectedCategory);
     }
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      articles = articles.filter(a =>
-        a.title.toLowerCase().includes(query) ||
-        a.titleEn.toLowerCase().includes(query) ||
-        a.content.toLowerCase().includes(query) ||
-        a.tags.some(tag => tag.toLowerCase().includes(query))
+      articles = articles.filter(
+        (a) =>
+          a.title.toLowerCase().includes(query) ||
+          a.titleEn.toLowerCase().includes(query) ||
+          a.content.toLowerCase().includes(query) ||
+          a.tags.some((tag) => tag.toLowerCase().includes(query))
       );
     }
 
@@ -286,11 +287,11 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'video':
-        return <Video className="w-4 h-4" />;
+        return <Video className="h-4 w-4" />;
       case 'tutorial':
-        return <BookOpen className="w-4 h-4" />;
+        return <BookOpen className="h-4 w-4" />;
       default:
-        return <FileText className="w-4 h-4" />;
+        return <FileText className="h-4 w-4" />;
     }
   };
 
@@ -307,19 +308,19 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[80vh] p-0 overflow-hidden">
+      <DialogContent className="h-[80vh] max-w-4xl overflow-hidden p-0">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="flex items-center gap-2 text-2xl">
-            <HelpCircle className="w-6 h-6 text-primary" />
+            <HelpCircle className="h-6 w-6 text-primary" />
             ศูนย์ช่วยเหลือ
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col h-full">
+        <div className="flex h-full flex-col">
           {/* Search Bar */}
-          <div className="px-6 py-4 border-b">
+          <div className="border-b px-6 py-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="ค้นหาคำถามหรือหัวข้อที่ต้องการ..."
                 value={searchQuery}
@@ -331,21 +332,21 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
                   onClick={() => setSearchQuery('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
-                  <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                 </button>
               )}
             </div>
           </div>
 
           {/* Category Tabs */}
-          <div className="px-6 py-3 border-b">
+          <div className="border-b px-6 py-3">
             <ScrollArea className="w-full whitespace-nowrap">
               <div className="flex gap-2">
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                       selectedCategory === cat.id
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-muted hover:bg-muted/80'
@@ -367,15 +368,15 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="h-full flex flex-col"
+                  className="flex h-full flex-col"
                 >
                   {/* Article Header */}
-                  <div className="px-6 py-4 border-b flex items-center justify-between">
+                  <div className="flex items-center justify-between border-b px-6 py-4">
                     <button
                       onClick={() => setSelectedArticle(null)}
                       className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
-                      <ChevronRight className="w-4 h-4 rotate-180" />
+                      <ChevronRight className="h-4 w-4 rotate-180" />
                       กลับไปรายการ
                     </button>
                     <Badge variant="secondary">
@@ -386,18 +387,18 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
 
                   {/* Article Content */}
                   <ScrollArea className="flex-1 p-6">
-                    <h2 className="text-2xl font-bold mb-2">{selectedArticle.title}</h2>
-                    <p className="text-muted-foreground mb-4">{selectedArticle.titleEn}</p>
+                    <h2 className="mb-2 text-2xl font-bold">{selectedArticle.title}</h2>
+                    <p className="mb-4 text-muted-foreground">{selectedArticle.titleEn}</p>
                     <p className="text-lg leading-relaxed">{selectedArticle.content}</p>
-                    
+
                     {selectedArticle.url && (
                       <a
                         href={selectedArticle.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 mt-6 text-primary hover:underline"
+                        className="mt-6 inline-flex items-center gap-2 text-primary hover:underline"
                       >
-                        <ExternalLink className="w-4 h-4" />
+                        <ExternalLink className="h-4 w-4" />
                         ดูรายละเอียดเพิ่มเติม
                       </a>
                     )}
@@ -413,8 +414,8 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
                 >
                   <ScrollArea className="h-full p-6">
                     {filteredArticles.length === 0 ? (
-                      <div className="text-center py-12">
-                        <Search className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                      <div className="py-12 text-center">
+                        <Search className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                         <p className="text-lg font-medium">ไม่พบผลลัพธ์</p>
                         <p className="text-muted-foreground">ลองค้นด้วยคำค้นอื่น</p>
                       </div>
@@ -424,29 +425,29 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
                           <button
                             key={article.id}
                             onClick={() => handleArticleClick(article)}
-                            className="w-full text-left p-4 rounded-lg border hover:border-primary hover:bg-muted/50 transition-colors"
+                            className="w-full rounded-lg border p-4 text-left transition-colors hover:border-primary hover:bg-muted/50"
                           >
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
+                                <div className="mb-1 flex items-center gap-2">
                                   {getTypeIcon(article.type)}
                                   <h3 className="font-semibold">{article.title}</h3>
                                 </div>
-                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                <p className="line-clamp-2 text-sm text-muted-foreground">
                                   {article.content}
                                 </p>
-                                <div className="flex flex-wrap gap-1 mt-2">
+                                <div className="mt-2 flex flex-wrap gap-1">
                                   {article.tags.slice(0, 3).map((tag) => (
                                     <span
                                       key={tag}
-                                      className="text-xs px-2 py-0.5 bg-muted rounded-full"
+                                      className="rounded-full bg-muted px-2 py-0.5 text-xs"
                                     >
                                       {tag}
                                     </span>
                                   ))}
                                 </div>
                               </div>
-                              <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                              <ChevronRight className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                             </div>
                           </button>
                         ))}
@@ -459,7 +460,7 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t bg-muted/50">
+          <div className="border-t bg-muted/50 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span>ต้องการความช่วยเหลือเพิ่มเติม?</span>
@@ -467,16 +468,16 @@ export function HelpCenter({ open, onOpenChange }: HelpCenterProps) {
               <div className="flex items-center gap-2">
                 <a
                   href="mailto:support@thaiaccounting.com"
-                  className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+                  className="flex items-center gap-2 rounded-md px-3 py-2 transition-colors hover:bg-muted"
                 >
-                  <Mail className="w-4 h-4" />
+                  <Mail className="h-4 w-4" />
                   <span className="text-sm">อีเมล</span>
                 </a>
                 <a
                   href="tel:021234567"
-                  className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+                  className="flex items-center gap-2 rounded-md px-3 py-2 transition-colors hover:bg-muted"
                 >
-                  <Phone className="w-4 h-4" />
+                  <Phone className="h-4 w-4" />
                   <span className="text-sm">โทร</span>
                 </a>
               </div>
@@ -495,9 +496,7 @@ export function useHelpCenter() {
   return {
     open,
     setOpen,
-    HelpCenterComponent: () => (
-      <HelpCenter open={open} onOpenChange={setOpen} />
-    )
+    HelpCenterComponent: () => <HelpCenter open={open} onOpenChange={setOpen} />,
   };
 }
 
@@ -509,9 +508,9 @@ export function HelpButton({ className }: { className?: string }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors ${className}`}
+        className={`flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 ${className}`}
       >
-        <HelpCircle className="w-4 h-4" />
+        <HelpCircle className="h-4 w-4" />
         <span>ช่วยเหลือ</span>
       </button>
       <HelpCenter open={open} onOpenChange={setOpen} />

@@ -1,22 +1,14 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Eye,
-  FileText,
-  Loader2
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { useState, useEffect } from 'react';
+import { Plus, Search, Edit, Trash2, Eye, FileText, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Table,
   TableBody,
@@ -24,33 +16,33 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { PurchaseForm } from '@/components/purchases/purchase-form'
-import { PurchaseEditDialog } from '@/components/purchases/purchase-edit-dialog'
-import { PurchaseViewDialog } from '@/components/purchases/purchase-view-dialog'
-import { useToast } from '@/hooks/use-toast'
-import { getStatusBadgeProps } from '@/lib/status-badge'
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { PurchaseForm } from '@/components/purchases/purchase-form';
+import { PurchaseEditDialog } from '@/components/purchases/purchase-edit-dialog';
+import { PurchaseViewDialog } from '@/components/purchases/purchase-view-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { getStatusBadgeProps } from '@/lib/status-badge';
 
 interface Purchase {
-  id: string
-  invoiceNo: string
-  vendorInvoiceNo?: string
-  invoiceDate: string
-  vendorName: string
-  subtotal: number
-  vatAmount: number
-  totalAmount: number
-  status: string
-  type: string
-  paidAmount: number
+  id: string;
+  invoiceNo: string;
+  vendorInvoiceNo?: string;
+  invoiceDate: string;
+  vendorName: string;
+  subtotal: number;
+  vatAmount: number;
+  totalAmount: number;
+  status: string;
+  type: string;
+  paidAmount: number;
 }
 
 const statusLabels: Record<string, string> = {
@@ -59,157 +51,159 @@ const statusLabels: Record<string, string> = {
   PAID: 'จ่ายแล้ว',
   CANCELLED: 'ยกเลิก',
   ISSUED: 'ออกแล้ว',
-}
+};
 
 // Helper function to get status badge
 const getStatusBadge = (status: string) => {
-  const config = getStatusBadgeProps(status)
-  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>
-}
+  const config = getStatusBadgeProps(status);
+  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>;
+};
 
 const typeLabels: Record<string, string> = {
   TAX_INVOICE: 'ใบกำกับภาษี',
   RECEIPT: 'ใบเสร็จรับเงิน',
   DELIVERY_NOTE: 'ใบส่งของ',
-}
+};
 
 interface PurchaseListProps {
-  refreshKey?: number
-  onRefresh?: () => void
+  refreshKey?: number;
+  onRefresh?: () => void;
 }
 
 export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [refreshKeyInternal, setRefreshKeyInternal] = useState(0)
-  const [editPurchaseId, setEditPurchaseId] = useState<string | null>(null)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [viewPurchaseId, setViewPurchaseId] = useState<string | null>(null)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [purchases, setPurchases] = useState<Purchase[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const { toast } = useToast()
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [refreshKeyInternal, setRefreshKeyInternal] = useState(0);
+  const [editPurchaseId, setEditPurchaseId] = useState<string | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [viewPurchaseId, setViewPurchaseId] = useState<string | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchPurchases = async () => {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
       try {
         // Add cache-busting timestamp to prevent stale responses
-        const cacheBuster = new Date().getTime()
-        const res = await fetch(`/api/purchases?_=${cacheBuster}`, { credentials: 'include' })
-        if (!res.ok) throw new Error('Fetch failed')
-        const result = await res.json()
+        const cacheBuster = new Date().getTime();
+        const res = await fetch(`/api/purchases?_=${cacheBuster}`, { credentials: 'include' });
+        if (!res.ok) throw new Error('Fetch failed');
+        const result = await res.json();
 
         // Handle empty response
         if (!result || typeof result !== 'object') {
-          throw new Error('Invalid response from server')
+          throw new Error('Invalid response from server');
         }
 
         // Check for API error response
         if (!result.success) {
-          throw new Error(result.error || 'Failed to load purchases')
+          throw new Error(result.error || 'Failed to load purchases');
         }
 
         // Check for missing data property
         if (!result.data) {
-          console.error('Response missing data property:', result)
-          throw new Error('No data received from server')
+          console.error('Response missing data property:', result);
+          throw new Error('No data received from server');
         }
 
         // API returns { success: true, data: [...], pagination: {...} }
-        const purchasesData = result.data || []
+        const purchasesData = result.data || [];
         if (!Array.isArray(purchasesData)) {
-          console.error('Unexpected data format:', result)
-          console.error('Response type:', typeof result)
-          console.error('Has success?', 'success' in result)
-          console.error('Has data?', 'data' in result)
-          console.error('Data type:', typeof result.data)
-          console.error('Data value:', result.data)
-          console.error('Is data null?', result.data === null)
-          console.error('Is data undefined?', result.data === undefined)
-          setPurchases([]) // Set empty array instead of throwing error
-          return
+          console.error('Unexpected data format:', result);
+          console.error('Response type:', typeof result);
+          console.error('Has success?', 'success' in result);
+          console.error('Has data?', 'data' in result);
+          console.error('Data type:', typeof result.data);
+          console.error('Data value:', result.data);
+          console.error('Is data null?', result.data === null);
+          console.error('Is data undefined?', result.data === undefined);
+          setPurchases([]); // Set empty array instead of throwing error
+          return;
         }
-        console.log('Successfully loaded', purchasesData.length, 'purchases')
-        setPurchases(purchasesData)
+        console.log('Successfully loaded', purchasesData.length, 'purchases');
+        setPurchases(purchasesData);
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล'
-        setError(message)
+        const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล';
+        setError(message);
         toast({
           title: 'ข้อผิดพลาด',
           description: 'โหลดข้อมูลไม่สำเร็จ',
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchPurchases()
-  }, [refreshKey + refreshKeyInternal, toast])
+    };
+    fetchPurchases();
+  }, [refreshKey + refreshKeyInternal, toast]);
 
-  const filteredPurchases = (purchases || []).filter(purchase => {
-    if (!purchase || typeof purchase !== 'object') return false
+  const filteredPurchases = (purchases || []).filter((purchase) => {
+    if (!purchase || typeof purchase !== 'object') return false;
 
-    const matchesSearch = purchase.vendorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          purchase.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          purchase.vendorInvoiceNo?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus === 'all' || purchase.status === filterStatus
-    return matchesSearch && matchesStatus
-  })
+    const matchesSearch =
+      purchase.vendorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      purchase.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      purchase.vendorInvoiceNo?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || purchase.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   const handlePurchaseSuccess = () => {
-    setRefreshKeyInternal(prev => prev + 1)
-    setIsAddDialogOpen(false)
-    onRefresh?.()
-  }
+    setRefreshKeyInternal((prev) => prev + 1);
+    setIsAddDialogOpen(false);
+    onRefresh?.();
+  };
 
   const handleEditPurchaseSuccess = () => {
-    setRefreshKeyInternal(prev => prev + 1)
-    setIsEditDialogOpen(false)
-    setEditPurchaseId(null)
-    onRefresh?.()
-  }
+    setRefreshKeyInternal((prev) => prev + 1);
+    setIsEditDialogOpen(false);
+    setEditPurchaseId(null);
+    onRefresh?.();
+  };
 
   const openEditDialog = (purchaseId: string) => {
-    setEditPurchaseId(purchaseId)
-    setIsEditDialogOpen(true)
-  }
+    setEditPurchaseId(purchaseId);
+    setIsEditDialogOpen(true);
+  };
 
   const openViewDialog = (purchaseId: string) => {
-    setViewPurchaseId(purchaseId)
-    setIsViewDialogOpen(true)
-  }
+    setViewPurchaseId(purchaseId);
+    setIsViewDialogOpen(true);
+  };
 
   const handleDelete = async (purchaseId: string) => {
-    if (!confirm('ยืนยันที่จะลบใบซื้อนี้?')) return
+    if (!confirm('ยืนยันที่จะลบใบซื้อนี้?')) return;
 
     try {
-      const res = await fetch(`/api/purchases/${purchaseId}`, { credentials: 'include', 
-        method: 'DELETE'
-      })
-      const result = await res.json()
+      const res = await fetch(`/api/purchases/${purchaseId}`, {
+        credentials: 'include',
+        method: 'DELETE',
+      });
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'ไม่สามารถลบได้')
+        throw new Error(result.error || 'ไม่สามารถลบได้');
       }
 
       toast({
         title: 'ลบสำเร็จ',
         description: 'ลบใบซื้อเรียบร้อยแล้ว',
-      })
-      setRefreshKeyInternal(prev => prev + 1)
-      onRefresh?.()
+      });
+      setRefreshKeyInternal((prev) => prev + 1);
+      onRefresh?.();
     } catch (error: any) {
       toast({
         title: 'ลบไม่สำเร็จ',
         description: error.message || 'กรุณาลองอีกครั้ง',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   // Loading UI
   if (loading) {
@@ -217,12 +211,12 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="mb-2 h-8 w-64" />
             <Skeleton className="h-5 w-80" />
           </div>
           <Skeleton className="h-10 w-40" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i}>
               <CardContent className="p-4">
@@ -233,12 +227,12 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
         </div>
         <Card>
           <CardContent className="p-4">
-            <Skeleton className="h-12 w-full mb-4" />
+            <Skeleton className="mb-4 h-12 w-full" />
             <Skeleton className="h-64 w-full" />
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Error UI
@@ -247,7 +241,7 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
       <Alert variant="destructive">
         <AlertDescription>{error}</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   // Empty UI
@@ -257,13 +251,13 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">ใบซื้อ / ใบสั่งซื้อสินค้า</h1>
-            <p className="text-gray-500 mt-1">จัดการใบซื้อ ใบกำกับภาษีจากผู้ขาย</p>
+            <p className="mt-1 text-gray-500">จัดการใบซื้อ ใบกำกับภาษีจากผู้ขาย</p>
           </div>
           <Button
             className="bg-blue-600 hover:bg-blue-700"
             onClick={() => setIsAddDialogOpen(true)}
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             สร้างใบซื้อใหม่
           </Button>
         </div>
@@ -276,10 +270,10 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
           onSuccess={handlePurchaseSuccess}
         />
       </div>
-    )
+    );
   }
 
-  const safePurchases = purchases || []
+  const safePurchases = purchases || [];
 
   return (
     <div className="space-y-6">
@@ -287,19 +281,16 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">ใบซื้อ / ใบสั่งซื้อสินค้า</h1>
-          <p className="text-gray-500 mt-1">จัดการใบซื้อ ใบกำกับภาษีจากผู้ขาย</p>
+          <p className="mt-1 text-gray-500">จัดการใบซื้อ ใบกำกับภาษีจากผู้ขาย</p>
         </div>
-        <Button
-          className="bg-blue-600 hover:bg-blue-700"
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
+        <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsAddDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
           สร้างใบซื้อใหม่
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">ทั้งหมด</p>
@@ -310,14 +301,18 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">รอออกใบซื้อ</p>
-            <p className="text-2xl font-bold text-yellow-600">{safePurchases.filter(p => p.status === 'DRAFT').length}</p>
+            <p className="text-2xl font-bold text-yellow-600">
+              {safePurchases.filter((p) => p.status === 'DRAFT').length}
+            </p>
             <p className="text-xs text-gray-400">รายการ</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">ออกแล้ว</p>
-            <p className="text-2xl font-bold text-green-600">{safePurchases.filter(p => p.status === 'ISSUED' || p.status === 'POSTED').length}</p>
+            <p className="text-2xl font-bold text-green-600">
+              {safePurchases.filter((p) => p.status === 'ISSUED' || p.status === 'POSTED').length}
+            </p>
             <p className="text-xs text-gray-400">รายการ</p>
           </CardContent>
         </Card>
@@ -325,7 +320,10 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">ยอดรวมทั้งหมด</p>
             <p className="text-2xl font-bold text-purple-600">
-              ฿{(safePurchases.reduce((sum, p) => sum + (p.totalAmount || 0), 0) / 100).toLocaleString()}
+              ฿
+              {(
+                safePurchases.reduce((sum, p) => sum + (p.totalAmount || 0), 0) / 100
+              ).toLocaleString()}
             </p>
             <p className="text-xs text-gray-400">บาท</p>
           </CardContent>
@@ -335,9 +333,9 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
       {/* Search & Filter */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="ค้นหาตามชื่อผู้ขายหรือเลขที่เอกสาร..."
                 className="pl-10"
@@ -385,18 +383,42 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
                 {filteredPurchases.map((purchase) => (
                   <TableRow key={purchase.id}>
                     <TableCell className="font-mono">{purchase.invoiceNo}</TableCell>
-                    <TableCell className="font-mono text-sm">{purchase.vendorInvoiceNo || '-'}</TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {purchase.vendorInvoiceNo || '-'}
+                    </TableCell>
                     <TableCell>
                       {new Date(purchase.invoiceDate).toLocaleDateString('th-TH')}
                     </TableCell>
                     <TableCell>{purchase.vendorName}</TableCell>
-                    <TableCell className="text-right">฿{((purchase.subtotal ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                    <TableCell className="text-right">฿{((purchase.vatAmount ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                    <TableCell className="text-right font-semibold">฿{((purchase.totalAmount ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                    <TableCell className="text-right">฿{((purchase.paidAmount ?? 0) / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                    <TableCell>
-                      {getStatusBadge(purchase.status)}
+                    <TableCell className="text-right">
+                      ฿
+                      {((purchase.subtotal ?? 0) / 100).toLocaleString('th-TH', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
                     </TableCell>
+                    <TableCell className="text-right">
+                      ฿
+                      {((purchase.vatAmount ?? 0) / 100).toLocaleString('th-TH', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                      ฿
+                      {((purchase.totalAmount ?? 0) / 100).toLocaleString('th-TH', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      ฿
+                      {((purchase.paidAmount ?? 0) / 100).toLocaleString('th-TH', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </TableCell>
+                    <TableCell>{getStatusBadge(purchase.status)}</TableCell>
                     <TableCell>
                       <div className="flex justify-center gap-1">
                         <Button
@@ -407,7 +429,7 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
                         >
                           <Eye className="h-4 w-4 text-gray-600" />
                         </Button>
-                        {(purchase.status === 'DRAFT') && (
+                        {purchase.status === 'DRAFT' && (
                           <>
                             <Button
                               variant="ghost"
@@ -461,5 +483,5 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
         />
       )}
     </div>
-  )
+  );
 }

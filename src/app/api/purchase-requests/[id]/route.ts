@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { z } from 'zod';
 
 // Validation schema for update
 const prUpdateSchema = z.object({
@@ -14,41 +14,39 @@ const prUpdateSchema = z.object({
   notes: z.string().optional(),
   internalNotes: z.string().optional(),
   status: z.enum(['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED', 'CONVERTED']).optional(),
-})
+});
 
 // Validation schema for approval
 const approvalSchema = z.object({
   action: z.enum(['submit', 'approve', 'reject', 'cancel']),
   approvalNotes: z.string().optional(),
-  lines: z.array(z.object({
-    id: z.string().optional(),
-    lineNo: z.number().int().positive(),
-    productId: z.string().optional(),
-    description: z.string().min(1),
-    quantity: z.number().positive(),
-    unit: z.string(),
-    unitPrice: z.number().min(0),
-    discount: z.number().min(0),
-    vatRate: z.number().min(0),
-    suggestedVendor: z.string().optional(),
-    specUrl: z.string().optional(),
-    notes: z.string().optional(),
-  })).optional(),
-})
+  lines: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        lineNo: z.number().int().positive(),
+        productId: z.string().optional(),
+        description: z.string().min(1),
+        quantity: z.number().positive(),
+        unit: z.string(),
+        unitPrice: z.number().min(0),
+        discount: z.number().min(0),
+        vatRate: z.number().min(0),
+        suggestedVendor: z.string().optional(),
+        specUrl: z.string().optional(),
+        notes: z.string().optional(),
+      })
+    )
+    .optional(),
+});
 
 // GET /api/purchase-requests/[id] - Get single PR
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     const pr = await prisma.purchaseRequest.findUnique({
@@ -122,78 +120,66 @@ export async function GET(
           },
         },
       },
-    })
+    });
 
     if (!pr) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบใบขอซื้อ' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบใบขอซื้อ' }, { status: 404 });
     }
 
     // Check access permission
-    const isOwner = pr.requestedBy === session.user.id
-    const isAdmin = ['ADMIN', 'ACCOUNTANT'].includes(session.user.role as string)
+    const isOwner = pr.requestedBy === session.user.id;
+    const isAdmin = ['ADMIN', 'ACCOUNTANT'].includes(session.user.role as string);
 
     if (!isAdmin && !isOwner) {
       return NextResponse.json(
         { success: false, error: 'ไม่มีสิทธิ์เข้าถึงข้อมูล' },
         { status: 403 }
-      )
+      );
     }
 
     return NextResponse.json({
       success: true,
       data: pr,
-    })
+    });
   } catch (error) {
-    console.error('Purchase Request Fetch Error:', error)
+    console.error('Purchase Request Fetch Error:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการโหลดข้อมูล',
       },
       { status: 500 }
-    )
+    );
   }
 }
 
 // PUT /api/purchase-requests/[id] - Update PR
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     // Check if PR exists
     const existing = await prisma.purchaseRequest.findUnique({
       where: { id: id },
-    })
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบใบขอซื้อ' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบใบขอซื้อ' }, { status: 404 });
     }
 
     // Check permission - only owner and admin/accountant can edit
-    const isOwner = existing.requestedBy === session.user.id
-    const isAdmin = ['ADMIN', 'ACCOUNTANT'].includes(session.user.role as string)
+    const isOwner = existing.requestedBy === session.user.id;
+    const isAdmin = ['ADMIN', 'ACCOUNTANT'].includes(session.user.role as string);
 
     if (!isAdmin && !isOwner) {
       return NextResponse.json(
         { success: false, error: 'ไม่มีสิทธิ์แก้ไขใบขอซื้อ' },
         { status: 403 }
-      )
+      );
     }
 
     // Can only edit DRAFT status
@@ -201,11 +187,11 @@ export async function PUT(
       return NextResponse.json(
         { success: false, error: 'สามารถแก้ไขเฉพาะใบขอซื้อที่มีสถานะร่างเท่านั้น' },
         { status: 400 }
-      )
+      );
     }
 
-    const body = await request.json()
-    const validatedData = prUpdateSchema.parse(body)
+    const body = await request.json();
+    const validatedData = prUpdateSchema.parse(body);
 
     // Update PR
     const pr = await prisma.purchaseRequest.update({
@@ -245,15 +231,15 @@ export async function PUT(
           },
         },
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
       data: pr,
       message: 'อัปเดตใบขอซื้อสำเร็จ',
-    })
+    });
   } catch (error) {
-    console.error('Purchase Request Update Error:', error)
+    console.error('Purchase Request Update Error:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -263,7 +249,7 @@ export async function PUT(
           details: error.issues,
         },
         { status: 400 }
-      )
+      );
     }
 
     return NextResponse.json(
@@ -272,7 +258,7 @@ export async function PUT(
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการอัปเดตใบขอซื้อ',
       },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -282,36 +268,27 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     // Check if PR exists
     const existing = await prisma.purchaseRequest.findUnique({
       where: { id: id },
-    })
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบใบขอซื้อ' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบใบขอซื้อ' }, { status: 404 });
     }
 
     // Check permission
-    const isOwner = existing.requestedBy === session.user.id
-    const isAdmin = session.user.role === 'ADMIN'
+    const isOwner = existing.requestedBy === session.user.id;
+    const isAdmin = session.user.role === 'ADMIN';
 
     if (!isAdmin && !isOwner) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์ลบใบขอซื้อ' },
-        { status: 403 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์ลบใบขอซื้อ' }, { status: 403 });
     }
 
     // Can only delete DRAFT status
@@ -319,7 +296,7 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: 'สามารถลบเฉพาะใบขอซื้อที่มีสถานะร่างเท่านั้น' },
         { status: 400 }
-      )
+      );
     }
 
     // Check if already converted to PO
@@ -327,43 +304,37 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: 'ไม่สามารถลบใบขอซื้อที่ถูกแปลงเป็นใบสั่งซื้อแล้ว' },
         { status: 400 }
-      )
+      );
     }
 
     // Delete PR (cascade will delete lines)
     await prisma.purchaseRequest.delete({
       where: { id: id },
-    })
+    });
 
     return NextResponse.json({
       success: true,
       message: 'ลบใบขอซื้อสำเร็จ',
-    })
+    });
   } catch (error) {
-    console.error('Purchase Request Deletion Error:', error)
+    console.error('Purchase Request Deletion Error:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการลบใบขอซื้อ',
       },
       { status: 500 }
-    )
+    );
   }
 }
 
 // POST /api/purchase-requests/[id]/approve - Approval workflow
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     // Only ADMIN and ACCOUNTANT can approve
@@ -371,7 +342,7 @@ export async function POST(
       return NextResponse.json(
         { success: false, error: 'ไม่มีสิทธิ์อนุมัติใบขอซื้อ' },
         { status: 403 }
-      )
+      );
     }
 
     // Check if PR exists
@@ -380,19 +351,16 @@ export async function POST(
       include: {
         lines: true,
       },
-    })
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบใบขอซื้อ' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบใบขอซื้อ' }, { status: 404 });
     }
 
-    const body = await request.json()
-    const { action, approvalNotes, lines } = approvalSchema.parse(body)
+    const body = await request.json();
+    const { action, approvalNotes, lines } = approvalSchema.parse(body);
 
-    const now = new Date()
+    const now = new Date();
 
     switch (action) {
       case 'submit':
@@ -400,7 +368,7 @@ export async function POST(
           return NextResponse.json(
             { success: false, error: 'สามารถส่งอนุมัติเฉพาะใบขอซื้อที่มีสถานะร่างเท่านั้น' },
             { status: 400 }
-          )
+          );
         }
 
         await prisma.purchaseRequest.update({
@@ -409,16 +377,16 @@ export async function POST(
             status: 'PENDING',
             submittedAt: now,
           },
-        })
+        });
 
-        break
+        break;
 
       case 'approve':
         if (existing.status !== 'PENDING') {
           return NextResponse.json(
             { success: false, error: 'สามารถอนุมัติเฉพาะใบขอซื้อที่มีสถานะรออนุมัติเท่านั้น' },
             { status: 400 }
-          )
+          );
         }
 
         await prisma.purchaseRequest.update({
@@ -429,16 +397,16 @@ export async function POST(
             approvedAt: now,
             approvalNotes,
           },
-        })
+        });
 
-        break
+        break;
 
       case 'reject':
         if (existing.status !== 'PENDING') {
           return NextResponse.json(
             { success: false, error: 'สามารถปฏิเสธเฉพาะใบขอซื้อที่มีสถานะรออนุมัติเท่านั้น' },
             { status: 400 }
-          )
+          );
         }
 
         await prisma.purchaseRequest.update({
@@ -449,16 +417,16 @@ export async function POST(
             approvedAt: now,
             approvalNotes,
           },
-        })
+        });
 
-        break
+        break;
 
       case 'cancel':
         if (existing.status === 'CONVERTED') {
           return NextResponse.json(
             { success: false, error: 'ไม่สามารถยกเลิกใบขอซื้อที่ถูกแปลงเป็นใบสั่งซื้อแล้ว' },
             { status: 400 }
-          )
+          );
         }
 
         await prisma.purchaseRequest.update({
@@ -466,17 +434,17 @@ export async function POST(
           data: {
             status: 'CANCELLED',
           },
-        })
+        });
 
-        break
+        break;
     }
 
     return NextResponse.json({
       success: true,
       message: `ดำเนินการสำเร็จ`,
-    })
+    });
   } catch (error) {
-    console.error('Purchase Request Approval Error:', error)
+    console.error('Purchase Request Approval Error:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -486,7 +454,7 @@ export async function POST(
           details: error.issues,
         },
         { status: 400 }
-      )
+      );
     }
 
     return NextResponse.json(
@@ -495,6 +463,6 @@ export async function POST(
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการดำเนินการ',
       },
       { status: 500 }
-    )
+    );
   }
 }

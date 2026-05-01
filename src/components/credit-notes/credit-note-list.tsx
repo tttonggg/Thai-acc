@@ -1,21 +1,13 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Eye,
-  FileText,
-  Loader2
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useState, useEffect } from 'react';
+import { Plus, Search, Edit, Trash2, Eye, FileText, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
@@ -23,134 +15,135 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { CreditNoteForm } from './credit-note-form'
-import { CreditNoteViewDialog } from './credit-note-view-dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { useToast } from '@/hooks/use-toast'
-import { getStatusBadgeProps } from '@/lib/status-badge'
+} from '@/components/ui/select';
+import { CreditNoteForm } from './credit-note-form';
+import { CreditNoteViewDialog } from './credit-note-view-dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import { getStatusBadgeProps } from '@/lib/status-badge';
 
 interface CreditNote {
-  id: string
-  creditNoteNo: string
-  creditNoteDate: string
-  customer: { id: string; name: string }
-  invoice?: { id: string; invoiceNo: string }
-  reason: string
-  subtotal: number
-  vatAmount: number
-  totalAmount: number
-  status: string
-  notes?: string
+  id: string;
+  creditNoteNo: string;
+  creditNoteDate: string;
+  customer: { id: string; name: string };
+  invoice?: { id: string; invoiceNo: string };
+  reason: string;
+  subtotal: number;
+  vatAmount: number;
+  totalAmount: number;
+  status: string;
+  notes?: string;
 }
 
 const statusLabels: Record<string, string> = {
   ISSUED: 'ออกแล้ว',
   CANCELLED: 'ยกเลิก',
-}
+};
 
 // Helper function to get status badge
 const getStatusBadge = (status: string) => {
-  const config = getStatusBadgeProps(status)
-  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>
-}
+  const config = getStatusBadgeProps(status);
+  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>;
+};
 
 const reasonLabels: Record<string, string> = {
   RETURN: 'คืนสินค้า',
   DISCOUNT: 'ส่วนลด',
   ALLOWANCE: 'ค่าเสียโอกาส',
   CANCELLATION: 'ยกเลิก',
-}
+};
 
 export function CreditNoteList() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [refreshKey, setRefreshKey] = useState(0)
-  const [viewCreditNoteId, setViewCreditNoteId] = useState<string | null>(null)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [creditNotes, setCreditNotes] = useState<CreditNote[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const { toast } = useToast()
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [viewCreditNoteId, setViewCreditNoteId] = useState<string | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [creditNotes, setCreditNotes] = useState<CreditNote[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchCreditNotes = async () => {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
       try {
-        const res = await fetch(`/api/credit-notes`, { credentials: 'include' })
-        if (!res.ok) throw new Error('Fetch failed')
-        const result = await res.json()
+        const res = await fetch(`/api/credit-notes`, { credentials: 'include' });
+        if (!res.ok) throw new Error('Fetch failed');
+        const result = await res.json();
         // API returns { success: true, data: [...], pagination: {...} }
         if (result.success && result.data) {
-          setCreditNotes(Array.isArray(result.data) ? result.data : [])
+          setCreditNotes(Array.isArray(result.data) ? result.data : []);
         } else {
-          setCreditNotes([])
+          setCreditNotes([]);
         }
       } catch (err) {
-        console.error('Credit Notes Fetch Error:', err)
-        const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล'
-        setError(message)
+        console.error('Credit Notes Fetch Error:', err);
+        const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล';
+        setError(message);
         toast({
           title: 'ข้อผิดพลาด',
           description: message,
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchCreditNotes()
-  }, [refreshKey, toast])
+    };
+    fetchCreditNotes();
+  }, [refreshKey, toast]);
 
-  const filteredCreditNotes = (creditNotes || []).filter(cn => {
-    if (!cn || typeof cn !== 'object') return false
+  const filteredCreditNotes = (creditNotes || []).filter((cn) => {
+    if (!cn || typeof cn !== 'object') return false;
 
-    const matchesSearch = cn.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          cn.creditNoteNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          cn.invoice?.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus === 'all' || cn.status === filterStatus
-    return matchesSearch && matchesStatus
-  })
+    const matchesSearch =
+      cn.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cn.creditNoteNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cn.invoice?.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || cn.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   const handleCreditNoteSuccess = () => {
-    setRefreshKey(prev => prev + 1)
-    setIsAddDialogOpen(false)
-  }
+    setRefreshKey((prev) => prev + 1);
+    setIsAddDialogOpen(false);
+  };
 
   const handleView = (creditNoteId: string) => {
-    setViewCreditNoteId(creditNoteId)
-    setIsViewDialogOpen(true)
-  }
+    setViewCreditNoteId(creditNoteId);
+    setIsViewDialogOpen(true);
+  };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleDateString('th-TH', {
       day: '2-digit',
       month: '2-digit',
       year: '2-digit',
-    })
-  }
+    });
+  };
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="mb-2 h-8 w-48" />
             <Skeleton className="h-5 w-80" />
           </div>
           <Skeleton className="h-10 w-40" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardContent className="p-4">
@@ -161,12 +154,12 @@ export function CreditNoteList() {
         </div>
         <Card>
           <CardContent className="p-4">
-            <Skeleton className="h-12 w-full mb-4" />
+            <Skeleton className="mb-4 h-12 w-full" />
             <Skeleton className="h-64 w-full" />
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -174,7 +167,7 @@ export function CreditNoteList() {
       <Alert variant="destructive">
         <AlertDescription>{error}</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   if (!creditNotes || creditNotes.length === 0) {
@@ -183,13 +176,10 @@ export function CreditNoteList() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">ใบลดหนี้ (Credit Notes)</h1>
-            <p className="text-gray-500 mt-1">จัดการใบลดหนี้สำหรับลูกค้า</p>
+            <p className="mt-1 text-gray-500">จัดการใบลดหนี้สำหรับลูกค้า</p>
           </div>
-          <Button
-            className="bg-red-600 hover:bg-red-700"
-            onClick={() => setIsAddDialogOpen(true)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
+          <Button className="bg-red-600 hover:bg-red-700" onClick={() => setIsAddDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
             สร้างใบลดหนี้
           </Button>
         </div>
@@ -202,22 +192,24 @@ export function CreditNoteList() {
           onSuccess={handleCreditNoteSuccess}
         />
       </div>
-    )
+    );
   }
 
   const totalCreditAmount = creditNotes
-    .filter(cn => cn.status === 'ISSUED')
-    .reduce((sum, cn) => sum + (cn.totalAmount || 0), 0)
+    .filter((cn) => cn.status === 'ISSUED')
+    .reduce((sum, cn) => sum + (cn.totalAmount || 0), 0);
 
   const thisMonthCreditAmount = creditNotes
-    .filter(cn => {
-      const cnDate = new Date(cn.creditNoteDate)
-      const now = new Date()
-      return cn.status === 'ISSUED' &&
-             cnDate.getMonth() === now.getMonth() &&
-             cnDate.getFullYear() === now.getFullYear()
+    .filter((cn) => {
+      const cnDate = new Date(cn.creditNoteDate);
+      const now = new Date();
+      return (
+        cn.status === 'ISSUED' &&
+        cnDate.getMonth() === now.getMonth() &&
+        cnDate.getFullYear() === now.getFullYear()
+      );
     })
-    .reduce((sum, cn) => sum + (cn.totalAmount || 0), 0)
+    .reduce((sum, cn) => sum + (cn.totalAmount || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -225,19 +217,16 @@ export function CreditNoteList() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">ใบลดหนี้ (Credit Notes)</h1>
-          <p className="text-gray-500 mt-1">จัดการใบลดหนี้สำหรับลูกค้า</p>
+          <p className="mt-1 text-gray-500">จัดการใบลดหนี้สำหรับลูกค้า</p>
         </div>
-        <Button
-          className="bg-red-600 hover:bg-red-700"
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
+        <Button className="bg-red-600 hover:bg-red-700" onClick={() => setIsAddDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
           สร้างใบลดหนี้
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">ใบลดหนี้ทั้งหมด</p>
@@ -255,7 +244,9 @@ export function CreditNoteList() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-gray-500">มูลค่าใบลดหนี้ (เดือนนี้)</p>
-            <p className="text-2xl font-bold text-orange-600">฿{thisMonthCreditAmount.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-orange-600">
+              ฿{thisMonthCreditAmount.toLocaleString()}
+            </p>
             <p className="text-xs text-gray-400">เดือนนี้</p>
           </CardContent>
         </Card>
@@ -264,9 +255,9 @@ export function CreditNoteList() {
       {/* Search & Filter */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="ค้นหาตามชื่อลูกค้า, เลขที่เอกสาร..."
                 className="pl-10"
@@ -315,14 +306,16 @@ export function CreditNoteList() {
                     <TableCell>{cn.customerName || '-'}</TableCell>
                     <TableCell className="font-mono">{cn.invoice?.invoiceNo || '-'}</TableCell>
                     <TableCell>{reasonLabels[cn.reason] || cn.reason}</TableCell>
-                    <TableCell className="text-right">฿{(cn.subtotal ?? 0).toLocaleString()}</TableCell>
-                    <TableCell className="text-right">฿{(cn.vatAmount ?? 0).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">
+                      ฿{(cn.subtotal ?? 0).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      ฿{(cn.vatAmount ?? 0).toLocaleString()}
+                    </TableCell>
                     <TableCell className="text-right font-semibold text-red-600">
                       -฿{(cn.totalAmount ?? 0).toLocaleString()}
                     </TableCell>
-                    <TableCell>
-                      {getStatusBadge(cn.status)}
-                    </TableCell>
+                    <TableCell>{getStatusBadge(cn.status)}</TableCell>
                     <TableCell>
                       <div className="flex justify-center gap-1">
                         <Button
@@ -358,5 +351,5 @@ export function CreditNoteList() {
         />
       )}
     </div>
-  )
+  );
 }

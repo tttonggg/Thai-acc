@@ -1,93 +1,109 @@
-'use client'
+'use client';
 
-import { useAuthStore } from '@/stores/auth-store'
-import { useSession } from 'next-auth/react'
+import { useAuthStore } from '@/stores/auth-store';
+import { useSession } from 'next-auth/react';
 
 // Legacy support: PermissionKey for old PERMISSIONS system
-type PermissionKey = string
+type PermissionKey = string;
 
 interface PermissionGuardProps {
   // Either legacy permission key OR module/action pair
-  permission?: PermissionKey
-  module?: string
-  action?: string
-  children: React.ReactNode
-  fallback?: React.ReactNode
+  permission?: PermissionKey;
+  module?: string;
+  action?: string;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
 }
 
-export function PermissionGuard({ permission, module, action, children, fallback }: PermissionGuardProps) {
-  const { data: session } = useSession()
-  const user = useAuthStore((state) => state.user)
-  const storeHasPermission = useAuthStore((state) => state.hasPermission)
+export function PermissionGuard({
+  permission,
+  module,
+  action,
+  children,
+  fallback,
+}: PermissionGuardProps) {
+  const { data: session } = useSession();
+  const user = useAuthStore((state) => state.user);
+  const storeHasPermission = useAuthStore((state) => state.hasPermission);
 
   // Use session user role if available, otherwise use store
-  const userRole = (session?.user?.role || user?.role) as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER' | undefined
+  const userRole = (session?.user?.role || user?.role) as
+    | 'ADMIN'
+    | 'ACCOUNTANT'
+    | 'USER'
+    | 'VIEWER'
+    | undefined;
 
   // Check if user is authenticated
   if (!userRole) {
-    return fallback ? <>{fallback}</> : null
+    return fallback ? <>{fallback}</> : null;
   }
 
   // ADMIN bypasses all permission checks
   if (userRole === 'ADMIN') {
-    return <>{children}</>
+    return <>{children}</>;
   }
 
   // New RBAC: module + action check
   if (module && action) {
     if (storeHasPermission(module, action)) {
-      return <>{children}</>
+      return <>{children}</>;
     }
-    return fallback ? <>{fallback}</> : null
+    return fallback ? <>{fallback}</> : null;
   }
 
   // Legacy: permission key check
   if (permission) {
     // Map old permission keys to module.action
     const permMap: Record<string, { module: string; action: string }> = {
-      'INVOICES_CREATE': { module: 'invoice', action: 'create' },
-      'INVOICES_EDIT': { module: 'invoice', action: 'update' },
-      'INVOICES_VIEW': { module: 'invoice', action: 'read' },
-      'JOURNAL_CREATE': { module: 'journal', action: 'create' },
-      'JOURNAL_POST': { module: 'journal', action: 'post' },
-      'REPORTS_VIEW': { module: 'report', action: 'read' },
-      'SETTINGS_VIEW': { module: 'admin', action: 'manage' },
-      'USER_MANAGEMENT': { module: 'admin', action: 'users' },
-    }
+      INVOICES_CREATE: { module: 'invoice', action: 'create' },
+      INVOICES_EDIT: { module: 'invoice', action: 'update' },
+      INVOICES_VIEW: { module: 'invoice', action: 'read' },
+      JOURNAL_CREATE: { module: 'journal', action: 'create' },
+      JOURNAL_POST: { module: 'journal', action: 'post' },
+      REPORTS_VIEW: { module: 'report', action: 'read' },
+      SETTINGS_VIEW: { module: 'admin', action: 'manage' },
+      USER_MANAGEMENT: { module: 'admin', action: 'users' },
+    };
 
-    const mapped = permMap[permission]
+    const mapped = permMap[permission];
     if (mapped && storeHasPermission(mapped.module, mapped.action)) {
-      return <>{children}</>
+      return <>{children}</>;
     }
   }
 
-  return fallback ? <>{fallback}</> : null
+  return fallback ? <>{fallback}</> : null;
 }
 
 interface RoleGuardProps {
-  minimumRole: 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER'
-  children: React.ReactNode
-  fallback?: React.ReactNode
+  minimumRole: 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER';
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
 }
 
 export function RoleGuard({ minimumRole, children, fallback }: RoleGuardProps) {
-  const { data: session } = useSession()
-  const user = useAuthStore((state) => state.user)
-  
-  const userRole = (session?.user?.role || user?.role) as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER' | undefined
-  
+  const { data: session } = useSession();
+  const user = useAuthStore((state) => state.user);
+
+  const userRole = (session?.user?.role || user?.role) as
+    | 'ADMIN'
+    | 'ACCOUNTANT'
+    | 'USER'
+    | 'VIEWER'
+    | undefined;
+
   const roleHierarchy = {
     ADMIN: 4,
     ACCOUNTANT: 3,
     USER: 2,
     VIEWER: 1,
-  }
-  
+  };
+
   if (!userRole || roleHierarchy[userRole] < roleHierarchy[minimumRole]) {
-    return fallback ? <>{fallback}</> : null
+    return fallback ? <>{fallback}</> : null;
   }
-  
-  return <>{children}</>
+
+  return <>{children}</>;
 }
 
 // HOC for wrapping components with permission check
@@ -104,8 +120,8 @@ export function withPermission<P extends object>(
       >
         <WrappedComponent {...props} />
       </PermissionGuard>
-    )
-  }
+    );
+  };
 }
 
 // HOC with module + action
@@ -124,6 +140,6 @@ export function withPermissionMA<P extends object>(
       >
         <WrappedComponent {...props} />
       </PermissionGuard>
-    )
-  }
+    );
+  };
 }

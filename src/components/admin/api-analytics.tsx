@@ -5,19 +5,32 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { 
-  Activity, 
-  Clock, 
-  AlertTriangle, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Activity,
+  Clock,
+  AlertTriangle,
   TrendingUp,
   Users,
   Server,
   RefreshCw,
   Download,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -85,28 +98,36 @@ export function ApiAnalytics() {
     setLoading(true);
     try {
       // Fetch overview metrics
-      const metricsRes = await fetch(`/api/admin/analytics?range=${timeRange}&type=overview`, { credentials: 'include' });
+      const metricsRes = await fetch(`/api/admin/analytics?range=${timeRange}&type=overview`, {
+        credentials: 'include',
+      });
       const metricsData = await metricsRes.json();
       if (metricsData.success) {
         setMetrics(metricsData.data);
       }
 
       // Fetch recent requests
-      const recentRes = await fetch(`/api/admin/analytics?type=recent&limit=50`, { credentials: 'include' });
+      const recentRes = await fetch(`/api/admin/analytics?type=recent&limit=50`, {
+        credentials: 'include',
+      });
       const recentData = await recentRes.json();
       if (recentData.success) {
         setRecentRequests(recentData.data);
       }
 
       // Fetch slow requests
-      const slowRes = await fetch(`/api/admin/analytics?type=slow&threshold=1000&limit=20`, { credentials: 'include' });
+      const slowRes = await fetch(`/api/admin/analytics?type=slow&threshold=1000&limit=20`, {
+        credentials: 'include',
+      });
       const slowData = await slowRes.json();
       if (slowData.success) {
         setSlowRequests(slowData.data);
       }
 
       // Fetch error requests
-      const errorRes = await fetch(`/api/admin/analytics?type=errors&limit=20`, { credentials: 'include' });
+      const errorRes = await fetch(`/api/admin/analytics?type=errors&limit=20`, {
+        credentials: 'include',
+      });
       const errorData = await errorRes.json();
       if (errorData.success) {
         setErrorRequests(errorData.data);
@@ -140,18 +161,23 @@ export function ApiAnalytics() {
 
   const getMethodColor = (method: string) => {
     switch (method) {
-      case 'GET': return 'bg-blue-100 text-blue-800';
-      case 'POST': return 'bg-green-100 text-green-800';
-      case 'PUT': return 'bg-yellow-100 text-yellow-800';
-      case 'DELETE': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'GET':
+        return 'bg-blue-100 text-blue-800';
+      case 'POST':
+        return 'bg-green-100 text-green-800';
+      case 'PUT':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'DELETE':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="flex h-64 items-center justify-center">
+        <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -176,7 +202,7 @@ export function ApiAnalytics() {
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={fetchData}>
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -184,7 +210,7 @@ export function ApiAnalytics() {
       {metrics && (
         <>
           {/* Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -195,7 +221,7 @@ export function ApiAnalytics() {
                       {formatNumber(metrics.requestsPerMinute)}/min
                     </p>
                   </div>
-                  <Activity className="w-8 h-8 text-blue-500" />
+                  <Activity className="h-8 w-8 text-blue-500" />
                 </div>
               </CardContent>
             </Card>
@@ -205,24 +231,24 @@ export function ApiAnalytics() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-500">Error Rate</p>
-                    <p className="text-3xl font-bold">
-                      {(metrics.errorRate * 100).toFixed(2)}%
-                    </p>
+                    <p className="text-3xl font-bold">{(metrics.errorRate * 100).toFixed(2)}%</p>
                     <p className="text-sm text-gray-500">
                       {metrics.errorRate > 0.05 ? (
-                        <span className="text-red-500 flex items-center gap-1">
-                          <ArrowUpRight className="w-3 h-3" />
+                        <span className="flex items-center gap-1 text-red-500">
+                          <ArrowUpRight className="h-3 w-3" />
                           High
                         </span>
                       ) : (
-                        <span className="text-green-500 flex items-center gap-1">
-                          <ArrowDownRight className="w-3 h-3" />
+                        <span className="flex items-center gap-1 text-green-500">
+                          <ArrowDownRight className="h-3 w-3" />
                           Normal
                         </span>
                       )}
                     </p>
                   </div>
-                  <AlertTriangle className={`w-8 h-8 ${metrics.errorRate > 0.05 ? 'text-red-500' : 'text-green-500'}`} />
+                  <AlertTriangle
+                    className={`h-8 w-8 ${metrics.errorRate > 0.05 ? 'text-red-500' : 'text-green-500'}`}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -233,11 +259,9 @@ export function ApiAnalytics() {
                   <div>
                     <p className="text-sm text-gray-500">Avg Response Time</p>
                     <p className="text-3xl font-bold">{formatDuration(metrics.averageDuration)}</p>
-                    <p className="text-sm text-gray-500">
-                      p95: {formatDuration(metrics.p95)}
-                    </p>
+                    <p className="text-sm text-gray-500">p95: {formatDuration(metrics.p95)}</p>
                   </div>
-                  <Clock className="w-8 h-8 text-yellow-500" />
+                  <Clock className="h-8 w-8 text-yellow-500" />
                 </div>
               </CardContent>
             </Card>
@@ -248,11 +272,9 @@ export function ApiAnalytics() {
                   <div>
                     <p className="text-sm text-gray-500">Active Users</p>
                     <p className="text-3xl font-bold">{formatNumber(metrics.topUsers.length)}</p>
-                    <p className="text-sm text-gray-500">
-                      Unique API consumers
-                    </p>
+                    <p className="text-sm text-gray-500">Unique API consumers</p>
                   </div>
-                  <Users className="w-8 h-8 text-purple-500" />
+                  <Users className="h-8 w-8 text-purple-500" />
                 </div>
               </CardContent>
             </Card>
@@ -266,17 +288,17 @@ export function ApiAnalytics() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="rounded-lg bg-gray-50 p-4 text-center">
                   <p className="text-sm text-gray-500">p50 (Median)</p>
                   <p className="text-2xl font-bold">{formatDuration(metrics.p50)}</p>
                   <p className="text-xs text-gray-400">50% of requests</p>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="rounded-lg bg-gray-50 p-4 text-center">
                   <p className="text-sm text-gray-500">p95</p>
                   <p className="text-2xl font-bold">{formatDuration(metrics.p95)}</p>
                   <p className="text-xs text-gray-400">95% of requests</p>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="rounded-lg bg-gray-50 p-4 text-center">
                   <p className="text-sm text-gray-500">p99</p>
                   <p className="text-2xl font-bold">{formatDuration(metrics.p99)}</p>
                   <p className="text-xs text-gray-400">99% of requests</p>
@@ -315,17 +337,11 @@ export function ApiAnalytics() {
                     <TableBody>
                       {recentRequests.slice(0, 20).map((req) => (
                         <TableRow key={req.id}>
+                          <TableCell>{new Date(req.timestamp).toLocaleTimeString()}</TableCell>
                           <TableCell>
-                            {new Date(req.timestamp).toLocaleTimeString()}
+                            <Badge className={getMethodColor(req.method)}>{req.method}</Badge>
                           </TableCell>
-                          <TableCell>
-                            <Badge className={getMethodColor(req.method)}>
-                              {req.method}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {req.path}
-                          </TableCell>
+                          <TableCell className="font-mono text-sm">{req.path}</TableCell>
                           <TableCell>
                             <Badge className={getStatusColor(req.statusCode)}>
                               {req.statusCode}
@@ -360,18 +376,12 @@ export function ApiAnalytics() {
                     <TableBody>
                       {slowRequests.map((req) => (
                         <TableRow key={req.id} className="bg-yellow-50">
+                          <TableCell>{new Date(req.timestamp).toLocaleTimeString()}</TableCell>
                           <TableCell>
-                            {new Date(req.timestamp).toLocaleTimeString()}
+                            <Badge className={getMethodColor(req.method)}>{req.method}</Badge>
                           </TableCell>
-                          <TableCell>
-                            <Badge className={getMethodColor(req.method)}>
-                              {req.method}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {req.path}
-                          </TableCell>
-                          <TableCell className="text-red-600 font-medium">
+                          <TableCell className="font-mono text-sm">{req.path}</TableCell>
+                          <TableCell className="font-medium text-red-600">
                             {formatDuration(req.duration)}
                           </TableCell>
                           <TableCell>
@@ -413,23 +423,17 @@ export function ApiAnalytics() {
                     <TableBody>
                       {errorRequests.map((req) => (
                         <TableRow key={req.id} className="bg-red-50">
+                          <TableCell>{new Date(req.timestamp).toLocaleTimeString()}</TableCell>
                           <TableCell>
-                            {new Date(req.timestamp).toLocaleTimeString()}
+                            <Badge className={getMethodColor(req.method)}>{req.method}</Badge>
                           </TableCell>
-                          <TableCell>
-                            <Badge className={getMethodColor(req.method)}>
-                              {req.method}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {req.path}
-                          </TableCell>
+                          <TableCell className="font-mono text-sm">{req.path}</TableCell>
                           <TableCell>
                             <Badge className={getStatusColor(req.statusCode)}>
                               {req.statusCode}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-red-600 text-sm">
+                          <TableCell className="text-sm text-red-600">
                             {req.error || 'Unknown error'}
                           </TableCell>
                         </TableRow>
@@ -465,13 +469,13 @@ export function ApiAnalytics() {
                     <TableBody>
                       {metrics.topPaths.map((path) => (
                         <TableRow key={path.path}>
-                          <TableCell className="font-mono text-sm">
-                            {path.path}
-                          </TableCell>
+                          <TableCell className="font-mono text-sm">{path.path}</TableCell>
                           <TableCell>{formatNumber(path.requestCount)}</TableCell>
                           <TableCell>{formatDuration(path.averageDuration)}</TableCell>
                           <TableCell>
-                            <span className={path.errorRate > 0.05 ? 'text-red-600' : 'text-green-600'}>
+                            <span
+                              className={path.errorRate > 0.05 ? 'text-red-600' : 'text-green-600'}
+                            >
                               {(path.errorRate * 100).toFixed(2)}%
                             </span>
                           </TableCell>

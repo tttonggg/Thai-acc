@@ -3,22 +3,19 @@
  * เส้นทาง API สำหรับส่งออกใบเสร็จรับเงินเป็น PDF
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/api-utils'
-import { prisma } from '@/lib/db'
-import { formatThaiDate, formatCurrency } from '@/lib/thai-accounting'
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-utils';
+import { prisma } from '@/lib/db';
+import { formatThaiDate, formatCurrency } from '@/lib/thai-accounting';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
+    const user = await requireAuth();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await params
+    const { id } = await params;
 
     // Fetch receipt with all related data
     const receipt = await prisma.receipt.findUnique({
@@ -28,34 +25,37 @@ export async function GET(
         bankAccount: true,
         allocations: {
           include: {
-            invoice: true
-          }
-        }
-      }
-    })
+            invoice: true,
+          },
+        },
+      },
+    });
 
     if (!receipt) {
-      return NextResponse.json({ error: 'Receipt not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Receipt not found' }, { status: 404 });
     }
 
     // Get company info
-    const company = await prisma.company.findFirst()
+    const company = await prisma.company.findFirst();
 
     // Generate simple HTML for PDF
-    const html = generateReceiptHTML(receipt, company)
+    const html = generateReceiptHTML(receipt, company);
 
     // Return HTML (for now - you can integrate with a PDF library later)
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-      }
-    })
+      },
+    });
   } catch (error) {
-    console.error('Error generating receipt PDF:', error)
+    console.error('Error generating receipt PDF:', error);
     return NextResponse.json(
-      { error: 'Failed to generate PDF', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to generate PDF',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -66,10 +66,13 @@ function generateReceiptHTML(receipt: any, company: any) {
     TRANSFER: 'โอนเงิน',
     CREDIT: 'บัตรเครดิต',
     OTHER: 'อื่นๆ',
-  }
+  };
 
-  const totalAllocated = receipt.allocations.reduce((sum: number, alloc: any) => sum + alloc.amount, 0)
-  const totalWht = receipt.whtAmount
+  const totalAllocated = receipt.allocations.reduce(
+    (sum: number, alloc: any) => sum + alloc.amount,
+    0
+  );
+  const totalWht = receipt.whtAmount;
 
   return `
 <!DOCTYPE html>
@@ -140,27 +143,41 @@ function generateReceiptHTML(receipt: any, company: any) {
         <div class="info-label">วิธีการชำระเงิน</div>
         <div class="info-value">${paymentMethodLabels[receipt.paymentMethod]}</div>
       </div>
-      ${receipt.bankAccount ? `
+      ${
+        receipt.bankAccount
+          ? `
       <div class="info-group">
         <div class="info-label">บัญชีธนาคาร</div>
         <div class="info-value">${receipt.bankAccount.bankName} - ${receipt.bankAccount.accountNumber}</div>
       </div>
-      ` : ''}
-      ${receipt.chequeNo ? `
+      `
+          : ''
+      }
+      ${
+        receipt.chequeNo
+          ? `
       <div class="info-group">
         <div class="info-label">เลขที่เช็ค</div>
         <div class="info-value">${receipt.chequeNo}</div>
       </div>
-      ` : ''}
-      ${receipt.chequeDate ? `
+      `
+          : ''
+      }
+      ${
+        receipt.chequeDate
+          ? `
       <div class="info-group">
         <div class="info-label">วันที่เช็ค</div>
         <div class="info-value">${formatThaiDate(receipt.chequeDate)}</div>
       </div>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
 
-    ${receipt.allocations.length > 0 ? `
+    ${
+      receipt.allocations.length > 0
+        ? `
     <div class="allocations">
       <h3 style="margin-bottom: 15px;">รายการจัดจ่าย</h3>
       <table>
@@ -174,7 +191,9 @@ function generateReceiptHTML(receipt: any, company: any) {
           </tr>
         </thead>
         <tbody>
-          ${receipt.allocations.map((alloc: any) => `
+          ${receipt.allocations
+            .map(
+              (alloc: any) => `
           <tr>
             <td>${alloc.invoice.invoiceNo}</td>
             <td class="text-right">${formatThaiDate(alloc.invoice.invoiceDate)}</td>
@@ -182,47 +201,67 @@ function generateReceiptHTML(receipt: any, company: any) {
             <td class="text-right">${formatCurrency(alloc.amount)}</td>
             <td class="text-right">${alloc.whtRate}% (${formatCurrency(alloc.whtAmount)})</td>
           </tr>
-          `).join('')}
+          `
+            )
+            .join('')}
         </tbody>
       </table>
     </div>
-    ` : ''}
+    `
+        : ''
+    }
 
     <div class="total-section">
       <div class="total-row">
         <span>ยอดรับเงินรวม</span>
         <span>${formatCurrency(receipt.amount)}</span>
       </div>
-      ${totalAllocated > 0 ? `
+      ${
+        totalAllocated > 0
+          ? `
       <div class="total-row">
         <span>จัดจ่ายใบกำกับภาษี</span>
         <span>${formatCurrency(totalAllocated)}</span>
       </div>
-      ` : ''}
-      ${totalWht > 0 ? `
+      `
+          : ''
+      }
+      ${
+        totalWht > 0
+          ? `
       <div class="total-row">
         <span>ภาษีหัก ณ ที่จ่าย</span>
         <span>${formatCurrency(totalWht)}</span>
       </div>
-      ` : ''}
-      ${receipt.unallocated > 0 ? `
+      `
+          : ''
+      }
+      ${
+        receipt.unallocated > 0
+          ? `
       <div class="total-row">
         <span>เครดิตคงเหลือ</span>
         <span>${formatCurrency(receipt.unallocated)}</span>
       </div>
-      ` : ''}
+      `
+          : ''
+      }
       <div class="total-row grand-total">
         <span>ยอดสุทธิ</span>
         <span>${formatCurrency(receipt.amount)}</span>
       </div>
     </div>
 
-    ${receipt.notes ? `
+    ${
+      receipt.notes
+        ? `
     <div style="margin-top: 30px; padding: 15px; background: #fffbe6; border-left: 4px solid #ffc107;">
       <div style="font-weight: bold; margin-bottom: 5px;">หมายเหตุ</div>
       <div>${receipt.notes}</div>
     </div>
-    ` : ''}
+    `
+        : ''
+    }
 
     <div class="footer">
       <div>พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')}</div>
@@ -231,5 +270,5 @@ function generateReceiptHTML(receipt: any, company: any) {
   </div>
 </body>
 </html>
-  `
+  `;
 }

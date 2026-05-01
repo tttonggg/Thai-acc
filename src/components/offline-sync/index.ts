@@ -3,9 +3,6 @@ export {
   useOfflineSync,
   SyncStatus,
   ConflictResolver,
-} from './offline-sync-provider'
+} from './offline-sync-provider';
 
-export type {
-  PendingChange,
-  Conflict,
-} from './offline-sync-provider'
+export type { PendingChange, Conflict } from './offline-sync-provider';

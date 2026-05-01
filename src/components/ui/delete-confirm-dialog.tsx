@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,18 +10,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { Loader2 } from 'lucide-react'
+} from '@/components/ui/alert-dialog';
+import { Loader2 } from 'lucide-react';
 
 export interface DeleteConfirmDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title?: string
-  message?: string
-  confirmLabel?: string
-  cancelLabel?: string
-  onConfirm: () => void | Promise<void>
-  loading?: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title?: string;
+  message?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm: () => void | Promise<void>;
+  loading?: boolean;
 }
 
 export function DeleteConfirmDialog({
@@ -35,12 +35,15 @@ export function DeleteConfirmDialog({
   loading = false,
 }: DeleteConfirmDialogProps) {
   const handleConfirm = async () => {
-    await onConfirm()
-  }
+    await onConfirm();
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description">
+      <AlertDialogContent
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
         <AlertDialogHeader>
           <AlertDialogTitle id="delete-dialog-title">{title}</AlertDialogTitle>
           <AlertDialogDescription id="delete-dialog-description">{message}</AlertDialogDescription>
@@ -67,5 +70,5 @@ export function DeleteConfirmDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

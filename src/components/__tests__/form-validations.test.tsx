@@ -3,10 +3,10 @@
  * Tests for form validations across all major components
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { z } from 'zod'
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { z } from 'zod';
 
 // Import validation schemas
 import {
@@ -16,7 +16,7 @@ import {
   vendorSchema,
   productSchema,
   paymentSchema,
-} from '@/lib/validations'
+} from '@/lib/validations';
 
 describe('Form Validation Schemas', () => {
   describe('Invoice Schema', () => {
@@ -33,11 +33,11 @@ describe('Form Validation Schemas', () => {
             unitPrice: 1000,
           },
         ],
-      }
+      };
 
-      const result = invoiceSchema.safeParse(validData)
-      expect(result.success).toBe(true)
-    })
+      const result = invoiceSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+    });
 
     it('should reject invoice without customer', () => {
       const invalidData = {
@@ -47,11 +47,11 @@ describe('Form Validation Schemas', () => {
         items: [],
         subtotal: 0,
         totalAmount: 0,
-      }
+      };
 
-      const result = invoiceSchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
+      const result = invoiceSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
 
     it('should reject negative amounts', () => {
       const invalidData = {
@@ -66,11 +66,11 @@ describe('Form Validation Schemas', () => {
             unitPrice: -1000,
           },
         ],
-      }
+      };
 
-      const result = invoiceSchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
+      const result = invoiceSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
 
     it('should reject due date before invoice date', () => {
       const invalidData = {
@@ -80,25 +80,23 @@ describe('Form Validation Schemas', () => {
         items: [],
         subtotal: 0,
         totalAmount: 0,
-      }
+      };
 
-      const result = invoiceSchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
+      const result = invoiceSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
 
     it('should validate VAT calculation', () => {
       const data = {
         customerId: 'cust-1',
         invoiceDate: new Date(),
         dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        lines: [
-          { description: 'Product 1', productId: 'prod-1', quantity: 1, unitPrice: 1000 },
-        ],
-      }
+        lines: [{ description: 'Product 1', productId: 'prod-1', quantity: 1, unitPrice: 1000 }],
+      };
 
-      const result = invoiceSchema.safeParse(data)
-      expect(result.success).toBe(true)
-    })
+      const result = invoiceSchema.safeParse(data);
+      expect(result.success).toBe(true);
+    });
 
     it('should validate withholding tax fields', () => {
       const data = {
@@ -107,12 +105,12 @@ describe('Form Validation Schemas', () => {
         dueDate: new Date(),
         lines: [{ description: 'Product 1', productId: 'prod-1', quantity: 1, unitPrice: 100000 }],
         withholdingRate: 3,
-      }
+      };
 
-      const result = invoiceSchema.safeParse(data)
-      expect(result.success).toBe(true)
-    })
-  })
+      const result = invoiceSchema.safeParse(data);
+      expect(result.success).toBe(true);
+    });
+  });
 
   describe('Journal Entry Schema', () => {
     it('should validate balanced journal entry', () => {
@@ -123,11 +121,11 @@ describe('Form Validation Schemas', () => {
           { accountId: 'acc-1', debit: 1000, credit: 0 },
           { accountId: 'acc-2', debit: 0, credit: 1000 },
         ],
-      }
+      };
 
-      const result = journalEntrySchema.safeParse(validData)
-      expect(result.success).toBe(true)
-    })
+      const result = journalEntrySchema.safeParse(validData);
+      expect(result.success).toBe(true);
+    });
 
     it('should reject unbalanced journal entry', () => {
       const invalidData = {
@@ -137,23 +135,23 @@ describe('Form Validation Schemas', () => {
           { accountId: 'acc-1', debit: 1000, credit: 0 },
           { accountId: 'acc-2', debit: 0, credit: 900 },
         ],
-      }
+      };
 
-      const result = journalEntrySchema.safeParse(invalidData)
+      const result = journalEntrySchema.safeParse(invalidData);
       // Schema does not validate balance, only structure
-      expect(result.success).toBe(true)
-    })
+      expect(result.success).toBe(true);
+    });
 
     it('should reject entry with less than 2 lines', () => {
       const invalidData = {
         date: new Date(),
         description: 'Single line entry',
         lines: [{ accountId: 'acc-1', debit: 1000, credit: 0 }],
-      }
+      };
 
-      const result = journalEntrySchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
+      const result = journalEntrySchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
 
     it('should reject entry without description', () => {
       const invalidData = {
@@ -163,12 +161,12 @@ describe('Form Validation Schemas', () => {
           { accountId: 'acc-1', debit: 1000, credit: 0 },
           { accountId: 'acc-2', debit: 0, credit: 1000 },
         ],
-      }
+      };
 
-      const result = journalEntrySchema.safeParse(invalidData)
+      const result = journalEntrySchema.safeParse(invalidData);
       // Schema allows optional description
-      expect(result.success).toBe(true)
-    })
+      expect(result.success).toBe(true);
+    });
 
     it('should reject negative debit/credit values', () => {
       const invalidData = {
@@ -178,11 +176,11 @@ describe('Form Validation Schemas', () => {
           { accountId: 'acc-1', debit: -1000, credit: 0 },
           { accountId: 'acc-2', debit: 0, credit: -1000 },
         ],
-      }
+      };
 
-      const result = journalEntrySchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
+      const result = journalEntrySchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
 
     it('should reject line with both debit and credit', () => {
       const invalidData = {
@@ -192,13 +190,13 @@ describe('Form Validation Schemas', () => {
           { accountId: 'acc-1', debit: 1000, credit: 1000 },
           { accountId: 'acc-2', debit: 0, credit: 1000 },
         ],
-      }
+      };
 
-      const result = journalEntrySchema.safeParse(invalidData)
+      const result = journalEntrySchema.safeParse(invalidData);
       // Schema allows both debit and credit on a line (business logic handles validation elsewhere)
-      expect(result.success).toBe(true)
-    })
-  })
+      expect(result.success).toBe(true);
+    });
+  });
 
   describe('Customer Schema', () => {
     it('should validate valid customer data', () => {
@@ -211,58 +209,58 @@ describe('Form Validation Schemas', () => {
         email: 'test@example.com',
         creditLimit: 100000,
         paymentTerms: 30,
-      }
+      };
 
-      const result = customerSchema.safeParse(validData)
-      expect(result.success).toBe(true)
-    })
+      const result = customerSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+    });
 
     it('should reject invalid email format', () => {
       const invalidData = {
         code: 'CUST001',
         name: 'Test Customer',
         email: 'invalid-email',
-      }
+      };
 
-      const result = customerSchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
+      const result = customerSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
 
     it('should reject invalid Thai tax ID length', () => {
       const invalidData = {
         code: 'CUST001',
         name: 'Test Customer',
         taxId: '123456', // Too short - but schema treats taxId as optional without length validation
-      }
+      };
 
-      const result = customerSchema.safeParse(invalidData)
+      const result = customerSchema.safeParse(invalidData);
       // Schema does not validate taxId length (optional field)
-      expect(result.success).toBe(true)
-    })
+      expect(result.success).toBe(true);
+    });
 
     it('should reject negative credit limit', () => {
       const invalidData = {
         code: 'CUST001',
         name: 'Test Customer',
         creditLimit: -1000,
-      }
+      };
 
-      const result = customerSchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
+      const result = customerSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
 
     it('should reject negative payment terms', () => {
       const invalidData = {
         code: 'CUST001',
         name: 'Test Customer',
         creditDays: -5, // Schema uses creditDays, not paymentTerms
-      }
+      };
 
-      const result = customerSchema.safeParse(invalidData)
+      const result = customerSchema.safeParse(invalidData);
       // Schema does validate negative creditDays (min 0)
-      expect(result.success).toBe(false)
-    })
-  })
+      expect(result.success).toBe(false);
+    });
+  });
 
   describe('Product Schema', () => {
     it('should validate valid product data', () => {
@@ -276,22 +274,22 @@ describe('Form Validation Schemas', () => {
         quantity: 100,
         minQuantity: 20,
         vatRate: 7,
-      }
+      };
 
-      const result = productSchema.safeParse(validData)
-      expect(result.success).toBe(true)
-    })
+      const result = productSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+    });
 
     it('should reject negative stock quantity', () => {
       const invalidData = {
         code: 'PROD001',
         name: 'Test Product',
         quantity: -10,
-      }
+      };
 
-      const result = productSchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
+      const result = productSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
 
     it('should reject negative prices', () => {
       const invalidData = {
@@ -299,24 +297,24 @@ describe('Form Validation Schemas', () => {
         name: 'Test Product',
         salePrice: -1000,
         costPrice: -500,
-      }
+      };
 
-      const result = productSchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
+      const result = productSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
 
     it('should validate VAT rate within valid range', () => {
       const invalidData = {
         code: 'PROD001',
         name: 'Test Product',
         vatRate: 25, // Invalid VAT rate - but schema allows 0-100
-      }
+      };
 
-      const result = productSchema.safeParse(invalidData)
+      const result = productSchema.safeParse(invalidData);
       // Schema allows vatRate 0-100, so 25 is valid
-      expect(result.success).toBe(true)
-    })
-  })
+      expect(result.success).toBe(true);
+    });
+  });
 
   describe('Payment Schema', () => {
     it('should validate valid payment data', () => {
@@ -328,14 +326,12 @@ describe('Form Validation Schemas', () => {
         bankAccountId: 'bank-1',
         reference: 'REF001',
         notes: 'Payment for invoice',
-        allocations: [
-          { invoiceId: 'inv-1', amount: 10000 },
-        ],
-      }
+        allocations: [{ invoiceId: 'inv-1', amount: 10000 }],
+      };
 
-      const result = paymentSchema.safeParse(validData)
-      expect(result.success).toBe(true)
-    })
+      const result = paymentSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+    });
 
     it('should reject negative payment amount', () => {
       const invalidData = {
@@ -343,14 +339,12 @@ describe('Form Validation Schemas', () => {
         paymentDate: new Date(),
         amount: -1000,
         paymentMethod: 'CASH',
-        allocations: [
-          { invoiceId: 'inv-1', amount: 10000 },
-        ],
-      }
+        allocations: [{ invoiceId: 'inv-1', amount: 10000 }],
+      };
 
-      const result = paymentSchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
+      const result = paymentSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
 
     // it('should reject zero payment amount', () => {
     //   // KNOWN BUG: paymentSchema accepts amount: 0
@@ -374,16 +368,14 @@ describe('Form Validation Schemas', () => {
         paymentDate: new Date(),
         amount: 1000,
         paymentMethod: '',
-        allocations: [
-          { invoiceId: 'inv-1', amount: 1000 },
-        ],
-      }
+        allocations: [{ invoiceId: 'inv-1', amount: 1000 }],
+      };
 
-      const result = paymentSchema.safeParse(invalidData)
-      expect(result.success).toBe(false)
-    })
-  })
-})
+      const result = paymentSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
+  });
+});
 
 describe('Form Validation Edge Cases', () => {
   it('should handle special characters in text fields', () => {
@@ -391,26 +383,24 @@ describe('Form Validation Edge Cases', () => {
       code: 'CUST-001_TEST',
       name: 'Test & Co. (Thailand) Ltd.',
       description: 'Line 1\nLine 2\tTabbed',
-    }
+    };
 
     // Should not throw errors
-    expect(() => customerSchema.safeParse(data)).not.toThrow()
-  })
+    expect(() => customerSchema.safeParse(data)).not.toThrow();
+  });
 
   it('should handle very large numbers', () => {
     const data = {
       customerId: 'cust-1',
       invoiceDate: new Date(),
       dueDate: new Date(),
-      lines: [
-        { description: 'Product', productId: 'prod-1', quantity: 1, unitPrice: 999999999 },
-      ],
-    }
+      lines: [{ description: 'Product', productId: 'prod-1', quantity: 1, unitPrice: 999999999 }],
+    };
 
-    const result = invoiceSchema.safeParse(data)
+    const result = invoiceSchema.safeParse(data);
     // Should handle without overflow
-    expect(result.success || !result.success).toBeDefined()
-  })
+    expect(result.success || !result.success).toBeDefined();
+  });
 
   it('should handle decimal precision correctly', () => {
     const data = {
@@ -420,23 +410,23 @@ describe('Form Validation Edge Cases', () => {
         { accountId: 'acc-1', debit: 1000.555, credit: 0 },
         { accountId: 'acc-2', debit: 0, credit: 1000.555 },
       ],
-    }
+    };
 
-    const result = journalEntrySchema.safeParse(data)
-    expect(result.success).toBe(true)
-  })
+    const result = journalEntrySchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
 
   it('should handle empty strings vs null', () => {
-    const data1 = { code: 'CUST001', name: 'Test', email: null }
-    const data2 = { code: 'CUST001', name: 'Test', email: '' }
+    const data1 = { code: 'CUST001', name: 'Test', email: null };
+    const data2 = { code: 'CUST001', name: 'Test', email: '' };
 
     // Both should be handled gracefully
-    expect(() => customerSchema.safeParse(data1)).not.toThrow()
-    expect(() => customerSchema.safeParse(data2)).not.toThrow()
-  })
+    expect(() => customerSchema.safeParse(data1)).not.toThrow();
+    expect(() => customerSchema.safeParse(data2)).not.toThrow();
+  });
 
   it('should validate date range constraints', () => {
-    const futureDate = new Date('2030-01-01')
+    const futureDate = new Date('2030-01-01');
 
     const data = {
       date: futureDate,
@@ -445,10 +435,10 @@ describe('Form Validation Edge Cases', () => {
         { accountId: 'acc-1', debit: 1000, credit: 0 },
         { accountId: 'acc-2', debit: 0, credit: 1000 },
       ],
-    }
+    };
 
     // Should accept future dates
-    const result = journalEntrySchema.safeParse(data)
-    expect(result.success).toBe(true)
-  })
-})
+    const result = journalEntrySchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+});

@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/api-utils'
-import { prisma } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-utils';
+import { prisma } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth()
+    const user = await requireAuth();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Export all data
@@ -18,10 +18,10 @@ export async function GET(request: NextRequest) {
         company: await prisma.company.findFirst(),
         accounts: await prisma.chartOfAccount.findMany(),
         journalEntries: await prisma.journalEntry.findMany({
-          include: { lines: true }
+          include: { lines: true },
         }),
         invoices: await prisma.invoice.findMany({
-          include: { lines: true }
+          include: { lines: true },
         }),
         customers: await prisma.customer.findMany(),
         vendors: await prisma.vendor.findMany(),
@@ -33,21 +33,24 @@ export async function GET(request: NextRequest) {
             email: true,
             name: true,
             role: true,
-            createdAt: true
-          }
-        })
-      }
-    }
+            createdAt: true,
+          },
+        }),
+      },
+    };
 
     return new NextResponse(JSON.stringify(backup, null, 2), {
       headers: {
         'Content-Type': 'application/json',
-        'Content-Disposition': `attachment; filename="thai-erp-backup-${new Date().toISOString().split('T')[0]}.json"`
-      }
-    })
+        'Content-Disposition': `attachment; filename="thai-erp-backup-${new Date().toISOString().split('T')[0]}.json"`,
+      },
+    });
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Failed to export data' 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: 'Failed to export data',
+      },
+      { status: 500 }
+    );
   }
 }

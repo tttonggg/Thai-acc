@@ -216,7 +216,7 @@ export async function getUserSessions(userId: string): Promise<SessionInfo[]> {
     orderBy: { lastActiveAt: 'desc' },
   });
 
-  return sessions.map(s => ({
+  return sessions.map((s) => ({
     id: s.id,
     ipAddress: s.ipAddress,
     userAgent: s.userAgent,
@@ -232,7 +232,7 @@ export async function cleanupExpiredSessions(userId?: string): Promise<number> {
   const where: Record<string, unknown> = {
     expiresAt: { lt: new Date() },
   };
-  
+
   if (userId) {
     where.userId = userId;
   }

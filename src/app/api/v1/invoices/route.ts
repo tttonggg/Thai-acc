@@ -1,7 +1,7 @@
 /**
  * API Version 1 - Invoices Endpoint
  * Phase D: API Mastery - API Versioning
- * 
+ *
  * This is the stable v1 API for invoices.
  * Changes to this endpoint will be backward compatible.
  */
@@ -26,10 +26,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', version: 'v1' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', version: 'v1' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -41,12 +38,13 @@ export async function GET(req: NextRequest) {
       isActive: true,
       ...(params.status && { status: params.status }),
       ...(params.customerId && { customerId: params.customerId }),
-      ...(params.startDate && params.endDate && {
-        invoiceDate: {
-          gte: new Date(params.startDate),
-          lte: new Date(params.endDate),
-        },
-      }),
+      ...(params.startDate &&
+        params.endDate && {
+          invoiceDate: {
+            gte: new Date(params.startDate),
+            lte: new Date(params.endDate),
+          },
+        }),
     };
 
     const [invoices, total] = await Promise.all([
@@ -92,10 +90,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching invoices (v1):', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch invoices', version: 'v1' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch invoices', version: 'v1' }, { status: 500 });
   }
 }
 
@@ -104,10 +99,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', version: 'v1' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', version: 'v1' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -190,16 +182,16 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      version: 'v1',
-      data: invoice,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        version: 'v1',
+        data: invoice,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating invoice (v1):', error);
-    return NextResponse.json(
-      { error: 'Failed to create invoice', version: 'v1' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create invoice', version: 'v1' }, { status: 500 });
   }
 }

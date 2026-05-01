@@ -1,49 +1,49 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requireRole } from '@/lib/api-utils'
-import { prisma } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { requireRole } from '@/lib/api-utils';
+import { prisma } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireRole(['ADMIN', 'ACCOUNTANT'])
+    const user = await requireRole(['ADMIN', 'ACCOUNTANT']);
 
-    const body = await request.json()
-    const { dataTypes, format, dateFrom, dateTo, includeDeleted } = body
+    const body = await request.json();
+    const { dataTypes, format, dateFrom, dateTo, includeDeleted } = body;
 
     if (!dataTypes || !Array.isArray(dataTypes) || dataTypes.length === 0) {
-      return NextResponse.json({ error: 'No data types selected' }, { status: 400 })
+      return NextResponse.json({ error: 'No data types selected' }, { status: 400 });
     }
 
     if (!format || !['csv', 'json'].includes(format)) {
-      return NextResponse.json({ error: 'Invalid format' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid format' }, { status: 400 });
     }
 
     // Build date filter
-    const dateFilter: any = {}
+    const dateFilter: any = {};
     if (dateFrom) {
-      dateFilter.gte = new Date(dateFrom)
+      dateFilter.gte = new Date(dateFrom);
     }
     if (dateTo) {
-      dateFilter.lte = new Date(dateTo)
+      dateFilter.lte = new Date(dateTo);
     }
-    const hasDateFilter = Object.keys(dateFilter).length > 0
+    const hasDateFilter = Object.keys(dateFilter).length > 0;
 
     // Fetch all requested data
     const exportData: any = {
       exportedAt: new Date().toISOString(),
       exportedBy: user.email,
       dataTypes: dataTypes,
-    }
+    };
 
-    let totalRecords = 0
+    let totalRecords = 0;
 
     // Fetch Customers
     if (dataTypes.includes('customers')) {
       const customers = await prisma.customer.findMany({
         where: includeDeleted ? {} : { deletedAt: null },
         orderBy: { createdAt: 'desc' },
-      })
-      exportData.customers = customers
-      totalRecords += customers.length
+      });
+      exportData.customers = customers;
+      totalRecords += customers.length;
     }
 
     // Fetch Vendors
@@ -51,9 +51,9 @@ export async function POST(request: NextRequest) {
       const vendors = await prisma.vendor.findMany({
         where: includeDeleted ? {} : { deletedAt: null },
         orderBy: { createdAt: 'desc' },
-      })
-      exportData.vendors = vendors
-      totalRecords += vendors.length
+      });
+      exportData.vendors = vendors;
+      totalRecords += vendors.length;
     }
 
     // Fetch Products
@@ -61,25 +61,25 @@ export async function POST(request: NextRequest) {
       const products = await prisma.product.findMany({
         where: includeDeleted ? {} : { deletedAt: null },
         orderBy: { createdAt: 'desc' },
-      })
-      exportData.products = products
-      totalRecords += products.length
+      });
+      exportData.products = products;
+      totalRecords += products.length;
     }
 
     // Fetch Chart of Accounts
     if (dataTypes.includes('accounts')) {
       const accounts = await prisma.chartOfAccount.findMany({
         orderBy: { code: 'asc' },
-      })
-      exportData.accounts = accounts
-      totalRecords += accounts.length
+      });
+      exportData.accounts = accounts;
+      totalRecords += accounts.length;
     }
 
     // Fetch Invoices
     if (dataTypes.includes('invoices')) {
-      const invoiceWhere: any = includeDeleted ? {} : { deletedAt: null }
+      const invoiceWhere: any = includeDeleted ? {} : { deletedAt: null };
       if (hasDateFilter) {
-        invoiceWhere.createdAt = dateFilter
+        invoiceWhere.createdAt = dateFilter;
       }
       const invoices = await prisma.invoice.findMany({
         where: invoiceWhere,
@@ -88,16 +88,16 @@ export async function POST(request: NextRequest) {
           customer: true,
         },
         orderBy: { createdAt: 'desc' },
-      })
-      exportData.invoices = invoices
-      totalRecords += invoices.length
+      });
+      exportData.invoices = invoices;
+      totalRecords += invoices.length;
     }
 
     // Fetch Receipts
     if (dataTypes.includes('receipts')) {
-      const receiptWhere: any = includeDeleted ? {} : { deletedAt: null }
+      const receiptWhere: any = includeDeleted ? {} : { deletedAt: null };
       if (hasDateFilter) {
-        receiptWhere.createdAt = dateFilter
+        receiptWhere.createdAt = dateFilter;
       }
       const receipts = await prisma.receipt.findMany({
         where: receiptWhere,
@@ -105,53 +105,53 @@ export async function POST(request: NextRequest) {
           customer: true,
         },
         orderBy: { createdAt: 'desc' },
-      })
-      exportData.receipts = receipts
-      totalRecords += receipts.length
+      });
+      exportData.receipts = receipts;
+      totalRecords += receipts.length;
     }
 
-    exportData.totalRecords = totalRecords
+    exportData.totalRecords = totalRecords;
 
     // Generate response based on format
     if (format === 'json') {
-      const json = JSON.stringify(exportData, null, 2)
+      const json = JSON.stringify(exportData, null, 2);
       return new NextResponse(json, {
         headers: {
           'Content-Type': 'application/json',
           'Content-Disposition': `attachment; filename="thai-erp-export-${new Date().toISOString().split('T')[0]}.json"`,
         },
-      })
+      });
     }
 
     // CSV format
-    let csvContent = ''
+    let csvContent = '';
 
     // Generate CSV for each data type
     for (const dataType of dataTypes) {
-      csvContent += `\n# ${dataType.toUpperCase()}\n`
+      csvContent += `\n# ${dataType.toUpperCase()}\n`;
 
       switch (dataType) {
         case 'customers':
-          csvContent += generateCustomerCSV(exportData.customers)
-          break
+          csvContent += generateCustomerCSV(exportData.customers);
+          break;
         case 'vendors':
-          csvContent += generateVendorCSV(exportData.vendors)
-          break
+          csvContent += generateVendorCSV(exportData.vendors);
+          break;
         case 'products':
-          csvContent += generateProductCSV(exportData.products)
-          break
+          csvContent += generateProductCSV(exportData.products);
+          break;
         case 'accounts':
-          csvContent += generateAccountCSV(exportData.accounts)
-          break
+          csvContent += generateAccountCSV(exportData.accounts);
+          break;
         case 'invoices':
-          csvContent += generateInvoiceCSV(exportData.invoices)
-          break
+          csvContent += generateInvoiceCSV(exportData.invoices);
+          break;
         case 'receipts':
-          csvContent += generateReceiptCSV(exportData.receipts)
-          break
+          csvContent += generateReceiptCSV(exportData.receipts);
+          break;
       }
 
-      csvContent += '\n'
+      csvContent += '\n';
     }
 
     // Add metadata
@@ -160,34 +160,49 @@ export async function POST(request: NextRequest) {
       `# Exported By,${user.email}`,
       `# Total Records,${totalRecords}`,
       '',
-    ].join('\n')
+    ].join('\n');
 
     return new NextResponse(metadata + csvContent, {
       headers: {
         'Content-Type': 'text/csv; charset=utf-8',
         'Content-Disposition': `attachment; filename="thai-erp-export-${new Date().toISOString().split('T')[0]}.csv"`,
       },
-    })
+    });
   } catch (error) {
-    console.error('Export error:', error)
+    console.error('Export error:', error);
     return NextResponse.json(
-      { error: 'Failed to export data', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to export data',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
-    )
+    );
   }
 }
 
 // CSV Generation Functions
 function generateCustomerCSV(customers: any[]): string {
-  if (customers.length === 0) return '# No customers found\n'
+  if (customers.length === 0) return '# No customers found\n';
 
   const headers = [
-    'code', 'name', 'taxId', 'branchCode', 'address', 'subDistrict',
-    'district', 'province', 'postalCode', 'phone', 'email', 'creditLimit',
-    'paymentTerms', 'isActive', 'createdAt'
-  ]
+    'code',
+    'name',
+    'taxId',
+    'branchCode',
+    'address',
+    'subDistrict',
+    'district',
+    'province',
+    'postalCode',
+    'phone',
+    'email',
+    'creditLimit',
+    'paymentTerms',
+    'isActive',
+    'createdAt',
+  ];
 
-  const rows = customers.map(c => [
+  const rows = customers.map((c) => [
     c.code,
     `"${c.name}"`,
     c.taxId || '',
@@ -203,21 +218,32 @@ function generateCustomerCSV(customers: any[]): string {
     c.paymentTerms || 0,
     c.isActive ? 'Y' : 'N',
     c.createdAt,
-  ])
+  ]);
 
-  return headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n') + '\n'
+  return headers.join(',') + '\n' + rows.map((r) => r.join(',')).join('\n') + '\n';
 }
 
 function generateVendorCSV(vendors: any[]): string {
-  if (vendors.length === 0) return '# No vendors found\n'
+  if (vendors.length === 0) return '# No vendors found\n';
 
   const headers = [
-    'code', 'name', 'taxId', 'branchCode', 'address', 'subDistrict',
-    'district', 'province', 'postalCode', 'phone', 'email', 'paymentTerms',
-    'isActive', 'createdAt'
-  ]
+    'code',
+    'name',
+    'taxId',
+    'branchCode',
+    'address',
+    'subDistrict',
+    'district',
+    'province',
+    'postalCode',
+    'phone',
+    'email',
+    'paymentTerms',
+    'isActive',
+    'createdAt',
+  ];
 
-  const rows = vendors.map(v => [
+  const rows = vendors.map((v) => [
     v.code,
     `"${v.name}"`,
     v.taxId || '',
@@ -232,20 +258,30 @@ function generateVendorCSV(vendors: any[]): string {
     v.paymentTerms || 0,
     v.isActive ? 'Y' : 'N',
     v.createdAt,
-  ])
+  ]);
 
-  return headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n') + '\n'
+  return headers.join(',') + '\n' + rows.map((r) => r.join(',')).join('\n') + '\n';
 }
 
 function generateProductCSV(products: any[]): string {
-  if (products.length === 0) return '# No products found\n'
+  if (products.length === 0) return '# No products found\n';
 
   const headers = [
-    'code', 'name', 'description', 'unit', 'price', 'cost', 'vatType',
-    'whtRate', 'incomeType', 'isActive', 'stockTracked', 'createdAt'
-  ]
+    'code',
+    'name',
+    'description',
+    'unit',
+    'price',
+    'cost',
+    'vatType',
+    'whtRate',
+    'incomeType',
+    'isActive',
+    'stockTracked',
+    'createdAt',
+  ];
 
-  const rows = products.map(p => [
+  const rows = products.map((p) => [
     p.code,
     `"${p.name}"`,
     `"${(p.description || '').replace(/"/g, '""')}"`,
@@ -258,20 +294,28 @@ function generateProductCSV(products: any[]): string {
     p.isActive ? 'Y' : 'N',
     p.stockTracked ? 'Y' : 'N',
     p.createdAt,
-  ])
+  ]);
 
-  return headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n') + '\n'
+  return headers.join(',') + '\n' + rows.map((r) => r.join(',')).join('\n') + '\n';
 }
 
 function generateAccountCSV(accounts: any[]): string {
-  if (accounts.length === 0) return '# No accounts found\n'
+  if (accounts.length === 0) return '# No accounts found\n';
 
   const headers = [
-    'code', 'name', 'nameEn', 'type', 'level', 'parentId', 'isDetail',
-    'isSystem', 'isActive', 'createdAt'
-  ]
+    'code',
+    'name',
+    'nameEn',
+    'type',
+    'level',
+    'parentId',
+    'isDetail',
+    'isSystem',
+    'isActive',
+    'createdAt',
+  ];
 
-  const rows = accounts.map(a => [
+  const rows = accounts.map((a) => [
     a.code,
     `"${a.name}"`,
     `"${(a.nameEn || '').replace(/"/g, '""')}"`,
@@ -282,22 +326,32 @@ function generateAccountCSV(accounts: any[]): string {
     a.isSystem ? 'Y' : 'N',
     a.isActive ? 'Y' : 'N',
     a.createdAt,
-  ])
+  ]);
 
-  return headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n') + '\n'
+  return headers.join(',') + '\n' + rows.map((r) => r.join(',')).join('\n') + '\n';
 }
 
 function generateInvoiceCSV(invoices: any[]): string {
-  if (invoices.length === 0) return '# No invoices found\n'
+  if (invoices.length === 0) return '# No invoices found\n';
 
   // For invoices, we need to flatten the data
   const headers = [
-    'invoiceNo', 'date', 'customerCode', 'customerName', 'subtotal',
-    'vatAmount', 'whtAmount', 'totalAmount', 'status', 'paymentStatus',
-    'dueDate', 'paidAmount', 'createdAt'
-  ]
+    'invoiceNo',
+    'date',
+    'customerCode',
+    'customerName',
+    'subtotal',
+    'vatAmount',
+    'whtAmount',
+    'totalAmount',
+    'status',
+    'paymentStatus',
+    'dueDate',
+    'paidAmount',
+    'createdAt',
+  ];
 
-  const rows = invoices.map(inv => [
+  const rows = invoices.map((inv) => [
     inv.invoiceNo,
     inv.date,
     inv.customer?.code || '',
@@ -311,20 +365,27 @@ function generateInvoiceCSV(invoices: any[]): string {
     inv.dueDate || '',
     inv.paidAmount || 0,
     inv.createdAt,
-  ])
+  ]);
 
-  return headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n') + '\n'
+  return headers.join(',') + '\n' + rows.map((r) => r.join(',')).join('\n') + '\n';
 }
 
 function generateReceiptCSV(receipts: any[]): string {
-  if (receipts.length === 0) return '# No receipts found\n'
+  if (receipts.length === 0) return '# No receipts found\n';
 
   const headers = [
-    'receiptNo', 'date', 'customerCode', 'customerName', 'amount',
-    'paymentMethod', 'reference', 'status', 'createdAt'
-  ]
+    'receiptNo',
+    'date',
+    'customerCode',
+    'customerName',
+    'amount',
+    'paymentMethod',
+    'reference',
+    'status',
+    'createdAt',
+  ];
 
-  const rows = receipts.map(r => [
+  const rows = receipts.map((r) => [
     r.receiptNo,
     r.date,
     r.customer?.code || '',
@@ -334,7 +395,7 @@ function generateReceiptCSV(receipts: any[]): string {
     r.reference || '',
     r.status,
     r.createdAt,
-  ])
+  ]);
 
-  return headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n') + '\n'
+  return headers.join(',') + '\n' + rows.map((r) => r.join(',')).join('\n') + '\n';
 }

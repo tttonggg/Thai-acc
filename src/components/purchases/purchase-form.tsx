@@ -1,137 +1,130 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import {
-  Plus,
-  Trash2,
-  Save,
-  Loader2,
-  AlertTriangle,
-  CheckCircle2,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useState, useEffect } from 'react';
+import { Plus, Trash2, Save, Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card'
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
-} from '@/components/ui/table'
-import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+  TableRow,
+} from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 // Types
 interface Vendor {
-  id: string
-  code: string
-  name: string
-  taxId?: string
-  branchCode?: string
+  id: string;
+  code: string;
+  name: string;
+  taxId?: string;
+  branchCode?: string;
 }
 
 interface Product {
-  id: string
-  code: string
-  name: string
-  nameEn?: string
-  costPrice?: number
-  unit?: string
-  vatRate?: number
+  id: string;
+  code: string;
+  name: string;
+  nameEn?: string;
+  costPrice?: number;
+  unit?: string;
+  vatRate?: number;
 }
 
 interface PurchaseOrderLine {
-  id: string
-  lineNo: number
-  productId?: string
-  description: string
-  quantity: number
-  receivedQty: number
-  unit: string
-  unitPrice: number
+  id: string;
+  lineNo: number;
+  productId?: string;
+  description: string;
+  quantity: number;
+  receivedQty: number;
+  unit: string;
+  unitPrice: number;
 }
 
 interface PurchaseOrder {
-  id: string
-  orderNo: string
-  vendorId: string
-  lines: PurchaseOrderLine[]
+  id: string;
+  orderNo: string;
+  vendorId: string;
+  lines: PurchaseOrderLine[];
 }
 
 interface ThreeWayMatchResult {
-  lineId: string
-  poQty: number
-  grnQty: number
-  invoiceQty: number
-  poPrice: number
-  invoicePrice: number
-  qtyVariancePercent: number
-  priceVariancePercent: number
-  status: 'MATCH' | 'WARNING' | 'BLOCKED'
-  qtyIssue: string
-  priceIssue: string
+  lineId: string;
+  poQty: number;
+  grnQty: number;
+  invoiceQty: number;
+  poPrice: number;
+  invoicePrice: number;
+  qtyVariancePercent: number;
+  priceVariancePercent: number;
+  status: 'MATCH' | 'WARNING' | 'BLOCKED';
+  qtyIssue: string;
+  priceIssue: string;
 }
 
 interface PurchaseLine {
-  id: string
-  productId?: string
-  description: string
-  quantity: number
-  unit: string
-  unitPrice: number
-  discount: number
-  vatRate: number
-  vatAmount: number
-  amount: number
-  notes?: string
+  id: string;
+  productId?: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  discount: number;
+  vatRate: number;
+  vatAmount: number;
+  amount: number;
+  notes?: string;
 }
 
 interface PurchaseFormProps {
-  open: boolean
-  onClose: () => void
-  onSuccess: () => void
-  defaultType?: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE'
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  defaultType?: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE';
 }
 
 const purchaseTypeLabels: Record<string, string> = {
   TAX_INVOICE: 'ใบซื้อ/ใบกำกับภาษีซื้อ',
   RECEIPT: 'ใบเสร็จรับเงินซื้อ',
   DELIVERY_NOTE: 'ใบส่งของซื้อ',
-}
+};
 
-const vatRates = [0, 7, 10]
+const vatRates = [0, 7, 10];
 
-export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOICE' }: PurchaseFormProps) {
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
-  const [fetchingData, setFetchingData] = useState(false)
-  const [vendors, setVendors] = useState<Vendor[]>([])
-  const [products, setProducts] = useState<Product[]>([])
-  const [purchaseNumber, setPurchaseNumber] = useState('')
+export function PurchaseForm({
+  open,
+  onClose,
+  onSuccess,
+  defaultType = 'TAX_INVOICE',
+}: PurchaseFormProps) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [fetchingData, setFetchingData] = useState(false);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [purchaseNumber, setPurchaseNumber] = useState('');
 
   const [formData, setFormData] = useState({
     vendorId: '',
@@ -146,7 +139,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
     withholdingRate: 0,
     notes: '',
     internalNotes: '',
-  })
+  });
 
   const [lines, setLines] = useState<PurchaseLine[]>([
     {
@@ -160,146 +153,150 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
       vatAmount: 0,
       amount: 0,
     },
-  ])
+  ]);
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null)
-  const [matchResults, setMatchResults] = useState<ThreeWayMatchResult[]>([])
-  const [overrideReason, setOverrideReason] = useState('')
-  const [showOverrideDialog, setShowOverrideDialog] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
+  const [matchResults, setMatchResults] = useState<ThreeWayMatchResult[]>([]);
+  const [overrideReason, setOverrideReason] = useState('');
+  const [showOverrideDialog, setShowOverrideDialog] = useState(false);
 
   // Fetch vendors and products on mount
   useEffect(() => {
     if (open) {
-      fetchInitialData()
+      fetchInitialData();
     }
-  }, [open])
+  }, [open]);
 
   // Fetch PO details when PO number changes
   useEffect(() => {
     if (formData.poNumber && formData.poNumber.trim()) {
-      fetchPODetails(formData.poNumber.trim())
+      fetchPODetails(formData.poNumber.trim());
     } else {
-      setSelectedPO(null)
-      setMatchResults([])
+      setSelectedPO(null);
+      setMatchResults([]);
     }
-  }, [formData.poNumber])
+  }, [formData.poNumber]);
 
   // Recalculate match results when lines or PO changes
   useEffect(() => {
     if (selectedPO && lines.length > 0) {
-      calculateThreeWayMatch()
+      calculateThreeWayMatch();
     } else {
-      setMatchResults([])
+      setMatchResults([]);
     }
-  }, [selectedPO, lines])
+  }, [selectedPO, lines]);
 
   const fetchInitialData = async () => {
-    setFetchingData(true)
+    setFetchingData(true);
     try {
       const [vendorsRes, productsRes] = await Promise.all([
         fetch(`/api/vendors`, { credentials: 'include' }),
         fetch(`/api/products`, { credentials: 'include' }),
-      ])
+      ]);
 
       if (vendorsRes.ok) {
-        const vendorsData = await vendorsRes.json()
-        setVendors(vendorsData.data || [])
+        const vendorsData = await vendorsRes.json();
+        setVendors(vendorsData.data || []);
       }
 
       // Always set products to an array, even on error
       if (productsRes.ok) {
-        const productsData = await productsRes.json()
-        setProducts(Array.isArray(productsData.data) ? productsData.data : [])
+        const productsData = await productsRes.json();
+        setProducts(Array.isArray(productsData.data) ? productsData.data : []);
       } else {
-        setProducts([])
+        setProducts([]);
       }
     } catch (error) {
-      console.error('Error fetching initial data:', error)
+      console.error('Error fetching initial data:', error);
       // Ensure products is always an array
-      setProducts([])
+      setProducts([]);
     } finally {
-      setFetchingData(false)
+      setFetchingData(false);
     }
-  }
+  };
 
   const fetchPODetails = async (poNumber: string) => {
     try {
-      const res = await fetch(`/api/purchase-orders?orderNo=${poNumber}`, { credentials: 'include' })
+      const res = await fetch(`/api/purchase-orders?orderNo=${poNumber}`, {
+        credentials: 'include',
+      });
       if (res.ok) {
-        const result = await res.json()
+        const result = await res.json();
         if (result.data && result.data.length > 0) {
-          const po = result.data[0]
-          setSelectedPO(po)
+          const po = result.data[0];
+          setSelectedPO(po);
           // Pre-fill lines from PO
           if (po.lines && po.lines.length > 0) {
-            const poLines: PurchaseLine[] = po.lines.map((line: PurchaseOrderLine, idx: number) => ({
-              id: Date.now().toString() + idx,
-              productId: line.productId,
-              description: line.description,
-              quantity: line.quantity - line.receivedQty, // Default to remaining qty
-              unit: line.unit,
-              unitPrice: line.unitPrice,
-              discount: 0,
-              vatRate: 7,
-              vatAmount: 0,
-              amount: 0,
-            }))
-            setLines(poLines.length > 0 ? poLines : lines)
+            const poLines: PurchaseLine[] = po.lines.map(
+              (line: PurchaseOrderLine, idx: number) => ({
+                id: Date.now().toString() + idx,
+                productId: line.productId,
+                description: line.description,
+                quantity: line.quantity - line.receivedQty, // Default to remaining qty
+                unit: line.unit,
+                unitPrice: line.unitPrice,
+                discount: 0,
+                vatRate: 7,
+                vatAmount: 0,
+                amount: 0,
+              })
+            );
+            setLines(poLines.length > 0 ? poLines : lines);
           }
         } else {
           toast({
             title: 'ไม่พบ PO',
             description: `ไม่พบเลขที่ PO ${poNumber} ในระบบ`,
             variant: 'destructive',
-          })
-          setSelectedPO(null)
+          });
+          setSelectedPO(null);
         }
       }
     } catch (error) {
-      console.error('Error fetching PO details:', error)
+      console.error('Error fetching PO details:', error);
     }
-  }
+  };
 
   const calculateThreeWayMatch = () => {
-    if (!selectedPO || !selectedPO.lines) return
+    if (!selectedPO || !selectedPO.lines) return;
 
     const results: ThreeWayMatchResult[] = selectedPO.lines.map((poLine) => {
       // Find matching invoice line by product or description
       const invoiceLine = lines.find(
         (l) => l.productId === poLine.productId || l.description === poLine.description
-      )
+      );
 
-      const invoiceQty = invoiceLine?.quantity || 0
-      const invoicePrice = invoiceLine?.unitPrice || 0
+      const invoiceQty = invoiceLine?.quantity || 0;
+      const invoicePrice = invoiceLine?.unitPrice || 0;
 
       // Calculate quantity variance
-      const qtyDiff = Math.abs(poLine.quantity - invoiceQty)
-      const qtyVariancePercent = poLine.quantity > 0 ? (qtyDiff / poLine.quantity) * 100 : 0
+      const qtyDiff = Math.abs(poLine.quantity - invoiceQty);
+      const qtyVariancePercent = poLine.quantity > 0 ? (qtyDiff / poLine.quantity) * 100 : 0;
 
       // Calculate price variance
-      const priceDiff = Math.abs(poLine.unitPrice - invoicePrice)
-      const priceVariancePercent = poLine.unitPrice > 0 ? (priceDiff / poLine.unitPrice) * 100 : 0
+      const priceDiff = Math.abs(poLine.unitPrice - invoicePrice);
+      const priceVariancePercent = poLine.unitPrice > 0 ? (priceDiff / poLine.unitPrice) * 100 : 0;
 
       // Determine status
-      let status: 'MATCH' | 'WARNING' | 'BLOCKED' = 'MATCH'
-      let qtyIssue = ''
-      let priceIssue = ''
+      let status: 'MATCH' | 'WARNING' | 'BLOCKED' = 'MATCH';
+      let qtyIssue = '';
+      let priceIssue = '';
 
       if (qtyVariancePercent > 10) {
-        status = 'BLOCKED'
-        qtyIssue = `ปริมาณต่างกัน ${qtyVariancePercent.toFixed(1)}% (เกินกำหนด 10%)`
+        status = 'BLOCKED';
+        qtyIssue = `ปริมาณต่างกัน ${qtyVariancePercent.toFixed(1)}% (เกินกำหนด 10%)`;
       } else if (qtyVariancePercent > 5) {
-        status = 'WARNING'
-        qtyIssue = `ปริมาณต่างกัน ${qtyVariancePercent.toFixed(1)}%`
+        status = 'WARNING';
+        qtyIssue = `ปริมาณต่างกัน ${qtyVariancePercent.toFixed(1)}%`;
       }
 
       if (priceVariancePercent > 5) {
-        status = 'BLOCKED'
-        priceIssue = `ราคาต่างกัน ${priceVariancePercent.toFixed(1)}% (เกินกำหนด 5%)`
+        status = 'BLOCKED';
+        priceIssue = `ราคาต่างกัน ${priceVariancePercent.toFixed(1)}% (เกินกำหนด 5%)`;
       } else if (priceVariancePercent > 3) {
-        if (status !== 'BLOCKED') status = 'WARNING'
-        priceIssue = `ราคาต่างกัน ${priceVariancePercent.toFixed(1)}%`
+        if (status !== 'BLOCKED') status = 'WARNING';
+        priceIssue = `ราคาต่างกัน ${priceVariancePercent.toFixed(1)}%`;
       }
 
       return {
@@ -314,39 +311,39 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
         status,
         qtyIssue,
         priceIssue,
-      }
-    })
+      };
+    });
 
-    setMatchResults(results)
-  }
+    setMatchResults(results);
+  };
 
   // Calculate totals
   const calculateLineTotals = (line: PurchaseLine): { amount: number; vatAmount: number } => {
-    const beforeDiscount = line.quantity * line.unitPrice
-    const discountAmount = beforeDiscount * (line.discount / 100)
-    const afterDiscount = beforeDiscount - discountAmount
-    const vatAmount = afterDiscount * (line.vatRate / 100)
-    const amount = afterDiscount
+    const beforeDiscount = line.quantity * line.unitPrice;
+    const discountAmount = beforeDiscount * (line.discount / 100);
+    const afterDiscount = beforeDiscount - discountAmount;
+    const vatAmount = afterDiscount * (line.vatRate / 100);
+    const amount = afterDiscount;
 
-    return { amount, vatAmount }
-  }
+    return { amount, vatAmount };
+  };
 
   const calculateTotals = () => {
-    let subtotal = 0
-    let totalVat = 0
+    let subtotal = 0;
+    let totalVat = 0;
 
-    lines.forEach(line => {
-      const { amount, vatAmount } = calculateLineTotals(line)
-      subtotal += amount
-      totalVat += vatAmount
-    })
+    lines.forEach((line) => {
+      const { amount, vatAmount } = calculateLineTotals(line);
+      subtotal += amount;
+      totalVat += vatAmount;
+    });
 
-    const discountAmount = subtotal * (formData.discountPercent / 100) + formData.discountAmount
-    const afterDiscount = subtotal - discountAmount
-    const vat = totalVat
-    const grandTotal = afterDiscount + vat
-    const withholdingAmount = grandTotal * (formData.withholdingRate / 100)
-    const netTotal = grandTotal - withholdingAmount
+    const discountAmount = subtotal * (formData.discountPercent / 100) + formData.discountAmount;
+    const afterDiscount = subtotal - discountAmount;
+    const vat = totalVat;
+    const grandTotal = afterDiscount + vat;
+    const withholdingAmount = grandTotal * (formData.withholdingRate / 100);
+    const netTotal = grandTotal - withholdingAmount;
 
     return {
       subtotal,
@@ -355,36 +352,38 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
       grandTotal,
       withholdingAmount,
       netTotal,
-    }
-  }
+    };
+  };
 
-  const totals = calculateTotals()
+  const totals = calculateTotals();
 
   // Update line
   const updateLine = (id: string, field: keyof PurchaseLine, value: any) => {
-    setLines(prev => prev.map(line => {
-      if (line.id === id) {
-        const updated = { ...line, [field]: value }
+    setLines((prev) =>
+      prev.map((line) => {
+        if (line.id === id) {
+          const updated = { ...line, [field]: value };
 
-        // Recalculate amounts
-        const { amount, vatAmount } = calculateLineTotals(updated)
-        updated.amount = amount
-        updated.vatAmount = vatAmount
+          // Recalculate amounts
+          const { amount, vatAmount } = calculateLineTotals(updated);
+          updated.amount = amount;
+          updated.vatAmount = vatAmount;
 
-        return updated
-      }
-      return line
-    }))
+          return updated;
+        }
+        return line;
+      })
+    );
 
     // Clear error for this line if exists
     if (errors[`line_${id}_${field}`]) {
-      setErrors(prev => {
-        const updated = { ...prev }
-        delete updated[`line_${id}_${field}`]
-        return updated
-      })
+      setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[`line_${id}_${field}`];
+        return updated;
+      });
     }
-  }
+  };
 
   // Add new line
   const addLine = () => {
@@ -398,9 +397,9 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
       vatRate: 7,
       vatAmount: 0,
       amount: 0,
-    }
-    setLines(prev => [...prev, newLine])
-  }
+    };
+    setLines((prev) => [...prev, newLine]);
+  };
 
   // Remove line
   const removeLine = (id: string) => {
@@ -409,76 +408,85 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
         title: 'ไม่สามารถลบรายการได้',
         description: 'ต้องมีอย่างน้อย 1 รายการ',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
-    setLines(prev => prev.filter(line => line.id !== id))
-  }
+    setLines((prev) => prev.filter((line) => line.id !== id));
+  };
 
   // Select product
   const selectProduct = (lineId: string, productId: string) => {
-    const product = products.find(p => p.id === productId)
+    const product = products.find((p) => p.id === productId);
     if (product) {
-      updateLine(lineId, 'productId', product.id)
-      updateLine(lineId, 'description', product.name)
-      updateLine(lineId, 'unit', product.unit || 'ชิ้น')
-      updateLine(lineId, 'unitPrice', product.costPrice || 0)
-      updateLine(lineId, 'vatRate', product.vatRate || 7)
+      updateLine(lineId, 'productId', product.id);
+      updateLine(lineId, 'description', product.name);
+      updateLine(lineId, 'unit', product.unit || 'ชิ้น');
+      updateLine(lineId, 'unitPrice', product.costPrice || 0);
+      updateLine(lineId, 'vatRate', product.vatRate || 7);
     }
-  }
+  };
 
   // Validate form
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (!formData.vendorId) {
-      newErrors.vendorId = 'กรุณาเลือกผู้ขาย'
+      newErrors.vendorId = 'กรุณาเลือกผู้ขาย';
     }
 
     if (lines.length === 0) {
-      newErrors.lines = 'ต้องมีอย่างน้อย 1 รายการ'
+      newErrors.lines = 'ต้องมีอย่างน้อย 1 รายการ';
     }
 
     lines.forEach((line) => {
       if (!line.description.trim()) {
-        newErrors[`line_${line.id}_description`] = 'กรุณาระบุรายการสินค้า'
+        newErrors[`line_${line.id}_description`] = 'กรุณาระบุรายการสินค้า';
       }
       if (line.quantity <= 0) {
-        newErrors[`line_${line.id}_quantity`] = 'จำนวนต้องมากกว่า 0'
+        newErrors[`line_${line.id}_quantity`] = 'จำนวนต้องมากกว่า 0';
       }
       if (line.unitPrice < 0) {
-        newErrors[`line_${line.id}_unitPrice`] = 'ราคาต้องไม่ติดลบ'
+        newErrors[`line_${line.id}_unitPrice`] = 'ราคาต้องไม่ติดลบ';
       }
-    })
+    });
 
     // Check three-way match blocking
-    const hasBlockedItems = matchResults.some((r) => r.status === 'BLOCKED')
+    const hasBlockedItems = matchResults.some((r) => r.status === 'BLOCKED');
     if (hasBlockedItems && !overrideReason.trim()) {
-      newErrors.threeWayMatch = 'มีรายการที่ไม่ผ่านการตรวจสอบ 3-way match กรุณาระบุเหตุผลในการอนุมัติ'
+      newErrors.threeWayMatch =
+        'มีรายการที่ไม่ผ่านการตรวจสอบ 3-way match กรุณาระบุเหตุผลในการอนุมัติ';
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const hasBlockedItems = (): boolean => {
-    return matchResults.some((r) => r.status === 'BLOCKED')
-  }
+    return matchResults.some((r) => r.status === 'BLOCKED');
+  };
 
   const hasWarningItems = (): boolean => {
-    return matchResults.some((r) => r.status === 'WARNING')
-  }
+    return matchResults.some((r) => r.status === 'WARNING');
+  };
 
   const getMatchStatusBadge = (status: 'MATCH' | 'WARNING' | 'BLOCKED') => {
     switch (status) {
       case 'MATCH':
-        return <Badge variant="default" className="bg-green-600">✅ ตรงกัน</Badge>
+        return (
+          <Badge variant="default" className="bg-green-600">
+            ✅ ตรงกัน
+          </Badge>
+        );
       case 'WARNING':
-        return <Badge variant="default" className="bg-yellow-600">⚠️ แจ้งเตือน</Badge>
+        return (
+          <Badge variant="default" className="bg-yellow-600">
+            ⚠️ แจ้งเตือน
+          </Badge>
+        );
       case 'BLOCKED':
-        return <Badge variant="destructive">🔴 ระงับ</Badge>
+        return <Badge variant="destructive">🔴 ระงับ</Badge>;
     }
-  }
+  };
 
   // Format currency
   const formatCurrency = (amount: number): string => {
@@ -487,8 +495,8 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
       currency: 'THB',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
   // Submit form
   const handleSubmit = async () => {
@@ -497,15 +505,15 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
         title: 'กรุณาตรวจสอบข้อมูล',
         description: 'มีข้อมูลที่ต้องกรอกไม่ครบถ้วน',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
       const payload = {
         ...formData,
-        lines: lines.map(line => ({
+        lines: lines.map((line) => ({
           productId: line.productId || null,
           description: line.description,
           quantity: line.quantity,
@@ -519,36 +527,40 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
         })),
         // Include three-way match metadata
         metadata: {
-          threeWayMatch: matchResults.length > 0 ? {
-            purchaseOrderId: selectedPO?.id,
-            purchaseOrderNo: formData.poNumber,
-            matchResults,
-            hasBlockedItems: hasBlockedItems(),
-            hasWarningItems: hasWarningItems(),
-            overrideReason: overrideReason || null,
-            validatedAt: new Date().toISOString(),
-          } : null,
+          threeWayMatch:
+            matchResults.length > 0
+              ? {
+                  purchaseOrderId: selectedPO?.id,
+                  purchaseOrderNo: formData.poNumber,
+                  matchResults,
+                  hasBlockedItems: hasBlockedItems(),
+                  hasWarningItems: hasWarningItems(),
+                  overrideReason: overrideReason || null,
+                  validatedAt: new Date().toISOString(),
+                }
+              : null,
         },
-      }
+      };
 
-      const response = await fetch(`/api/purchases`, { credentials: 'include', 
+      const response = await fetch(`/api/purchases`, {
+        credentials: 'include',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'ไม่สามารถบันทึกใบซื้อได้')
+        throw new Error(result.error || 'ไม่สามารถบันทึกใบซื้อได้');
       }
 
       toast({
         title: 'บันทึกสำเร็จ',
         description: `บันทึก ${purchaseTypeLabels[formData.type]} เลขที่ ${result.data.invoiceNo} แล้ว`,
-      })
+      });
 
       // Reset form
       setFormData({
@@ -564,7 +576,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
         withholdingRate: 0,
         notes: '',
         internalNotes: '',
-      })
+      });
       setLines([
         {
           id: '1',
@@ -577,35 +589,36 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
           vatAmount: 0,
           amount: 0,
         },
-      ])
-      setErrors({})
-      setSelectedPO(null)
-      setMatchResults([])
-      setOverrideReason('')
+      ]);
+      setErrors({});
+      setSelectedPO(null);
+      setMatchResults([]);
+      setOverrideReason('');
 
-      onSuccess()
-      onClose()
+      onSuccess();
+      onClose();
     } catch (error: any) {
-      console.error('Error submitting purchase:', error)
+      console.error('Error submitting purchase:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: error.message || 'ไม่สามารถบันทึกใบซื้อได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">
             สร้าง{purchaseTypeLabels[formData.type]}ใหม่
           </DialogTitle>
           <DialogDescription>
-            กรอกรายละเอียดใบซื้อ รายการสินค้า และคำนวณยอดรวม ใบซื้อนี้จะถูกบันทึกลงระบบและลงบัญชีการเงิน
+            กรอกรายละเอียดใบซื้อ รายการสินค้า และคำนวณยอดรวม
+            ใบซื้อนี้จะถูกบันทึกลงระบบและลงบัญชีการเงิน
           </DialogDescription>
         </DialogHeader>
 
@@ -617,7 +630,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
         ) : (
           <div className="space-y-6">
             {/* Vendor & Dates */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               <div className="md:col-span-1">
                 <Label htmlFor="vendorId" className="required">
                   ผู้ขาย *
@@ -625,13 +638,13 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                 <Select
                   value={formData.vendorId}
                   onValueChange={(value) => {
-                    setFormData(prev => ({ ...prev, vendorId: value }))
+                    setFormData((prev) => ({ ...prev, vendorId: value }));
                     if (errors.vendorId) {
-                      setErrors(prev => {
-                        const updated = { ...prev }
-                        delete updated.vendorId
-                        return updated
-                      })
+                      setErrors((prev) => {
+                        const updated = { ...prev };
+                        delete updated.vendorId;
+                        return updated;
+                      });
                     }
                   }}
                 >
@@ -642,7 +655,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                     <SelectValue placeholder="เลือกผู้ขาย" />
                   </SelectTrigger>
                   <SelectContent>
-                    {vendors.map(vendor => (
+                    {vendors.map((vendor) => (
                       <SelectItem key={vendor.id} value={vendor.id}>
                         {vendor.code} - {vendor.name}
                         {vendor.taxId && ` (${vendor.taxId})`}
@@ -651,7 +664,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                   </SelectContent>
                 </Select>
                 {errors.vendorId && (
-                  <p className="text-sm text-destructive mt-1">{errors.vendorId}</p>
+                  <p className="mt-1 text-sm text-destructive">{errors.vendorId}</p>
                 )}
               </div>
 
@@ -662,7 +675,9 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                   type="date"
                   className="!h-11 text-base"
                   value={formData.invoiceDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, invoiceDate: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, invoiceDate: e.target.value }))
+                  }
                   max={new Date().toISOString().split('T')[0]}
                 />
               </div>
@@ -674,14 +689,14 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                   type="date"
                   className="!h-11 text-base"
                   value={formData.dueDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, dueDate: e.target.value }))}
                   min={formData.invoiceDate}
                 />
               </div>
             </div>
 
             {/* Vendor Invoice No & Reference */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="vendorInvoiceNo">เลขที่ใบกำกับภาษีผู้ขาย</Label>
                 <Input
@@ -689,7 +704,9 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                   placeholder="เลขที่ใบกำกับภาษีของผู้ขาย"
                   className="!h-11 text-base"
                   value={formData.vendorInvoiceNo}
-                  onChange={(e) => setFormData(prev => ({ ...prev, vendorInvoiceNo: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, vendorInvoiceNo: e.target.value }))
+                  }
                 />
               </div>
               <div>
@@ -699,7 +716,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                   placeholder="เลขที่อ้างอิง (ถ้ามี)"
                   className="!h-11 text-base"
                   value={formData.reference}
-                  onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, reference: e.target.value }))}
                 />
               </div>
             </div>
@@ -712,22 +729,30 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                 placeholder="เลขที่ Purchase Order (ถ้ามี)"
                 className="!h-11 text-base"
                 value={formData.poNumber}
-                onChange={(e) => setFormData(prev => ({ ...prev, poNumber: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, poNumber: e.target.value }))}
               />
             </div>
 
             {/* Three-Way Match Validation Panel */}
             {matchResults.length > 0 && (
-              <Card className={`border-2 ${hasBlockedItems() ? 'border-red-500 bg-red-50' : hasWarningItems() ? 'border-yellow-500 bg-yellow-50' : 'border-green-500 bg-green-50'}`}>
+              <Card
+                className={`border-2 ${hasBlockedItems() ? 'border-red-500 bg-red-50' : hasWarningItems() ? 'border-yellow-500 bg-yellow-50' : 'border-green-500 bg-green-50'}`}
+              >
                 <CardHeader>
-                  <CardTitle className="text-lg flex items-center justify-between">
+                  <CardTitle className="flex items-center justify-between text-lg">
                     <span>📊 ตรวจสอบ 3-Way Match (PO vs ใบส่งของ vs ใบกำกับภาษี)</span>
                     {hasBlockedItems() ? (
-                      <Badge variant="destructive" className="text-base">🔴 ระงับการบันทึก</Badge>
+                      <Badge variant="destructive" className="text-base">
+                        🔴 ระงับการบันทึก
+                      </Badge>
                     ) : hasWarningItems() ? (
-                      <Badge variant="default" className="bg-yellow-600 text-base">⚠️ มีคำเตือน</Badge>
+                      <Badge variant="default" className="bg-yellow-600 text-base">
+                        ⚠️ มีคำเตือน
+                      </Badge>
                     ) : (
-                      <Badge variant="default" className="bg-green-600 text-base">✅ ผ่านการตรวจสอบ</Badge>
+                      <Badge variant="default" className="bg-green-600 text-base">
+                        ✅ ผ่านการตรวจสอบ
+                      </Badge>
                     )}
                   </CardTitle>
                 </CardHeader>
@@ -750,13 +775,20 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                       </TableHeader>
                       <TableBody>
                         {matchResults.map((result, idx) => (
-                          <TableRow key={result.lineId} className={
-                            result.status === 'BLOCKED' ? 'bg-red-100' :
-                            result.status === 'WARNING' ? 'bg-yellow-50' : ''
-                          }>
+                          <TableRow
+                            key={result.lineId}
+                            className={
+                              result.status === 'BLOCKED'
+                                ? 'bg-red-100'
+                                : result.status === 'WARNING'
+                                  ? 'bg-yellow-50'
+                                  : ''
+                            }
+                          >
                             <TableCell className="font-medium">{idx + 1}</TableCell>
                             <TableCell>
-                              {selectedPO?.lines.find(l => l.id === result.lineId)?.description || '-'}
+                              {selectedPO?.lines.find((l) => l.id === result.lineId)?.description ||
+                                '-'}
                             </TableCell>
                             <TableCell className="text-right">{result.poQty}</TableCell>
                             <TableCell className="text-right">{result.grnQty}</TableCell>
@@ -772,10 +804,12 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                               {result.qtyIssue ? (
                                 <span className="text-xs text-red-600">{result.qtyIssue}</span>
                               ) : (
-                                <span className="text-green-600 text-xs">✅ ตรง</span>
+                                <span className="text-xs text-green-600">✅ ตรง</span>
                               )}
                             </TableCell>
-                            <TableCell className="text-right">{formatCurrency(result.poPrice)}</TableCell>
+                            <TableCell className="text-right">
+                              {formatCurrency(result.poPrice)}
+                            </TableCell>
                             <TableCell className="text-right font-medium">
                               {formatCurrency(result.invoicePrice)}
                               {result.priceVariancePercent > 3 && (
@@ -801,9 +835,11 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                     <Alert className="mt-4 border-red-500 bg-red-50">
                       <AlertTriangle className="h-4 w-4 text-red-600" />
                       <AlertDescription className="text-red-800">
-                        <div className="font-semibold mb-2">⚠️ ไม่สามารถบันทึกใบซื้อได้</div>
-                        <ul className="list-disc list-inside space-y-1 text-sm">
-                          <li>ปริมาณหรือราคาต่างกันเกินเกณฑ์ที่กำหนด (ปริมาณ {'>'} 10%, ราคา {'>'} 5%)</li>
+                        <div className="mb-2 font-semibold">⚠️ ไม่สามารถบันทึกใบซื้อได้</div>
+                        <ul className="list-inside list-disc space-y-1 text-sm">
+                          <li>
+                            ปริมาณหรือราคาต่างกันเกินเกณฑ์ที่กำหนด (ปริมาณ {'>'} 10%, ราคา {'>'} 5%)
+                          </li>
                           <li>กรุณาตรวจสอบรายการที่มีปัญหา หรือขออนุมัติพิเศษ</li>
                         </ul>
                       </AlertDescription>
@@ -814,8 +850,10 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                     <Alert className="mt-4 border-yellow-500 bg-yellow-50">
                       <AlertTriangle className="h-4 w-4 text-yellow-600" />
                       <AlertDescription className="text-yellow-800">
-                        <div className="font-semibold mb-1">⚠️ มีความแตกต่างระดับคำเตือน</div>
-                        <p className="text-sm">ปริมาณหรือราคาต่างกันอยู่ในช่วงที่อนุญาต (ปริมาณ 5-10%, ราคา 3-5%)</p>
+                        <div className="mb-1 font-semibold">⚠️ มีความแตกต่างระดับคำเตือน</div>
+                        <p className="text-sm">
+                          ปริมาณหรือราคาต่างกันอยู่ในช่วงที่อนุญาต (ปริมาณ 5-10%, ราคา 3-5%)
+                        </p>
                         <p className="text-sm">คุณสามารถบันทึกใบซื้อได้ แต่ควรตรวจสอบความถูกต้อง</p>
                       </AlertDescription>
                     </Alert>
@@ -826,14 +864,16 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                       <AlertDescription className="text-green-800">
                         <div className="font-semibold">✅ ผ่านการตรวจสอบ 3-Way Match</div>
-                        <p className="text-sm">ปริมาณและราคาตรงกับ PO และใบส่งของ สามารถดำเนินการต่อได้</p>
+                        <p className="text-sm">
+                          ปริมาณและราคาตรงกับ PO และใบส่งของ สามารถดำเนินการต่อได้
+                        </p>
                       </AlertDescription>
                     </Alert>
                   )}
 
                   {/* Actions for blocked items */}
                   {hasBlockedItems() && (
-                    <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                    <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                       <Button
                         type="button"
                         variant="outline"
@@ -850,7 +890,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           toast({
                             title: 'ส่งกลับไปตรวจสอบ',
                             description: 'กรุณาติดต่อฝ่ายจัดซื้อเพื่อตรวจสอบ PO หรือ GRN',
-                          })
+                          });
                         }}
                       >
                         📧 แจ้งฝ่ายจัดซื้อ (Return to Vendor)
@@ -860,8 +900,10 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
 
                   {/* Override Reason Input */}
                   {overrideReason && (
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
-                      <div className="font-semibold text-blue-900 mb-1">📝 เหตุผลการอนุมัติพิเศษ:</div>
+                    <div className="mt-4 rounded border border-blue-200 bg-blue-50 p-3">
+                      <div className="mb-1 font-semibold text-blue-900">
+                        📝 เหตุผลการอนุมัติพิเศษ:
+                      </div>
                       <p className="text-sm text-blue-800">{overrideReason}</p>
                       <Button
                         type="button"
@@ -886,7 +928,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
               <CardContent>
                 <div className="space-y-4">
                   {/* Header */}
-                  <div className="hidden md:grid md:grid-cols-12 gap-2 text-sm font-medium text-muted-foreground">
+                  <div className="hidden gap-2 text-sm font-medium text-muted-foreground md:grid md:grid-cols-12">
                     <div className="col-span-4">รายการ</div>
                     <div className="col-span-1 text-center">จำนวน</div>
                     <div className="col-span-1">หน่วย</div>
@@ -899,19 +941,22 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
 
                   {/* Lines */}
                   {lines.map((line) => (
-                    <div key={line.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-start">
+                    <div
+                      key={line.id}
+                      className="grid grid-cols-1 items-start gap-2 md:grid-cols-12"
+                    >
                       {/* Product/Description */}
-                      <div className="md:col-span-4 space-y-1">
+                      <div className="space-y-1 md:col-span-4">
                         {products.length > 0 && (
                           <Select
                             value={line.productId || ''}
                             onValueChange={(value) => selectProduct(line.id, value)}
                           >
-                            <SelectTrigger className="w-full !h-11 text-base">
+                            <SelectTrigger className="!h-11 w-full text-base">
                               <SelectValue placeholder="เลือกสินค้า" />
                             </SelectTrigger>
                             <SelectContent>
-                              {products.map(product => (
+                              {products.map((product) => (
                                 <SelectItem key={product.id} value={product.id}>
                                   {product.code} - {product.name}
                                 </SelectItem>
@@ -926,7 +971,9 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           className={`!h-11 text-base ${errors[`line_${line.id}_description`] ? 'border-destructive' : ''}`}
                         />
                         {errors[`line_${line.id}_description`] && (
-                          <p className="text-xs text-destructive">{errors[`line_${line.id}_description`]}</p>
+                          <p className="text-xs text-destructive">
+                            {errors[`line_${line.id}_description`]}
+                          </p>
                         )}
                       </div>
 
@@ -937,11 +984,13 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           min="0"
                           step="1"
                           value={line.quantity}
-                          onChange={(e) => updateLine(line.id, 'quantity', parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateLine(line.id, 'quantity', parseFloat(e.target.value) || 0)
+                          }
                           className={`!h-11 text-base ${errors[`line_${line.id}_quantity`] ? 'border-destructive' : ''}`}
                         />
                         {errors[`line_${line.id}_quantity`] && (
-                          <p className="text-xs text-destructive md:hidden mt-1">
+                          <p className="mt-1 text-xs text-destructive md:hidden">
                             {errors[`line_${line.id}_quantity`]}
                           </p>
                         )}
@@ -953,7 +1002,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           value={line.unit}
                           onValueChange={(value) => updateLine(line.id, 'unit', value)}
                         >
-                          <SelectTrigger className="w-full !h-11 text-base">
+                          <SelectTrigger className="!h-11 w-full text-base">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -977,7 +1026,9 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           step="0.01"
                           placeholder="0.00"
                           value={line.unitPrice}
-                          onChange={(e) => updateLine(line.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateLine(line.id, 'unitPrice', parseFloat(e.target.value) || 0)
+                          }
                           className={`!h-11 text-base ${errors[`line_${line.id}_unitPrice`] ? 'border-destructive' : ''}`}
                         />
                       </div>
@@ -991,23 +1042,29 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                           step="1"
                           placeholder="0"
                           value={line.discount}
-                          onChange={(e) => updateLine(line.id, 'discount', parseFloat(e.target.value) || 0)}
-                          className="!h-11 text-base pr-6"
+                          onChange={(e) =>
+                            updateLine(line.id, 'discount', parseFloat(e.target.value) || 0)
+                          }
+                          className="!h-11 pr-6 text-base"
                         />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                          %
+                        </span>
                       </div>
 
                       {/* VAT */}
                       <div>
                         <Select
                           value={line.vatRate.toString()}
-                          onValueChange={(value) => updateLine(line.id, 'vatRate', parseFloat(value))}
+                          onValueChange={(value) =>
+                            updateLine(line.id, 'vatRate', parseFloat(value))
+                          }
                         >
-                          <SelectTrigger className="w-full !h-11 text-base">
+                          <SelectTrigger className="!h-11 w-full text-base">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {vatRates.map(rate => (
+                            {vatRates.map((rate) => (
                               <SelectItem key={rate} value={rate.toString()}>
                                 {rate}%
                               </SelectItem>
@@ -1045,7 +1102,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                     onClick={addLine}
                     className="w-full"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="mr-2 h-4 w-4" />
                     เพิ่มรายการ
                   </Button>
                 </div>
@@ -1061,7 +1118,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                     <span>{formatCurrency(totals.subtotal)}</span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                       <Label htmlFor="discountPercent">ส่วนลด (%)</Label>
                       <Input
@@ -1071,7 +1128,12 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                         max="100"
                         className="!h-11 text-base"
                         value={formData.discountPercent}
-                        onChange={(e) => setFormData(prev => ({ ...prev, discountPercent: parseFloat(e.target.value) || 0 }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            discountPercent: parseFloat(e.target.value) || 0,
+                          }))
+                        }
                       />
                     </div>
                     <div>
@@ -1083,7 +1145,12 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                         step="0.01"
                         className="!h-11 text-base"
                         value={formData.discountAmount}
-                        onChange={(e) => setFormData(prev => ({ ...prev, discountAmount: parseFloat(e.target.value) || 0 }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            discountAmount: parseFloat(e.target.value) || 0,
+                          }))
+                        }
                       />
                     </div>
                   </div>
@@ -1105,7 +1172,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                     <span>{formatCurrency(totals.totalVat)}</span>
                   </div>
 
-                  <div className="flex justify-between text-lg font-bold border-t pt-2">
+                  <div className="flex justify-between border-t pt-2 text-lg font-bold">
                     <span>ยอดรวมสุทธิ</span>
                     <span className="text-blue-600">{formatCurrency(totals.grandTotal)}</span>
                   </div>
@@ -1127,12 +1194,14 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
             </Card>
 
             {/* Withholding Tax & Notes */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               <div>
                 <Label htmlFor="withholdingRate">หัก ณ ที่จ่าย (%)</Label>
                 <Select
                   value={formData.withholdingRate.toString()}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, withholdingRate: parseFloat(value) }))}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, withholdingRate: parseFloat(value) }))
+                  }
                 >
                   <SelectTrigger id="withholdingRate" className="!h-11 text-base">
                     <SelectValue />
@@ -1153,7 +1222,7 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                   placeholder="หมายเหตุ (ถ้ามี)"
                   className="!h-11 text-base"
                   value={formData.notes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
                 />
               </div>
 
@@ -1164,19 +1233,16 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                   placeholder="หมายเหตุภายใน (ถ้ามี)"
                   className="!h-11 text-base"
                   value={formData.internalNotes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, internalNotes: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, internalNotes: e.target.value }))
+                  }
                 />
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={loading}
-              >
+            <div className="flex flex-col-reverse justify-end gap-2 border-t pt-4 sm:flex-row">
+              <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
                 ยกเลิก
               </Button>
               <Button
@@ -1187,12 +1253,12 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
               >
                 {loading ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     กำลังบันทึก...
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="mr-2 h-4 w-4" />
                     บันทึก
                   </>
                 )}
@@ -1213,7 +1279,9 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="overrideReason" className="required">เหตุผลการอนุมัติ *</Label>
+              <Label htmlFor="overrideReason" className="required">
+                เหตุผลการอนุมัติ *
+              </Label>
               <Textarea
                 id="overrideReason"
                 placeholder="ระบุเหตุผล เช่น: ราคาปรับตามราคาตลาด, ปริมาณเปลี่ยนตามการตรวจสอบจริง, ฯลฯ"
@@ -1222,13 +1290,13 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                 rows={4}
                 className="!min-h-[100px]"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-muted-foreground">
                 เหตุผลนี้จะถูกบันทึกในระบบเพื่อการตรวจสอบภายหลัง
               </p>
             </div>
             <Alert className="border-yellow-500 bg-yellow-50">
               <AlertTriangle className="h-4 w-4 text-yellow-600" />
-              <AlertDescription className="text-yellow-800 text-sm">
+              <AlertDescription className="text-sm text-yellow-800">
                 การอนุมัติพิเศษจะต้องได้รับการตรวจสอบจากผู้บังคับบัญชาระดับสูงกว่า
               </AlertDescription>
             </Alert>
@@ -1237,8 +1305,8 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
             <Button
               variant="outline"
               onClick={() => {
-                setShowOverrideDialog(false)
-                setOverrideReason('')
+                setShowOverrideDialog(false);
+                setOverrideReason('');
               }}
             >
               ยกเลิก
@@ -1250,14 +1318,14 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
                     title: 'กรุณาระบุเหตุผล',
                     description: 'ต้องระบุเหตุผลในการอนุมัติพิเศษ',
                     variant: 'destructive',
-                  })
-                  return
+                  });
+                  return;
                 }
-                setShowOverrideDialog(false)
+                setShowOverrideDialog(false);
                 toast({
                   title: 'บันทึกเหตุผลแล้ว',
                   description: 'สามารถกดบันทึกใบซื้อได้',
-                })
+                });
               }}
               className="bg-blue-600 hover:bg-blue-700"
             >
@@ -1267,5 +1335,5 @@ export function PurchaseForm({ open, onClose, onSuccess, defaultType = 'TAX_INVO
         </DialogContent>
       </Dialog>
     </Dialog>
-  )
+  );
 }

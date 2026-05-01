@@ -13,182 +13,182 @@
  * Full Thai font support requires font file conversion and embedding.
  */
 
-import { prisma } from '@/lib/db'
-import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import { prisma } from '@/lib/db';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 // Extend jsPDF to include autoTable
 declare module 'jspdf' {
   interface jsPDF {
-    autoTable: (options: any) => jsPDF
+    autoTable: (options: any) => jsPDF;
     lastAutoTable: {
-      finalY: number
-    }
+      finalY: number;
+    };
   }
 }
 
 // Type definitions for our data structures
 interface InvoiceData {
-  invoiceNo: string
-  invoiceDate: Date
-  dueDate?: Date
+  invoiceNo: string;
+  invoiceDate: Date;
+  dueDate?: Date;
   customer: {
-    name: string
-    taxId?: string
-    address?: string
-    subDistrict?: string
-    district?: string
-    province?: string
-    postalCode?: string
-    branchCode?: string
-  }
+    name: string;
+    taxId?: string;
+    address?: string;
+    subDistrict?: string;
+    district?: string;
+    province?: string;
+    postalCode?: string;
+    branchCode?: string;
+  };
   lines: Array<{
-    lineNo: number
-    description: string
-    quantity: number
-    unit: string
-    unitPrice: number
-    discount: number
-    amount: number
-  }>
-  subtotal: number
-  discountAmount: number
-  vatRate: number
-  vatAmount: number
-  totalAmount: number
-  netAmount: number
-  type: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE'
-  notes?: string
-  reference?: string
+    lineNo: number;
+    description: string;
+    quantity: number;
+    unit: string;
+    unitPrice: number;
+    discount: number;
+    amount: number;
+  }>;
+  subtotal: number;
+  discountAmount: number;
+  vatRate: number;
+  vatAmount: number;
+  totalAmount: number;
+  netAmount: number;
+  type: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE';
+  notes?: string;
+  reference?: string;
 }
 
 interface ReceiptData {
-  receiptNo: string
-  receiptDate: Date
+  receiptNo: string;
+  receiptDate: Date;
   customer: {
-    name: string
-    taxId?: string
-    address?: string
-  }
-  amount: number
-  paymentMethod: string
-  bankName?: string
-  bankAccount?: string
-  chequeNo?: string
-  withholding?: number
-  discount?: number
-  netAmount: number
-  notes?: string
+    name: string;
+    taxId?: string;
+    address?: string;
+  };
+  amount: number;
+  paymentMethod: string;
+  bankName?: string;
+  bankAccount?: string;
+  chequeNo?: string;
+  withholding?: number;
+  discount?: number;
+  netAmount: number;
+  notes?: string;
 }
 
 interface JournalEntryData {
-  entryNo: string
-  date: Date
-  description?: string
+  entryNo: string;
+  date: Date;
+  description?: string;
   lines: Array<{
-    lineNo: number
-    accountCode: string
-    accountName: string
-    description?: string
-    debit: number
-    credit: number
-  }>
-  totalDebit: number
-  totalCredit: number
-  notes?: string
+    lineNo: number;
+    accountCode: string;
+    accountName: string;
+    description?: string;
+    debit: number;
+    credit: number;
+  }>;
+  totalDebit: number;
+  totalCredit: number;
+  notes?: string;
 }
 
 interface ReportData {
-  title: string
-  titleTh: string
-  startDate?: Date
-  endDate?: Date
-  columns: string[]
-  data: Array<{ [key: string]: any }>
-  totals?: { [key: string]: number }
+  title: string;
+  titleTh: string;
+  startDate?: Date;
+  endDate?: Date;
+  columns: string[];
+  data: Array<{ [key: string]: any }>;
+  totals?: { [key: string]: number };
 }
 
 interface PayslipData {
   employee: {
-    firstName: string
-    lastName: string
-    employeeCode: string
-    position?: string
-    department?: string
-    idCardNumber?: string
-    taxId?: string
-    bankAccountNo?: string
-    bankName?: string
-  }
+    firstName: string;
+    lastName: string;
+    employeeCode: string;
+    position?: string;
+    department?: string;
+    idCardNumber?: string;
+    taxId?: string;
+    bankAccountNo?: string;
+    bankName?: string;
+  };
   payroll: {
-    baseSalary: number
-    additions: number
-    deductions: number
-    grossSalary: number
-    socialSecurity: number
-    withholdingTax: number
-    netPay: number
-  }
+    baseSalary: number;
+    additions: number;
+    deductions: number;
+    grossSalary: number;
+    socialSecurity: number;
+    withholdingTax: number;
+    netPay: number;
+  };
   payrollRun: {
-    runNo: string
-    periodMonth: number
-    periodYear: number
-    paymentDate: Date
-  }
+    runNo: string;
+    periodMonth: number;
+    periodYear: number;
+    paymentDate: Date;
+  };
   company?: {
-    name: string
-    address?: string
-    taxId?: string
-    phone?: string
-    bankName?: string
-    bankAccount?: string
-    bankAccountName?: string
-  }
+    name: string;
+    address?: string;
+    taxId?: string;
+    phone?: string;
+    bankName?: string;
+    bankAccount?: string;
+    bankAccountName?: string;
+  };
 }
 
 // Company information cache
-let companyCache: any = null
+let companyCache: any = null;
 
 async function getCompanyInfo() {
   if (companyCache) {
-    return companyCache
+    return companyCache;
   }
 
-  const company = await prisma.company.findFirst()
+  const company = await prisma.company.findFirst();
   if (company) {
-    companyCache = company
+    companyCache = company;
   }
-  return company
+  return company;
 }
 
 // Export utility functions for testing
 export function formatCurrency(amount: number): string {
-  return `฿${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
+  return `฿${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 }
 
 export function formatDateThai(date: Date): string {
-  const d = new Date(date)
-  const day = d.getDate().toString().padStart(2, '0')
-  const month = (d.getMonth() + 1).toString().padStart(2, '0')
-  const year = d.getFullYear() + 543 // Convert to Buddhist era
-  return `${day}/${month}/${year}`
+  const d = new Date(date);
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear() + 543; // Convert to Buddhist era
+  return `${day}/${month}/${year}`;
 }
 
 export function formatAddress(addr: {
-  address?: string
-  subDistrict?: string
-  district?: string
-  province?: string
-  postalCode?: string
+  address?: string;
+  subDistrict?: string;
+  district?: string;
+  province?: string;
+  postalCode?: string;
 }): string {
   const parts = [
     addr.address,
     addr.subDistrict,
     addr.district,
     addr.province,
-    addr.postalCode
-  ].filter(Boolean)
-  return parts.join(' ')
+    addr.postalCode,
+  ].filter(Boolean);
+  return parts.join(' ');
 }
 
 /**
@@ -198,35 +198,35 @@ export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: 'a4'
-  })
+    format: 'a4',
+  });
 
   // Register autoTable plugin
 
-  const company = await getCompanyInfo()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const margin = 15
-  let yPos = 15
+  const company = await getCompanyInfo();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  let yPos = 15;
 
   // Company Header
-  doc.setFontSize(16)
-  doc.setFont('helvetica', 'bold')
-  doc.text(company?.name || 'Company Name', margin, yPos)
-  yPos += 7
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text(company?.name || 'Company Name', margin, yPos);
+  yPos += 7;
 
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
   if (company?.address) {
-    doc.text(company.address, margin, yPos)
-    yPos += 5
+    doc.text(company.address, margin, yPos);
+    yPos += 5;
   }
   if (company?.taxId) {
-    doc.text(`Tax ID: ${company.taxId}`, margin, yPos)
-    yPos += 5
+    doc.text(`Tax ID: ${company.taxId}`, margin, yPos);
+    yPos += 5;
   }
   if (company?.phone) {
-    doc.text(`Tel: ${company.phone}`, margin, yPos)
-    yPos += 5
+    doc.text(`Tel: ${company.phone}`, margin, yPos);
+    yPos += 5;
   }
 
   // Document Title
@@ -234,65 +234,65 @@ export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     invoice.type === 'TAX_INVOICE'
       ? 'TAX INVOICE / ใบกำกับภาษี'
       : invoice.type === 'RECEIPT'
-      ? 'RECEIPT / ใบเสร็จรับเงิน'
-      : invoice.type === 'CREDIT_NOTE'
-      ? 'CREDIT NOTE / ใบลดหนี้'
-      : 'INVOICE / ใบแจ้งหนี้'
+        ? 'RECEIPT / ใบเสร็จรับเงิน'
+        : invoice.type === 'CREDIT_NOTE'
+          ? 'CREDIT NOTE / ใบลดหนี้'
+          : 'INVOICE / ใบแจ้งหนี้';
 
-  doc.setFontSize(18)
-  doc.setFont('helvetica', 'bold')
-  doc.text(docTitle, pageWidth / 2, yPos, { align: 'center' })
-  yPos += 12
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text(docTitle, pageWidth / 2, yPos, { align: 'center' });
+  yPos += 12;
 
   // Invoice Details (Left) - Customer (Right)
-  const leftCol = margin
-  const rightCol = pageWidth / 2 + 10
+  const leftCol = margin;
+  const rightCol = pageWidth / 2 + 10;
 
   // Left Column - Invoice Info
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  doc.text('Invoice No / เลขที่:', leftCol, yPos)
-  doc.text(`: ${invoice.invoiceNo}`, leftCol + 35, yPos)
-  yPos += 6
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Invoice No / เลขที่:', leftCol, yPos);
+  doc.text(`: ${invoice.invoiceNo}`, leftCol + 35, yPos);
+  yPos += 6;
 
-  doc.text('Date / วันที่:', leftCol, yPos)
-  doc.text(`: ${formatDateThai(invoice.invoiceDate)}`, leftCol + 35, yPos)
-  yPos += 6
+  doc.text('Date / วันที่:', leftCol, yPos);
+  doc.text(`: ${formatDateThai(invoice.invoiceDate)}`, leftCol + 35, yPos);
+  yPos += 6;
 
   if (invoice.dueDate) {
-    doc.text('Due Date / ครบกำหนด:', leftCol, yPos)
-    doc.text(`: ${formatDateThai(invoice.dueDate)}`, leftCol + 35, yPos)
-    yPos += 6
+    doc.text('Due Date / ครบกำหนด:', leftCol, yPos);
+    doc.text(`: ${formatDateThai(invoice.dueDate)}`, leftCol + 35, yPos);
+    yPos += 6;
   }
 
   if (invoice.reference) {
-    doc.text('Reference / อ้างอิง:', leftCol, yPos)
-    doc.text(`: ${invoice.reference}`, leftCol + 35, yPos)
-    yPos += 6
+    doc.text('Reference / อ้างอิง:', leftCol, yPos);
+    doc.text(`: ${invoice.reference}`, leftCol + 35, yPos);
+    yPos += 6;
   }
 
   // Right Column - Customer Info
-  let customerYPos = yPos - 18 // Start from top of right column
-  doc.text('Customer / ลูกค้า:', rightCol, customerYPos)
-  customerYPos += 6
+  let customerYPos = yPos - 18; // Start from top of right column
+  doc.text('Customer / ลูกค้า:', rightCol, customerYPos);
+  customerYPos += 6;
 
-  doc.setFont('helvetica', 'bold')
-  doc.text(invoice.customer?.name || 'N/A', rightCol, customerYPos)
-  customerYPos += 6
+  doc.setFont('helvetica', 'bold');
+  doc.text(invoice.customer?.name || 'N/A', rightCol, customerYPos);
+  customerYPos += 6;
 
-  doc.setFont('helvetica', 'normal')
+  doc.setFont('helvetica', 'normal');
   if (invoice.customer?.taxId) {
-    doc.text(`Tax ID: ${invoice.customer.taxId}`, rightCol, customerYPos)
-    customerYPos += 6
+    doc.text(`Tax ID: ${invoice.customer.taxId}`, rightCol, customerYPos);
+    customerYPos += 6;
   }
 
-  const customerAddress = formatAddress(invoice.customer || {})
+  const customerAddress = formatAddress(invoice.customer || {});
   if (customerAddress) {
-    const lines = doc.splitTextToSize(customerAddress, pageWidth / 2 - margin - 10)
-    doc.text(lines, rightCol, customerYPos)
+    const lines = doc.splitTextToSize(customerAddress, pageWidth / 2 - margin - 10);
+    doc.text(lines, rightCol, customerYPos);
   }
 
-  yPos = Math.max(yPos + 5, customerYPos + 15)
+  yPos = Math.max(yPos + 5, customerYPos + 15);
 
   // Line Items Table
   const tableData = invoice.lines.map((line: any) => [
@@ -302,8 +302,8 @@ export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     line.unit,
     formatCurrency(line.unitPrice),
     line.discount > 0 ? formatCurrency(line.discount) : '-',
-    formatCurrency(line.amount)
-  ])
+    formatCurrency(line.amount),
+  ]);
 
   doc.autoTable({
     startY: yPos,
@@ -315,8 +315,8 @@ export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
         'Unit\nหน่วย',
         'Unit Price\nราคา/หน่วย',
         'Discount\nส่วนลด',
-        'Amount\nจำนวนเงิน'
-      ]
+        'Amount\nจำนวนเงิน',
+      ],
     ],
     body: tableData,
     theme: 'grid',
@@ -326,11 +326,11 @@ export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
       fontSize: 8,
       fontStyle: 'bold',
       halign: 'center',
-      cellPadding: 3
+      cellPadding: 3,
     },
     bodyStyles: {
       fontSize: 9,
-      cellPadding: 2
+      cellPadding: 2,
     },
     columnStyles: {
       0: { cellWidth: 12, halign: 'center' }, // No
@@ -339,91 +339,88 @@ export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
       3: { cellWidth: 18, halign: 'center' }, // Unit
       4: { cellWidth: 25, halign: 'right' }, // Unit Price
       5: { cellWidth: 20, halign: 'right' }, // Discount
-      6: { cellWidth: 30, halign: 'right' } // Amount
+      6: { cellWidth: 30, halign: 'right' }, // Amount
     },
     styles: {
-      overflow: 'linebreak'
-    }
-  })
+      overflow: 'linebreak',
+    },
+  });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10
+  yPos = (doc.lastAutoTable as any).finalY + 10;
 
   // Summary Section
-  const summaryX = pageWidth - margin - 70
+  const summaryX = pageWidth - margin - 70;
 
   // Subtotal
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'normal')
-  doc.text('Subtotal / ยอดรวม:', summaryX, yPos)
-  doc.text(formatCurrency(invoice.subtotal), pageWidth - margin, yPos, { align: 'right' })
-  yPos += 6
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Subtotal / ยอดรวม:', summaryX, yPos);
+  doc.text(formatCurrency(invoice.subtotal), pageWidth - margin, yPos, { align: 'right' });
+  yPos += 6;
 
   // Discount
   if (invoice.discountAmount > 0) {
-    doc.text('Discount / ส่วนลด:', summaryX, yPos)
-    doc.text(
-      `(${formatCurrency(invoice.discountAmount)})`,
-      pageWidth - margin,
-      yPos,
-      { align: 'right' }
-    )
-    yPos += 6
+    doc.text('Discount / ส่วนลด:', summaryX, yPos);
+    doc.text(`(${formatCurrency(invoice.discountAmount)})`, pageWidth - margin, yPos, {
+      align: 'right',
+    });
+    yPos += 6;
   }
 
   // VAT
-  doc.text(`VAT ${invoice.vatRate}% / ภาษีมูลค่าเพิ่ม:`, summaryX, yPos)
-  doc.text(formatCurrency(invoice.vatAmount), pageWidth - margin, yPos, { align: 'right' })
-  yPos += 6
+  doc.text(`VAT ${invoice.vatRate}% / ภาษีมูลค่าเพิ่ม:`, summaryX, yPos);
+  doc.text(formatCurrency(invoice.vatAmount), pageWidth - margin, yPos, { align: 'right' });
+  yPos += 6;
 
   // Grand Total
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(11)
-  doc.text('Grand Total / ยอดสุทธิ:', summaryX, yPos)
-  doc.text(formatCurrency(invoice.netAmount), pageWidth - margin, yPos, { align: 'right' })
-  yPos += 12
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('Grand Total / ยอดสุทธิ:', summaryX, yPos);
+  doc.text(formatCurrency(invoice.netAmount), pageWidth - margin, yPos, { align: 'right' });
+  yPos += 12;
 
   // Terms and Conditions
   if (invoice.notes || invoice.terms) {
-    doc.setFontSize(9)
-    doc.setFont('helvetica', 'bold')
-    doc.text('Terms & Conditions / เงื่อนไข:', margin, yPos)
-    yPos += 5
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Terms & Conditions / เงื่อนไข:', margin, yPos);
+    yPos += 5;
 
-    doc.setFont('helvetica', 'normal')
+    doc.setFont('helvetica', 'normal');
     const termsText =
       invoice.terms ||
       '1. Payment due within 30 days / ชำระภายใน 30 วัน\n' +
         '2. Please quote invoice number in all correspondence / กรุณาระบุเลขที่ใบกำกับภาษีในการติดต่อ\n' +
-        '3. Bank transfer details: / รายละเอียดการโอนเงิน:'
+        '3. Bank transfer details: / รายละเอียดการโอนเงิน:';
 
-    const lines = doc.splitTextToSize(termsText, pageWidth - margin * 2)
-    doc.text(lines, margin, yPos)
+    const lines = doc.splitTextToSize(termsText, pageWidth - margin * 2);
+    doc.text(lines, margin, yPos);
 
     if (company?.bankName || company?.bankAccount) {
-      yPos += lines.length * 4 + 3
+      yPos += lines.length * 4 + 3;
       const bankInfo = [
         company.bankName && `Bank: ${company.bankName}`,
         company.bankAccount && `Account No: ${company.bankAccount}`,
-        company.bankAccountName && `Account Name: ${company.bankAccountName}`
+        company.bankAccountName && `Account Name: ${company.bankAccountName}`,
       ]
         .filter(Boolean)
-        .join('\n')
-      doc.text(bankInfo, margin + 3, yPos)
+        .join('\n');
+      doc.text(bankInfo, margin + 3, yPos);
     }
   }
 
   // Footer
-  const footerY = doc.internal.pageSize.getHeight() - 15
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
+  const footerY = doc.internal.pageSize.getHeight() - 15;
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
   doc.text(
     `This is a computer-generated document / เอกสารนี้เป็นการสร้างจากระบบคอมพิวเตอร์`,
     pageWidth / 2,
     footerY,
     { align: 'center' }
-  )
+  );
 
-  return doc.output('arraybuffer') as Uint8Array
+  return doc.output('arraybuffer') as Uint8Array;
 }
 
 /**
@@ -433,183 +430,171 @@ export async function generateReceiptPDF(receipt: any): Promise<Uint8Array> {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: 'a4'
-  })
+    format: 'a4',
+  });
 
-
-  const company = await getCompanyInfo()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const margin = 15
-  let yPos = 15
+  const company = await getCompanyInfo();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  let yPos = 15;
 
   // Company Header
-  doc.setFontSize(16)
-  doc.setFont('helvetica', 'bold')
-  doc.text(company?.name || 'Company Name', margin, yPos)
-  yPos += 7
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text(company?.name || 'Company Name', margin, yPos);
+  yPos += 7;
 
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
   if (company?.address) {
-    doc.text(company.address, margin, yPos)
-    yPos += 5
+    doc.text(company.address, margin, yPos);
+    yPos += 5;
   }
   if (company?.taxId) {
-    doc.text(`Tax ID: ${company.taxId}`, margin, yPos)
-    yPos += 5
+    doc.text(`Tax ID: ${company.taxId}`, margin, yPos);
+    yPos += 5;
   }
   if (company?.phone) {
-    doc.text(`Tel: ${company.phone}`, margin, yPos)
-    yPos += 5
+    doc.text(`Tel: ${company.phone}`, margin, yPos);
+    yPos += 5;
   }
 
   // Document Title
-  doc.setFontSize(18)
-  doc.setFont('helvetica', 'bold')
-  doc.text('RECEIPT / ใบเสร็จรับเงิน', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 12
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('RECEIPT / ใบเสร็จรับเงิน', pageWidth / 2, yPos, { align: 'center' });
+  yPos += 12;
 
   // Receipt Details
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  doc.text('Receipt No / เลขที่:', margin, yPos)
-  doc.text(`: ${receipt.receiptNo}`, margin + 35, yPos)
-  yPos += 6
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Receipt No / เลขที่:', margin, yPos);
+  doc.text(`: ${receipt.receiptNo}`, margin + 35, yPos);
+  yPos += 6;
 
-  doc.text('Date / วันที่:', margin, yPos)
-  doc.text(`: ${formatDateThai(receipt.receiptDate)}`, margin + 35, yPos)
-  yPos += 10
+  doc.text('Date / วันที่:', margin, yPos);
+  doc.text(`: ${formatDateThai(receipt.receiptDate)}`, margin + 35, yPos);
+  yPos += 10;
 
   // Customer Info
-  doc.setFont('helvetica', 'bold')
-  doc.text('Received from / รับเงินจาก:', margin, yPos)
-  yPos += 6
+  doc.setFont('helvetica', 'bold');
+  doc.text('Received from / รับเงินจาก:', margin, yPos);
+  yPos += 6;
 
-  doc.setFont('helvetica', 'normal')
-  doc.text(receipt.customer?.name || 'N/A', margin, yPos)
-  yPos += 6
+  doc.setFont('helvetica', 'normal');
+  doc.text(receipt.customer?.name || 'N/A', margin, yPos);
+  yPos += 6;
 
   if (receipt.customer?.taxId) {
-    doc.text(`Tax ID: ${receipt.customer.taxId}`, margin, yPos)
-    yPos += 6
+    doc.text(`Tax ID: ${receipt.customer.taxId}`, margin, yPos);
+    yPos += 6;
   }
 
   if (receipt.customer?.address) {
-    const addressLines = doc.splitTextToSize(
-      receipt.customer.address,
-      pageWidth - margin * 2
-    )
-    doc.text(addressLines, margin, yPos)
-    yPos += addressLines.length * 4 + 5
+    const addressLines = doc.splitTextToSize(receipt.customer.address, pageWidth - margin * 2);
+    doc.text(addressLines, margin, yPos);
+    yPos += addressLines.length * 4 + 5;
   } else {
-    yPos += 5
+    yPos += 5;
   }
 
   // Payment Details
-  doc.text('Being payment for / การชำระเพื่อ:', margin, yPos)
-  yPos += 6
+  doc.text('Being payment for / การชำระเพื่อ:', margin, yPos);
+  yPos += 6;
 
   if (receipt.invoice) {
-    doc.text(
-      `Invoice No: ${receipt.invoice.invoiceNo}`,
-      margin + 3,
-      yPos
-    )
-    yPos += 5
+    doc.text(`Invoice No: ${receipt.invoice.invoiceNo}`, margin + 3, yPos);
+    yPos += 5;
   }
 
   // Amount Section
-  yPos += 5
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(12)
-  doc.text(`Amount / จำนวนเงิน: ${formatCurrency(receipt.amount)}`, margin, yPos)
-  yPos += 8
+  yPos += 5;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text(`Amount / จำนวนเงิน: ${formatCurrency(receipt.amount)}`, margin, yPos);
+  yPos += 8;
 
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
 
   // Payment Method
-  doc.text('Payment Method / วิธีการชำระ:', margin, yPos)
-  yPos += 6
-  doc.text(
-    `: ${receipt.paymentMethod || 'CASH'}`,
-    margin + 3,
-    yPos
-  )
-  yPos += 6
+  doc.text('Payment Method / วิธีการชำระ:', margin, yPos);
+  yPos += 6;
+  doc.text(`: ${receipt.paymentMethod || 'CASH'}`, margin + 3, yPos);
+  yPos += 6;
 
   if (receipt.bankName) {
-    doc.text(`Bank: ${receipt.bankName}`, margin + 3, yPos)
-    yPos += 5
+    doc.text(`Bank: ${receipt.bankName}`, margin + 3, yPos);
+    yPos += 5;
   }
 
   if (receipt.bankAccount) {
-    doc.text(`Account: ${receipt.bankAccount}`, margin + 3, yPos)
-    yPos += 5
+    doc.text(`Account: ${receipt.bankAccount}`, margin + 3, yPos);
+    yPos += 5;
   }
 
   if (receipt.chequeNo) {
-    doc.text(`Cheque No: ${receipt.chequeNo}`, margin + 3, yPos)
-    yPos += 5
+    doc.text(`Cheque No: ${receipt.chequeNo}`, margin + 3, yPos);
+    yPos += 5;
     if (receipt.chequeDate) {
-      doc.text(`Cheque Date: ${formatDateThai(receipt.chequeDate)}`, margin + 3, yPos)
-      yPos += 5
+      doc.text(`Cheque Date: ${formatDateThai(receipt.chequeDate)}`, margin + 3, yPos);
+      yPos += 5;
     }
   }
 
   // Summary
-  yPos += 5
-  const summaryX = pageWidth - margin - 50
+  yPos += 5;
+  const summaryX = pageWidth - margin - 50;
 
   // Withholding Tax
   if (receipt.withholding > 0) {
-    doc.text('Withholding Tax / ภาษีหัก ณ ที่จ่าย:', summaryX, yPos)
+    doc.text('Withholding Tax / ภาษีหัก ณ ที่จ่าย:', summaryX, yPos);
     doc.text(`(${formatCurrency(receipt.withholding)})`, pageWidth - margin, yPos, {
-      align: 'right'
-    })
-    yPos += 6
+      align: 'right',
+    });
+    yPos += 6;
   }
 
   // Discount
   if (receipt.discount > 0) {
-    doc.text('Discount / ส่วนลด:', summaryX, yPos)
+    doc.text('Discount / ส่วนลด:', summaryX, yPos);
     doc.text(`(${formatCurrency(receipt.discount)})`, pageWidth - margin, yPos, {
-      align: 'right'
-    })
-    yPos += 6
+      align: 'right',
+    });
+    yPos += 6;
   }
 
   // Net Amount
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(11)
-  doc.text('Net Received / ยอดสุทธิ:', summaryX, yPos)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('Net Received / ยอดสุทธิ:', summaryX, yPos);
   doc.text(formatCurrency(receipt.netAmount), pageWidth - margin, yPos, {
-    align: 'right'
-  })
-  yPos += 12
+    align: 'right',
+  });
+  yPos += 12;
 
   // Notes
   if (receipt.notes) {
-    doc.setFontSize(9)
-    doc.setFont('helvetica', 'normal')
-    doc.text('Notes / หมายเหตุ:', margin, yPos)
-    yPos += 5
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Notes / หมายเหตุ:', margin, yPos);
+    yPos += 5;
 
-    const noteLines = doc.splitTextToSize(receipt.notes, pageWidth - margin * 2)
-    doc.text(noteLines, margin, yPos)
+    const noteLines = doc.splitTextToSize(receipt.notes, pageWidth - margin * 2);
+    doc.text(noteLines, margin, yPos);
   }
 
   // Footer
-  const footerY = doc.internal.pageSize.getHeight() - 15
-  doc.setFontSize(8)
+  const footerY = doc.internal.pageSize.getHeight() - 15;
+  doc.setFontSize(8);
   doc.text(
     'This is a computer-generated document / เอกสารนี้เป็นการสร้างจากระบบคอมพิวเตอร์',
     pageWidth / 2,
     footerY,
     { align: 'center' }
-  )
+  );
 
-  return doc.output('arraybuffer') as Uint8Array
+  return doc.output('arraybuffer') as Uint8Array;
 }
 
 /**
@@ -619,50 +604,49 @@ export async function generateJournalEntryPDF(entry: any): Promise<Uint8Array> {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: 'a4'
-  })
+    format: 'a4',
+  });
 
-
-  const company = await getCompanyInfo()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const margin = 15
-  let yPos = 15
+  const company = await getCompanyInfo();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  let yPos = 15;
 
   // Company Header
-  doc.setFontSize(16)
-  doc.setFont('helvetica', 'bold')
-  doc.text(company?.name || 'Company Name', margin, yPos)
-  yPos += 7
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text(company?.name || 'Company Name', margin, yPos);
+  yPos += 7;
 
   // Document Title
-  doc.setFontSize(14)
-  doc.text('JOURNAL ENTRY / บันทึกบัญชี', margin, yPos)
-  yPos += 12
+  doc.setFontSize(14);
+  doc.text('JOURNAL ENTRY / บันทึกบัญชี', margin, yPos);
+  yPos += 12;
 
   // Entry Details
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  doc.text('Entry No / เลขที่:', margin, yPos)
-  doc.text(`: ${entry.entryNo}`, margin + 30, yPos)
-  yPos += 6
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Entry No / เลขที่:', margin, yPos);
+  doc.text(`: ${entry.entryNo}`, margin + 30, yPos);
+  yPos += 6;
 
-  doc.text('Date / วันที่:', margin, yPos)
-  doc.text(`: ${formatDateThai(entry.date)}`, margin + 30, yPos)
-  yPos += 6
+  doc.text('Date / วันที่:', margin, yPos);
+  doc.text(`: ${formatDateThai(entry.date)}`, margin + 30, yPos);
+  yPos += 6;
 
   if (entry.description) {
-    doc.text('Description / รายการ:', margin, yPos)
-    doc.text(`: ${entry.description}`, margin + 30, yPos)
-    yPos += 6
+    doc.text('Description / รายการ:', margin, yPos);
+    doc.text(`: ${entry.description}`, margin + 30, yPos);
+    yPos += 6;
   }
 
   if (entry.reference) {
-    doc.text('Reference / เอกสารอ้างอิง:', margin, yPos)
-    doc.text(`: ${entry.reference}`, margin + 30, yPos)
-    yPos += 6
+    doc.text('Reference / เอกสารอ้างอิง:', margin, yPos);
+    doc.text(`: ${entry.reference}`, margin + 30, yPos);
+    yPos += 6;
   }
 
-  yPos += 5
+  yPos += 5;
 
   // Debit/Credit Table
   const tableData = entry.lines.map((line: any) => [
@@ -671,8 +655,8 @@ export async function generateJournalEntryPDF(entry: any): Promise<Uint8Array> {
     line.account?.name || line.accountName,
     line.description || '',
     line.debit > 0 ? formatCurrency(line.debit) : '',
-    line.credit > 0 ? formatCurrency(line.credit) : ''
-  ])
+    line.credit > 0 ? formatCurrency(line.credit) : '',
+  ]);
 
   doc.autoTable({
     startY: yPos,
@@ -683,8 +667,8 @@ export async function generateJournalEntryPDF(entry: any): Promise<Uint8Array> {
         'Account Name\nชื่อบัญชี',
         'Description\nรายการ',
         'Debit\nเดบิต',
-        'Credit\nเครดิต'
-      ]
+        'Credit\nเครดิต',
+      ],
     ],
     body: tableData,
     theme: 'grid',
@@ -693,11 +677,11 @@ export async function generateJournalEntryPDF(entry: any): Promise<Uint8Array> {
       textColor: 255,
       fontSize: 8,
       fontStyle: 'bold',
-      halign: 'center'
+      halign: 'center',
     },
     bodyStyles: {
       fontSize: 9,
-      cellPadding: 2
+      cellPadding: 2,
     },
     columnStyles: {
       0: { cellWidth: 12, halign: 'center' },
@@ -705,42 +689,51 @@ export async function generateJournalEntryPDF(entry: any): Promise<Uint8Array> {
       2: { cellWidth: 50 },
       3: { cellWidth: 45 },
       4: { cellWidth: 30, halign: 'right' },
-      5: { cellWidth: 30, halign: 'right' }
+      5: { cellWidth: 30, halign: 'right' },
     },
-    foot: [['', '', '', 'TOTAL / รวม', formatCurrency(entry.totalDebit), formatCurrency(entry.totalCredit)]],
+    foot: [
+      [
+        '',
+        '',
+        '',
+        'TOTAL / รวม',
+        formatCurrency(entry.totalDebit),
+        formatCurrency(entry.totalCredit),
+      ],
+    ],
     footStyles: {
       fillColor: [200, 200, 200],
       fontStyle: 'bold',
-      fontSize: 9
-    }
-  })
+      fontSize: 9,
+    },
+  });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10
+  yPos = (doc.lastAutoTable as any).finalY + 10;
 
   // Balance Check
-  const isBalanced = Math.abs(entry.totalDebit - entry.totalCredit) < 0.01
-  doc.setFontSize(10)
+  const isBalanced = Math.abs(entry.totalDebit - entry.totalCredit) < 0.01;
+  doc.setFontSize(10);
   if (isBalanced) {
-    doc.setTextColor(0, 128, 0)
-    doc.text('✓ Balanced / ตรงกัน', margin, yPos)
+    doc.setTextColor(0, 128, 0);
+    doc.text('✓ Balanced / ตรงกัน', margin, yPos);
   } else {
-    doc.setTextColor(255, 0, 0)
-    doc.text('✗ Not Balanced / ไม่ตรงกัน', margin, yPos)
+    doc.setTextColor(255, 0, 0);
+    doc.text('✗ Not Balanced / ไม่ตรงกัน', margin, yPos);
   }
-  doc.setTextColor(0, 0, 0)
+  doc.setTextColor(0, 0, 0);
 
   // Notes
   if (entry.notes) {
-    yPos += 10
-    doc.setFont('helvetica', 'normal')
-    doc.text('Notes / หมายเหตุ:', margin, yPos)
-    yPos += 5
+    yPos += 10;
+    doc.setFont('helvetica', 'normal');
+    doc.text('Notes / หมายเหตุ:', margin, yPos);
+    yPos += 5;
 
-    const noteLines = doc.splitTextToSize(entry.notes, pageWidth - margin * 2)
-    doc.text(noteLines, margin, yPos)
+    const noteLines = doc.splitTextToSize(entry.notes, pageWidth - margin * 2);
+    doc.text(noteLines, margin, yPos);
   }
 
-  return doc.output('arraybuffer') as Uint8Array
+  return doc.output('arraybuffer') as Uint8Array;
 }
 
 /**
@@ -750,43 +743,42 @@ export async function generateTrialBalancePDF(data: ReportData): Promise<Uint8Ar
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',
-    format: 'a4'
-  })
+    format: 'a4',
+  });
 
-
-  const company = await getCompanyInfo()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-  const margin = 10
-  let yPos = 10
+  const company = await getCompanyInfo();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 10;
+  let yPos = 10;
 
   // Company Header
-  doc.setFontSize(14)
-  doc.setFont('helvetica', 'bold')
-  doc.text(company?.name || 'Company Name', margin, yPos)
-  yPos += 7
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(company?.name || 'Company Name', margin, yPos);
+  yPos += 7;
 
   // Report Title
-  doc.setFontSize(16)
-  doc.text(`${data.title} / ${data.titleTh}`, pageWidth / 2, yPos, { align: 'center' })
-  yPos += 7
+  doc.setFontSize(16);
+  doc.text(`${data.title} / ${data.titleTh}`, pageWidth / 2, yPos, { align: 'center' });
+  yPos += 7;
 
   // Date Range
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
   if (data.startDate && data.endDate) {
     doc.text(
       `For the period / ระหว่างวันที่: ${formatDateThai(data.startDate)} - ${formatDateThai(data.endDate)}`,
       pageWidth / 2,
       yPos,
       { align: 'center' }
-    )
+    );
   } else if (data.endDate) {
     doc.text(`As of / ณ วันที่: ${formatDateThai(data.endDate)}`, pageWidth / 2, yPos, {
-      align: 'center'
-    })
+      align: 'center',
+    });
   }
-  yPos += 10
+  yPos += 10;
 
   // Table
   doc.autoTable({
@@ -799,42 +791,39 @@ export async function generateTrialBalancePDF(data: ReportData): Promise<Uint8Ar
       textColor: 255,
       fontSize: 8,
       fontStyle: 'bold',
-      halign: 'center'
+      halign: 'center',
     },
     bodyStyles: {
       fontSize: 8,
-      cellPadding: 2
+      cellPadding: 2,
     },
     styles: {
-      overflow: 'linebreak'
+      overflow: 'linebreak',
     },
     columnStyles: data.columns.reduce((acc, _, i) => {
       if (i === 0) {
         // First column (Account Code)
-        acc[i] = { cellWidth: 20 }
+        acc[i] = { cellWidth: 20 };
       } else if (i === 1) {
         // Second column (Account Name)
-        acc[i] = { cellWidth: 60 }
+        acc[i] = { cellWidth: 60 };
       } else {
         // Numeric columns
-        acc[i] = { halign: 'right', cellWidth: 35 }
+        acc[i] = { halign: 'right', cellWidth: 35 };
       }
-      return acc
-    }, {} as any)
-  })
+      return acc;
+    }, {} as any),
+  });
 
   // Footer
-  const footerY = pageHeight - 10
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
-  doc.text(
-    `Generated on / สร้างเมื่อ: ${formatDateThai(new Date())}`,
-    pageWidth / 2,
-    footerY,
-    { align: 'center' }
-  )
+  const footerY = pageHeight - 10;
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Generated on / สร้างเมื่อ: ${formatDateThai(new Date())}`, pageWidth / 2, footerY, {
+    align: 'center',
+  });
 
-  return doc.output('arraybuffer') as Uint8Array
+  return doc.output('arraybuffer') as Uint8Array;
 }
 
 /**
@@ -844,43 +833,42 @@ export async function generateIncomeStatementPDF(data: ReportData): Promise<Uint
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: 'a4'
-  })
+    format: 'a4',
+  });
 
-
-  const company = await getCompanyInfo()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-  const margin = 15
-  let yPos = 15
+  const company = await getCompanyInfo();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 15;
+  let yPos = 15;
 
   // Company Header
-  doc.setFontSize(14)
-  doc.setFont('helvetica', 'bold')
-  doc.text(company?.name || 'Company Name', margin, yPos)
-  yPos += 7
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(company?.name || 'Company Name', margin, yPos);
+  yPos += 7;
 
   // Report Title
-  doc.setFontSize(16)
-  doc.text(`${data.title} / ${data.titleTh}`, pageWidth / 2, yPos, { align: 'center' })
-  yPos += 7
+  doc.setFontSize(16);
+  doc.text(`${data.title} / ${data.titleTh}`, pageWidth / 2, yPos, { align: 'center' });
+  yPos += 7;
 
   // Date Range
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
   if (data.startDate && data.endDate) {
     doc.text(
       `For the period / ระหว่างวันที่: ${formatDateThai(data.startDate)} - ${formatDateThai(data.endDate)}`,
       pageWidth / 2,
       yPos,
       { align: 'center' }
-    )
+    );
   } else if (data.endDate) {
     doc.text(`As of / ณ วันที่: ${formatDateThai(data.endDate)}`, pageWidth / 2, yPos, {
-      align: 'center'
-    })
+      align: 'center',
+    });
   }
-  yPos += 10
+  yPos += 10;
 
   // Table
   doc.autoTable({
@@ -893,69 +881,66 @@ export async function generateIncomeStatementPDF(data: ReportData): Promise<Uint
       textColor: 255,
       fontSize: 9,
       fontStyle: 'bold',
-      halign: 'left'
+      halign: 'left',
     },
     bodyStyles: {
       fontSize: 9,
-      cellPadding: 2
+      cellPadding: 2,
     },
     styles: {
-      overflow: 'linebreak'
+      overflow: 'linebreak',
     },
     columnStyles: {
       0: { cellWidth: 80 }, // Description
       1: { halign: 'right', cellWidth: 40 }, // Amount
-      2: { halign: 'right', cellWidth: 40 } // Percentage (optional)
+      2: { halign: 'right', cellWidth: 40 }, // Percentage (optional)
     },
     didParseCell: function (data: any) {
       // Add styling for section headers and totals
-      const row = data.row.raw
+      const row = data.row.raw;
       if (row && typeof row === 'object') {
         const isHeader =
           row[0]?.includes('REVENUE') ||
           row[0]?.includes('รายได้') ||
           row[0]?.includes('EXPENSE') ||
-          row[0]?.includes('ค่าใช้จ่าย')
+          row[0]?.includes('ค่าใช้จ่าย');
         const isTotal =
-          row[0]?.includes('TOTAL') || row[0]?.includes('รวม') || row[0]?.includes('NET')
+          row[0]?.includes('TOTAL') || row[0]?.includes('รวม') || row[0]?.includes('NET');
 
         if (isHeader) {
-          data.cell.styles.fillColor = [240, 240, 240]
-          data.cell.styles.fontStyle = 'bold'
+          data.cell.styles.fillColor = [240, 240, 240];
+          data.cell.styles.fontStyle = 'bold';
         }
         if (isTotal) {
-          data.cell.styles.fillColor = [220, 220, 220]
-          data.cell.styles.fontStyle = 'bold'
+          data.cell.styles.fillColor = [220, 220, 220];
+          data.cell.styles.fontStyle = 'bold';
         }
       }
-    }
-  })
+    },
+  });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10
+  yPos = (doc.lastAutoTable as any).finalY + 10;
 
   // Footer with totals
   if (data.totals) {
     Object.entries(data.totals).forEach(([key, value]) => {
       if (typeof value === 'number') {
-        doc.setFont('helvetica', 'bold')
-        doc.text(`${key}: ${formatCurrency(value)}`, margin, yPos)
-        yPos += 6
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${key}: ${formatCurrency(value)}`, margin, yPos);
+        yPos += 6;
       }
-    })
+    });
   }
 
   // Footer
-  const footerY = pageHeight - 15
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
-  doc.text(
-    `Generated on / สร้างเมื่อ: ${formatDateThai(new Date())}`,
-    pageWidth / 2,
-    footerY,
-    { align: 'center' }
-  )
+  const footerY = pageHeight - 15;
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Generated on / สร้างเมื่อ: ${formatDateThai(new Date())}`, pageWidth / 2, footerY, {
+    align: 'center',
+  });
 
-  return doc.output('arraybuffer') as Uint8Array
+  return doc.output('arraybuffer') as Uint8Array;
 }
 
 /**
@@ -965,49 +950,48 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: 'a4'
-  })
+    format: 'a4',
+  });
 
-
-  const company = await getCompanyInfo()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-  const margin = 15
-  let yPos = 15
+  const company = await getCompanyInfo();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 15;
+  let yPos = 15;
 
   // Company Header
-  doc.setFontSize(14)
-  doc.setFont('helvetica', 'bold')
-  doc.text(company?.name || 'Company Name', margin, yPos)
-  yPos += 7
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(company?.name || 'Company Name', margin, yPos);
+  yPos += 7;
 
   // Report Title
-  doc.setFontSize(16)
-  doc.text(`${data.title} / ${data.titleTh}`, pageWidth / 2, yPos, { align: 'center' })
-  yPos += 7
+  doc.setFontSize(16);
+  doc.text(`${data.title} / ${data.titleTh}`, pageWidth / 2, yPos, { align: 'center' });
+  yPos += 7;
 
   // Date
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
   if (data.endDate) {
     doc.text(`As of / ณ วันที่: ${formatDateThai(data.endDate)}`, pageWidth / 2, yPos, {
-      align: 'center'
-    })
+      align: 'center',
+    });
   }
-  yPos += 10
+  yPos += 10;
 
   // Table - Split into Assets and Liabilities/Equity
-  const halfWidth = (pageWidth - margin * 2) / 2 - 5
+  const halfWidth = (pageWidth - margin * 2) / 2 - 5;
 
   // Assets Section
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(11)
-  doc.text('ASSETS / สินทรัพย์', margin, yPos)
-  yPos += 5
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('ASSETS / สินทรัพย์', margin, yPos);
+  yPos += 5;
 
   const assetsData = data.data
     .filter((row) => row.type === 'ASSET' || row.category?.includes('Assets'))
-    .map((row) => [row.account || row.description, formatCurrency(row.amount || 0)])
+    .map((row) => [row.account || row.description, formatCurrency(row.amount || 0)]);
 
   if (assetsData.length > 0) {
     doc.autoTable({
@@ -1019,33 +1003,33 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
         fillColor: [100, 100, 150],
         textColor: 255,
         fontSize: 8,
-        fontStyle: 'bold'
+        fontStyle: 'bold',
       },
       bodyStyles: {
         fontSize: 8,
-        cellPadding: 1
+        cellPadding: 1,
       },
       columnStyles: {
         0: { cellWidth: halfWidth - 25 },
-        1: { halign: 'right', cellWidth: 25 }
-      }
-    })
+        1: { halign: 'right', cellWidth: 25 },
+      },
+    });
 
-    yPos = (doc.lastAutoTable as any).finalY + 3
+    yPos = (doc.lastAutoTable as any).finalY + 3;
   }
 
   // Total Assets
-  const totalAssets = data.totals?.totalAssets || data.totals?.assets || 0
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(9)
-  doc.text(`Total Assets / สินทรัพย์รวม: ${formatCurrency(totalAssets)}`, margin, yPos)
-  yPos += 8
+  const totalAssets = data.totals?.totalAssets || data.totals?.assets || 0;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text(`Total Assets / สินทรัพย์รวม: ${formatCurrency(totalAssets)}`, margin, yPos);
+  yPos += 8;
 
   // Liabilities Section
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(11)
-  doc.text('LIABILITIES & EQUITY / หนี้สินและทุน', margin, yPos)
-  yPos += 5
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('LIABILITIES & EQUITY / หนี้สินและทุน', margin, yPos);
+  yPos += 5;
 
   const liabilitiesData = data.data
     .filter(
@@ -1055,7 +1039,7 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
         row.category?.includes('Liabilities') ||
         row.category?.includes('Equity')
     )
-    .map((row) => [row.account || row.description, formatCurrency(row.amount || 0)])
+    .map((row) => [row.account || row.description, formatCurrency(row.amount || 0)]);
 
   if (liabilitiesData.length > 0) {
     doc.autoTable({
@@ -1067,57 +1051,54 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
         fillColor: [150, 100, 100],
         textColor: 255,
         fontSize: 8,
-        fontStyle: 'bold'
+        fontStyle: 'bold',
       },
       bodyStyles: {
         fontSize: 8,
-        cellPadding: 1
+        cellPadding: 1,
       },
       columnStyles: {
         0: { cellWidth: halfWidth - 25 },
-        1: { halign: 'right', cellWidth: 25 }
-      }
-    })
+        1: { halign: 'right', cellWidth: 25 },
+      },
+    });
 
-    yPos = (doc.lastAutoTable as any).finalY + 3
+    yPos = (doc.lastAutoTable as any).finalY + 3;
   }
 
   // Total Liabilities & Equity
   const totalLiabilitiesEquity =
     data.totals?.totalLiabilitiesEquity ||
-    (data.totals?.liabilities || 0) + (data.totals?.equity || 0)
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(9)
+    (data.totals?.liabilities || 0) + (data.totals?.equity || 0);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
   doc.text(
     `Total Liabilities & Equity / หนี้สินและทุนรวม: ${formatCurrency(totalLiabilitiesEquity)}`,
     margin,
     yPos
-  )
+  );
 
   // Balance Check
-  yPos += 10
-  const isBalanced = Math.abs(totalAssets - totalLiabilitiesEquity) < 0.01
+  yPos += 10;
+  const isBalanced = Math.abs(totalAssets - totalLiabilitiesEquity) < 0.01;
   if (isBalanced) {
-    doc.setTextColor(0, 128, 0)
-    doc.text('✓ Balanced / ตรงกัน', margin, yPos)
+    doc.setTextColor(0, 128, 0);
+    doc.text('✓ Balanced / ตรงกัน', margin, yPos);
   } else {
-    doc.setTextColor(255, 0, 0)
-    doc.text('✗ Not Balanced / ไม่ตรงกัน', margin, yPos)
+    doc.setTextColor(255, 0, 0);
+    doc.text('✗ Not Balanced / ไม่ตรงกัน', margin, yPos);
   }
-  doc.setTextColor(0, 0, 0)
+  doc.setTextColor(0, 0, 0);
 
   // Footer
-  const footerY = pageHeight - 15
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
-  doc.text(
-    `Generated on / สร้างเมื่อ: ${formatDateThai(new Date())}`,
-    pageWidth / 2,
-    footerY,
-    { align: 'center' }
-  )
+  const footerY = pageHeight - 15;
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Generated on / สร้างเมื่อ: ${formatDateThai(new Date())}`, pageWidth / 2, footerY, {
+    align: 'center',
+  });
 
-  return doc.output('arraybuffer') as Uint8Array
+  return doc.output('arraybuffer') as Uint8Array;
 }
 
 /**
@@ -1133,9 +1114,9 @@ export function escapeThaiText(text: string): string {
     .replace(/[^\x00-\x7F]/g, (match) => {
       // Try to preserve basic Thai characters by returning them
       // jsPDF may not render them correctly without proper font
-      return match
+      return match;
     })
-    .trim()
+    .trim();
 }
 
 /**
@@ -1164,121 +1145,132 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: 'a4'
-  })
+    format: 'a4',
+  });
 
-
-  const company = data.company || await getCompanyInfo()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-  const margin = 15
-  let yPos = 15
+  const company = data.company || (await getCompanyInfo());
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 15;
+  let yPos = 15;
 
   // Thai month names
-  const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-                       'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
+  const THAI_MONTHS = [
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
+  ];
 
   // Company Header
-  doc.setFontSize(16)
-  doc.setFont('helvetica', 'bold')
-  doc.text(company?.name || 'Company Name', margin, yPos)
-  yPos += 7
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text(company?.name || 'Company Name', margin, yPos);
+  yPos += 7;
 
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
   if (company?.address) {
-    doc.text(company.address, margin, yPos)
-    yPos += 5
+    doc.text(company.address, margin, yPos);
+    yPos += 5;
   }
   if (company?.taxId) {
-    doc.text(`Tax ID: ${company.taxId}`, margin, yPos)
-    yPos += 5
+    doc.text(`Tax ID: ${company.taxId}`, margin, yPos);
+    yPos += 5;
   }
   if (company?.phone) {
-    doc.text(`Tel: ${company.phone}`, margin, yPos)
-    yPos += 5
+    doc.text(`Tel: ${company.phone}`, margin, yPos);
+    yPos += 5;
   }
 
   // Payslip Title
-  doc.setFontSize(20)
-  doc.setFont('helvetica', 'bold')
-  doc.text('PAYSLIP / สลิปเงินเดือน', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 15
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('PAYSLIP / สลิปเงินเดือน', pageWidth / 2, yPos, { align: 'center' });
+  yPos += 15;
 
   // Pay Period
-  doc.setFontSize(11)
-  doc.setFont('helvetica', 'bold')
-  doc.text('Pay Period / งวดเงินเดือน:', margin, yPos)
-  yPos += 6
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Pay Period / งวดเงินเดือน:', margin, yPos);
+  yPos += 6;
 
-  doc.setFont('helvetica', 'normal')
-  const monthName = THAI_MONTHS[data.payrollRun.periodMonth - 1]
-  const periodText = `${monthName} ${data.payrollRun.periodYear + 543} (${data.payrollRun.periodMonth}/${data.payrollRun.periodYear})`
-  doc.text(periodText, margin + 3, yPos)
-  yPos += 10
+  doc.setFont('helvetica', 'normal');
+  const monthName = THAI_MONTHS[data.payrollRun.periodMonth - 1];
+  const periodText = `${monthName} ${data.payrollRun.periodYear + 543} (${data.payrollRun.periodMonth}/${data.payrollRun.periodYear})`;
+  doc.text(periodText, margin + 3, yPos);
+  yPos += 10;
 
   // Employee Information Section
-  doc.setDrawColor(200, 200, 200)
-  doc.setLineWidth(0.5)
-  doc.rect(margin, yPos, pageWidth - margin * 2, 35)
-  yPos += 5
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.5);
+  doc.rect(margin, yPos, pageWidth - margin * 2, 35);
+  yPos += 5;
 
-  doc.setFontSize(11)
-  doc.setFont('helvetica', 'bold')
-  doc.text('Employee Information / ข้อมูลพนักงาน', margin + 3, yPos)
-  yPos += 7
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Employee Information / ข้อมูลพนักงาน', margin + 3, yPos);
+  yPos += 7;
 
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
 
-  const employeeName = `${data.employee.firstName} ${data.employee.lastName}`
-  doc.text(`Name / ชื่อ-สกุล:`, margin + 5, yPos)
-  doc.text(employeeName, margin + 40, yPos)
-  yPos += 6
+  const employeeName = `${data.employee.firstName} ${data.employee.lastName}`;
+  doc.text(`Name / ชื่อ-สกุล:`, margin + 5, yPos);
+  doc.text(employeeName, margin + 40, yPos);
+  yPos += 6;
 
-  doc.text(`Employee ID / รหัสพนักงาน:`, margin + 5, yPos)
-  doc.text(data.employee.employeeCode, margin + 40, yPos)
-  yPos += 6
+  doc.text(`Employee ID / รหัสพนักงาน:`, margin + 5, yPos);
+  doc.text(data.employee.employeeCode, margin + 40, yPos);
+  yPos += 6;
 
   if (data.employee.position) {
-    doc.text(`Position / ตำแหน่ง:`, margin + 5, yPos)
-    doc.text(data.employee.position, margin + 40, yPos)
-    yPos += 6
+    doc.text(`Position / ตำแหน่ง:`, margin + 5, yPos);
+    doc.text(data.employee.position, margin + 40, yPos);
+    yPos += 6;
   }
 
   if (data.employee.department) {
-    doc.text(`Department / แผนก:`, margin + 5, yPos)
-    doc.text(data.employee.department, margin + 40, yPos)
-    yPos += 6
+    doc.text(`Department / แผนก:`, margin + 5, yPos);
+    doc.text(data.employee.department, margin + 40, yPos);
+    yPos += 6;
   }
 
   if (data.employee.idCardNumber) {
-    doc.text(`ID Card / เลขบัตรประชาชน:`, margin + 5, yPos)
-    doc.text(data.employee.idCardNumber, margin + 40, yPos)
+    doc.text(`ID Card / เลขบัตรประชาชน:`, margin + 5, yPos);
+    doc.text(data.employee.idCardNumber, margin + 40, yPos);
   }
 
-  yPos += 12
+  yPos += 12;
 
   // Earnings Section
-  doc.setDrawColor(66, 139, 202) // Blue
-  doc.setLineWidth(1)
-  doc.line(margin, yPos, pageWidth - margin, yPos)
-  yPos += 5
+  doc.setDrawColor(66, 139, 202); // Blue
+  doc.setLineWidth(1);
+  doc.line(margin, yPos, pageWidth - margin, yPos);
+  yPos += 5;
 
-  doc.setFontSize(12)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(66, 139, 202)
-  doc.text('EARNINGS / รายการรับ', margin, yPos)
-  doc.setTextColor(0, 0, 0)
-  yPos += 8
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(66, 139, 202);
+  doc.text('EARNINGS / รายการรับ', margin, yPos);
+  doc.setTextColor(0, 0, 0);
+  yPos += 8;
 
   // Earnings Table
   const earningsData = [
     ['Basic Salary / เงินเดือนพื้นฐาน', formatCurrency(data.payroll.baseSalary)],
     ['Additions / เบี้ยเลี้ยงและอื่นๆ', formatCurrency(data.payroll.additions)],
     ['', ''], // Spacer
-    ['Gross Salary / รายได้รวม', formatCurrency(data.payroll.grossSalary)]
-  ]
+    ['Gross Salary / รายได้รวม', formatCurrency(data.payroll.grossSalary)],
+  ];
 
   doc.autoTable({
     startY: yPos,
@@ -1287,43 +1279,51 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
     theme: 'plain',
     bodyStyles: {
       fontSize: 10,
-      cellPadding: 2
+      cellPadding: 2,
     },
     columnStyles: {
       0: { cellWidth: 100 },
-      1: { halign: 'right', cellWidth: 40, fontStyle: 'normal' }
+      1: { halign: 'right', cellWidth: 40, fontStyle: 'normal' },
     },
     didParseCell: function (data: any) {
       // Bold the last row (Gross Salary)
       if (data.row.index === 3) {
-        data.cell.styles.fontStyle = 'bold'
+        data.cell.styles.fontStyle = 'bold';
       }
-    }
-  })
+    },
+  });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10
+  yPos = (doc.lastAutoTable as any).finalY + 10;
 
   // Deductions Section
-  doc.setDrawColor(220, 53, 69) // Red
-  doc.setLineWidth(1)
-  doc.line(margin, yPos, pageWidth - margin, yPos)
-  yPos += 5
+  doc.setDrawColor(220, 53, 69); // Red
+  doc.setLineWidth(1);
+  doc.line(margin, yPos, pageWidth - margin, yPos);
+  yPos += 5;
 
-  doc.setFontSize(12)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(220, 53, 69)
-  doc.text('DEDUCTIONS / รายการหัก', margin, yPos)
-  doc.setTextColor(0, 0, 0)
-  yPos += 8
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(220, 53, 69);
+  doc.text('DEDUCTIONS / รายการหัก', margin, yPos);
+  doc.setTextColor(0, 0, 0);
+  yPos += 8;
 
   // Deductions Table
   const deductionsData = [
     ['Social Security / ประกันสังคม', formatCurrency(data.payroll.socialSecurity)],
-    ['Withholding Tax (PND1) / ภาษีเงินได้หัก ณ ที่จ่าย', formatCurrency(data.payroll.withholdingTax)],
+    [
+      'Withholding Tax (PND1) / ภาษีเงินได้หัก ณ ที่จ่าย',
+      formatCurrency(data.payroll.withholdingTax),
+    ],
     ['Other Deductions / หักอื่นๆ', formatCurrency(data.payroll.deductions)],
     ['', ''], // Spacer
-    ['Total Deductions / รวมหัก', formatCurrency(data.payroll.socialSecurity + data.payroll.withholdingTax + data.payroll.deductions)]
-  ]
+    [
+      'Total Deductions / รวมหัก',
+      formatCurrency(
+        data.payroll.socialSecurity + data.payroll.withholdingTax + data.payroll.deductions
+      ),
+    ],
+  ];
 
   doc.autoTable({
     startY: yPos,
@@ -1332,103 +1332,117 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
     theme: 'plain',
     bodyStyles: {
       fontSize: 10,
-      cellPadding: 2
+      cellPadding: 2,
     },
     columnStyles: {
       0: { cellWidth: 100 },
-      1: { halign: 'right', cellWidth: 40, fontStyle: 'normal' }
+      1: { halign: 'right', cellWidth: 40, fontStyle: 'normal' },
     },
     didParseCell: function (data: any) {
       // Bold the last row (Total Deductions)
       if (data.row.index === 4) {
-        data.cell.styles.fontStyle = 'bold'
+        data.cell.styles.fontStyle = 'bold';
       }
-    }
-  })
+    },
+  });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10
+  yPos = (doc.lastAutoTable as any).finalY + 10;
 
   // Net Pay Section - Large and Prominent
-  doc.setDrawColor(40, 167, 69) // Green
-  doc.setFillColor(240, 253, 244)
-  doc.roundedRect(margin, yPos, pageWidth - margin * 2, 20, 3, 3, 'FD')
-  yPos += 10
+  doc.setDrawColor(40, 167, 69); // Green
+  doc.setFillColor(240, 253, 244);
+  doc.roundedRect(margin, yPos, pageWidth - margin * 2, 20, 3, 3, 'FD');
+  yPos += 10;
 
-  doc.setFontSize(14)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(40, 167, 69)
-  doc.text('NET PAY / เงินได้สุทธิ', margin + 10, yPos)
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(40, 167, 69);
+  doc.text('NET PAY / เงินได้สุทธิ', margin + 10, yPos);
 
-  doc.setFontSize(22)
-  doc.text(formatCurrency(data.payroll.netPay), pageWidth - margin - 10, yPos, { align: 'right' })
-  doc.setTextColor(0, 0, 0)
-  yPos += 18
+  doc.setFontSize(22);
+  doc.text(formatCurrency(data.payroll.netPay), pageWidth - margin - 10, yPos, { align: 'right' });
+  doc.setTextColor(0, 0, 0);
+  yPos += 18;
 
   // Payment Date and Bank Info
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  doc.text(`Payment Date / วันที่จ่าย: ${formatDateThai(data.payrollRun.paymentDate)}`, margin, yPos)
-  yPos += 6
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text(
+    `Payment Date / วันที่จ่าย: ${formatDateThai(data.payrollRun.paymentDate)}`,
+    margin,
+    yPos
+  );
+  yPos += 6;
 
   // Bank Information
   if (data.employee.bankAccountNo) {
-    const bankInfo = `Payment to / โอนเข้าบัญชี: ${data.employee.bankName || 'Bank'} - ${data.employee.bankAccountNo}`
-    doc.text(bankInfo, margin, yPos)
-    yPos += 6
+    const bankInfo = `Payment to / โอนเข้าบัญชี: ${data.employee.bankName || 'Bank'} - ${data.employee.bankAccountNo}`;
+    doc.text(bankInfo, margin, yPos);
+    yPos += 6;
   }
 
   // Company Bank Info (for reference)
   if (company?.bankName || company?.bankAccount) {
-    doc.setFont('helvetica', 'bold')
-    doc.text('Payment from / ชำระโดย:', margin, yPos)
-    yPos += 4
+    doc.setFont('helvetica', 'bold');
+    doc.text('Payment from / ชำระโดย:', margin, yPos);
+    yPos += 4;
 
-    doc.setFont('helvetica', 'normal')
+    doc.setFont('helvetica', 'normal');
     const companyBankInfo = [
       company.bankName && `Bank: ${company.bankName}`,
       company.bankAccount && `Account No: ${company.bankAccount}`,
-      company.bankAccountName && `Account Name: ${company.bankAccountName}`
-    ].filter(Boolean).join(' | ')
+      company.bankAccountName && `Account Name: ${company.bankAccountName}`,
+    ]
+      .filter(Boolean)
+      .join(' | ');
 
     if (companyBankInfo) {
-      doc.text(companyBankInfo, margin + 3, yPos)
-      yPos += 6
+      doc.text(companyBankInfo, margin + 3, yPos);
+      yPos += 6;
     }
   } else {
     // Skip company bank info if not available
-    yPos += 2
+    yPos += 2;
   }
 
-  yPos += 5
+  yPos += 5;
 
   // Additional Information
-  doc.setDrawColor(150, 150, 150)
-  doc.setLineWidth(0.3)
-  doc.line(margin, yPos, pageWidth - margin, yPos)
-  yPos += 8
+  doc.setDrawColor(150, 150, 150);
+  doc.setLineWidth(0.3);
+  doc.line(margin, yPos, pageWidth - margin, yPos);
+  yPos += 8;
 
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'italic')
-  doc.text('Note / หมายเหตุ:', margin, yPos)
-  yPos += 4
-  doc.text('- This is a computer-generated payslip / เอกสารนี้เป็นการสร้างจากระบบคอมพิวเตอร์', margin + 3, yPos)
-  yPos += 4
-  doc.text('- Please verify amounts with HR department / กรุณาตรวจสอบยอดเงินกับแผนก HR', margin + 3, yPos)
-  yPos += 4
-  doc.text('- For inquiries, contact HR / หากมีข้อสงสัย กรุณาติดต่อ HR', margin + 3, yPos)
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'italic');
+  doc.text('Note / หมายเหตุ:', margin, yPos);
+  yPos += 4;
+  doc.text(
+    '- This is a computer-generated payslip / เอกสารนี้เป็นการสร้างจากระบบคอมพิวเตอร์',
+    margin + 3,
+    yPos
+  );
+  yPos += 4;
+  doc.text(
+    '- Please verify amounts with HR department / กรุณาตรวจสอบยอดเงินกับแผนก HR',
+    margin + 3,
+    yPos
+  );
+  yPos += 4;
+  doc.text('- For inquiries, contact HR / หากมีข้อสงสัย กรุณาติดต่อ HR', margin + 3, yPos);
 
   // Footer
-  const footerY = pageHeight - 12
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
+  const footerY = pageHeight - 12;
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
   doc.text(
     `Generated by Thai Accounting ERP | ${data.payrollRun.runNo} | ${formatDateThai(new Date())}`,
     pageWidth / 2,
     footerY,
     { align: 'center' }
-  )
+  );
 
-  return doc.output('arraybuffer') as Uint8Array
+  return doc.output('arraybuffer') as Uint8Array;
 }
 
 /**
@@ -1436,105 +1450,125 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
  * สร้างแบบฟอร์ม ภ.พ.30 (ภาษีมูลค่าเพิ่ม)
  */
 export async function generatePP30PDF(data: {
-  companyName: string
-  companyTaxId: string
-  companyBranch?: string
-  companyAddress?: string
-  month: number
-  year: number
-  outputVat: number  // in Satang
-  inputVat: number   // in Satang
-  netVat: number     // in Satang
-  outputAmount: number // in Satang
-  inputAmount: number // in Satang
+  companyName: string;
+  companyTaxId: string;
+  companyBranch?: string;
+  companyAddress?: string;
+  month: number;
+  year: number;
+  outputVat: number; // in Satang
+  inputVat: number; // in Satang
+  netVat: number; // in Satang
+  outputAmount: number; // in Satang
+  inputAmount: number; // in Satang
   vatRecords?: Array<{
-    docNo: string
-    docDate: string
-    name: string
-    taxId?: string
-    amount: number
-    vatAmount: number
-  }>
+    docNo: string;
+    docDate: string;
+    name: string;
+    taxId?: string;
+    amount: number;
+    vatAmount: number;
+  }>;
 }): Promise<Uint8Array> {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: 'a4'
-  })
+    format: 'a4',
+  });
 
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const margin = 15
-  const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-                       'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  const THAI_MONTHS = [
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
+  ];
 
   const formatCurrencySatang = (amount: number) => {
-    return (amount / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  }
+    return (amount / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
 
-  let yPos = margin
+  let yPos = margin;
 
   // Header - RD Logo area and Form number
-  doc.setFontSize(12)
-  doc.setFont('helvetica', 'bold')
-  doc.text('แบบฟอร์ม ภ.พ. 30', margin, yPos)
-  doc.text('VOLUNTARY TAX', pageWidth - margin, yPos, { align: 'right' })
-  yPos += 8
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('แบบฟอร์ม ภ.พ. 30', margin, yPos);
+  doc.text('VOLUNTARY TAX', pageWidth - margin, yPos, { align: 'right' });
+  yPos += 8;
 
   // Form Title
-  doc.setFontSize(18)
-  doc.setFont('helvetica', 'bold')
-  doc.text('VALUE ADDED TAX RETURN', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 7
-  doc.setFontSize(14)
-  doc.text('แบบแสดงรายการภาษีมูลค่าเพิ่ม', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 10
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('VALUE ADDED TAX RETURN', pageWidth / 2, yPos, { align: 'center' });
+  yPos += 7;
+  doc.setFontSize(14);
+  doc.text('แบบแสดงรายการภาษีมูลค่าเพิ่ม', pageWidth / 2, yPos, { align: 'center' });
+  yPos += 10;
 
   // Company Info Box
-  doc.setDrawColor(100, 100, 100)
-  doc.setLineWidth(0.5)
-  doc.rect(margin, yPos, pageWidth - margin * 2, 25)
+  doc.setDrawColor(100, 100, 100);
+  doc.setLineWidth(0.5);
+  doc.rect(margin, yPos, pageWidth - margin * 2, 25);
 
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  yPos += 5
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  yPos += 5;
 
-  doc.text(`ชื่อบริษัท / ผู้ประกอบการ: ${data.companyName || 'N/A'}`, margin + 3, yPos)
-  yPos += 6
+  doc.text(`ชื่อบริษัท / ผู้ประกอบการ: ${data.companyName || 'N/A'}`, margin + 3, yPos);
+  yPos += 6;
 
-  const taxIdLine = `เลขประจำตัวผู้เสียภาษี: ${data.companyTaxId || 'N/A'}`
-  const branchLine = data.companyBranch ? `สาขาที่: ${data.companyBranch}` : 'สาขาที่: 00000'
-  doc.text(taxIdLine, margin + 3, yPos)
-  doc.text(branchLine, pageWidth / 2 + 10, yPos)
-  yPos += 6
+  const taxIdLine = `เลขประจำตัวผู้เสียภาษี: ${data.companyTaxId || 'N/A'}`;
+  const branchLine = data.companyBranch ? `สาขาที่: ${data.companyBranch}` : 'สาขาที่: 00000';
+  doc.text(taxIdLine, margin + 3, yPos);
+  doc.text(branchLine, pageWidth / 2 + 10, yPos);
+  yPos += 6;
 
   if (data.companyAddress) {
-    doc.text(`ที่อยู่: ${data.companyAddress}`, margin + 3, yPos)
-    yPos += 6
+    doc.text(`ที่อยู่: ${data.companyAddress}`, margin + 3, yPos);
+    yPos += 6;
   }
 
   // Tax Period
-  const periodText = `ประจำเดือน ${THAI_MONTHS[data.month - 1]} พ.ศ. ${data.year + 543}`
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(12)
-  doc.text(periodText, pageWidth / 2, yPos, { align: 'center' })
-  yPos += 15
+  const periodText = `ประจำเดือน ${THAI_MONTHS[data.month - 1]} พ.ศ. ${data.year + 543}`;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text(periodText, pageWidth / 2, yPos, { align: 'center' });
+  yPos += 15;
 
   // Summary Section
-  doc.setFontSize(11)
-  doc.setFont('helvetica', 'bold')
-  doc.text('SUMMARY / สรุปยอด', margin, yPos)
-  yPos += 8
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SUMMARY / สรุปยอด', margin, yPos);
+  yPos += 8;
 
   // VAT Summary Box
-  doc.setDrawColor(66, 66, 66)
-  doc.setLineWidth(0.3)
+  doc.setDrawColor(66, 66, 66);
+  doc.setLineWidth(0.3);
 
   const summaryData = [
     ['รายการ', 'มูลค่า (บาท)', 'ภาษี (บาท)'],
-    ['ภาษีขาย Output VAT', formatCurrencySatang(data.outputAmount), formatCurrencySatang(data.outputVat)],
-    ['ภาษีซื้อ Input VAT', formatCurrencySatang(data.inputAmount), formatCurrencySatang(data.inputVat)],
+    [
+      'ภาษีขาย Output VAT',
+      formatCurrencySatang(data.outputAmount),
+      formatCurrencySatang(data.outputVat),
+    ],
+    [
+      'ภาษีซื้อ Input VAT',
+      formatCurrencySatang(data.inputAmount),
+      formatCurrencySatang(data.inputVat),
+    ],
     ['ภาษีสุทธิ Net VAT Payable', '', formatCurrencySatang(data.netVat)],
-  ]
+  ];
 
   doc.autoTable({
     startY: yPos,
@@ -1558,22 +1592,23 @@ export async function generatePP30PDF(data: {
       2: { halign: 'right', cellWidth: 50 },
     },
     didParseCell: (cellData: any) => {
-      if (cellData.row.index === 2) { // Net VAT row
-        cellData.cell.styles.fontStyle = 'bold'
-        cellData.cell.styles.fillColor = [240, 240, 240]
+      if (cellData.row.index === 2) {
+        // Net VAT row
+        cellData.cell.styles.fontStyle = 'bold';
+        cellData.cell.styles.fillColor = [240, 240, 240];
       }
     },
     margin: { left: margin, right: margin },
-  })
+  });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10
+  yPos = (doc.lastAutoTable as any).finalY + 10;
 
   // VAT Records Table (if provided)
   if (data.vatRecords && data.vatRecords.length > 0) {
-    doc.setFontSize(11)
-    doc.setFont('helvetica', 'bold')
-    doc.text('VAT RECORDS / รายละเอียด VAT', margin, yPos)
-    yPos += 5
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('VAT RECORDS / รายละเอียด VAT', margin, yPos);
+    yPos += 5;
 
     const vatTableData = data.vatRecords.map((r, i) => [
       (i + 1).toString(),
@@ -1582,7 +1617,7 @@ export async function generatePP30PDF(data: {
       r.name.length > 20 ? r.name.substring(0, 20) + '...' : r.name,
       formatCurrencySatang(r.amount),
       formatCurrencySatang(r.vatAmount),
-    ])
+    ]);
 
     doc.autoTable({
       startY: yPos,
@@ -1609,178 +1644,190 @@ export async function generatePP30PDF(data: {
         5: { halign: 'right', cellWidth: 25 },
       },
       margin: { left: margin, right: margin },
-    })
+    });
 
-    yPos = (doc.lastAutoTable as any).finalY + 10
+    yPos = (doc.lastAutoTable as any).finalY + 10;
   }
 
   // Declaration Section
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'bold')
-  doc.text('DECLARATION / คำขอ', margin, yPos)
-  yPos += 6
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('DECLARATION / คำขอ', margin, yPos);
+  yPos += 6;
 
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9)
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
   const declaration = [
     'ข้าพเจ้าขอรับรองว่าข้อความในแบบแสดงรายการนี้ถูกต้องและครบถ้วนทุกประการ',
     'I hereby certify that the information in this return is true and complete.',
-  ]
+  ];
   for (const line of declaration) {
-    doc.text(line, margin, yPos)
-    yPos += 5
+    doc.text(line, margin, yPos);
+    yPos += 5;
   }
-  yPos += 5
+  yPos += 5;
 
   // Signature Area
-  const sigBoxWidth = (pageWidth - margin * 2) / 2 - 10
-  doc.setDrawColor(100, 100, 100)
-  doc.rect(margin, yPos, sigBoxWidth, 25)
-  doc.rect(pageWidth / 2 + 5, yPos, sigBoxWidth, 25)
+  const sigBoxWidth = (pageWidth - margin * 2) / 2 - 10;
+  doc.setDrawColor(100, 100, 100);
+  doc.rect(margin, yPos, sigBoxWidth, 25);
+  doc.rect(pageWidth / 2 + 5, yPos, sigBoxWidth, 25);
 
-  doc.setFontSize(9)
-  doc.text('ผู้ลงนาม / Signatory', margin + 3, yPos + 5)
-  doc.text('วันที่ / Date: _____________', margin + 3, yPos + 12)
-  doc.text('ตำแหน่ง / Position: _________', margin + 3, yPos + 19)
+  doc.setFontSize(9);
+  doc.text('ผู้ลงนาม / Signatory', margin + 3, yPos + 5);
+  doc.text('วันที่ / Date: _____________', margin + 3, yPos + 12);
+  doc.text('ตำแหน่ง / Position: _________', margin + 3, yPos + 19);
 
-  doc.text('ผู้ลงนาม / Signatory', pageWidth / 2 + 8, yPos + 5)
-  doc.text('วันที่ / Date: _____________', pageWidth / 2 + 8, yPos + 12)
-  doc.text('ตำแหน่ง / Position: _________', pageWidth / 2 + 8, yPos + 19)
+  doc.text('ผู้ลงนาม / Signatory', pageWidth / 2 + 8, yPos + 5);
+  doc.text('วันที่ / Date: _____________', pageWidth / 2 + 8, yPos + 12);
+  doc.text('ตำแหน่ง / Position: _________', pageWidth / 2 + 8, yPos + 19);
 
   // Footer
-  const footerY = doc.internal.pageSize.getHeight() - 12
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
+  const footerY = doc.internal.pageSize.getHeight() - 12;
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
   doc.text(
     `Generated by Thai Accounting ERP | ${formatDateThai(new Date())}`,
     pageWidth / 2,
     footerY,
     { align: 'center' }
-  )
+  );
 
-  return doc.output('arraybuffer') as Uint8Array
+  return doc.output('arraybuffer') as Uint8Array;
 }
 
 // PND3 Income Type names
 const PND3_INCOME_TYPE_NAMES: Record<string, string> = {
-  "1": "เงินเดือน ค่าจ้าง เบี้ยเลี้ยง โบนัส",
-  "2": "ค่านายหน้า ค่าแห่งกำไร",
-  "3": "ค่าดอกเบี้ย",
-  "4": "ค่าปันผล เงินส่วนแบ่งกำไร",
-  "5": "ค่าเช่าทรัพย์สิน",
-}
+  '1': 'เงินเดือน ค่าจ้าง เบี้ยเลี้ยง โบนัส',
+  '2': 'ค่านายหน้า ค่าแห่งกำไร',
+  '3': 'ค่าดอกเบี้ย',
+  '4': 'ค่าปันผล เงินส่วนแบ่งกำไร',
+  '5': 'ค่าเช่าทรัพย์สิน',
+};
 
 // PND53 Income Type names
 const PND53_INCOME_TYPE_NAMES: Record<string, string> = {
-  "1": "ค่าบริการ",
-  "2": "ค่าเช่าอาคาร ที่ดิน สิ่งปลูกสร้าง",
-  "3": "ค่าส่งออกสินค้า",
-  "4": "ค่าจ้างทำของ จ้างเหมา",
-  "5": "ค่าโฆษณา",
-  "6": "ค่าบริการวิชาชีพอิสระ",
-}
+  '1': 'ค่าบริการ',
+  '2': 'ค่าเช่าอาคาร ที่ดิน สิ่งปลูกสร้าง',
+  '3': 'ค่าส่งออกสินค้า',
+  '4': 'ค่าจ้างทำของ จ้างเหมา',
+  '5': 'ค่าโฆษณา',
+  '6': 'ค่าบริการวิชาชีพอิสระ',
+};
 
 /**
  * Generate PND3 (Employee Withholding) PDF
  * สร้างแบบฟอร์ม ภงด.3 (ภาษีเงินได้หัก ณ ที่จ่าย ประเภทเงินเดือน)
  */
 export async function generatePND3PDF(data: {
-  companyName: string
-  companyTaxId: string
-  companyBranch?: string
-  companyAddress?: string
-  month: number
-  year: number
-  totalAmount: number  // in Satang
-  totalTax: number     // in Satang
+  companyName: string;
+  companyTaxId: string;
+  companyBranch?: string;
+  companyAddress?: string;
+  month: number;
+  year: number;
+  totalAmount: number; // in Satang
+  totalTax: number; // in Satang
   lines: Array<{
-    payeeName: string
-    payeeTaxId?: string
-    description: string
-    incomeType: string
-    incomeAmount: number
-    taxRate: number
-    taxAmount: number
-  }>
+    payeeName: string;
+    payeeTaxId?: string;
+    description: string;
+    incomeType: string;
+    incomeAmount: number;
+    taxRate: number;
+    taxAmount: number;
+  }>;
 }): Promise<Uint8Array> {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: 'a4'
-  })
+    format: 'a4',
+  });
 
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const margin = 15
-  const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-                       'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  const THAI_MONTHS = [
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
+  ];
 
   const formatCurrencySatang = (amount: number) => {
-    return (amount / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  }
+    return (amount / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
 
-  let yPos = margin
+  let yPos = margin;
 
   // Header - Form number
-  doc.setFontSize(12)
-  doc.setFont('helvetica', 'bold')
-  doc.text('แบบฟอร์ม ภ.ง.ด. 3', margin, yPos)
-  doc.text('WITHHOLDING TAX', pageWidth - margin, yPos, { align: 'right' })
-  yPos += 8
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('แบบฟอร์ม ภ.ง.ด. 3', margin, yPos);
+  doc.text('WITHHOLDING TAX', pageWidth - margin, yPos, { align: 'right' });
+  yPos += 8;
 
   // Form Title
-  doc.setFontSize(18)
-  doc.setFont('helvetica', 'bold')
-  doc.text('WITHHOLDING TAX RETURN (SALARY)', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 7
-  doc.setFontSize(14)
-  doc.text('แบบแสดงรายการภาษีหัก ณ ที่จ่าย (เงินเดือน)', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 10
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('WITHHOLDING TAX RETURN (SALARY)', pageWidth / 2, yPos, { align: 'center' });
+  yPos += 7;
+  doc.setFontSize(14);
+  doc.text('แบบแสดงรายการภาษีหัก ณ ที่จ่าย (เงินเดือน)', pageWidth / 2, yPos, { align: 'center' });
+  yPos += 10;
 
   // Company Info Box
-  doc.setDrawColor(100, 100, 100)
-  doc.setLineWidth(0.5)
-  doc.rect(margin, yPos, pageWidth - margin * 2, 25)
+  doc.setDrawColor(100, 100, 100);
+  doc.setLineWidth(0.5);
+  doc.rect(margin, yPos, pageWidth - margin * 2, 25);
 
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  yPos += 5
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  yPos += 5;
 
-  doc.text(`ชื่อบริษัท / ผู้ประกอบการ: ${data.companyName || 'N/A'}`, margin + 3, yPos)
-  yPos += 6
+  doc.text(`ชื่อบริษัท / ผู้ประกอบการ: ${data.companyName || 'N/A'}`, margin + 3, yPos);
+  yPos += 6;
 
-  const taxIdLine = `เลขประจำตัวผู้เสียภาษี: ${data.companyTaxId || 'N/A'}`
-  const branchLine = data.companyBranch ? `สาขาที่: ${data.companyBranch}` : 'สาขาที่: 00000'
-  doc.text(taxIdLine, margin + 3, yPos)
-  doc.text(branchLine, pageWidth / 2 + 10, yPos)
-  yPos += 6
+  const taxIdLine = `เลขประจำตัวผู้เสียภาษี: ${data.companyTaxId || 'N/A'}`;
+  const branchLine = data.companyBranch ? `สาขาที่: ${data.companyBranch}` : 'สาขาที่: 00000';
+  doc.text(taxIdLine, margin + 3, yPos);
+  doc.text(branchLine, pageWidth / 2 + 10, yPos);
+  yPos += 6;
 
   if (data.companyAddress) {
-    doc.text(`ที่อยู่: ${data.companyAddress}`, margin + 3, yPos)
-    yPos += 6
+    doc.text(`ที่อยู่: ${data.companyAddress}`, margin + 3, yPos);
+    yPos += 6;
   }
 
   // Tax Period
-  const periodText = `ประจำเดือน ${THAI_MONTHS[data.month - 1]} พ.ศ. ${data.year + 543}`
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(12)
-  doc.text(periodText, pageWidth / 2, yPos, { align: 'center' })
-  yPos += 15
+  const periodText = `ประจำเดือน ${THAI_MONTHS[data.month - 1]} พ.ศ. ${data.year + 543}`;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text(periodText, pageWidth / 2, yPos, { align: 'center' });
+  yPos += 15;
 
   // Summary Section
-  doc.setFontSize(11)
-  doc.setFont('helvetica', 'bold')
-  doc.text('SUMMARY / สรุปยอด', margin, yPos)
-  yPos += 8
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SUMMARY / สรุปยอด', margin, yPos);
+  yPos += 8;
 
   // Summary Box
-  doc.setDrawColor(66, 66, 66)
-  doc.setLineWidth(0.3)
+  doc.setDrawColor(66, 66, 66);
+  doc.setLineWidth(0.3);
 
   const summaryData = [
     ['รายการ', 'มูลค่า (บาท)', 'ภาษี (บาท)'],
     ['รวมเงินได้ Total Income', formatCurrencySatang(data.totalAmount), ''],
     ['รวมภาษีหัก Total Tax', '', formatCurrencySatang(data.totalTax)],
-  ]
+  ];
 
   doc.autoTable({
     startY: yPos,
@@ -1804,16 +1851,16 @@ export async function generatePND3PDF(data: {
       2: { halign: 'right', cellWidth: 50 },
     },
     margin: { left: margin, right: margin },
-  })
+  });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10
+  yPos = (doc.lastAutoTable as any).finalY + 10;
 
   // Withholding Records Table
   if (data.lines.length > 0) {
-    doc.setFontSize(11)
-    doc.setFont('helvetica', 'bold')
-    doc.text('WITHHOLDING RECORDS / รายละเอียดการหักภาษี', margin, yPos)
-    yPos += 5
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('WITHHOLDING RECORDS / รายละเอียดการหักภาษี', margin, yPos);
+    yPos += 5;
 
     const pnd3TableData = data.lines.map((line, i) => [
       (i + 1).toString(),
@@ -1823,11 +1870,13 @@ export async function generatePND3PDF(data: {
       formatCurrencySatang(line.incomeAmount),
       line.taxRate.toString() + '%',
       formatCurrencySatang(line.taxAmount),
-    ])
+    ]);
 
     doc.autoTable({
       startY: yPos,
-      head: [['No.', 'ผู้ถูกหักภาษี', 'เลขผู้เสียภาษี', 'ประเภทเงินได้', 'มูลค่า', 'อัตรา', 'ภาษี']],
+      head: [
+        ['No.', 'ผู้ถูกหักภาษี', 'เลขผู้เสียภาษี', 'ประเภทเงินได้', 'มูลค่า', 'อัตรา', 'ภาษี'],
+      ],
       body: pnd3TableData,
       theme: 'grid',
       headStyles: {
@@ -1851,56 +1900,56 @@ export async function generatePND3PDF(data: {
         6: { halign: 'right', cellWidth: 25 },
       },
       margin: { left: margin, right: margin },
-    })
+    });
 
-    yPos = (doc.lastAutoTable as any).finalY + 10
+    yPos = (doc.lastAutoTable as any).finalY + 10;
   }
 
   // Declaration Section
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'bold')
-  doc.text('DECLARATION / คำขอ', margin, yPos)
-  yPos += 6
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('DECLARATION / คำขอ', margin, yPos);
+  yPos += 6;
 
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9)
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
   const declaration = [
     'ข้าพเจ้าขอรับรองว่าข้อความในแบบแสดงรายการนี้ถูกต้องและครบถ้วนทุกประการ',
     'I hereby certify that the information in this return is true and complete.',
-  ]
+  ];
   for (const line of declaration) {
-    doc.text(line, margin, yPos)
-    yPos += 5
+    doc.text(line, margin, yPos);
+    yPos += 5;
   }
-  yPos += 5
+  yPos += 5;
 
   // Signature Area
-  const sigBoxWidth = (pageWidth - margin * 2) / 2 - 10
-  doc.setDrawColor(100, 100, 100)
-  doc.rect(margin, yPos, sigBoxWidth, 25)
-  doc.rect(pageWidth / 2 + 5, yPos, sigBoxWidth, 25)
+  const sigBoxWidth = (pageWidth - margin * 2) / 2 - 10;
+  doc.setDrawColor(100, 100, 100);
+  doc.rect(margin, yPos, sigBoxWidth, 25);
+  doc.rect(pageWidth / 2 + 5, yPos, sigBoxWidth, 25);
 
-  doc.setFontSize(9)
-  doc.text('ผู้ลงนาม / Signatory', margin + 3, yPos + 5)
-  doc.text('วันที่ / Date: _____________', margin + 3, yPos + 12)
-  doc.text('ตำแหน่ง / Position: _________', margin + 3, yPos + 19)
+  doc.setFontSize(9);
+  doc.text('ผู้ลงนาม / Signatory', margin + 3, yPos + 5);
+  doc.text('วันที่ / Date: _____________', margin + 3, yPos + 12);
+  doc.text('ตำแหน่ง / Position: _________', margin + 3, yPos + 19);
 
-  doc.text('ผู้ลงนาม / Signatory', pageWidth / 2 + 8, yPos + 5)
-  doc.text('วันที่ / Date: _____________', pageWidth / 2 + 8, yPos + 12)
-  doc.text('ตำแหน่ง / Position: _________', pageWidth / 2 + 8, yPos + 19)
+  doc.text('ผู้ลงนาม / Signatory', pageWidth / 2 + 8, yPos + 5);
+  doc.text('วันที่ / Date: _____________', pageWidth / 2 + 8, yPos + 12);
+  doc.text('ตำแหน่ง / Position: _________', pageWidth / 2 + 8, yPos + 19);
 
   // Footer
-  const footerY = doc.internal.pageSize.getHeight() - 12
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
+  const footerY = doc.internal.pageSize.getHeight() - 12;
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
   doc.text(
     `Generated by Thai Accounting ERP | ${formatDateThai(new Date())}`,
     pageWidth / 2,
     footerY,
     { align: 'center' }
-  )
+  );
 
-  return doc.output('arraybuffer') as Uint8Array
+  return doc.output('arraybuffer') as Uint8Array;
 }
 
 /**
@@ -1908,102 +1957,114 @@ export async function generatePND3PDF(data: {
  * สร้างแบบฟอร์ม ภงด.53 (ภาษีเงินได้หัก ณ ที่จ่าย ค่าบริการ)
  */
 export async function generatePND53PDF(data: {
-  companyName: string
-  companyTaxId: string
-  companyBranch?: string
-  companyAddress?: string
-  month: number
-  year: number
-  totalAmount: number  // in Satang
-  totalTax: number     // in Satang
+  companyName: string;
+  companyTaxId: string;
+  companyBranch?: string;
+  companyAddress?: string;
+  month: number;
+  year: number;
+  totalAmount: number; // in Satang
+  totalTax: number; // in Satang
   lines: Array<{
-    payeeName: string
-    payeeTaxId?: string
-    description: string
-    incomeType: string
-    incomeAmount: number
-    taxRate: number
-    taxAmount: number
-  }>
+    payeeName: string;
+    payeeTaxId?: string;
+    description: string;
+    incomeType: string;
+    incomeAmount: number;
+    taxRate: number;
+    taxAmount: number;
+  }>;
 }): Promise<Uint8Array> {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: 'a4'
-  })
+    format: 'a4',
+  });
 
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const margin = 15
-  const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-                       'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  const THAI_MONTHS = [
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
+  ];
 
   const formatCurrencySatang = (amount: number) => {
-    return (amount / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  }
+    return (amount / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
 
-  let yPos = margin
+  let yPos = margin;
 
   // Header - Form number
-  doc.setFontSize(12)
-  doc.setFont('helvetica', 'bold')
-  doc.text('แบบฟอร์ม ภ.ง.ด. 53', margin, yPos)
-  doc.text('WITHHOLDING TAX', pageWidth - margin, yPos, { align: 'right' })
-  yPos += 8
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('แบบฟอร์ม ภ.ง.ด. 53', margin, yPos);
+  doc.text('WITHHOLDING TAX', pageWidth - margin, yPos, { align: 'right' });
+  yPos += 8;
 
   // Form Title
-  doc.setFontSize(18)
-  doc.setFont('helvetica', 'bold')
-  doc.text('WITHHOLDING TAX RETURN (SERVICES)', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 7
-  doc.setFontSize(14)
-  doc.text('แบบแสดงรายการภาษีหัก ณ ที่จ่าย (ค่าบริการ)', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 10
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('WITHHOLDING TAX RETURN (SERVICES)', pageWidth / 2, yPos, { align: 'center' });
+  yPos += 7;
+  doc.setFontSize(14);
+  doc.text('แบบแสดงรายการภาษีหัก ณ ที่จ่าย (ค่าบริการ)', pageWidth / 2, yPos, { align: 'center' });
+  yPos += 10;
 
   // Company Info Box
-  doc.setDrawColor(100, 100, 100)
-  doc.setLineWidth(0.5)
-  doc.rect(margin, yPos, pageWidth - margin * 2, 25)
+  doc.setDrawColor(100, 100, 100);
+  doc.setLineWidth(0.5);
+  doc.rect(margin, yPos, pageWidth - margin * 2, 25);
 
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  yPos += 5
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  yPos += 5;
 
-  doc.text(`ชื่อบริษัท / ผู้ประกอบการ: ${data.companyName || 'N/A'}`, margin + 3, yPos)
-  yPos += 6
+  doc.text(`ชื่อบริษัท / ผู้ประกอบการ: ${data.companyName || 'N/A'}`, margin + 3, yPos);
+  yPos += 6;
 
-  const taxIdLine = `เลขประจำตัวผู้เสียภาษี: ${data.companyTaxId || 'N/A'}`
-  const branchLine = data.companyBranch ? `สาขาที่: ${data.companyBranch}` : 'สาขาที่: 00000'
-  doc.text(taxIdLine, margin + 3, yPos)
-  doc.text(branchLine, pageWidth / 2 + 10, yPos)
-  yPos += 6
+  const taxIdLine = `เลขประจำตัวผู้เสียภาษี: ${data.companyTaxId || 'N/A'}`;
+  const branchLine = data.companyBranch ? `สาขาที่: ${data.companyBranch}` : 'สาขาที่: 00000';
+  doc.text(taxIdLine, margin + 3, yPos);
+  doc.text(branchLine, pageWidth / 2 + 10, yPos);
+  yPos += 6;
 
   if (data.companyAddress) {
-    doc.text(`ที่อยู่: ${data.companyAddress}`, margin + 3, yPos)
-    yPos += 6
+    doc.text(`ที่อยู่: ${data.companyAddress}`, margin + 3, yPos);
+    yPos += 6;
   }
 
   // Tax Period
-  const periodText = `ประจำเดือน ${THAI_MONTHS[data.month - 1]} พ.ศ. ${data.year + 543}`
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(12)
-  doc.text(periodText, pageWidth / 2, yPos, { align: 'center' })
-  yPos += 15
+  const periodText = `ประจำเดือน ${THAI_MONTHS[data.month - 1]} พ.ศ. ${data.year + 543}`;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text(periodText, pageWidth / 2, yPos, { align: 'center' });
+  yPos += 15;
 
   // Summary Section
-  doc.setFontSize(11)
-  doc.setFont('helvetica', 'bold')
-  doc.text('SUMMARY / สรุปยอด', margin, yPos)
-  yPos += 8
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SUMMARY / สรุปยอด', margin, yPos);
+  yPos += 8;
 
   // Summary Box
-  doc.setDrawColor(66, 66, 66)
-  doc.setLineWidth(0.3)
+  doc.setDrawColor(66, 66, 66);
+  doc.setLineWidth(0.3);
 
   const summaryData = [
     ['รายการ', 'มูลค่า (บาท)', 'ภาษี (บาท)'],
     ['รวมเงินได้ Total Income', formatCurrencySatang(data.totalAmount), ''],
     ['รวมภาษีหัก Total Tax', '', formatCurrencySatang(data.totalTax)],
-  ]
+  ];
 
   doc.autoTable({
     startY: yPos,
@@ -2027,16 +2088,16 @@ export async function generatePND53PDF(data: {
       2: { halign: 'right', cellWidth: 50 },
     },
     margin: { left: margin, right: margin },
-  })
+  });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10
+  yPos = (doc.lastAutoTable as any).finalY + 10;
 
   // Withholding Records Table
   if (data.lines.length > 0) {
-    doc.setFontSize(11)
-    doc.setFont('helvetica', 'bold')
-    doc.text('WITHHOLDING RECORDS / รายละเอียดการหักภาษี', margin, yPos)
-    yPos += 5
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('WITHHOLDING RECORDS / รายละเอียดการหักภาษี', margin, yPos);
+    yPos += 5;
 
     const pnd53TableData = data.lines.map((line, i) => [
       (i + 1).toString(),
@@ -2046,11 +2107,13 @@ export async function generatePND53PDF(data: {
       formatCurrencySatang(line.incomeAmount),
       line.taxRate.toString() + '%',
       formatCurrencySatang(line.taxAmount),
-    ])
+    ]);
 
     doc.autoTable({
       startY: yPos,
-      head: [['No.', 'ผู้ถูกหักภาษี', 'เลขผู้เสียภาษี', 'ประเภทเงินได้', 'มูลค่า', 'อัตรา', 'ภาษี']],
+      head: [
+        ['No.', 'ผู้ถูกหักภาษี', 'เลขผู้เสียภาษี', 'ประเภทเงินได้', 'มูลค่า', 'อัตรา', 'ภาษี'],
+      ],
       body: pnd53TableData,
       theme: 'grid',
       headStyles: {
@@ -2074,76 +2137,76 @@ export async function generatePND53PDF(data: {
         6: { halign: 'right', cellWidth: 25 },
       },
       margin: { left: margin, right: margin },
-    })
+    });
 
-    yPos = (doc.lastAutoTable as any).finalY + 10
+    yPos = (doc.lastAutoTable as any).finalY + 10;
   }
 
   // Declaration Section
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'bold')
-  doc.text('DECLARATION / คำขอ', margin, yPos)
-  yPos += 6
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('DECLARATION / คำขอ', margin, yPos);
+  yPos += 6;
 
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9)
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
   const declaration = [
     'ข้าพเจ้าขอรับรองว่าข้อความในแบบแสดงรายการนี้ถูกต้องและครบถ้วนทุกประการ',
     'I hereby certify that the information in this return is true and complete.',
-  ]
+  ];
   for (const line of declaration) {
-    doc.text(line, margin, yPos)
-    yPos += 5
+    doc.text(line, margin, yPos);
+    yPos += 5;
   }
-  yPos += 5
+  yPos += 5;
 
   // Signature Area
-  const sigBoxWidth = (pageWidth - margin * 2) / 2 - 10
-  doc.setDrawColor(100, 100, 100)
-  doc.rect(margin, yPos, sigBoxWidth, 25)
-  doc.rect(pageWidth / 2 + 5, yPos, sigBoxWidth, 25)
+  const sigBoxWidth = (pageWidth - margin * 2) / 2 - 10;
+  doc.setDrawColor(100, 100, 100);
+  doc.rect(margin, yPos, sigBoxWidth, 25);
+  doc.rect(pageWidth / 2 + 5, yPos, sigBoxWidth, 25);
 
-  doc.setFontSize(9)
-  doc.text('ผู้ลงนาม / Signatory', margin + 3, yPos + 5)
-  doc.text('วันที่ / Date: _____________', margin + 3, yPos + 12)
-  doc.text('ตำแหน่ง / Position: _________', margin + 3, yPos + 19)
+  doc.setFontSize(9);
+  doc.text('ผู้ลงนาม / Signatory', margin + 3, yPos + 5);
+  doc.text('วันที่ / Date: _____________', margin + 3, yPos + 12);
+  doc.text('ตำแหน่ง / Position: _________', margin + 3, yPos + 19);
 
-  doc.text('ผู้ลงนาม / Signatory', pageWidth / 2 + 8, yPos + 5)
-  doc.text('วันที่ / Date: _____________', pageWidth / 2 + 8, yPos + 12)
-  doc.text('ตำแหน่ง / Position: _________', pageWidth / 2 + 8, yPos + 19)
+  doc.text('ผู้ลงนาม / Signatory', pageWidth / 2 + 8, yPos + 5);
+  doc.text('วันที่ / Date: _____________', pageWidth / 2 + 8, yPos + 12);
+  doc.text('ตำแหน่ง / Position: _________', pageWidth / 2 + 8, yPos + 19);
 
   // Footer
-  const footerY = doc.internal.pageSize.getHeight() - 12
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
+  const footerY = doc.internal.pageSize.getHeight() - 12;
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
   doc.text(
     `Generated by Thai Accounting ERP | ${formatDateThai(new Date())}`,
     pageWidth / 2,
     footerY,
     { align: 'center' }
-  )
+  );
 
-  return doc.output('arraybuffer') as Uint8Array
+  return doc.output('arraybuffer') as Uint8Array;
 }
 
 // Stub function for tax form PDF generation
 export async function generatePDF(params: {
-  type: string
-  content: unknown
-  title: string
+  type: string;
+  content: unknown;
+  title: string;
 }): Promise<Uint8Array> {
-  const { jsPDF } = await import('jspdf')
-  const doc = new jsPDF()
-  
+  const { jsPDF } = await import('jspdf');
+  const doc = new jsPDF();
+
   // Add title
-  doc.setFontSize(16)
-  doc.text(params.title, 20, 20)
-  
+  doc.setFontSize(16);
+  doc.text(params.title, 20, 20);
+
   // Add content as JSON for now
-  doc.setFontSize(10)
-  const contentStr = JSON.stringify(params.content, null, 2)
-  const lines = doc.splitTextToSize(contentStr, 170)
-  doc.text(lines, 20, 40)
-  
-  return doc.output('arraybuffer') as Uint8Array
+  doc.setFontSize(10);
+  const contentStr = JSON.stringify(params.content, null, 2);
+  const lines = doc.splitTextToSize(contentStr, 170);
+  doc.text(lines, 20, 40);
+
+  return doc.output('arraybuffer') as Uint8Array;
 }

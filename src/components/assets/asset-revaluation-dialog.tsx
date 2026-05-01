@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useMemo } from 'react'
-import { TrendingUp, TrendingDown, Minus, History, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { useState, useEffect, useMemo } from 'react';
+import { TrendingUp, TrendingDown, Minus, History, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -14,94 +14,93 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 
 interface Asset {
-  id: string
-  code: string
-  name: string
-  purchaseCost: number // Satang
-  salvageValue: number // Satang
-  netBookValue?: number
-  accumulatedDepreciation?: number
+  id: string;
+  code: string;
+  name: string;
+  purchaseCost: number; // Satang
+  salvageValue: number; // Satang
+  netBookValue?: number;
+  accumulatedDepreciation?: number;
   schedules?: Array<{
-    accumulated: number
-    posted: boolean
-  }>
+    accumulated: number;
+    posted: boolean;
+  }>;
 }
 
 interface RevaluationResult {
-  id: string
-  oldCost: number
-  oldAccumDep: number
-  newCost: number
-  newAccumDep: number
-  revalGain: number
-  revalLoss: number
+  id: string;
+  oldCost: number;
+  oldAccumDep: number;
+  newCost: number;
+  newAccumDep: number;
+  revalGain: number;
+  revalLoss: number;
 }
 
 interface RevaluationHistory {
-  id: string
-  revalDate: string
-  oldCost: number
-  oldAccumDep: number
-  newCost: number
-  newAccumDep: number
-  revalGain: number
-  revalLoss: number
-  notes: string | null
-  createdAt: string
+  id: string;
+  revalDate: string;
+  oldCost: number;
+  oldAccumDep: number;
+  newCost: number;
+  newAccumDep: number;
+  revalGain: number;
+  revalLoss: number;
+  notes: string | null;
+  createdAt: string;
 }
 
 interface AssetRevaluationDialogProps {
-  asset: Asset | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSuccess: () => void
+  asset: Asset | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
 }
 
 const fc = (n: number) =>
-  new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(n / 100)
-const fd = (d: string) =>
-  new Date(d).toLocaleDateString('th-TH', { dateStyle: 'medium' })
+  new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(n / 100);
+const fd = (d: string) => new Date(d).toLocaleDateString('th-TH', { dateStyle: 'medium' });
 
 function calculateNewValues(
   oldCost: number,
   oldAccumDep: number,
   newFairValue: number
 ): {
-  newCost: number
-  newAccumDep: number
-  revalGain: number
-  revalLoss: number
+  newCost: number;
+  newAccumDep: number;
+  revalGain: number;
+  revalLoss: number;
 } {
-  const oldNetBookValue = oldCost - oldAccumDep
-  const netChange = newFairValue - oldNetBookValue
+  const oldNetBookValue = oldCost - oldAccumDep;
+  const netChange = newFairValue - oldNetBookValue;
 
-  let newCost = oldCost
-  let newAccumDep = oldAccumDep
-  let revalGain = 0
-  let revalLoss = 0
+  let newCost = oldCost;
+  let newAccumDep = oldAccumDep;
+  let revalGain = 0;
+  let revalLoss = 0;
 
   if (netChange > 0) {
-    revalGain = netChange
-    newCost = oldCost + netChange
-    newAccumDep = oldAccumDep
+    revalGain = netChange;
+    newCost = oldCost + netChange;
+    newAccumDep = oldAccumDep;
   } else if (netChange < 0) {
-    revalLoss = Math.abs(netChange)
-    const absNetChange = Math.abs(netChange)
+    revalLoss = Math.abs(netChange);
+    const absNetChange = Math.abs(netChange);
     if (absNetChange <= oldAccumDep) {
-      newAccumDep = oldAccumDep - absNetChange
-      newCost = oldCost
+      newAccumDep = oldAccumDep - absNetChange;
+      newCost = oldCost;
     } else {
-      newCost = oldCost - (absNetChange - oldAccumDep)
-      newAccumDep = 0
+      newCost = oldCost - (absNetChange - oldAccumDep);
+      newAccumDep = 0;
     }
   }
 
-  return { newCost, newAccumDep, revalGain, revalLoss }
+  return { newCost, newAccumDep, revalGain, revalLoss };
 }
 
 export function AssetRevaluationDialog({
@@ -110,57 +109,56 @@ export function AssetRevaluationDialog({
   onOpenChange,
   onSuccess,
 }: AssetRevaluationDialogProps) {
-  const { toast } = useToast()
-  const [newFairValue, setNewFairValue] = useState('')
-  const [revalDate, setRevalDate] = useState(
-    new Date().toISOString().split('T')[0]
-  )
-  const [notes, setNotes] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [history, setHistory] = useState<RevaluationHistory[]>([])
-  const [loadingHistory, setLoadingHistory] = useState(false)
+  const { toast } = useToast();
+  const [newFairValue, setNewFairValue] = useState('');
+  const [revalDate, setRevalDate] = useState(new Date().toISOString().split('T')[0]);
+  const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [history, setHistory] = useState<RevaluationHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
-  const oldCost = asset?.purchaseCost ?? 0
-  const oldAccumDep = asset?.schedules?.find((s) => s.posted)?.accumulated ?? 0
+  const oldCost = asset?.purchaseCost ?? 0;
+  const oldAccumDep = asset?.schedules?.find((s) => s.posted)?.accumulated ?? 0;
 
   const preview = useMemo(() => {
     if (!newFairValue || isNaN(Number(newFairValue)) || Number(newFairValue) <= 0) {
-      return null
+      return null;
     }
-    const fairValueSatang = Math.round(parseFloat(newFairValue) * 100)
-    return calculateNewValues(oldCost, oldAccumDep, fairValueSatang)
-  }, [newFairValue, oldCost, oldAccumDep])
+    const fairValueSatang = Math.round(parseFloat(newFairValue) * 100);
+    return calculateNewValues(oldCost, oldAccumDep, fairValueSatang);
+  }, [newFairValue, oldCost, oldAccumDep]);
 
   useEffect(() => {
     if (asset?.id && open) {
-      fetchHistory()
+      fetchHistory();
     }
-  }, [asset?.id, open])
+  }, [asset?.id, open]);
 
   const fetchHistory = async () => {
-    if (!asset) return
-    setLoadingHistory(true)
+    if (!asset) return;
+    setLoadingHistory(true);
     try {
-      const res = await fetch(`/api/assets/${asset.id}/revaluations`, { credentials: 'include' })
+      const res = await fetch(`/api/assets/${asset.id}/revaluations`, { credentials: 'include' });
       if (res.ok) {
-        const data = await res.json()
+        const data = await res.json();
         if (data.success) {
-          setHistory(data.data)
+          setHistory(data.data);
         }
       }
     } catch (error) {
-      console.error('Error fetching revaluation history:', error)
+      console.error('Error fetching revaluation history:', error);
     } finally {
-      setLoadingHistory(false)
+      setLoadingHistory(false);
     }
-  }
+  };
 
   const handleSubmit = async () => {
-    if (!asset || !preview) return
+    if (!asset || !preview) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/assets/${asset.id}/revaluation`, { credentials: 'include', 
+      const res = await fetch(`/api/assets/${asset.id}/revaluation`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -168,9 +166,9 @@ export function AssetRevaluationDialog({
           revalDate,
           notes: notes || undefined,
         }),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
       if (data.success) {
         toast({
           title: 'บันทึกสำเร็จ',
@@ -178,44 +176,44 @@ export function AssetRevaluationDialog({
             data.data.revalGain > 0
               ? `บันทึกการตีราคาสำเร็จ กำไรจากการตีราคา ฿${fc(data.data.revalGain)}`
               : `บันทึกการตีราคาสำเร็จ ขาดทุนจากการตีราคา ฿${fc(data.data.revalLoss)}`,
-        })
-        setNewFairValue('')
-        setNotes('')
-        onSuccess()
-        onOpenChange(false)
-        fetchHistory()
+        });
+        setNewFairValue('');
+        setNotes('');
+        onSuccess();
+        onOpenChange(false);
+        fetchHistory();
       } else {
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: data.error || 'ไม่สามารถบันทึกการตีราคาได้',
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
-      console.error('Error submitting revaluation:', error)
+      console.error('Error submitting revaluation:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleClose = (open: boolean) => {
     if (!open) {
-      setNewFairValue('')
-      setNotes('')
+      setNewFairValue('');
+      setNotes('');
     }
-    onOpenChange(open)
-  }
+    onOpenChange(open);
+  };
 
-  if (!asset) return null
+  if (!asset) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>ตีราคาสินทรัพย์ (Revaluation)</DialogTitle>
           <DialogDescription>
@@ -223,12 +221,12 @@ export function AssetRevaluationDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden flex gap-4 min-h-0">
+        <div className="flex min-h-0 flex-1 gap-4 overflow-hidden">
           {/* Left: Form */}
           <div className="flex-1 space-y-4 overflow-y-auto">
             {/* Current Values */}
             <Card className="bg-gray-50">
-              <CardContent className="p-3 space-y-2">
+              <CardContent className="space-y-2 p-3">
                 <p className="text-xs font-medium text-gray-500">มูลค่าปัจจุบัน</p>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
@@ -295,16 +293,14 @@ export function AssetRevaluationDialog({
               <Card
                 className={
                   preview.revalGain > 0
-                    ? 'bg-green-50 border-green-200'
+                    ? 'border-green-200 bg-green-50'
                     : preview.revalLoss > 0
-                    ? 'bg-red-50 border-red-200'
-                    : 'bg-gray-50'
+                      ? 'border-red-200 bg-red-50'
+                      : 'bg-gray-50'
                 }
               >
-                <CardContent className="p-3 space-y-2">
-                  <p className="text-xs font-medium text-gray-500">
-                    ผลการตีราคา (Preview)
-                  </p>
+                <CardContent className="space-y-2 p-3">
+                  <p className="text-xs font-medium text-gray-500">ผลการตีราคา (Preview)</p>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
                       <span className="text-gray-500">ราคาทุนใหม่:</span>{' '}
@@ -317,7 +313,7 @@ export function AssetRevaluationDialog({
                   </div>
 
                   {preview.revalGain > 0 && (
-                    <div className="flex items-center gap-2 pt-2 border-t border-green-200">
+                    <div className="flex items-center gap-2 border-t border-green-200 pt-2">
                       <TrendingUp className="h-4 w-4 text-green-600" />
                       <span className="text-sm font-medium text-green-700">
                         กำไรจากการตีราคา: ฿{fc(preview.revalGain)}
@@ -326,7 +322,7 @@ export function AssetRevaluationDialog({
                   )}
 
                   {preview.revalLoss > 0 && (
-                    <div className="flex items-center gap-2 pt-2 border-t border-red-200">
+                    <div className="flex items-center gap-2 border-t border-red-200 pt-2">
                       <TrendingDown className="h-4 w-4 text-red-600" />
                       <span className="text-sm font-medium text-red-700">
                         ขาดทุนจากการตีราคา: ฿{fc(preview.revalLoss)}
@@ -335,11 +331,9 @@ export function AssetRevaluationDialog({
                   )}
 
                   {preview.revalGain === 0 && preview.revalLoss === 0 && (
-                    <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+                    <div className="flex items-center gap-2 border-t border-gray-200 pt-2">
                       <Minus className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm text-gray-600">
-                        ไม่มีการเปลี่ยนแปลง
-                      </span>
+                      <span className="text-sm text-gray-600">ไม่มีการเปลี่ยนแปลง</span>
                     </div>
                   )}
                 </CardContent>
@@ -348,8 +342,8 @@ export function AssetRevaluationDialog({
           </div>
 
           {/* Right: History */}
-          <div className="w-72 flex flex-col border-l pl-4">
-            <div className="flex items-center gap-2 mb-3">
+          <div className="flex w-72 flex-col border-l pl-4">
+            <div className="mb-3 flex items-center gap-2">
               <History className="h-4 w-4 text-gray-500" />
               <span className="text-sm font-medium">ประวัติการตีราคา</span>
             </div>
@@ -359,48 +353,42 @@ export function AssetRevaluationDialog({
                 <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
               </div>
             ) : history.length === 0 ? (
-              <div className="text-center py-8 text-sm text-gray-400">
-                ยังไม่มีประวัติการตีราคา
-              </div>
+              <div className="py-8 text-center text-sm text-gray-400">ยังไม่มีประวัติการตีราคา</div>
             ) : (
               <ScrollArea className="flex-1">
                 <div className="space-y-3 pr-2">
                   {history.map((h) => (
                     <Card key={h.id} className="bg-gray-50/50">
-                      <CardContent className="p-2.5 space-y-1.5">
+                      <CardContent className="space-y-1.5 p-2.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-500">
-                            {fd(h.revalDate)}
-                          </span>
+                          <span className="text-xs text-gray-500">{fd(h.revalDate)}</span>
                           {h.revalGain > 0 && (
                             <Badge
                               variant="outline"
-                              className="text-green-600 border-green-200 text-xs"
+                              className="border-green-200 text-xs text-green-600"
                             >
-                              <TrendingUp className="h-3 w-3 mr-0.5" />
+                              <TrendingUp className="mr-0.5 h-3 w-3" />
                               กำไร
                             </Badge>
                           )}
                           {h.revalLoss > 0 && (
                             <Badge
                               variant="outline"
-                              className="text-red-600 border-red-200 text-xs"
+                              className="border-red-200 text-xs text-red-600"
                             >
-                              <TrendingDown className="h-3 w-3 mr-0.5" />
+                              <TrendingDown className="mr-0.5 h-3 w-3" />
                               ขาดทุน
                             </Badge>
                           )}
                         </div>
-                        <div className="text-xs space-y-0.5">
+                        <div className="space-y-0.5 text-xs">
                           <div className="flex justify-between">
                             <span className="text-gray-500">ราคาทุนเดิม:</span>
                             <span>฿{fc(h.oldCost)}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">ราคาทุนใหม่:</span>
-                            <span className="font-medium">
-                              ฿{fc(h.newCost)}
-                            </span>
+                            <span className="font-medium">฿{fc(h.newCost)}</span>
                           </div>
                           {h.revalGain > 0 && (
                             <div className="flex justify-between text-green-600">
@@ -416,9 +404,7 @@ export function AssetRevaluationDialog({
                           )}
                         </div>
                         {h.notes && (
-                          <p className="text-xs text-gray-400 italic pt-1 border-t">
-                            {h.notes}
-                          </p>
+                          <p className="border-t pt-1 text-xs italic text-gray-400">{h.notes}</p>
                         )}
                       </CardContent>
                     </Card>
@@ -440,13 +426,13 @@ export function AssetRevaluationDialog({
               (preview?.revalGain ?? 0) > 0
                 ? 'bg-green-600 hover:bg-green-700'
                 : (preview?.revalLoss ?? 0) > 0
-                ? 'bg-red-600 hover:bg-red-700'
-                : ''
+                  ? 'bg-red-600 hover:bg-red-700'
+                  : ''
             }
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 กำลังบันทึก...
               </>
             ) : (
@@ -456,5 +442,5 @@ export function AssetRevaluationDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

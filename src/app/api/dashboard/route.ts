@@ -1,28 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { requireAuth } from '@/lib/api-utils'
-import { satangToBaht } from '@/lib/currency'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { requireAuth } from '@/lib/api-utils';
+import { satangToBaht } from '@/lib/currency';
 
 // GET - Dashboard summary (requires authentication)
 export async function GET(request: NextRequest) {
   try {
     // Require authentication - pass request context
-    await requireAuth()
+    await requireAuth();
 
-    const searchParams = request.nextUrl.searchParams
-    const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString())
-    const month = searchParams.get('month') ? parseInt(searchParams.get('month')!) : null
+    const searchParams = request.nextUrl.searchParams;
+    const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString());
+    const month = searchParams.get('month') ? parseInt(searchParams.get('month')!) : null;
 
     // Build date filter
-    let startDate: Date
-    let endDate: Date
+    let startDate: Date;
+    let endDate: Date;
 
     if (month) {
-      startDate = new Date(year, month - 1, 1)
-      endDate = new Date(year, month, 0, 23, 59, 59)
+      startDate = new Date(year, month - 1, 1);
+      endDate = new Date(year, month, 0, 23, 59, 59);
     } else {
-      startDate = new Date(year, 0, 1)
-      endDate = new Date(year, 11, 31, 23, 59, 59)
+      startDate = new Date(year, 0, 1);
+      endDate = new Date(year, 11, 31, 23, 59, 59);
     }
 
     // ✅ OPTIMIZED: Execute all independent queries in parallel using Promise.all
@@ -107,39 +107,49 @@ export async function GET(request: NextRequest) {
 
       // Check pending VAT records (parallel)
       (() => {
-        const currentMonth = new Date().getMonth() + 1
-        const currentYear = new Date().getFullYear()
+        const currentMonth = new Date().getMonth() + 1;
+        const currentYear = new Date().getFullYear();
         return prisma.vatRecord.count({
           where: {
             taxMonth: currentMonth,
             taxYear: currentYear,
             reportStatus: 'PENDING',
           },
-        })
+        });
       })(),
-    ])
+    ]);
 
     // Calculate revenue and expenses from fetched journal entries
     const revenue = journalEntries.reduce((sum, entry) => {
-      return sum + entry.lines.reduce((lineSum, line) => {
-        if (line.account?.code?.startsWith('4') && line.credit > 0) {
-          return lineSum + line.credit
-        }
-        return lineSum
-      }, 0)
-    }, 0)
+      return (
+        sum +
+        entry.lines.reduce((lineSum, line) => {
+          if (line.account?.code?.startsWith('4') && line.credit > 0) {
+            return lineSum + line.credit;
+          }
+          return lineSum;
+        }, 0)
+      );
+    }, 0);
 
     const expenses = journalEntries.reduce((sum, entry) => {
-      return sum + entry.lines.reduce((lineSum, line) => {
-        if (line.account?.code?.startsWith('5') && line.debit > 0) {
-          return lineSum + line.debit
-        }
-        return lineSum
-      }, 0)
-    }, 0)
+      return (
+        sum +
+        entry.lines.reduce((lineSum, line) => {
+          if (line.account?.code?.startsWith('5') && line.debit > 0) {
+            return lineSum + line.debit;
+          }
+          return lineSum;
+        }, 0)
+      );
+    }, 0);
 
-    const accountsReceivable = Math.round((arBalance._sum.totalAmount || 0) - (arBalance._sum.paidAmount || 0))
-    const accountsPayable = Math.round((apBalance._sum.totalAmount || 0) - (apBalance._sum.paidAmount || 0))
+    const accountsReceivable = Math.round(
+      (arBalance._sum.totalAmount || 0) - (arBalance._sum.paidAmount || 0)
+    );
+    const accountsPayable = Math.round(
+      (apBalance._sum.totalAmount || 0) - (apBalance._sum.paidAmount || 0)
+    );
 
     return NextResponse.json({
       success: true,
@@ -150,13 +160,13 @@ export async function GET(request: NextRequest) {
           ar: { amount: satangToBaht(accountsReceivable), change: 0 },
           ap: { amount: satangToBaht(accountsPayable), change: 0 },
         },
-        monthlyData: monthlyData.map(m => ({
+        monthlyData: monthlyData.map((m) => ({
           ...m,
           revenue: satangToBaht(m.revenue),
           expense: satangToBaht(m.expense),
           profit: satangToBaht(m.profit),
         })),
-        vatData: vatData.map(v => ({
+        vatData: vatData.map((v) => ({
           ...v,
           vatOutput: satangToBaht(v.vatOutput),
           vatInput: satangToBaht(v.vatInput),
@@ -205,31 +215,47 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-    })
+    });
   } catch (error: any) {
-    console.error('Dashboard API error:', error)
-    console.error('Stack:', error?.stack)
+    console.error('Dashboard API error:', error);
+    console.error('Stack:', error?.stack);
 
     // Check if it's an auth error
     if (error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
-      )
+      );
     }
 
     return NextResponse.json(
-      { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล: ' + (error?.message || 'Unknown error') },
+      {
+        success: false,
+        error: 'เกิดข้อผิดพลาดในการดึงข้อมูล: ' + (error?.message || 'Unknown error'),
+      },
       { status: 500 }
-    )
+    );
   }
 }
 
 // ✅ OPTIMIZED: Get all monthly data in a single query using aggregation
 async function getMonthlyDataOptimized(year: number) {
-  const startDate = new Date(year, 0, 1)
-  const endDate = new Date(year, 11, 31, 23, 59, 59)
-  const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
+  const startDate = new Date(year, 0, 1);
+  const endDate = new Date(year, 11, 31, 23, 59, 59);
+  const thaiMonths = [
+    'ม.ค.',
+    'ก.พ.',
+    'มี.ค.',
+    'เม.ย.',
+    'พ.ค.',
+    'มิ.ย.',
+    'ก.ค.',
+    'ส.ค.',
+    'ก.ย.',
+    'ต.ค.',
+    'พ.ย.',
+    'ธ.ค.',
+  ];
 
   // Single query to get all journal entries for the year with their lines and accounts
   const journalEntries = await prisma.journalEntry.findMany({
@@ -244,40 +270,65 @@ async function getMonthlyDataOptimized(year: number) {
         },
       },
     },
-  })
+  });
 
   // Group and aggregate in memory (much faster than 12 separate queries)
   const monthlyData = Array.from({ length: 12 }, (_, m) => {
-    const monthStart = new Date(year, m, 1)
-    const monthEnd = new Date(year, m + 1, 0, 23, 59, 59)
+    const monthStart = new Date(year, m, 1);
+    const monthEnd = new Date(year, m + 1, 0, 23, 59, 59);
 
-    const monthEntries = journalEntries.filter(entry => {
-      const entryDate = new Date(entry.date)
-      return entryDate >= monthStart && entryDate <= monthEnd
-    })
+    const monthEntries = journalEntries.filter((entry) => {
+      const entryDate = new Date(entry.date);
+      return entryDate >= monthStart && entryDate <= monthEnd;
+    });
 
-    const revenue = monthEntries.reduce((sum, e) =>
-      sum + e.lines.reduce((s, l) => l.account?.code?.startsWith('4') && l.credit > 0 ? s + l.credit : s, 0)
-    , 0)
+    const revenue = monthEntries.reduce(
+      (sum, e) =>
+        sum +
+        e.lines.reduce(
+          (s, l) => (l.account?.code?.startsWith('4') && l.credit > 0 ? s + l.credit : s),
+          0
+        ),
+      0
+    );
 
-    const expense = monthEntries.reduce((sum, e) =>
-      sum + e.lines.reduce((s, l) => l.account?.code?.startsWith('5') && l.debit > 0 ? s + l.debit : s, 0)
-    , 0)
+    const expense = monthEntries.reduce(
+      (sum, e) =>
+        sum +
+        e.lines.reduce(
+          (s, l) => (l.account?.code?.startsWith('5') && l.debit > 0 ? s + l.debit : s),
+          0
+        ),
+      0
+    );
 
     return {
       month: thaiMonths[m],
       revenue,
       expense,
       profit: revenue - expense,
-    }
-  })
+    };
+  });
 
-  return monthlyData
+  return monthlyData;
 }
 
 // ✅ OPTIMIZED: Get all monthly VAT data in two queries (one for OUTPUT, one for INPUT)
 async function getMonthlyVatDataOptimized(year: number) {
-  const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
+  const thaiMonths = [
+    'ม.ค.',
+    'ก.พ.',
+    'มี.ค.',
+    'เม.ย.',
+    'พ.ค.',
+    'มิ.ย.',
+    'ก.ค.',
+    'ส.ค.',
+    'ก.ย.',
+    'ต.ค.',
+    'พ.ย.',
+    'ธ.ค.',
+  ];
 
   // ✅ OPTIMIZED: Single query for all OUTPUT VAT data
   const vatOutputByMonth = await prisma.vatRecord.groupBy({
@@ -289,7 +340,7 @@ async function getMonthlyVatDataOptimized(year: number) {
     _sum: {
       vatAmount: true,
     },
-  })
+  });
 
   // ✅ OPTIMIZED: Single query for all INPUT VAT data
   const vatInputByMonth = await prisma.vatRecord.groupBy({
@@ -301,32 +352,32 @@ async function getMonthlyVatDataOptimized(year: number) {
     _sum: {
       vatAmount: true,
     },
-  })
+  });
 
   // Build monthly data from aggregated results
   const monthlyData = Array.from({ length: 12 }, (_, i) => {
-    const month = i + 1
-    const outputRecord = vatOutputByMonth.find(r => r.taxMonth === month)
-    const inputRecord = vatInputByMonth.find(r => r.taxMonth === month)
+    const month = i + 1;
+    const outputRecord = vatOutputByMonth.find((r) => r.taxMonth === month);
+    const inputRecord = vatInputByMonth.find((r) => r.taxMonth === month);
 
     return {
       month: thaiMonths[i],
-      vatOutput: (outputRecord?._sum.vatAmount || 0),
-      vatInput: (inputRecord?._sum.vatAmount || 0),
-    }
-  })
+      vatOutput: outputRecord?._sum.vatAmount || 0,
+      vatInput: inputRecord?._sum.vatAmount || 0,
+    };
+  });
 
-  return monthlyData
+  return monthlyData;
 }
 
 async function getWhtSummary(year: number, month: number | null) {
-  const where: any = {}
+  const where: any = {};
 
   if (month) {
-    where.taxYear = year
-    where.taxMonth = month
+    where.taxYear = year;
+    where.taxMonth = month;
   } else {
-    where.taxYear = year
+    where.taxYear = year;
   }
 
   // Run both queries in parallel
@@ -339,17 +390,17 @@ async function getWhtSummary(year: number, month: number | null) {
       where: { ...where, type: 'PND53' },
       _sum: { whtAmount: true },
     }),
-  ])
+  ]);
 
   return {
     pnd3: pnd3._sum.whtAmount || 0,
     pnd53: pnd53._sum.whtAmount || 0,
     total: (pnd3._sum.whtAmount || 0) + (pnd53._sum.whtAmount || 0),
-  }
+  };
 }
 
 async function getARAging() {
-  const now = new Date()
+  const now = new Date();
   const invoices = await prisma.invoice.findMany({
     where: {
       status: { in: ['ISSUED', 'PARTIAL'] },
@@ -360,43 +411,43 @@ async function getARAging() {
       totalAmount: true,
       paidAmount: true,
     },
-  })
+  });
 
   const aging = {
-    current: 0,        // <= 30 days
-    days31to60: 0,     // 31-60 days
-    days61to90: 0,     // 61-90 days
-    over90: 0,         // > 90 days
-  }
+    current: 0, // <= 30 days
+    days31to60: 0, // 31-60 days
+    days61to90: 0, // 61-90 days
+    over90: 0, // > 90 days
+  };
 
-  invoices.forEach(inv => {
-    const balance = inv.totalAmount - inv.paidAmount
-    if (balance <= 0) return
+  invoices.forEach((inv) => {
+    const balance = inv.totalAmount - inv.paidAmount;
+    if (balance <= 0) return;
 
-    const dueDate = inv.dueDate ? new Date(inv.dueDate) : null
+    const dueDate = inv.dueDate ? new Date(inv.dueDate) : null;
     if (!dueDate) {
-      aging.current += balance
-      return
+      aging.current += balance;
+      return;
     }
 
-    const daysOverdue = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24))
+    const daysOverdue = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
 
     if (daysOverdue <= 30) {
-      aging.current += balance
+      aging.current += balance;
     } else if (daysOverdue <= 60) {
-      aging.days31to60 += balance
+      aging.days31to60 += balance;
     } else if (daysOverdue <= 90) {
-      aging.days61to90 += balance
+      aging.days61to90 += balance;
     } else {
-      aging.over90 += balance
+      aging.over90 += balance;
     }
-  })
+  });
 
-  return aging
+  return aging;
 }
 
 async function getAPAging() {
-  const now = new Date()
+  const now = new Date();
   const purchases = await prisma.purchaseInvoice.findMany({
     where: {
       status: { in: ['ISSUED', 'PARTIAL'] },
@@ -407,37 +458,37 @@ async function getAPAging() {
       totalAmount: true,
       paidAmount: true,
     },
-  })
+  });
 
   const aging = {
     current: 0,
     days31to60: 0,
     days61to90: 0,
     over90: 0,
-  }
+  };
 
-  purchases.forEach(pur => {
-    const balance = pur.totalAmount - pur.paidAmount
-    if (balance <= 0) return
+  purchases.forEach((pur) => {
+    const balance = pur.totalAmount - pur.paidAmount;
+    if (balance <= 0) return;
 
-    const dueDate = pur.dueDate ? new Date(pur.dueDate) : null
+    const dueDate = pur.dueDate ? new Date(pur.dueDate) : null;
     if (!dueDate) {
-      aging.current += balance
-      return
+      aging.current += balance;
+      return;
     }
 
-    const daysOverdue = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24))
+    const daysOverdue = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
 
     if (daysOverdue <= 30) {
-      aging.current += balance
+      aging.current += balance;
     } else if (daysOverdue <= 60) {
-      aging.days31to60 += balance
+      aging.days31to60 += balance;
     } else if (daysOverdue <= 90) {
-      aging.days61to90 += balance
+      aging.days61to90 += balance;
     } else {
-      aging.over90 += balance
+      aging.over90 += balance;
     }
-  })
+  });
 
-  return aging
+  return aging;
 }

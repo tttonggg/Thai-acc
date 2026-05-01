@@ -1,40 +1,53 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
-import { Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 interface Warehouse {
-  id: string
-  code: string
-  name: string
-  type: string
-  location: string | null
-  notes: string | null
-  isActive: boolean
+  id: string;
+  code: string;
+  name: string;
+  type: string;
+  location: string | null;
+  notes: string | null;
+  isActive: boolean;
 }
 
 interface WarehouseEditDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  warehouse?: Warehouse | null
-  onSuccess: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  warehouse?: Warehouse | null;
+  onSuccess: () => void;
 }
 
 export function WarehouseEditDialog({
   open,
   onOpenChange,
   warehouse,
-  onSuccess
+  onSuccess,
 }: WarehouseEditDialogProps) {
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     code: '',
     name: '',
@@ -42,7 +55,7 @@ export function WarehouseEditDialog({
     location: '',
     notes: '',
     isActive: true,
-  })
+  });
 
   useEffect(() => {
     if (warehouse) {
@@ -53,7 +66,7 @@ export function WarehouseEditDialog({
         location: warehouse.location || '',
         notes: warehouse.notes || '',
         isActive: warehouse.isActive,
-      })
+      });
     } else {
       setFormData({
         code: '',
@@ -62,58 +75,56 @@ export function WarehouseEditDialog({
         location: '',
         notes: '',
         isActive: true,
-      })
+      });
     }
-  }, [warehouse, open])
+  }, [warehouse, open]);
 
   const handleSubmit = async () => {
     if (!formData.code.trim() || !formData.name.trim()) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'กรุณากรอกรหัสและชื่อคลังสินค้า',
-        variant: 'destructive'
-      })
-      return
+        variant: 'destructive',
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const url = warehouse
-        ? `/api/warehouses/${warehouse.id}`
-        : '/api/warehouses'
+      const url = warehouse ? `/api/warehouses/${warehouse.id}` : '/api/warehouses';
 
-      const method = warehouse ? 'PUT' : 'POST'
+      const method = warehouse ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
-      }).then(r => r.json())
+      }).then((r) => r.json());
 
       if (res.success) {
         toast({
           title: warehouse ? 'แก้ไขคลังสำเร็จ' : 'สร้างคลังสำเร็จ',
-          description: `คลัง ${formData.name} บันทึกเรียบร้อยแล้ว`
-        })
-        onOpenChange(false)
-        onSuccess()
+          description: `คลัง ${formData.name} บันทึกเรียบร้อยแล้ว`,
+        });
+        onOpenChange(false);
+        onSuccess();
       } else {
         toast({
           title: 'ข้อผิดพลาด',
           description: res.error,
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -124,13 +135,11 @@ export function WarehouseEditDialog({
           </DialogDescription>
         </VisuallyHidden>
         <DialogHeader>
-          <DialogTitle>
-            {warehouse ? 'แก้ไขคลังสินค้า' : 'สร้างคลังสินค้าใหม่'}
-          </DialogTitle>
+          <DialogTitle>{warehouse ? 'แก้ไขคลังสินค้า' : 'สร้างคลังสินค้าใหม่'}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <Label htmlFor="code">รหัสคลัง *</Label>
               <Input
@@ -212,11 +221,7 @@ export function WarehouseEditDialog({
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             ยกเลิก
           </Button>
           <Button
@@ -224,11 +229,11 @@ export function WarehouseEditDialog({
             disabled={loading}
             className="bg-blue-600 hover:bg-blue-700"
           >
-            {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {warehouse ? 'บันทึกการแก้ไข' : 'สร้างคลัง'}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { z } from 'zod'
-import { requireAuth, requireRole } from '@/lib/api-utils'
-import { bahtToSatang, satangToBaht } from '@/lib/currency'
-import { checkPeriodStatus } from '@/lib/period-service'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { z } from 'zod';
+import { requireAuth, requireRole } from '@/lib/api-utils';
+import { bahtToSatang, satangToBaht } from '@/lib/currency';
+import { checkPeriodStatus } from '@/lib/period-service';
 
 // Validation schema for journal entry
 const journalLineSchema = z.object({
@@ -11,33 +11,35 @@ const journalLineSchema = z.object({
   description: z.string().optional(),
   debit: z.number().min(0, 'เดบิตต้องไม่ติดลบ').default(0),
   credit: z.number().min(0, 'เครดิตต้องไม่ติดลบ').default(0),
-})
+});
 
-const journalEntrySchema = z.object({
-  date: z.string().transform((val) => new Date(val)),
-  description: z.string().optional(),
-  reference: z.string().optional(),
-  documentType: z.string().optional(),
-  documentId: z.string().optional(),
-  notes: z.string().optional(),
-  lines: z.array(journalLineSchema).min(2, 'ต้องมีอย่างน้อย 2 รายการ'),
-}).refine(
-  (data) => {
-    const totalDebit = data.lines.reduce((sum, line) => sum + line.debit, 0)
-    const totalCredit = data.lines.reduce((sum, line) => sum + line.credit, 0)
-    return Math.abs(totalDebit - totalCredit) < 0.01
-  },
-  { message: 'ยอดเดบิตและเครดิตต้องเท่ากัน' }
-)
+const journalEntrySchema = z
+  .object({
+    date: z.string().transform((val) => new Date(val)),
+    description: z.string().optional(),
+    reference: z.string().optional(),
+    documentType: z.string().optional(),
+    documentId: z.string().optional(),
+    notes: z.string().optional(),
+    lines: z.array(journalLineSchema).min(2, 'ต้องมีอย่างน้อย 2 รายการ'),
+  })
+  .refine(
+    (data) => {
+      const totalDebit = data.lines.reduce((sum, line) => sum + line.debit, 0);
+      const totalCredit = data.lines.reduce((sum, line) => sum + line.credit, 0);
+      return Math.abs(totalDebit - totalCredit) < 0.01;
+    },
+    { message: 'ยอดเดบิตและเครดิตต้องเท่ากัน' }
+  );
 
 // Generate entry number
 async function generateEntryNumber(): Promise<string> {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  
-  const prefix = `JV-${year}${month}`
-  
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+
+  const prefix = `JV-${year}${month}`;
+
   const lastEntry = await prisma.journalEntry.findFirst({
     where: {
       entryNo: {
@@ -45,53 +47,53 @@ async function generateEntryNumber(): Promise<string> {
       },
     },
     orderBy: { entryNo: 'desc' },
-  })
-  
-  let nextNum = 1
+  });
+
+  let nextNum = 1;
   if (lastEntry) {
-    const lastNum = parseInt(lastEntry.entryNo.split('-')[2] || '0')
-    nextNum = lastNum + 1
+    const lastNum = parseInt(lastEntry.entryNo.split('-')[2] || '0');
+    nextNum = lastNum + 1;
   }
-  
-  return `${prefix}-${String(nextNum).padStart(4, '0')}`
+
+  return `${prefix}-${String(nextNum).padStart(4, '0')}`;
 }
 
 // GET - List journal entries (ACCOUNTANT or ADMIN only)
 export async function GET(request: NextRequest) {
   try {
     // Require ACCOUNTANT or ADMIN role
-    await requireRole(['ACCOUNTANT', 'ADMIN'])
+    await requireRole(['ACCOUNTANT', 'ADMIN']);
 
-    const searchParams = request.nextUrl.searchParams
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const status = searchParams.get('status')
-    const startDate = searchParams.get('startDate')
-    const endDate = searchParams.get('endDate')
-    const search = searchParams.get('search')
-    
-    const skip = (page - 1) * limit
-    
-    const where: any = {}
-    
+    const searchParams = request.nextUrl.searchParams;
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const status = searchParams.get('status');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const search = searchParams.get('search');
+
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
     if (status) {
-      where.status = status
+      where.status = status;
     }
-    
+
     if (startDate || endDate) {
-      where.date = {}
-      if (startDate) where.date.gte = new Date(startDate)
-      if (endDate) where.date.lte = new Date(endDate)
+      where.date = {};
+      if (startDate) where.date.gte = new Date(startDate);
+      if (endDate) where.date.lte = new Date(endDate);
     }
-    
+
     if (search) {
       where.OR = [
         { entryNo: { contains: search } },
         { description: { contains: search } },
         { reference: { contains: search } },
-      ]
+      ];
     }
-    
+
     const [entries, total] = await Promise.all([
       prisma.journalEntry.findMany({
         where,
@@ -108,7 +110,7 @@ export async function GET(request: NextRequest) {
         take: limit,
       }),
       prisma.journalEntry.count({ where }),
-    ])
+    ]);
 
     // Convert Satang to Baht for response
     const entriesWithBaht = entries.map((entry: any) => ({
@@ -120,7 +122,7 @@ export async function GET(request: NextRequest) {
         debit: satangToBaht(line.debit),
         credit: satangToBaht(line.credit),
       })),
-    }))
+    }));
 
     return NextResponse.json({
       success: true,
@@ -131,26 +133,23 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-    })
+    });
   } catch (error: any) {
     // Handle auth errors
     if (error?.statusCode === 401 || error?.message?.includes('Unauthorized')) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
-      )
+      );
     }
     if (error?.statusCode === 403) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์เข้าถึง' },
-        { status: 403 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
-    console.error('Journal API error:', error)
+    console.error('Journal API error:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -158,18 +157,18 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Require ACCOUNTANT or ADMIN role
-    await requireRole(['ACCOUNTANT', 'ADMIN'])
+    await requireRole(['ACCOUNTANT', 'ADMIN']);
 
-    const body = await request.json()
-    const validatedData = journalEntrySchema.parse(body)
+    const body = await request.json();
+    const validatedData = journalEntrySchema.parse(body);
 
     // B1. Period Locking - Check if period is open for journal entry date
-    const periodCheck = await checkPeriodStatus(validatedData.date)
+    const periodCheck = await checkPeriodStatus(validatedData.date);
     if (!periodCheck.isValid) {
       return NextResponse.json(
-        { success: false, error: periodCheck.error || "ไม่สามารถสร้างบันทึกบัญชีในงวดที่ปิดแล้ว" },
+        { success: false, error: periodCheck.error || 'ไม่สามารถสร้างบันทึกบัญชีในงวดที่ปิดแล้ว' },
         { status: 400 }
-      )
+      );
     }
 
     // Convert Baht to Satang for debit/credit amounts
@@ -180,14 +179,14 @@ export async function POST(request: NextRequest) {
         debit: bahtToSatang(line.debit),
         credit: bahtToSatang(line.credit),
       })),
-    }
+    };
 
     // Calculate totals (already in Satang)
-    const totalDebit = dataInSatang.lines.reduce((sum, line) => sum + line.debit, 0)
-    const totalCredit = dataInSatang.lines.reduce((sum, line) => sum + line.credit, 0)
+    const totalDebit = dataInSatang.lines.reduce((sum, line) => sum + line.debit, 0);
+    const totalCredit = dataInSatang.lines.reduce((sum, line) => sum + line.credit, 0);
 
     // Generate entry number
-    const entryNo = await generateEntryNumber()
+    const entryNo = await generateEntryNumber();
 
     // Create journal entry with lines
     const entry = await prisma.journalEntry.create({
@@ -219,7 +218,7 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-    })
+    });
 
     // Convert response to Baht
     const entryInBaht = {
@@ -231,19 +230,19 @@ export async function POST(request: NextRequest) {
         debit: satangToBaht(line.debit),
         credit: satangToBaht(line.credit),
       })),
-    }
+    };
 
-    return NextResponse.json({ success: true, data: entryInBaht })
+    return NextResponse.json({ success: true, data: entryInBaht });
   } catch (error: any) {
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
         { status: 400 }
-      )
+      );
     }
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการสร้างบันทึกบัญชี' },
       { status: 500 }
-    )
+    );
   }
 }

@@ -4,7 +4,13 @@
  */
 
 import { prisma } from './db';
-import { encrypt, decrypt, createHmacSignature, verifyHmacSignature, generateSecureToken } from './encryption-service';
+import {
+  encrypt,
+  decrypt,
+  createHmacSignature,
+  verifyHmacSignature,
+  generateSecureToken,
+} from './encryption-service';
 
 export interface WebhookPayload {
   event: string;
@@ -53,7 +59,7 @@ export function signWebhookPayload(
 ): { signature: string; body: string } {
   const body = JSON.stringify(payload);
   const signature = createHmacSignature(body, secret);
-  
+
   return { signature, body };
 }
 
@@ -99,7 +105,7 @@ export async function deliverWebhook(
 
   // Attempt delivery with retries
   let lastError: string | undefined;
-  
+
   for (let attempt = 0; attempt < webhook.retryCount; attempt++) {
     try {
       const response = await fetch(webhook.url, {
@@ -158,7 +164,7 @@ export async function deliverWebhook(
 
     // Wait before retry (exponential backoff)
     if (attempt < webhook.retryCount - 1) {
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
     }
   }
 
@@ -171,22 +177,24 @@ export async function deliverWebhook(
 export async function getWebhookDeliveries(
   webhookId: string,
   limit: number = 50
-): Promise<Array<{
-  id: string;
-  event: string;
-  success: boolean;
-  responseStatus: number | null;
-  deliveredAt: Date;
-  retryCount: number;
-  errorMessage: string | null;
-}>> {
+): Promise<
+  Array<{
+    id: string;
+    event: string;
+    success: boolean;
+    responseStatus: number | null;
+    deliveredAt: Date;
+    retryCount: number;
+    errorMessage: string | null;
+  }>
+> {
   const deliveries = await prisma.webhookDelivery.findMany({
     where: { webhookId },
     orderBy: { deliveredAt: 'desc' },
     take: limit,
   });
 
-  return deliveries.map(d => ({
+  return deliveries.map((d) => ({
     id: d.id,
     event: d.event,
     success: d.success,
@@ -257,7 +265,7 @@ export function verifyTimestampedSignature(
   toleranceSeconds: number = 300 // 5 minute tolerance
 ): boolean {
   const { timestamp, signatures } = parseSignatureHeader(header);
-  
+
   // Check timestamp tolerance
   const now = Math.floor(Date.now() / 1000);
   if (Math.abs(now - timestamp) > toleranceSeconds) {
@@ -267,7 +275,7 @@ export function verifyTimestampedSignature(
   const signedPayload = `${timestamp}.${payload}`;
   const expectedSignature = createHmacSignature(signedPayload, secret);
 
-  return signatures.some(sig => sig === expectedSignature);
+  return signatures.some((sig) => sig === expectedSignature);
 }
 
 /**

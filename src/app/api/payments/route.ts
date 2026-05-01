@@ -1,113 +1,118 @@
-import { db } from "@/lib/db"
-import { requireAuth, apiResponse, apiError, unauthorizedError, generateDocNumber } from "@/lib/api-utils"
-import { z } from "zod"
-import { bahtToSatang, satangToBaht } from "@/lib/currency"
-import { generateWhtFromPayment } from "@/lib/wht-service"
+import { db } from '@/lib/db';
+import {
+  requireAuth,
+  apiResponse,
+  apiError,
+  unauthorizedError,
+  generateDocNumber,
+} from '@/lib/api-utils';
+import { z } from 'zod';
+import { bahtToSatang, satangToBaht } from '@/lib/currency';
+import { generateWhtFromPayment } from '@/lib/wht-service';
 
 // Validation schema
 const paymentAllocationSchema = z.object({
-  invoiceId: z.string().min(1, "กรุณาเลือกใบซื้อ"),
-  amount: z.number().min(0, "จำนวนเงินต้องไม่น้อยกว่า 0"),
+  invoiceId: z.string().min(1, 'กรุณาเลือกใบซื้อ'),
+  amount: z.number().min(0, 'จำนวนเงินต้องไม่น้อยกว่า 0'),
   whtRate: z.number().min(0).max(100).default(0),
   whtAmount: z.number().min(0).default(0),
   notes: z.string().optional(),
-})
+});
 
 const paymentSchema = z.object({
-  vendorId: z.string().min(1, "กรุณาเลือกผู้ขาย"),
+  vendorId: z.string().min(1, 'กรุณาเลือกผู้ขาย'),
   paymentDate: z.string().or(z.date()),
-  paymentMethod: z.enum(["CASH", "TRANSFER", "CHEQUE", "CREDIT", "OTHER"]),
+  paymentMethod: z.enum(['CASH', 'TRANSFER', 'CHEQUE', 'CREDIT', 'OTHER']),
   bankAccountId: z.string().optional(),
   chequeNo: z.string().optional(),
   chequeDate: z.string().or(z.date()).optional(),
-  amount: z.number().min(0, "จำนวนเงินต้องไม่น้อยกว่า 0"),
+  amount: z.number().min(0, 'จำนวนเงินต้องไม่น้อยกว่า 0'),
   whtAmount: z.number().min(0).default(0),
   unallocated: z.number().min(0).default(0),
   notes: z.string().optional(),
-  allocations: z.array(paymentAllocationSchema).min(1, "ต้องมีการจัดจ่ายอย่างน้อย 1 รายการ"),
-  status: z.enum(["DRAFT", "POSTED", "CANCELLED"]).default("DRAFT"),
-})
+  allocations: z.array(paymentAllocationSchema).min(1, 'ต้องมีการจัดจ่ายอย่างน้อย 1 รายการ'),
+  status: z.enum(['DRAFT', 'POSTED', 'CANCELLED']).default('DRAFT'),
+});
 
 // GET /api/payments - List payments
 export async function GET(request: Request) {
   try {
-    await requireAuth()
+    await requireAuth();
 
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get("page") || "1")
-    const limit = Math.min(100, parseInt(searchParams.get("limit") || "20"))
-    const status = searchParams.get("status")
-    const vendorId = searchParams.get("vendorId")
-    const startDate = searchParams.get("startDate")
-    const endDate = searchParams.get("endDate")
-    const search = searchParams.get("search")
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = Math.min(100, parseInt(searchParams.get('limit') || '20'));
+    const status = searchParams.get('status');
+    const vendorId = searchParams.get('vendorId');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const search = searchParams.get('search');
 
-    const skip = (page - 1) * limit
+    const skip = (page - 1) * limit;
 
-    const where: any = {}
+    const where: any = {};
 
     if (status) {
-      where.status = status
+      where.status = status;
     }
 
     if (vendorId) {
-      where.vendorId = vendorId
+      where.vendorId = vendorId;
     }
 
     if (startDate || endDate) {
-      where.paymentDate = {}
-      if (startDate) where.paymentDate.gte = new Date(startDate)
-      if (endDate) where.paymentDate.lte = new Date(endDate)
+      where.paymentDate = {};
+      if (startDate) where.paymentDate.gte = new Date(startDate);
+      if (endDate) where.paymentDate.lte = new Date(endDate);
     }
 
     if (search) {
-      where.OR = [
-        { paymentNo: { contains: search } },
-        { vendor: { name: { contains: search } } },
-      ]
+      where.OR = [{ paymentNo: { contains: search } }, { vendor: { name: { contains: search } } }];
     }
 
     const [payments, total] = await Promise.all([
       db.payment.findMany({
         where,
-        orderBy: { paymentDate: "desc" },
+        orderBy: { paymentDate: 'desc' },
         skip,
         take: limit,
         include: {
           vendor: {
-            select: { id: true, code: true, name: true, taxId: true }
+            select: { id: true, code: true, name: true, taxId: true },
           },
           bankAccount: {
-            select: { id: true, code: true, bankName: true, accountNumber: true }
+            select: { id: true, code: true, bankName: true, accountNumber: true },
           },
           allocations: {
             include: {
               invoice: {
-                select: { id: true, invoiceNo: true, invoiceDate: true, totalAmount: true }
-              }
-            }
-          }
-        }
+                select: { id: true, invoiceNo: true, invoiceDate: true, totalAmount: true },
+              },
+            },
+          },
+        },
       }),
-      db.payment.count({ where })
-    ])
+      db.payment.count({ where }),
+    ]);
 
     // Convert Satang to Baht for all monetary fields
-    const paymentsInBaht = payments.map(payment => ({
+    const paymentsInBaht = payments.map((payment) => ({
       ...payment,
       amount: satangToBaht(payment.amount),
       whtAmount: satangToBaht(payment.whtAmount),
       unallocated: satangToBaht(payment.unallocated),
-      allocations: payment.allocations.map(alloc => ({
+      allocations: payment.allocations.map((alloc) => ({
         ...alloc,
         amount: satangToBaht(alloc.amount),
         whtAmount: satangToBaht(alloc.whtAmount),
-        invoice: alloc.invoice ? {
-          ...alloc.invoice,
-          totalAmount: satangToBaht(alloc.invoice.totalAmount),
-        } : alloc.invoice,
+        invoice: alloc.invoice
+          ? {
+              ...alloc.invoice,
+              totalAmount: satangToBaht(alloc.invoice.totalAmount),
+            }
+          : alloc.invoice,
       })),
-    }))
+    }));
 
     return Response.json({
       success: true,
@@ -116,75 +121,78 @@ export async function GET(request: Request) {
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit)
-      }
-    })
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
-    if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
-      return unauthorizedError()
+    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+      return unauthorizedError();
     }
-    return apiError("เกิดข้อผิดพลาดในการดึงข้อมูลใบจ่ายเงิน")
+    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลใบจ่ายเงิน');
   }
 }
 
 // POST /api/payments - Create payment
 export async function POST(request: Request) {
   try {
-    const user = await requireAuth()
+    const user = await requireAuth();
 
-    if (user.role === "VIEWER") {
-      return apiError("ไม่มีสิทธิ์สร้างใบจ่ายเงิน", 403)
+    if (user.role === 'VIEWER') {
+      return apiError('ไม่มีสิทธิ์สร้างใบจ่ายเงิน', 403);
     }
 
-    const body = await request.json()
-    const validatedData = paymentSchema.parse(body)
+    const body = await request.json();
+    const validatedData = paymentSchema.parse(body);
 
     // Verify vendor exists
     const vendor = await db.vendor.findUnique({
-      where: { id: validatedData.vendorId }
-    })
+      where: { id: validatedData.vendorId },
+    });
 
     if (!vendor) {
-      return apiError("ไม่พบผู้ขาย")
+      return apiError('ไม่พบผู้ขาย');
     }
 
     // B-03: Require bank account for transfer/cheque payments
-    if ((validatedData.paymentMethod === "TRANSFER" || validatedData.paymentMethod === "CHEQUE") && !validatedData.bankAccountId) {
-      return apiError("กรุณาระบุบัญชีธนาคาร", 400)
+    if (
+      (validatedData.paymentMethod === 'TRANSFER' || validatedData.paymentMethod === 'CHEQUE') &&
+      !validatedData.bankAccountId
+    ) {
+      return apiError('กรุณาระบุบัญชีธนาคาร', 400);
     }
     if (validatedData.bankAccountId) {
       const bankAccount = await db.bankAccount.findUnique({
-        where: { id: validatedData.bankAccountId }
-      })
+        where: { id: validatedData.bankAccountId },
+      });
       if (!bankAccount) {
-        return apiError("ไม่พบบัญชีธนาคาร")
+        return apiError('ไม่พบบัญชีธนาคาร');
       }
     }
 
     // Verify all invoices exist and belong to vendor
-    const invoiceIds = validatedData.allocations.map(a => a.invoiceId)
+    const invoiceIds = validatedData.allocations.map((a) => a.invoiceId);
     const invoices = await db.purchaseInvoice.findMany({
       where: {
         id: { in: invoiceIds },
-        vendorId: validatedData.vendorId
-      }
-    })
+        vendorId: validatedData.vendorId,
+      },
+    });
 
     if (invoices.length !== invoiceIds.length) {
-      return apiError("ไม่พบใบซื้อบางรายการ หรือใบซื้อไม่ใช่ของผู้ขายรายนี้")
+      return apiError('ไม่พบใบซื้อบางรายการ หรือใบซื้อไม่ใช่ของผู้ขายรายนี้');
     }
 
     // Calculate totals
-    const totalAllocated = validatedData.allocations.reduce((sum, a) => sum + a.amount, 0)
-    const totalWHT = validatedData.allocations.reduce((sum, a) => sum + a.whtAmount, 0)
+    const totalAllocated = validatedData.allocations.reduce((sum, a) => sum + a.amount, 0);
+    const totalWHT = validatedData.allocations.reduce((sum, a) => sum + a.whtAmount, 0);
 
     // Validate total amount
     if (validatedData.amount < totalAllocated) {
-      return apiError("ยอดจ่ายรวมต้องไม่น้อยกว่ายอดจัดจ่าย")
+      return apiError('ยอดจ่ายรวมต้องไม่น้อยกว่ายอดจัดจ่าย');
     }
 
     // Generate payment number
-    const paymentNo = await generateDocNumber("PAYMENT", "PAY")
+    const paymentNo = await generateDocNumber('PAYMENT', 'PAY');
 
     // Create payment with allocations
     const payment = await db.payment.create({
@@ -209,48 +217,50 @@ export async function POST(request: Request) {
             whtRate: allocation.whtRate,
             whtAmount: bahtToSatang(allocation.whtAmount),
             notes: allocation.notes,
-          }))
-        }
+          })),
+        },
       },
       include: {
         vendor: true,
         allocations: {
           include: {
-            invoice: true
-          }
-        }
-      }
-    })
+            invoice: true,
+          },
+        },
+      },
+    });
 
     // Create cheque record if payment by cheque
-    if (validatedData.paymentMethod === "CHEQUE" && validatedData.chequeNo) {
+    if (validatedData.paymentMethod === 'CHEQUE' && validatedData.chequeNo) {
       const bankAccount = validatedData.bankAccountId
         ? await db.bankAccount.findUnique({ where: { id: validatedData.bankAccountId } })
-        : null
+        : null;
 
       await db.cheque.create({
         data: {
           chequeNo: validatedData.chequeNo,
-          type: "PAY",
-          bankAccountId: validatedData.bankAccountId || "",
-          dueDate: validatedData.chequeDate ? new Date(validatedData.chequeDate) : new Date(validatedData.paymentDate),
+          type: 'PAY',
+          bankAccountId: validatedData.bankAccountId || '',
+          dueDate: validatedData.chequeDate
+            ? new Date(validatedData.chequeDate)
+            : new Date(validatedData.paymentDate),
           amount: bahtToSatang(validatedData.amount),
           payeeName: vendor.name,
-          status: "ON_HAND",
+          status: 'ON_HAND',
           documentRef: paymentNo,
           paymentId: payment.id,
-        }
-      })
+        },
+      });
     }
 
     // If POSTED, create journal entry
-    if (validatedData.status === "POSTED") {
-      await postPaymentToGL(payment)
+    if (validatedData.status === 'POSTED') {
+      await postPaymentToGL(payment);
 
       // Auto-generate WHT records for vendor-withheld amounts (PND3/PND53)
       // Mirrors the pattern used in receipts/[id]/post/route.ts lines 266-311
       if (payment.whtAmount > 0) {
-        await generateWhtFromPayment(payment.id)
+        await generateWhtFromPayment(payment.id);
       }
     }
 
@@ -260,24 +270,24 @@ export async function POST(request: Request) {
       amount: satangToBaht(payment.amount),
       whtAmount: satangToBaht(payment.whtAmount),
       unallocated: satangToBaht(payment.unallocated),
-      allocations: payment.allocations.map(alloc => ({
+      allocations: payment.allocations.map((alloc) => ({
         ...alloc,
         amount: satangToBaht(alloc.amount),
         whtAmount: satangToBaht(alloc.whtAmount),
       })),
-    }
+    };
 
-    return apiResponse(paymentInBaht, 201)
+    return apiResponse(paymentInBaht, 201);
   } catch (error) {
-    if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
-      return unauthorizedError()
+    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+      return unauthorizedError();
     }
     if (error instanceof z.ZodError) {
-      const issues = error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')
-      return apiError(`ข้อมูลไม่ถูกต้อง: ${issues}`, 400)
+      const issues = error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ');
+      return apiError(`ข้อมูลไม่ถูกต้อง: ${issues}`, 400);
     }
-    console.error("Payment creation error:", error)
-    return apiError("เกิดข้อผิดพลาดในการสร้างใบจ่ายเงิน")
+    console.error('Payment creation error:', error);
+    return apiError('เกิดข้อผิดพลาดในการสร้างใบจ่ายเงิน');
   }
 }
 
@@ -285,34 +295,34 @@ export async function POST(request: Request) {
 export async function postPaymentToGL(payment: any, tx: any = db) {
   // Get AP account (2110 - เจ้าหนี้การค้า) — MUST match purchase invoice posting (2110)
   const apAccount = await tx.chartOfAccount.findUnique({
-    where: { code: "2110" }
-  })
+    where: { code: '2110' },
+  });
 
   // Get cash/bank account based on payment method
-  let cashAccountId: string | null = null
-  if (payment.paymentMethod === "CASH") {
+  let cashAccountId: string | null = null;
+  if (payment.paymentMethod === 'CASH') {
     const cashAccount = await tx.chartOfAccount.findUnique({
-      where: { code: "1110" } // เงินสด
-    })
-    cashAccountId = cashAccount?.id || null
+      where: { code: '1110' }, // เงินสด
+    });
+    cashAccountId = cashAccount?.id || null;
   } else if (payment.bankAccountId) {
     const bankGlAccount = await tx.chartOfAccount.findFirst({
-      where: { code: { startsWith: "112" } } // เงินฝากธนาคาร
-    })
-    cashAccountId = bankGlAccount?.id || null
+      where: { code: { startsWith: '112' } }, // เงินฝากธนาคาร
+    });
+    cashAccountId = bankGlAccount?.id || null;
   }
 
   // Get WHT receivable account
   const whtAccount = await tx.chartOfAccount.findUnique({
-    where: { code: "2130" } // ภาษีหัก ณ ที่จ่าย
-  })
+    where: { code: '2130' }, // ภาษีหัก ณ ที่จ่าย
+  });
 
   if (!apAccount) {
-    throw new Error("ไม่พบบัญชีเจ้าหนี้การค้า (2110)")
+    throw new Error('ไม่พบบัญชีเจ้าหนี้การค้า (2110)');
   }
 
   // Create journal entry lines
-  const lines: any[] = []
+  const lines: any[] = [];
 
   // Debit: AP (reduce liability)
   for (const allocation of payment.allocations) {
@@ -322,7 +332,7 @@ export async function postPaymentToGL(payment: any, tx: any = db) {
       debit: allocation.amount + allocation.whtAmount,
       credit: 0,
       reference: payment.paymentNo,
-    })
+    });
   }
 
   // Credit: Cash/Bank
@@ -333,7 +343,7 @@ export async function postPaymentToGL(payment: any, tx: any = db) {
       debit: 0,
       credit: payment.amount - payment.unallocated,
       reference: payment.paymentNo,
-    })
+    });
   }
 
   // Credit: Unallocated (vendor credit)
@@ -344,7 +354,7 @@ export async function postPaymentToGL(payment: any, tx: any = db) {
       debit: 0,
       credit: payment.unallocated,
       reference: payment.paymentNo,
-    })
+    });
   }
 
   // Credit: WHT (if any)
@@ -355,7 +365,7 @@ export async function postPaymentToGL(payment: any, tx: any = db) {
       debit: 0,
       credit: payment.whtAmount,
       reference: payment.paymentNo,
-    })
+    });
   }
 
   // Create journal entry
@@ -364,25 +374,25 @@ export async function postPaymentToGL(payment: any, tx: any = db) {
       date: payment.paymentDate,
       description: `ใบจ่ายเงิน ${payment.paymentNo} - ${payment.vendor.name}`,
       reference: payment.paymentNo,
-      documentType: "PAYMENT",
+      documentType: 'PAYMENT',
       documentId: payment.id,
       totalDebit: lines.reduce((sum, l) => sum + l.debit, 0),
       totalCredit: lines.reduce((sum, l) => sum + l.credit, 0),
-      status: "POSTED",
+      status: 'POSTED',
       lines: {
         create: lines.map((line, index) => ({
           ...line,
           lineNo: index + 1,
-        }))
-      }
-    }
-  })
+        })),
+      },
+    },
+  });
 
   // Update payment with journal entry ID
   await tx.payment.update({
     where: { id: payment.id },
-    data: { journalEntryId: journalEntry.id }
-  })
+    data: { journalEntryId: journalEntry.id },
+  });
 
   // Update invoice balances
   for (const allocation of payment.allocations) {
@@ -390,11 +400,11 @@ export async function postPaymentToGL(payment: any, tx: any = db) {
       where: { id: allocation.invoiceId },
       data: {
         paidAmount: {
-          increment: allocation.amount
-        }
-      }
-    })
+          increment: allocation.amount,
+        },
+      },
+    });
   }
 
-  return journalEntry
+  return journalEntry;
 }

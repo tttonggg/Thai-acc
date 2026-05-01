@@ -1,19 +1,24 @@
 /**
  * API Versions Endpoint
  * Phase D: API Mastery - API Versioning
- * 
+ *
  * Returns information about available API versions
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { API_VERSIONS, LATEST_VERSION, MINIMUM_VERSION, getMigrationGuide } from '@/lib/api-version';
+import {
+  API_VERSIONS,
+  LATEST_VERSION,
+  MINIMUM_VERSION,
+  getMigrationGuide,
+} from '@/lib/api-version';
 
 // GET /api/versions - List all API versions
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
-    
+
     const { searchParams } = new URL(req.url);
     const from = searchParams.get('from');
     const to = searchParams.get('to');
@@ -21,10 +26,7 @@ export async function GET(req: NextRequest) {
     // If from and to are provided, return migration guide
     if (from && to) {
       if (!session?.user) {
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
       const guide = getMigrationGuide(from, to);
@@ -63,9 +65,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching API versions:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch API versions' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch API versions' }, { status: 500 });
   }
 }

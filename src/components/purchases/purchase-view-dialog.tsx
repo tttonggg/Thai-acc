@@ -1,24 +1,18 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import {
-  X,
-  Loader2,
-  FileText,
-  Download,
-  Printer
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useState, useEffect } from 'react';
+import { X, Loader2, FileText, Download, Printer } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -26,77 +20,77 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Separator } from '@/components/ui/separator'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/table';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 
 interface PurchaseLine {
-  id: string
-  description: string
-  quantity: number
-  unit: string
-  unitPrice: number
-  discount: number
-  amount: number
-  vatRate: number
-  vatAmount: number
+  id: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  discount: number;
+  amount: number;
+  vatRate: number;
+  vatAmount: number;
   product?: {
-    code: string
-    name: string
-  }
+    code: string;
+    name: string;
+  };
 }
 
 interface Purchase {
-  id: string
-  invoiceNo: string
-  vendorInvoiceNo?: string
-  invoiceDate: string
-  dueDate?: string
+  id: string;
+  invoiceNo: string;
+  vendorInvoiceNo?: string;
+  invoiceDate: string;
+  dueDate?: string;
   vendor: {
-    code: string
-    name: string
-    taxId?: string
-    address?: string
-  }
-  type: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE'
-  status: 'DRAFT' | 'ISSUED' | 'POSTED' | 'PAID' | 'CANCELLED'
-  reference?: string
-  poNumber?: string
-  subtotal: number
-  discountAmount: number
-  vatRate: number
-  vatAmount: number
-  totalAmount: number
-  withholdingRate: number
-  withholdingAmount: number
-  netAmount: number
-  paidAmount: number
-  notes?: string
-  internalNotes?: string
-  lines: PurchaseLine[]
-  journalEntryId?: string
+    code: string;
+    name: string;
+    taxId?: string;
+    address?: string;
+  };
+  type: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE';
+  status: 'DRAFT' | 'ISSUED' | 'POSTED' | 'PAID' | 'CANCELLED';
+  reference?: string;
+  poNumber?: string;
+  subtotal: number;
+  discountAmount: number;
+  vatRate: number;
+  vatAmount: number;
+  totalAmount: number;
+  withholdingRate: number;
+  withholdingAmount: number;
+  netAmount: number;
+  paidAmount: number;
+  notes?: string;
+  internalNotes?: string;
+  lines: PurchaseLine[];
+  journalEntryId?: string;
   journalEntry?: {
-    entryNo: string
-    status: string
-  }
+    entryNo: string;
+    status: string;
+  };
   payments?: Array<{
-    paymentNo: string
-    paymentDate: string
-    amount: number
-  }>
+    paymentNo: string;
+    paymentDate: string;
+    amount: number;
+  }>;
 }
 
 interface PurchaseViewDialogProps {
-  purchaseId: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  purchaseId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const purchaseTypeLabels: Record<string, string> = {
   TAX_INVOICE: 'ใบกำกับภาษี',
   RECEIPT: 'ใบเสร็จรับเงิน',
   DELIVERY_NOTE: 'ใบส่งของ',
-}
+};
 
 const statusLabels: Record<string, string> = {
   DRAFT: 'ร่าง',
@@ -104,7 +98,7 @@ const statusLabels: Record<string, string> = {
   POSTED: 'ลงบัญชีแล้ว',
   PAID: 'จ่ายแล้ว',
   CANCELLED: 'ยกเลิก',
-}
+};
 
 const statusColors: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-800',
@@ -112,47 +106,47 @@ const statusColors: Record<string, string> = {
   POSTED: 'bg-green-100 text-green-800',
   PAID: 'bg-green-100 text-green-800',
   CANCELLED: 'bg-red-100 text-red-800',
-}
+};
 
 export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseViewDialogProps) {
-  const [purchase, setPurchase] = useState<Purchase | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [printing, setPrinting] = useState(false)
-  const { toast } = useToast()
+  const [purchase, setPurchase] = useState<Purchase | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [printing, setPrinting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (open && purchaseId) {
-      fetchPurchase()
+      fetchPurchase();
     }
-  }, [open, purchaseId])
+  }, [open, purchaseId]);
 
   const fetchPurchase = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const res = await fetch(`/api/purchases/${purchaseId}`, { credentials: 'include' })
+      const res = await fetch(`/api/purchases/${purchaseId}`, { credentials: 'include' });
 
       // Handle non-OK responses with error JSON
       if (!res.ok) {
-        let errorMessage = 'ไม่สามารถดึงข้อมูลใบซื้อได้'
+        let errorMessage = 'ไม่สามารถดึงข้อมูลใบซื้อได้';
         try {
-          const errorData = await res.json()
-          errorMessage = errorData.error || errorMessage
+          const errorData = await res.json();
+          errorMessage = errorData.error || errorMessage;
         } catch {
           // JSON parse failed, use default message
         }
-        throw new Error(errorMessage)
+        throw new Error(errorMessage);
       }
 
-      const result = await res.json()
-      setPurchase(result.data)
+      const result = await res.json();
+      setPurchase(result.data);
     } catch (err: any) {
-      setError(err.message || 'เกิดข้อผิดพลาด')
+      setError(err.message || 'เกิดข้อผิดพลาด');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('th-TH', {
@@ -160,30 +154,30 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
       currency: 'THB',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('th-TH', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    })
-  }
+    });
+  };
 
   const handlePrint = () => {
-    if (!purchase) return
-    
-    setPrinting(true)
-    const printWindow = window.open('', '_blank')
+    if (!purchase) return;
+
+    setPrinting(true);
+    const printWindow = window.open('', '_blank');
     if (!printWindow) {
       toast({
         title: 'ไม่สามารถเปิดหน้าต่างได้',
         description: 'กรุณาอนุญาตให้เปิดหน้าต่างใหม่',
-        variant: 'destructive'
-      })
-      setPrinting(false)
-      return
+        variant: 'destructive',
+      });
+      setPrinting(false);
+      return;
     }
 
     const html = `
@@ -243,7 +237,9 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
             </tr>
           </thead>
           <tbody>
-            ${purchase.lines.map((line, index) => `
+            ${purchase.lines
+              .map(
+                (line, index) => `
               <tr>
                 <td>${index + 1}</td>
                 <td>${line.description}</td>
@@ -251,7 +247,9 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
                 <td class="text-right">${formatCurrency(line.unitPrice)}</td>
                 <td class="text-right">${formatCurrency(line.amount)}</td>
               </tr>
-            `).join('')}
+            `
+              )
+              .join('')}
           </tbody>
         </table>
 
@@ -260,12 +258,16 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
             <span>มูลค่าก่อน VAT</span>
             <span>${formatCurrency(purchase.subtotal)}</span>
           </div>
-          ${purchase.discountAmount > 0 ? `
+          ${
+            purchase.discountAmount > 0
+              ? `
           <div class="summary-row">
             <span>ส่วนลด</span>
             <span>-${formatCurrency(purchase.discountAmount)}</span>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
           <div class="summary-row">
             <span>VAT (${purchase.vatRate}%)</span>
             <span>${formatCurrency(purchase.vatAmount)}</span>
@@ -274,7 +276,9 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
             <span>ยอดรวมสุทธิ</span>
             <span>${formatCurrency(purchase.totalAmount)}</span>
           </div>
-          ${purchase.withholdingAmount > 0 ? `
+          ${
+            purchase.withholdingAmount > 0
+              ? `
           <div class="summary-row">
             <span>หัก ณ ที่จ่าย (${purchase.withholdingRate}%)</span>
             <span>-${formatCurrency(purchase.withholdingAmount)}</span>
@@ -283,7 +287,9 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
             <span>ยอดสุทธิหลังหัก ณ ที่จ่าย</span>
             <span>${formatCurrency(purchase.netAmount)}</span>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
 
         ${purchase.notes ? `<p style="margin-top: 20px;"><strong>หมายเหตุ:</strong> ${purchase.notes}</p>` : ''}
@@ -291,35 +297,35 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
         <script>window.onload = () => { setTimeout(() => { window.print(); }, 500); }</script>
       </body>
       </html>
-    `
-    
-    printWindow.document.write(html)
-    printWindow.document.close()
-    setTimeout(() => setPrinting(false), 1000)
-  }
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    setTimeout(() => setPrinting(false), 1000);
+  };
 
   const handleDownload = async () => {
     try {
       toast({
         title: 'กำลังดาวน์โหลด',
         description: 'กำลังสร้างไฟล์ PDF...',
-      })
+      });
       // In production, this would call a PDF generation endpoint
       // For now, just print
-      handlePrint()
+      handlePrint();
     } catch (error) {
       toast({
         title: 'ดาวน์โหลดไม่สำเร็จ',
         description: 'กรุณาลองอีกครั้ง',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-4xl">
           <VisuallyHidden>
             <DialogTitle>กำลังโหลดข้อมูลใบซื้อ</DialogTitle>
             <DialogDescription>กำลังดึงข้อมูลใบซื้อจากระบบ</DialogDescription>
@@ -330,7 +336,7 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   if (error || !purchase) {
@@ -341,17 +347,17 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
             <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบซื้อ</DialogTitle>
             <DialogDescription>ไม่สามารถดึงข้อมูลใบซื้อได้ กรุณาลองใหม่</DialogDescription>
           </VisuallyHidden>
-          <div className="text-center py-12 text-red-600">
+          <div className="py-12 text-center text-red-600">
             เกิดข้อผิดพลาด: {error || 'ไม่พบข้อมูล'}
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-5xl max-h-[90vh] overflow-y-auto print:max-h-none print:overflow-visible">
+      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-5xl print:max-h-none print:overflow-visible">
         <DialogHeader className="print:hidden">
           <div className="flex items-center justify-between">
             <div>
@@ -359,48 +365,34 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
                 ดู{purchaseTypeLabels[purchase.type]} - {purchase.invoiceNo}
               </DialogTitle>
               {purchase.vendorInvoiceNo && (
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="mt-1 text-sm text-muted-foreground">
                   เลขที่ใบกำกับภาษีผู้ขาย: {purchase.vendorInvoiceNo}
                 </p>
               )}
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownload}
-                disabled={printing}
-              >
+              <Button variant="outline" size="sm" onClick={handleDownload} disabled={printing}>
                 {printing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <Download className="h-4 w-4 mr-2" />
+                  <Download className="mr-2 h-4 w-4" />
                 )}
                 ดาวน์โหลด
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePrint}
-                disabled={printing}
-              >
+              <Button variant="outline" size="sm" onClick={handlePrint} disabled={printing}>
                 {printing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <Printer className="h-4 w-4 mr-2" />
+                  <Printer className="mr-2 h-4 w-4" />
                 )}
                 พิมพ์
               </Button>
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            <Badge className={statusColors[purchase.status]}>
-              {statusLabels[purchase.status]}
-            </Badge>
+          <div className="mt-2 flex items-center gap-2">
+            <Badge className={statusColors[purchase.status]}>{statusLabels[purchase.status]}</Badge>
             {purchase.journalEntry && (
-              <Badge variant="outline">
-                บันทึกบัญชี: {purchase.journalEntry.entryNo}
-              </Badge>
+              <Badge variant="outline">บันทึกบัญชี: {purchase.journalEntry.entryNo}</Badge>
             )}
           </div>
         </DialogHeader>
@@ -408,18 +400,18 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
         {/* Print Content */}
         <div className="space-y-6 print:space-y-4" id="purchase-content">
           {/* Header */}
-          <div className="flex justify-between items-start border-b pb-4">
+          <div className="flex items-start justify-between border-b pb-4">
             <div>
               <h1 className="text-2xl font-bold">{purchaseTypeLabels[purchase.type]}</h1>
-              <p className="text-lg text-muted-foreground mt-1">{purchase.invoiceNo}</p>
+              <p className="mt-1 text-lg text-muted-foreground">{purchase.invoiceNo}</p>
               {purchase.vendorInvoiceNo && (
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="mt-1 text-sm text-muted-foreground">
                   เลขที่ใบกำกับภาษีผู้ขาย: {purchase.vendorInvoiceNo}
                 </p>
               )}
             </div>
             <div className="text-right">
-              <div className="flex items-center gap-2 justify-end mb-2">
+              <div className="mb-2 flex items-center justify-end gap-2">
                 <Badge className={statusColors[purchase.status]}>
                   {statusLabels[purchase.status]}
                 </Badge>
@@ -434,16 +426,16 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
           {/* Vendor Info */}
           <Card>
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">ผู้ขาย</p>
-                  <p className="font-semibold text-lg">{purchase.vendor.name}</p>
+                  <p className="mb-1 text-sm text-muted-foreground">ผู้ขาย</p>
+                  <p className="text-lg font-semibold">{purchase.vendor.name}</p>
                   <p className="text-sm text-muted-foreground">{purchase.vendor.code}</p>
                   {purchase.vendor.taxId && (
                     <p className="text-sm">เลขประจำตัวผู้เสียภาษี: {purchase.vendor.taxId}</p>
                   )}
                   {purchase.vendor.address && (
-                    <p className="text-sm mt-2">{purchase.vendor.address}</p>
+                    <p className="mt-2 text-sm">{purchase.vendor.address}</p>
                   )}
                 </div>
                 <div className="space-y-2 text-sm">
@@ -506,9 +498,15 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
                       <TableCell className="text-right">{line.quantity.toLocaleString()}</TableCell>
                       <TableCell>{line.unit}</TableCell>
                       <TableCell className="text-right">{formatCurrency(line.unitPrice)}</TableCell>
-                      <TableCell className="text-right">{line.discount > 0 ? `${line.discount}%` : '-'}</TableCell>
-                      <TableCell className="text-right">{line.vatRate > 0 ? `${line.vatRate}%` : '-'}</TableCell>
-                      <TableCell className="text-right font-medium">{formatCurrency(line.amount)}</TableCell>
+                      <TableCell className="text-right">
+                        {line.discount > 0 ? `${line.discount}%` : '-'}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {line.vatRate > 0 ? `${line.vatRate}%` : '-'}
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {formatCurrency(line.amount)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -520,7 +518,7 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
           <Card>
             <CardContent className="pt-6">
               <div className="flex justify-end">
-                <div className="w-full md:w-1/2 space-y-2">
+                <div className="w-full space-y-2 md:w-1/2">
                   <div className="flex justify-between text-sm">
                     <span>มูลค่าก่อน VAT</span>
                     <span>{formatCurrency(purchase.subtotal)}</span>
@@ -569,7 +567,9 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
                       <Separator />
                       <div className="flex justify-between text-sm">
                         <span>จ่ายแล้ว</span>
-                        <span className="text-green-600">-{formatCurrency(purchase.paidAmount)}</span>
+                        <span className="text-green-600">
+                          -{formatCurrency(purchase.paidAmount)}
+                        </span>
                       </div>
                       <div className="flex justify-between text-base font-semibold">
                         <span>ค้างจ่าย</span>
@@ -591,13 +591,13 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
                 <div className="space-y-2">
                   {purchase.notes && (
                     <div>
-                      <p className="text-sm font-medium mb-1">หมายเหตุ</p>
+                      <p className="mb-1 text-sm font-medium">หมายเหตุ</p>
                       <p className="text-sm text-muted-foreground">{purchase.notes}</p>
                     </div>
                   )}
                   {purchase.internalNotes && (
                     <div>
-                      <p className="text-sm font-medium mb-1">หมายเหตุภายใน</p>
+                      <p className="mb-1 text-sm font-medium">หมายเหตุภายใน</p>
                       <p className="text-sm text-muted-foreground">{purchase.internalNotes}</p>
                     </div>
                   )}
@@ -653,5 +653,5 @@ export function PurchaseViewDialog({ purchaseId, open, onOpenChange }: PurchaseV
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

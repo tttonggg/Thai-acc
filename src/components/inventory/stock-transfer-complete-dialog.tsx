@@ -1,87 +1,94 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/hooks/use-toast'
-import { Loader2, Package, ArrowRight, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Package, ArrowRight, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 
 interface StockTransfer {
-  transferNo: string
-  date: string
-  productId: string
-  product: { code: string; name: string; unit: string }
-  fromWarehouse: { code: string; name: string }
-  toWarehouse: { code: string; name: string }
-  quantity: number
-  status: string
-  notes: string | null
+  transferNo: string;
+  date: string;
+  productId: string;
+  product: { code: string; name: string; unit: string };
+  fromWarehouse: { code: string; name: string };
+  toWarehouse: { code: string; name: string };
+  quantity: number;
+  status: string;
+  notes: string | null;
 }
 
 interface StockTransferCompleteDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  transfer?: StockTransfer | null
-  onSuccess: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  transfer?: StockTransfer | null;
+  onSuccess: () => void;
 }
 
 export function StockTransferCompleteDialog({
   open,
   onOpenChange,
   transfer,
-  onSuccess
+  onSuccess,
 }: StockTransferCompleteDialogProps) {
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
-  const [mode, setMode] = useState<'complete' | 'cancel'>('complete')
-  const [receivedQuantity, setReceivedQuantity] = useState('')
-  const [notes, setNotes] = useState('')
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<'complete' | 'cancel'>('complete');
+  const [receivedQuantity, setReceivedQuantity] = useState('');
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     if (transfer) {
-      setReceivedQuantity(transfer.quantity.toString())
-      setNotes('')
-      setMode('complete')
+      setReceivedQuantity(transfer.quantity.toString());
+      setNotes('');
+      setMode('complete');
     }
-  }, [transfer, open])
+  }, [transfer, open]);
 
-  if (!transfer) return null
+  if (!transfer) return null;
 
-  const quantityDiff = receivedQuantity !== ''
-    ? parseFloat(receivedQuantity) - transfer.quantity
-    : 0
+  const quantityDiff =
+    receivedQuantity !== '' ? parseFloat(receivedQuantity) - transfer.quantity : 0;
 
-  const hasDifference = Math.abs(quantityDiff) > 0.01
+  const hasDifference = Math.abs(quantityDiff) > 0.01;
 
   const handleSubmit = async () => {
     if (mode === 'complete' && receivedQuantity === '') {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'กรุณาระบุจำนวนที่ได้รับ',
-        variant: 'destructive'
-      })
-      return
+        variant: 'destructive',
+      });
+      return;
     }
 
-    const qty = parseFloat(receivedQuantity)
+    const qty = parseFloat(receivedQuantity);
 
     if (qty < 0) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'จำนวนที่ได้รับต้องไม่ติดลบ',
-        variant: 'destructive'
-      })
-      return
+        variant: 'destructive',
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await fetch(`/api/stock/transfers/${transfer.transferNo}`, { credentials: 'include', 
+      const res = await fetch(`/api/stock/transfers/${transfer.transferNo}`, {
+        credentials: 'include',
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -89,41 +96,43 @@ export function StockTransferCompleteDialog({
           receivedQuantity: mode === 'complete' ? qty : undefined,
           notes,
         }),
-      }).then(r => r.json())
+      }).then((r) => r.json());
 
       if (res.success) {
         toast({
           title: mode === 'complete' ? 'ยืนยันการรับสินค้าสำเร็จ' : 'ยกเลิกการโอนสำเร็จ',
-          description: res.data?.message || res.message || 'ดำเนินการเรียบร้อยแล้ว'
-        })
-        onOpenChange(false)
-        onSuccess()
+          description: res.data?.message || res.message || 'ดำเนินการเรียบร้อยแล้ว',
+        });
+        onOpenChange(false);
+        onSuccess();
       } else {
         toast({
           title: 'ข้อผิดพลาด',
           description: res.error,
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const isCompleted = transfer.status === 'COMPLETED'
+  const isCompleted = transfer.status === 'COMPLETED';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] md:max-w-md">
         <VisuallyHidden>
           <DialogDescription>
-            {isCompleted ? 'แสดงรายละเอียดการโอนสินค้าที่สำเร็จแล้ว' : 'ดำเนินการยืนยันรับสินค้าหรือยกเลิกการโอน'}
+            {isCompleted
+              ? 'แสดงรายละเอียดการโอนสินค้าที่สำเร็จแล้ว'
+              : 'ดำเนินการยืนยันรับสินค้าหรือยกเลิกการโอน'}
           </DialogDescription>
         </VisuallyHidden>
         <DialogHeader>
@@ -134,30 +143,38 @@ export function StockTransferCompleteDialog({
 
         <div className="space-y-4 py-4">
           {/* Transfer Info */}
-          <div className="bg-gray-50 p-3 rounded-lg space-y-2">
-            <div className="flex justify-between items-start">
+          <div className="space-y-2 rounded-lg bg-gray-50 p-3">
+            <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-semibold">{transfer.product.name}</p>
-                <p className="text-xs text-gray-500 font-mono">{transfer.product.code}</p>
+                <p className="font-mono text-xs text-gray-500">{transfer.product.code}</p>
               </div>
-              <Badge className={isCompleted ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+              <Badge
+                className={
+                  isCompleted ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                }
+              >
                 {isCompleted ? 'สำเร็จ' : 'ระหว่างดำเนินการ'}
               </Badge>
             </div>
 
-            <div className="flex items-center justify-between text-sm py-2">
-              <div className="text-center flex-1">
-                <Badge variant="outline" className="mb-1">{transfer.fromWarehouse.name}</Badge>
+            <div className="flex items-center justify-between py-2 text-sm">
+              <div className="flex-1 text-center">
+                <Badge variant="outline" className="mb-1">
+                  {transfer.fromWarehouse.name}
+                </Badge>
                 <p className="text-xs text-gray-500">จากคลัง</p>
               </div>
-              <ArrowRight className="h-4 w-4 text-gray-400 mx-2" />
-              <div className="text-center flex-1">
-                <Badge variant="outline" className="mb-1">{transfer.toWarehouse.name}</Badge>
+              <ArrowRight className="mx-2 h-4 w-4 text-gray-400" />
+              <div className="flex-1 text-center">
+                <Badge variant="outline" className="mb-1">
+                  {transfer.toWarehouse.name}
+                </Badge>
                 <p className="text-xs text-gray-500">ไปยังคลัง</p>
               </div>
             </div>
 
-            <div className="flex justify-between items-center text-sm pt-2 border-t">
+            <div className="flex items-center justify-between border-t pt-2 text-sm">
               <span>จำนวนที่โอน:</span>
               <span className="font-semibold text-blue-600">
                 {transfer.quantity.toFixed(2)} {transfer.product.unit}
@@ -169,9 +186,7 @@ export function StockTransferCompleteDialog({
             </div>
 
             {transfer.notes && (
-              <div className="text-xs text-gray-600 pt-1 border-t">
-                หมายเหตุ: {transfer.notes}
-              </div>
+              <div className="border-t pt-1 text-xs text-gray-600">หมายเหตุ: {transfer.notes}</div>
             )}
           </div>
 
@@ -182,25 +197,25 @@ export function StockTransferCompleteDialog({
                 <button
                   onClick={() => setMode('complete')}
                   disabled={isCompleted}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
                     mode === 'complete'
                       ? 'bg-green-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  <CheckCircle className="h-4 w-4 mr-1 inline" />
+                  <CheckCircle className="mr-1 inline h-4 w-4" />
                   ยืนยันรับสินค้า
                 </button>
                 <button
                   onClick={() => setMode('cancel')}
                   disabled={isCompleted}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
                     mode === 'cancel'
                       ? 'bg-red-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  <XCircle className="h-4 w-4 mr-1 inline" />
+                  <XCircle className="mr-1 inline h-4 w-4" />
                   ยกเลิกการโอน
                 </button>
               </div>
@@ -218,29 +233,36 @@ export function StockTransferCompleteDialog({
                       placeholder="ระบุจำนวนที่ได้รับจริง"
                       disabled={loading}
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="mt-1 text-xs text-gray-500">
                       จำนวนที่โอน: {transfer.quantity} {transfer.product.unit}
                     </p>
                   </div>
 
                   {hasDifference && (
-                    <div className={`p-3 rounded-lg border ${
-                      quantityDiff > 0 ? 'bg-orange-50 border-orange-200' : 'bg-red-50 border-red-200'
-                    }`}>
+                    <div
+                      className={`rounded-lg border p-3 ${
+                        quantityDiff > 0
+                          ? 'border-orange-200 bg-orange-50'
+                          : 'border-red-200 bg-red-50'
+                      }`}
+                    >
                       <div className="flex items-start gap-2">
-                        <AlertTriangle className={`h-4 w-4 mt-0.5 ${
-                          quantityDiff > 0 ? 'text-orange-600' : 'text-red-600'
-                        }`} />
+                        <AlertTriangle
+                          className={`mt-0.5 h-4 w-4 ${
+                            quantityDiff > 0 ? 'text-orange-600' : 'text-red-600'
+                          }`}
+                        />
                         <div className="text-xs">
                           <p className="font-semibold">
                             {quantityDiff > 0 ? 'ได้รับมากกว่าที่โอน' : 'ได้รับน้อยกว่าที่โอน'}
                           </p>
-                          <p className="text-gray-600 mt-1">
+                          <p className="mt-1 text-gray-600">
                             ผลต่าง: {Math.abs(quantityDiff).toFixed(2)} {transfer.product.unit}
                           </p>
                           {quantityDiff < 0 && (
-                            <p className="text-gray-600 mt-1">
-                              ระบบจะบันทึกเป็นสูญหาย/เสียหาย {Math.abs(quantityDiff).toFixed(2)} {transfer.product.unit}
+                            <p className="mt-1 text-gray-600">
+                              ระบบจะบันทึกเป็นสูญหาย/เสียหาย {Math.abs(quantityDiff).toFixed(2)}{' '}
+                              {transfer.product.unit}
                             </p>
                           )}
                         </div>
@@ -263,12 +285,12 @@ export function StockTransferCompleteDialog({
               )}
 
               {mode === 'cancel' && (
-                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3">
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
+                    <AlertTriangle className="mt-0.5 h-4 w-4 text-red-600" />
                     <div className="text-sm text-red-800">
                       <p className="font-semibold">ยกเลิกการโอนสินค้า</p>
-                      <p className="text-xs mt-1">
+                      <p className="mt-1 text-xs">
                         ระบบจะคืนสินค้ากลับเข้าคลังต้นทาง และยกเลิกรายการโอนนี้
                       </p>
                     </div>
@@ -279,14 +301,12 @@ export function StockTransferCompleteDialog({
           )}
 
           {isCompleted && (
-            <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+            <div className="rounded-lg border border-green-200 bg-green-50 p-3">
               <div className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                <CheckCircle className="mt-0.5 h-4 w-4 text-green-600" />
                 <div className="text-sm text-green-800">
                   <p className="font-semibold">การโอนสินค้าสำเร็จแล้ว</p>
-                  <p className="text-xs mt-1">
-                    สินค้าถูกโอนไปยังคลังปลายทางเรียบร้อยแล้ว
-                  </p>
+                  <p className="mt-1 text-xs">สินค้าถูกโอนไปยังคลังปลายทางเรียบร้อยแล้ว</p>
                 </div>
               </div>
             </div>
@@ -294,25 +314,25 @@ export function StockTransferCompleteDialog({
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             {isCompleted ? 'ปิด' : 'ยกเลิก'}
           </Button>
           {!isCompleted && (
             <Button
               onClick={handleSubmit}
               disabled={loading}
-              className={mode === 'complete' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
+              className={
+                mode === 'complete'
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-red-600 hover:bg-red-700'
+              }
             >
-              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {mode === 'complete' ? 'ยืนยันรับสินค้า' : 'ยืนยันการยกเลิก'}
             </Button>
           )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

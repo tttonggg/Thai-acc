@@ -20,13 +20,39 @@ const MINIMUM_SCORE = 3;
 
 // Common passwords to block (in addition to zxcvbn's dictionary)
 const BLOCKED_PASSWORDS = [
-  'password', '123456', '12345678', 'qwerty', 'abc123',
-  'monkey', 'letmein', 'dragon', '111111', 'baseball',
-  'iloveyou', 'trustno1', 'sunshine', 'princess', 'admin',
-  'welcome', 'shadow', 'ashley', 'football', 'jesus',
-  'michael', 'ninja', 'mustang', 'password1', '123456789',
-  'thaiaccounting', 'thaierp', 'accounting', 'ledger',
-  'admin123', 'root123', 'user123', 'pass123'
+  'password',
+  '123456',
+  '12345678',
+  'qwerty',
+  'abc123',
+  'monkey',
+  'letmein',
+  'dragon',
+  '111111',
+  'baseball',
+  'iloveyou',
+  'trustno1',
+  'sunshine',
+  'princess',
+  'admin',
+  'welcome',
+  'shadow',
+  'ashley',
+  'football',
+  'jesus',
+  'michael',
+  'ninja',
+  'mustang',
+  'password1',
+  '123456789',
+  'thaiaccounting',
+  'thaierp',
+  'accounting',
+  'ledger',
+  'admin123',
+  'root123',
+  'user123',
+  'pass123',
 ];
 
 /**
@@ -48,12 +74,15 @@ export function checkPasswordStrength(password: string): PasswordStrengthResult 
 
   // Check blocked passwords (case-insensitive)
   const lowerPassword = password.toLowerCase();
-  if (BLOCKED_PASSWORDS.some(blocked => lowerPassword.includes(blocked))) {
+  if (BLOCKED_PASSWORDS.some((blocked) => lowerPassword.includes(blocked))) {
     return {
       score: 0,
       feedback: {
         warning: 'รหัสผ่านนี้ใช้กันทั่วไปและเดาได้ง่าย',
-        suggestions: ['เลือกรหัสผ่านที่ไม่ซ้ำใครมากขึ้น', 'หลีกเลี่ยงคำทั่วไปและรูปแบบที่คาดเดาได้'],
+        suggestions: [
+          'เลือกรหัสผ่านที่ไม่ซ้ำใครมากขึ้น',
+          'หลีกเลี่ยงคำทั่วไปและรูปแบบที่คาดเดาได้',
+        ],
       },
       crackTimeDisplay: 'instant',
       isStrongEnough: false,
@@ -65,7 +94,7 @@ export function checkPasswordStrength(password: string): PasswordStrengthResult 
 
   // Enhance feedback with Thai Accounting specific suggestions
   const suggestions: string[] = [...result.feedback.suggestions];
-  
+
   if (!/[A-Z]/.test(password)) {
     suggestions.push('เพิ่มตัวพิมพ์ใหญ่');
   }
@@ -80,7 +109,9 @@ export function checkPasswordStrength(password: string): PasswordStrengthResult 
   }
 
   // Remove duplicates using filter
-  const uniqueSuggestions = suggestions.filter((item, index) => suggestions.indexOf(item) === index);
+  const uniqueSuggestions = suggestions.filter(
+    (item, index) => suggestions.indexOf(item) === index
+  );
 
   return {
     score: result.score,
@@ -98,9 +129,10 @@ export function checkPasswordStrength(password: string): PasswordStrengthResult 
  */
 export function validatePasswordStrength(password: string): void {
   const result = checkPasswordStrength(password);
-  
+
   if (!result.isStrongEnough) {
-    const errorMessage = result.feedback.warning || 
+    const errorMessage =
+      result.feedback.warning ||
       `รหัสผ่านอ่อนแอเกินไป (คะแนน: ${result.score}/4). ${result.feedback.suggestions.join('. ')}`;
     throw new Error(errorMessage);
   }
@@ -111,12 +143,18 @@ export function validatePasswordStrength(password: string): void {
  */
 export function getPasswordStrengthLabel(score: number): string {
   switch (score) {
-    case 0: return 'อ่อนแอมาก';
-    case 1: return 'อ่อนแอ';
-    case 2: return 'พอใช้';
-    case 3: return 'ดี';
-    case 4: return 'แข็งแกร่ง';
-    default: return 'ไม่ทราบ';
+    case 0:
+      return 'อ่อนแอมาก';
+    case 1:
+      return 'อ่อนแอ';
+    case 2:
+      return 'พอใช้';
+    case 3:
+      return 'ดี';
+    case 4:
+      return 'แข็งแกร่ง';
+    default:
+      return 'ไม่ทราบ';
   }
 }
 
@@ -125,12 +163,18 @@ export function getPasswordStrengthLabel(score: number): string {
  */
 export function getPasswordStrengthColor(score: number): string {
   switch (score) {
-    case 0: return 'text-red-600';
-    case 1: return 'text-red-500';
-    case 2: return 'text-yellow-500';
-    case 3: return 'text-green-500';
-    case 4: return 'text-green-600';
-    default: return 'text-gray-500';
+    case 0:
+      return 'text-red-600';
+    case 1:
+      return 'text-red-500';
+    case 2:
+      return 'text-yellow-500';
+    case 3:
+      return 'text-green-500';
+    case 4:
+      return 'text-green-600';
+    default:
+      return 'text-gray-500';
   }
 }
 
@@ -142,25 +186,28 @@ export function generateStrongPassword(length: number = 16): string {
   const lowercase = 'abcdefghijklmnopqrstuvwxyz';
   const numbers = '0123456789';
   const special = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-  
+
   const all = uppercase + lowercase + numbers + special;
-  
+
   let password = '';
-  
+
   // Ensure at least one of each type
   password += uppercase[Math.floor(Math.random() * uppercase.length)];
   password += lowercase[Math.floor(Math.random() * lowercase.length)];
   password += numbers[Math.floor(Math.random() * numbers.length)];
   password += special[Math.floor(Math.random() * special.length)];
-  
+
   // Fill the rest randomly
   for (let i = 4; i < length; i++) {
     const char = all[Math.floor(Math.random() * all.length)];
     password += char;
   }
-  
+
   // Shuffle the password
-  return password.split('').sort(() => Math.random() - 0.5).join('');
+  return password
+    .split('')
+    .sort(() => Math.random() - 0.5)
+    .join('');
 }
 
 /**

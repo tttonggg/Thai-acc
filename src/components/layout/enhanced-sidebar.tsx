@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
+import { useState } from 'react';
 import {
   LayoutDashboard,
   FileText,
@@ -24,9 +24,9 @@ import {
   History,
   Bell,
   Keyboard,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
-import type { Module } from '@/app/page'
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { Module } from '@/app/page';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,35 +34,48 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { RecentItemsList, useRecentItems, RecentItem } from '@/components/personalization/recent-items'
-import { NotificationCenter, useNotifications } from '@/components/notifications/notification-center'
-import { ThemeToggle } from '@/components/personalization/user-preferences'
-import { useKeyboardShortcuts, KeyboardShortcutsHelp } from '@/components/keyboard-shortcuts/use-keyboard-shortcuts'
-import { UserPreferencesDialog, UserPreferences } from '@/components/personalization/user-preferences'
-import { SyncStatus } from '@/components/offline-sync/offline-sync-provider'
-import { InstallPrompt, OfflineIndicator, UpdateNotification } from '@/components/pwa/pwa-provider'
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  RecentItemsList,
+  useRecentItems,
+  RecentItem,
+} from '@/components/personalization/recent-items';
+import {
+  NotificationCenter,
+  useNotifications,
+} from '@/components/notifications/notification-center';
+import { ThemeToggle } from '@/components/personalization/user-preferences';
+import {
+  useKeyboardShortcuts,
+  KeyboardShortcutsHelp,
+} from '@/components/keyboard-shortcuts/use-keyboard-shortcuts';
+import {
+  UserPreferencesDialog,
+  UserPreferences,
+} from '@/components/personalization/user-preferences';
+import { SyncStatus } from '@/components/offline-sync/offline-sync-provider';
+import { InstallPrompt, OfflineIndicator, UpdateNotification } from '@/components/pwa/pwa-provider';
 
 interface MenuItem {
-  id: Module
-  label: string
-  icon: React.ComponentType<{ size?: number; className?: string }>
-  adminOnly?: boolean
+  id: Module;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  adminOnly?: boolean;
 }
 
 interface EnhancedSidebarProps {
-  activeModule: Module
-  setActiveModule: (module: Module) => void
-  isOpen: boolean
-  setIsOpen: (open: boolean) => void
-  menuItems?: MenuItem[]
-  userRole?: string
-  userName?: string
-  userId?: string
-  onLogout?: () => void
+  activeModule: Module;
+  setActiveModule: (module: Module) => void;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  menuItems?: MenuItem[];
+  userRole?: string;
+  userName?: string;
+  userId?: string;
+  onLogout?: () => void;
 }
 
 const defaultMenuItems: MenuItem[] = [
@@ -83,14 +96,14 @@ const defaultMenuItems: MenuItem[] = [
   { id: 'reports' as Module, label: 'รายงาน', icon: BarChart3 },
   { id: 'settings' as Module, label: 'ตั้งค่า', icon: Settings, adminOnly: true },
   { id: 'users' as Module, label: 'จัดการผู้ใช้', icon: UserCog, adminOnly: true },
-]
+];
 
 const roleLabels: Record<string, string> = {
   ADMIN: 'ผู้ดูแลระบบ',
   ACCOUNTANT: 'นักบัญชี',
   USER: 'ผู้ใช้ทั่วไป',
   VIEWER: 'ผู้ชมเท่านั้น',
-}
+};
 
 export function EnhancedSidebar({
   activeModule,
@@ -103,55 +116,71 @@ export function EnhancedSidebar({
   userId,
   onLogout,
 }: EnhancedSidebarProps) {
-  const [showShortcuts, setShowShortcuts] = useState(false)
-  const [showPreferences, setShowPreferences] = useState(false)
-  const { recentItems, recordAccess, clearRecentItems } = useRecentItems(userId)
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, clearAll } = useNotifications(userId)
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
+  const { recentItems, recordAccess, clearRecentItems } = useRecentItems(userId);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, clearAll } =
+    useNotifications(userId);
 
   // Keyboard shortcuts
   const shortcuts = [
-    { key: 'n', ctrl: true, description: 'สร้างใบกำกับภาษีใหม่', category: 'ทั่วไป', action: () => setActiveModule('invoices' as Module) },
+    {
+      key: 'n',
+      ctrl: true,
+      description: 'สร้างใบกำกับภาษีใหม่',
+      category: 'ทั่วไป',
+      action: () => setActiveModule('invoices' as Module),
+    },
     { key: 's', ctrl: true, description: 'บันทึก', category: 'ทั่วไป', action: () => {} },
-    { key: 'p', ctrl: true, description: 'พิมพ์', category: 'ทั่วไป', action: () => window.print() },
+    {
+      key: 'p',
+      ctrl: true,
+      description: 'พิมพ์',
+      category: 'ทั่วไป',
+      action: () => window.print(),
+    },
     { key: 'Escape', description: 'ปิด/ยกเลิก', category: 'ทั่วไป', action: () => {} },
     { key: 'k', ctrl: true, description: 'ค้นหา', category: 'ทั่วไป', action: () => {} },
-    { key: '?', description: 'แสดงคีย์ลัด', category: 'ทั่วไป', action: () => setShowShortcuts(true) },
-  ]
+    {
+      key: '?',
+      description: 'แสดงคีย์ลัด',
+      category: 'ทั่วไป',
+      action: () => setShowShortcuts(true),
+    },
+  ];
 
-  useKeyboardShortcuts(shortcuts)
+  useKeyboardShortcuts(shortcuts);
 
-  const visibleMenuItems = menuItems.filter(
-    (item) => !item.adminOnly || userRole === 'ADMIN'
-  )
+  const visibleMenuItems = menuItems.filter((item) => !item.adminOnly || userRole === 'ADMIN');
 
   const handleRecentItemClick = (item: { module: string; recordId: string }) => {
-    setActiveModule(item.module as Module)
-  }
+    setActiveModule(item.module as Module);
+  };
 
   return (
     <>
       <aside
         className={cn(
-          "bg-gradient-to-b from-blue-900 to-blue-800 text-white transition-all duration-300 flex flex-col h-screen",
-          isOpen ? "w-72" : "w-16"
+          'flex h-screen flex-col bg-gradient-to-b from-blue-900 to-blue-800 text-white transition-all duration-300',
+          isOpen ? 'w-72' : 'w-16'
         )}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between p-4 border-b border-blue-700">
-          <div className={cn("flex items-center gap-3", !isOpen && "justify-center w-full")}>
-            <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Landmark className="w-6 h-6 text-blue-900" />
+        <div className="flex items-center justify-between border-b border-blue-700 p-4">
+          <div className={cn('flex items-center gap-3', !isOpen && 'w-full justify-center')}>
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-yellow-500">
+              <Landmark className="h-6 w-6 text-blue-900" />
             </div>
             {isOpen && (
               <div>
-                <h1 className="font-bold text-lg">Thai ERP</h1>
+                <h1 className="text-lg font-bold">Thai ERP</h1>
                 <p className="text-xs text-blue-200">โปรแกรมบัญชีมาตรฐานไทย</p>
               </div>
             )}
           </div>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-1 hover:bg-blue-700 rounded hidden lg:block flex-shrink-0"
+            className="hidden flex-shrink-0 rounded p-1 hover:bg-blue-700 lg:block"
           >
             {isOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
           </button>
@@ -161,32 +190,32 @@ export function EnhancedSidebar({
         <ScrollArea className="flex-1 p-2">
           <nav className="space-y-1">
             {visibleMenuItems.map((item) => {
-              const Icon = item.icon
-              const isActive = activeModule === item.id
+              const Icon = item.icon;
+              const isActive = activeModule === item.id;
 
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveModule(item.id)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all",
+                    'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition-all',
                     isActive
-                      ? "bg-yellow-500 text-blue-900 font-medium shadow-lg"
-                      : "hover:bg-blue-700 text-blue-100",
-                    !isOpen && "justify-center"
+                      ? 'bg-yellow-500 font-medium text-blue-900 shadow-lg'
+                      : 'text-blue-100 hover:bg-blue-700',
+                    !isOpen && 'justify-center'
                   )}
                   title={!isOpen ? item.label : undefined}
                 >
                   <Icon size={20} />
                   {isOpen && <span className="text-sm">{item.label}</span>}
                 </button>
-              )
+              );
             })}
           </nav>
 
           {/* Recent Items Section */}
           {isOpen && recentItems.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-blue-700">
+            <div className="mt-6 border-t border-blue-700 pt-4">
               <RecentItemsList
                 items={recentItems}
                 onItemClick={handleRecentItemClick}
@@ -199,15 +228,15 @@ export function EnhancedSidebar({
 
         {/* Bottom Actions */}
         {isOpen && (
-          <div className="p-3 border-t border-blue-700 space-y-2">
+          <div className="space-y-2 border-t border-blue-700 p-3">
             <SyncStatus />
           </div>
         )}
 
         {/* User Profile & Logout */}
         {isOpen && (
-          <div className="p-3 border-t border-blue-700">
-            <div className="flex items-center gap-2 mb-3">
+          <div className="border-t border-blue-700 p-3">
+            <div className="mb-3 flex items-center gap-2">
               <NotificationCenter
                 notifications={notifications}
                 onMarkAsRead={markAsRead}
@@ -222,7 +251,7 @@ export function EnhancedSidebar({
                 onClick={() => setShowShortcuts(true)}
                 className="text-blue-100 hover:bg-blue-700 hover:text-white"
               >
-                <Keyboard className="w-5 h-5" />
+                <Keyboard className="h-5 w-5" />
               </Button>
             </div>
 
@@ -230,15 +259,15 @@ export function EnhancedSidebar({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start gap-3 text-blue-100 hover:bg-blue-700 hover:text-white p-2 h-auto"
+                  className="h-auto w-full justify-start gap-3 p-2 text-blue-100 hover:bg-blue-700 hover:text-white"
                 >
                   <Avatar className="h-8 w-8 bg-blue-600">
-                    <AvatarFallback className="bg-blue-600 text-white text-sm">
+                    <AvatarFallback className="bg-blue-600 text-sm text-white">
                       {userName?.charAt(0).toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="text-left flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{userName}</p>
+                  <div className="min-w-0 flex-1 text-left">
+                    <p className="truncate text-sm font-medium">{userName}</p>
                     <p className="text-xs text-blue-300">{roleLabels[userRole] || userRole}</p>
                   </div>
                 </Button>
@@ -261,7 +290,7 @@ export function EnhancedSidebar({
 
         {/* Footer */}
         {isOpen && (
-          <div className="p-4 border-t border-blue-700 text-xs text-blue-300">
+          <div className="border-t border-blue-700 p-4 text-xs text-blue-300">
             <p>Thai Accounting ERP v1.0</p>
             <p>มาตรฐานบัญชีไทย (TFRS)</p>
           </div>
@@ -297,5 +326,5 @@ export function EnhancedSidebar({
       <UpdateNotification />
       <InstallPrompt />
     </>
-  )
+  );
 }

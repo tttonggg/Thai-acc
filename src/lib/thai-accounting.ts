@@ -75,7 +75,18 @@ export function formatNumber(amount: number, decimals: number = 2): string {
 // ฟังก์ชันแปลงเลขเป็นคำอ่านภาษาไทย
 export function numberToThaiText(num: number): string {
   const ones = ['', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
-  const tens = ['', 'สิบ', 'ยี่สิบ', 'สามสิบ', 'สี่สิบ', 'ห้าสิบ', 'หกสิบ', 'เจ็ดสิบ', 'แปดสิบ', 'เก้าสิบ'];
+  const tens = [
+    '',
+    'สิบ',
+    'ยี่สิบ',
+    'สามสิบ',
+    'สี่สิบ',
+    'ห้าสิบ',
+    'หกสิบ',
+    'เจ็ดสิบ',
+    'แปดสิบ',
+    'เก้าสิบ',
+  ];
   const scales = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
 
   if (num === 0) return 'ศูนย์บาทถ้วน';
@@ -102,17 +113,17 @@ export function numberToThaiText(num: number): string {
 
 function convertNumberToText(num: number, ones: string[], tens: string[]): string {
   if (num === 0) return '';
-  
+
   let result = '';
   const numStr = num.toString();
   const len = numStr.length;
-  
+
   for (let i = 0; i < len; i++) {
     const digit = parseInt(numStr[i]);
     const position = len - i - 1;
-    
+
     if (digit === 0) continue;
-    
+
     if (position === 1 && digit === 1) {
       result += 'สิบ';
     } else if (position === 1 && digit === 2) {
@@ -126,12 +137,16 @@ function convertNumberToText(num: number, ones: string[], tens: string[]): strin
       }
     }
   }
-  
+
   return result;
 }
 
 // คำนวณ VAT
-export function calculateVAT(amount: number, rate: number = VAT_RATE, isInclusive: boolean = false): {
+export function calculateVAT(
+  amount: number,
+  rate: number = VAT_RATE,
+  isInclusive: boolean = false
+): {
   subtotal: number;
   vatAmount: number;
   total: number;

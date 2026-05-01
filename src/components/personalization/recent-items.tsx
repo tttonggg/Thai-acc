@@ -1,40 +1,40 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { cn } from '@/lib/utils'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Button } from '@/components/ui/button'
-import { History, X, Clock, FileText, User, Package, Calculator, Landmark } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
-import { th } from 'date-fns/locale'
+import { useState, useEffect, useCallback } from 'react';
+import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { History, X, Clock, FileText, User, Package, Calculator, Landmark } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { th } from 'date-fns/locale';
 
 export interface RecentItem {
-  id: string
-  module: string
-  recordId: string
-  recordType: string
-  recordName: string
-  action: 'view' | 'edit' | 'create'
-  accessedAt: Date
+  id: string;
+  module: string;
+  recordId: string;
+  recordType: string;
+  recordName: string;
+  action: 'view' | 'edit' | 'create';
+  accessedAt: Date;
 }
 
 interface RecentItemsProps {
-  items: RecentItem[]
-  onItemClick: (item: RecentItem) => void
-  onClear: () => void
-  maxItems?: number
-  className?: string
+  items: RecentItem[];
+  onItemClick: (item: RecentItem) => void;
+  onClear: () => void;
+  maxItems?: number;
+  className?: string;
 }
 
 const moduleIcons: Record<string, React.ReactNode> = {
-  invoice: <FileText className="w-4 h-4" />,
-  customer: <User className="w-4 h-4" />,
-  vendor: <User className="w-4 h-4" />,
-  product: <Package className="w-4 h-4" />,
-  journal: <Calculator className="w-4 h-4" />,
-  banking: <Landmark className="w-4 h-4" />,
-  default: <FileText className="w-4 h-4" />,
-}
+  invoice: <FileText className="h-4 w-4" />,
+  customer: <User className="h-4 w-4" />,
+  vendor: <User className="h-4 w-4" />,
+  product: <Package className="h-4 w-4" />,
+  journal: <Calculator className="h-4 w-4" />,
+  banking: <Landmark className="h-4 w-4" />,
+  default: <FileText className="h-4 w-4" />,
+};
 
 const moduleLabels: Record<string, string> = {
   invoice: 'ใบกำกับภาษี',
@@ -45,7 +45,7 @@ const moduleLabels: Record<string, string> = {
   banking: 'ธนาคาร',
   receipt: 'ใบเสร็จ',
   payment: 'ใบจ่ายเงิน',
-}
+};
 
 export function RecentItemsList({
   items,
@@ -54,22 +54,22 @@ export function RecentItemsList({
   maxItems = 10,
   className,
 }: RecentItemsProps) {
-  const displayItems = items.slice(0, maxItems)
+  const displayItems = items.slice(0, maxItems);
 
   if (displayItems.length === 0) {
     return (
       <div className={cn('p-4 text-center text-muted-foreground', className)}>
-        <History className="w-8 h-8 mx-auto mb-2 opacity-50" />
+        <History className="mx-auto mb-2 h-8 w-8 opacity-50" />
         <p className="text-sm">ไม่มีรายการล่าสุด</p>
       </div>
-    )
+    );
   }
 
   return (
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between px-2">
-        <h3 className="text-sm font-medium flex items-center gap-2">
-          <History className="w-4 h-4" />
+        <h3 className="flex items-center gap-2 text-sm font-medium">
+          <History className="h-4 w-4" />
           รายการล่าสุด
         </h3>
         <Button
@@ -78,7 +78,7 @@ export function RecentItemsList({
           onClick={onClear}
           className="h-6 text-xs text-muted-foreground hover:text-destructive"
         >
-          <X className="w-3 h-3 mr-1" />
+          <X className="mr-1 h-3 w-3" />
           ล้าง
         </Button>
       </div>
@@ -86,28 +86,28 @@ export function RecentItemsList({
       <ScrollArea className="h-[200px]">
         <div className="space-y-1 pr-3">
           {displayItems.map((item) => {
-            const icon = moduleIcons[item.module] || moduleIcons.default
-            const moduleLabel = moduleLabels[item.module] || item.module
+            const icon = moduleIcons[item.module] || moduleIcons.default;
+            const moduleLabel = moduleLabels[item.module] || item.module;
 
             return (
               <button
                 key={`${item.module}-${item.recordId}`}
                 onClick={() => onItemClick(item)}
                 className={cn(
-                  'w-full flex items-start gap-3 p-2 rounded-lg text-left',
-                  'hover:bg-muted transition-colors group'
+                  'flex w-full items-start gap-3 rounded-lg p-2 text-left',
+                  'group transition-colors hover:bg-muted'
                 )}
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-muted rounded flex items-center justify-center text-muted-foreground group-hover:bg-background">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded bg-muted text-muted-foreground group-hover:bg-background">
                   {icon}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{item.recordName}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{item.recordName}</p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>{moduleLabel}</span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
+                      <Clock className="h-3 w-3" />
                       {formatDistanceToNow(new Date(item.accessedAt), {
                         addSuffix: true,
                         locale: th,
@@ -116,67 +116,65 @@ export function RecentItemsList({
                   </div>
                 </div>
               </button>
-            )
+            );
           })}
         </div>
       </ScrollArea>
     </div>
-  )
+  );
 }
 
 // Recent items sidebar component for main layout
 interface RecentItemsSidebarProps {
-  userId: string
-  onNavigate: (module: string, recordId: string) => void
-  className?: string
+  userId: string;
+  onNavigate: (module: string, recordId: string) => void;
+  className?: string;
 }
 
-export function RecentItemsSidebar({
-  userId,
-  onNavigate,
-  className,
-}: RecentItemsSidebarProps) {
-  const [items, setItems] = useState<RecentItem[]>([])
-  const [isExpanded, setIsExpanded] = useState(true)
+export function RecentItemsSidebar({ userId, onNavigate, className }: RecentItemsSidebarProps) {
+  const [items, setItems] = useState<RecentItem[]>([]);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // Helper: load recent items from API
   const loadRecentItems = async () => {
     try {
-      const response = await fetch(`/api/user/recent-items`, { credentials: 'include' })
+      const response = await fetch(`/api/user/recent-items`, { credentials: 'include' });
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         queueMicrotask(() =>
-          setItems(data.items.map((item: RecentItem) => ({
-            ...item,
-            accessedAt: new Date(item.accessedAt),
-          })))
-        )
+          setItems(
+            data.items.map((item: RecentItem) => ({
+              ...item,
+              accessedAt: new Date(item.accessedAt),
+            }))
+          )
+        );
       }
     } catch (error) {
-      console.error('Failed to load recent items:', error)
+      console.error('Failed to load recent items:', error);
     }
-  }
+  };
 
   useEffect(() => {
-    loadRecentItems()
-  }, [userId])
+    loadRecentItems();
+  }, [userId]);
 
   const handleItemClick = (item: RecentItem) => {
-    onNavigate(item.module, item.recordId)
+    onNavigate(item.module, item.recordId);
     // Update accessed time
-    recordAccess(item.module, item.recordId, item.recordName, item.recordType, 'view')
-  }
+    recordAccess(item.module, item.recordId, item.recordName, item.recordType, 'view');
+  };
 
   const handleClear = async () => {
     try {
-      await fetch(`/api/user/recent-items`, { credentials: 'include',  method: 'DELETE' })
-      setItems([])
+      await fetch(`/api/user/recent-items`, { credentials: 'include', method: 'DELETE' });
+      setItems([]);
     } catch (error) {
-      console.error('Failed to clear recent items:', error)
+      console.error('Failed to clear recent items:', error);
     }
-  }
+  };
 
-  if (items.length === 0) return null
+  if (items.length === 0) return null;
 
   return (
     <div
@@ -188,10 +186,10 @@ export function RecentItemsSidebar({
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-2 flex items-center justify-center hover:bg-muted"
+        className="flex w-full items-center justify-center p-2 hover:bg-muted"
         title={isExpanded ? 'ยุบ' : 'ขยาย'}
       >
-        <History className="w-5 h-5" />
+        <History className="h-5 w-5" />
       </button>
 
       {isExpanded && (
@@ -205,36 +203,38 @@ export function RecentItemsSidebar({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // Hook for tracking recent items
 export function useRecentItems(userId?: string) {
-  const [recentItems, setRecentItems] = useState<RecentItem[]>([])
+  const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
 
   // Helper: load recent items from API
   const loadRecentItems = async () => {
     try {
-      const response = await fetch(`/api/user/recent-items`, { credentials: 'include' })
+      const response = await fetch(`/api/user/recent-items`, { credentials: 'include' });
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         queueMicrotask(() =>
-          setRecentItems(data.items.map((item: RecentItem) => ({
-            ...item,
-            accessedAt: new Date(item.accessedAt),
-          })))
-        )
+          setRecentItems(
+            data.items.map((item: RecentItem) => ({
+              ...item,
+              accessedAt: new Date(item.accessedAt),
+            }))
+          )
+        );
       }
     } catch (error) {
-      console.error('Failed to load recent items:', error)
+      console.error('Failed to load recent items:', error);
     }
-  }
+  };
 
   useEffect(() => {
     if (userId) {
-      loadRecentItems()
+      loadRecentItems();
     }
-  }, [userId])
+  }, [userId]);
 
   const recordAccess = useCallback(
     async (
@@ -244,7 +244,7 @@ export function useRecentItems(userId?: string) {
       recordType: string,
       action: 'view' | 'edit' | 'create' = 'view'
     ) => {
-      if (!userId) return
+      if (!userId) return;
 
       const newItem: RecentItem = {
         id: crypto.randomUUID(),
@@ -254,19 +254,20 @@ export function useRecentItems(userId?: string) {
         recordType,
         action,
         accessedAt: new Date(),
-      }
+      };
 
       // Update local state
       setRecentItems((prev) => {
         const filtered = prev.filter(
           (item) => !(item.module === module && item.recordId === recordId)
-        )
-        return [newItem, ...filtered].slice(0, 20)
-      })
+        );
+        return [newItem, ...filtered].slice(0, 20);
+      });
 
       // Send to server
       try {
-        await fetch(`/api/user/recent-items`, { credentials: 'include', 
+        await fetch(`/api/user/recent-items`, {
+          credentials: 'include',
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -276,62 +277,62 @@ export function useRecentItems(userId?: string) {
             recordType,
             action,
           }),
-        })
+        });
       } catch (error) {
-        console.error('Failed to record access:', error)
+        console.error('Failed to record access:', error);
       }
     },
     [userId]
-  )
+  );
 
   const clearRecentItems = useCallback(async () => {
-    if (!userId) return
+    if (!userId) return;
 
     try {
-      await fetch(`/api/user/recent-items`, { credentials: 'include',  method: 'DELETE' })
-      setRecentItems([])
+      await fetch(`/api/user/recent-items`, { credentials: 'include', method: 'DELETE' });
+      setRecentItems([]);
     } catch (error) {
-      console.error('Failed to clear recent items:', error)
+      console.error('Failed to clear recent items:', error);
     }
-  }, [userId])
+  }, [userId]);
 
   return {
     recentItems,
     recordAccess,
     clearRecentItems,
     refresh: loadRecentItems,
-  }
+  };
 }
 
 // Quick access card component
 interface QuickAccessCardProps {
-  items: RecentItem[]
-  onItemClick: (item: RecentItem) => void
-  className?: string
+  items: RecentItem[];
+  onItemClick: (item: RecentItem) => void;
+  className?: string;
 }
 
 export function QuickAccessCard({ items, onItemClick, className }: QuickAccessCardProps) {
-  const displayItems = items.slice(0, 5)
+  const displayItems = items.slice(0, 5);
 
   return (
     <div className={cn('space-y-2', className)}>
       <h3 className="text-sm font-medium text-muted-foreground">เข้าถึงด่วน</h3>
       <div className="flex flex-wrap gap-2">
         {displayItems.map((item) => {
-          const icon = moduleIcons[item.module] || moduleIcons.default
+          const icon = moduleIcons[item.module] || moduleIcons.default;
 
           return (
             <button
               key={`${item.module}-${item.recordId}`}
               onClick={() => onItemClick(item)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full text-sm hover:bg-muted/80 transition-colors"
+              className="flex items-center gap-2 rounded-full bg-muted px-3 py-1.5 text-sm transition-colors hover:bg-muted/80"
             >
               {icon}
-              <span className="truncate max-w-[120px]">{item.recordName}</span>
+              <span className="max-w-[120px] truncate">{item.recordName}</span>
             </button>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

@@ -1,7 +1,7 @@
 /**
  * API Analytics Middleware
  * Phase D: API Mastery - API Analytics
- * 
+ *
  * Tracks request metrics:
  * - Request count, latency, errors
  * - Rate limit usage
@@ -43,9 +43,8 @@ export async function trackApiRequest(
     const statusCode = response.status;
     const apiVersion = extractApiVersion(path);
     const sessionId = request.headers.get('x-session-id') || undefined;
-    const ipAddress = request.headers.get('x-forwarded-for') ||
-                      request.headers.get('x-real-ip') ||
-                      'unknown';
+    const ipAddress =
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     // Add to cache for real-time metrics
@@ -65,22 +64,24 @@ export async function trackApiRequest(
     }
 
     // Persist to database asynchronously (fire and forget)
-    prisma.apiRequestLog.create({
-      data: {
-        userId,
-        sessionId,
-        apiVersion,
-        method,
-        path,
-        statusCode,
-        duration,
-        ipAddress: ipAddress.toString().split(',')[0].trim(),
-        userAgent,
-        error: statusCode >= 400 ? `HTTP ${statusCode}` : undefined,
-      },
-    }).catch(err => {
-      console.error('Failed to log API request:', err);
-    });
+    prisma.apiRequestLog
+      .create({
+        data: {
+          userId,
+          sessionId,
+          apiVersion,
+          method,
+          path,
+          statusCode,
+          duration,
+          ipAddress: ipAddress.toString().split(',')[0].trim(),
+          userAgent,
+          error: statusCode >= 400 ? `HTTP ${statusCode}` : undefined,
+        },
+      })
+      .catch((err) => {
+        console.error('Failed to log API request:', err);
+      });
   } catch (error) {
     // Analytics should never break the app
     console.error('Error tracking API request:', error);
@@ -98,34 +99,24 @@ function extractApiVersion(path: string): string {
 /**
  * Get API metrics for the specified time range
  */
-export async function getApiMetrics(
-  startDate: Date,
-  endDate: Date,
-  path?: string
-) {
+export async function getApiMetrics(startDate: Date, endDate: Date, path?: string) {
   const where = {
     timestamp: { gte: startDate, lte: endDate },
     ...(path && { path }),
   };
 
-  const [
-    totalRequests,
-    errorRequests,
-    avgDuration,
-    percentileStats,
-    pathStats,
-    statusStats,
-  ] = await Promise.all([
-    prisma.apiRequestLog.count({ where }),
-    prisma.apiRequestLog.count({ where: { ...where, statusCode: { gte: 400 } } }),
-    prisma.apiRequestLog.aggregate({
-      where,
-      _avg: { duration: true },
-    }),
-    getPercentiles(where),
-    getPathStats(where),
-    getStatusStats(where),
-  ]);
+  const [totalRequests, errorRequests, avgDuration, percentileStats, pathStats, statusStats] =
+    await Promise.all([
+      prisma.apiRequestLog.count({ where }),
+      prisma.apiRequestLog.count({ where: { ...where, statusCode: { gte: 400 } } }),
+      prisma.apiRequestLog.aggregate({
+        where,
+        _avg: { duration: true },
+      }),
+      getPercentiles(where),
+      getPathStats(where),
+      getStatusStats(where),
+    ]);
 
   return {
     totalRequests,
@@ -153,7 +144,7 @@ async function getPercentiles(where: any) {
     return { p50: 0, p95: 0, p99: 0 };
   }
 
-  const durations = logs.map(l => l.duration);
+  const durations = logs.map((l) => l.duration);
   return {
     p50: calculatePercentile(durations, 0.5),
     p95: calculatePercentile(durations, 0.95),
@@ -178,7 +169,7 @@ async function getPathStats(where: any) {
     orderBy: { _count: { id: 'desc' } },
   });
 
-  return logs.map(log => ({
+  return logs.map((log) => ({
     path: log.path,
     requestCount: log._count.id,
     averageDuration: log._avg.duration || 0,
@@ -195,7 +186,7 @@ async function getStatusStats(where: any) {
     _count: { id: true },
   });
 
-  return logs.map(log => ({
+  return logs.map((log) => ({
     statusCode: log.statusCode,
     count: log._count.id,
   }));
@@ -243,7 +234,7 @@ export async function getRateLimitUsage(
  */
 export function getRealtimeMetrics(minutes: number = 5) {
   const cutoff = Date.now() - minutes * 60 * 1000;
-  const recentRequests = metricsCache.requests.filter(r => r.timestamp >= cutoff);
+  const recentRequests = metricsCache.requests.filter((r) => r.timestamp >= cutoff);
 
   if (recentRequests.length === 0) {
     return {
@@ -255,7 +246,7 @@ export function getRealtimeMetrics(minutes: number = 5) {
   }
 
   const totalRequests = recentRequests.length;
-  const errorRequests = recentRequests.filter(r => r.statusCode >= 400).length;
+  const errorRequests = recentRequests.filter((r) => r.statusCode >= 400).length;
   const totalDuration = recentRequests.reduce((sum, r) => sum + r.duration, 0);
 
   return {
@@ -319,21 +310,15 @@ export async function getAnalyticsDashboard() {
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  const [
-    lastHour,
-    last24Hours,
-    last7Days,
-    topEndpoints,
-    errorBreakdown,
-    versionUsage,
-  ] = await Promise.all([
-    getApiMetrics(oneHourAgo, now),
-    getApiMetrics(oneDayAgo, now),
-    getApiMetrics(sevenDaysAgo, now),
-    getTopEndpoints(10),
-    getErrorBreakdown(oneDayAgo, now),
-    getVersionUsage(oneDayAgo, now),
-  ]);
+  const [lastHour, last24Hours, last7Days, topEndpoints, errorBreakdown, versionUsage] =
+    await Promise.all([
+      getApiMetrics(oneHourAgo, now),
+      getApiMetrics(oneDayAgo, now),
+      getApiMetrics(sevenDaysAgo, now),
+      getTopEndpoints(10),
+      getErrorBreakdown(oneDayAgo, now),
+      getVersionUsage(oneDayAgo, now),
+    ]);
 
   return {
     summary: {
@@ -383,7 +368,7 @@ async function getErrorBreakdown(startDate: Date, endDate: Date) {
     take: 20,
   });
 
-  return errors.map(e => ({
+  return errors.map((e) => ({
     statusCode: e.statusCode,
     path: e.path,
     count: e._count.id,
@@ -397,7 +382,7 @@ async function getVersionUsage(startDate: Date, endDate: Date) {
     _count: { id: true },
   });
 
-  return versions.map(v => ({
+  return versions.map((v) => ({
     version: v.apiVersion,
     requests: v._count.id,
   }));

@@ -30,39 +30,39 @@ import {
 
 const THAI_ERROR_MESSAGES: Record<string, string> = {
   // Authentication & Authorization
-  'AuthError': 'กรุณาเข้าสู่ระบบก่อนใช้งาน',
-  'ForbiddenError': 'คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้',
+  AuthError: 'กรุณาเข้าสู่ระบบก่อนใช้งาน',
+  ForbiddenError: 'คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้',
 
   // Validation
-  'ValidationError': 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่',
-  'ZodError': 'รูปแบบข้อมูลไม่ถูกต้อง',
+  ValidationError: 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่',
+  ZodError: 'รูปแบบข้อมูลไม่ถูกต้อง',
 
   // Not Found
-  'NotFoundError': 'ไม่พบข้อมูลที่ค้นหา',
+  NotFoundError: 'ไม่พบข้อมูลที่ค้นหา',
 
   // Conflict
-  'ConflictError': 'ข้อมูลซ้ำ หรือมีการใช้งานอยู่',
-  'DuplicateRecordError': 'ข้อมูลนี้มีอยู่ในระบบแล้ว',
+  ConflictError: 'ข้อมูลซ้ำ หรือมีการใช้งานอยู่',
+  DuplicateRecordError: 'ข้อมูลนี้มีอยู่ในระบบแล้ว',
 
   // Database
-  'DatabaseError': 'เกิดข้อผิดพลาดในการเข้าถึงฐานข้อมูล กรุณาลองใหม่',
-  'QueryError': 'การค้นหาข้อมูลผิดพลาด',
-  'TransactionError': 'การบันทึกข้อมูลผิดพลาด',
+  DatabaseError: 'เกิดข้อผิดพลาดในการเข้าถึงฐานข้อมูล กรุณาลองใหม่',
+  QueryError: 'การค้นหาข้อมูลผิดพลาด',
+  TransactionError: 'การบันทึกข้อมูลผิดพลาด',
 
   // Business Logic
-  'BusinessLogicError': 'ไม่สามารถดำเนินการได้ กรุณาตรวจสอบเงื่อนไข',
-  'AccountingError': 'เกิดข้อผิดพลาดทางการบัญชี',
-  'DebitCreditMismatchError': 'ยอดเดบิตและเครดิตไม่เท่ากัน',
-  'InsufficientStockError': 'สินค้าในคลังไม่เพียงพอ',
+  BusinessLogicError: 'ไม่สามารถดำเนินการได้ กรุณาตรวจสอบเงื่อนไข',
+  AccountingError: 'เกิดข้อผิดพลาดทางการบัญชี',
+  DebitCreditMismatchError: 'ยอดเดบิตและเครดิตไม่เท่ากัน',
+  InsufficientStockError: 'สินค้าในคลังไม่เพียงพอ',
 
   // Rate Limiting
-  'RateLimitError': 'ส่งคำขอบ่อยเกินไป กรุณารอสักครู่',
+  RateLimitError: 'ส่งคำขอบ่อยเกินไป กรุณารอสักครู่',
 
   // Service Unavailable
-  'ServiceUnavailableError': 'บริการไม่พร้อมใช้งานในขณะนี้',
+  ServiceUnavailableError: 'บริการไม่พร้อมใช้งานในขณะนี้',
 
   // Generic
-  'Error': 'เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่',
+  Error: 'เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่',
 };
 
 // ============================================================================
@@ -82,10 +82,7 @@ interface ErrorResponse {
   };
 }
 
-function buildErrorResponse(
-  error: Error,
-  req?: Request
-): ErrorResponse {
+function buildErrorResponse(error: Error, req?: Request): ErrorResponse {
   const statusCode = getStatusCode(error);
   const message = getErrorMessage(error);
   const errorName = error.name || 'Error';
@@ -125,10 +122,7 @@ function buildErrorResponse(
 // Main Error Handler
 // ============================================================================
 
-export function handleApiError(
-  error: unknown,
-  req?: Request
-): NextResponse<ErrorResponse> {
+export function handleApiError(error: unknown, req?: Request): NextResponse<ErrorResponse> {
   console.error('[API Error]', error);
 
   // Handle Prisma errors
@@ -174,24 +168,16 @@ interface PrismaError {
 }
 
 function isPrismaError(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    'clientVersion' in error
-  );
+  return typeof error === 'object' && error !== null && 'code' in error && 'clientVersion' in error;
 }
 
-function handlePrismaError(
-  error: PrismaError,
-  req?: Request
-): NextResponse<ErrorResponse> {
+function handlePrismaError(error: PrismaError, req?: Request): NextResponse<ErrorResponse> {
   console.error('[Prisma Error]', error.code, error.meta);
 
   switch (error.code) {
     // Unique constraint violation
     case 'P2002':
-      const uniqueConstraint = error.meta?.target as string[] || [];
+      const uniqueConstraint = (error.meta?.target as string[]) || [];
       const field = uniqueConstraint.join(', ');
       return NextResponse.json(
         {
@@ -352,9 +338,7 @@ export function withErrorHandler<T>(
  * return NextResponse.json({ success: true, data });
  * ```
  */
-export async function tryAsync<T>(
-  operation: Promise<T>
-): Promise<[T | null, Error | null]> {
+export async function tryAsync<T>(operation: Promise<T>): Promise<[T | null, Error | null]> {
   try {
     const data = await operation;
     return [data, null];

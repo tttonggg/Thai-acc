@@ -1,42 +1,45 @@
-'use client'
+'use client';
 
-import React, { Component, ReactNode } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import React, { Component, ReactNode } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface AsyncErrorBoundaryProps {
-  children: ReactNode
-  fallback?: ReactNode
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
 interface AsyncErrorBoundaryState {
-  hasError: boolean
-  error: Error | null
-  errorInfo: React.ErrorInfo | null
+  hasError: boolean;
+  error: Error | null;
+  errorInfo: React.ErrorInfo | null;
 }
 
-export class AsyncErrorBoundary extends Component<AsyncErrorBoundaryProps, AsyncErrorBoundaryState> {
-  state: AsyncErrorBoundaryState = { hasError: false, error: null, errorInfo: null }
+export class AsyncErrorBoundary extends Component<
+  AsyncErrorBoundaryProps,
+  AsyncErrorBoundaryState
+> {
+  state: AsyncErrorBoundaryState = { hasError: false, error: null, errorInfo: null };
 
   static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error }
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log to error reporting service
-    console.error('AsyncErrorBoundary:', error, errorInfo)
+    console.error('AsyncErrorBoundary:', error, errorInfo);
 
     this.setState({
       error,
-      errorInfo
-    })
+      errorInfo,
+    });
   }
 
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
-        return this.props.fallback
+        return this.props.fallback;
       }
 
       return (
@@ -54,24 +57,24 @@ export class AsyncErrorBoundary extends Component<AsyncErrorBoundaryProps, Async
               </p>
               {process.env.NODE_ENV === 'development' && this.state.error?.stack && (
                 <details className="mt-4">
-                  <summary className="cursor-pointer text-sm font-mono bg-gray-100 p-2 rounded hover:bg-gray-200 transition-colors">
+                  <summary className="cursor-pointer rounded bg-gray-100 p-2 font-mono text-sm transition-colors hover:bg-gray-200">
                     รายละเอียดข้อผิดพลาด
                   </summary>
-                  <pre className="mt-2 text-xs overflow-auto bg-gray-50 p-3 rounded border border-gray-200">
+                  <pre className="mt-2 overflow-auto rounded border border-gray-200 bg-gray-50 p-3 text-xs">
                     {this.state.error.stack}
                   </pre>
                 </details>
               )}
               <Button onClick={() => window.location.reload()}>
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="mr-2 h-4 w-4" />
                 โหลดหน้าใหม่
               </Button>
             </div>
           </CardContent>
         </Card>
-      )
+      );
     }
 
-    return this.props.children
+    return this.props.children;
   }
 }

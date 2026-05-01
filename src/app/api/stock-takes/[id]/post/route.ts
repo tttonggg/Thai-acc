@@ -1,21 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, requireRole, apiError, notFoundError, unauthorizedError, forbiddenError } from '@/lib/api-auth'
-import { apiResponse } from '@/lib/api-utils'
-import { db } from '@/lib/db'
-import { recordStockMovement } from '@/lib/inventory-service'
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  requireAuth,
+  requireRole,
+  apiError,
+  notFoundError,
+  unauthorizedError,
+  forbiddenError,
+} from '@/lib/api-auth';
+import { apiResponse } from '@/lib/api-utils';
+import { db } from '@/lib/db';
+import { recordStockMovement } from '@/lib/inventory-service';
 
 // POST /api/stock-takes/[id]/post - Post stock take to GL and update stock
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
     // Only ADMIN and ACCOUNTANT can post stock takes
     if (user.role !== 'ADMIN' && user.role !== 'ACCOUNTANT') {
-      return forbiddenError('ไม่มีสิทธิ์ลงบัญชีการตรวจนับสต็อก')
+      return forbiddenError('ไม่มีสิทธิ์ลงบัญชีการตรวจนับสต็อก');
     }
 
     const stockTake = await db.stockTake.findUnique({
@@ -28,22 +32,22 @@ export async function POST(
           },
         },
       },
-    })
+    });
 
     if (!stockTake) {
-      return notFoundError('ไม่พบการตรวจนับสต็อก')
+      return notFoundError('ไม่พบการตรวจนับสต็อก');
     }
 
     if (stockTake.status === 'COMPLETED') {
-      return apiError('การตรวจนับสต็อกนี้ได้ลงบัญชีแล้ว')
+      return apiError('การตรวจนับสต็อกนี้ได้ลงบัญชีแล้ว');
     }
 
     if (stockTake.status === 'CANCELLED') {
-      return apiError('ไม่สามารถลงบัญชีการตรวจนับสต็อกที่ยกเลิกแล้วได้')
+      return apiError('ไม่สามารถลงบัญชีการตรวจนับสต็อกที่ยกเลิกแล้วได้');
     }
 
     if (stockTake.status === 'DRAFT') {
-      return apiError('กรุณาอนุมัติการตรวจนับสต็อกก่อนลงบัญชี')
+      return apiError('กรุณาอนุมัติการตรวจนับสต็อกก่อนลงบัญชี');
     }
 
     // Get chart of accounts for variance posting
@@ -53,10 +57,10 @@ export async function POST(
       where: {
         code: '5200', // Inventory variance expense account
       },
-    })
+    });
 
     if (!varianceAccount) {
-      return apiError('ไม่พบบัญชีค่าความแตกต่างของสต็อก (กรุณาตั้งค่าบัญชี 5200)')
+      return apiError('ไม่พบบัญชีค่าความแตกต่างของสต็อก (กรุณาตั้งค่าบัญชี 5200)');
     }
 
     // Get inventory account (1200 = สินค้าคงเหลือ)
@@ -64,27 +68,27 @@ export async function POST(
       where: {
         code: '1200',
       },
-    })
+    });
 
     if (!inventoryAccount) {
-      return apiError('ไม่พบบัญชีสินค้าคงเหลือ (กรุณาตั้งค่าบัญชี 1200)')
+      return apiError('ไม่พบบัญชีสินค้าคงเหลือ (กรุณาตั้งค่าบัญชี 1200)');
     }
 
     // Calculate total variance
-    let totalVarianceValue = 0
+    let totalVarianceValue = 0;
     for (const line of stockTake.lines) {
-      totalVarianceValue += line.varianceValue
+      totalVarianceValue += line.varianceValue;
     }
 
     // Only create journal entry if there's a variance
-    let journalEntry = null
+    let journalEntry = null;
     if (Math.abs(totalVarianceValue) > 0.01) {
       // Generate journal entry number
-      const now = new Date()
-      const year = now.getFullYear()
-      const month = String(now.getMonth() + 1).padStart(2, '0')
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
 
-      const prefix = `JE-${year}${month}`
+      const prefix = `JE-${year}${month}`;
       const lastEntry = await db.journalEntry.findFirst({
         where: {
           entryNo: {
@@ -92,19 +96,19 @@ export async function POST(
           },
         },
         orderBy: { entryNo: 'desc' },
-      })
+      });
 
-      let nextNum = 1
+      let nextNum = 1;
       if (lastEntry) {
-        const parts = lastEntry.entryNo.split('-')
-        const lastNum = parseInt(parts[parts.length - 1] || '0')
-        nextNum = lastNum + 1
+        const parts = lastEntry.entryNo.split('-');
+        const lastNum = parseInt(parts[parts.length - 1] || '0');
+        nextNum = lastNum + 1;
       }
 
-      const entryNo = `${prefix}-${String(nextNum).padStart(4, '0')}`
+      const entryNo = `${prefix}-${String(nextNum).padStart(4, '0')}`;
 
       // Create journal entry lines
-      const journalLines = []
+      const journalLines = [];
 
       if (totalVarianceValue > 0) {
         // Stock increase (positive variance)
@@ -114,13 +118,13 @@ export async function POST(
           description: `ปรับสต็อกเพิ่ม - การตรวจนับ ${stockTake.takeNo}`,
           debit: Math.abs(totalVarianceValue),
           credit: 0,
-        })
+        });
         journalLines.push({
           accountId: varianceAccount.id,
           description: `ปรับสต็อกเพิ่ม - การตรวจนับ ${stockTake.takeNo}`,
           debit: 0,
           credit: Math.abs(totalVarianceValue),
-        })
+        });
       } else {
         // Stock decrease (negative variance)
         // Debit Variance Expense, Credit Inventory
@@ -129,13 +133,13 @@ export async function POST(
           description: `ปรับสต็อกลด - การตรวจนับ ${stockTake.takeNo}`,
           debit: Math.abs(totalVarianceValue),
           credit: 0,
-        })
+        });
         journalLines.push({
           accountId: inventoryAccount.id,
           description: `ปรับสต็อกลด - การตรวจนับ ${stockTake.takeNo}`,
           debit: 0,
           credit: Math.abs(totalVarianceValue),
-        })
+        });
       }
 
       // Create journal entry
@@ -157,7 +161,7 @@ export async function POST(
             })),
           },
         },
-      })
+      });
     }
 
     // Update stock balances and record stock movements
@@ -174,7 +178,7 @@ export async function POST(
           referenceNo: stockTake.takeNo,
           notes: `ปรับปรุงตามการตรวจนับ ${stockTake.takeNo}`,
           sourceChannel: 'STOCK_TAKE',
-        })
+        });
       }
     }
 
@@ -184,7 +188,7 @@ export async function POST(
       data: {
         status: 'COMPLETED',
         metadata: {
-          ...(stockTake.metadata as any || {}),
+          ...((stockTake.metadata as any) || {}),
           journalEntryId: journalEntry?.id,
           postedAt: new Date().toISOString(),
           postedBy: user.email,
@@ -198,18 +202,18 @@ export async function POST(
           },
         },
       },
-    })
+    });
 
     return apiResponse({
       message: 'ลงบัญชีการตรวจนับสต็อกสำเร็จ',
       data: updated,
       journalEntry,
-    })
+    });
   } catch (error: any) {
     if (error.name === 'AuthError') {
-      return unauthorizedError()
+      return unauthorizedError();
     }
-    console.error('Stock Take Post Error:', error)
-    return apiError(error.message || 'เกิดข้อผิดพลาดในการลงบัญชีการตรวจนับสต็อก')
+    console.error('Stock Take Post Error:', error);
+    return apiError(error.message || 'เกิดข้อผิดพลาดในการลงบัญชีการตรวจนับสต็อก');
   }
 }

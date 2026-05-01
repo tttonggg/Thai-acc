@@ -1,24 +1,24 @@
-import { db } from '@/lib/db'
-import { bahtToSatang, satangToBaht } from '@/lib/currency'
+import { db } from '@/lib/db';
+import { bahtToSatang, satangToBaht } from '@/lib/currency';
 
 export interface ReceiptLineInput {
-  lineNo: number
-  invoiceId?: string | null
-  amount: number
-  whtRate?: number
-  whtAmount?: number
-  notes?: string
+  lineNo: number;
+  invoiceId?: string | null;
+  amount: number;
+  whtRate?: number;
+  whtAmount?: number;
+  notes?: string;
 }
 
 export interface ReceiptLineOutput {
-  id: string
-  lineNo: number
-  invoiceId: string | null
-  amount: number
-  whtRate: number
-  whtAmount: number
-  notes: string | null
-  createdAt: Date
+  id: string;
+  lineNo: number;
+  invoiceId: string | null;
+  amount: number;
+  whtRate: number;
+  whtAmount: number;
+  notes: string | null;
+  createdAt: Date;
 }
 
 /**
@@ -36,14 +36,14 @@ export function calculateReceiptTotalsFromLines(
       amount: flatAmount,
       whtAmount: flatWhtAmount,
       unallocated: flatAmount,
-    }
+    };
   }
 
-  const amount = lines.reduce((sum, line) => sum + line.amount, 0)
-  const whtAmount = lines.reduce((sum, line) => sum + line.whtAmount, 0)
-  const unallocated = flatAmount - amount
+  const amount = lines.reduce((sum, line) => sum + line.amount, 0);
+  const whtAmount = lines.reduce((sum, line) => sum + line.whtAmount, 0);
+  const unallocated = flatAmount - amount;
 
-  return { amount, whtAmount, unallocated }
+  return { amount, whtAmount, unallocated };
 }
 
 /**
@@ -52,36 +52,36 @@ export function calculateReceiptTotalsFromLines(
  */
 export async function createReceiptWithLines(
   data: {
-    receiptDate: Date
-    customerId: string
-    paymentMethod: string
-    bankAccountId?: string | null
-    chequeNo?: string
-    chequeDate?: Date
-    amount: number // Baht input
-    notes?: string
-    lines?: ReceiptLineInput[]
+    receiptDate: Date;
+    customerId: string;
+    paymentMethod: string;
+    bankAccountId?: string | null;
+    chequeNo?: string;
+    chequeDate?: Date;
+    amount: number; // Baht input
+    notes?: string;
+    lines?: ReceiptLineInput[];
   },
   options?: { generateDocNumber?: (type: string, prefix: string) => Promise<string> }
 ) {
-  const { lines, ...flatData } = data
-  const hasLines = lines && lines.length > 0
+  const { lines, ...flatData } = data;
+  const hasLines = lines && lines.length > 0;
 
   // Calculate totals
-  let totalAmount = bahtToSatang(flatData.amount)
-  let totalWhtAmount = 0
-  let unallocated = totalAmount
+  let totalAmount = bahtToSatang(flatData.amount);
+  let totalWhtAmount = 0;
+  let unallocated = totalAmount;
 
   if (hasLines) {
-    totalAmount = lines.reduce((sum, l) => sum + bahtToSatang(l.amount), 0)
-    totalWhtAmount = lines.reduce((sum, l) => sum + bahtToSatang(l.whtAmount || 0), 0)
-    unallocated = bahtToSatang(flatData.amount) - totalAmount
+    totalAmount = lines.reduce((sum, l) => sum + bahtToSatang(l.amount), 0);
+    totalWhtAmount = lines.reduce((sum, l) => sum + bahtToSatang(l.whtAmount || 0), 0);
+    unallocated = bahtToSatang(flatData.amount) - totalAmount;
   }
 
   // Generate receipt number
   const receiptNo = options?.generateDocNumber
     ? await options.generateDocNumber('RECEIPT', 'RCP')
-    : `RCP-${Date.now()}`
+    : `RCP-${Date.now()}`;
 
   const receipt = await db.receipt.create({
     data: {
@@ -129,9 +129,9 @@ export async function createReceiptWithLines(
       },
       allocations: true,
     },
-  })
+  });
 
-  return receipt
+  return receipt;
 }
 
 /**
@@ -172,9 +172,9 @@ export async function getReceiptWithLines(receiptId: string) {
         select: { id: true, entryNo: true },
       },
     },
-  })
+  });
 
-  if (!receipt) return null
+  if (!receipt) return null;
 
   // Convert Satang to Baht
   return {
@@ -182,12 +182,11 @@ export async function getReceiptWithLines(receiptId: string) {
     amount: satangToBaht(receipt.amount),
     whtAmount: satangToBaht(receipt.whtAmount),
     unallocated: satangToBaht(receipt.unallocated),
-    totalAllocated: satangToBaht(
-      receipt.allocations.reduce((sum, a) => sum + a.amount, 0)
-    ),
-    totalLineAmount: receipt.lines.length > 0
-      ? satangToBaht(receipt.lines.reduce((sum, l) => sum + l.amount, 0))
-      : satangToBaht(receipt.amount),
+    totalAllocated: satangToBaht(receipt.allocations.reduce((sum, a) => sum + a.amount, 0)),
+    totalLineAmount:
+      receipt.lines.length > 0
+        ? satangToBaht(receipt.lines.reduce((sum, l) => sum + l.amount, 0))
+        : satangToBaht(receipt.amount),
     lines: receipt.lines.map((line) => ({
       ...line,
       amount: satangToBaht(line.amount),
@@ -204,5 +203,5 @@ export async function getReceiptWithLines(receiptId: string) {
         ? { ...alloc.invoice, totalAmount: satangToBaht(alloc.invoice.totalAmount) }
         : null,
     })),
-  }
+  };
 }

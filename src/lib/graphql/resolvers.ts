@@ -41,12 +41,7 @@ function requireAdmin(context: GraphQLContext) {
 }
 
 // Helper for pagination
-function createConnection<T>(
-  items: T[],
-  totalCount: number,
-  page: number,
-  limit: number
-) {
+function createConnection<T>(items: T[], totalCount: number, page: number, limit: number) {
   const edges = items.map((item, index) => ({
     node: item,
     cursor: Buffer.from(`${page}:${index}`).toString('base64'),
@@ -197,11 +192,7 @@ export const resolvers = {
       return context.loaders.accountById.load(id);
     },
 
-    async accountByCode(
-      _: any,
-      { code }: { code: string },
-      context: GraphQLContext
-    ) {
+    async accountByCode(_: any, { code }: { code: string }, context: GraphQLContext) {
       requireAuth(context);
       return prisma.chartOfAccount.findUnique({ where: { code } });
     },
@@ -229,9 +220,10 @@ export const resolvers = {
 
       const where: any = {
         ...(status && { status }),
-        ...(startDate && endDate && {
-          date: { gte: startDate, lte: endDate },
-        }),
+        ...(startDate &&
+          endDate && {
+            date: { gte: startDate, lte: endDate },
+          }),
       };
 
       const [entries, totalCount] = await Promise.all([
@@ -247,11 +239,7 @@ export const resolvers = {
       return createConnection(entries, totalCount, page, limit);
     },
 
-    async journalEntry(
-      _: any,
-      { id }: { id: string },
-      context: GraphQLContext
-    ) {
+    async journalEntry(_: any, { id }: { id: string }, context: GraphQLContext) {
       requireAuth(context);
       return context.loaders.journalEntryById.load(id);
     },
@@ -283,9 +271,10 @@ export const resolvers = {
         isActive: true,
         ...(status && { status }),
         ...(customerId && { customerId }),
-        ...(startDate && endDate && {
-          invoiceDate: { gte: startDate, lte: endDate },
-        }),
+        ...(startDate &&
+          endDate && {
+            invoiceDate: { gte: startDate, lte: endDate },
+          }),
       };
 
       const [invoices, totalCount] = await Promise.all([
@@ -306,11 +295,7 @@ export const resolvers = {
       return context.loaders.invoiceById.load(id);
     },
 
-    async invoiceByNumber(
-      _: any,
-      { invoiceNo }: { invoiceNo: string },
-      context: GraphQLContext
-    ) {
+    async invoiceByNumber(_: any, { invoiceNo }: { invoiceNo: string }, context: GraphQLContext) {
       requireAuth(context);
       return prisma.invoice.findUnique({ where: { invoiceNo } });
     },
@@ -318,11 +303,7 @@ export const resolvers = {
     // Customer queries
     async customers(
       _: any,
-      {
-        page = 1,
-        limit = 20,
-        isActive,
-      }: { page?: number; limit?: number; isActive?: boolean },
+      { page = 1, limit = 20, isActive }: { page?: number; limit?: number; isActive?: boolean },
       context: GraphQLContext
     ) {
       requireAuth(context);
@@ -351,21 +332,13 @@ export const resolvers = {
       return context.loaders.customerById.load(id);
     },
 
-    async customerByCode(
-      _: any,
-      { code }: { code: string },
-      context: GraphQLContext
-    ) {
+    async customerByCode(_: any, { code }: { code: string }, context: GraphQLContext) {
       requireAuth(context);
       return prisma.customer.findUnique({ where: { code } });
     },
 
     // Vendor queries
-    async vendors(
-      _: any,
-      { isActive }: { isActive?: boolean },
-      context: GraphQLContext
-    ) {
+    async vendors(_: any, { isActive }: { isActive?: boolean }, context: GraphQLContext) {
       requireAuth(context);
       return prisma.vendor.findMany({
         where: {
@@ -403,21 +376,13 @@ export const resolvers = {
       return context.loaders.productById.load(id);
     },
 
-    async productByCode(
-      _: any,
-      { code }: { code: string },
-      context: GraphQLContext
-    ) {
+    async productByCode(_: any, { code }: { code: string }, context: GraphQLContext) {
       requireAuth(context);
       return prisma.product.findUnique({ where: { code } });
     },
 
     // Purchase Invoice queries
-    async purchaseInvoices(
-      _: any,
-      { status }: { status?: string },
-      context: GraphQLContext
-    ) {
+    async purchaseInvoices(_: any, { status }: { status?: string }, context: GraphQLContext) {
       requireAuth(context);
       return prisma.purchaseInvoice.findMany({
         where: {
@@ -428,11 +393,7 @@ export const resolvers = {
       });
     },
 
-    async purchaseInvoice(
-      _: any,
-      { id }: { id: string },
-      context: GraphQLContext
-    ) {
+    async purchaseInvoice(_: any, { id }: { id: string }, context: GraphQLContext) {
       requireAuth(context);
       return context.loaders.purchaseInvoiceById.load(id);
     },
@@ -474,21 +435,13 @@ export const resolvers = {
       });
     },
 
-    async bankAccount(
-      _: any,
-      { id }: { id: string },
-      context: GraphQLContext
-    ) {
+    async bankAccount(_: any, { id }: { id: string }, context: GraphQLContext) {
       requireAuth(context);
       return context.loaders.bankAccountById.load(id);
     },
 
     // Employee queries
-    async employees(
-      _: any,
-      { isActive }: { isActive?: boolean },
-      context: GraphQLContext
-    ) {
+    async employees(_: any, { isActive }: { isActive?: boolean }, context: GraphQLContext) {
       requireAuth(context);
       return prisma.employee.findMany({
         where: {
@@ -540,11 +493,7 @@ export const resolvers = {
     // Analytics queries
     async apiAnalytics(
       _: any,
-      {
-        startDate,
-        endDate,
-        path,
-      }: { startDate: Date; endDate: Date; path?: string },
+      { startDate, endDate, path }: { startDate: Date; endDate: Date; path?: string },
       context: GraphQLContext
     ) {
       requireAdmin(context);
@@ -560,10 +509,10 @@ export const resolvers = {
 
     async apiMetrics(_: any, __: any, context: GraphQLContext) {
       requireAdmin(context);
-      
+
       // Calculate metrics from the last 24 hours
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      
+
       const logs = await prisma.apiRequestLog.findMany({
         where: { timestamp: { gte: since } },
       });
@@ -614,9 +563,7 @@ export const resolvers = {
         requestsPerMinute: totalRequests / (24 * 60),
         errorRate: totalRequests > 0 ? errorRequests / totalRequests : 0,
         averageDuration:
-          totalRequests > 0
-            ? durations.reduce((a, b) => a + b, 0) / totalRequests
-            : 0,
+          totalRequests > 0 ? durations.reduce((a, b) => a + b, 0) / totalRequests : 0,
         p50: durations[p50Index] || 0,
         p95: durations[p95Index] || 0,
         p99: durations[p99Index] || 0,
@@ -776,11 +723,7 @@ export const resolvers = {
   // Mutation resolvers
   Mutation: {
     // Invoice mutations
-    async createInvoice(
-      _: any,
-      { input }: { input: any },
-      context: GraphQLContext
-    ) {
+    async createInvoice(_: any, { input }: { input: any }, context: GraphQLContext) {
       requireAuth(context);
       // Would call invoice service
       throw new GraphQLError('Not implemented', {
@@ -827,22 +770,14 @@ export const resolvers = {
     },
 
     // Journal Entry mutations
-    async createJournalEntry(
-      _: any,
-      { input }: { input: any },
-      context: GraphQLContext
-    ) {
+    async createJournalEntry(_: any, { input }: { input: any }, context: GraphQLContext) {
       requireAuth(context);
       throw new GraphQLError('Not implemented', {
         extensions: { code: 'NOT_IMPLEMENTED' },
       });
     },
 
-    async postJournalEntry(
-      _: any,
-      { id }: { id: string },
-      context: GraphQLContext
-    ) {
+    async postJournalEntry(_: any, { id }: { id: string }, context: GraphQLContext) {
       requireAuth(context);
       throw new GraphQLError('Not implemented', {
         extensions: { code: 'NOT_IMPLEMENTED' },
@@ -860,11 +795,7 @@ export const resolvers = {
       });
     },
 
-    async deleteJournalEntry(
-      _: any,
-      { id }: { id: string },
-      context: GraphQLContext
-    ) {
+    async deleteJournalEntry(_: any, { id }: { id: string }, context: GraphQLContext) {
       requireAuth(context);
       await prisma.journalEntry.update({
         where: { id },
@@ -874,11 +805,7 @@ export const resolvers = {
     },
 
     // Customer mutations
-    async createCustomer(
-      _: any,
-      { input }: { input: any },
-      context: GraphQLContext
-    ) {
+    async createCustomer(_: any, { input }: { input: any }, context: GraphQLContext) {
       requireAuth(context);
       return prisma.customer.create({
         data: {
@@ -910,11 +837,7 @@ export const resolvers = {
     },
 
     // Product mutations
-    async createProduct(
-      _: any,
-      { input }: { input: any },
-      context: GraphQLContext
-    ) {
+    async createProduct(_: any, { input }: { input: any }, context: GraphQLContext) {
       requireAuth(context);
       return prisma.product.create({
         data: {
@@ -946,11 +869,7 @@ export const resolvers = {
     },
 
     // Webhook mutations
-    async createWebhook(
-      _: any,
-      { input }: { input: any },
-      context: GraphQLContext
-    ) {
+    async createWebhook(_: any, { input }: { input: any }, context: GraphQLContext) {
       requireAuth(context);
       return prisma.webhookEndpoint.create({
         data: {

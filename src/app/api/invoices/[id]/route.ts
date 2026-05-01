@@ -1,28 +1,32 @@
-import { NextRequest, NextResponse } from "next/server"
-import { requireAuth, apiError, unauthorizedError, notFoundError, forbiddenError, AuthError } from "@/lib/api-auth"
-import { apiResponse } from "@/lib/api-utils"
-import { db } from "@/lib/db"
-import { satangToBaht } from "@/lib/currency"
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  requireAuth,
+  apiError,
+  unauthorizedError,
+  notFoundError,
+  forbiddenError,
+  AuthError,
+} from '@/lib/api-auth';
+import { apiResponse } from '@/lib/api-utils';
+import { db } from '@/lib/db';
+import { satangToBaht } from '@/lib/currency';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
     // Find invoice
     const invoice = await db.invoice.findUnique({
       where: { id },
       include: {
         customer: { select: { id: true, name: true } },
-        lines: true
-      }
-    })
+        lines: true,
+      },
+    });
 
     if (!invoice) {
-      return notFoundError("ไม่พบใบกำกับภาษี")
+      return notFoundError('ไม่พบใบกำกับภาษี');
     }
 
     // CRITICAL: Convert Satang to Baht for all monetary fields
@@ -36,78 +40,75 @@ export async function GET(
       withholdingAmount: satangToBaht(invoice.withholdingAmount),
       netAmount: satangToBaht(invoice.netAmount),
       paidAmount: satangToBaht(invoice.paidAmount),
-      lines: invoice.lines.map(line => ({
+      lines: invoice.lines.map((line) => ({
         ...line,
         unitPrice: satangToBaht(line.unitPrice),
         discount: satangToBaht(line.discount),
         amount: satangToBaht(line.amount),
         vatAmount: satangToBaht(line.vatAmount),
       })),
-    }
+    };
 
-    return apiResponse(invoiceInBaht)
+    return apiResponse(invoiceInBaht);
   } catch (error) {
     if (error instanceof AuthError) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
     if (error instanceof Response) {
-      return error
+      return error;
     }
-    if (error instanceof Error && error.message.includes("unauthorized")) {
-      return unauthorizedError()
+    if (error instanceof Error && error.message.includes('unauthorized')) {
+      return unauthorizedError();
     }
-    return apiError("เกิดข้อผิดพลาดในการดึงข้อมูลใบกำกับภาษี")
+    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลใบกำกับภาษี');
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
-    const body = await request.json()
-    const { action } = body
+    const user = await requireAuth();
+    const { id } = await params;
+    const body = await request.json();
+    const { action } = body;
 
     // Find invoice
     const invoice = await db.invoice.findUnique({
-      where: { id }
-    })
+      where: { id },
+    });
 
     if (!invoice) {
-      return notFoundError("ไม่พบใบกำกับภาษี")
+      return notFoundError('ไม่พบใบกำกับภาษี');
     }
 
     // Handle different actions
     if (action === 'post') {
       // Issue invoice (DRAFT → ISSUED)
       if (invoice.status !== 'DRAFT') {
-        return apiError("สามารถออกเฉพาะใบกำกับภาษีสถานะร่างเท่านั้น", 400)
+        return apiError('สามารถออกเฉพาะใบกำกับภาษีสถานะร่างเท่านั้น', 400);
       }
 
       const updatedInvoice = await db.invoice.update({
         where: { id },
-        data: { status: 'ISSUED' }
-      })
+        data: { status: 'ISSUED' },
+      });
 
-      return apiResponse(updatedInvoice)
+      return apiResponse(updatedInvoice);
     }
 
     if (action === 'update') {
       // Update DRAFT invoice
       if (invoice.status !== 'DRAFT') {
-        return forbiddenError("สามารถแก้ไขได้เฉพาะใบกำกับภาษีสถานะร่างเท่านั้น")
+        return forbiddenError('สามารถแก้ไขได้เฉพาะใบกำกับภาษีสถานะร่างเท่านั้น');
       }
 
       // Permission: only creator or ADMIN
-      const isAdmin = user.role === 'ADMIN'
-      const isCreator = invoice.createdById === user.id
+      const isAdmin = user.role === 'ADMIN';
+      const isCreator = invoice.createdById === user.id;
       if (!isCreator && !isAdmin) {
-        return forbiddenError("ไม่มีสิทธิ์แก้ไขใบกำกับภาษีนี้")
+        return forbiddenError('ไม่มีสิทธิ์แก้ไขใบกำกับภาษีนี้');
       }
 
-      const { data } = body
+      const { data } = body;
 
       // Update allowed fields
       const updatedInvoice = await db.invoice.update({
@@ -125,33 +126,30 @@ export async function PATCH(
           notes: data.notes,
           internalNotes: data.internalNotes,
           terms: data.terms,
-        }
-      })
+        },
+      });
 
-      return apiResponse(updatedInvoice)
+      return apiResponse(updatedInvoice);
     }
 
-    return apiError("ไม่รองรับ action ที่ร้องขอ", 400)
+    return apiError('ไม่รองรับ action ที่ร้องขอ', 400);
   } catch (error) {
     if (error instanceof AuthError) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
     if (error instanceof Response) {
-      return error
+      return error;
     }
-    if (error instanceof Error && error.message.includes("unauthorized")) {
-      return unauthorizedError()
+    if (error instanceof Error && error.message.includes('unauthorized')) {
+      return unauthorizedError();
     }
-    return apiError("เกิดข้อผิดพลาดในการอัปเดตสถานะใบกำกับภาษี")
+    return apiError('เกิดข้อผิดพลาดในการอัปเดตสถานะใบกำกับภาษี');
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   // Basic PUT implementation
-  return apiResponse({ message: "PUT endpoint working" })
+  return apiResponse({ message: 'PUT endpoint working' });
 }
 
 export async function DELETE(
@@ -159,28 +157,28 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
     // Find invoice
     const invoice = await db.invoice.findUnique({
-      where: { id }
-    })
+      where: { id },
+    });
 
     if (!invoice) {
-      return notFoundError("ไม่พบใบกำกับภาษี")
+      return notFoundError('ไม่พบใบกำกับภาษี');
     }
 
     // Permission: only DRAFT status
     if (invoice.status !== 'DRAFT') {
-      return forbiddenError("สามารถลบได้เฉพาะใบกำกับภาษีสถานะร่างเท่านั้น")
+      return forbiddenError('สามารถลบได้เฉพาะใบกำกับภาษีสถานะร่างเท่านั้น');
     }
 
     // Permission: only creator or ADMIN
-    const isAdmin = user.role === 'ADMIN'
-    const isCreator = invoice.createdById === user.id
+    const isAdmin = user.role === 'ADMIN';
+    const isCreator = invoice.createdById === user.id;
     if (!isCreator && !isAdmin) {
-      return forbiddenError("ไม่มีสิทธิ์ลบใบกำกับภาษีนี้")
+      return forbiddenError('ไม่มีสิทธิ์ลบใบกำกับภาษีนี้');
     }
 
     // Soft-delete invoice + hard-delete cascade children
@@ -188,18 +186,18 @@ export async function DELETE(
       // Soft-delete parent
       db.invoice.update({
         where: { id },
-        data: { deletedAt: new Date(), deletedBy: user.id }
+        data: { deletedAt: new Date(), deletedBy: user.id },
       }),
       // Hard-delete cascade children (audit trail not meaningful for orphaned children)
       db.invoiceLine.deleteMany({ where: { invoiceId: id } }),
       db.invoiceComment.deleteMany({ where: { invoiceId: id } }),
-    ])
+    ]);
 
-    return apiResponse({ message: "ลบใบกำกับภาษีเรียบร้อยแล้ว" })
+    return apiResponse({ message: 'ลบใบกำกับภาษีเรียบร้อยแล้ว' });
   } catch (error) {
-    if (error instanceof Error && error.message.includes("unauthorized")) {
-      return unauthorizedError()
+    if (error instanceof Error && error.message.includes('unauthorized')) {
+      return unauthorizedError();
     }
-    return apiError("เกิดข้อผิดพลาดในการลบใบกำกับภาษี")
+    return apiError('เกิดข้อผิดพลาดในการลบใบกำกับภาษี');
   }
 }

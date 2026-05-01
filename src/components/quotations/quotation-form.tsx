@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { format, addDays } from 'date-fns'
-import { Plus, Trash2, Save, Send, Loader2, Search, Calendar as CalendarIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { format, addDays } from 'date-fns';
+import { Plus, Trash2, Save, Send, Loader2, Search, Calendar as CalendarIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -18,14 +18,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -33,45 +33,45 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useToast } from '@/components/ui/use-toast'
-import { cn } from '@/lib/utils'
-import { quotationSchema, quotationLineSchema } from '@/lib/validations'
+} from '@/components/ui/dialog';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useToast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
+import { quotationSchema, quotationLineSchema } from '@/lib/validations';
 
 // Types
 interface Product {
-  id: string
-  code: string
-  name: string
-  unit: string
-  salePrice: number
-  costPrice: number
+  id: string;
+  code: string;
+  name: string;
+  unit: string;
+  salePrice: number;
+  costPrice: number;
 }
 
 interface Customer {
-  id: string
-  name: string
-  code: string
-  taxId?: string
-  creditDays?: number
+  id: string;
+  name: string;
+  code: string;
+  taxId?: string;
+  creditDays?: number;
 }
 
-type QuotationFormValues = z.infer<typeof quotationSchema>
+type QuotationFormValues = z.infer<typeof quotationSchema>;
 
 interface QuotationFormProps {
-  initialData?: Partial<QuotationFormValues> & { id?: string }
-  mode?: 'create' | 'edit'
-  onSuccess?: () => void
-  onCancel?: () => void
+  initialData?: Partial<QuotationFormValues> & { id?: string };
+  mode?: 'create' | 'edit';
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 export function QuotationForm({
@@ -80,11 +80,11 @@ export function QuotationForm({
   onSuccess,
   onCancel,
 }: QuotationFormProps) {
-  const [loading, setLoading] = useState(false)
-  const [products, setProducts] = useState<Product[]>([])
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [submitting, setSubmitting] = useState<'draft' | 'send' | null>(null)
-  const { toast } = useToast()
+  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [submitting, setSubmitting] = useState<'draft' | 'send' | null>(null);
+  const { toast } = useToast();
 
   const form = useForm<QuotationFormValues>({
     resolver: zodResolver(quotationSchema),
@@ -106,56 +106,60 @@ export function QuotationForm({
       ],
       ...initialData,
     },
-  })
+  });
 
   // Fetch data
   useEffect(() => {
     Promise.all([
-      fetch(`/api/products`, { credentials: 'include' }).then(r => r.json()).then(d => setProducts(d.data || [])),
-      fetch(`/api/customers`, { credentials: 'include' }).then(r => r.json()).then(d => setCustomers(d.data || [])),
-    ])
-  }, [])
+      fetch(`/api/products`, { credentials: 'include' })
+        .then((r) => r.json())
+        .then((d) => setProducts(d.data || [])),
+      fetch(`/api/customers`, { credentials: 'include' })
+        .then((r) => r.json())
+        .then((d) => setCustomers(d.data || [])),
+    ]);
+  }, []);
 
   // Calculate line amount
   const calculateLineAmount = (line: any) => {
-    const subtotal = line.quantity * line.unitPrice
-    const discountAmount = subtotal * (line.discount / 100)
-    const afterDiscount = subtotal - discountAmount
-    const vatAmount = afterDiscount * (line.vatRate / 100)
+    const subtotal = line.quantity * line.unitPrice;
+    const discountAmount = subtotal * (line.discount / 100);
+    const afterDiscount = subtotal - discountAmount;
+    const vatAmount = afterDiscount * (line.vatRate / 100);
     return {
       subtotal: Math.round(subtotal * 100) / 100,
       discountAmount: Math.round(discountAmount * 100) / 100,
       vatAmount: Math.round(vatAmount * 100) / 100,
       amount: Math.round((afterDiscount + vatAmount) * 100) / 100,
-    }
-  }
+    };
+  };
 
   // Calculate totals
   const calculateTotals = () => {
-    const lines = form.watch('lines') || []
-    const discountPercent = form.watch('discountPercent') || 0
-    const discountAmount = form.watch('discountAmount') || 0
-    const vatRate = form.watch('vatRate') || 7
+    const lines = form.watch('lines') || [];
+    const discountPercent = form.watch('discountPercent') || 0;
+    const discountAmount = form.watch('discountAmount') || 0;
+    const vatRate = form.watch('vatRate') || 7;
 
     const subtotal = lines.reduce((sum, line) => {
-      const calc = calculateLineAmount(line)
-      return sum + calc.subtotal
-    }, 0)
+      const calc = calculateLineAmount(line);
+      return sum + calc.subtotal;
+    }, 0);
 
     const lineDiscountTotal = lines.reduce((sum, line) => {
-      const calc = calculateLineAmount(line)
-      return sum + calc.discountAmount
-    }, 0)
+      const calc = calculateLineAmount(line);
+      return sum + calc.discountAmount;
+    }, 0);
 
-    const subtotalAfterLineDiscount = subtotal - lineDiscountTotal
+    const subtotalAfterLineDiscount = subtotal - lineDiscountTotal;
 
     // Calculate document-level discount
-    const docDiscountPercentAmount = subtotalAfterLineDiscount * (discountPercent / 100)
-    const totalDiscount = lineDiscountTotal + docDiscountPercentAmount + discountAmount
-    const afterDiscount = subtotal - totalDiscount
+    const docDiscountPercentAmount = subtotalAfterLineDiscount * (discountPercent / 100);
+    const totalDiscount = lineDiscountTotal + docDiscountPercentAmount + discountAmount;
+    const afterDiscount = subtotal - totalDiscount;
 
-    const vatAmount = afterDiscount * (vatRate / 100)
-    const totalAmount = afterDiscount + vatAmount
+    const vatAmount = afterDiscount * (vatRate / 100);
+    const totalAmount = afterDiscount + vatAmount;
 
     return {
       subtotal: Math.round(subtotal * 100) / 100,
@@ -165,12 +169,12 @@ export function QuotationForm({
       afterDiscount: Math.round(afterDiscount * 100) / 100,
       vatAmount: Math.round(vatAmount * 100) / 100,
       totalAmount: Math.round(totalAmount * 100) / 100,
-    }
-  }
+    };
+  };
 
   // Add line
   const addLine = () => {
-    const lines = form.getValues('lines')
+    const lines = form.getValues('lines');
     form.setValue('lines', [
       ...lines,
       {
@@ -181,40 +185,43 @@ export function QuotationForm({
         discount: 0,
         vatRate: 7,
       },
-    ])
-  }
+    ]);
+  };
 
   // Remove line
   const removeLine = (index: number) => {
-    const lines = form.getValues('lines')
+    const lines = form.getValues('lines');
     if (lines.length > 1) {
-      form.setValue('lines', lines.filter((_, i) => i !== index))
+      form.setValue(
+        'lines',
+        lines.filter((_, i) => i !== index)
+      );
     }
-  }
+  };
 
   // Select product
   const selectProduct = (index: number, product: Product) => {
-    const lines = form.getValues('lines')
+    const lines = form.getValues('lines');
     lines[index] = {
       ...lines[index],
       productId: product.id,
       description: product.name,
       unit: product.unit,
       unitPrice: product.salePrice || 0,
-    }
-    form.setValue('lines', lines)
-  }
+    };
+    form.setValue('lines', lines);
+  };
 
   // Submit form
   const onSubmit = async (data: QuotationFormValues, submitType: 'draft' | 'send') => {
-    setSubmitting(submitType)
+    setSubmitting(submitType);
     try {
-      const totals = calculateTotals()
+      const totals = calculateTotals();
       const lines = data.lines.map((line, index) => ({
         ...line,
         lineNo: index + 1,
         ...calculateLineAmount(line),
-      }))
+      }));
 
       const payload = {
         ...data,
@@ -224,69 +231,72 @@ export function QuotationForm({
         vatRate: data.vatRate,
         vatAmount: Math.round(totals.vatAmount * 100),
         totalAmount: Math.round(totals.totalAmount * 100),
-      }
+      };
 
       // Create or update quotation
-      const url = mode === 'edit' && initialData?.id
-        ? `/api/quotations/${initialData.id}`
-        : '/api/quotations'
+      const url =
+        mode === 'edit' && initialData?.id
+          ? `/api/quotations/${initialData.id}`
+          : '/api/quotations';
 
-      const method = mode === 'edit' ? 'PUT' : 'POST'
+      const method = mode === 'edit' ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      })
+      });
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'บันทึกใบเสนอราคาไม่สำเร็จ')
+        throw new Error(result.error || 'บันทึกใบเสนอราคาไม่สำเร็จ');
       }
 
       // Send quotation if requested
       if (submitType === 'send' && result.data?.id) {
-        const sendRes = await fetch(`/api/quotations/${result.data.id}/send`, { credentials: 'include', 
+        const sendRes = await fetch(`/api/quotations/${result.data.id}/send`, {
+          credentials: 'include',
           method: 'POST',
-        })
+        });
 
-        const sendResult = await sendRes.json()
+        const sendResult = await sendRes.json();
 
         if (!sendRes.ok) {
-          throw new Error(sendResult.error || 'ส่งใบเสนอราคาไม่สำเร็จ')
+          throw new Error(sendResult.error || 'ส่งใบเสนอราคาไม่สำเร็จ');
         }
       }
 
       toast({
         title: 'สำเร็จ',
-        description: submitType === 'send'
-          ? mode === 'edit'
-            ? 'อัปเดตและส่งใบเสนอราคาเรียบร้อยแล้ว'
-            : 'สร้างและส่งใบเสนอราคาเรียบร้อยแล้ว'
-          : mode === 'edit'
-            ? 'อัปเดตใบเสนอราคาเรียบร้อยแล้ว'
-            : 'บันทึกใบเสนอราคาเรียบร้อยแล้ว',
-      })
+        description:
+          submitType === 'send'
+            ? mode === 'edit'
+              ? 'อัปเดตและส่งใบเสนอราคาเรียบร้อยแล้ว'
+              : 'สร้างและส่งใบเสนอราคาเรียบร้อยแล้ว'
+            : mode === 'edit'
+              ? 'อัปเดตใบเสนอราคาเรียบร้อยแล้ว'
+              : 'บันทึกใบเสนอราคาเรียบร้อยแล้ว',
+      });
 
-      if (onSuccess) onSuccess()
+      if (onSuccess) onSuccess();
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
         description: error instanceof Error ? error.message : 'กรุณาลองอีกครั้ง',
-      })
+      });
     } finally {
-      setSubmitting(null)
+      setSubmitting(null);
     }
-  }
+  };
 
-  const totals = calculateTotals()
-  const selectedCustomer = customers.find(c => c.id === form.watch('customerId'))
+  const totals = calculateTotals();
+  const selectedCustomer = customers.find((c) => c.id === form.watch('customerId'));
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(data => onSubmit(data, 'draft'))} className="space-y-6">
+      <form onSubmit={form.handleSubmit((data) => onSubmit(data, 'draft'))} className="space-y-6">
         {/* Header */}
         <Card>
           <CardHeader>
@@ -300,7 +310,7 @@ export function QuotationForm({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               {/* Quotation Date */}
               <FormField
                 control={form.control}
@@ -374,10 +384,10 @@ export function QuotationForm({
                           onSelect={(date) => field.onChange(date?.toISOString())}
                           initialFocus
                           disabled={(date) => {
-                            const quotationDate = form.watch('quotationDate')
+                            const quotationDate = form.watch('quotationDate');
                             return quotationDate
                               ? date <= new Date(quotationDate)
-                              : date < new Date()
+                              : date < new Date();
                           }}
                         />
                       </PopoverContent>
@@ -410,8 +420,10 @@ export function QuotationForm({
                     </Select>
                     {selectedCustomer && (
                       <FormDescription>
-                        {selectedCustomer.taxId && `เลขประจำตัวผู้เสียภาษี: ${selectedCustomer.taxId}`}
-                        {selectedCustomer.creditDays && ` | เครดิต: ${selectedCustomer.creditDays} วัน`}
+                        {selectedCustomer.taxId &&
+                          `เลขประจำตัวผู้เสียภาษี: ${selectedCustomer.taxId}`}
+                        {selectedCustomer.creditDays &&
+                          ` | เครดิต: ${selectedCustomer.creditDays} วัน`}
                       </FormDescription>
                     )}
                     <FormMessage />
@@ -420,7 +432,7 @@ export function QuotationForm({
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Contact Person */}
               <FormField
                 control={form.control}
@@ -453,7 +465,7 @@ export function QuotationForm({
             </div>
 
             {/* Discount and VAT */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               <FormField
                 control={form.control}
                 name="discountPercent"
@@ -551,7 +563,7 @@ export function QuotationForm({
                 <CardDescription>เพิ่มรายการที่ต้องการเสนอราคา</CardDescription>
               </div>
               <Button type="button" variant="outline" size="sm" onClick={addLine}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 เพิ่มรายการ
               </Button>
             </div>
@@ -575,12 +587,10 @@ export function QuotationForm({
                 </TableHeader>
                 <TableBody>
                   {form.watch('lines')?.map((line, index) => {
-                    const calc = calculateLineAmount(line)
+                    const calc = calculateLineAmount(line);
                     return (
                       <TableRow key={index}>
-                        <TableCell className="text-center font-medium">
-                          {index + 1}
-                        </TableCell>
+                        <TableCell className="text-center font-medium">{index + 1}</TableCell>
                         <TableCell>
                           <ProductSelector
                             products={products}
@@ -594,10 +604,7 @@ export function QuotationForm({
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
-                                  <Input
-                                    placeholder="รายการสินค้า/บริการ"
-                                    {...field}
-                                  />
+                                  <Input placeholder="รายการสินค้า/บริการ" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -713,14 +720,16 @@ export function QuotationForm({
                         <TableCell className="text-right font-medium">
                           <div className="space-y-1">
                             <div className="text-xs text-gray-500">
-                              ฿{calc.amount.toLocaleString('th-TH', {
+                              ฿
+                              {calc.amount.toLocaleString('th-TH', {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
                               })}
                             </div>
                             {calc.vatAmount > 0 && (
                               <div className="text-xs text-blue-600">
-                                +VAT ฿{calc.vatAmount.toLocaleString('th-TH', {
+                                +VAT ฿
+                                {calc.vatAmount.toLocaleString('th-TH', {
                                   minimumFractionDigits: 2,
                                   maximumFractionDigits: 2,
                                 })}
@@ -740,19 +749,20 @@ export function QuotationForm({
                           </Button>
                         </TableCell>
                       </TableRow>
-                    )
+                    );
                   })}
                 </TableBody>
               </Table>
             </div>
 
             {/* Totals */}
-            <div className="flex justify-end mt-4">
-              <div className="w-full md:w-96 space-y-2">
+            <div className="mt-4 flex justify-end">
+              <div className="w-full space-y-2 md:w-96">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">ยอดรวมสินค้า:</span>
                   <span className="font-medium">
-                    ฿{totals.subtotal.toLocaleString('th-TH', {
+                    ฿
+                    {totals.subtotal.toLocaleString('th-TH', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
@@ -762,7 +772,8 @@ export function QuotationForm({
                   <div className="flex justify-between text-sm text-orange-600">
                     <span>ส่วนลดต่อรายการ:</span>
                     <span>
-                      -฿{totals.lineDiscountTotal.toLocaleString('th-TH', {
+                      -฿
+                      {totals.lineDiscountTotal.toLocaleString('th-TH', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
@@ -773,7 +784,8 @@ export function QuotationForm({
                   <div className="flex justify-between text-sm text-orange-600">
                     <span>ส่วนลดเปอร์เซ็นต์:</span>
                     <span>
-                      -฿{totals.docDiscountPercentAmount.toLocaleString('th-TH', {
+                      -฿
+                      {totals.docDiscountPercentAmount.toLocaleString('th-TH', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
@@ -784,17 +796,19 @@ export function QuotationForm({
                   <div className="flex justify-between text-sm text-orange-600">
                     <span>ส่วนลดบาท:</span>
                     <span>
-                      -฿{form.watch('discountAmount').toLocaleString('th-TH', {
+                      -฿
+                      {form.watch('discountAmount').toLocaleString('th-TH', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm pt-2 border-t">
+                <div className="flex justify-between border-t pt-2 text-sm">
                   <span className="font-medium">หลังหักส่วนลด:</span>
                   <span className="font-medium">
-                    ฿{totals.afterDiscount.toLocaleString('th-TH', {
+                    ฿
+                    {totals.afterDiscount.toLocaleString('th-TH', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
@@ -803,16 +817,18 @@ export function QuotationForm({
                 <div className="flex justify-between text-sm text-blue-600">
                   <span>VAT {form.watch('vatRate')}%:</span>
                   <span>
-                    ฿{totals.vatAmount.toLocaleString('th-TH', {
+                    ฿
+                    {totals.vatAmount.toLocaleString('th-TH', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
                   </span>
                 </div>
-                <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                <div className="flex justify-between border-t pt-2 text-lg font-bold">
                   <span>ยอดรวมสุทธิ:</span>
                   <span className="text-green-600">
-                    ฿{totals.totalAmount.toLocaleString('th-TH', {
+                    ฿
+                    {totals.totalAmount.toLocaleString('th-TH', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
@@ -853,11 +869,7 @@ export function QuotationForm({
                 <FormItem>
                   <FormLabel>บันทึกภายใน (ไม่แสดงในใบเสนอราคา)</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="บันทึกภายใน..."
-                      className="min-h-[80px]"
-                      {...field}
-                    />
+                    <Textarea placeholder="บันทึกภายใน..." className="min-h-[80px]" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -876,33 +888,33 @@ export function QuotationForm({
           <Button
             type="button"
             variant="outline"
-            onClick={form.handleSubmit(data => onSubmit(data, 'draft'))}
+            onClick={form.handleSubmit((data) => onSubmit(data, 'draft'))}
             disabled={submitting !== null}
           >
             {submitting === 'draft' ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="mr-2 h-4 w-4" />
             )}
             {mode === 'edit' ? 'อัปเดตร่าง' : 'บันทึกร่าง'}
           </Button>
           <Button
             type="button"
-            onClick={form.handleSubmit(data => onSubmit(data, 'send'))}
+            onClick={form.handleSubmit((data) => onSubmit(data, 'send'))}
             disabled={submitting !== null}
             className="bg-blue-600 hover:bg-blue-700"
           >
             {submitting === 'send' ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Send className="h-4 w-4 mr-2" />
+              <Send className="mr-2 h-4 w-4" />
             )}
             {mode === 'edit' ? 'อัปเดตและส่ง' : 'บันทึกและส่ง'}
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }
 
 // Product Selector Component
@@ -910,17 +922,17 @@ function ProductSelector({
   products,
   onSelect,
 }: {
-  products: Product[]
-  onSelect: (product: Product) => void
+  products: Product[];
+  onSelect: (product: Product) => void;
 }) {
-  const [open, setOpen] = useState(false)
-  const [search, setSearch] = useState('')
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.code.toLowerCase().includes(search.toLowerCase())
-  )
+  );
 
   return (
     <div className="relative">
@@ -930,7 +942,7 @@ function ProductSelector({
         className="w-full justify-start"
         onClick={() => setOpen(true)}
       >
-        <Search className="h-4 w-4 mr-2" />
+        <Search className="mr-2 h-4 w-4" />
         เลือกสินค้า...
       </Button>
 
@@ -939,9 +951,7 @@ function ProductSelector({
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>เลือกสินค้า</DialogTitle>
-              <DialogDescription>
-                เลือกสินค้าจากรายการสินค้าในระบบ
-              </DialogDescription>
+              <DialogDescription>เลือกสินค้าจากรายการสินค้าในระบบ</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
@@ -953,18 +963,16 @@ function ProductSelector({
 
               <div className="max-h-[400px] overflow-y-auto">
                 {filteredProducts.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    ไม่พบสินค้า
-                  </div>
+                  <div className="py-8 text-center text-gray-500">ไม่พบสินค้า</div>
                 ) : (
                   <div className="space-y-2">
                     {filteredProducts.map((product) => (
                       <div
                         key={product.id}
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                        className="flex cursor-pointer items-center justify-between rounded-lg border p-3 hover:bg-gray-50"
                         onClick={() => {
-                          onSelect(product)
-                          setOpen(false)
+                          onSelect(product);
+                          setOpen(false);
                         }}
                       >
                         <div>
@@ -992,5 +1000,5 @@ function ProductSelector({
         </Dialog>
       )}
     </div>
-  )
+  );
 }

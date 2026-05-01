@@ -1,52 +1,64 @@
-import type { Metadata, Viewport } from "next";
-import { Quicksand, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
-import { Providers } from "@/components/providers";
-import { ErrorBoundary } from "@/components/error-boundary";
-import { BuildInfo } from "@/components/build-info";
+import type { Metadata, Viewport } from 'next';
+import { Quicksand, JetBrains_Mono } from 'next/font/google';
+import './globals.css';
+import { Providers } from '@/components/providers';
+import { ErrorBoundary } from '@/components/error-boundary';
+import { BuildInfo } from '@/components/build-info';
 
 const quicksand = Quicksand({
-  variable: "--font-quicksand",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  variable: '--font-quicksand',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  variable: '--font-jetbrains',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
 });
 
 export const metadata: Metadata = {
-  title: "Keerati ERP - โปรแกรมบัญชีสไตล์คุณ",
-  description: "ระบบบัญชีสไตล์พาสเทล ใช้งานง่าย สวยงาม ครบวงจร รองรับภาษีมูลค่าเพิ่ม ภาษีหัก ณ ที่จ่าย งบการเงิน และรายงานต่างๆ",
-  keywords: ["Keerati ERP", "บัญชี", "ERP", "TFRS", "บัญชีไทย", "ภาษีมูลค่าเพิ่ม", "VAT", "WHT", "พาสเทล", "สีพาสเทล"],
-  authors: [{ name: "Keerati ERP Team" }],
-  manifest: "/manifest.json",
+  title: 'Keerati ERP - โปรแกรมบัญชีสไตล์คุณ',
+  description:
+    'ระบบบัญชีสไตล์พาสเทล ใช้งานง่าย สวยงาม ครบวงจร รองรับภาษีมูลค่าเพิ่ม ภาษีหัก ณ ที่จ่าย งบการเงิน และรายงานต่างๆ',
+  keywords: [
+    'Keerati ERP',
+    'บัญชี',
+    'ERP',
+    'TFRS',
+    'บัญชีไทย',
+    'ภาษีมูลค่าเพิ่ม',
+    'VAT',
+    'WHT',
+    'พาสเทล',
+    'สีพาสเทล',
+  ],
+  authors: [{ name: 'Keerati ERP Team' }],
+  manifest: '/manifest.json',
   icons: {
-    icon: "/icons/icon.svg",
-    apple: "/icons/icon.svg",
+    icon: '/icons/icon.svg',
+    apple: '/icons/icon.svg',
   },
-  favicon: "/icon.svg",
+  favicon: '/icon.svg',
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "KeeratiERP",
+    statusBarStyle: 'default',
+    title: 'KeeratiERP',
   },
   openGraph: {
-    title: "Keerati ERP",
-    description: "โปรแกรมบัญชีสไตล์พาสเทล ครบวงจร",
-    type: "website",
+    title: 'Keerati ERP',
+    description: 'โปรแกรมบัญชีสไตล์พาสเทล ครบวงจร',
+    type: 'website',
   },
 };
 
 export const viewport: Viewport = {
-  width: "device-width",
+  width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fefdfb" },
-    { media: "(prefers-color-scheme: dark)", color: "#2d2a3a" },
+    { media: '(prefers-color-scheme: light)', color: '#fefdfb' },
+    { media: '(prefers-color-scheme: dark)', color: '#2d2a3a' },
   ],
 };
 
@@ -69,13 +81,11 @@ export default function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body
-        className={`${quicksand.variable} ${jetbrainsMono.variable} antialiased bg-background text-foreground`}
+        className={`${quicksand.variable} ${jetbrainsMono.variable} bg-background text-foreground antialiased`}
         style={{ fontFamily: 'var(--font-quicksand), Quicksand, sans-serif' }}
       >
         <Providers>
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
+          <ErrorBoundary>{children}</ErrorBoundary>
         </Providers>
         <BuildInfo />
       </body>

@@ -4,9 +4,6 @@ export {
   ActivityFeedWithPresence,
   ActivitySummary,
   useActivityFeed,
-} from './activity-feed'
+} from './activity-feed';
 
-export type {
-  Activity,
-  OnlineUser,
-} from './activity-feed'
+export type { Activity, OnlineUser } from './activity-feed';

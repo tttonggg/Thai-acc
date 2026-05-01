@@ -10,7 +10,7 @@ export {
   ResponsiveContainer,
   MobileFab,
   MobileSearchBar,
-} from './mobile-optimized-form'
+} from './mobile-optimized-form';
 
 export type {
   MobileFormFieldProps,
@@ -22,4 +22,4 @@ export type {
   ResponsiveContainerProps,
   MobileFabProps,
   MobileSearchBarProps,
-} from './mobile-optimized-form'
+} from './mobile-optimized-form';

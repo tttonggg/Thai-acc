@@ -3,5 +3,5 @@
  */
 
 export function TestComponent() {
-  return <div>Test Component Working</div>
+  return <div>Test Component Working</div>;
 }

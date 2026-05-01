@@ -1,30 +1,30 @@
-import { db } from "@/lib/db"
-import { formatThaiDate } from "@/lib/thai-accounting"
-import { apiResponse, notFoundError } from "@/lib/api-utils"
-import { requireAuth } from "@/lib/api-utils"
+import { db } from '@/lib/db';
+import { formatThaiDate } from '@/lib/thai-accounting';
+import { apiResponse, notFoundError } from '@/lib/api-utils';
+import { requireAuth } from '@/lib/api-utils';
 
 interface AuditEntry {
-  id: string
-  action: string
-  entityType: "INVOICE" | "LINE_ITEM"
-  entityId: string
-  beforeState: any
-  afterState: any
-  userId: string
-  userName: string | null
-  createdAt: Date
-  thaiDate: string
+  id: string;
+  action: string;
+  entityType: 'INVOICE' | 'LINE_ITEM';
+  entityId: string;
+  beforeState: any;
+  afterState: any;
+  userId: string;
+  userName: string | null;
+  createdAt: Date;
+  thaiDate: string;
   // Line item specific fields
-  field?: string | null
-  fieldName?: string
-  oldValue?: string | null
-  newValue?: string | null
+  field?: string | null;
+  fieldName?: string;
+  oldValue?: string | null;
+  newValue?: string | null;
   lineItem?: {
-    id: string
-    description: string
-    lineNo: number
-  } | null
-  changeReason?: string | null
+    id: string;
+    description: string;
+    lineNo: number;
+  } | null;
+  changeReason?: string | null;
 }
 
 /**
@@ -53,52 +53,49 @@ interface AuditEntry {
  *   }
  * }
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
     // Parse query parameters
-    const { searchParams } = new URL(request.url)
-    const action = searchParams.get("action")
-    const entityType = searchParams.get("entityType")
-    const userId = searchParams.get("userId")
-    const startDate = searchParams.get("startDate")
-    const endDate = searchParams.get("endDate")
-    const limit = Math.min(Number(searchParams.get("limit") || "50"), 100)
-    const cursor = searchParams.get("cursor")
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get('action');
+    const entityType = searchParams.get('entityType');
+    const userId = searchParams.get('userId');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const limit = Math.min(Number(searchParams.get('limit') || '50'), 100);
+    const cursor = searchParams.get('cursor');
 
     // Check if invoice exists
     const invoice = await db.invoice.findUnique({
       where: { id },
-      select: { id: true, createdById: true }
-    })
+      select: { id: true, createdById: true },
+    });
 
     if (!invoice) {
-      return notFoundError("ไม่พบใบกำกับภาษี")
+      return notFoundError('ไม่พบใบกำกับภาษี');
     }
 
     // IDOR Protection: Check ownership - only ADMIN can access any invoice
-    if (user.role !== "ADMIN" && invoice.createdById && invoice.createdById !== user.id) {
-      return apiError("ไม่มีสิทธิ์เข้าถึงข้อมูล", 403)
+    if (user.role !== 'ADMIN' && invoice.createdById && invoice.createdById !== user.id) {
+      return apiError('ไม่มีสิทธิ์เข้าถึงข้อมูล', 403);
     }
 
     // Build date filter
-    const dateFilter: any = {}
+    const dateFilter: any = {};
     if (startDate) {
-      dateFilter.gte = new Date(startDate)
+      dateFilter.gte = new Date(startDate);
     }
     if (endDate) {
-      dateFilter.lte = new Date(endDate)
+      dateFilter.lte = new Date(endDate);
     }
 
     // Fetch general audit logs for the invoice
     const generalAuditLogs = await db.auditLog.findMany({
       where: {
-        entityType: "Invoice",
+        entityType: 'Invoice',
         entityId: id,
         ...(action && { action }),
         ...(userId && { userId }),
@@ -111,22 +108,22 @@ export async function GET(
             id: true,
             name: true,
             email: true,
-          }
-        }
+          },
+        },
       },
       orderBy: {
-        timestamp: "desc"
+        timestamp: 'desc',
       },
       take: limit,
-    })
+    });
 
     // Get line item IDs for this invoice
     const lineItems = await db.invoiceLine.findMany({
       where: { invoiceId: id },
-      select: { id: true }
-    })
+      select: { id: true },
+    });
 
-    const lineItemIds = lineItems.map(item => item.id)
+    const lineItemIds = lineItems.map((item) => item.id);
 
     // Fetch line item audit logs
     const lineItemAuditLogs = await db.invoiceLineItemAudit.findMany({
@@ -135,10 +132,10 @@ export async function GET(
         ...(action && { action }),
         ...(userId && { changedById: userId }),
         ...(Object.keys(dateFilter).length > 0 && {
-          createdAt: dateFilter
+          createdAt: dateFilter,
         }),
         ...(cursor && {
-          createdAt: { ...dateFilter, lt: new Date(cursor) }
+          createdAt: { ...dateFilter, lt: new Date(cursor) },
         }),
       },
       include: {
@@ -146,32 +143,32 @@ export async function GET(
           select: {
             id: true,
             description: true,
-            lineNo: true
-          }
-        }
+            lineNo: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: "desc"
+        createdAt: 'desc',
       },
       take: limit,
-    })
+    });
 
     // Format field names in Thai/English
     const fieldNames: Record<string, string> = {
-      description: "รายการ",
-      quantity: "จำนวน",
-      unit: "หน่วย",
-      unitPrice: "ราคาต่อหน่วย",
-      discount: "ส่วนลด",
-      vatRate: "อัตรา VAT",
-      notes: "หมายเหตุ"
-    }
+      description: 'รายการ',
+      quantity: 'จำนวน',
+      unit: 'หน่วย',
+      unitPrice: 'ราคาต่อหน่วย',
+      discount: 'ส่วนลด',
+      vatRate: 'อัตรา VAT',
+      notes: 'หมายเหตุ',
+    };
 
     // Transform general audit logs to unified format
-    const generalEntries: AuditEntry[] = generalAuditLogs.map(log => ({
+    const generalEntries: AuditEntry[] = generalAuditLogs.map((log) => ({
       id: log.id,
       action: log.action,
-      entityType: "INVOICE",
+      entityType: 'INVOICE',
       entityId: log.entityId,
       beforeState: log.beforeState,
       afterState: log.afterState,
@@ -185,13 +182,13 @@ export async function GET(
       newValue: null,
       lineItem: null,
       changeReason: null,
-    }))
+    }));
 
     // Transform line item audit logs to unified format
-    const lineItemEntries: AuditEntry[] = lineItemAuditLogs.map(log => ({
+    const lineItemEntries: AuditEntry[] = lineItemAuditLogs.map((log) => ({
       id: log.id,
       action: log.action,
-      entityType: "LINE_ITEM",
+      entityType: 'LINE_ITEM',
       entityId: log.lineItemId,
       beforeState: null,
       afterState: null,
@@ -200,32 +197,33 @@ export async function GET(
       createdAt: log.createdAt,
       thaiDate: formatThaiDate(log.createdAt),
       field: log.field,
-      fieldName: fieldNames[log.field || ""] || log.field,
+      fieldName: fieldNames[log.field || ''] || log.field,
       oldValue: log.oldValue,
       newValue: log.newValue,
       lineItem: log.lineItem,
       changeReason: log.changeReason,
-    }))
+    }));
 
     // Combine and sort all entries by date (most recent first)
-    const allEntries = [...generalEntries, ...lineItemEntries].sort((a, b) =>
-      b.createdAt.getTime() - a.createdAt.getTime()
-    )
+    const allEntries = [...generalEntries, ...lineItemEntries].sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
 
     // Apply additional filters
-    let filteredEntries = allEntries
+    let filteredEntries = allEntries;
 
-    if (entityType === "INVOICE") {
-      filteredEntries = allEntries.filter(e => e.entityType === "INVOICE")
-    } else if (entityType === "LINE_ITEM") {
-      filteredEntries = allEntries.filter(e => e.entityType === "LINE_ITEM")
+    if (entityType === 'INVOICE') {
+      filteredEntries = allEntries.filter((e) => e.entityType === 'INVOICE');
+    } else if (entityType === 'LINE_ITEM') {
+      filteredEntries = allEntries.filter((e) => e.entityType === 'LINE_ITEM');
     }
 
     // Apply pagination
-    const paginatedEntries = filteredEntries.slice(0, limit)
-    const nextCursor = paginatedEntries.length < filteredEntries.length
-      ? paginatedEntries[paginatedEntries.length - 1].createdAt.toISOString()
-      : null
+    const paginatedEntries = filteredEntries.slice(0, limit);
+    const nextCursor =
+      paginatedEntries.length < filteredEntries.length
+        ? paginatedEntries[paginatedEntries.length - 1].createdAt.toISOString()
+        : null;
 
     return apiResponse({
       entries: paginatedEntries,
@@ -237,15 +235,15 @@ export async function GET(
         userId,
         startDate,
         endDate,
-      }
-    })
+      },
+    });
   } catch (error) {
-    console.error("Audit log fetch error:", error)
+    console.error('Audit log fetch error:', error);
 
-    if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
-      return unauthorizedError()
+    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+      return unauthorizedError();
     }
 
-    return apiError("เกิดข้อผิดพลาดในการดึงข้อมูลประวัติการแก้ไข")
+    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลประวัติการแก้ไข');
   }
 }

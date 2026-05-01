@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Edit,
@@ -11,172 +11,175 @@ import {
   MessageSquare,
   History,
   Link2,
-  AlertTriangle
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CommentSection } from './comment-section'
-import { AuditLog } from './audit-log'
-import { RelatedDocuments } from './related-documents'
-import { useToast } from '@/hooks/use-toast'
-import { useSession } from 'next-auth/react'
-import { formatThaiDate, formatCurrency } from '@/lib/thai-accounting'
+  AlertTriangle,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CommentSection } from './comment-section';
+import { AuditLog } from './audit-log';
+import { RelatedDocuments } from './related-documents';
+import { useToast } from '@/hooks/use-toast';
+import { useSession } from 'next-auth/react';
+import { formatThaiDate, formatCurrency } from '@/lib/thai-accounting';
 
 // Types
 interface InvoiceDetail {
-  id: string
-  invoiceNo: string
-  invoiceDate: string
-  dueDate?: string
-  customerId: string
+  id: string;
+  invoiceNo: string;
+  invoiceDate: string;
+  dueDate?: string;
+  customerId: string;
   customer: {
-    id: string
-    name: string
-    taxId?: string
-    address?: string
-  }
-  type: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE'
-  status: 'DRAFT' | 'ISSUED' | 'PAID' | 'PARTIAL' | 'CANCELLED'
-  reference?: string
-  poNumber?: string
-  subtotal: number
-  vatAmount: number
-  discountAmount: number
-  totalAmount: number
-  netAmount: number
-  withholdingRate?: number
-  withholdingAmount?: number
-  notes?: string
+    id: string;
+    name: string;
+    taxId?: string;
+    address?: string;
+  };
+  type: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE';
+  status: 'DRAFT' | 'ISSUED' | 'PAID' | 'PARTIAL' | 'CANCELLED';
+  reference?: string;
+  poNumber?: string;
+  subtotal: number;
+  vatAmount: number;
+  discountAmount: number;
+  totalAmount: number;
+  netAmount: number;
+  withholdingRate?: number;
+  withholdingAmount?: number;
+  notes?: string;
   lines: Array<{
-    id: string
-    lineNo: number
-    description: string
-    quantity: number
-    unit: string
-    unitPrice: number
-    discount: number
-    vatRate: number
-    vatAmount: number
-    amount: number
-  }>
+    id: string;
+    lineNo: number;
+    description: string;
+    quantity: number;
+    unit: string;
+    unitPrice: number;
+    discount: number;
+    vatRate: number;
+    vatAmount: number;
+    amount: number;
+  }>;
   _count?: {
-    comments: number
-  }
-  createdAt: string
-  updatedAt: string
-  createdById?: string
+    comments: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+  createdById?: string;
 }
 
 interface InvoiceDetailPageProps {
-  invoiceId: string
-  onBack: () => void
-  onEdit: (invoiceId: string) => void
+  invoiceId: string;
+  onBack: () => void;
+  onEdit: (invoiceId: string) => void;
 }
 
 export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPageProps) {
-  const { toast } = useToast()
-  const { data: session } = useSession()
-  const [invoice, setInvoice] = useState<InvoiceDetail | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [downloading, setDownloading] = useState(false)
-  const [printing, setPrinting] = useState(false)
+  const { toast } = useToast();
+  const { data: session } = useSession();
+  const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [printing, setPrinting] = useState(false);
 
   useEffect(() => {
-    fetchInvoice()
-  }, [invoiceId])
+    fetchInvoice();
+  }, [invoiceId]);
 
   const fetchInvoice = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}`, { credentials: 'include' })
-      const result = await response.json()
+      const response = await fetch(`/api/invoices/${invoiceId}`, { credentials: 'include' });
+      const result = await response.json();
 
       if (response.ok) {
-        setInvoice(result.data)
+        setInvoice(result.data);
       } else {
-        throw new Error(result.error || 'ไม่พบใบกำกับภาษี')
+        throw new Error(result.error || 'ไม่พบใบกำกับภาษี');
       }
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: err.message,
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleDownload = async () => {
-    setDownloading(true)
+    setDownloading(true);
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/export/pdf`, { credentials: 'include' })
-      if (!response.ok) throw new Error('Download failed')
+      const response = await fetch(`/api/invoices/${invoiceId}/export/pdf`, {
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Download failed');
 
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${invoice?.invoiceNo}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${invoice?.invoiceNo}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
       toast({
         title: 'ดาวน์โหลดสำเร็จ',
-        description: `ดาวน์โหลด ${invoice?.invoiceNo} เรียบร้อยแล้ว`
-      })
+        description: `ดาวน์โหลด ${invoice?.invoiceNo} เรียบร้อยแล้ว`,
+      });
     } catch (error) {
       toast({
         title: 'ดาวน์โหลดไม่สำเร็จ',
         description: 'กรุณาลองอีกครั้ง',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setDownloading(false)
+      setDownloading(false);
     }
-  }
+  };
 
   const handlePrint = () => {
-    window.print()
-  }
+    window.print();
+  };
 
   const handleDelete = async () => {
     if (!confirm('คุณต้องการลบใบกำกับภาษีนี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}`, { credentials: 'include', 
-        method: 'DELETE'
-      })
+      const response = await fetch(`/api/invoices/${invoiceId}`, {
+        credentials: 'include',
+        method: 'DELETE',
+      });
 
       if (response.ok) {
         toast({
           title: 'ลบสำเร็จ',
-          description: 'ลบใบกำกับภาษีเรียบร้อยแล้ว'
-        })
-        onBack()
+          description: 'ลบใบกำกับภาษีเรียบร้อยแล้ว',
+        });
+        onBack();
       } else {
-        const result = await response.json()
-        throw new Error(result.error || 'ไม่สามารถลบได้')
+        const result = await response.json();
+        throw new Error(result.error || 'ไม่สามารถลบได้');
       }
     } catch (error: any) {
       toast({
         title: 'ลบไม่สำเร็จ',
         description: error.message,
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   // Loading state
   if (loading) {
@@ -195,7 +198,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Error state
@@ -204,7 +207,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
       <Alert variant="destructive">
         <AlertDescription>{error || 'ไม่พบข้อมูล'}</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   const statusLabels: Record<string, string> = {
@@ -213,7 +216,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
     PARTIAL: 'รับชำระบางส่วน',
     PAID: 'รับชำระเต็มจำนวน',
     CANCELLED: 'ยกเลิก',
-  }
+  };
 
   const typeLabels: Record<string, string> = {
     TAX_INVOICE: 'ใบกำกับภาษี',
@@ -221,7 +224,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
     DELIVERY_NOTE: 'ใบส่งของ',
     CREDIT_NOTE: 'ใบลดหนี้',
     DEBIT_NOTE: 'ใบเพิ่มหนี้',
-  }
+  };
 
   const statusColors: Record<string, string> = {
     DRAFT: 'bg-gray-100 text-gray-800',
@@ -229,7 +232,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
     PARTIAL: 'bg-yellow-100 text-yellow-800',
     PAID: 'bg-green-100 text-green-800',
     CANCELLED: 'bg-red-100 text-red-800',
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -243,37 +246,35 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
             <h1 className="text-2xl font-bold text-gray-800">
               {typeLabels[invoice.type]} {invoice.invoiceNo}
             </h1>
-            <div className="flex items-center gap-2 mt-1">
-              <p className="text-gray-500">
-                {formatThaiDate(invoice.invoiceDate)}
-              </p>
-              <Badge className={statusColors[invoice.status]}>
-                {statusLabels[invoice.status]}
-              </Badge>
+            <div className="mt-1 flex items-center gap-2">
+              <p className="text-gray-500">{formatThaiDate(invoice.invoiceDate)}</p>
+              <Badge className={statusColors[invoice.status]}>{statusLabels[invoice.status]}</Badge>
             </div>
           </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleDownload} disabled={downloading}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             ดาวน์โหลด
           </Button>
           <Button variant="outline" onClick={handlePrint} disabled={printing}>
-            <Printer className="h-4 w-4 mr-2" />
+            <Printer className="mr-2 h-4 w-4" />
             พิมพ์
           </Button>
-          {invoice.status === 'DRAFT' && (session?.user?.role === 'ADMIN' || invoice.createdById === session?.user?.id) && (
-            <Button onClick={() => onEdit(invoiceId)}>
-              <Edit className="h-4 w-4 mr-2" />
-              แก้ไข
-            </Button>
-          )}
-          {invoice.status === 'DRAFT' && (session?.user?.role === 'ADMIN' || invoice.createdById === session?.user?.id) && (
-            <Button variant="destructive" onClick={handleDelete}>
-              <Trash2 className="h-4 w-4 mr-2" />
-              ลบ
-            </Button>
-          )}
+          {invoice.status === 'DRAFT' &&
+            (session?.user?.role === 'ADMIN' || invoice.createdById === session?.user?.id) && (
+              <Button onClick={() => onEdit(invoiceId)}>
+                <Edit className="mr-2 h-4 w-4" />
+                แก้ไข
+              </Button>
+            )}
+          {invoice.status === 'DRAFT' &&
+            (session?.user?.role === 'ADMIN' || invoice.createdById === session?.user?.id) && (
+              <Button variant="destructive" onClick={handleDelete}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                ลบ
+              </Button>
+            )}
         </div>
       </div>
 
@@ -283,7 +284,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
           <CardTitle>สรุปข้อมูล</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <div>
               <p className="text-sm text-gray-500">ลูกค้า</p>
               <p className="font-semibold">{invoice.customer.name}</p>
@@ -304,7 +305,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
           </div>
 
           {invoice.status === 'ISSUED' && (
-            <Alert className="mt-4 bg-yellow-50 border-yellow-200">
+            <Alert className="mt-4 border-yellow-200 bg-yellow-50">
               <AlertTriangle className="h-4 w-4 text-yellow-600" />
               <AlertDescription className="text-yellow-800">
                 ใบกำกับภาษีถูกออกแล้ว การแก้ไขอาจกระทบการคำนวณภาษี
@@ -318,11 +319,11 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
       <Tabs defaultValue="details" className="space-y-4">
         <TabsList>
           <TabsTrigger value="details">
-            <FileText className="h-4 w-4 mr-2" />
+            <FileText className="mr-2 h-4 w-4" />
             รายละเอียด
           </TabsTrigger>
           <TabsTrigger value="comments">
-            <MessageSquare className="h-4 w-4 mr-2" />
+            <MessageSquare className="mr-2 h-4 w-4" />
             คอมเมนต์
             {invoice._count?.comments > 0 && (
               <Badge variant="secondary" className="ml-2">
@@ -331,11 +332,11 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
             )}
           </TabsTrigger>
           <TabsTrigger value="audit">
-            <History className="h-4 w-4 mr-2" />
+            <History className="mr-2 h-4 w-4" />
             ประวัติการแก้ไข
           </TabsTrigger>
           <TabsTrigger value="related">
-            <Link2 className="h-4 w-4 mr-2" />
+            <Link2 className="mr-2 h-4 w-4" />
             เอกสารที่เกี่ยวข้อง
           </TabsTrigger>
         </TabsList>
@@ -349,7 +350,10 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
             <CardContent>
               <div className="space-y-3">
                 {invoice.lines.map((line) => (
-                  <div key={line.id} className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                  <div
+                    key={line.id}
+                    className="flex items-center justify-between rounded-lg bg-muted p-3"
+                  >
                     <div className="flex-1">
                       <p className="font-medium">{line.description}</p>
                       <p className="text-sm text-gray-500">
@@ -359,9 +363,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
                     <div className="text-right">
                       <p className="font-semibold">{formatCurrency(line.amount)}</p>
                       {line.discount > 0 && (
-                        <p className="text-xs text-red-600">
-                          ส่วนลด {line.discount}%
-                        </p>
+                        <p className="text-xs text-red-600">ส่วนลด {line.discount}%</p>
                       )}
                     </div>
                   </div>
@@ -369,7 +371,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
               </div>
 
               {/* Totals */}
-              <div className="mt-6 space-y-2 pt-4 border-t">
+              <div className="mt-6 space-y-2 border-t pt-4">
                 <div className="flex justify-between text-sm">
                   <span>ยอดรวมสินค้า</span>
                   <span>{formatCurrency(invoice.subtotal)}</span>
@@ -384,7 +386,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
                   <span>VAT 7%</span>
                   <span>{formatCurrency(invoice.vatAmount)}</span>
                 </div>
-                <div className="flex justify-between font-bold text-lg pt-2 border-t">
+                <div className="flex justify-between border-t pt-2 text-lg font-bold">
                   <span>ยอดรวมสุทธิ</span>
                   <span className="text-blue-600">
                     {formatCurrency(invoice.netAmount || invoice.totalAmount)}
@@ -401,7 +403,7 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
                 <CardTitle>หมายเหตุ</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm whitespace-pre-wrap">{invoice.notes}</p>
+                <p className="whitespace-pre-wrap text-sm">{invoice.notes}</p>
               </CardContent>
             </Card>
           )}
@@ -440,23 +442,18 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
                 id: session.user.id,
                 name: session.user.name || undefined,
                 email: session.user.email,
-                role: session.user.role
+                role: session.user.role,
               }}
             />
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="py-8 text-center text-muted-foreground">
               กรุณาเข้าสู่ระบบเพื่อดูคอมเมนต์
             </div>
           )}
         </TabsContent>
 
         <TabsContent value="audit">
-          <AuditLog
-            invoiceId={invoiceId}
-            entityType="ALL"
-            showFilters={true}
-            maxHeight="600px"
-          />
+          <AuditLog invoiceId={invoiceId} entityType="ALL" showFilters={true} maxHeight="600px" />
         </TabsContent>
 
         <TabsContent value="related">
@@ -464,11 +461,11 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
             invoiceId={invoiceId}
             onDocumentClick={(module, id) => {
               // Navigate to related document
-              window.location.href = `/${module}/${id}`
+              window.location.href = `/${module}/${id}`;
             }}
           />
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

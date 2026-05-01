@@ -3,9 +3,9 @@
 // บริการใบขอซื้อ (PR) และใบสั่งซื้อ (PO)
 // ============================================
 
-import prisma from '@/lib/db'
-import { generateDocNumber } from '@/lib/api-utils'
-import { bahtToSatang, satangToBaht, calculatePercent } from '@/lib/currency'
+import prisma from '@/lib/db';
+import { generateDocNumber } from '@/lib/api-utils';
+import { bahtToSatang, satangToBaht, calculatePercent } from '@/lib/currency';
 
 // ============================================
 // Custom Error Classes
@@ -13,22 +13,22 @@ import { bahtToSatang, satangToBaht, calculatePercent } from '@/lib/currency'
 
 export class PRValidationError extends Error {
   constructor(message: string) {
-    super(message)
-    this.name = 'PRValidationError'
+    super(message);
+    this.name = 'PRValidationError';
   }
 }
 
 export class POWorkflowError extends Error {
   constructor(message: string) {
-    super(message)
-    this.name = 'POWorkflowError'
+    super(message);
+    this.name = 'POWorkflowError';
   }
 }
 
 export class BudgetInsufficientError extends Error {
   constructor(message: string) {
-    super(message)
-    this.name = 'BudgetInsufficientError'
+    super(message);
+    this.name = 'BudgetInsufficientError';
   }
 }
 
@@ -37,49 +37,49 @@ export class BudgetInsufficientError extends Error {
 // ============================================
 
 export interface ReceivedItem {
-  lineId: string
-  receivedQty: number
-  notes?: string
+  lineId: string;
+  receivedQty: number;
+  notes?: string;
 }
 
 export interface POStatusInfo {
-  canSubmit: boolean
-  canConfirm: boolean
-  canShip: boolean
-  canReceive: boolean
-  canCancel: boolean
-  allowedTransitions: string[]
+  canSubmit: boolean;
+  canConfirm: boolean;
+  canShip: boolean;
+  canReceive: boolean;
+  canCancel: boolean;
+  allowedTransitions: string[];
 }
 
 export interface POConversionOptions {
-  vendorContact?: string
-  vendorEmail?: string
-  vendorPhone?: string
-  shippingTerms?: string
-  paymentTerms?: string
-  deliveryAddress?: string
-  expectedDate?: Date
-  notes?: string
+  vendorContact?: string;
+  vendorEmail?: string;
+  vendorPhone?: string;
+  shippingTerms?: string;
+  paymentTerms?: string;
+  deliveryAddress?: string;
+  expectedDate?: Date;
+  notes?: string;
 }
 
 export interface POLineCalculation {
-  subtotal: number
-  discountAmount: number
-  afterDiscount: number
-  vatAmount: number
-  amount: number
+  subtotal: number;
+  discountAmount: number;
+  afterDiscount: number;
+  vatAmount: number;
+  amount: number;
 }
 
 export interface POTotalCalculation {
-  subtotal: number
-  vatAmount: number
-  totalAmount: number
+  subtotal: number;
+  vatAmount: number;
+  totalAmount: number;
 }
 
 export interface BudgetValidationResult {
-  valid: boolean
-  budget?: any
-  error?: string
+  valid: boolean;
+  budget?: any;
+  error?: string;
 }
 
 // ============================================
@@ -93,10 +93,10 @@ export interface BudgetValidationResult {
  * Example: PR202603-0001
  */
 export async function generatePRNumber(): Promise<string> {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const prefix = `PR${year}${month}`
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const prefix = `PR${year}${month}`;
 
   // Find the last PR number for this month
   const lastPR = await prisma.purchaseRequest.findFirst({
@@ -108,15 +108,15 @@ export async function generatePRNumber(): Promise<string> {
     orderBy: {
       requestNo: 'desc',
     },
-  })
+  });
 
-  let sequence = 1
+  let sequence = 1;
   if (lastPR) {
-    const lastSequence = parseInt(lastPR.requestNo.split('-')[1])
-    sequence = lastSequence + 1
+    const lastSequence = parseInt(lastPR.requestNo.split('-')[1]);
+    sequence = lastSequence + 1;
   }
 
-  return `${prefix}-${String(sequence).padStart(4, '0')}`
+  return `${prefix}-${String(sequence).padStart(4, '0')}`;
 }
 
 /**
@@ -126,10 +126,10 @@ export async function generatePRNumber(): Promise<string> {
  * Example: PO202603-0001
  */
 export async function generatePONumber(): Promise<string> {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const prefix = `PO${year}${month}`
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const prefix = `PO${year}${month}`;
 
   // Find the last PO number for this month
   const lastPO = await prisma.purchaseOrder.findFirst({
@@ -141,15 +141,15 @@ export async function generatePONumber(): Promise<string> {
     orderBy: {
       orderNo: 'desc',
     },
-  })
+  });
 
-  let sequence = 1
+  let sequence = 1;
   if (lastPO) {
-    const lastSequence = parseInt(lastPO.orderNo.split('-')[1])
-    sequence = lastSequence + 1
+    const lastSequence = parseInt(lastPO.orderNo.split('-')[1]);
+    sequence = lastSequence + 1;
   }
 
-  return `${prefix}-${String(sequence).padStart(4, '0')}`
+  return `${prefix}-${String(sequence).padStart(4, '0')}`;
 }
 
 // ============================================
@@ -160,10 +160,7 @@ export async function generatePONumber(): Promise<string> {
  * Submit PR for Approval
  * ส่งใบขอซื้อเพื่อขออนุมัติ
  */
-export async function submitPRForApproval(
-  prId: string,
-  userId?: string
-): Promise<any> {
+export async function submitPRForApproval(prId: string, userId?: string): Promise<any> {
   return await prisma.$transaction(async (tx) => {
     const pr = await tx.purchaseRequest.findUnique({
       where: { id: prId },
@@ -171,31 +168,31 @@ export async function submitPRForApproval(
         lines: true,
         budget: true,
       },
-    })
+    });
 
     if (!pr) {
-      throw new PRValidationError('ไม่พบใบขอซื้อ (PR not found)')
+      throw new PRValidationError('ไม่พบใบขอซื้อ (PR not found)');
     }
 
     if (pr.status !== 'DRAFT') {
       throw new PRValidationError(
         `สถานะใบขอซื้อไม่ถูกต้อง ต้องเป็น DRAFT เท่านั้น (Invalid PR status, must be DRAFT)`
-      )
+      );
     }
 
     if (!pr.lines || pr.lines.length === 0) {
       throw new PRValidationError(
         'ต้องมีรายการสินค้าอย่างน้อย 1 รายการ (Must have at least 1 line item)'
-      )
+      );
     }
 
     // Check budget if specified
     if (pr.budgetId) {
-      const budgetCheck = await checkPRBudget(prId)
+      const budgetCheck = await checkPRBudget(prId);
       if (!budgetCheck.sufficient) {
         throw new BudgetInsufficientError(
           budgetCheck.error || 'งบประมาณไม่เพียงพอ (Insufficient budget)'
-        )
+        );
       }
     }
 
@@ -222,21 +219,17 @@ export async function submitPRForApproval(
           },
         },
       },
-    })
+    });
 
-    return updatedPR
-  })
+    return updatedPR;
+  });
 }
 
 /**
  * Approve PR
  * อนุมัติใบขอซื้อ
  */
-export async function approvePR(
-  prId: string,
-  approverId: string,
-  notes?: string
-): Promise<any> {
+export async function approvePR(prId: string, approverId: string, notes?: string): Promise<any> {
   return await prisma.$transaction(async (tx) => {
     const pr = await tx.purchaseRequest.findUnique({
       where: { id: prId },
@@ -244,36 +237,36 @@ export async function approvePR(
         lines: true,
         budget: true,
       },
-    })
+    });
 
     if (!pr) {
-      throw new PRValidationError('ไม่พบใบขอซื้อ (PR not found)')
+      throw new PRValidationError('ไม่พบใบขอซื้อ (PR not found)');
     }
 
     if (pr.status !== 'PENDING') {
       throw new PRValidationError(
         `สถานะใบขอซื้อไม่ถูกต้อง ต้องเป็น PENDING เท่านั้น (Invalid PR status, must be PENDING)`
-      )
+      );
     }
 
     // Final budget check before approval
     if (pr.budgetId) {
-      const budgetCheck = await checkPRBudget(prId)
+      const budgetCheck = await checkPRBudget(prId);
       if (!budgetCheck.sufficient) {
         throw new BudgetInsufficientError(
           budgetCheck.error || 'งบประมาณไม่เพียงพอ (Insufficient budget)'
-        )
+        );
       }
 
       // Reserve budget amount
       if (budgetCheck.budget) {
-        const newUsedAmount = budgetCheck.budget.usedAmount + pr.estimatedAmount
-        const newRemainingAmount = budgetCheck.budget.remainingAmount - pr.estimatedAmount
+        const newUsedAmount = budgetCheck.budget.usedAmount + pr.estimatedAmount;
+        const newRemainingAmount = budgetCheck.budget.remainingAmount - pr.estimatedAmount;
 
         if (newRemainingAmount < 0) {
           throw new BudgetInsufficientError(
             `งบประมาณคงเหลือไม่เพียงพอ: คงเหลือ ${newRemainingAmount / 100} บาท (Insufficient remaining budget)`
-          )
+          );
         }
 
         await tx.departmentBudget.update({
@@ -282,7 +275,7 @@ export async function approvePR(
             usedAmount: newUsedAmount,
             remainingAmount: newRemainingAmount,
           },
-        })
+        });
       }
     }
 
@@ -318,40 +311,34 @@ export async function approvePR(
           },
         },
       },
-    })
+    });
 
-    return updatedPR
-  })
+    return updatedPR;
+  });
 }
 
 /**
  * Reject PR
  * ปฏิเสธใบขอซื้อ
  */
-export async function rejectPR(
-  prId: string,
-  approverId: string,
-  reason: string
-): Promise<any> {
+export async function rejectPR(prId: string, approverId: string, reason: string): Promise<any> {
   if (!reason || reason.trim().length === 0) {
-    throw new PRValidationError(
-      'ต้องระบุเหตุผลในการปฏิเสธ (Must specify rejection reason)'
-    )
+    throw new PRValidationError('ต้องระบุเหตุผลในการปฏิเสธ (Must specify rejection reason)');
   }
 
   return await prisma.$transaction(async (tx) => {
     const pr = await tx.purchaseRequest.findUnique({
       where: { id: prId },
-    })
+    });
 
     if (!pr) {
-      throw new PRValidationError('ไม่พบใบขอซื้อ (PR not found)')
+      throw new PRValidationError('ไม่พบใบขอซื้อ (PR not found)');
     }
 
     if (pr.status !== 'PENDING') {
       throw new PRValidationError(
         `สถานะใบขอซื้อไม่ถูกต้อง ต้องเป็น PENDING เท่านั้น (Invalid PR status, must be PENDING)`
-      )
+      );
     }
 
     const updatedPR = await tx.purchaseRequest.update({
@@ -386,10 +373,10 @@ export async function rejectPR(
           },
         },
       },
-    })
+    });
 
-    return updatedPR
-  })
+    return updatedPR;
+  });
 }
 
 /**
@@ -397,47 +384,47 @@ export async function rejectPR(
  * ตรวจสอบงบประมาณสำหรับใบขอซื้อ
  */
 export async function checkPRBudget(prId: string): Promise<{
-  sufficient: boolean
-  budget?: any
-  error?: string
+  sufficient: boolean;
+  budget?: any;
+  error?: string;
 }> {
   const pr = await prisma.purchaseRequest.findUnique({
     where: { id: prId },
     include: {
       budget: true,
     },
-  })
+  });
 
   if (!pr) {
-    return { sufficient: false, error: 'ไม่พบใบขอซื้อ (PR not found)' }
+    return { sufficient: false, error: 'ไม่พบใบขอซื้อ (PR not found)' };
   }
 
   if (!pr.budgetId) {
     // No budget specified, consider as sufficient
-    return { sufficient: true }
+    return { sufficient: true };
   }
 
   if (!pr.budget) {
-    return { sufficient: false, error: 'ไม่พบงบประมาณ (Budget not found)' }
+    return { sufficient: false, error: 'ไม่พบงบประมาณ (Budget not found)' };
   }
 
   if (pr.budget.status !== 'ACTIVE') {
     return {
       sufficient: false,
       error: `งบประมาณไม่อยู่ในสถานะใช้งาน (Budget status is ${pr.budget.status})`,
-    }
+    };
   }
 
-  const now = new Date()
+  const now = new Date();
   if (now < pr.budget.startDate || now > pr.budget.endDate) {
     return {
       sufficient: false,
       error: 'งบประมาณไม่อยู่ในช่วงเวลาที่กำหนด (Budget not in valid date range)',
-    }
+    };
   }
 
-  const remainingAmount = pr.budget.remainingAmount - pr.estimatedAmount
-  const sufficient = remainingAmount >= 0
+  const remainingAmount = pr.budget.remainingAmount - pr.estimatedAmount;
+  const sufficient = remainingAmount >= 0;
 
   return {
     sufficient,
@@ -445,7 +432,7 @@ export async function checkPRBudget(prId: string): Promise<{
     error: sufficient
       ? undefined
       : `งบประมาณคงเหลือไม่เพียงพอ: คงเหลือ ${pr.budget.remainingAmount / 100} บาท ต้องการ ${pr.estimatedAmount / 100} บาท`,
-  }
+  };
 }
 
 // ============================================
@@ -474,35 +461,33 @@ export async function convertPRToPO(
         },
         budget: true,
       },
-    })
+    });
 
     if (!pr) {
-      throw new PRValidationError('ไม่พบใบขอซื้อ (PR not found)')
+      throw new PRValidationError('ไม่พบใบขอซื้อ (PR not found)');
     }
 
     if (pr.status !== 'APPROVED') {
       throw new PRValidationError(
         `สถานะใบขอซื้อไม่ถูกต้อง ต้องเป็น APPROVED เท่านั้น (Invalid PR status, must be APPROVED)`
-      )
+      );
     }
 
     if (pr.purchaseOrderId) {
-      throw new PRValidationError(
-        'ใบขอซื้อนี้ถูกแปลงเป็น PO แล้ว (PR already converted to PO)'
-      )
+      throw new PRValidationError('ใบขอซื้อนี้ถูกแปลงเป็น PO แล้ว (PR already converted to PO)');
     }
 
     // Verify vendor exists
     const vendor = await tx.vendor.findUnique({
       where: { id: vendorId },
-    })
+    });
 
     if (!vendor) {
-      throw new PRValidationError('ไม่พบผู้ขาย (Vendor not found)')
+      throw new PRValidationError('ไม่พบผู้ขาย (Vendor not found)');
     }
 
     // Generate PO number
-    const orderNo = await generatePONumber()
+    const orderNo = await generatePONumber();
 
     // Create PO lines from PR lines
     const poLinesData = pr.lines.map((line, index) => ({
@@ -518,12 +503,12 @@ export async function convertPRToPO(
       amount: line.amount,
       specUrl: line.specUrl,
       notes: line.notes,
-    }))
+    }));
 
     // Calculate totals
-    const subtotal = pr.lines.reduce((sum, line) => sum + line.amount, 0)
-    const vatAmount = pr.lines.reduce((sum, line) => sum + line.vatAmount, 0)
-    const totalAmount = subtotal + vatAmount
+    const subtotal = pr.lines.reduce((sum, line) => sum + line.amount, 0);
+    const vatAmount = pr.lines.reduce((sum, line) => sum + line.vatAmount, 0);
+    const totalAmount = subtotal + vatAmount;
 
     // Create PO
     const po = await tx.purchaseOrder.create({
@@ -562,7 +547,7 @@ export async function convertPRToPO(
           },
         },
       },
-    })
+    });
 
     // Update PR status
     await tx.purchaseRequest.update({
@@ -572,10 +557,10 @@ export async function convertPRToPO(
         purchaseOrderId: po.id,
         updatedById: userId,
       },
-    })
+    });
 
-    return po
-  })
+    return po;
+  });
 }
 
 // ============================================
@@ -593,22 +578,22 @@ export async function submitPOToVendor(poId: string, userId?: string): Promise<a
       include: {
         lines: true,
       },
-    })
+    });
 
     if (!po) {
-      throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)')
+      throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)');
     }
 
     if (po.status !== 'DRAFT' && po.status !== 'PENDING') {
       throw new POWorkflowError(
         `สถานะใบสั่งซื้อไม่ถูกต้อง ต้องเป็น DRAFT หรือ PENDING เท่านั้น (Invalid PO status, must be DRAFT or PENDING)`
-      )
+      );
     }
 
     if (!po.lines || po.lines.length === 0) {
       throw new POWorkflowError(
         'ต้องมีรายการสินค้าอย่างน้อย 1 รายการ (Must have at least 1 line item)'
-      )
+      );
     }
 
     const updatedPO = await tx.purchaseOrder.update({
@@ -632,10 +617,10 @@ export async function submitPOToVendor(poId: string, userId?: string): Promise<a
           },
         },
       },
-    })
+    });
 
-    return updatedPO
-  })
+    return updatedPO;
+  });
 }
 
 /**
@@ -646,16 +631,16 @@ export async function confirmPOFromVendor(poId: string): Promise<any> {
   return await prisma.$transaction(async (tx) => {
     const po = await tx.purchaseOrder.findUnique({
       where: { id: poId },
-    })
+    });
 
     if (!po) {
-      throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)')
+      throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)');
     }
 
     if (po.status !== 'SENT') {
       throw new POWorkflowError(
         `สถานะใบสั่งซื้อไม่ถูกต้อง ต้องเป็น SENT เท่านั้น (Invalid PO status, must be SENT)`
-      )
+      );
     }
 
     const updatedPO = await tx.purchaseOrder.update({
@@ -674,33 +659,30 @@ export async function confirmPOFromVendor(poId: string): Promise<any> {
           },
         },
       },
-    })
+    });
 
-    return updatedPO
-  })
+    return updatedPO;
+  });
 }
 
 /**
  * Mark PO as Shipped
  * ทำเครื่องหมายใบสั่งซื้อว่าจัดส่งแล้ว
  */
-export async function markPOAsShipped(
-  poId: string,
-  trackingInfo?: any
-): Promise<any> {
+export async function markPOAsShipped(poId: string, trackingInfo?: any): Promise<any> {
   return await prisma.$transaction(async (tx) => {
     const po = await tx.purchaseOrder.findUnique({
       where: { id: poId },
-    })
+    });
 
     if (!po) {
-      throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)')
+      throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)');
     }
 
     if (po.status !== 'CONFIRMED') {
       throw new POWorkflowError(
         `สถานะใบสั่งซื้อไม่ถูกต้อง ต้องเป็น CONFIRMED เท่านั้น (Invalid PO status, must be CONFIRMED)`
-      )
+      );
     }
 
     const updatedPO = await tx.purchaseOrder.update({
@@ -722,10 +704,10 @@ export async function markPOAsShipped(
           },
         },
       },
-    })
+    });
 
-    return updatedPO
-  })
+    return updatedPO;
+  });
 }
 
 /**
@@ -747,44 +729,46 @@ export async function markPOAsReceived(
         vendor: true,
         purchaseRequest: true,
       },
-    })
+    });
 
     if (!po) {
-      throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)')
+      throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)');
     }
 
     if (po.status !== 'SHIPPED' && po.status !== 'CONFIRMED') {
       throw new POWorkflowError(
         `สถานะใบสั่งซื้อไม่ถูกต้อง ต้องเป็น SHIPPED หรือ CONFIRMED เท่านั้น (Invalid PO status, must be SHIPPED or CONFIRMED)`
-      )
+      );
     }
 
     // Build GRN lines from receivedItems
     const grnLines: Array<{
-      poLineId: string
-      productId: string | null
-      description: string
-      unit: string | null
-      qtyOrdered: number
-      qtyReceived: number
-      qtyRejected: number
-      unitCost: number
-      amount: number
-      notes: string | null
-    }> = []
+      poLineId: string;
+      productId: string | null;
+      description: string;
+      unit: string | null;
+      qtyOrdered: number;
+      qtyReceived: number;
+      qtyRejected: number;
+      unitCost: number;
+      amount: number;
+      notes: string | null;
+    }> = [];
 
-    let totalReceivedAmount = 0
+    let totalReceivedAmount = 0;
 
     for (const receivedItem of receivedItems) {
-      const line = po.lines.find((l) => l.id === receivedItem.lineId)
+      const line = po.lines.find((l) => l.id === receivedItem.lineId);
       if (!line) {
-        throw new POWorkflowError(`ไม่พบรายการสินค้า (Line item not found): ${receivedItem.lineId}`)
+        throw new POWorkflowError(
+          `ไม่พบรายการสินค้า (Line item not found): ${receivedItem.lineId}`
+        );
       }
 
       if (receivedItem.receivedQty > line.quantity - line.receivedQty) {
         throw new POWorkflowError(
           `จำนวนรับเกินกว่าที่สั่งซื้อ (Received quantity exceeds ordered quantity): ${line.description}`
-        )
+        );
       }
 
       // Calculate unit cost (after discount, in satang)
@@ -793,9 +777,9 @@ export async function markPOAsReceived(
         unitPrice: line.unitPrice,
         discount: line.discount,
         vatRate: line.vatRate,
-      })
-      const unitCostSatang = Math.round(calculation.afterDiscount / line.quantity)
-      const lineAmount = unitCostSatang * receivedItem.receivedQty
+      });
+      const unitCostSatang = Math.round(calculation.afterDiscount / line.quantity);
+      const lineAmount = unitCostSatang * receivedItem.receivedQty;
 
       grnLines.push({
         poLineId: line.id,
@@ -808,14 +792,14 @@ export async function markPOAsReceived(
         unitCost: unitCostSatang / 100,
         amount: lineAmount / 100,
         notes: receivedItem.notes ?? null,
-      })
+      });
 
-      totalReceivedAmount += lineAmount
+      totalReceivedAmount += lineAmount;
     }
 
     // Create GoodsReceiptNote
-    const grnNo = await generateDocNumber('GRN', 'GRN')
-    const today = new Date()
+    const grnNo = await generateDocNumber('GRN', 'GRN');
+    const today = new Date();
 
     const grn = await tx.goodsReceiptNote.create({
       data: {
@@ -827,7 +811,7 @@ export async function markPOAsReceived(
         warehouseId,
         receivedById: userId ?? null,
       },
-    })
+    });
 
     // Create GRN lines
     await tx.goodsReceiptNoteLine.createMany({
@@ -835,20 +819,20 @@ export async function markPOAsReceived(
         grnId: grn.id,
         ...l,
       })),
-    })
+    });
 
     // Create GR/IR journal entry: Dr Inventory (1140), Cr GR/IR Clearing (2160)
     if (totalReceivedAmount > 0) {
-      const inventoryAccount = await tx.chartOfAccount.findUnique({ where: { code: '1140' } })
-      const grirAccount = await tx.chartOfAccount.findUnique({ where: { code: '2160' } })
+      const inventoryAccount = await tx.chartOfAccount.findUnique({ where: { code: '1140' } });
+      const grirAccount = await tx.chartOfAccount.findUnique({ where: { code: '2160' } });
 
       if (!inventoryAccount || !grirAccount) {
         throw new POWorkflowError(
           'ไม่พบบัญชี Inventory (1140) หรือ GR/IR Clearing (2160) — กรุณาตรวจสอบ Chart of Accounts'
-        )
+        );
       }
 
-      const journalNo = await generateDocNumber('JOURNAL_ENTRY', 'JE')
+      const journalNo = await generateDocNumber('JOURNAL_ENTRY', 'JE');
       await tx.journalEntry.create({
         data: {
           entryNo: journalNo,
@@ -881,26 +865,26 @@ export async function markPOAsReceived(
             ],
           },
         },
-      })
+      });
     }
 
     // Update received quantities on PO lines
     for (const receivedItem of receivedItems) {
-      const line = po.lines.find((l) => l.id === receivedItem.lineId)
+      const line = po.lines.find((l) => l.id === receivedItem.lineId);
       await tx.purchaseOrderLine.update({
         where: { id: receivedItem.lineId },
         data: {
           receivedQty: { increment: receivedItem.receivedQty },
           notes: receivedItem.notes
             ? `${line?.notes || ''}\n${receivedItem.notes}`
-            : line?.notes ?? undefined,
+            : (line?.notes ?? undefined),
         },
-      })
+      });
     }
 
     // Check if all items received
-    const updatedLines = await tx.purchaseOrderLine.findMany({ where: { orderId: poId } })
-    const allReceived = updatedLines.every((line) => line.receivedQty >= line.quantity)
+    const updatedLines = await tx.purchaseOrderLine.findMany({ where: { orderId: poId } });
+    const allReceived = updatedLines.every((line) => line.receivedQty >= line.quantity);
 
     const updatedPO = await tx.purchaseOrder.update({
       where: { id: poId },
@@ -915,13 +899,13 @@ export async function markPOAsReceived(
         budget: true,
         lines: { include: { product: true } },
       },
-    })
+    });
 
     // Create stock movements for inventory updates
-    await createStockMovementFromPO(poId, warehouseId, receivedItems)
+    await createStockMovementFromPO(poId, warehouseId, receivedItems);
 
-    return updatedPO
-  })
+    return updatedPO;
+  });
 }
 
 /**
@@ -930,9 +914,7 @@ export async function markPOAsReceived(
  */
 export async function cancelPO(poId: string, reason: string, userId?: string): Promise<any> {
   if (!reason || reason.trim().length === 0) {
-    throw new POWorkflowError(
-      'ต้องระบุเหตุผลในการยกเลิก (Must specify cancellation reason)'
-    )
+    throw new POWorkflowError('ต้องระบุเหตุผลในการยกเลิก (Must specify cancellation reason)');
   }
 
   return await prisma.$transaction(async (tx) => {
@@ -941,20 +923,20 @@ export async function cancelPO(poId: string, reason: string, userId?: string): P
       include: {
         purchaseRequest: true,
       },
-    })
+    });
 
     if (!po) {
-      throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)')
+      throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)');
     }
 
     if (po.status === 'CANCELLED') {
-      throw new POWorkflowError('ใบสั่งซื้อถูกยกเลิกไปแล้ว (PO already cancelled)')
+      throw new POWorkflowError('ใบสั่งซื้อถูกยกเลิกไปแล้ว (PO already cancelled)');
     }
 
     if (po.status === 'RECEIVED' || po.status === 'CLOSED') {
       throw new POWorkflowError(
         'ไม่สามารถยกเลิกใบสั่งซื้อที่รับสินค้าแล้ว (Cannot cancel received PO)'
-      )
+      );
     }
 
     // Update PO status
@@ -974,18 +956,18 @@ export async function cancelPO(poId: string, reason: string, userId?: string): P
           },
         },
       },
-    })
+    });
 
     // Release budget if reserved
     if (po.budgetId && po.purchaseRequest) {
       const pr = await tx.purchaseRequest.findUnique({
         where: { id: po.purchaseRequestId! },
         include: { budget: true },
-      })
+      });
 
       if (pr && pr.budget) {
-        const newUsedAmount = pr.budget.usedAmount - pr.estimatedAmount
-        const newRemainingAmount = pr.budget.remainingAmount + pr.estimatedAmount
+        const newUsedAmount = pr.budget.usedAmount - pr.estimatedAmount;
+        const newRemainingAmount = pr.budget.remainingAmount + pr.estimatedAmount;
 
         await tx.departmentBudget.update({
           where: { id: po.budgetId },
@@ -993,12 +975,12 @@ export async function cancelPO(poId: string, reason: string, userId?: string): P
             usedAmount: newUsedAmount,
             remainingAmount: newRemainingAmount,
           },
-        })
+        });
       }
     }
 
-    return updatedPO
-  })
+    return updatedPO;
+  });
 }
 
 // ============================================
@@ -1015,13 +997,13 @@ export async function validateBudgetAvailability(
 ): Promise<BudgetValidationResult> {
   const budget = await prisma.departmentBudget.findUnique({
     where: { id: budgetId },
-  })
+  });
 
   if (!budget) {
     return {
       valid: false,
       error: 'ไม่พบงบประมาณ (Budget not found)',
-    }
+    };
   }
 
   if (budget.status !== 'ACTIVE') {
@@ -1029,20 +1011,20 @@ export async function validateBudgetAvailability(
       valid: false,
       budget,
       error: `งบประมาณไม่อยู่ในสถานะใช้งาน (Budget status is ${budget.status})`,
-    }
+    };
   }
 
-  const now = new Date()
+  const now = new Date();
   if (now < budget.startDate || now > budget.endDate) {
     return {
       valid: false,
       budget,
       error: 'งบประมาณไม่อยู่ในช่วงเวลาที่กำหนด (Budget not in valid date range)',
-    }
+    };
   }
 
-  const remainingAmount = budget.remainingAmount - amount
-  const valid = remainingAmount >= 0
+  const remainingAmount = budget.remainingAmount - amount;
+  const valid = remainingAmount >= 0;
 
   return {
     valid,
@@ -1050,7 +1032,7 @@ export async function validateBudgetAvailability(
     error: valid
       ? undefined
       : `งบประมาณคงเหลือไม่เพียงพอ: คงเหลือ ${budget.remainingAmount / 100} บาท ต้องการ ${amount / 100} บาท`,
-  }
+  };
 }
 
 // ============================================
@@ -1064,17 +1046,17 @@ export async function validateBudgetAvailability(
  * CRITICAL: All inputs are in Satang, all outputs are in Satang
  */
 export function calculatePOLine(line: {
-  quantity: number
-  unitPrice: number
-  discount: number
-  vatRate: number
+  quantity: number;
+  unitPrice: number;
+  discount: number;
+  vatRate: number;
 }): POLineCalculation {
   // All inputs should be in Satang
-  const subtotal = line.quantity * line.unitPrice
-  const discountAmount = calculatePercent(subtotal, line.discount)
-  const afterDiscount = subtotal - discountAmount
-  const vatAmount = calculatePercent(afterDiscount, line.vatRate)
-  const amount = afterDiscount + vatAmount
+  const subtotal = line.quantity * line.unitPrice;
+  const discountAmount = calculatePercent(subtotal, line.discount);
+  const afterDiscount = subtotal - discountAmount;
+  const vatAmount = calculatePercent(afterDiscount, line.vatRate);
+  const amount = afterDiscount + vatAmount;
 
   return {
     subtotal: Math.round(subtotal),
@@ -1082,7 +1064,7 @@ export function calculatePOLine(line: {
     afterDiscount: Math.round(afterDiscount),
     vatAmount: Math.round(vatAmount),
     amount: Math.round(amount),
-  }
+  };
 }
 
 /**
@@ -1095,15 +1077,15 @@ export function calculatePOTotal(
   lines: Array<{ amount: number }>,
   discountAmount: number
 ): POTotalCalculation {
-  const subtotal = lines.reduce((sum, line) => sum + line.amount, 0)
-  const vatAmount = calculatePercent(subtotal, 7) // 7% VAT
-  const totalAmount = subtotal + vatAmount - discountAmount
+  const subtotal = lines.reduce((sum, line) => sum + line.amount, 0);
+  const vatAmount = calculatePercent(subtotal, 7); // 7% VAT
+  const totalAmount = subtotal + vatAmount - discountAmount;
 
   return {
     subtotal: Math.round(subtotal),
     vatAmount: Math.round(vatAmount),
     totalAmount: Math.round(totalAmount),
-  }
+  };
 }
 
 // ============================================
@@ -1119,7 +1101,7 @@ export async function createStockMovementFromPO(
   warehouseId: string,
   receivedItems: ReceivedItem[]
 ): Promise<void> {
-  const { recordStockMovement } = await import('./inventory-service')
+  const { recordStockMovement } = await import('./inventory-service');
 
   const po = await prisma.purchaseOrder.findUnique({
     where: { id: poId },
@@ -1131,15 +1113,15 @@ export async function createStockMovementFromPO(
       },
       vendor: true,
     },
-  })
+  });
 
   if (!po) {
-    throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)')
+    throw new POWorkflowError('ไม่พบใบสั่งซื้อ (PO not found)');
   }
 
   for (const receivedItem of receivedItems) {
-    const line = po.lines.find((l) => l.id === receivedItem.lineId)
-    if (!line || !line.productId) continue
+    const line = po.lines.find((l) => l.id === receivedItem.lineId);
+    if (!line || !line.productId) continue;
 
     // Calculate weighted average cost
     const calculation = calculatePOLine({
@@ -1147,9 +1129,9 @@ export async function createStockMovementFromPO(
       unitPrice: line.unitPrice,
       discount: line.discount,
       vatRate: line.vatRate,
-    })
+    });
 
-    const unitCost = calculation.afterDiscount / line.quantity
+    const unitCost = calculation.afterDiscount / line.quantity;
 
     // Create stock movement
     await recordStockMovement({
@@ -1170,7 +1152,7 @@ export async function createStockMovementFromPO(
         lineId: line.id,
         description: line.description,
       },
-    })
+    });
   }
 }
 
@@ -1193,9 +1175,9 @@ export function getPOStatusInfo(status: string): POStatusInfo {
     RECEIVED: ['CLOSED'],
     CLOSED: [],
     CANCELLED: [],
-  }
+  };
 
-  const allowedTransitions = transitions[status] || []
+  const allowedTransitions = transitions[status] || [];
 
   return {
     canSubmit: ['DRAFT', 'PENDING', 'APPROVED'].includes(status),
@@ -1204,7 +1186,7 @@ export function getPOStatusInfo(status: string): POStatusInfo {
     canReceive: ['SHIPPED', 'CONFIRMED'].includes(status),
     canCancel: !['CLOSED', 'CANCELLED', 'RECEIVED'].includes(status),
     allowedTransitions,
-  }
+  };
 }
 
 // ============================================
@@ -1216,32 +1198,32 @@ export function getPOStatusInfo(status: string): POStatusInfo {
  * รายงานใบขอซื้อ
  */
 export async function getPRReport(filters: {
-  startDate?: Date
-  endDate?: Date
-  departmentId?: string
-  status?: string
-  userId?: string
+  startDate?: Date;
+  endDate?: Date;
+  departmentId?: string;
+  status?: string;
+  userId?: string;
 }) {
   const where: any = {
     deletedAt: null,
-  }
+  };
 
   if (filters.startDate || filters.endDate) {
-    where.requestDate = {}
-    if (filters.startDate) where.requestDate.gte = filters.startDate
-    if (filters.endDate) where.requestDate.lte = filters.endDate
+    where.requestDate = {};
+    if (filters.startDate) where.requestDate.gte = filters.startDate;
+    if (filters.endDate) where.requestDate.lte = filters.endDate;
   }
 
   if (filters.departmentId) {
-    where.departmentId = filters.departmentId
+    where.departmentId = filters.departmentId;
   }
 
   if (filters.status) {
-    where.status = filters.status
+    where.status = filters.status;
   }
 
   if (filters.userId) {
-    where.requestedBy = filters.userId
+    where.requestedBy = filters.userId;
   }
 
   const prs = await prisma.purchaseRequest.findMany({
@@ -1279,12 +1261,9 @@ export async function getPRReport(filters: {
     orderBy: {
       requestDate: 'desc',
     },
-  })
+  });
 
-  const totalEstimatedAmount = prs.reduce(
-    (sum, pr) => sum + pr.estimatedAmount,
-    0
-  )
+  const totalEstimatedAmount = prs.reduce((sum, pr) => sum + pr.estimatedAmount, 0);
 
   return {
     prs,
@@ -1293,13 +1272,13 @@ export async function getPRReport(filters: {
       totalEstimatedAmount,
       statusBreakdown: prs.reduce(
         (acc, pr) => {
-          acc[pr.status] = (acc[pr.status] || 0) + 1
-          return acc
+          acc[pr.status] = (acc[pr.status] || 0) + 1;
+          return acc;
         },
         {} as Record<string, number>
       ),
     },
-  }
+  };
 }
 
 /**
@@ -1307,25 +1286,25 @@ export async function getPRReport(filters: {
  * รายงานใบสั่งซื้อ
  */
 export async function getPOReport(filters: {
-  startDate?: Date
-  endDate?: Date
-  vendorId?: string
-  status?: string
+  startDate?: Date;
+  endDate?: Date;
+  vendorId?: string;
+  status?: string;
 }) {
-  const where: any = {}
+  const where: any = {};
 
   if (filters.startDate || filters.endDate) {
-    where.orderDate = {}
-    if (filters.startDate) where.orderDate.gte = filters.startDate
-    if (filters.endDate) where.orderDate.lte = filters.endDate
+    where.orderDate = {};
+    if (filters.startDate) where.orderDate.gte = filters.startDate;
+    if (filters.endDate) where.orderDate.lte = filters.endDate;
   }
 
   if (filters.vendorId) {
-    where.vendorId = filters.vendorId
+    where.vendorId = filters.vendorId;
   }
 
   if (filters.status) {
-    where.status = filters.status
+    where.status = filters.status;
   }
 
   const pos = await prisma.purchaseOrder.findMany({
@@ -1348,10 +1327,10 @@ export async function getPOReport(filters: {
     orderBy: {
       orderDate: 'desc',
     },
-  })
+  });
 
-  const totalAmount = pos.reduce((sum, po) => sum + po.totalAmount, 0)
-  const totalVATAmount = pos.reduce((sum, po) => sum + po.vatAmount, 0)
+  const totalAmount = pos.reduce((sum, po) => sum + po.totalAmount, 0);
+  const totalVATAmount = pos.reduce((sum, po) => sum + po.vatAmount, 0);
 
   return {
     pos,
@@ -1361,13 +1340,13 @@ export async function getPOReport(filters: {
       totalVATAmount,
       statusBreakdown: pos.reduce(
         (acc, po) => {
-          acc[po.status] = (acc[po.status] || 0) + 1
-          return acc
+          acc[po.status] = (acc[po.status] || 0) + 1;
+          return acc;
         },
         {} as Record<string, number>
       ),
     },
-  }
+  };
 }
 
 /**
@@ -1378,10 +1357,10 @@ export async function getPendingApprovals(departmentId?: string) {
   const where: any = {
     status: 'PENDING',
     deletedAt: null,
-  }
+  };
 
   if (departmentId) {
-    where.departmentId = departmentId
+    where.departmentId = departmentId;
   }
 
   const pendingPRs = await prisma.purchaseRequest.findMany({
@@ -1405,9 +1384,9 @@ export async function getPendingApprovals(departmentId?: string) {
     orderBy: {
       requestDate: 'asc',
     },
-  })
+  });
 
-  return pendingPRs
+  return pendingPRs;
 }
 
 /**
@@ -1415,7 +1394,7 @@ export async function getPendingApprovals(departmentId?: string) {
  * ดูใบขอซื้อที่เกินกำหนด
  */
 export async function getOverduePRs() {
-  const now = new Date()
+  const now = new Date();
 
   const overduePRs = await prisma.purchaseRequest.findMany({
     where: {
@@ -1446,7 +1425,7 @@ export async function getOverduePRs() {
     orderBy: {
       requiredDate: 'asc',
     },
-  })
+  });
 
-  return overduePRs
+  return overduePRs;
 }

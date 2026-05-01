@@ -1,18 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 // GET /api/user/preferences - Get user preferences
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     let preferences = await prisma.userPreference.findUnique({
       where: { userId: session.user.id },
-    })
+    });
 
     // Create default preferences if not exists
     if (!preferences) {
@@ -28,28 +28,25 @@ export async function GET(req: NextRequest) {
           emailNotifications: true,
           pushNotifications: true,
         },
-      })
+      });
     }
 
-    return NextResponse.json({ success: true, preferences })
+    return NextResponse.json({ success: true, preferences });
   } catch (error) {
-    console.error('Error fetching user preferences:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch user preferences' },
-      { status: 500 }
-    )
+    console.error('Error fetching user preferences:', error);
+    return NextResponse.json({ error: 'Failed to fetch user preferences' }, { status: 500 });
   }
 }
 
 // PUT /api/user/preferences - Update user preferences
 export async function PUT(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await req.json()
+    const body = await req.json();
     const {
       theme,
       density,
@@ -60,7 +57,7 @@ export async function PUT(req: NextRequest) {
       dashboardLayout,
       emailNotifications,
       pushNotifications,
-    } = body
+    } = body;
 
     const preferences = await prisma.userPreference.upsert({
       where: { userId: session.user.id },
@@ -87,14 +84,11 @@ export async function PUT(req: NextRequest) {
         emailNotifications: emailNotifications !== undefined ? emailNotifications : true,
         pushNotifications: pushNotifications !== undefined ? pushNotifications : true,
       },
-    })
+    });
 
-    return NextResponse.json({ success: true, preferences })
+    return NextResponse.json({ success: true, preferences });
   } catch (error) {
-    console.error('Error updating user preferences:', error)
-    return NextResponse.json(
-      { error: 'Failed to update user preferences' },
-      { status: 500 }
-    )
+    console.error('Error updating user preferences:', error);
+    return NextResponse.json({ error: 'Failed to update user preferences' }, { status: 500 });
   }
 }

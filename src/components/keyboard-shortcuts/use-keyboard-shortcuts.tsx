@@ -1,27 +1,27 @@
-'use client'
+'use client';
 
-import { useEffect, useCallback, useRef, useState } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react';
 
 export interface KeyboardShortcut {
-  key: string
-  ctrl?: boolean
-  shift?: boolean
-  alt?: boolean
-  meta?: boolean
-  description: string
-  category?: string
-  action: (event: KeyboardEvent) => void
-  preventDefault?: boolean
+  key: string;
+  ctrl?: boolean;
+  shift?: boolean;
+  alt?: boolean;
+  meta?: boolean;
+  description: string;
+  category?: string;
+  action: (event: KeyboardEvent) => void;
+  preventDefault?: boolean;
 }
 
 export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
-  const shortcutsRef = useRef(shortcuts)
+  const shortcutsRef = useRef(shortcuts);
 
   useEffect(() => {
-    shortcutsRef.current = shortcuts
+    shortcutsRef.current = shortcuts;
     const handleKeyDown = (event: KeyboardEvent) => {
       // Don't trigger shortcuts when user is typing in an input
-      const target = event.target as HTMLElement
+      const target = event.target as HTMLElement;
       if (
         target.tagName === 'INPUT' ||
         target.tagName === 'TEXTAREA' ||
@@ -30,30 +30,30 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
       ) {
         // Allow Escape key even in inputs
         if (event.key !== 'Escape') {
-          return
+          return;
         }
       }
 
       for (const shortcut of shortcutsRef.current) {
-        const keyMatch = event.key.toLowerCase() === shortcut.key.toLowerCase()
-        const ctrlMatch = !!shortcut.ctrl === event.ctrlKey
-        const shiftMatch = !!shortcut.shift === event.shiftKey
-        const altMatch = !!shortcut.alt === event.altKey
-        const metaMatch = !!shortcut.meta === event.metaKey
+        const keyMatch = event.key.toLowerCase() === shortcut.key.toLowerCase();
+        const ctrlMatch = !!shortcut.ctrl === event.ctrlKey;
+        const shiftMatch = !!shortcut.shift === event.shiftKey;
+        const altMatch = !!shortcut.alt === event.altKey;
+        const metaMatch = !!shortcut.meta === event.metaKey;
 
         if (keyMatch && ctrlMatch && shiftMatch && altMatch && metaMatch) {
           if (shortcut.preventDefault !== false) {
-            event.preventDefault()
+            event.preventDefault();
           }
-          shortcut.action(event)
-          break
+          shortcut.action(event);
+          break;
         }
       }
-    }
+    };
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 }
 
 // Common shortcuts for the ERP
@@ -64,62 +64,65 @@ export const commonShortcuts = {
   close: { key: 'Escape', description: 'ปิด/ยกเลิก' },
   search: { key: 'k', ctrl: true, description: 'ค้นหา' },
   help: { key: '?', description: 'แสดงคีย์ลัด' },
-}
+};
 
 // Hook for arrow key navigation in tables
-export function useTableNavigation(itemCount: number, options?: {
-  onSelect?: (index: number) => void
-  onActivate?: (index: number) => void
-}) {
-  const [focusedIndex, setFocusedIndex] = useState<number>(-1)
-  const containerRef = useRef<HTMLElement>(null)
+export function useTableNavigation(
+  itemCount: number,
+  options?: {
+    onSelect?: (index: number) => void;
+    onActivate?: (index: number) => void;
+  }
+) {
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const containerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
+    const container = containerRef.current;
+    if (!container) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       switch (event.key) {
         case 'ArrowDown':
-          event.preventDefault()
-          setFocusedIndex(prev => {
-            const next = Math.min(prev + 1, itemCount - 1)
-            options?.onSelect?.(next)
-            return next
-          })
-          break
+          event.preventDefault();
+          setFocusedIndex((prev) => {
+            const next = Math.min(prev + 1, itemCount - 1);
+            options?.onSelect?.(next);
+            return next;
+          });
+          break;
         case 'ArrowUp':
-          event.preventDefault()
-          setFocusedIndex(prev => {
-            const next = Math.max(prev - 1, 0)
-            options?.onSelect?.(next)
-            return next
-          })
-          break
+          event.preventDefault();
+          setFocusedIndex((prev) => {
+            const next = Math.max(prev - 1, 0);
+            options?.onSelect?.(next);
+            return next;
+          });
+          break;
         case 'Enter':
           if (focusedIndex >= 0) {
-            event.preventDefault()
-            options?.onActivate?.(focusedIndex)
+            event.preventDefault();
+            options?.onActivate?.(focusedIndex);
           }
-          break
+          break;
         case 'Home':
-          event.preventDefault()
-          setFocusedIndex(0)
-          options?.onSelect?.(0)
-          break
+          event.preventDefault();
+          setFocusedIndex(0);
+          options?.onSelect?.(0);
+          break;
         case 'End':
-          event.preventDefault()
-          setFocusedIndex(itemCount - 1)
-          options?.onSelect?.(itemCount - 1)
-          break
+          event.preventDefault();
+          setFocusedIndex(itemCount - 1);
+          options?.onSelect?.(itemCount - 1);
+          break;
       }
-    }
+    };
 
-    container.addEventListener('keydown', handleKeyDown)
-    return () => container.removeEventListener('keydown', handleKeyDown)
-  }, [itemCount, focusedIndex, options])
+    container.addEventListener('keydown', handleKeyDown);
+    return () => container.removeEventListener('keydown', handleKeyDown);
+  }, [itemCount, focusedIndex, options]);
 
-  return { focusedIndex, setFocusedIndex, containerRef }
+  return { focusedIndex, setFocusedIndex, containerRef };
 }
 
 export function KeyboardShortcutsHelp({
@@ -127,49 +130,55 @@ export function KeyboardShortcutsHelp({
   onClose,
   shortcuts,
 }: {
-  isOpen: boolean
-  onClose: () => void
-  shortcuts: KeyboardShortcut[]
+  isOpen: boolean;
+  onClose: () => void;
+  shortcuts: KeyboardShortcut[];
 }) {
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   // Group shortcuts by category
-  const grouped = shortcuts.reduce((acc, shortcut) => {
-    const category = shortcut.category || 'ทั่วไป'
-    if (!acc[category]) acc[category] = []
-    acc[category].push(shortcut)
-    return acc
-  }, {} as Record<string, KeyboardShortcut[]>)
+  const grouped = shortcuts.reduce(
+    (acc, shortcut) => {
+      const category = shortcut.category || 'ทั่วไป';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(shortcut);
+      return acc;
+    },
+    {} as Record<string, KeyboardShortcut[]>
+  );
 
   const formatKey = (shortcut: KeyboardShortcut) => {
-    const keys: string[] = []
-    if (shortcut.ctrl) keys.push('Ctrl')
-    if (shortcut.alt) keys.push('Alt')
-    if (shortcut.shift) keys.push('Shift')
-    if (shortcut.meta) keys.push('⌘')
-    keys.push(shortcut.key.length === 1 ? shortcut.key.toUpperCase() : shortcut.key)
-    return keys.join(' + ')
-  }
+    const keys: string[] = [];
+    if (shortcut.ctrl) keys.push('Ctrl');
+    if (shortcut.alt) keys.push('Alt');
+    if (shortcut.shift) keys.push('Shift');
+    if (shortcut.meta) keys.push('⌘');
+    keys.push(shortcut.key.length === 1 ? shortcut.key.toUpperCase() : shortcut.key);
+    return keys.join(' + ');
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
       <div
-        className="bg-background rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[80vh] overflow-auto"
+        className="mx-4 max-h-[80vh] w-full max-w-2xl overflow-auto rounded-lg bg-background shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
-          <h2 className="text-xl font-bold mb-4">คีย์ลัดแป้นพิมพ์</h2>
+          <h2 className="mb-4 text-xl font-bold">คีย์ลัดแป้นพิมพ์</h2>
           <div className="space-y-6">
             {Object.entries(grouped).map(([category, items]) => (
               <div key={category}>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-2">
+                <h3 className="mb-2 text-sm font-semibold uppercase text-muted-foreground">
                   {category}
                 </h3>
                 <div className="space-y-2">
                   {items.map((shortcut, idx) => (
                     <div key={idx} className="flex items-center justify-between py-1">
                       <span className="text-sm">{shortcut.description}</span>
-                      <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono border">
+                      <kbd className="rounded border bg-muted px-2 py-1 font-mono text-xs">
                         {formatKey(shortcut)}
                       </kbd>
                     </div>
@@ -178,10 +187,10 @@ export function KeyboardShortcutsHelp({
               </div>
             ))}
           </div>
-          <div className="mt-6 pt-4 border-t">
+          <div className="mt-6 border-t pt-4">
             <button
               onClick={onClose}
-              className="w-full py-2 px-4 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
+              className="w-full rounded bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
             >
               ปิด (Esc)
             </button>
@@ -189,5 +198,5 @@ export function KeyboardShortcutsHelp({
         </div>
       </div>
     </div>
-  )
+  );
 }

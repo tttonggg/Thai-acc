@@ -1,39 +1,39 @@
-'use client'
+'use client';
 
-import { useRef, useState, useCallback } from 'react'
-import { useVirtualizer } from '@tanstack/react-virtual'
-import { cn } from '@/lib/utils'
-import { Checkbox } from '@/components/ui/checkbox'
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { useRef, useState, useCallback } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { cn } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface Column<T> {
-  key: string
-  header: string
-  width?: number
-  minWidth?: number
-  maxWidth?: number
-  sortable?: boolean
-  align?: 'left' | 'center' | 'right'
-  formatter?: (value: unknown, row: T) => React.ReactNode
+  key: string;
+  header: string;
+  width?: number;
+  minWidth?: number;
+  maxWidth?: number;
+  sortable?: boolean;
+  align?: 'left' | 'center' | 'right';
+  formatter?: (value: unknown, row: T) => React.ReactNode;
 }
 
 interface VirtualTableProps<T> {
-  data: T[]
-  columns: Column<T>[]
-  keyExtractor: (row: T) => string
-  rowHeight?: number
-  headerHeight?: number
-  maxHeight?: number
-  selectable?: boolean
-  selectedIds?: string[]
-  onSelect?: (ids: string[]) => void
-  onRowClick?: (row: T) => void
-  onSort?: (key: string, direction: 'asc' | 'desc') => void
-  sortKey?: string
-  sortDirection?: 'asc' | 'desc'
-  emptyMessage?: string
-  className?: string
-  overscan?: number
+  data: T[];
+  columns: Column<T>[];
+  keyExtractor: (row: T) => string;
+  rowHeight?: number;
+  headerHeight?: number;
+  maxHeight?: number;
+  selectable?: boolean;
+  selectedIds?: string[];
+  onSelect?: (ids: string[]) => void;
+  onRowClick?: (row: T) => void;
+  onSort?: (key: string, direction: 'asc' | 'desc') => void;
+  sortKey?: string;
+  sortDirection?: 'asc' | 'desc';
+  emptyMessage?: string;
+  className?: string;
+  overscan?: number;
 }
 
 export function VirtualTable<T>({
@@ -54,8 +54,8 @@ export function VirtualTable<T>({
   className,
   overscan = 5,
 }: VirtualTableProps<T>) {
-  const parentRef = useRef<HTMLDivElement>(null)
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null)
+  const parentRef = useRef<HTMLDivElement>(null);
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
   /* eslint-disable-next-line react-hooks/incompatible-library */
   const virtualizer = useVirtualizer({
@@ -63,62 +63,79 @@ export function VirtualTable<T>({
     getScrollElement: () => parentRef.current,
     estimateSize: () => rowHeight,
     overscan,
-  })
+  });
 
-  const allSelected = data.length > 0 && data.every(row => selectedIds.includes(keyExtractor(row)))
-  const someSelected = selectedIds.length > 0 && !allSelected
+  const allSelected =
+    data.length > 0 && data.every((row) => selectedIds.includes(keyExtractor(row)));
+  const someSelected = selectedIds.length > 0 && !allSelected;
 
   const handleSelectAll = useCallback(() => {
-    if (!onSelect) return
+    if (!onSelect) return;
     if (allSelected) {
-      onSelect([])
+      onSelect([]);
     } else {
-      onSelect(data.map(row => keyExtractor(row)))
+      onSelect(data.map((row) => keyExtractor(row)));
     }
-  }, [allSelected, data, keyExtractor, onSelect])
+  }, [allSelected, data, keyExtractor, onSelect]);
 
-  const handleSelectRow = useCallback((id: string, checked: boolean) => {
-    if (!onSelect) return
-    if (checked) {
-      onSelect([...selectedIds, id])
-    } else {
-      onSelect(selectedIds.filter(sid => sid !== id))
-    }
-  }, [onSelect, selectedIds])
+  const handleSelectRow = useCallback(
+    (id: string, checked: boolean) => {
+      if (!onSelect) return;
+      if (checked) {
+        onSelect([...selectedIds, id]);
+      } else {
+        onSelect(selectedIds.filter((sid) => sid !== id));
+      }
+    },
+    [onSelect, selectedIds]
+  );
 
-  const handleSort = useCallback((column: Column<T>) => {
-    if (!column.sortable || !onSort) return
-    const newDirection = sortKey === column.key && sortDirection === 'asc' ? 'desc' : 'asc'
-    onSort(column.key, newDirection)
-  }, [onSort, sortKey, sortDirection])
+  const handleSort = useCallback(
+    (column: Column<T>) => {
+      if (!column.sortable || !onSort) return;
+      const newDirection = sortKey === column.key && sortDirection === 'asc' ? 'desc' : 'asc';
+      onSort(column.key, newDirection);
+    },
+    [onSort, sortKey, sortDirection]
+  );
 
-  const virtualRows = virtualizer.getVirtualItems()
+  const virtualRows = virtualizer.getVirtualItems();
 
   if (data.length === 0) {
     return (
-      <div className={cn("flex items-center justify-center h-64 border rounded-lg bg-muted/50", className)}>
+      <div
+        className={cn(
+          'flex h-64 items-center justify-center rounded-lg border bg-muted/50',
+          className
+        )}
+      >
         <p className="text-muted-foreground">{emptyMessage}</p>
       </div>
-    )
+    );
   }
 
   return (
     <div
       ref={parentRef}
-      className={cn("overflow-auto border rounded-lg", className)}
+      className={cn('overflow-auto rounded-lg border', className)}
       style={{ maxHeight }}
     >
-      <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+      <div
+        style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}
+      >
         {/* Header */}
         <div
-          className="sticky top-0 z-10 flex bg-muted border-b font-medium text-sm"
+          className="sticky top-0 z-10 flex border-b bg-muted text-sm font-medium"
           style={{ height: headerHeight }}
         >
           {selectable && (
-            <div className="flex items-center justify-center px-4 border-r bg-muted" style={{ width: 48 }}>
+            <div
+              className="flex items-center justify-center border-r bg-muted px-4"
+              style={{ width: 48 }}
+            >
               <Checkbox
                 checked={allSelected}
-                data-state={someSelected ? "indeterminate" : allSelected ? "checked" : "unchecked"}
+                data-state={someSelected ? 'indeterminate' : allSelected ? 'checked' : 'unchecked'}
                 onCheckedChange={handleSelectAll}
                 aria-label="เลือกทั้งหมด"
               />
@@ -128,14 +145,19 @@ export function VirtualTable<T>({
             <div
               key={column.key}
               className={cn(
-                "flex items-center px-4 border-r last:border-r-0 bg-muted cursor-pointer hover:bg-muted/80 transition-colors",
-                column.sortable && "cursor-pointer select-none"
+                'flex cursor-pointer items-center border-r bg-muted px-4 transition-colors last:border-r-0 hover:bg-muted/80',
+                column.sortable && 'cursor-pointer select-none'
               )}
               style={{
                 width: column.width || 150,
                 minWidth: column.minWidth,
                 maxWidth: column.maxWidth,
-                justifyContent: column.align === 'center' ? 'center' : column.align === 'right' ? 'flex-end' : 'flex-start',
+                justifyContent:
+                  column.align === 'center'
+                    ? 'center'
+                    : column.align === 'right'
+                      ? 'flex-end'
+                      : 'flex-start',
               }}
               onClick={() => handleSort(column)}
             >
@@ -144,12 +166,12 @@ export function VirtualTable<T>({
                 <span className="ml-2">
                   {sortKey === column.key ? (
                     sortDirection === 'asc' ? (
-                      <ArrowUp className="w-4 h-4" />
+                      <ArrowUp className="h-4 w-4" />
                     ) : (
-                      <ArrowDown className="w-4 h-4" />
+                      <ArrowDown className="h-4 w-4" />
                     )
                   ) : (
-                    <ArrowUpDown className="w-4 h-4 text-muted-foreground/50" />
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground/50" />
                   )}
                 </span>
               )}
@@ -159,10 +181,10 @@ export function VirtualTable<T>({
 
         {/* Virtual Rows */}
         {virtualRows.map((virtualRow) => {
-          const row = data[virtualRow.index]
-          const rowId = keyExtractor(row)
-          const isSelected = selectedIds.includes(rowId)
-          const isHovered = hoveredRow === rowId
+          const row = data[virtualRow.index];
+          const rowId = keyExtractor(row);
+          const isSelected = selectedIds.includes(rowId);
+          const isHovered = hoveredRow === rowId;
 
           return (
             <div
@@ -170,10 +192,10 @@ export function VirtualTable<T>({
               data-index={virtualRow.index}
               ref={virtualizer.measureElement}
               className={cn(
-                "flex absolute left-0 w-full border-b last:border-b-0 transition-colors",
-                isSelected && "bg-primary/10",
-                isHovered && !isSelected && "bg-muted/50",
-                onRowClick && "cursor-pointer"
+                'absolute left-0 flex w-full border-b transition-colors last:border-b-0',
+                isSelected && 'bg-primary/10',
+                isHovered && !isSelected && 'bg-muted/50',
+                onRowClick && 'cursor-pointer'
               )}
               style={{
                 height: `${virtualRow.size}px`,
@@ -185,7 +207,7 @@ export function VirtualTable<T>({
             >
               {selectable && (
                 <div
-                  className="flex items-center justify-center px-4 border-r"
+                  className="flex items-center justify-center border-r px-4"
                   style={{ width: 48 }}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -197,14 +219,14 @@ export function VirtualTable<T>({
                 </div>
               )}
               {columns.map((column) => {
-                const value = (row as Record<string, unknown>)[column.key]
+                const value = (row as Record<string, unknown>)[column.key];
                 return (
                   <div
                     key={column.key}
                     className={cn(
-                      "flex items-center px-4 border-r last:border-r-0 overflow-hidden",
-                      column.align === 'center' && "justify-center",
-                      column.align === 'right' && "justify-end"
+                      'flex items-center overflow-hidden border-r px-4 last:border-r-0',
+                      column.align === 'center' && 'justify-center',
+                      column.align === 'right' && 'justify-end'
                     )}
                     style={{
                       width: column.width || 150,
@@ -213,24 +235,22 @@ export function VirtualTable<T>({
                     }}
                   >
                     <span className="truncate">
-                      {column.formatter
-                        ? column.formatter(value, row)
-                        : value as React.ReactNode}
+                      {column.formatter ? column.formatter(value, row) : (value as React.ReactNode)}
                     </span>
                   </div>
-                )
+                );
               })}
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
 
 // Hook for using virtual scroll with large lists
 export function useVirtualList<T>(items: T[], options?: { overscan?: number }) {
-  const parentRef = useRef<HTMLDivElement>(null)
+  const parentRef = useRef<HTMLDivElement>(null);
 
   /* eslint-disable-next-line react-hooks/incompatible-library */
   const virtualizer = useVirtualizer({
@@ -238,14 +258,14 @@ export function useVirtualList<T>(items: T[], options?: { overscan?: number }) {
     getScrollElement: () => parentRef.current,
     estimateSize: () => 48,
     overscan: options?.overscan ?? 5,
-  })
+  });
 
   return {
     parentRef,
     virtualizer,
     virtualItems: virtualizer.getVirtualItems(),
     totalSize: virtualizer.getTotalSize(),
-  }
+  };
 }
 
-export type { Column as VirtualTableColumn }
+export type { Column as VirtualTableColumn };

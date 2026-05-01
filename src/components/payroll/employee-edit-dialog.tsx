@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 // ============================================
 // 👥 Employee Edit Dialog
@@ -6,38 +6,44 @@
 // Create/Edit employee with validation
 // ============================================
 
-import { useState, useEffect } from 'react'
-import { User, X } from 'lucide-react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useToast } from '@/hooks/use-toast'
+import { useState, useEffect } from 'react';
+import { User, X } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
-const fc = (n: number) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 0 }).format(n)
+const fc = (n: number) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 0 }).format(n);
 
 interface Employee {
-  id: string
-  employeeCode: string
-  firstName: string
-  lastName: string
-  position: string | null
-  department: string | null
-  baseSalary: number
-  hireDate: string
-  taxId: string | null
-  socialSecurityNo: string | null
-  bankAccountNo: string | null
-  bankName: string | null
-  isActive: boolean
+  id: string;
+  employeeCode: string;
+  firstName: string;
+  lastName: string;
+  position: string | null;
+  department: string | null;
+  baseSalary: number;
+  hireDate: string;
+  taxId: string | null;
+  socialSecurityNo: string | null;
+  bankAccountNo: string | null;
+  bankName: string | null;
+  isActive: boolean;
 }
 
 interface EmployeeEditDialogProps {
-  open: boolean
-  onClose: () => void
-  onSuccess: () => void
-  employee?: Employee | null
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  employee?: Employee | null;
 }
 
 const EMPTY_FORM = {
@@ -53,13 +59,18 @@ const EMPTY_FORM = {
   bankAccountNo: '',
   bankName: '',
   isActive: 'true',
-}
+};
 
-export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: EmployeeEditDialogProps) {
-  const [form, setForm] = useState(EMPTY_FORM)
-  const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
-  const isEdit = !!employee
+export function EmployeeEditDialog({
+  open,
+  onClose,
+  onSuccess,
+  employee,
+}: EmployeeEditDialogProps) {
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const isEdit = !!employee;
 
   useEffect(() => {
     if (open) {
@@ -77,31 +88,37 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
           bankAccountNo: employee.bankAccountNo || '',
           bankName: employee.bankName || '',
           isActive: String(employee.isActive !== false),
-        })
+        });
       } else {
-        setForm(EMPTY_FORM)
+        setForm(EMPTY_FORM);
       }
     }
-  }, [open, employee])
+  }, [open, employee]);
 
   const handleSubmit = async () => {
     // Validation
-    if (!form.employeeCode || !form.firstName || !form.lastName || !form.hireDate || !form.baseSalary) {
-      toast({ title: 'กรุณากรอกข้อมูลให้ครบถ้วน', variant: 'destructive' })
-      return
+    if (
+      !form.employeeCode ||
+      !form.firstName ||
+      !form.lastName ||
+      !form.hireDate ||
+      !form.baseSalary
+    ) {
+      toast({ title: 'กรุณากรอกข้อมูลให้ครบถ้วน', variant: 'destructive' });
+      return;
     }
 
-    const baseSalary = parseFloat(form.baseSalary)
+    const baseSalary = parseFloat(form.baseSalary);
     if (isNaN(baseSalary) || baseSalary <= 0) {
-      toast({ title: 'เงินเดือนต้องมากกว่า 0', variant: 'destructive' })
-      return
+      toast({ title: 'เงินเดือนต้องมากกว่า 0', variant: 'destructive' });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const url = isEdit ? `/api/employees/${employee.id}` : '/api/employees'
-      const method = isEdit ? 'PATCH' : 'POST'
+      const url = isEdit ? `/api/employees/${employee.id}` : '/api/employees';
+      const method = isEdit ? 'PATCH' : 'POST';
 
       const response = await window.fetch(url, {
         method,
@@ -111,30 +128,34 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
           baseSalary,
           isActive: form.isActive === 'true',
         }),
-      })
+      });
 
-      const res = await response.json()
+      const res = await response.json();
 
       if (res.success) {
         toast({
           title: isEdit ? 'แก้ไขพนักงานสำเร็จ' : 'เพิ่มพนักงานสำเร็จ',
           description: `${form.firstName} ${form.lastName}`,
-        })
-        onSuccess()
-        onClose()
+        });
+        onSuccess();
+        onClose();
       } else {
-        toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+        toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' });
       }
     } catch (error) {
-      toast({ title: 'ข้อผิดพลาด', description: 'ไม่สามารถบันทึกข้อมูลได้', variant: 'destructive' })
+      toast({
+        title: 'ข้อผิดพลาด',
+        description: 'ไม่สามารถบันทึกข้อมูลได้',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] md:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
@@ -150,12 +171,12 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
         <div className="space-y-4">
           {/* Basic Info */}
           <div className="space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div>
                 <Label>รหัสพนักงาน *</Label>
                 <Input
                   value={form.employeeCode}
-                  onChange={e => setForm(p => ({ ...p, employeeCode: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, employeeCode: e.target.value }))}
                   placeholder="EMP-001"
                 />
               </div>
@@ -164,17 +185,17 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
                 <Input
                   type="date"
                   value={form.hireDate}
-                  onChange={e => setForm(p => ({ ...p, hireDate: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, hireDate: e.target.value }))}
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div>
                 <Label>ชื่อ *</Label>
                 <Input
                   value={form.firstName}
-                  onChange={e => setForm(p => ({ ...p, firstName: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, firstName: e.target.value }))}
                   placeholder="สมชาย"
                 />
               </div>
@@ -182,18 +203,18 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
                 <Label>นามสกุล *</Label>
                 <Input
                   value={form.lastName}
-                  onChange={e => setForm(p => ({ ...p, lastName: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, lastName: e.target.value }))}
                   placeholder="ใจดี"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div>
                 <Label>ตำแหน่ง</Label>
                 <Input
                   value={form.position}
-                  onChange={e => setForm(p => ({ ...p, position: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))}
                   placeholder="โปรแกรมเมอร์"
                 />
               </div>
@@ -201,7 +222,7 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
                 <Label>แผนก</Label>
                 <Input
                   value={form.department}
-                  onChange={e => setForm(p => ({ ...p, department: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, department: e.target.value }))}
                   placeholder="IT"
                 />
               </div>
@@ -212,13 +233,13 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
               <Input
                 type="number"
                 value={form.baseSalary}
-                onChange={e => setForm(p => ({ ...p, baseSalary: e.target.value }))}
+                onChange={(e) => setForm((p) => ({ ...p, baseSalary: e.target.value }))}
                 placeholder="15000"
               />
               {form.baseSalary && !isNaN(parseFloat(form.baseSalary)) && (
-                <p className="text-xs text-teal-600 mt-1">
-                  SSC: ฿{fc(Math.min(parseFloat(form.baseSalary) * 0.05, 750))} |{' '}
-                  ประมาณ PND1: ฿{fc(Math.max(0, (parseFloat(form.baseSalary) * 12 - 150000) * 0.05 / 12))}
+                <p className="mt-1 text-xs text-teal-600">
+                  SSC: ฿{fc(Math.min(parseFloat(form.baseSalary) * 0.05, 750))} | ประมาณ PND1: ฿
+                  {fc(Math.max(0, ((parseFloat(form.baseSalary) * 12 - 150000) * 0.05) / 12))}
                 </p>
               )}
             </div>
@@ -228,12 +249,12 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
           <div className="space-y-3 border-t pt-3">
             <h3 className="text-sm font-medium text-gray-700">ภาษีและประกันสังคม</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div>
                 <Label>เลขบัตรประชาชน</Label>
                 <Input
                   value={form.taxId}
-                  onChange={e => setForm(p => ({ ...p, taxId: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, taxId: e.target.value }))}
                   placeholder="x-xxxx-xxxxx-xx-x"
                   maxLength={13}
                 />
@@ -242,7 +263,7 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
                 <Label>เลขประกันสังคม</Label>
                 <Input
                   value={form.socialSecurityNo}
-                  onChange={e => setForm(p => ({ ...p, socialSecurityNo: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, socialSecurityNo: e.target.value }))}
                   placeholder="xxxxxxxxx"
                   maxLength={9}
                 />
@@ -254,12 +275,12 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
           <div className="space-y-3 border-t pt-3">
             <h3 className="text-sm font-medium text-gray-700">ข้อมูลธนาคาร</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div>
                 <Label>เลขที่บัญชีธนาคาร</Label>
                 <Input
                   value={form.bankAccountNo}
-                  onChange={e => setForm(p => ({ ...p, bankAccountNo: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, bankAccountNo: e.target.value }))}
                   placeholder="xxx-x-xxxxx-x"
                 />
               </div>
@@ -267,7 +288,7 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
                 <Label>ธนาคาร</Label>
                 <Input
                   value={form.bankName}
-                  onChange={e => setForm(p => ({ ...p, bankName: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, bankName: e.target.value }))}
                   placeholder="กรุงไทย"
                 />
               </div>
@@ -286,7 +307,7 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
                     type="button"
                     size="sm"
                     variant={form.isActive === 'true' ? 'default' : 'outline'}
-                    onClick={() => setForm(p => ({ ...p, isActive: 'true' }))}
+                    onClick={() => setForm((p) => ({ ...p, isActive: 'true' }))}
                     className={form.isActive === 'true' ? 'bg-green-600 hover:bg-green-700' : ''}
                   >
                     ทำงาน
@@ -295,21 +316,23 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
                     type="button"
                     size="sm"
                     variant={form.isActive === 'false' ? 'default' : 'outline'}
-                    onClick={() => setForm(p => ({ ...p, isActive: 'false' }))}
+                    onClick={() => setForm((p) => ({ ...p, isActive: 'false' }))}
                     className={form.isActive === 'false' ? 'bg-gray-600 hover:bg-gray-700' : ''}
                   >
                     ลาออก
                   </Button>
                 </div>
                 {form.isActive === 'false' && (
-                  <Badge variant="secondary" className="text-xs">ไม่รวมในการคำนวณเงินเดือน</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    ไม่รวมในการคำนวณเงินเดือน
+                  </Badge>
                 )}
               </div>
             </div>
           )}
         </div>
 
-        <div className="flex justify-end gap-2 pt-4 border-t">
+        <div className="flex justify-end gap-2 border-t pt-4">
           <Button variant="outline" onClick={onClose} disabled={loading}>
             ยกเลิก
           </Button>
@@ -323,5 +346,5 @@ export function EmployeeEditDialog({ open, onClose, onSuccess, employee }: Emplo
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

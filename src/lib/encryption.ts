@@ -35,7 +35,7 @@ export function encrypt(value: string | null | undefined): string | null {
 export function decrypt(encryptedValue: string | null | undefined): string | null {
   if (!encryptedValue) return null;
   if (!encryptedValue.startsWith('enc:')) return encryptedValue; // Not encrypted
-  
+
   try {
     const ciphertext = encryptedValue.substring(4); // Remove 'enc:' prefix
     const decrypted = CryptoJS.AES.decrypt(ciphertext, KEY).toString(CryptoJS.enc.Utf8);
@@ -156,13 +156,12 @@ export function encryptForAudit(value: string | null | undefined): {
   masked: string | null;
 } {
   if (!value) return { encrypted: null, masked: null };
-  
+
   const encrypted = encrypt(value);
   // Create masked version (show first 2 and last 2 chars)
-  const masked = value.length > 4 
-    ? value.substring(0, 2) + '***' + value.substring(value.length - 2)
-    : '****';
-    
+  const masked =
+    value.length > 4 ? value.substring(0, 2) + '***' + value.substring(value.length - 2) : '****';
+
   return { encrypted, masked };
 }
 

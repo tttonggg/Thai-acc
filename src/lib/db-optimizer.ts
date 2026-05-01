@@ -119,10 +119,7 @@ export class QueryOptimizer {
     }
 
     // UPDATE/DELETE operations
-    if (
-      (query.operation === 'UPDATE' || query.operation === 'DELETE') &&
-      query.duration > 1000
-    ) {
+    if ((query.operation === 'UPDATE' || query.operation === 'DELETE') && query.duration > 1000) {
       recommendations.push('Ensure the WHERE clause uses indexed columns');
       recommendations.push('Consider batch operations for multiple records');
     }
@@ -171,7 +168,7 @@ export class QueryOptimizer {
 
   // ============================================================================
   // Index Suggestions
-// ============================================================================
+  // ============================================================================
 
   /**
    * Suggest indexes based on query patterns
@@ -304,10 +301,7 @@ export class QueryOptimizer {
   /**
    * Batch query execution to reduce round trips
    */
-  async batchQuery<T>(
-    queries: Array<Promise<T>>,
-    batchSize: number = 10
-  ): Promise<T[]> {
+  async batchQuery<T>(queries: Array<Promise<T>>, batchSize: number = 10): Promise<T[]> {
     const results: T[] = [];
 
     for (let i = 0; i < queries.length; i += batchSize) {

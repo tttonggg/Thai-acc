@@ -3,9 +3,9 @@
  * ส่วนแสดงความคิดเห็นพร้อมระบบตอบกลับและติดตามสถานะ
  */
 
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   MessageSquare,
   Send,
@@ -20,73 +20,64 @@ import {
   Trash2,
   X,
   FileText,
-  Filter
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage
-} from '@/components/ui/avatar'
-import { useToast } from '@/hooks/use-toast'
-import { formatThaiDate } from '@/lib/thai-accounting'
+  Filter,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
+import { formatThaiDate } from '@/lib/thai-accounting';
 
 // ========================================
 // Type Definitions
 // ========================================
 
 interface User {
-  id: string
-  name?: string
-  email: string
-  role: string
+  id: string;
+  name?: string;
+  email: string;
+  role: string;
 }
 
 interface Attachment {
-  name: string
-  url: string
-  size: number
-  type: string
+  name: string;
+  url: string;
+  size: number;
+  type: string;
 }
 
 interface Comment {
-  id: string
-  invoiceId: string
-  userId: string
-  content: string
-  isInternal: boolean
-  resolved: boolean
-  resolvedAt?: string
-  resolvedBy?: string
-  parentId?: string | null
-  mentions?: string[]
-  attachments?: Attachment[]
-  createdAt: string
-  updatedAt: string
-  user?: User
-  mentionedUsers?: User[]
-  replies?: Comment[]
-  replyCount?: number
+  id: string;
+  invoiceId: string;
+  userId: string;
+  content: string;
+  isInternal: boolean;
+  resolved: boolean;
+  resolvedAt?: string;
+  resolvedBy?: string;
+  parentId?: string | null;
+  mentions?: string[];
+  attachments?: Attachment[];
+  createdAt: string;
+  updatedAt: string;
+  user?: User;
+  mentionedUsers?: User[];
+  replies?: Comment[];
+  replyCount?: number;
 }
 
 interface CommentSectionProps {
-  invoiceId: string
+  invoiceId: string;
   currentUser: {
-    id: string
-    name?: string
-    email: string
-    role: string
-  }
+    id: string;
+    name?: string;
+    email: string;
+    role: string;
+  };
 }
 
 // ========================================
@@ -94,20 +85,25 @@ interface CommentSectionProps {
 // ========================================
 
 function formatThaiDateTime(date: string | Date): string {
-  const d = new Date(date)
-  const day = d.getDate().toString().padStart(2, '0')
-  const month = (d.getMonth() + 1).toString().padStart(2, '0')
-  const year = d.getFullYear() + 543
-  const hours = d.getHours().toString().padStart(2, '0')
-  const minutes = d.getMinutes().toString().padStart(2, '0')
-  return `${day}/${month}/${year} ${hours}:${minutes}`
+  const d = new Date(date);
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear() + 543;
+  const hours = d.getHours().toString().padStart(2, '0');
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
 function getInitials(name?: string, email?: string): string {
   if (name) {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   }
-  return email?.slice(0, 2).toUpperCase() || 'U'
+  return email?.slice(0, 2).toUpperCase() || 'U';
 }
 
 function getRoleLabel(role: string): string {
@@ -116,18 +112,18 @@ function getRoleLabel(role: string): string {
     ACCOUNTANT: 'นักบัญชี',
     USER: 'ผู้ใช้',
     VIEWER: 'ผู้ดู',
-  }
-  return roles[role] || role
+  };
+  return roles[role] || role;
 }
 
 function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return bytes + ' B'
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
 function canEditOrDelete(comment: Comment, currentUser: User): boolean {
-  return comment.userId === currentUser.id || currentUser.role === 'ADMIN'
+  return comment.userId === currentUser.id || currentUser.role === 'ADMIN';
 }
 
 // ========================================
@@ -135,15 +131,15 @@ function canEditOrDelete(comment: Comment, currentUser: User): boolean {
 // ========================================
 
 interface CommentCardProps {
-  comment: Comment
-  currentUser: User
-  invoiceId: string
-  onReply: (commentId: string) => void
-  onEdit: (comment: Comment) => void
-  onDelete: (commentId: string) => void
-  onResolve: (commentId: string, resolved: boolean) => void
-  replyingTo: string | null
-  depth?: number
+  comment: Comment;
+  currentUser: User;
+  invoiceId: string;
+  onReply: (commentId: string) => void;
+  onEdit: (comment: Comment) => void;
+  onDelete: (commentId: string) => void;
+  onResolve: (commentId: string, resolved: boolean) => void;
+  replyingTo: string | null;
+  depth?: number;
 }
 
 function CommentCard({
@@ -155,17 +151,17 @@ function CommentCard({
   onDelete,
   onResolve,
   replyingTo,
-  depth = 0
+  depth = 0,
 }: CommentCardProps) {
-  const [showReplies, setShowReplies] = useState(false)
-  const [editing, setEditing] = useState(false)
-  const [editContent, setEditContent] = useState(comment.content)
-  const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
+  const [showReplies, setShowReplies] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editContent, setEditContent] = useState(comment.content);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  const isTopLevel = !comment.parentId
-  const canEdit = canEditOrDelete(comment, currentUser)
-  const hasReplies = comment.replies && comment.replies.length > 0
+  const isTopLevel = !comment.parentId;
+  const canEdit = canEditOrDelete(comment, currentUser);
+  const hasReplies = comment.replies && comment.replies.length > 0;
 
   const handleSaveEdit = async () => {
     if (!editContent.trim()) {
@@ -173,137 +169,130 @@ function CommentCard({
         title: 'กรุณากรอกข้อความ',
         description: 'ต้องระบุข้อความคอมเมนต์',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch(
-        `/api/invoices/${invoiceId}/comments/${comment.id}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: editContent }),
-        }
-      )
+      const response = await fetch(`/api/invoices/${invoiceId}/comments/${comment.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: editContent }),
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (response.ok) {
-        setEditing(false)
-        onEdit({ ...comment, ...result.data, content: editContent })
+        setEditing(false);
+        onEdit({ ...comment, ...result.data, content: editContent });
         toast({
           title: 'บันทึกสำเร็จ',
           description: 'แก้ไขคอมเมนต์แล้ว',
-        })
+        });
       } else {
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถแก้ไขคอมเมนต์ได้',
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
-      console.error('Error editing comment:', error)
+      console.error('Error editing comment:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถแก้ไขคอมเมนต์ได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleDelete = async () => {
     if (!confirm('คุณต้องการลบคอมเมนต์นี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch(
-        `/api/invoices/${invoiceId}/comments/${comment.id}`,
-        { method: 'DELETE' }
-      )
+      const response = await fetch(`/api/invoices/${invoiceId}/comments/${comment.id}`, {
+        method: 'DELETE',
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (response.ok) {
-        onDelete(comment.id)
+        onDelete(comment.id);
         toast({
           title: 'ลบสำเร็จ',
           description: 'ลบคอมเมนต์แล้ว',
-        })
+        });
       } else {
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถลบคอมเมนต์ได้',
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
-      console.error('Error deleting comment:', error)
+      console.error('Error deleting comment:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถลบคอมเมนต์ได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleResolve = async (resolved: boolean) => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch(
-        `/api/invoices/${invoiceId}/comments/${comment.id}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ resolved }),
-        }
-      )
+      const response = await fetch(`/api/invoices/${invoiceId}/comments/${comment.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resolved }),
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (response.ok) {
-        onResolve(comment.id, resolved)
+        onResolve(comment.id, resolved);
         toast({
           title: resolved ? 'แก้ไขแล้ว' : 'ยกเลิกการแก้ไข',
           description: resolved ? 'ทำเครื่องหมายว่าแก้ไขแล้ว' : 'ยกเลิกการแก้ไข',
-        })
+        });
       } else {
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถอัปเดตสถานะได้',
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
-      console.error('Error updating resolve status:', error)
+      console.error('Error updating resolve status:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถอัปเดตสถานะได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div
-      className={`${depth > 0 ? 'ml-8 mt-3' : 'mt-4'} ${comment.resolved ? 'opacity-75' : ''}`}
-    >
-      <div className={`p-4 rounded-lg border ${comment.resolved ? 'bg-green-50/50 border-green-200' : 'bg-muted/50'}`}>
+    <div className={`${depth > 0 ? 'ml-8 mt-3' : 'mt-4'} ${comment.resolved ? 'opacity-75' : ''}`}>
+      <div
+        className={`rounded-lg border p-4 ${comment.resolved ? 'border-green-200 bg-green-50/50' : 'bg-muted/50'}`}
+      >
         {/* Header: User info and badges */}
         <div className="flex items-start gap-3">
           <Avatar className="h-8 w-8">
             {comment.user?.name && (
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+              <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">
                 {getInitials(comment.user.name, comment.user.email)}
               </AvatarFallback>
             )}
@@ -311,21 +300,21 @@ function CommentCard({
 
           <div className="flex-1 space-y-2">
             {/* User info row */}
-            <div className="flex items-center flex-wrap gap-2">
-              <span className="font-medium text-sm">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-medium">
                 {comment.user?.name || comment.user?.email}
               </span>
               <Badge variant="outline" className="text-xs">
                 {getRoleLabel(comment.user?.role || '')}
               </Badge>
               {comment.isInternal && (
-                <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                   <Shield className="h-3 w-3" />
                   ภายใน
                 </Badge>
               )}
               {comment.resolved && (
-                <Badge variant="default" className="text-xs flex items-center gap-1 bg-green-600">
+                <Badge variant="default" className="flex items-center gap-1 bg-green-600 text-xs">
                   <CheckCircle2 className="h-3 w-3" />
                   แก้ไขแล้ว
                 </Badge>
@@ -364,8 +353,8 @@ function CommentCard({
                     size="sm"
                     variant="outline"
                     onClick={() => {
-                      setEditing(false)
-                      setEditContent(comment.content)
+                      setEditing(false);
+                      setEditContent(comment.content);
                     }}
                     disabled={loading}
                   >
@@ -374,7 +363,7 @@ function CommentCard({
                 </div>
               </div>
             ) : (
-              <div className="text-sm whitespace-pre-wrap">{comment.content}</div>
+              <div className="whitespace-pre-wrap text-sm">{comment.content}</div>
             )}
 
             {/* Attachments */}
@@ -407,7 +396,7 @@ function CommentCard({
             )}
 
             {/* Action Buttons */}
-            <div className="flex items-center flex-wrap gap-2 pt-2">
+            <div className="flex flex-wrap items-center gap-2 pt-2">
               {/* Reply button - only for top-level or 1st level replies */}
               {depth < 2 && currentUser.role !== 'VIEWER' && (
                 <Button
@@ -416,7 +405,7 @@ function CommentCard({
                   className="h-7 text-xs"
                   onClick={() => onReply(comment.id)}
                 >
-                  <Reply className="h-3 w-3 mr-1" />
+                  <Reply className="mr-1 h-3 w-3" />
                   ตอบกลับ
                 </Button>
               )}
@@ -432,7 +421,7 @@ function CommentCard({
                       onClick={() => handleResolve(false)}
                       disabled={loading}
                     >
-                      <Circle className="h-3 w-3 mr-1" />
+                      <Circle className="mr-1 h-3 w-3" />
                       ยกเลิกการแก้ไข
                     </Button>
                   ) : (
@@ -443,7 +432,7 @@ function CommentCard({
                       onClick={() => handleResolve(true)}
                       disabled={loading}
                     >
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      <CheckCircle2 className="mr-1 h-3 w-3" />
                       แก้ไขแล้ว
                     </Button>
                   )}
@@ -459,7 +448,7 @@ function CommentCard({
                   onClick={() => setEditing(true)}
                   disabled={loading}
                 >
-                  <Edit className="h-3 w-3 mr-1" />
+                  <Edit className="mr-1 h-3 w-3" />
                   แก้ไข
                 </Button>
               )}
@@ -473,7 +462,7 @@ function CommentCard({
                   onClick={handleDelete}
                   disabled={loading}
                 >
-                  <Trash2 className="h-3 w-3 mr-1" />
+                  <Trash2 className="mr-1 h-3 w-3" />
                   ลบ
                 </Button>
               )}
@@ -485,7 +474,7 @@ function CommentCard({
         {hasReplies && (
           <>
             {/* Show/hide replies toggle */}
-            <div className="mt-3 pt-3 border-t">
+            <div className="mt-3 border-t pt-3">
               <Button
                 size="sm"
                 variant="ghost"
@@ -494,12 +483,12 @@ function CommentCard({
               >
                 {showReplies ? (
                   <>
-                    <ChevronUp className="h-3 w-3 mr-1" />
+                    <ChevronUp className="mr-1 h-3 w-3" />
                     ซ่อน {comment.replies?.length} คำตอบ
                   </>
                 ) : (
                   <>
-                    <ChevronDown className="h-3 w-3 mr-1" />
+                    <ChevronDown className="mr-1 h-3 w-3" />
                     แสดง {comment.replies?.length} คำตอบ
                   </>
                 )}
@@ -540,7 +529,7 @@ function CommentCard({
         )}
       </div>
     </div>
-  )
+  );
 }
 
 // ========================================
@@ -548,18 +537,18 @@ function CommentCard({
 // ========================================
 
 interface ReplyFormProps {
-  invoiceId: string
-  parentId: string
-  currentUser: User
-  onCancel: () => void
-  onSubmit: () => void
+  invoiceId: string;
+  parentId: string;
+  currentUser: User;
+  onCancel: () => void;
+  onSubmit: () => void;
 }
 
 function ReplyForm({ invoiceId, parentId, currentUser, onCancel, onSubmit }: ReplyFormProps) {
-  const [content, setContent] = useState('')
-  const [isInternal, setIsInternal] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
+  const [content, setContent] = useState('');
+  const [isInternal, setIsInternal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async () => {
     if (!content.trim()) {
@@ -567,11 +556,11 @@ function ReplyForm({ invoiceId, parentId, currentUser, onCancel, onSubmit }: Rep
         title: 'กรุณากรอกข้อความ',
         description: 'ต้องระบุข้อความคอมเมนต์',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await fetch(`/api/invoices/${invoiceId}/comments`, {
         credentials: 'include',
@@ -582,39 +571,39 @@ function ReplyForm({ invoiceId, parentId, currentUser, onCancel, onSubmit }: Rep
           isInternal,
           parentId,
         }),
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (response.ok) {
-        setContent('')
-        setIsInternal(false)
-        onSubmit()
+        setContent('');
+        setIsInternal(false);
+        onSubmit();
         toast({
           title: 'บันทึกสำเร็จ',
           description: 'ตอบกลับแล้ว',
-        })
+        });
       } else {
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถตอบกลับได้',
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
-      console.error('Error adding reply:', error)
+      console.error('Error adding reply:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถตอบกลับได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="mt-3 p-3 rounded-lg bg-muted border">
+    <div className="mt-3 rounded-lg border bg-muted p-3">
       <div className="space-y-3">
         <Textarea
           placeholder="พิมพ์คำตอบ..."
@@ -634,14 +623,14 @@ function ReplyForm({ invoiceId, parentId, currentUser, onCancel, onSubmit }: Rep
               />
               <Label
                 htmlFor={`internal-${parentId}`}
-                className="text-sm cursor-pointer flex items-center gap-1"
+                className="flex cursor-pointer items-center gap-1 text-sm"
               >
                 <Shield className="h-3 w-3" />
                 ภายในเท่านั้น
               </Label>
             </div>
           )}
-          <div className="flex gap-2 ml-auto">
+          <div className="ml-auto flex gap-2">
             <Button size="sm" variant="outline" onClick={onCancel} disabled={loading}>
               ยกเลิก
             </Button>
@@ -652,7 +641,7 @@ function ReplyForm({ invoiceId, parentId, currentUser, onCancel, onSubmit }: Rep
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // ========================================
@@ -660,51 +649,53 @@ function ReplyForm({ invoiceId, parentId, currentUser, onCancel, onSubmit }: Rep
 // ========================================
 
 export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) {
-  const { toast } = useToast()
-  const [comments, setComments] = useState<Comment[]>([])
-  const [loading, setLoading] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [newComment, setNewComment] = useState('')
-  const [isInternal, setIsInternal] = useState(false)
-  const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const [filterResolved, setFilterResolved] = useState<boolean | null>(null) // null = show all
+  const { toast } = useToast();
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [isInternal, setIsInternal] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [filterResolved, setFilterResolved] = useState<boolean | null>(null); // null = show all
 
   // Fetch comments on mount
   useEffect(() => {
-    fetchComments()
-  }, [invoiceId])
+    fetchComments();
+  }, [invoiceId]);
 
   const fetchComments = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const params = new URLSearchParams()
+      const params = new URLSearchParams();
       if (filterResolved !== null) {
-        params.append('includeResolved', filterResolved.toString())
+        params.append('includeResolved', filterResolved.toString());
       }
 
-      const response = await fetch(`/api/invoices/${invoiceId}/comments?${params}`, { credentials: 'include' })
-      const result = await response.json()
+      const response = await fetch(`/api/invoices/${invoiceId}/comments?${params}`, {
+        credentials: 'include',
+      });
+      const result = await response.json();
 
       if (response.ok) {
-        setComments(result.data?.comments || [])
+        setComments(result.data?.comments || []);
       } else {
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถดึงข้อมูลคอมเมนต์ได้',
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
-      console.error('Error fetching comments:', error)
+      console.error('Error fetching comments:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถดึงข้อมูลคอมเมนต์ได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async () => {
     if (!newComment.trim()) {
@@ -712,11 +703,11 @@ export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) 
         title: 'กรุณากรอกข้อความ',
         description: 'ต้องระบุข้อความคอมเมนต์',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setSubmitting(true)
+    setSubmitting(true);
     try {
       const response = await fetch(`/api/invoices/${invoiceId}/comments`, {
         credentials: 'include',
@@ -724,114 +715,114 @@ export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content: newComment,
-          isInternal
+          isInternal,
         }),
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (response.ok) {
         // Add new comment to list
-        setComments(prev => [
+        setComments((prev) => [
           {
             ...result.data,
             user: currentUser,
             replies: [],
-            replyCount: 0
+            replyCount: 0,
           },
-          ...prev
-        ])
+          ...prev,
+        ]);
 
         // Reset form
-        setNewComment('')
-        setIsInternal(false)
+        setNewComment('');
+        setIsInternal(false);
 
         toast({
           title: 'บันทึกสำเร็จ',
           description: 'เพิ่มคอมเมนต์แล้ว',
-        })
+        });
       } else {
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถเพิ่มคอมเมนต์ได้',
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
-      console.error('Error adding comment:', error)
+      console.error('Error adding comment:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถเพิ่มคอมเมนต์ได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const handleReply = (commentId: string) => {
-    setReplyingTo(replyingTo === commentId ? null : commentId)
-  }
+    setReplyingTo(replyingTo === commentId ? null : commentId);
+  };
 
   const handleEdit = (updatedComment: Comment) => {
-    setComments(prev =>
-      prev.map(comment => {
+    setComments((prev) =>
+      prev.map((comment) => {
         if (comment.id === updatedComment.id) {
-          return { ...comment, ...updatedComment }
+          return { ...comment, ...updatedComment };
         }
         if (comment.replies) {
           return {
             ...comment,
-            replies: comment.replies.map(reply =>
+            replies: comment.replies.map((reply) =>
               reply.id === updatedComment.id ? { ...reply, ...updatedComment } : reply
-            )
-          }
+            ),
+          };
         }
-        return comment
+        return comment;
       })
-    )
-  }
+    );
+  };
 
   const handleDelete = (commentId: string) => {
-    setComments(prev =>
+    setComments((prev) =>
       prev
-        .filter(comment => comment.id !== commentId)
-        .map(comment => ({
+        .filter((comment) => comment.id !== commentId)
+        .map((comment) => ({
           ...comment,
-          replies: comment.replies?.filter(reply => reply.id !== commentId) || [],
-          replyCount: (comment.replies?.filter(reply => reply.id !== commentId) || []).length
+          replies: comment.replies?.filter((reply) => reply.id !== commentId) || [],
+          replyCount: (comment.replies?.filter((reply) => reply.id !== commentId) || []).length,
         }))
-    )
-  }
+    );
+  };
 
   const handleResolve = (commentId: string, resolved: boolean) => {
-    setComments(prev =>
-      prev.map(comment => {
+    setComments((prev) =>
+      prev.map((comment) => {
         if (comment.id === commentId) {
           return {
             ...comment,
             resolved,
             resolvedAt: resolved ? new Date().toISOString() : undefined,
-            resolvedBy: resolved ? currentUser.id : undefined
-          }
+            resolvedBy: resolved ? currentUser.id : undefined,
+          };
         }
-        return comment
+        return comment;
       })
-    )
-  }
+    );
+  };
 
   // Filter comments based on resolved status
-  const filteredComments = comments.filter(comment => {
-    if (filterResolved === null) return true
-    if (filterResolved === true) return comment.resolved
-    return !comment.resolved
-  })
+  const filteredComments = comments.filter((comment) => {
+    if (filterResolved === null) return true;
+    if (filterResolved === true) return comment.resolved;
+    return !comment.resolved;
+  });
 
   const commentStats = {
     total: comments.length,
-    resolved: comments.filter(c => c.resolved).length,
-    unresolved: comments.filter(c => !c.resolved).length,
-  }
+    resolved: comments.filter((c) => c.resolved).length,
+    unresolved: comments.filter((c) => !c.resolved).length,
+  };
 
   return (
     <Card>
@@ -846,7 +837,7 @@ export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) 
             <div className="flex gap-1">
               <Button
                 size="sm"
-                variant={filterResolved === null ? "default" : "outline"}
+                variant={filterResolved === null ? 'default' : 'outline'}
                 className="h-7 text-xs"
                 onClick={() => setFilterResolved(null)}
               >
@@ -854,7 +845,7 @@ export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) 
               </Button>
               <Button
                 size="sm"
-                variant={filterResolved === false ? "default" : "outline"}
+                variant={filterResolved === false ? 'default' : 'outline'}
                 className="h-7 text-xs"
                 onClick={() => setFilterResolved(false)}
               >
@@ -862,7 +853,7 @@ export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) 
               </Button>
               <Button
                 size="sm"
-                variant={filterResolved === true ? "default" : "outline"}
+                variant={filterResolved === true ? 'default' : 'outline'}
                 className="h-7 text-xs"
                 onClick={() => setFilterResolved(true)}
               >
@@ -876,17 +867,16 @@ export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) 
       <CardContent className="space-y-4">
         {/* Add Comment Form */}
         {currentUser.role !== 'VIEWER' && (
-          <div className="space-y-3 pb-4 border-b">
+          <div className="space-y-3 border-b pb-4">
             <div className="flex items-center justify-between">
               <Label htmlFor="comment">เพิ่มคอมเมนต์</Label>
               {(currentUser.role === 'ADMIN' || currentUser.role === 'ACCOUNTANT') && (
                 <div className="flex items-center gap-2">
-                  <Switch
-                    id="internal"
-                    checked={isInternal}
-                    onCheckedChange={setIsInternal}
-                  />
-                  <Label htmlFor="internal" className="text-sm cursor-pointer flex items-center gap-1">
+                  <Switch id="internal" checked={isInternal} onCheckedChange={setIsInternal} />
+                  <Label
+                    htmlFor="internal"
+                    className="flex cursor-pointer items-center gap-1 text-sm"
+                  >
                     <Shield className="h-3 w-3" />
                     ภายในเท่านั้น
                   </Label>
@@ -902,16 +892,12 @@ export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) 
               disabled={submitting}
             />
             <div className="flex justify-end">
-              <Button
-                onClick={handleSubmit}
-                disabled={submitting || !newComment.trim()}
-                size="sm"
-              >
+              <Button onClick={handleSubmit} disabled={submitting || !newComment.trim()} size="sm">
                 {submitting ? (
                   <>กำลังบันทึก...</>
                 ) : (
                   <>
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className="mr-2 h-4 w-4" />
                     ส่งคอมเมนต์
                   </>
                 )}
@@ -923,16 +909,14 @@ export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) 
         {/* Comments List */}
         <div className="space-y-2">
           {loading ? (
-            <div className="text-center text-muted-foreground py-8">
-              กำลังโหลด...
-            </div>
+            <div className="py-8 text-center text-muted-foreground">กำลังโหลด...</div>
           ) : filteredComments.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
+            <div className="py-8 text-center text-muted-foreground">
               {filterResolved === null
                 ? 'ยังไม่มีคอมเมนต์'
                 : filterResolved === false
-                ? 'ไม่มีคอมเมนต์ที่ยังไม่แก้'
-                : 'ไม่มีคอมเมนต์ที่แก้แล้ว'}
+                  ? 'ไม่มีคอมเมนต์ที่ยังไม่แก้'
+                  : 'ไม่มีคอมเมนต์ที่แก้แล้ว'}
             </div>
           ) : (
             filteredComments.map((comment) => (
@@ -952,5 +936,5 @@ export function CommentSection({ invoiceId, currentUser }: CommentSectionProps) 
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

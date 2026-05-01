@@ -1,7 +1,7 @@
 /**
  * API Versioning Middleware for Thai Accounting ERP
  * Phase D: API Mastery - API Versioning
- * 
+ *
  * Features:
  * - URL-based versioning (/api/v1/, /api/v2/)
  * - Version header support
@@ -17,27 +17,33 @@ export const API_VERSIONS = {
   V2: 'v2',
 } as const;
 
-export type ApiVersion = typeof API_VERSIONS[keyof typeof API_VERSIONS];
+export type ApiVersion = (typeof API_VERSIONS)[keyof typeof API_VERSIONS];
 
 // Current stable version
 export const CURRENT_VERSION: ApiVersion = 'v1';
 
 // Deprecation status for versions
-export const VERSION_STATUS: Record<string, {
-  status: 'stable' | 'deprecated' | 'sunset';
-  sunsetDate?: Date;
-  migrationGuide?: string;
-}> = {
+export const VERSION_STATUS: Record<
+  string,
+  {
+    status: 'stable' | 'deprecated' | 'sunset';
+    sunsetDate?: Date;
+    migrationGuide?: string;
+  }
+> = {
   v1: {
     status: 'stable',
   },
 };
 
 // Version-specific behaviors
-export const VERSION_BEHAVIORS: Record<string, {
-  features: string[];
-  breakingChanges?: string[];
-}> = {
+export const VERSION_BEHAVIORS: Record<
+  string,
+  {
+    features: string[];
+    breakingChanges?: string[];
+  }
+> = {
   v1: {
     features: [
       'Basic CRUD operations',
@@ -68,7 +74,10 @@ export function getApiVersion(req: NextRequest): ApiVersion {
 
   // Check X-API-Version header
   const customHeaderVersion = req.headers.get('X-API-Version');
-  if (customHeaderVersion && Object.values(API_VERSIONS).includes(customHeaderVersion as ApiVersion)) {
+  if (
+    customHeaderVersion &&
+    Object.values(API_VERSIONS).includes(customHeaderVersion as ApiVersion)
+  ) {
     return customHeaderVersion as ApiVersion;
   }
 
@@ -88,14 +97,14 @@ export function isVersionDeprecated(version: ApiVersion): boolean {
  */
 export function getDeprecationHeaders(version: ApiVersion): Record<string, string> {
   const status = VERSION_STATUS[version];
-  
+
   if (!status || status.status === 'stable') {
     return {};
   }
 
   const headers: Record<string, string> = {
-    'Deprecation': 'true',
-    'Sunset': status.sunsetDate?.toUTCString() || '',
+    Deprecation: 'true',
+    Sunset: status.sunsetDate?.toUTCString() || '',
   };
 
   if (status.migrationGuide) {
@@ -207,7 +216,8 @@ export function createVersionedResponse<T>(
       headers['Warning'] = `299 - "${options.deprecationMessage}"`;
     }
     if (options?.migrationGuide || VERSION_STATUS[version]?.migrationGuide) {
-      headers['Link'] = `<${options?.migrationGuide || VERSION_STATUS[version]?.migrationGuide}>; rel="migration"`;
+      headers['Link'] =
+        `<${options?.migrationGuide || VERSION_STATUS[version]?.migrationGuide}>; rel="migration"`;
     }
   }
 
@@ -256,16 +266,12 @@ export function generateMigrationGuide(fromVersion: ApiVersion, toVersion: ApiVe
     `# Migration Guide: ${fromVersion} to ${toVersion}`,
     '',
     '## New Features',
-    ...toBehaviors.features.filter(f => !fromBehaviors.features.includes(f)).map(f => `- ${f}`),
+    ...toBehaviors.features.filter((f) => !fromBehaviors.features.includes(f)).map((f) => `- ${f}`),
     '',
   ];
 
   if (toBehaviors.breakingChanges?.length) {
-    guide.push(
-      '## Breaking Changes',
-      ...toBehaviors.breakingChanges.map(c => `- ${c}`),
-      ''
-    );
+    guide.push('## Breaking Changes', ...toBehaviors.breakingChanges.map((c) => `- ${c}`), '');
   }
 
   guide.push(
@@ -288,19 +294,20 @@ export function getVersionInfo(): {
   current: string;
   supported: string[];
   deprecated: string[];
-  versions: Record<string, {
-    status: string;
-    features: string[];
-    sunsetDate?: string;
-  }>;
+  versions: Record<
+    string,
+    {
+      status: string;
+      features: string[];
+      sunsetDate?: string;
+    }
+  >;
 } {
   return {
     current: CURRENT_VERSION,
-    supported: Object.keys(VERSION_STATUS).filter(
-      v => VERSION_STATUS[v].status !== 'sunset'
-    ),
+    supported: Object.keys(VERSION_STATUS).filter((v) => VERSION_STATUS[v].status !== 'sunset'),
     deprecated: Object.keys(VERSION_STATUS).filter(
-      v => VERSION_STATUS[v].status === 'deprecated'
+      (v) => VERSION_STATUS[v].status === 'deprecated'
     ),
     versions: Object.fromEntries(
       Object.entries(VERSION_STATUS).map(([version, status]) => [

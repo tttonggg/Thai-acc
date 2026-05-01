@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
-import { db } from '@/lib/db'
-import { requireAuth, requireRole } from "@/lib/api-utils"
-import { AuthError } from "@/lib/api-auth"
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { db } from '@/lib/db';
+import { requireAuth, requireRole } from '@/lib/api-utils';
+import { AuthError } from '@/lib/api-auth';
 
 // Validation schema for company info
 const companyInfoSchema = z.object({
@@ -20,20 +20,17 @@ const companyInfoSchema = z.object({
   email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง').optional().or(z.literal('')),
   website: z.string().optional(),
   logo: z.string().optional(),
-})
+});
 
 // GET /api/company - Fetch company info
 export async function GET(req: NextRequest) {
   try {
-    await requireAuth()
+    await requireAuth();
 
-    const company = await db.company.findFirst()
+    const company = await db.company.findFirst();
 
     if (!company) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบข้อมูลบริษัท' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบข้อมูลบริษัท' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -55,20 +52,20 @@ export async function GET(req: NextRequest) {
         website: company.website,
         logo: company.logo,
         fiscalYearStart: company.fiscalYearStart,
-      }
-    })
+      },
+    });
   } catch (error: any) {
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
-      )
+      );
     }
-    console.error('Error fetching company:', error)
+    console.error('Error fetching company:', error);
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถดึงข้อมูลบริษัทได้' },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -76,19 +73,16 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     // Require ADMIN role for company updates
-    await requireRole(['ADMIN'])
+    await requireRole(['ADMIN']);
 
-    const body = await req.json()
-    const validated = companyInfoSchema.parse(body)
+    const body = await req.json();
+    const validated = companyInfoSchema.parse(body);
 
     // Get company
-    const company = await db.company.findFirst()
+    const company = await db.company.findFirst();
 
     if (!company) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบข้อมูลบริษัท' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบข้อมูลบริษัท' }, { status: 404 });
     }
 
     // Update company
@@ -110,7 +104,7 @@ export async function PUT(req: NextRequest) {
         website: validated.website,
         logo: validated.logo,
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
@@ -131,32 +125,29 @@ export async function PUT(req: NextRequest) {
         email: updated.email,
         website: updated.website,
         logo: updated.logo,
-      }
-    })
+      },
+    });
   } catch (error: any) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
-      )
+      );
     }
     if (error?.statusCode === 403) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์เข้าถึง' },
-        { status: 403 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
-    console.error('Error updating company:', error)
+    console.error('Error updating company:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: 'รูปแบบข้อมูลไม่ถูกต้อง', details: error.issues },
         { status: 400 }
-      )
+      );
     }
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถบันทึกข้อมูลบริษัทได้' },
       { status: 500 }
-    )
+    );
   }
 }

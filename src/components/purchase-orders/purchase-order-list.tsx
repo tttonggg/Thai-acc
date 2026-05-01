@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Plus,
   Search,
@@ -20,15 +20,15 @@ import {
   Building2,
   TrendingUp,
   Filter,
-  Truck
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ScrollArea } from '@/components/ui/scroll-area'
+  Truck,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Table,
   TableBody,
@@ -36,69 +36,69 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useToast } from '@/hooks/use-toast'
-import { getStatusBadgeProps } from '@/lib/status-badge'
-import { PurchaseOrderForm } from './purchase-order-form'
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import { getStatusBadgeProps } from '@/lib/status-badge';
+import { PurchaseOrderForm } from './purchase-order-form';
 
 interface PurchaseOrder {
-  id: string
-  orderNo: string
-  orderDate: string
-  expectedDate?: string
-  vendorName: string
-  subtotal: number
-  vatAmount: number
-  totalAmount: number
-  status: string
-  paymentStatus: string
-  deliveryStatus: string
+  id: string;
+  orderNo: string;
+  orderDate: string;
+  expectedDate?: string;
+  vendorName: string;
+  subtotal: number;
+  vatAmount: number;
+  totalAmount: number;
+  status: string;
+  paymentStatus: string;
+  deliveryStatus: string;
   createdByUser: {
-    id: string
-    name: string
-    email: string
-  }
+    id: string;
+    name: string;
+    email: string;
+  };
   approvedByUser?: {
-    id: string
-    name: string
-    email: string
-  }
-  approvedAt?: string
-  notes?: string
+    id: string;
+    name: string;
+    email: string;
+  };
+  approvedAt?: string;
+  notes?: string;
   lines: Array<{
-    id: string
-    lineNo: number
-    description: string
-    quantity: number
-    unit: string
-    unitPrice: number
-    amount: number
+    id: string;
+    lineNo: number;
+    description: string;
+    quantity: number;
+    unit: string;
+    unitPrice: number;
+    amount: number;
     product?: {
-      id: string
-      code: string
-      name: string
-    }
-  }>
+      id: string;
+      code: string;
+      name: string;
+    };
+  }>;
   _count?: {
-    lines: number
-    receipts: number
-  }
+    lines: number;
+    receipts: number;
+  };
 }
 
 // Status labels and colors
@@ -110,183 +110,186 @@ const statusLabels: Record<string, string> = {
   RECEIVING: 'รับของบางส่วน',
   RECEIVED: 'รับของครบแล้ว',
   CANCELLED: 'ยกเลิก',
-}
+};
 
 const paymentStatusLabels: Record<string, string> = {
   UNPAID: 'ยังไม่จ่าย',
   PARTIAL: 'จ่ายบางส่วน',
   PAID: 'จ่ายครบแล้ว',
-}
+};
 
 // Helper function to get status badge
 const getStatusBadge = (status: string) => {
-  const config = getStatusBadgeProps(status)
-  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>
-}
+  const config = getStatusBadgeProps(status);
+  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>;
+};
 
 // Helper function to get payment status badge
 const getPaymentStatusBadge = (status: string) => {
-  const config = getStatusBadgeProps(status)
-  return <Badge variant={config.variant}>{paymentStatusLabels[status] || config.label}</Badge>
-}
+  const config = getStatusBadgeProps(status);
+  return <Badge variant={config.variant}>{paymentStatusLabels[status] || config.label}</Badge>;
+};
 
 export function PurchaseOrderList() {
-  const [pos, setPos] = useState<PurchaseOrder[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
-  const [filterPaymentStatus, setFilterPaymentStatus] = useState('all')
-  const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0 })
-  const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [processingAction, setProcessingAction] = useState<string | null>(null)
-  const [deletingPO, setDeletingPO] = useState<string | null>(null)
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const { toast } = useToast()
+  const [pos, setPos] = useState<PurchaseOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterPaymentStatus, setFilterPaymentStatus] = useState('all');
+  const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0 });
+  const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [processingAction, setProcessingAction] = useState<string | null>(null);
+  const [deletingPO, setDeletingPO] = useState<string | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   // Fetch POs
   useEffect(() => {
-    fetchPOs()
-  }, [pagination.page, pagination.limit])
+    fetchPOs();
+  }, [pagination.page, pagination.limit]);
 
   const fetchPOs = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
-      })
+      });
 
-      if (filterStatus !== 'all') params.append('status', filterStatus)
-      if (filterPaymentStatus !== 'all') params.append('paymentStatus', filterPaymentStatus)
-      if (searchTerm) params.append('search', searchTerm)
+      if (filterStatus !== 'all') params.append('status', filterStatus);
+      if (filterPaymentStatus !== 'all') params.append('paymentStatus', filterPaymentStatus);
+      if (searchTerm) params.append('search', searchTerm);
 
-      const res = await fetch(`/api/purchase-orders?${params}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Fetch failed')
+      const res = await fetch(`/api/purchase-orders?${params}`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Fetch failed');
 
-      const result = await res.json()
-      const posData = result.data || []
+      const result = await res.json();
+      const posData = result.data || [];
 
       if (!Array.isArray(posData)) {
-        throw new Error('Invalid data format')
+        throw new Error('Invalid data format');
       }
 
-      setPos(posData)
-      setPagination(prev => ({
+      setPos(posData);
+      setPagination((prev) => ({
         ...prev,
         total: result.pagination?.total || 0,
-      }))
+      }));
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล'
-      setError(message)
+      const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล';
+      setError(message);
       toast({
         title: 'ข้อผิดพลาด',
         description: 'โหลดข้อมูลไม่สำเร็จ',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Filter POs
-  const filteredPOs = (pos || []).filter(po => {
+  const filteredPOs = (pos || []).filter((po) => {
     const matchesSearch =
       !searchTerm ||
       po.orderNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      po.vendorName?.toLowerCase().includes(searchTerm.toLowerCase())
+      po.vendorName?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = filterStatus === 'all' || po.status === filterStatus
-    const matchesPaymentStatus = filterPaymentStatus === 'all' || po.paymentStatus === filterPaymentStatus
+    const matchesStatus = filterStatus === 'all' || po.status === filterStatus;
+    const matchesPaymentStatus =
+      filterPaymentStatus === 'all' || po.paymentStatus === filterPaymentStatus;
 
-    return matchesSearch && matchesStatus && matchesPaymentStatus
-  })
+    return matchesSearch && matchesStatus && matchesPaymentStatus;
+  });
 
   // Action handlers
   const handleView = (po: PurchaseOrder) => {
-    setSelectedPO(po)
-    setIsViewDialogOpen(true)
-  }
+    setSelectedPO(po);
+    setIsViewDialogOpen(true);
+  };
 
   const handleEdit = (poId: string) => {
     toast({
       title: 'แก้ไขใบสั่งซื้อ',
       description: 'ฟีเจอร์นี้จะเปิดใช้งานเร็วๆ นี้',
-    })
-  }
+    });
+  };
 
   const handleDelete = async (poId: string) => {
     if (!confirm('คุณต้องการลบใบสั่งซื้อนี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
-    setDeletingPO(poId)
+    setDeletingPO(poId);
     try {
-      const res = await fetch(`/api/purchase-orders/${poId}`, { credentials: 'include', 
+      const res = await fetch(`/api/purchase-orders/${poId}`, {
+        credentials: 'include',
         method: 'DELETE',
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'ลบไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'ลบไม่สำเร็จ');
       }
 
       toast({
         title: 'ลบสำเร็จ',
         description: 'ลบใบสั่งซื้อเรียบร้อยแล้ว',
-      })
+      });
 
-      fetchPOs()
+      fetchPOs();
     } catch (err) {
       toast({
         title: 'ลบไม่สำเร็จ',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setDeletingPO(null)
+      setDeletingPO(null);
     }
-  }
+  };
 
   const handleAction = async (poId: string, action: 'submit' | 'approve' | 'cancel') => {
-    setProcessingAction(`${poId}-${action}`)
+    setProcessingAction(`${poId}-${action}`);
     try {
-      const res = await fetch(`/api/purchase-orders/${poId}`, { credentials: 'include', 
+      const res = await fetch(`/api/purchase-orders/${poId}`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'ดำเนินการไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'ดำเนินการไม่สำเร็จ');
       }
 
       const actionLabels = {
         submit: 'ส่งอนุมัติ',
         approve: 'อนุมัติ',
         cancel: 'ยกเลิก',
-      }
+      };
 
       toast({
         title: 'สำเร็จ',
         description: `${actionLabels[action]}เรียบร้อยแล้ว`,
-      })
+      });
 
-      fetchPOs()
-      setIsViewDialogOpen(false)
+      fetchPOs();
+      setIsViewDialogOpen(false);
     } catch (err) {
       toast({
         title: 'ดำเนินการไม่สำเร็จ',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setProcessingAction(null)
+      setProcessingAction(null);
     }
-  }
+  };
 
   // Loading UI
   if (loading) {
@@ -294,12 +297,12 @@ export function PurchaseOrderList() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="mb-2 h-8 w-64" />
             <Skeleton className="h-5 w-80" />
           </div>
           <Skeleton className="h-10 w-40" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i}>
               <CardContent className="p-4">
@@ -310,12 +313,12 @@ export function PurchaseOrderList() {
         </div>
         <Card>
           <CardContent className="p-4">
-            <Skeleton className="h-12 w-full mb-4" />
+            <Skeleton className="mb-4 h-12 w-full" />
             <Skeleton className="h-64 w-full" />
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Error UI
@@ -325,16 +328,16 @@ export function PurchaseOrderList() {
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>{error}</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   // Calculate stats
   const stats = {
-    draft: pos.filter(p => p.status === 'DRAFT').length,
-    pending: pos.filter(p => p.status === 'PENDING').length,
-    approved: pos.filter(p => p.status === 'APPROVED' || p.status === 'ORDERED').length,
-    received: pos.filter(p => p.status === 'RECEIVED').length,
-  }
+    draft: pos.filter((p) => p.status === 'DRAFT').length,
+    pending: pos.filter((p) => p.status === 'PENDING').length,
+    approved: pos.filter((p) => p.status === 'APPROVED' || p.status === 'ORDERED').length,
+    received: pos.filter((p) => p.status === 'RECEIVED').length,
+  };
 
   return (
     <div className="space-y-6">
@@ -342,19 +345,16 @@ export function PurchaseOrderList() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">ใบสั่งซื้อ (Purchase Order)</h1>
-          <p className="text-gray-500 mt-1">จัดการใบสั่งซื้อจากผู้ขาย</p>
+          <p className="mt-1 text-gray-500">จัดการใบสั่งซื้อจากผู้ขาย</p>
         </div>
-        <Button 
-          className="bg-blue-600 hover:bg-blue-700"
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
+        <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsAddDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
           สร้างใบสั่งซื้อ
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -404,9 +404,9 @@ export function PurchaseOrderList() {
       {/* Search & Filter */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="ค้นหาตามเลขที่ PO หรือชื่อผู้ขาย..."
                 className="pl-10"
@@ -464,8 +464,8 @@ export function PurchaseOrderList() {
               <TableBody>
                 {filteredPOs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                      <Truck className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <TableCell colSpan={8} className="py-8 text-center text-gray-500">
+                      <Truck className="mx-auto mb-4 h-12 w-12 text-gray-300" />
                       <p>ไม่พบใบสั่งซื้อ</p>
                     </TableCell>
                   </TableRow>
@@ -473,22 +473,17 @@ export function PurchaseOrderList() {
                   filteredPOs.map((po) => (
                     <TableRow key={po.id} className="cursor-pointer hover:bg-gray-50">
                       <TableCell className="font-mono font-medium">{po.orderNo}</TableCell>
-                      <TableCell>
-                        {new Date(po.orderDate).toLocaleDateString('th-TH')}
-                      </TableCell>
+                      <TableCell>{new Date(po.orderDate).toLocaleDateString('th-TH')}</TableCell>
                       <TableCell>{po.vendorName}</TableCell>
                       <TableCell className="text-right font-medium">
-                        ฿{(po.totalAmount / 100).toLocaleString('th-TH', {
+                        ฿
+                        {(po.totalAmount / 100).toLocaleString('th-TH', {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
                       </TableCell>
-                      <TableCell>
-                        {getStatusBadge(po.status)}
-                      </TableCell>
-                      <TableCell>
-                        {getPaymentStatusBadge(po.paymentStatus)}
-                      </TableCell>
+                      <TableCell>{getStatusBadge(po.status)}</TableCell>
+                      <TableCell>{getPaymentStatusBadge(po.paymentStatus)}</TableCell>
                       <TableCell className="text-center">
                         <Badge variant="secondary">{po._count?.lines || 0} รายการ</Badge>
                       </TableCell>
@@ -520,7 +515,7 @@ export function PurchaseOrderList() {
                                 disabled={deletingPO === po.id}
                               >
                                 {deletingPO === po.id ? (
-                                  <Loader2 className="h-4 w-4 text-red-600 animate-spin" />
+                                  <Loader2 className="h-4 w-4 animate-spin text-red-600" />
                                 ) : (
                                   <Trash2 className="h-4 w-4 text-red-600" />
                                 )}
@@ -569,7 +564,7 @@ export function PurchaseOrderList() {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
@@ -577,11 +572,14 @@ export function PurchaseOrderList() {
             </DialogTitle>
             <DialogDescription>
               {selectedPO && (
-                <div className="flex items-center gap-4 mt-2">
+                <div className="mt-2 flex items-center gap-4">
                   <Badge className={statusColors[selectedPO.status]} variant="outline">
                     {statusLabels[selectedPO.status]}
                   </Badge>
-                  <Badge className={paymentStatusColors[selectedPO.paymentStatus]} variant="outline">
+                  <Badge
+                    className={paymentStatusColors[selectedPO.paymentStatus]}
+                    variant="outline"
+                  >
                     {paymentStatusLabels[selectedPO.paymentStatus]}
                   </Badge>
                 </div>
@@ -618,9 +616,7 @@ export function PurchaseOrderList() {
                     <User className="h-4 w-4" />
                     ผู้สร้าง
                   </Label>
-                  <p className="text-sm font-medium">
-                    {selectedPO.createdByUser.name}
-                  </p>
+                  <p className="text-sm font-medium">{selectedPO.createdByUser.name}</p>
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
@@ -635,7 +631,7 @@ export function PurchaseOrderList() {
               {selectedPO.notes && (
                 <div className="space-y-2">
                   <Label>หมายเหตุ</Label>
-                  <p className="text-sm bg-gray-50 p-3 rounded">{selectedPO.notes}</p>
+                  <p className="rounded bg-gray-50 p-3 text-sm">{selectedPO.notes}</p>
                 </div>
               )}
 
@@ -645,7 +641,7 @@ export function PurchaseOrderList() {
                   <Package className="h-4 w-4" />
                   รายการสินค้า ({selectedPO.lines?.length || 0} รายการ)
                 </Label>
-                <div className="border rounded-lg overflow-hidden">
+                <div className="overflow-hidden rounded-lg border">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -664,9 +660,7 @@ export function PurchaseOrderList() {
                             <div>
                               <p className="font-medium">{line.description}</p>
                               {line.product && (
-                                <p className="text-xs text-gray-500">
-                                  รหัส: {line.product.code}
-                                </p>
+                                <p className="text-xs text-gray-500">รหัส: {line.product.code}</p>
                               )}
                             </div>
                           </TableCell>
@@ -674,13 +668,15 @@ export function PurchaseOrderList() {
                             {line.quantity.toLocaleString('th-TH')} {line.unit}
                           </TableCell>
                           <TableCell className="text-right">
-                            ฿{(line.unitPrice / 100).toLocaleString('th-TH', {
+                            ฿
+                            {(line.unitPrice / 100).toLocaleString('th-TH', {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             })}
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            ฿{(line.amount / 100).toLocaleString('th-TH', {
+                            ฿
+                            {(line.amount / 100).toLocaleString('th-TH', {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             })}
@@ -691,15 +687,24 @@ export function PurchaseOrderList() {
                   </Table>
                 </div>
                 <div className="flex justify-end">
-                  <div className="text-right space-y-1">
+                  <div className="space-y-1 text-right">
                     <p className="text-sm text-gray-600">
-                      มูลค่าก่อน VAT: ฿{(selectedPO.subtotal / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                      มูลค่าก่อน VAT: ฿
+                      {(selectedPO.subtotal / 100).toLocaleString('th-TH', {
+                        minimumFractionDigits: 2,
+                      })}
                     </p>
                     <p className="text-sm text-gray-600">
-                      VAT: ฿{(selectedPO.vatAmount / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                      VAT: ฿
+                      {(selectedPO.vatAmount / 100).toLocaleString('th-TH', {
+                        minimumFractionDigits: 2,
+                      })}
                     </p>
                     <p className="text-xl font-bold text-blue-600">
-                      ยอดรวม: ฿{(selectedPO.totalAmount / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                      ยอดรวม: ฿
+                      {(selectedPO.totalAmount / 100).toLocaleString('th-TH', {
+                        minimumFractionDigits: 2,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -707,8 +712,8 @@ export function PurchaseOrderList() {
 
               {/* Approval Info */}
               {selectedPO.approvedByUser && (
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <Label className="text-green-900 flex items-center gap-2">
+                <div className="rounded-lg bg-green-50 p-4">
+                  <Label className="flex items-center gap-2 text-green-900">
                     <CheckCircle2 className="h-4 w-4" />
                     ข้อมูลการอนุมัติ
                   </Label>
@@ -730,7 +735,7 @@ export function PurchaseOrderList() {
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2 pt-4 border-t">
+              <div className="flex flex-wrap gap-2 border-t pt-4">
                 {selectedPO.status === 'DRAFT' && (
                   <>
                     <Button
@@ -739,17 +744,14 @@ export function PurchaseOrderList() {
                       disabled={processingAction === `${selectedPO.id}-submit`}
                     >
                       {processingAction === `${selectedPO.id}-submit` ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <Send className="h-4 w-4 mr-2" />
+                        <Send className="mr-2 h-4 w-4" />
                       )}
                       ส่งอนุมัติ
                     </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleEdit(selectedPO.id)}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
+                    <Button variant="outline" onClick={() => handleEdit(selectedPO.id)}>
+                      <Edit className="mr-2 h-4 w-4" />
                       แก้ไข
                     </Button>
                   </>
@@ -762,9 +764,9 @@ export function PurchaseOrderList() {
                       disabled={processingAction === `${selectedPO.id}-approve`}
                     >
                       {processingAction === `${selectedPO.id}-approve` ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
                       )}
                       อนุมัติ
                     </Button>
@@ -774,9 +776,9 @@ export function PurchaseOrderList() {
                       disabled={processingAction === `${selectedPO.id}-cancel`}
                     >
                       {processingAction === `${selectedPO.id}-cancel` ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <XCircle className="h-4 w-4 mr-2" />
+                        <XCircle className="mr-2 h-4 w-4" />
                       )}
                       ยกเลิก
                     </Button>
@@ -793,14 +795,14 @@ export function PurchaseOrderList() {
         open={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
         onSuccess={() => {
-          setIsAddDialogOpen(false)
-          fetchPOs()
+          setIsAddDialogOpen(false);
+          fetchPOs();
           toast({
             title: 'สำเร็จ',
             description: 'สร้างใบสั่งซื้อเรียบร้อยแล้ว',
-          })
+          });
         }}
       />
     </div>
-  )
+  );
 }

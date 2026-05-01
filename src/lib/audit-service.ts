@@ -6,13 +6,25 @@
 import { prisma } from './db';
 import { createHash } from './encryption';
 
-export type AuditAction = 
-  | 'CREATE' | 'UPDATE' | 'DELETE' 
-  | 'POST' | 'VOID' | 'APPROVE' | 'REJECT'
-  | 'EXPORT' | 'IMPORT' | 'VIEW'
-  | 'LOGIN' | 'LOGOUT' | 'LOGIN_FAILED'
-  | 'MFA_SETUP' | 'MFA_DISABLE' | 'PASSWORD_RESET'
-  | 'SESSION_TERMINATED' | 'PRIVILEGE_ESCALATION';
+export type AuditAction =
+  | 'CREATE'
+  | 'UPDATE'
+  | 'DELETE'
+  | 'POST'
+  | 'VOID'
+  | 'APPROVE'
+  | 'REJECT'
+  | 'EXPORT'
+  | 'IMPORT'
+  | 'VIEW'
+  | 'LOGIN'
+  | 'LOGOUT'
+  | 'LOGIN_FAILED'
+  | 'MFA_SETUP'
+  | 'MFA_DISABLE'
+  | 'PASSWORD_RESET'
+  | 'SESSION_TERMINATED'
+  | 'PRIVILEGE_ESCALATION';
 
 export interface AuditLogEntry {
   userId: string;
@@ -28,17 +40,26 @@ export interface AuditLogEntry {
 
 // Fields that should be masked in audit logs
 const SENSITIVE_AUDIT_FIELDS = [
-  'password', 'mfaSecret', 'token', 'secret', 
-  'taxId', 'bankAccount', 'bankAccountNo',
-  'idCardNumber', 'socialSecurityNo', 'signature'
+  'password',
+  'mfaSecret',
+  'token',
+  'secret',
+  'taxId',
+  'bankAccount',
+  'bankAccountNo',
+  'idCardNumber',
+  'socialSecurityNo',
+  'signature',
 ];
 
 /**
  * Sanitize sensitive data before logging
  */
-function sanitizeForAudit(data: Record<string, unknown> | null | undefined): Record<string, unknown> | null {
+function sanitizeForAudit(
+  data: Record<string, unknown> | null | undefined
+): Record<string, unknown> | null {
   if (!data) return null;
-  
+
   const sanitized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(data)) {
     if (SENSITIVE_AUDIT_FIELDS.includes(key)) {
@@ -46,8 +67,8 @@ function sanitizeForAudit(data: Record<string, unknown> | null | undefined): Rec
     } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
       sanitized[key] = sanitizeForAudit(value as Record<string, unknown>);
     } else if (Array.isArray(value)) {
-      sanitized[key] = value.map(item => 
-        typeof item === 'object' && item !== null 
+      sanitized[key] = value.map((item) =>
+        typeof item === 'object' && item !== null
           ? sanitizeForAudit(item as Record<string, unknown>)
           : item
       );
@@ -98,11 +119,11 @@ export async function logAudit(entry: AuditLogEntry): Promise<void> {
   try {
     const prevHash = await getLastHash();
     const timestamp = new Date();
-    
+
     // Sanitize sensitive data
     const sanitizedBefore = sanitizeForAudit(entry.beforeState);
     const sanitizedAfter = sanitizeForAudit(entry.afterState);
-    
+
     // Create tamper-evident hash
     const hash = createAuditHash(
       {
@@ -252,7 +273,7 @@ export async function getAuditLogs(filters: {
   total: number;
 }> {
   const where: Record<string, unknown> = {};
-  
+
   if (filters.userId) where.userId = filters.userId;
   if (filters.action) where.action = filters.action;
   if (filters.entityType) where.entityType = filters.entityType;
@@ -275,7 +296,7 @@ export async function getAuditLogs(filters: {
   ]);
 
   return {
-    logs: logs.map(log => ({
+    logs: logs.map((log) => ({
       id: log.id,
       timestamp: log.timestamp,
       userId: log.userId,
@@ -298,8 +319,15 @@ export async function getAuditLogs(filters: {
  */
 export async function logSecurityEvent(
   userId: string | null,
-  action: 'LOGIN' | 'LOGIN_FAILED' | 'LOGOUT' | 'MFA_SETUP' | 'MFA_DISABLE' | 
-          'PASSWORD_RESET' | 'SESSION_TERMINATED' | 'PRIVILEGE_ESCALATION',
+  action:
+    | 'LOGIN'
+    | 'LOGIN_FAILED'
+    | 'LOGOUT'
+    | 'MFA_SETUP'
+    | 'MFA_DISABLE'
+    | 'PASSWORD_RESET'
+    | 'SESSION_TERMINATED'
+    | 'PRIVILEGE_ESCALATION',
   details: Record<string, unknown>,
   ipAddress: string,
   userAgent: string
@@ -319,21 +347,23 @@ export async function logSecurityEvent(
 /**
  * Export audit logs to syslog/SIEM format
  */
-export function exportToSyslogFormat(logs: Array<{
-  timestamp: Date;
-  userId: string;
-  action: string;
-  entityType: string;
-  entityId: string;
-  ipAddress: string;
-}>): string[] {
-  return logs.map(log => {
+export function exportToSyslogFormat(
+  logs: Array<{
+    timestamp: Date;
+    userId: string;
+    action: string;
+    entityType: string;
+    entityId: string;
+    ipAddress: string;
+  }>
+): string[] {
+  return logs.map((log) => {
     // RFC 5424 syslog format
     const timestamp = log.timestamp.toISOString();
     const hostname = 'thai-accounting-erp';
     const appName = 'audit';
     const msgId = log.action;
-    
+
     return `<14>${timestamp} ${hostname} ${appName} - ${msgId} [userId="${log.userId}" entityType="${log.entityType}" entityId="${log.entityId}" ip="${log.ipAddress}"] Audit event: ${log.action}`;
   });
 }
@@ -341,25 +371,31 @@ export function exportToSyslogFormat(logs: Array<{
 /**
  * Export audit logs to JSON format for SIEM integration
  */
-export function exportToJSON(logs: Array<{
-  id: string;
-  timestamp: Date;
-  userId: string;
-  action: string;
-  entityType: string;
-  entityId: string;
-  beforeState: unknown;
-  afterState: unknown;
-  ipAddress: string;
-  userAgent: string;
-  hash: string;
-}>): string {
-  return JSON.stringify(logs.map(log => ({
-    ...log,
-    timestamp: log.timestamp.toISOString(),
-    siem_version: '1.0',
-    source: 'thai-accounting-erp',
-  })), null, 2);
+export function exportToJSON(
+  logs: Array<{
+    id: string;
+    timestamp: Date;
+    userId: string;
+    action: string;
+    entityType: string;
+    entityId: string;
+    beforeState: unknown;
+    afterState: unknown;
+    ipAddress: string;
+    userAgent: string;
+    hash: string;
+  }>
+): string {
+  return JSON.stringify(
+    logs.map((log) => ({
+      ...log,
+      timestamp: log.timestamp.toISOString(),
+      siem_version: '1.0',
+      source: 'thai-accounting-erp',
+    })),
+    null,
+    2
+  );
 }
 
 /**

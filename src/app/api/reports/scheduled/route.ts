@@ -1,9 +1,9 @@
 // Scheduled Reports API
 // /api/reports/scheduled - Manage scheduled report configurations
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { requireAuth } from '@/lib/api-utils'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { requireAuth } from '@/lib/api-utils';
+import { z } from 'zod';
 
 // Validation schema for creating/updating scheduled reports
 const scheduledReportSchema = z.object({
@@ -19,7 +19,7 @@ const scheduledReportSchema = z.object({
     'WHT_REPORT',
     'INVENTORY_REPORT',
     'SALES_REPORT',
-    'PURCHASE_REPORT'
+    'PURCHASE_REPORT',
   ]),
   schedule: z.enum(['daily', 'weekly', 'monthly', 'quarterly', 'custom']),
   dayOfWeek: z.number().min(0).max(6).optional(),
@@ -27,35 +27,37 @@ const scheduledReportSchema = z.object({
   monthOfYear: z.number().min(1).max(12).optional(),
   time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
   enabled: z.boolean().default(true),
-  parameters: z.object({
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
-    accountId: z.string().optional(),
-    customerId: z.string().optional(),
-    vendorId: z.string().optional(),
-    warehouseId: z.string().optional(),
-    includeZeroBalances: z.boolean().optional(),
-    compareToPrevious: z.boolean().optional(),
-  }).optional(),
+  parameters: z
+    .object({
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      accountId: z.string().optional(),
+      customerId: z.string().optional(),
+      vendorId: z.string().optional(),
+      warehouseId: z.string().optional(),
+      includeZeroBalances: z.boolean().optional(),
+      compareToPrevious: z.boolean().optional(),
+    })
+    .optional(),
   recipients: z.string().min(1, 'At least one recipient email is required'),
   outputFormat: z.enum(['PDF', 'EXCEL']).default('PDF'),
   emailSubject: z.string().optional(),
   emailBody: z.string().optional(),
-})
+});
 
 // GET /api/reports/scheduled - List all scheduled reports
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireAuth()
+    const session = await requireAuth();
 
-    const { searchParams } = request.nextUrl
-    const enabled = searchParams.get('enabled')
-    const reportType = searchParams.get('reportType')
+    const { searchParams } = request.nextUrl;
+    const enabled = searchParams.get('enabled');
+    const reportType = searchParams.get('reportType');
 
-    const where: any = {}
-    if (enabled === 'true') where.enabled = true
-    if (enabled === 'false') where.enabled = false
-    if (reportType) where.reportType = reportType
+    const where: any = {};
+    if (enabled === 'true') where.enabled = true;
+    if (enabled === 'false') where.enabled = false;
+    if (reportType) where.reportType = reportType;
 
     const reports = await prisma.scheduledReport.findMany({
       where,
@@ -66,50 +68,61 @@ export async function GET(request: NextRequest) {
           take: 5,
         },
       },
-    })
+    });
 
     // Calculate next run date for each report
-    const reportsWithNextRun = reports.map(report => ({
+    const reportsWithNextRun = reports.map((report) => ({
       ...report,
-      nextRunDate: calculateNextRunDate(report.schedule, report.dayOfWeek, report.dayOfMonth, report.monthOfYear, report.time),
+      nextRunDate: calculateNextRunDate(
+        report.schedule,
+        report.dayOfWeek,
+        report.dayOfMonth,
+        report.monthOfYear,
+        report.time
+      ),
       lastRunStatus: report.runs[0]?.status || null,
       lastRunAt: report.runs[0]?.runAt || null,
-    }))
+    }));
 
     return NextResponse.json({
       success: true,
       data: reportsWithNextRun,
       count: reportsWithNextRun.length,
-    })
+    });
   } catch (error: any) {
-    console.error('Error fetching scheduled reports:', error)
+    console.error('Error fetching scheduled reports:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch scheduled reports' },
       { status: 500 }
-    )
+    );
   }
 }
 
 // POST /api/reports/scheduled - Create a new scheduled report
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireAuth()
+    const session = await requireAuth();
 
-    const body = await request.json()
-    const validated = scheduledReportSchema.parse(body)
+    const body = await request.json();
+    const validated = scheduledReportSchema.parse(body);
 
     // Validate schedule-specific fields
-    validateScheduleFields(validated.schedule, validated.dayOfWeek, validated.dayOfMonth, validated.monthOfYear)
+    validateScheduleFields(
+      validated.schedule,
+      validated.dayOfWeek,
+      validated.dayOfMonth,
+      validated.monthOfYear
+    );
 
     // Validate email recipients
-    const emails = validated.recipients.split(',').map(e => e.trim())
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const emails = validated.recipients.split(',').map((e) => e.trim());
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     for (const email of emails) {
       if (!emailRegex.test(email)) {
         return NextResponse.json(
           { success: false, error: `Invalid email address: ${email}` },
           { status: 400 }
-        )
+        );
       }
     }
 
@@ -118,29 +131,35 @@ export async function POST(request: NextRequest) {
         ...validated,
         createdBy: session.user?.id || 'system',
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
       data: {
         ...report,
-        nextRunDate: calculateNextRunDate(report.schedule, report.dayOfWeek, report.dayOfMonth, report.monthOfYear, report.time),
+        nextRunDate: calculateNextRunDate(
+          report.schedule,
+          report.dayOfWeek,
+          report.dayOfMonth,
+          report.monthOfYear,
+          report.time
+        ),
       },
-    })
+    });
   } catch (error: any) {
-    console.error('Error creating scheduled report:', error)
+    console.error('Error creating scheduled report:', error);
 
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'Validation failed', details: error.errors },
         { status: 400 }
-      )
+      );
     }
 
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to create scheduled report' },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -152,55 +171,61 @@ function calculateNextRunDate(
   monthOfYear?: number | null,
   time?: string | null
 ): Date | null {
-  if (!time) return null
+  if (!time) return null;
 
-  const [hours, minutes] = time.split(':').map(Number)
-  const now = new Date()
-  const next = new Date()
+  const [hours, minutes] = time.split(':').map(Number);
+  const now = new Date();
+  const next = new Date();
 
-  next.setHours(hours, minutes, 0, 0)
+  next.setHours(hours, minutes, 0, 0);
 
   switch (schedule) {
     case 'daily':
-      next.setDate(next.getDate() + 1)
-      break
+      next.setDate(next.getDate() + 1);
+      break;
 
     case 'weekly':
-      if (dayOfWeek === undefined || dayOfWeek === null) return null
-      const currentDay = now.getDay()
-      const daysUntilNext = (dayOfWeek - currentDay + 7) % 7 || 7
-      next.setDate(next.getDate() + daysUntilNext)
-      break
+      if (dayOfWeek === undefined || dayOfWeek === null) return null;
+      const currentDay = now.getDay();
+      const daysUntilNext = (dayOfWeek - currentDay + 7) % 7 || 7;
+      next.setDate(next.getDate() + daysUntilNext);
+      break;
 
     case 'monthly':
-      if (dayOfMonth === undefined || dayOfMonth === null) return null
-      next.setDate(dayOfMonth)
+      if (dayOfMonth === undefined || dayOfMonth === null) return null;
+      next.setDate(dayOfMonth);
       if (next <= now) {
-        next.setMonth(next.getMonth() + 1)
+        next.setMonth(next.getMonth() + 1);
       }
       // Handle edge case where dayOfMonth doesn't exist in some months
       if (next.getDate() !== dayOfMonth) {
-        next.setDate(0) // Last day of month
+        next.setDate(0); // Last day of month
       }
-      break
+      break;
 
     case 'quarterly':
-      if (dayOfMonth === undefined || dayOfMonth === null || monthOfYear === undefined || monthOfYear === null) return null
-      next.setMonth(monthOfYear - 1) // monthOfYear is 1-12
-      next.setDate(dayOfMonth)
+      if (
+        dayOfMonth === undefined ||
+        dayOfMonth === null ||
+        monthOfYear === undefined ||
+        monthOfYear === null
+      )
+        return null;
+      next.setMonth(monthOfYear - 1); // monthOfYear is 1-12
+      next.setDate(dayOfMonth);
       if (next <= now) {
-        next.setFullYear(next.getFullYear() + 1)
+        next.setFullYear(next.getFullYear() + 1);
       }
-      break
+      break;
 
     case 'custom':
-      return null
+      return null;
 
     default:
-      return null
+      return null;
   }
 
-  return next
+  return next;
 }
 
 // Helper function to validate schedule-specific fields
@@ -213,20 +238,25 @@ function validateScheduleFields(
   switch (schedule) {
     case 'weekly':
       if (dayOfWeek === undefined || dayOfWeek === null) {
-        throw new Error('dayOfWeek is required for weekly schedules')
+        throw new Error('dayOfWeek is required for weekly schedules');
       }
-      break
+      break;
 
     case 'monthly':
       if (dayOfMonth === undefined || dayOfMonth === null) {
-        throw new Error('dayOfMonth is required for monthly schedules')
+        throw new Error('dayOfMonth is required for monthly schedules');
       }
-      break
+      break;
 
     case 'quarterly':
-      if (dayOfMonth === undefined || dayOfMonth === null || monthOfYear === undefined || monthOfYear === null) {
-        throw new Error('dayOfMonth and monthOfYear are required for quarterly schedules')
+      if (
+        dayOfMonth === undefined ||
+        dayOfMonth === null ||
+        monthOfYear === undefined ||
+        monthOfYear === null
+      ) {
+        throw new Error('dayOfMonth and monthOfYear are required for quarterly schedules');
       }
-      break
+      break;
   }
 }

@@ -17,12 +17,12 @@ function createLoader<K, V>(
   return new DataLoader<K, V, K>(async (keys) => {
     const items = await batchLoadFn(keys as K[]);
     const itemMap = new Map<K, V>();
-    
+
     for (const item of items) {
       const key = keyFn(item);
       itemMap.set(key, item);
     }
-    
+
     return keys.map((key) => itemMap.get(key) as V);
   });
 }
@@ -58,91 +58,101 @@ export function createDataLoaders() {
 
     // Invoice loaders
     invoiceById: createLoader(
-      (ids) => prisma.invoice.findMany({ 
-        where: { id: { in: ids } },
-        include: { lines: true, customer: true }
-      }),
+      (ids) =>
+        prisma.invoice.findMany({
+          where: { id: { in: ids } },
+          include: { lines: true, customer: true },
+        }),
       (i) => i.id
     ),
 
     // Invoice lines by invoice ID
     invoiceLinesByInvoiceId: createLoader(
-      (ids) => prisma.invoiceLine.findMany({ 
-        where: { invoiceId: { in: ids } },
-        include: { product: true }
-      }),
+      (ids) =>
+        prisma.invoiceLine.findMany({
+          where: { invoiceId: { in: ids } },
+          include: { product: true },
+        }),
       (l) => l.invoiceId
     ),
 
     // Purchase Invoice loaders
     purchaseInvoiceById: createLoader(
-      (ids) => prisma.purchaseInvoice.findMany({ 
-        where: { id: { in: ids } },
-        include: { lines: true, vendor: true }
-      }),
+      (ids) =>
+        prisma.purchaseInvoice.findMany({
+          where: { id: { in: ids } },
+          include: { lines: true, vendor: true },
+        }),
       (i) => i.id
     ),
 
     // Purchase invoice lines by purchase ID
     purchaseLinesByPurchaseId: createLoader(
-      (ids) => prisma.purchaseInvoiceLine.findMany({ 
-        where: { purchaseId: { in: ids } },
-        include: { product: true }
-      }),
+      (ids) =>
+        prisma.purchaseInvoiceLine.findMany({
+          where: { purchaseId: { in: ids } },
+          include: { product: true },
+        }),
       (l) => l.purchaseId
     ),
 
     // Journal Entry loaders
     journalEntryById: createLoader(
-      (ids) => prisma.journalEntry.findMany({ 
-        where: { id: { in: ids } },
-        include: { lines: { include: { account: true } } }
-      }),
+      (ids) =>
+        prisma.journalEntry.findMany({
+          where: { id: { in: ids } },
+          include: { lines: { include: { account: true } } },
+        }),
       (j) => j.id
     ),
 
     // Journal lines by entry ID
     journalLinesByEntryId: createLoader(
-      (ids) => prisma.journalLine.findMany({ 
-        where: { entryId: { in: ids } },
-        include: { account: true }
-      }),
+      (ids) =>
+        prisma.journalLine.findMany({
+          where: { entryId: { in: ids } },
+          include: { account: true },
+        }),
       (l) => l.entryId
     ),
 
     // Receipt loaders
     receiptById: createLoader(
-      (ids) => prisma.receipt.findMany({ 
-        where: { id: { in: ids } },
-        include: { customer: true, bankAccount: true }
-      }),
+      (ids) =>
+        prisma.receipt.findMany({
+          where: { id: { in: ids } },
+          include: { customer: true, bankAccount: true },
+        }),
       (r) => r.id
     ),
 
     // Receipt allocations by receipt ID
     receiptAllocationsByReceiptId: createLoader(
-      (ids) => prisma.receiptAllocation.findMany({ 
-        where: { receiptId: { in: ids } },
-        include: { invoice: true }
-      }),
+      (ids) =>
+        prisma.receiptAllocation.findMany({
+          where: { receiptId: { in: ids } },
+          include: { invoice: true },
+        }),
       (a) => a.receiptId
     ),
 
     // Payment loaders
     paymentById: createLoader(
-      (ids) => prisma.payment.findMany({ 
-        where: { id: { in: ids } },
-        include: { vendor: true, bankAccount: true }
-      }),
+      (ids) =>
+        prisma.payment.findMany({
+          where: { id: { in: ids } },
+          include: { vendor: true, bankAccount: true },
+        }),
       (p) => p.id
     ),
 
     // Payment allocations by payment ID
     paymentAllocationsByPaymentId: createLoader(
-      (ids) => prisma.paymentAllocation.findMany({ 
-        where: { paymentId: { in: ids } },
-        include: { invoice: true }
-      }),
+      (ids) =>
+        prisma.paymentAllocation.findMany({
+          where: { paymentId: { in: ids } },
+          include: { invoice: true },
+        }),
       (a) => a.paymentId
     ),
 
@@ -166,28 +176,31 @@ export function createDataLoaders() {
 
     // Invoices by customer ID
     invoicesByCustomerId: createLoader(
-      (ids) => prisma.invoice.findMany({ 
-        where: { customerId: { in: ids } },
-        orderBy: { invoiceDate: 'desc' }
-      }),
+      (ids) =>
+        prisma.invoice.findMany({
+          where: { customerId: { in: ids } },
+          orderBy: { invoiceDate: 'desc' },
+        }),
       (i) => i.customerId
     ),
 
     // Purchase invoices by vendor ID
     purchaseInvoicesByVendorId: createLoader(
-      (ids) => prisma.purchaseInvoice.findMany({ 
-        where: { vendorId: { in: ids } },
-        orderBy: { invoiceDate: 'desc' }
-      }),
+      (ids) =>
+        prisma.purchaseInvoice.findMany({
+          where: { vendorId: { in: ids } },
+          orderBy: { invoiceDate: 'desc' },
+        }),
       (i) => i.vendorId
     ),
 
     // Chart of Account children by parent ID
     accountChildrenByParentId: createLoader(
-      (ids) => prisma.chartOfAccount.findMany({ 
-        where: { parentId: { in: ids } },
-        orderBy: { code: 'asc' }
-      }),
+      (ids) =>
+        prisma.chartOfAccount.findMany({
+          where: { parentId: { in: ids } },
+          orderBy: { code: 'asc' },
+        }),
       (a) => a.parentId
     ),
   };

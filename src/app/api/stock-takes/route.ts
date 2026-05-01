@@ -1,14 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, apiResponse, apiError, unauthorizedError, forbiddenError, notFoundError } from '@/lib/api-utils'
-import { AuthError } from '@/lib/api-auth'
-import { z } from 'zod'
-import { db } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  requireAuth,
+  apiResponse,
+  apiError,
+  unauthorizedError,
+  forbiddenError,
+  notFoundError,
+} from '@/lib/api-utils';
+import { AuthError } from '@/lib/api-auth';
+import { z } from 'zod';
+import { db } from '@/lib/db';
 
 // Wrapper that properly handles auth with request context
 async function requireAuthWithRequest(request: NextRequest): Promise<any> {
   // Import the requireAuth that accepts request from api-auth
-  const { requireAuth: requireAuthWithReq } = await import('@/lib/api-auth')
-  return requireAuthWithReq(request)
+  const { requireAuth: requireAuthWithReq } = await import('@/lib/api-auth');
+  return requireAuthWithReq(request);
 }
 
 // Validation schema for stock take lines
@@ -17,7 +24,7 @@ const stockTakeLineSchema = z.object({
   systemQuantity: z.number().min(0, 'จำนวนในระบบต้องไม่ติดลบ'),
   actualQuantity: z.number().min(0, 'จำนวนนับจริงต้องไม่ติดลบ'),
   notes: z.string().optional(),
-})
+});
 
 // Validation schema for stock take
 const stockTakeSchema = z.object({
@@ -25,15 +32,15 @@ const stockTakeSchema = z.object({
   warehouseId: z.string().min(1, 'ต้องเลือกคลังสินค้า'),
   notes: z.string().optional(),
   lines: z.array(stockTakeLineSchema).min(1, 'ต้องมีอย่างน้อย 1 รายการ'),
-})
+});
 
 // Generate stock take number
 async function generateStockTakeNumber(): Promise<string> {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
 
-  const prefix = `ST-${year}${month}`
+  const prefix = `ST-${year}${month}`;
 
   const lastStockTake = await db.stockTake.findFirst({
     where: {
@@ -42,50 +49,47 @@ async function generateStockTakeNumber(): Promise<string> {
       },
     },
     orderBy: { stockTakeNumber: 'desc' },
-  })
+  });
 
-  let nextNum = 1
+  let nextNum = 1;
   if (lastStockTake) {
-    const parts = lastStockTake.stockTakeNumber.split('-')
-    const lastNum = parseInt(parts[parts.length - 1] || '0')
-    nextNum = lastNum + 1
+    const parts = lastStockTake.stockTakeNumber.split('-');
+    const lastNum = parseInt(parts[parts.length - 1] || '0');
+    nextNum = lastNum + 1;
   }
 
-  return `${prefix}-${String(nextNum).padStart(4, '0')}`
+  return `${prefix}-${String(nextNum).padStart(4, '0')}`;
 }
 
 // GET /api/stock-takes - List stock takes with pagination and filters
 export async function GET(request: NextRequest) {
   try {
-    await requireAuthWithRequest(request)
+    await requireAuthWithRequest(request);
 
-    const searchParams = request.nextUrl.searchParams
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const status = searchParams.get('status')
-    const warehouseId = searchParams.get('warehouseId')
-    const startDate = searchParams.get('startDate')
-    const endDate = searchParams.get('endDate')
-    const search = searchParams.get('search')
+    const searchParams = request.nextUrl.searchParams;
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const status = searchParams.get('status');
+    const warehouseId = searchParams.get('warehouseId');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const search = searchParams.get('search');
 
-    const skip = (page - 1) * limit
+    const skip = (page - 1) * limit;
 
-    const where: any = {}
+    const where: any = {};
 
-    if (status) where.status = status
-    if (warehouseId) where.warehouseId = warehouseId
+    if (status) where.status = status;
+    if (warehouseId) where.warehouseId = warehouseId;
 
     if (startDate || endDate) {
-      where.takeDate = {}
-      if (startDate) where.takeDate.gte = new Date(startDate)
-      if (endDate) where.takeDate.lte = new Date(endDate)
+      where.takeDate = {};
+      if (startDate) where.takeDate.gte = new Date(startDate);
+      if (endDate) where.takeDate.lte = new Date(endDate);
     }
 
     if (search) {
-      where.OR = [
-        { stockTakeNumber: { contains: search } },
-        { notes: { contains: search } },
-      ]
+      where.OR = [{ stockTakeNumber: { contains: search } }, { notes: { contains: search } }];
     }
 
     const [stockTakes, total] = await Promise.all([
@@ -104,7 +108,7 @@ export async function GET(request: NextRequest) {
         take: limit,
       }),
       db.stockTake.count({ where }),
-    ])
+    ]);
 
     return apiResponse({
       success: true,
@@ -115,44 +119,44 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-    })
+    });
   } catch (error) {
     if (error instanceof AuthError) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
-    console.error('Stock Takes API Error:', error)
+    console.error('Stock Takes API Error:', error);
     if (error instanceof Error) {
-      console.error('Error message:', error.message)
-      console.error('Error stack:', error.stack)
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
     }
-    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลการตรวจนับสต็อก')
+    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลการตรวจนับสต็อก');
   }
 }
 
 // POST /api/stock-takes - Create new stock take
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuthWithRequest(request)
+    const user = await requireAuthWithRequest(request);
 
     // Only ADMIN and ACCOUNTANT can create stock takes
     if (user.role !== 'ADMIN' && user.role !== 'ACCOUNTANT') {
-      return apiError('ไม่มีสิทธิ์สร้างการตรวจนับสต็อก', 403)
+      return apiError('ไม่มีสิทธิ์สร้างการตรวจนับสต็อก', 403);
     }
 
-    const body = await request.json()
-    const validatedData = stockTakeSchema.parse(body)
+    const body = await request.json();
+    const validatedData = stockTakeSchema.parse(body);
 
     // Verify warehouse exists
     const warehouse = await db.warehouse.findUnique({
       where: { id: validatedData.warehouseId },
-    })
+    });
 
     if (!warehouse) {
-      return notFoundError('ไม่พบคลังสินค้า')
+      return notFoundError('ไม่พบคลังสินค้า');
     }
 
     // Generate stock take number
-    const stockTakeNumber = await generateStockTakeNumber()
+    const stockTakeNumber = await generateStockTakeNumber();
 
     // Create stock take with lines
     const stockTake = await db.$transaction(async (tx) => {
@@ -165,11 +169,11 @@ export async function POST(request: NextRequest) {
           status: 'DRAFT',
           notes: validatedData.notes,
         },
-      })
+      });
 
       // ✅ OPTIMIZED: Create lines with variance calculations
       // Get all required data in batch first
-      const productIds = validatedData.lines.map(l => l.productId)
+      const productIds = validatedData.lines.map((l) => l.productId);
 
       // Get all stock balances in ONE query
       const balances = await tx.stockBalance.findMany({
@@ -179,37 +183,35 @@ export async function POST(request: NextRequest) {
             warehouseId: validatedData.warehouseId,
           },
         },
-      })
+      });
 
       // Create a map for quick balance lookup
-      const balanceMap = new Map(
-        balances.map(b => [`${b.productId}_${b.warehouseId}`, b])
-      )
+      const balanceMap = new Map(balances.map((b) => [`${b.productId}_${b.warehouseId}`, b]));
 
       // Get all products in ONE query
       const products = await tx.product.findMany({
         where: { id: { in: productIds } },
-        select: { id: true, cost: true }
-      })
+        select: { id: true, cost: true },
+      });
 
       // Create a map for quick product lookup
-      const productMap = new Map(products.map(p => [p.id, p]))
+      const productMap = new Map(products.map((p) => [p.id, p]));
 
       // Now create all lines in parallel using the pre-fetched data
       const lines = await Promise.all(
         validatedData.lines.map((line) => {
           // Get balance from map (no query!)
-          const balanceKey = `${line.productId}_${validatedData.warehouseId}`
-          const balance = balanceMap.get(balanceKey)
-          const systemQty = balance?.quantity || 0
+          const balanceKey = `${line.productId}_${validatedData.warehouseId}`;
+          const balance = balanceMap.get(balanceKey);
+          const systemQty = balance?.quantity || 0;
 
-          const actualQty = line.actualQuantity
-          const variance = actualQty - systemQty
+          const actualQty = line.actualQuantity;
+          const variance = actualQty - systemQty;
 
           // Get product from map (no query!)
-          const product = productMap.get(line.productId)
-          const unitCost = product?.cost || 0
-          const varianceValue = variance * unitCost
+          const product = productMap.get(line.productId);
+          const unitCost = product?.cost || 0;
+          const varianceValue = variance * unitCost;
 
           return tx.stockTakeLine.create({
             data: {
@@ -224,15 +226,15 @@ export async function POST(request: NextRequest) {
             include: {
               product: true,
             },
-          })
+          });
         })
-      )
+      );
 
       return {
         ...take,
         lines,
-      }
-    })
+      };
+    });
 
     // Fetch complete data with relations
     const completeStockTake = await db.stockTake.findUnique({
@@ -245,19 +247,19 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-    })
+    });
 
-    return apiResponse({ success: true, data: completeStockTake }, 201)
+    return apiResponse({ success: true, data: completeStockTake }, 201);
   } catch (error) {
     if (error instanceof AuthError) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
-    console.error('Stock Take Creation Error:', error)
+    console.error('Stock Take Creation Error:', error);
     if (error instanceof z.ZodError) {
-      return apiError('ข้อมูลไม่ถูกต้อง', 400)
+      return apiError('ข้อมูลไม่ถูกต้อง', 400);
     }
-    console.error('Error message:', error?.message)
-    console.error('Error stack:', error?.stack)
-    return apiError(error?.message || 'เกิดข้อผิดพลาดในการสร้างการตรวจนับสต็อก')
+    console.error('Error message:', error?.message);
+    console.error('Error stack:', error?.stack);
+    return apiError(error?.message || 'เกิดข้อผิดพลาดในการสร้างการตรวจนับสต็อก');
   }
 }

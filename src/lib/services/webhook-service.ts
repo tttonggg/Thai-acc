@@ -1,7 +1,7 @@
 /**
  * Webhook Service for Thai Accounting ERP
  * Phase D: API Mastery - Webhooks
- * 
+ *
  * Features:
  * - Event emission
  * - Retry logic with exponential backoff
@@ -20,31 +20,31 @@ export const WebhookEvents = {
   INVOICE_ISSUED: 'INVOICE_ISSUED',
   INVOICE_PAID: 'INVOICE_PAID',
   INVOICE_VOIDED: 'INVOICE_VOIDED',
-  
+
   // Receipt events
   RECEIPT_CREATED: 'RECEIPT_CREATED',
   RECEIPT_POSTED: 'RECEIPT_POSTED',
-  
+
   // Payment events
   PAYMENT_CREATED: 'PAYMENT_CREATED',
   PAYMENT_POSTED: 'PAYMENT_POSTED',
-  
+
   // Journal events
   JOURNAL_ENTRY_POSTED: 'JOURNAL_ENTRY_POSTED',
-  
+
   // Customer events
   CUSTOMER_CREATED: 'CUSTOMER_CREATED',
   CUSTOMER_UPDATED: 'CUSTOMER_UPDATED',
-  
+
   // Product events
   PRODUCT_CREATED: 'PRODUCT_CREATED',
   PRODUCT_UPDATED: 'PRODUCT_UPDATED',
-  
+
   // Stock events
   STOCK_MOVEMENT: 'STOCK_MOVEMENT',
 } as const;
 
-export type WebhookEvent = typeof WebhookEvents[keyof typeof WebhookEvents];
+export type WebhookEvent = (typeof WebhookEvents)[keyof typeof WebhookEvents];
 
 // Webhook payload interface
 interface WebhookPayload {
@@ -66,25 +66,15 @@ interface DeliveryResult {
  * Generate HMAC signature for webhook payload
  */
 export function generateSignature(payload: string, secret: string): string {
-  return crypto
-    .createHmac('sha256', secret)
-    .update(payload)
-    .digest('hex');
+  return crypto.createHmac('sha256', secret).update(payload).digest('hex');
 }
 
 /**
  * Verify webhook signature
  */
-export function verifySignature(
-  payload: string,
-  signature: string,
-  secret: string
-): boolean {
+export function verifySignature(payload: string, signature: string, secret: string): boolean {
   const expected = generateSignature(payload, secret);
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expected)
-  );
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
 }
 
 /**
@@ -144,10 +134,7 @@ async function deliverWebhook(
 /**
  * Emit webhook event to all subscribed endpoints
  */
-export async function emitWebhookEvent(
-  event: WebhookEvent,
-  data: any
-): Promise<void> {
+export async function emitWebhookEvent(event: WebhookEvent, data: any): Promise<void> {
   const payload: WebhookPayload = {
     event,
     timestamp: new Date().toISOString(),
@@ -205,7 +192,7 @@ export async function emitWebhookEvent(
         if (!success && attempt < webhook.retryCount) {
           // Wait before retry (exponential backoff)
           const delay = Math.min(1000 * Math.pow(2, attempt - 1), 30000);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     })

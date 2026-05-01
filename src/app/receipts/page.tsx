@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { KeeratiSidebar } from '@/components/layout/keerati-sidebar'
-import { ReceiptList } from '@/components/receipts/receipt-list'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { KeeratiSidebar } from '@/components/layout/keerati-sidebar';
+import { ReceiptList } from '@/components/receipts/receipt-list';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function ReceiptsPage() {
-  const router = useRouter()
-  const [activeModule, setActiveModule] = useState('receipts')
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const router = useRouter();
+  const [activeModule, setActiveModule] = useState('receipts');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -22,5 +22,5 @@ export default function ReceiptsPage() {
         <ReceiptList />
       </main>
     </div>
-  )
+  );
 }

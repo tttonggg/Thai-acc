@@ -19,7 +19,7 @@ const metrics = {
 function formatMetrics(): string {
   const timestamp = Date.now();
   const memoryUsage = process.memoryUsage();
-  
+
   return `# HELP http_requests_total Total HTTP requests
 # TYPE http_requests_total counter
 http_requests_total ${metrics.httpRequestsTotal} ${timestamp}
@@ -77,7 +77,7 @@ export async function GET(): Promise<NextResponse> {
 export function recordHttpRequest(duration: number): void {
   metrics.httpRequestsTotal++;
   metrics.httpRequestDuration.push(duration);
-  
+
   // Keep only last 1000 durations
   if (metrics.httpRequestDuration.length > 1000) {
     metrics.httpRequestDuration.shift();

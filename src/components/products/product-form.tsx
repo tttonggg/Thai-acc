@@ -1,48 +1,48 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 
 interface Product {
-  id: string
-  code: string
-  name: string
-  nameEn?: string
-  description?: string
-  category?: string
-  unit: string
-  type: 'PRODUCT' | 'SERVICE'
-  salePrice: number
-  costPrice: number
-  vatRate: number
-  vatType: 'EXCLUSIVE' | 'INCLUSIVE' | 'NONE'
-  isInventory: boolean
-  quantity: number
-  minQuantity: number
-  incomeType?: string
-  costingMethod: 'WEIGHTED_AVERAGE' | 'FIFO'
-  isActive: boolean
-  notes?: string
+  id: string;
+  code: string;
+  name: string;
+  nameEn?: string;
+  description?: string;
+  category?: string;
+  unit: string;
+  type: 'PRODUCT' | 'SERVICE';
+  salePrice: number;
+  costPrice: number;
+  vatRate: number;
+  vatType: 'EXCLUSIVE' | 'INCLUSIVE' | 'NONE';
+  isInventory: boolean;
+  quantity: number;
+  minQuantity: number;
+  incomeType?: string;
+  costingMethod: 'WEIGHTED_AVERAGE' | 'FIFO';
+  isActive: boolean;
+  notes?: string;
 }
 
 interface ProductFormProps {
-  product: Product | null
-  onSubmit: (data: Partial<Product>) => Promise<void>
-  isLoading?: boolean
+  product: Product | null;
+  onSubmit: (data: Partial<Product>) => Promise<void>;
+  isLoading?: boolean;
 }
 
 const PRODUCT_CATEGORIES = [
@@ -51,7 +51,7 @@ const PRODUCT_CATEGORIES = [
   'สินค้ากึ่งสำเร็จรูป',
   'บริการ',
   'อื่นๆ',
-]
+];
 
 const PRODUCT_UNITS = [
   'ชิ้น',
@@ -72,9 +72,9 @@ const PRODUCT_UNITS = [
   'กระป๋อง',
   'ขวด',
   'หีบ',
-]
+];
 
-const VAT_RATES = [0, 7]
+const VAT_RATES = [0, 7];
 
 const INCOME_TYPES = [
   { value: 'service', label: 'ค่าบริการ (3%)' },
@@ -82,23 +82,23 @@ const INCOME_TYPES = [
   { value: 'professional', label: 'ค่าบริการวิชาชีพ (3%)' },
   { value: 'contract', label: 'ค่าจ้างทำของ (1%)' },
   { value: 'advertising', label: 'ค่าโฆษณา (2%)' },
-]
+];
 
 const COSTING_METHODS = [
   { value: 'WEIGHTED_AVERAGE', label: 'ต้นทุนเฉลี่ยถ่วงน้ำหนัก (WAC)' },
   { value: 'FIFO', label: 'เข้าก่อนออกก่อน (FIFO)' },
-]
+];
 
 const CATEGORY_CODE_PREFIXES: Record<string, string> = {
-  'สินค้าสำเร็จรูป': 'FG',
-  'วัตถุดิบ': 'RM',
-  'สินค้ากึ่งสำเร็จรูป': 'WIP',
-  'บริการ': 'SV',
-  'อื่นๆ': 'OT',
-}
+  สินค้าสำเร็จรูป: 'FG',
+  วัตถุดิบ: 'RM',
+  สินค้ากึ่งสำเร็จรูป: 'WIP',
+  บริการ: 'SV',
+  อื่นๆ: 'OT',
+};
 
 export function ProductForm({ product, onSubmit, isLoading = false }: ProductFormProps) {
-  const { toast } = useToast()
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     code: '',
     name: '',
@@ -118,8 +118,8 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
     costingMethod: 'WEIGHTED_AVERAGE' as 'WEIGHTED_AVERAGE' | 'FIFO',
     isActive: true,
     notes: '',
-  })
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (product) {
@@ -143,96 +143,100 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
           costingMethod: product.costingMethod || 'WEIGHTED_AVERAGE',
           isActive: product.isActive !== false,
           notes: product.notes || '',
-        })
-      })
+        });
+      });
     }
-  }, [product])
+  }, [product]);
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     // Code required
     if (!formData.code.trim()) {
-      newErrors.code = 'กรุณาระบุรหัสสินค้า'
+      newErrors.code = 'กรุณาระบุรหัสสินค้า';
     }
 
     // Name required
     if (!formData.name.trim()) {
-      newErrors.name = 'กรุณาระบุชื่อสินค้า'
+      newErrors.name = 'กรุณาระบุชื่อสินค้า';
     }
 
     // Sale price validation
     if (formData.salePrice < 0) {
-      newErrors.salePrice = 'ราคาขายต้องไม่น้อยกว่า 0'
+      newErrors.salePrice = 'ราคาขายต้องไม่น้อยกว่า 0';
     }
 
     // Cost price validation
     if (formData.costPrice < 0) {
-      newErrors.costPrice = 'ราคาทุนต้องไม่น้อยกว่า 0'
+      newErrors.costPrice = 'ราคาทุนต้องไม่น้อยกว่า 0';
     }
 
     // Sale price should be greater than cost price
-    if (formData.salePrice > 0 && formData.costPrice > 0 && formData.salePrice < formData.costPrice) {
-      newErrors.salePrice = 'ราคาขายควรมากกว่าราคาทุน'
+    if (
+      formData.salePrice > 0 &&
+      formData.costPrice > 0 &&
+      formData.salePrice < formData.costPrice
+    ) {
+      newErrors.salePrice = 'ราคาขายควรมากกว่าราคาทุน';
     }
 
     // VAT rate validation
     if (formData.vatType !== 'NONE' && formData.vatRate === 0) {
-      newErrors.vatRate = 'กรุณาระบุอัตรา VAT'
+      newErrors.vatRate = 'กรุณาระบุอัตรา VAT';
     }
 
     // Inventory validations
     if (formData.isInventory) {
       if (formData.quantity < 0) {
-        newErrors.quantity = 'จำนวนคงเหลือต้องไม่น้อยกว่า 0'
+        newErrors.quantity = 'จำนวนคงเหลือต้องไม่น้อยกว่า 0';
       }
       if (formData.minQuantity < 0) {
-        newErrors.minQuantity = 'จำนวนต่ำสุดต้องไม่น้อยกว่า 0'
+        newErrors.minQuantity = 'จำนวนต่ำสุดต้องไม่น้อยกว่า 0';
       }
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
     try {
-      await onSubmit(formData)
+      await onSubmit(formData);
     } catch (error) {
-      console.error('Error submitting product:', error)
+      console.error('Error submitting product:', error);
     }
-  }
+  };
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => {
-      const newData = { ...prev, [field]: value }
+      const newData = { ...prev, [field]: value };
 
       // Auto-generate code when category changes (only for new products)
       if (field === 'category' && !product && value) {
-        const prefix = CATEGORY_CODE_PREFIXES[value] || 'PD'
-        newData.code = prefix + Date.now().toString().slice(-6)
+        const prefix = CATEGORY_CODE_PREFIXES[value] || 'PD';
+        newData.code = prefix + Date.now().toString().slice(-6);
       }
 
       // Clear error for this field when user starts typing
       if (errors[field]) {
         setErrors((prev) => {
-          const newErrors = { ...prev }
-          delete newErrors[field]
-          return newErrors
-        })
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
       }
 
-      return newData
-    })
-  }
+      return newData;
+    });
+  };
 
-  const isService = formData.type === 'SERVICE'
+  const isService = formData.type === 'SERVICE';
 
   return (
     <form onSubmit={handleSubmit}>
@@ -242,7 +246,7 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
           <h3 className="text-lg font-semibold">ข้อมูลพื้นฐาน</h3>
           <Separator />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* Product Code */}
             <div className="space-y-2">
               <Label htmlFor="code">
@@ -255,14 +259,14 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
                 placeholder="เช่น PD000001"
                 className={errors.code ? 'border-red-500' : ''}
               />
-              {errors.code && (
-                <p className="text-sm text-red-500">{errors.code}</p>
-              )}
+              {errors.code && <p className="text-sm text-red-500">{errors.code}</p>}
             </div>
 
             {/* Product Type */}
             <div className="space-y-2">
-              <Label htmlFor="type">ประเภท <span className="text-red-500">*</span></Label>
+              <Label htmlFor="type">
+                ประเภท <span className="text-red-500">*</span>
+              </Label>
               <Select
                 value={formData.type}
                 onValueChange={(value: any) => handleInputChange('type', value)}
@@ -290,9 +294,7 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
               placeholder="ชื่อสินค้าภาษาไทย"
               className={errors.name ? 'border-red-500' : ''}
             />
-            {errors.name && (
-              <p className="text-sm text-red-500">{errors.name}</p>
-            )}
+            {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
           </div>
 
           {/* Name (English) */}
@@ -318,7 +320,7 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* Category */}
             <div className="space-y-2">
               <Label htmlFor="category">หมวดหมู่</Label>
@@ -368,7 +370,7 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
           <h3 className="text-lg font-semibold">ข้อมูลราคา</h3>
           <Separator />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* Sale Price */}
             <div className="space-y-2">
               <Label htmlFor="salePrice">
@@ -384,9 +386,7 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
                 step="0.01"
                 className={errors.salePrice ? 'border-red-500' : ''}
               />
-              {errors.salePrice && (
-                <p className="text-sm text-red-500">{errors.salePrice}</p>
-              )}
+              {errors.salePrice && <p className="text-sm text-red-500">{errors.salePrice}</p>}
             </div>
 
             {/* Cost Price */}
@@ -402,13 +402,11 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
                 step="0.01"
                 className={errors.costPrice ? 'border-red-500' : ''}
               />
-              {errors.costPrice && (
-                <p className="text-sm text-red-500">{errors.costPrice}</p>
-              )}
+              {errors.costPrice && <p className="text-sm text-red-500">{errors.costPrice}</p>}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* VAT Rate */}
             <div className="space-y-2">
               <Label htmlFor="vatRate">อัตรา VAT</Label>
@@ -436,11 +434,11 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
               <Select
                 value={formData.vatType}
                 onValueChange={(value: any) => {
-                  handleInputChange('vatType', value)
+                  handleInputChange('vatType', value);
                   if (value === 'NONE') {
-                    handleInputChange('vatRate', 0)
+                    handleInputChange('vatRate', 0);
                   } else if (formData.vatRate === 0) {
-                    handleInputChange('vatRate', 7)
+                    handleInputChange('vatRate', 7);
                   }
                 }}
               >
@@ -506,7 +504,7 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
             <Separator />
 
             {formData.isInventory && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 {/* Current Quantity */}
                 <div className="space-y-2">
                   <Label htmlFor="quantity">จำนวนคงเหลือ</Label>
@@ -520,9 +518,7 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
                     step="0.01"
                     className={errors.quantity ? 'border-red-500' : ''}
                   />
-                  {errors.quantity && (
-                    <p className="text-sm text-red-500">{errors.quantity}</p>
-                  )}
+                  {errors.quantity && <p className="text-sm text-red-500">{errors.quantity}</p>}
                 </div>
 
                 {/* Minimum Quantity */}
@@ -532,7 +528,9 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
                     id="minQuantity"
                     type="number"
                     value={formData.minQuantity}
-                    onChange={(e) => handleInputChange('minQuantity', parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      handleInputChange('minQuantity', parseFloat(e.target.value) || 0)
+                    }
                     placeholder="0"
                     min="0"
                     step="0.01"
@@ -599,7 +597,7 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
       </CardContent>
 
       {/* Form Actions */}
-      <div className="flex justify-end gap-2 mt-6 px-6 pb-6">
+      <div className="mt-6 flex justify-end gap-2 px-6 pb-6">
         <Button
           type="button"
           variant="outline"
@@ -625,7 +623,7 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
                 costingMethod: product.costingMethod || 'WEIGHTED_AVERAGE',
                 isActive: product.isActive !== false,
                 notes: product.notes || '',
-              })
+              });
             }
           }}
           disabled={isLoading}
@@ -637,5 +635,5 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
         </Button>
       </div>
     </form>
-  )
+  );
 }

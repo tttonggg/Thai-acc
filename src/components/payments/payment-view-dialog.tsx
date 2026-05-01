@@ -1,24 +1,24 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Download, Printer } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, Download, Printer } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface PaymentViewDialogProps {
-  paymentId: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  paymentId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const paymentMethodLabels: Record<string, string> = {
@@ -27,62 +27,62 @@ const paymentMethodLabels: Record<string, string> = {
   CHEQUE: 'เช็ค',
   CREDIT: 'บัตรเครดิต',
   OTHER: 'อื่นๆ',
-}
+};
 
 const statusColors: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-800',
   POSTED: 'bg-green-100 text-green-800',
   CANCELLED: 'bg-red-100 text-red-800',
-}
+};
 
 const statusLabels: Record<string, string> = {
   DRAFT: 'ร่าง',
   POSTED: 'ลงบัญชีแล้ว',
   CANCELLED: 'ยกเลิก',
-}
+};
 
 export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentViewDialogProps) {
-  const [payment, setPayment] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
-  const [downloading, setDownloading] = useState(false)
-  const { toast } = useToast()
+  const [payment, setPayment] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchPayment = async () => {
-      if (!open || !paymentId) return
+      if (!open || !paymentId) return;
 
-      setLoading(true)
+      setLoading(true);
       try {
-        const res = await fetch(`/api/payments/${paymentId}`, { credentials: 'include' })
-        if (!res.ok) throw new Error('Fetch failed')
+        const res = await fetch(`/api/payments/${paymentId}`, { credentials: 'include' });
+        if (!res.ok) throw new Error('Fetch failed');
 
-        const data = await res.json()
-        setPayment(data.data || data)
+        const data = await res.json();
+        setPayment(data.data || data);
       } catch (error) {
-        console.error('Error fetching payment:', error)
+        console.error('Error fetching payment:', error);
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: 'โหลดข้อมูลไม่สำเร็จ',
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchPayment()
-  }, [open, paymentId, toast])
+    };
+    fetchPayment();
+  }, [open, paymentId, toast]);
 
   const handlePrint = () => {
-    if (!payment) return
-    
-    const printWindow = window.open('', '_blank')
+    if (!payment) return;
+
+    const printWindow = window.open('', '_blank');
     if (!printWindow) {
       toast({
         title: 'ไม่สามารถเปิดหน้าต่างได้',
         description: 'กรุณาอนุญาตให้เปิดหน้าต่างใหม่',
-        variant: 'destructive'
-      })
-      return
+        variant: 'destructive',
+      });
+      return;
     }
 
     const html = `
@@ -126,7 +126,9 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
           ${payment.chequeNo ? `<p><strong>เลขที่เช็ค:</strong> ${payment.chequeNo}</p>` : ''}
         </div>
 
-        ${payment.allocations && payment.allocations.length > 0 ? `
+        ${
+          payment.allocations && payment.allocations.length > 0
+            ? `
         <div class="section">
           <h3>การจัดจ่ายใบซื้อ</h3>
           <table>
@@ -137,16 +139,22 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
               </tr>
             </thead>
             <tbody>
-              ${payment.allocations.map((a: any) => `
+              ${payment.allocations
+                .map(
+                  (a: any) => `
                 <tr>
                   <td>${a.invoice?.invoiceNo || '-'}</td>
                   <td class="text-right">${(a.amount / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join('')}
             </tbody>
           </table>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <div class="section">
           <p class="total">ยอดจ่ายรวม: ${(payment.amount / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</p>
@@ -156,18 +164,18 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
         <script>window.onload = () => { setTimeout(() => window.print(), 500); }</script>
       </body>
       </html>
-    `
-    
-    printWindow.document.write(html)
-    printWindow.document.close()
-  }
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
 
   const handleDownload = async () => {
-    setDownloading(true)
+    setDownloading(true);
     try {
       // Client-side HTML download
-      if (!payment) return
-      
+      if (!payment) return;
+
       const html = `
         <!DOCTYPE html>
         <html>
@@ -195,32 +203,32 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
           </div>
         </body>
         </html>
-      `
-      
-      const blob = new Blob([html], { type: 'text/html' })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${payment.paymentNo}.html`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      `;
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${payment.paymentNo}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
       toast({
         title: 'ดาวน์โหลดสำเร็จ',
-        description: `ดาวน์โหลด ${payment.paymentNo} เรียบร้อยแล้ว`
-      })
+        description: `ดาวน์โหลด ${payment.paymentNo} เรียบร้อยแล้ว`,
+      });
     } catch (error) {
       toast({
         title: 'ดาวน์โหลดไม่สำเร็จ',
         description: 'กรุณาลองอีกครั้ง',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setDownloading(false)
+      setDownloading(false);
     }
-  }
+  };
 
   if (loading || !payment) {
     return (
@@ -235,27 +243,26 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
-  const totalAllocated = payment.allocations?.reduce((sum: number, a: any) => sum + (a.amount || 0), 0) || 0
-  const totalWHT = payment.whtAmount || 0
-  const toBaht = (satang: number) => satang / 100
+  const totalAllocated =
+    payment.allocations?.reduce((sum: number, a: any) => sum + (a.amount || 0), 0) || 0;
+  const totalWHT = payment.whtAmount || 0;
+  const toBaht = (satang: number) => satang / 100;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-4xl">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle>ใบจ่ายเงิน</DialogTitle>
-              <DialogDescription className="font-mono text-lg mt-1">
+              <DialogDescription className="mt-1 font-mono text-lg">
                 {payment.paymentNo}
               </DialogDescription>
             </div>
-            <Badge className={statusColors[payment.status]}>
-              {statusLabels[payment.status]}
-            </Badge>
+            <Badge className={statusColors[payment.status]}>{statusLabels[payment.status]}</Badge>
           </div>
         </DialogHeader>
 
@@ -325,8 +332,8 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
               <CardContent>
                 <div className="space-y-3">
                   {payment.allocations.map((allocation: any, index: number) => (
-                    <div key={index} className="border rounded-lg p-3">
-                      <div className="flex justify-between items-start">
+                    <div key={index} className="rounded-lg border p-3">
+                      <div className="flex items-start justify-between">
                         <div>
                           <p className="font-medium">{allocation.invoice?.invoiceNo}</p>
                           <p className="text-sm text-gray-500">
@@ -334,10 +341,18 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">฿{toBaht(allocation.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</p>
+                          <p className="font-medium">
+                            ฿
+                            {toBaht(allocation.amount).toLocaleString('th-TH', {
+                              minimumFractionDigits: 2,
+                            })}
+                          </p>
                           {allocation.whtAmount > 0 && (
                             <p className="text-sm text-gray-500">
-                              WHT ({allocation.whtRate}%): ฿{toBaht(allocation.whtAmount).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                              WHT ({allocation.whtRate}%): ฿
+                              {toBaht(allocation.whtAmount).toLocaleString('th-TH', {
+                                minimumFractionDigits: 2,
+                              })}
                             </p>
                           )}
                         </div>
@@ -347,23 +362,36 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
                 </div>
 
                 {/* Totals */}
-                <div className="mt-4 pt-4 border-t space-y-2">
+                <div className="mt-4 space-y-2 border-t pt-4">
                   <div className="flex justify-between">
                     <span>จัดจ่ายรวม:</span>
-                    <span className="font-medium">฿{toBaht(totalAllocated).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                    <span className="font-medium">
+                      ฿
+                      {toBaht(totalAllocated).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>หัก ณ ที่จ่ายรวม:</span>
-                    <span className="font-medium">฿{toBaht(totalWHT).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                    <span className="font-medium">
+                      ฿{toBaht(totalWHT).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                    </span>
                   </div>
                   <div className="flex justify-between text-lg">
                     <span className="font-bold">ยอดจ่ายรวม:</span>
-                    <span className="font-bold">฿{toBaht(payment.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                    <span className="font-bold">
+                      ฿
+                      {toBaht(payment.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                    </span>
                   </div>
                   {payment.unallocated > 0 && (
                     <div className="flex justify-between text-sm text-blue-600">
                       <span>คงเหลือ (เครดิตเจ้าหนี้):</span>
-                      <span>฿{toBaht(payment.unallocated).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                      <span>
+                        ฿
+                        {toBaht(payment.unallocated).toLocaleString('th-TH', {
+                          minimumFractionDigits: 2,
+                        })}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -389,14 +417,18 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
                   </div>
                   {payment.journalEntry.lines && payment.journalEntry.lines.length > 0 && (
                     <div className="mt-3 border-t pt-3">
-                      <p className="text-sm font-medium mb-2">รายการบัญชี:</p>
+                      <p className="mb-2 text-sm font-medium">รายการบัญชี:</p>
                       <div className="space-y-1">
                         {payment.journalEntry.lines.map((line: any, index: number) => (
                           <div key={index} className="flex justify-between text-sm">
-                            <span>{line.account?.code} - {line.account?.name}</span>
+                            <span>
+                              {line.account?.code} - {line.account?.name}
+                            </span>
                             <span className="font-mono">
-                              {line.debit > 0 && `Dr ${toBaht(line.debit).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
-                              {line.credit > 0 && `Cr ${toBaht(line.credit).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
+                              {line.debit > 0 &&
+                                `Dr ${toBaht(line.debit).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
+                              {line.credit > 0 &&
+                                `Cr ${toBaht(line.credit).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`}
                             </span>
                           </div>
                         ))}
@@ -410,25 +442,18 @@ export function PaymentViewDialog({ paymentId, open, onOpenChange }: PaymentView
 
           {/* Actions */}
           <div className="flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={handlePrint}
-              disabled={payment.status !== 'POSTED'}
-            >
-              <Printer className="h-4 w-4 mr-2" />
+            <Button variant="outline" onClick={handlePrint} disabled={payment.status !== 'POSTED'}>
+              <Printer className="mr-2 h-4 w-4" />
               พิมพ์
             </Button>
-            <Button
-              onClick={handleDownload}
-              disabled={downloading || payment.status !== 'POSTED'}
-            >
-              {downloading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              <Download className="h-4 w-4 mr-2" />
+            <Button onClick={handleDownload} disabled={downloading || payment.status !== 'POSTED'}>
+              {downloading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Download className="mr-2 h-4 w-4" />
               ดาวน์โหลด PDF
             </Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

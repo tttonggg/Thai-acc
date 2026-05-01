@@ -20,7 +20,7 @@ export interface AuditContext {
  * Higher-order function to wrap API handlers with audit logging
  */
 export function withAudit<
-  T extends (request: NextRequest, ...args: any[]) => Promise<NextResponse>
+  T extends (request: NextRequest, ...args: any[]) => Promise<NextResponse>,
 >(
   handler: T,
   options: {
@@ -33,7 +33,7 @@ export function withAudit<
 ): T {
   return (async (request: NextRequest, ...args: any[]) => {
     // Extract before state if applicable
-    const beforeState = options.extractBeforeState 
+    const beforeState = options.extractBeforeState
       ? await options.extractBeforeState(request)
       : null;
 
@@ -111,9 +111,7 @@ export function extractEntityIdFromPath(request: NextRequest, position: number =
 /**
  * Helper to clone and parse response body
  */
-export async function extractResponseBody<T>(
-  response: NextResponse
-): Promise<T | null> {
+export async function extractResponseBody<T>(response: NextResponse): Promise<T | null> {
   try {
     const cloned = response.clone();
     const body = await cloned.json();

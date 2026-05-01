@@ -1,87 +1,87 @@
-import { NextAuthOptions, getServerSession } from "next-auth"
-import { cookies } from "next/headers"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { prisma } from "./db"
-import bcrypt from "bcryptjs"
-import { logLogin, logFailedLogin } from "./activity-logger"
-import { verifyMFAToken } from "./mfa-service"
-import { createSession, invalidateSession } from "./session-service"
-import { validatePasswordStrength } from "./password-strength"
-import { logSecurityEvent } from "./audit-logger"
+import { NextAuthOptions, getServerSession } from 'next-auth';
+import { cookies } from 'next/headers';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { prisma } from './db';
+import bcrypt from 'bcryptjs';
+import { logLogin, logFailedLogin } from './activity-logger';
+import { verifyMFAToken } from './mfa-service';
+import { createSession, invalidateSession } from './session-service';
+import { validatePasswordStrength } from './password-strength';
+import { logSecurityEvent } from './audit-logger';
 
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session {
     user: {
-      id: string
-      email: string
-      name?: string | null
-      role: string
-      mfaEnabled: boolean
-      mfaVerified: boolean
-    }
+      id: string;
+      email: string;
+      name?: string | null;
+      role: string;
+      mfaEnabled: boolean;
+      mfaVerified: boolean;
+    };
   }
   interface User {
-    id: string
-    email: string
-    name?: string | null
-    role: string
-    mfaEnabled: boolean
-    requiresMFA: boolean
+    id: string;
+    email: string;
+    name?: string | null;
+    role: string;
+    mfaEnabled: boolean;
+    requiresMFA: boolean;
   }
 }
 
-declare module "next-auth/jwt" {
+declare module 'next-auth/jwt' {
   interface JWT {
-    id: string
-    email: string
-    name?: string | null
-    role: string
-    mfaEnabled: boolean
-    mfaVerified: boolean
+    id: string;
+    email: string;
+    name?: string | null;
+    role: string;
+    mfaEnabled: boolean;
+    mfaVerified: boolean;
   }
 }
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "credentials",
+      name: 'credentials',
       credentials: {
-        email: { label: "อีเมล", type: "email" },
-        password: { label: "รหัสผ่าน", type: "password" },
-        mfaToken: { label: "รหัสยืนยัน", type: "text" },
-        sessionId: { label: "Session ID", type: "text" }
+        email: { label: 'อีเมล', type: 'email' },
+        password: { label: 'รหัสผ่าน', type: 'password' },
+        mfaToken: { label: 'รหัสยืนยัน', type: 'text' },
+        sessionId: { label: 'Session ID', type: 'text' },
       },
       async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          return null;
         }
 
         let user;
         try {
           user = await prisma.user.findUnique({
-            where: { email: credentials.email }
-          })
+            where: { email: credentials.email },
+          });
         } catch (dbError) {
-          console.error('Database error during user lookup:', dbError)
-          throw new Error('Database connection error. Please try again.')
+          console.error('Database error during user lookup:', dbError);
+          throw new Error('Database connection error. Please try again.');
         }
 
         if (!user || !user.isActive) {
-          await logFailedLogin(credentials.email)
-          return null
+          await logFailedLogin(credentials.email);
+          return null;
         }
 
         let passwordMatch;
         try {
-          passwordMatch = await bcrypt.compare(credentials.password, user.password)
+          passwordMatch = await bcrypt.compare(credentials.password, user.password);
         } catch (bcryptError) {
-          console.error('Bcrypt error during password comparison:', bcryptError)
-          throw new Error('Authentication error. Please try again.')
+          console.error('Bcrypt error during password comparison:', bcryptError);
+          throw new Error('Authentication error. Please try again.');
         }
 
         if (!passwordMatch) {
-          await logFailedLogin(credentials.email, undefined, 'Invalid password')
-          return null
+          await logFailedLogin(credentials.email, undefined, 'Invalid password');
+          return null;
         }
 
         // Check if MFA is enabled
@@ -95,16 +95,16 @@ export const authOptions: NextAuthOptions = {
               role: user.role,
               mfaEnabled: true,
               requiresMFA: true,
-            } as const
+            } as const;
           }
 
           // Verify MFA token
           let mfaResult;
           try {
-            mfaResult = await verifyMFAToken(user.id, credentials.mfaToken)
+            mfaResult = await verifyMFAToken(user.id, credentials.mfaToken);
           } catch (mfaError) {
-            console.error('MFA verification system error:', mfaError)
-            throw new Error('MFA system error. Please contact support.')
+            console.error('MFA verification system error:', mfaError);
+            throw new Error('MFA system error. Please contact support.');
           }
 
           if (!mfaResult.valid) {
@@ -112,22 +112,22 @@ export const authOptions: NextAuthOptions = {
               user.id,
               'LOGIN_FAILED',
               { reason: 'Invalid MFA token' },
-              req?.headers?.['x-forwarded-for'] as string || 'unknown',
-              req?.headers?.['user-agent'] as string || 'unknown'
-            )
-            await logFailedLogin(credentials.email, user.id, 'Invalid MFA')
-            throw new Error('Invalid MFA code')
+              (req?.headers?.['x-forwarded-for'] as string) || 'unknown',
+              (req?.headers?.['user-agent'] as string) || 'unknown'
+            );
+            await logFailedLogin(credentials.email, user.id, 'Invalid MFA');
+            throw new Error('Invalid MFA code');
           }
         }
 
         // Create session in our session table for concurrent session limiting
-        const ipAddress = req?.headers?.['x-forwarded-for'] as string || 'unknown'
-        const userAgent = req?.headers?.['user-agent'] as string || 'unknown'
+        const ipAddress = (req?.headers?.['x-forwarded-for'] as string) || 'unknown';
+        const userAgent = (req?.headers?.['user-agent'] as string) || 'unknown';
 
         try {
-          await createSession(user.id, ipAddress, userAgent)
+          await createSession(user.id, ipAddress, userAgent);
         } catch (sessionError) {
-          console.error('Session creation error:', sessionError)
+          console.error('Session creation error:', sessionError);
           // Continue with login even if session tracking fails
         }
 
@@ -136,17 +136,17 @@ export const authOptions: NextAuthOptions = {
           await prisma.$transaction([
             prisma.user.update({
               where: { id: user.id },
-              data: { lastLoginAt: new Date() }
+              data: { lastLoginAt: new Date() },
             }),
             prisma.activityLog.create({
               data: {
                 userId: user.id,
                 action: 'LOGIN',
                 module: 'auth',
-                status: 'success'
-              }
-            })
-          ])
+                status: 'success',
+              },
+            }),
+          ]);
 
           await logSecurityEvent(
             user.id,
@@ -154,9 +154,9 @@ export const authOptions: NextAuthOptions = {
             { mfaUsed: user.mfaEnabled },
             ipAddress,
             userAgent
-          )
+          );
         } catch (logError) {
-          console.error('Error during post-login logging:', logError)
+          console.error('Error during post-login logging:', logError);
           // Continue with login even if logging fails
         }
 
@@ -167,40 +167,40 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           mfaEnabled: user.mfaEnabled,
           requiresMFA: false,
-        }
-      }
-    })
+        };
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user, trigger }) {
       if (user) {
-        token.id = user.id
-        token.email = user.email
-        token.name = user.name
-        token.role = user.role
-        token.mfaEnabled = user.mfaEnabled
-        token.mfaVerified = !user.requiresMFA
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.role = user.role;
+        token.mfaEnabled = user.mfaEnabled;
+        token.mfaVerified = !user.requiresMFA;
       }
-      
+
       // Handle session rotation on privilege escalation
       if (trigger === 'update' && token.role) {
         try {
           // Log privilege escalation check
-          const { logSecurityEvent } = await import('./audit-logger')
+          const { logSecurityEvent } = await import('./audit-logger');
           await logSecurityEvent(
             token.id,
             'PRIVILEGE_ESCALATION',
             { role: token.role },
             'unknown',
             'session-update'
-          )
+          );
         } catch (error) {
-          console.error('Error logging privilege escalation:', error)
+          console.error('Error logging privilege escalation:', error);
           // Continue even if logging fails
         }
       }
 
-      return token
+      return token;
     },
     async session({ session, token }) {
       if (token) {
@@ -211,17 +211,17 @@ export const authOptions: NextAuthOptions = {
           role: token.role || 'USER',
           mfaEnabled: token.mfaEnabled || false,
           mfaVerified: token.mfaVerified || false,
-        }
+        };
       }
-      return session
-    }
+      return session;
+    },
   },
   pages: {
-    signIn: "/",
-    error: "/",
+    signIn: '/',
+    error: '/',
   },
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
     maxAge: 8 * 60 * 60, // 8 hours
   },
   trustHost: true,
@@ -230,20 +230,14 @@ export const authOptions: NextAuthOptions = {
     async signOut({ token }) {
       // Invalidate session when user signs out
       if (token?.id) {
-        const { invalidateAllUserSessions } = await import('./session-service')
-        await invalidateAllUserSessions(token.id)
-        
-        await logSecurityEvent(
-          token.id,
-          'LOGOUT',
-          {},
-          'unknown',
-          'signout'
-        )
+        const { invalidateAllUserSessions } = await import('./session-service');
+        await invalidateAllUserSessions(token.id);
+
+        await logSecurityEvent(token.id, 'LOGOUT', {}, 'unknown', 'signout');
       }
     },
   },
-}
+};
 
 /**
  * Register a new user with password strength validation
@@ -256,25 +250,25 @@ export async function registerUser(
 ): Promise<{ success: boolean; userId?: string; error?: string }> {
   try {
     // Validate password strength
-    validatePasswordStrength(password)
+    validatePasswordStrength(password);
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Invalid password'
-    }
+      error: error instanceof Error ? error.message : 'Invalid password',
+    };
   }
 
   // Check if email exists
   const existing = await prisma.user.findUnique({
-    where: { email }
-  })
+    where: { email },
+  });
 
   if (existing) {
-    return { success: false, error: 'Email already registered' }
+    return { success: false, error: 'Email already registered' };
   }
 
   // Hash password
-  const hashedPassword = await bcrypt.hash(password, 12)
+  const hashedPassword = await bcrypt.hash(password, 12);
 
   // Create user
   const user = await prisma.user.create({
@@ -283,10 +277,10 @@ export async function registerUser(
       password: hashedPassword,
       name,
       role,
-    }
-  })
+    },
+  });
 
-  return { success: true, userId: user.id }
+  return { success: true, userId: user.id };
 }
 
 /**
@@ -298,26 +292,26 @@ export async function resetPassword(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // Validate password strength
-    validatePasswordStrength(newPassword)
+    validatePasswordStrength(newPassword);
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Invalid password'
-    }
+      error: error instanceof Error ? error.message : 'Invalid password',
+    };
   }
 
-  const hashedPassword = await bcrypt.hash(newPassword, 12)
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
 
   await prisma.user.update({
     where: { id: userId },
-    data: { password: hashedPassword }
-  })
+    data: { password: hashedPassword },
+  });
 
   // Invalidate all sessions for security
-  const { invalidateAllUserSessions } = await import('./session-service')
-  await invalidateAllUserSessions(userId)
+  const { invalidateAllUserSessions } = await import('./session-service');
+  await invalidateAllUserSessions(userId);
 
-  return { success: true }
+  return { success: true };
 }
 
 /**
@@ -329,28 +323,27 @@ export async function changePassword(
   newPassword: string
 ): Promise<{ success: boolean; error?: string }> {
   const user = await prisma.user.findUnique({
-    where: { id: userId }
-  })
+    where: { id: userId },
+  });
 
   if (!user) {
-    return { success: false, error: 'User not found' }
+    return { success: false, error: 'User not found' };
   }
 
   // Verify old password
-  const passwordMatch = await bcrypt.compare(oldPassword, user.password)
+  const passwordMatch = await bcrypt.compare(oldPassword, user.password);
   if (!passwordMatch) {
-    return { success: false, error: 'Current password is incorrect' }
+    return { success: false, error: 'Current password is incorrect' };
   }
 
   // Check new password is different
-  const samePassword = await bcrypt.compare(newPassword, user.password)
+  const samePassword = await bcrypt.compare(newPassword, user.password);
   if (samePassword) {
-    return { success: false, error: 'New password must be different from old password' }
+    return { success: false, error: 'New password must be different from old password' };
   }
 
-  return resetPassword(userId, newPassword)
+  return resetPassword(userId, newPassword);
 }
-
 
 /**
  * Get current session (auth helper)
@@ -358,12 +351,12 @@ export async function changePassword(
  */
 export async function auth() {
   try {
-    const session = await getServerSession(authOptions)
-    return session
+    const session = await getServerSession(authOptions);
+    return session;
   } catch (error) {
     // getServerSession may throw if host/origin doesn't match NEXTAUTH_URL
     // This can happen with reverse proxies or when NEXTAUTH_URL is misconfigured
-    console.error('getServerSession error:', error)
-    return null
+    console.error('getServerSession error:', error);
+    return null;
   }
 }

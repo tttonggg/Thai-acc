@@ -1,17 +1,17 @@
 // Activity Logger
 // บันทึกกิจกรรมของผู้ใช้ในระบบ
 
-import { prisma } from './db'
+import { prisma } from './db';
 
 export interface ActivityLogOptions {
-  userId: string
-  action: string // LOGIN, LOGOUT, CREATE, UPDATE, DELETE, POST, VIEW, EXPORT, etc.
-  module: string // invoices, payments, inventory, banking, assets, payroll, petty-cash, etc.
-  recordId?: string // ID of affected record
-  details?: any // Additional context (JSON data)
-  ipAddress?: string
-  status?: 'success' | 'failed'
-  errorMessage?: string
+  userId: string;
+  action: string; // LOGIN, LOGOUT, CREATE, UPDATE, DELETE, POST, VIEW, EXPORT, etc.
+  module: string; // invoices, payments, inventory, banking, assets, payroll, petty-cash, etc.
+  recordId?: string; // ID of affected record
+  details?: any; // Additional context (JSON data)
+  ipAddress?: string;
+  status?: 'success' | 'failed';
+  errorMessage?: string;
 }
 
 /**
@@ -28,7 +28,7 @@ export async function logActivity(options: ActivityLogOptions): Promise<void> {
     ipAddress,
     status = 'success',
     errorMessage,
-  } = options
+  } = options;
 
   try {
     // Run asynchronously in the background
@@ -43,27 +43,24 @@ export async function logActivity(options: ActivityLogOptions): Promise<void> {
         status,
         errorMessage,
       },
-    })
+    });
   } catch (error) {
     // Silent fail - don't break the main operation if logging fails
-    console.error('Failed to log activity:', error)
+    console.error('Failed to log activity:', error);
   }
 }
 
 /**
  * Log successful login
  */
-export async function logLogin(
-  userId: string,
-  ipAddress?: string
-): Promise<void> {
+export async function logLogin(userId: string, ipAddress?: string): Promise<void> {
   await logActivity({
     userId,
     action: 'LOGIN',
     module: 'auth',
     ipAddress,
     status: 'success',
-  })
+  });
 }
 
 /**
@@ -87,26 +84,23 @@ export async function logFailedLogin(
         status: 'failed',
         errorMessage: errorMessage || 'Invalid credentials',
       },
-    })
+    });
   } catch (error) {
-    console.error('Failed to log failed login:', error)
+    console.error('Failed to log failed login:', error);
   }
 }
 
 /**
  * Log logout
  */
-export async function logLogout(
-  userId: string,
-  ipAddress?: string
-): Promise<void> {
+export async function logLogout(userId: string, ipAddress?: string): Promise<void> {
   await logActivity({
     userId,
     action: 'LOGOUT',
     module: 'auth',
     ipAddress,
     status: 'success',
-  })
+  });
 }
 
 /**
@@ -127,7 +121,7 @@ export async function logCreate(
     details,
     ipAddress,
     status: 'success',
-  })
+  });
 }
 
 export async function logUpdate(
@@ -145,7 +139,7 @@ export async function logUpdate(
     details,
     ipAddress,
     status: 'success',
-  })
+  });
 }
 
 export async function logDelete(
@@ -163,7 +157,7 @@ export async function logDelete(
     details,
     ipAddress,
     status: 'success',
-  })
+  });
 }
 
 /**
@@ -184,7 +178,7 @@ export async function logPost(
     details,
     ipAddress,
     status: 'success',
-  })
+  });
 }
 
 /**
@@ -203,7 +197,7 @@ export async function logView(
     recordId,
     ipAddress,
     status: 'success',
-  })
+  });
 }
 
 /**
@@ -222,7 +216,7 @@ export async function logExport(
     details,
     ipAddress,
     status: 'success',
-  })
+  });
 }
 
 /**
@@ -244,5 +238,5 @@ export async function logError(
     ipAddress,
     status: 'failed',
     errorMessage,
-  })
+  });
 }

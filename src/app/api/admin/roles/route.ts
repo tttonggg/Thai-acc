@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requirePermission } from '@/lib/api-utils'
-import { db } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { requirePermission } from '@/lib/api-utils';
+import { db } from '@/lib/db';
 
 // GET /api/admin/roles - List all roles with permissions
 export async function GET() {
   try {
-    await requirePermission('admin', 'manage')
+    await requirePermission('admin', 'manage');
 
     const roles = await db.role.findMany({
       include: {
@@ -20,37 +20,37 @@ export async function GET() {
           },
         },
       },
-      orderBy: [
-        { type: 'asc' },
-        { name: 'asc' },
-      ],
-    })
+      orderBy: [{ type: 'asc' }, { name: 'asc' }],
+    });
 
-    return NextResponse.json({ success: true, data: roles })
+    return NextResponse.json({ success: true, data: roles });
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 403 })
+      return NextResponse.json({ success: false, error: error.message }, { status: 403 });
     }
-    return NextResponse.json({ success: false, error: 'Failed to fetch roles' }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Failed to fetch roles' }, { status: 500 });
   }
 }
 
 // POST /api/admin/roles - Create a new custom role
 export async function POST(request: NextRequest) {
   try {
-    await requirePermission('admin', 'manage')
+    await requirePermission('admin', 'manage');
 
-    const body = await request.json()
-    const { name, description, permissionIds } = body
+    const body = await request.json();
+    const { name, description, permissionIds } = body;
 
     if (!name) {
-      return NextResponse.json({ success: false, error: 'Role name is required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'Role name is required' }, { status: 400 });
     }
 
     // Check if role name already exists
-    const existing = await db.role.findUnique({ where: { name } })
+    const existing = await db.role.findUnique({ where: { name } });
     if (existing) {
-      return NextResponse.json({ success: false, error: 'Role name already exists' }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: 'Role name already exists' },
+        { status: 400 }
+      );
     }
 
     // Create role with permissions
@@ -74,13 +74,13 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-    })
+    });
 
-    return NextResponse.json({ success: true, data: role }, { status: 201 })
+    return NextResponse.json({ success: true, data: role }, { status: 201 });
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 403 })
+      return NextResponse.json({ success: false, error: error.message }, { status: 403 });
     }
-    return NextResponse.json({ success: false, error: 'Failed to create role' }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Failed to create role' }, { status: 500 });
   }
 }

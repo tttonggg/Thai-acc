@@ -1,75 +1,105 @@
-'use client'
+'use client';
 
 // ============================================
 // 📦 Stock Take Management Page (TAS 2 Compliant)
 // Stock Count & Variance Processing
 // ============================================
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
-  Package, ClipboardCheck, Plus, Search, Filter, Calendar,
-  Warehouse, CheckCircle, XCircle, Clock, AlertCircle,
-  FileText, Download, Eye, Edit, Trash2, MoreHorizontal,
-  TrendingUp, TrendingDown, RefreshCw
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
-import { ScrollArea } from '@/components/ui/scroll-area'
+  Package,
+  ClipboardCheck,
+  Plus,
+  Search,
+  Filter,
+  Calendar,
+  Warehouse,
+  CheckCircle,
+  XCircle,
+  Clock,
+  AlertCircle,
+  FileText,
+  Download,
+  Eye,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  TrendingUp,
+  TrendingDown,
+  RefreshCw,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table'
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select'
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
-} from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface StockTake {
-  id: string
-  takeNo: string
-  date: string
-  status: 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
-  notes: string | null
+  id: string;
+  takeNo: string;
+  date: string;
+  status: 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  notes: string | null;
   warehouse: {
-    id: string
-    code: string
-    name: string
-  }
-  lines: StockTakeLine[]
-  metadata?: any
+    id: string;
+    code: string;
+    name: string;
+  };
+  lines: StockTakeLine[];
+  metadata?: any;
 }
 
 interface StockTakeLine {
-  id: string
-  productId: string
+  id: string;
+  productId: string;
   product: {
-    id: string
-    code: string
-    name: string
-    unit: string
-  }
-  systemQuantity: number
-  actualQuantity: number
-  varianceQuantity: number
-  unitCost: number
-  notes: string | null
+    id: string;
+    code: string;
+    name: string;
+    unit: string;
+  };
+  systemQuantity: number;
+  actualQuantity: number;
+  varianceQuantity: number;
+  unitCost: number;
+  notes: string | null;
 }
 
 interface Warehouse {
-  id: string
-  code: string
-  name: string
-  type: string
-  location: string | null
+  id: string;
+  code: string;
+  name: string;
+  type: string;
+  location: string | null;
 }
 
 // ─── Status Helpers ───────────────────────────────────────────────────────────
@@ -79,92 +109,93 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   IN_PROGRESS: { label: 'กำลังนับ', color: 'bg-blue-100 text-blue-700', icon: Clock },
   COMPLETED: { label: 'เสร็จสิ้น', color: 'bg-green-100 text-green-700', icon: CheckCircle },
   CANCELLED: { label: 'ยกเลิก', color: 'bg-red-100 text-red-700', icon: XCircle },
-}
+};
 
-const fc = (n: number) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
-const fd = (d: string) => new Date(d).toLocaleDateString('th-TH', { dateStyle: 'short' })
+const fc = (n: number) =>
+  new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+const fd = (d: string) => new Date(d).toLocaleDateString('th-TH', { dateStyle: 'short' });
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function StockTakePage() {
-  const [stockTakes, setStockTakes] = useState<StockTake[]>([])
-  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('ALL')
-  const [warehouseFilter, setWarehouseFilter] = useState<string>('ALL')
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [showViewDialog, setShowViewDialog] = useState(false)
-  const [selectedStockTake, setSelectedStockTake] = useState<StockTake | null>(null)
-  const [editingLine, setEditingLine] = useState<StockTakeLine | null>(null)
-  const [newActualQty, setNewActualQty] = useState<number>(0)
+  const [stockTakes, setStockTakes] = useState<StockTake[]>([]);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [warehouseFilter, setWarehouseFilter] = useState<string>('ALL');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [selectedStockTake, setSelectedStockTake] = useState<StockTake | null>(null);
+  const [editingLine, setEditingLine] = useState<StockTakeLine | null>(null);
+  const [newActualQty, setNewActualQty] = useState<number>(0);
 
   // Form state for new stock take
   const [newStockTake, setNewStockTake] = useState({
     warehouseId: '',
     date: new Date().toISOString().split('T')[0],
     notes: '',
-  })
+  });
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   // Fetch stock takes
   const fetchStockTakes = async () => {
     try {
-      setLoading(true)
-      setError(null)
-      const params = new URLSearchParams()
-      if (statusFilter !== 'ALL') params.append('status', statusFilter)
-      if (warehouseFilter !== 'ALL') params.append('warehouseId', warehouseFilter)
-      if (searchTerm) params.append('search', searchTerm)
+      setLoading(true);
+      setError(null);
+      const params = new URLSearchParams();
+      if (statusFilter !== 'ALL') params.append('status', statusFilter);
+      if (warehouseFilter !== 'ALL') params.append('warehouseId', warehouseFilter);
+      if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`/api/stock-takes?${params}`, { credentials: 'include' })
-      const json = await response.json()
+      const response = await fetch(`/api/stock-takes?${params}`, { credentials: 'include' });
+      const json = await response.json();
 
       if (json.success && json.data) {
         // Handle different response structures
-        const stockTakesData = json.data?.data || json.data || json.stockTakes || []
-        setStockTakes(Array.isArray(stockTakesData) ? stockTakesData : [])
+        const stockTakesData = json.data?.data || json.data || json.stockTakes || [];
+        setStockTakes(Array.isArray(stockTakesData) ? stockTakesData : []);
       } else {
-        setError(json.error || 'ไม่สามารถดึงข้อมูลได้')
-        setStockTakes([])
+        setError(json.error || 'ไม่สามารถดึงข้อมูลได้');
+        setStockTakes([]);
       }
     } catch (error) {
-      console.error('Error fetching stock takes:', error)
-      setError('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้')
-      setStockTakes([])
+      console.error('Error fetching stock takes:', error);
+      setError('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+      setStockTakes([]);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถดึงข้อมูลการตรวจนับสต็อกได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Fetch warehouses
   const fetchWarehouses = async () => {
     try {
-      const response = await fetch(`/api/warehouses`, { credentials: 'include' })
-      const json = await response.json()
+      const response = await fetch(`/api/warehouses`, { credentials: 'include' });
+      const json = await response.json();
 
       if (json.success) {
         // Warehouses API returns { success: true, data: [...] } directly
-        const warehousesData = json.data || json.warehouses || []
-        setWarehouses(Array.isArray(warehousesData) ? warehousesData : [])
+        const warehousesData = json.data || json.warehouses || [];
+        setWarehouses(Array.isArray(warehousesData) ? warehousesData : []);
       }
     } catch (error) {
-      console.error('Error fetching warehouses:', error)
-      setWarehouses([])
+      console.error('Error fetching warehouses:', error);
+      setWarehouses([]);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchStockTakes()
-    fetchWarehouses()
-  }, [statusFilter, warehouseFilter])
+    fetchStockTakes();
+    fetchWarehouses();
+  }, [statusFilter, warehouseFilter]);
 
   // Create stock take
   const handleCreate = async () => {
@@ -173,142 +204,149 @@ export function StockTakePage() {
         title: 'กรุณากรอกข้อมูล',
         description: 'เลือกคลังสินค้า',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
     try {
-      const response = await fetch(`/api/stock-takes`, { credentials: 'include', 
+      const response = await fetch(`/api/stock-takes`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newStockTake),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
         toast({
           title: 'สร้างสำเร็จ',
           description: `สร้างการตรวจนับ ${data.data.takeNo} เรียบร้อยแล้ว`,
-        })
-        setShowCreateDialog(false)
+        });
+        setShowCreateDialog(false);
         setNewStockTake({
           warehouseId: '',
           date: new Date().toISOString().split('T')[0],
           notes: '',
-        })
-        fetchStockTakes()
+        });
+        fetchStockTakes();
       } else {
-        throw new Error(data.error || 'ไม่สามารถสร้างการตรวจนับได้')
+        throw new Error(data.error || 'ไม่สามารถสร้างการตรวจนับได้');
       }
     } catch (error: any) {
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: error.message || 'ไม่สามารถสร้างการตรวจนับได้',
         variant: 'destructive',
-      })
+      });
     }
-  }
+  };
 
   // View stock take details
   const handleView = (stockTake: StockTake) => {
-    setSelectedStockTake(stockTake)
-    setShowViewDialog(true)
-  }
+    setSelectedStockTake(stockTake);
+    setShowViewDialog(true);
+  };
 
   // Update stock take line
   const handleUpdateLine = async () => {
-    if (!editingLine || !selectedStockTake) return
+    if (!editingLine || !selectedStockTake) return;
 
     try {
       // Update all lines with the modified line
       const updatedLines = selectedStockTake.lines.map((line) =>
         line.id === editingLine.id
           ? { ...line, actualQuantity: newActualQty }
-          : { productId: line.productId, actualQuantity: line.actualQuantity, notes: line.notes || '' }
-      )
+          : {
+              productId: line.productId,
+              actualQuantity: line.actualQuantity,
+              notes: line.notes || '',
+            }
+      );
 
-      const response = await fetch(`/api/stock-takes/${selectedStockTake.id}`, { credentials: 'include', 
+      const response = await fetch(`/api/stock-takes/${selectedStockTake.id}`, {
+        credentials: 'include',
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lines: updatedLines }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
         toast({
           title: 'อัปเดตสำเร็จ',
           description: 'อัปเดตยอดตรวจนับเรียบร้อยแล้ว',
-        })
-        setEditingLine(null)
-        setNewActualQty(0)
+        });
+        setEditingLine(null);
+        setNewActualQty(0);
         // Refresh data
-        setSelectedStockTake(data.data)
-        fetchStockTakes()
+        setSelectedStockTake(data.data);
+        fetchStockTakes();
       } else {
-        throw new Error(data.error || 'ไม่สามารถอัปเดตได้')
+        throw new Error(data.error || 'ไม่สามารถอัปเดตได้');
       }
     } catch (error: any) {
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: error.message || 'ไม่สามารถอัปเดตได้',
         variant: 'destructive',
-      })
+      });
     }
-  }
+  };
 
   // Approve stock take
   const handleApprove = async () => {
-    if (!selectedStockTake) return
+    if (!selectedStockTake) return;
 
     try {
-      const response = await fetch(`/api/stock-takes/${selectedStockTake.id}/approve`, { credentials: 'include', 
+      const response = await fetch(`/api/stock-takes/${selectedStockTake.id}/approve`, {
+        credentials: 'include',
         method: 'POST',
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
         toast({
           title: 'อนุมัติสำเร็จ',
           description: `อนุมัติการตรวจนับ ${selectedStockTake.takeNo} เรียบร้อยแล้ว`,
-        })
-        setShowViewDialog(false)
-        fetchStockTakes()
+        });
+        setShowViewDialog(false);
+        fetchStockTakes();
       } else {
-        throw new Error(data.error || 'ไม่สามารถอนุมัติได้')
+        throw new Error(data.error || 'ไม่สามารถอนุมัติได้');
       }
     } catch (error: any) {
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: error.message || 'ไม่สามารถอนุมัติได้',
         variant: 'destructive',
-      })
+      });
     }
-  }
+  };
 
   // Calculate summary
   const calculateSummary = (stockTake: StockTake) => {
-    const totalItems = stockTake.lines.length
-    const totalVariance = stockTake.lines.reduce((sum, line) => sum + line.varianceQuantity, 0)
+    const totalItems = stockTake.lines.length;
+    const totalVariance = stockTake.lines.reduce((sum, line) => sum + line.varianceQuantity, 0);
     const totalVarianceValue = stockTake.lines.reduce(
       (sum, line) => sum + Math.abs(line.varianceQuantity) * line.unitCost,
       0
-    )
-    const lossCount = stockTake.lines.filter((line) => line.varianceQuantity < 0).length
-    const gainCount = stockTake.lines.filter((line) => line.varianceQuantity > 0).length
+    );
+    const lossCount = stockTake.lines.filter((line) => line.varianceQuantity < 0).length;
+    const gainCount = stockTake.lines.filter((line) => line.varianceQuantity > 0).length;
 
-    return { totalItems, totalVariance, totalVarianceValue, lossCount, gainCount }
-  }
+    return { totalItems, totalVariance, totalVarianceValue, lossCount, gainCount };
+  };
 
   // Filtered stock takes
   const filteredStockTakes = (stockTakes || []).filter((st) => {
     const matchesSearch =
       st?.takeNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      st?.warehouse?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesSearch
-  })
+      st?.warehouse?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
 
   // Summary cards
   const summaryStats = {
@@ -316,19 +354,19 @@ export function StockTakePage() {
     draft: (stockTakes || []).filter((st) => st?.status === 'DRAFT').length,
     inProgress: (stockTakes || []).filter((st) => st?.status === 'IN_PROGRESS').length,
     completed: (stockTakes || []).filter((st) => st?.status === 'COMPLETED').length,
-  }
+  };
 
   // Loading state
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">การตรวจนับสต็อก</h1>
-            <p className="text-sm text-gray-500 mt-1">Stock Take Management</p>
+            <p className="mt-1 text-sm text-gray-500">Stock Take Management</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i}>
               <CardContent className="p-6">
@@ -343,23 +381,23 @@ export function StockTakePage() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Error state
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">การตรวจนับสต็อก</h1>
-            <p className="text-sm text-gray-500 mt-1">Stock Take Management</p>
+            <p className="mt-1 text-sm text-gray-500">Stock Take Management</p>
           </div>
         </div>
         <Card className="border-red-200 bg-red-50">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <AlertCircle className="w-6 h-6 text-red-600" />
+              <AlertCircle className="h-6 w-6 text-red-600" />
               <div>
                 <p className="font-semibold text-red-900">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
                 <p className="text-sm text-red-700">{error}</p>
@@ -368,25 +406,25 @@ export function StockTakePage() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">การตรวจนับสต็อก</h1>
-          <p className="text-sm text-gray-500 mt-1">Stock Take Management</p>
+          <p className="mt-1 text-sm text-gray-500">Stock Take Management</p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
+          <Plus className="h-4 w-4" />
           สร้างการตรวจนับ
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -394,7 +432,7 @@ export function StockTakePage() {
                 <p className="text-sm text-gray-500">ทั้งหมด</p>
                 <p className="text-2xl font-bold text-gray-900">{summaryStats.total}</p>
               </div>
-              <Package className="w-8 h-8 text-blue-600" />
+              <Package className="h-8 w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -405,7 +443,7 @@ export function StockTakePage() {
                 <p className="text-sm text-gray-500">ร่าง</p>
                 <p className="text-2xl font-bold text-gray-900">{summaryStats.draft}</p>
               </div>
-              <FileText className="w-8 h-8 text-gray-600" />
+              <FileText className="h-8 w-8 text-gray-600" />
             </div>
           </CardContent>
         </Card>
@@ -416,7 +454,7 @@ export function StockTakePage() {
                 <p className="text-sm text-gray-500">กำลังนับ</p>
                 <p className="text-2xl font-bold text-gray-900">{summaryStats.inProgress}</p>
               </div>
-              <Clock className="w-8 h-8 text-blue-600" />
+              <Clock className="h-8 w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -427,7 +465,7 @@ export function StockTakePage() {
                 <p className="text-sm text-gray-500">เสร็จสิ้น</p>
                 <p className="text-2xl font-bold text-gray-900">{summaryStats.completed}</p>
               </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
+              <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -436,10 +474,10 @@ export function StockTakePage() {
       {/* Filters */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                 <Input
                   placeholder="ค้นหาเลขที่, คลังสินค้า..."
                   value={searchTerm}
@@ -474,7 +512,7 @@ export function StockTakePage() {
               </SelectContent>
             </Select>
             <Button variant="outline" onClick={fetchStockTakes} className="gap-2">
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="h-4 w-4" />
               รีเฟรช
             </Button>
           </div>
@@ -510,15 +548,15 @@ export function StockTakePage() {
                 <TableBody>
                   {filteredStockTakes.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-gray-500 py-8">
+                      <TableCell colSpan={7} className="py-8 text-center text-gray-500">
                         ไม่พบข้อมูลการตรวจนับสต็อก
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredStockTakes.map((stockTake) => {
-                      const summary = calculateSummary(stockTake)
-                      const statusConfig = STATUS_CONFIG[stockTake.status]
-                      const StatusIcon = statusConfig.icon
+                      const summary = calculateSummary(stockTake);
+                      const statusConfig = STATUS_CONFIG[stockTake.status];
+                      const StatusIcon = statusConfig.icon;
 
                       return (
                         <TableRow key={stockTake.id}>
@@ -526,7 +564,7 @@ export function StockTakePage() {
                           <TableCell>{fd(stockTake.date)}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <Warehouse className="w-4 h-4 text-gray-400" />
+                              <Warehouse className="h-4 w-4 text-gray-400" />
                               {stockTake.warehouse.code} - {stockTake.warehouse.name}
                             </div>
                           </TableCell>
@@ -536,24 +574,28 @@ export function StockTakePage() {
                               {summary.totalVariance !== 0 && (
                                 <>
                                   {summary.totalVariance < 0 ? (
-                                    <TrendingDown className="w-4 h-4 text-red-600" />
+                                    <TrendingDown className="h-4 w-4 text-red-600" />
                                   ) : (
-                                    <TrendingUp className="w-4 h-4 text-green-600" />
+                                    <TrendingUp className="h-4 w-4 text-green-600" />
                                   )}
                                   <span
-                                    className={summary.totalVariance < 0 ? 'text-red-600' : 'text-green-600'}
+                                    className={
+                                      summary.totalVariance < 0 ? 'text-red-600' : 'text-green-600'
+                                    }
                                   >
                                     {summary.totalVariance > 0 ? '+' : ''}
                                     {summary.totalVariance}
                                   </span>
                                 </>
                               )}
-                              {summary.totalVariance === 0 && <span className="text-gray-400">-</span>}
+                              {summary.totalVariance === 0 && (
+                                <span className="text-gray-400">-</span>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>
                             <Badge className={statusConfig.color}>
-                              <StatusIcon className="w-3 h-3 mr-1" />
+                              <StatusIcon className="mr-1 h-3 w-3" />
                               {statusConfig.label}
                             </Badge>
                           </TableCell>
@@ -564,12 +606,12 @@ export function StockTakePage() {
                               onClick={() => handleView(stockTake)}
                               className="gap-1"
                             >
-                              <Eye className="w-4 h-4" />
+                              <Eye className="h-4 w-4" />
                               ดูรายละเอียด
                             </Button>
                           </TableCell>
                         </TableRow>
-                      )
+                      );
                     })
                   )}
                 </TableBody>
@@ -633,10 +675,10 @@ export function StockTakePage() {
 
       {/* View Dialog */}
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-[800px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <ClipboardCheck className="w-5 h-5" />
+              <ClipboardCheck className="h-5 w-5" />
               {selectedStockTake?.takeNo}
             </DialogTitle>
           </DialogHeader>
@@ -671,10 +713,12 @@ export function StockTakePage() {
 
               {/* Summary */}
               {calculateSummary(selectedStockTake).totalItems > 0 && (
-                <div className="grid grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg">
+                <div className="grid grid-cols-4 gap-4 rounded-lg bg-gray-50 p-4">
                   <div>
                     <p className="text-sm text-gray-500">รายการทั้งหมด</p>
-                    <p className="text-lg font-bold">{calculateSummary(selectedStockTake).totalItems}</p>
+                    <p className="text-lg font-bold">
+                      {calculateSummary(selectedStockTake).totalItems}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">ผลต่างรวม</p>
@@ -700,7 +744,7 @@ export function StockTakePage() {
 
               {/* Lines Table */}
               <div>
-                <h3 className="font-semibold mb-2">รายการตรวจนับ</h3>
+                <h3 className="mb-2 font-semibold">รายการตรวจนับ</h3>
                 <ScrollArea className="w-full">
                   <Table>
                     <TableHeader>
@@ -746,10 +790,10 @@ export function StockTakePage() {
                             <span
                               className={
                                 line.varianceQuantity < 0
-                                  ? 'text-red-600 font-medium'
+                                  ? 'font-medium text-red-600'
                                   : line.varianceQuantity > 0
-                                  ? 'text-green-600 font-medium'
-                                  : ''
+                                    ? 'font-medium text-green-600'
+                                    : ''
                               }
                             >
                               {line.varianceQuantity !== 0 ? (
@@ -764,7 +808,7 @@ export function StockTakePage() {
                           </TableCell>
                           <TableCell className="text-center">
                             {editingLine?.id === line.id ? (
-                              <div className="flex gap-1 justify-center">
+                              <div className="flex justify-center gap-1">
                                 <Button size="sm" onClick={handleUpdateLine}>
                                   บันทึก
                                 </Button>
@@ -772,8 +816,8 @@ export function StockTakePage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => {
-                                    setEditingLine(null)
-                                    setNewActualQty(0)
+                                    setEditingLine(null);
+                                    setNewActualQty(0);
                                   }}
                                 >
                                   ยกเลิก
@@ -784,15 +828,15 @@ export function StockTakePage() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  setEditingLine(line)
-                                  setNewActualQty(line.actualQuantity)
+                                  setEditingLine(line);
+                                  setNewActualQty(line.actualQuantity);
                                 }}
                                 disabled={
                                   selectedStockTake.status === 'COMPLETED' ||
                                   selectedStockTake.status === 'CANCELLED'
                                 }
                               >
-                                <Edit className="w-3 h-3" />
+                                <Edit className="h-3 w-3" />
                               </Button>
                             )}
                           </TableCell>
@@ -804,13 +848,14 @@ export function StockTakePage() {
               </div>
 
               {/* Actions */}
-              {selectedStockTake.status === 'DRAFT' || selectedStockTake.status === 'IN_PROGRESS' ? (
+              {selectedStockTake.status === 'DRAFT' ||
+              selectedStockTake.status === 'IN_PROGRESS' ? (
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setShowViewDialog(false)}>
                     ปิด
                   </Button>
                   <Button onClick={handleApprove} className="gap-2">
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle className="h-4 w-4" />
                     อนุมัติการตรวจนับ
                   </Button>
                 </div>
@@ -826,5 +871,5 @@ export function StockTakePage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

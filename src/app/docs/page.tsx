@@ -4,18 +4,24 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Play, 
-  Copy, 
-  Check, 
-  Globe, 
-  Lock, 
+import {
+  Play,
+  Copy,
+  Check,
+  Globe,
+  Lock,
   Clock,
   AlertCircle,
   CheckCircle,
@@ -23,7 +29,7 @@ import {
   Code,
   FileJson,
   BookOpen,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
 
 interface Endpoint {
@@ -50,8 +56,8 @@ const ENDPOINTS: Endpoint[] = [
     requestBody: {
       email: 'admin@thaiaccounting.com',
       password: 'admin123',
-      redirect: false
-    }
+      redirect: false,
+    },
   },
   {
     id: 'accounts-list',
@@ -63,10 +69,20 @@ const ENDPOINTS: Endpoint[] = [
     auth: true,
     queryParams: [
       { name: 'page', type: 'number', required: false, description: 'Page number (default: 1)' },
-      { name: 'limit', type: 'number', required: false, description: 'Items per page (default: 20)' },
-      { name: 'type', type: 'string', required: false, description: 'Filter by type: ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE' },
-      { name: 'search', type: 'string', required: false, description: 'Search by name or code' }
-    ]
+      {
+        name: 'limit',
+        type: 'number',
+        required: false,
+        description: 'Items per page (default: 20)',
+      },
+      {
+        name: 'type',
+        type: 'string',
+        required: false,
+        description: 'Filter by type: ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE',
+      },
+      { name: 'search', type: 'string', required: false, description: 'Search by name or code' },
+    ],
   },
   {
     id: 'accounts-create',
@@ -80,8 +96,8 @@ const ENDPOINTS: Endpoint[] = [
       code: '1102',
       name: 'ลูกหนี้การค้า - ลูกค้ารายย่อย',
       type: 'ASSET',
-      parentId: 'acc_001'
-    }
+      parentId: 'acc_001',
+    },
   },
   {
     id: 'invoices-list',
@@ -94,11 +110,26 @@ const ENDPOINTS: Endpoint[] = [
     queryParams: [
       { name: 'page', type: 'number', required: false, description: 'Page number' },
       { name: 'limit', type: 'number', required: false, description: 'Items per page' },
-      { name: 'status', type: 'string', required: false, description: 'DRAFT, ISSUED, PARTIAL, PAID, CANCELLED' },
+      {
+        name: 'status',
+        type: 'string',
+        required: false,
+        description: 'DRAFT, ISSUED, PARTIAL, PAID, CANCELLED',
+      },
       { name: 'customerId', type: 'string', required: false, description: 'Filter by customer ID' },
-      { name: 'startDate', type: 'string', required: false, description: 'Filter from date (YYYY-MM-DD)' },
-      { name: 'endDate', type: 'string', required: false, description: 'Filter to date (YYYY-MM-DD)' }
-    ]
+      {
+        name: 'startDate',
+        type: 'string',
+        required: false,
+        description: 'Filter from date (YYYY-MM-DD)',
+      },
+      {
+        name: 'endDate',
+        type: 'string',
+        required: false,
+        description: 'Filter to date (YYYY-MM-DD)',
+      },
+    ],
   },
   {
     id: 'invoices-create',
@@ -117,10 +148,10 @@ const ENDPOINTS: Endpoint[] = [
           description: 'บริการที่ปรึกษา',
           quantity: 1,
           unitPrice: 50000,
-          vatRate: 7
-        }
-      ]
-    }
+          vatRate: 7,
+        },
+      ],
+    },
   },
   {
     id: 'invoices-issue',
@@ -129,7 +160,7 @@ const ENDPOINTS: Endpoint[] = [
     name: 'Issue Invoice',
     description: 'Issue invoice and create journal entries',
     category: 'Invoices',
-    auth: true
+    auth: true,
   },
   {
     id: 'receipts-list',
@@ -138,7 +169,7 @@ const ENDPOINTS: Endpoint[] = [
     name: 'List Receipts',
     description: 'Get list of receipts',
     category: 'Receipts',
-    auth: true
+    auth: true,
   },
   {
     id: 'receipts-create',
@@ -156,10 +187,10 @@ const ENDPOINTS: Endpoint[] = [
       allocations: [
         {
           invoiceId: 'inv_001',
-          amount: 53500
-        }
-      ]
-    }
+          amount: 53500,
+        },
+      ],
+    },
   },
   {
     id: 'journal-list',
@@ -168,7 +199,7 @@ const ENDPOINTS: Endpoint[] = [
     name: 'List Journal Entries',
     description: 'Get list of journal entries',
     category: 'Journal',
-    auth: true
+    auth: true,
   },
   {
     id: 'journal-create',
@@ -184,9 +215,9 @@ const ENDPOINTS: Endpoint[] = [
       reference: 'ADJ-001',
       lines: [
         { accountId: 'acc_001', description: 'โอนเงิน', debit: 10000, credit: 0 },
-        { accountId: 'acc_002', description: 'โอนเงิน', debit: 0, credit: 10000 }
-      ]
-    }
+        { accountId: 'acc_002', description: 'โอนเงิน', debit: 0, credit: 10000 },
+      ],
+    },
   },
   {
     id: 'customers-list',
@@ -195,7 +226,7 @@ const ENDPOINTS: Endpoint[] = [
     name: 'List Customers',
     description: 'Get list of customers',
     category: 'Customers',
-    auth: true
+    auth: true,
   },
   {
     id: 'customers-create',
@@ -211,8 +242,8 @@ const ENDPOINTS: Endpoint[] = [
       taxId: '1234567890123',
       address: '123 ถนนสุขุมวิท',
       phone: '02-123-4567',
-      email: 'contact@example.com'
-    }
+      email: 'contact@example.com',
+    },
   },
   {
     id: 'reports-gl',
@@ -225,8 +256,8 @@ const ENDPOINTS: Endpoint[] = [
     queryParams: [
       { name: 'startDate', type: 'string', required: true, description: 'Start date (YYYY-MM-DD)' },
       { name: 'endDate', type: 'string', required: true, description: 'End date (YYYY-MM-DD)' },
-      { name: 'accountId', type: 'string', required: false, description: 'Filter by account ID' }
-    ]
+      { name: 'accountId', type: 'string', required: false, description: 'Filter by account ID' },
+    ],
   },
   {
     id: 'settings-get',
@@ -235,7 +266,7 @@ const ENDPOINTS: Endpoint[] = [
     name: 'Get Settings',
     description: 'Get system settings',
     category: 'Settings',
-    auth: true
+    auth: true,
   },
   {
     id: 'settings-update',
@@ -249,14 +280,17 @@ const ENDPOINTS: Endpoint[] = [
       companyName: 'บริษัท ตัวอย่าง จำกัด',
       taxId: '1234567890123',
       vatRate: 7,
-      address: '123 ถนนสุขุมวิท'
-    }
-  }
+      address: '123 ถนนสุขุมวิท',
+    },
+  },
 ];
 
-const CATEGORIES = Array.from(new Set(ENDPOINTS.map(e => e.category)));
+const CATEGORIES = Array.from(new Set(ENDPOINTS.map((e) => e.category)));
 
-const LANGUAGE_TEMPLATES: Record<string, (endpoint: Endpoint, baseUrl: string, body?: string) => string> = {
+const LANGUAGE_TEMPLATES: Record<
+  string,
+  (endpoint: Endpoint, baseUrl: string, body?: string) => string
+> = {
   curl: (endpoint, baseUrl, body) => {
     const url = `${baseUrl}${endpoint.path}`;
     let cmd = `curl -X ${endpoint.method} "${url}"`;
@@ -323,7 +357,7 @@ const LANGUAGE_TEMPLATES: Record<string, (endpoint: Endpoint, baseUrl: string, b
     code += `    System.out.println(response.body().string());\n`;
     code += `}`;
     return code;
-  }
+  },
 };
 
 export default function ApiDocsPage() {
@@ -359,7 +393,7 @@ export default function ApiDocsPage() {
 
     try {
       let url = selectedEndpoint.path;
-      
+
       // Replace path parameters
       Object.entries(queryParams).forEach(([key, value]) => {
         url = url.replace(`{${key}}`, value);
@@ -378,8 +412,8 @@ export default function ApiDocsPage() {
       const options: RequestInit = {
         method: selectedEndpoint.method,
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       };
 
       if (selectedEndpoint.requestBody && requestBody) {
@@ -409,11 +443,16 @@ export default function ApiDocsPage() {
 
   const getMethodColor = (method: string) => {
     switch (method) {
-      case 'GET': return 'bg-blue-500';
-      case 'POST': return 'bg-green-500';
-      case 'PUT': return 'bg-yellow-500';
-      case 'DELETE': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'GET':
+        return 'bg-blue-500';
+      case 'POST':
+        return 'bg-green-500';
+      case 'PUT':
+        return 'bg-yellow-500';
+      case 'DELETE':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
@@ -423,47 +462,48 @@ export default function ApiDocsPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-7xl">
+    <div className="container mx-auto max-w-7xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Interactive API Documentation</h1>
+        <h1 className="mb-2 text-4xl font-bold">Interactive API Documentation</h1>
         <p className="text-muted-foreground">
-          Explore and test the Thai Accounting ERP API endpoints. Try requests directly in the browser.
+          Explore and test the Thai Accounting ERP API endpoints. Try requests directly in the
+          browser.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
         {/* Sidebar - Endpoint List */}
         <div className="lg:col-span-1">
           <Card className="h-[calc(100vh-200px)]">
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <BookOpen className="h-5 w-5" />
                 Endpoints
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <ScrollArea className="h-[calc(100vh-280px)]">
-                <div className="px-4 pb-4 space-y-4">
-                  {CATEGORIES.map(category => (
+                <div className="space-y-4 px-4 pb-4">
+                  {CATEGORIES.map((category) => (
                     <div key={category}>
-                      <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+                      <h4 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
                         {category}
                       </h4>
                       <div className="space-y-1">
-                        {ENDPOINTS.filter(e => e.category === category).map(endpoint => (
+                        {ENDPOINTS.filter((e) => e.category === category).map((endpoint) => (
                           <button
                             key={endpoint.id}
                             onClick={() => setSelectedEndpoint(endpoint)}
-                            className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                            className={`w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${
                               selectedEndpoint.id === endpoint.id
                                 ? 'bg-primary text-primary-foreground'
                                 : 'hover:bg-muted'
                             }`}
                           >
                             <div className="flex items-center gap-2">
-                              <Badge 
-                                variant="secondary" 
-                                className={`${getMethodColor(endpoint.method)} text-white text-xs px-1.5 py-0`}
+                              <Badge
+                                variant="secondary"
+                                className={`${getMethodColor(endpoint.method)} px-1.5 py-0 text-xs text-white`}
                               >
                                 {endpoint.method}
                               </Badge>
@@ -486,16 +526,16 @@ export default function ApiDocsPage() {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="mb-2 flex items-center gap-3">
                     <Badge className={`${getMethodColor(selectedEndpoint.method)} text-white`}>
                       {selectedEndpoint.method}
                     </Badge>
-                    <code className="text-lg font-mono bg-muted px-2 py-1 rounded">
+                    <code className="rounded bg-muted px-2 py-1 font-mono text-lg">
                       {selectedEndpoint.path}
                     </code>
                     {selectedEndpoint.auth && (
                       <Badge variant="outline" className="flex items-center gap-1">
-                        <Lock className="w-3 h-3" />
+                        <Lock className="h-3 w-3" />
                         Auth Required
                       </Badge>
                     )}
@@ -510,38 +550,40 @@ export default function ApiDocsPage() {
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="try" className="flex items-center gap-2">
-                    <Play className="w-4 h-4" />
+                    <Play className="h-4 w-4" />
                     Try It Now
                   </TabsTrigger>
                   <TabsTrigger value="code" className="flex items-center gap-2">
-                    <Code className="w-4 h-4" />
+                    <Code className="h-4 w-4" />
                     Code Examples
                   </TabsTrigger>
                   <TabsTrigger value="docs" className="flex items-center gap-2">
-                    <FileJson className="w-4 h-4" />
+                    <FileJson className="h-4 w-4" />
                     Documentation
                   </TabsTrigger>
                 </TabsList>
 
                 {/* Try It Now Tab */}
-                <TabsContent value="try" className="space-y-4 mt-4">
+                <TabsContent value="try" className="mt-4 space-y-4">
                   {selectedEndpoint.queryParams && (
                     <div className="space-y-3">
                       <h4 className="font-semibold">Query Parameters</h4>
-                      {selectedEndpoint.queryParams.map(param => (
-                        <div key={param.name} className="grid grid-cols-12 gap-4 items-center">
+                      {selectedEndpoint.queryParams.map((param) => (
+                        <div key={param.name} className="grid grid-cols-12 items-center gap-4">
                           <div className="col-span-3">
-                            <code className="text-sm bg-muted px-2 py-1 rounded">{param.name}</code>
-                            {param.required && <span className="text-red-500 ml-1">*</span>}
+                            <code className="rounded bg-muted px-2 py-1 text-sm">{param.name}</code>
+                            {param.required && <span className="ml-1 text-red-500">*</span>}
                           </div>
                           <div className="col-span-9">
                             <Input
                               placeholder={param.description}
                               value={queryParams[param.name] || ''}
-                              onChange={e => setQueryParams(prev => ({ 
-                                ...prev, 
-                                [param.name]: e.target.value 
-                              }))}
+                              onChange={(e) =>
+                                setQueryParams((prev) => ({
+                                  ...prev,
+                                  [param.name]: e.target.value,
+                                }))
+                              }
                             />
                           </div>
                         </div>
@@ -554,7 +596,7 @@ export default function ApiDocsPage() {
                       <h4 className="font-semibold">Request Body</h4>
                       <Textarea
                         value={requestBody}
-                        onChange={e => setRequestBody(e.target.value)}
+                        onChange={(e) => setRequestBody(e.target.value)}
                         rows={10}
                         className="font-mono text-sm"
                       />
@@ -562,43 +604,39 @@ export default function ApiDocsPage() {
                   )}
 
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Globe className="w-4 h-4" />
+                    <Globe className="h-4 w-4" />
                     <span>Base URL: {baseUrl || '...'}</span>
                   </div>
 
-                  <Button 
-                    onClick={handleTryIt} 
-                    disabled={loading}
-                    className="w-full"
-                  >
+                  <Button onClick={handleTryIt} disabled={loading} className="w-full">
                     {loading ? (
                       <>
-                        <Clock className="w-4 h-4 mr-2 animate-spin" />
+                        <Clock className="mr-2 h-4 w-4 animate-spin" />
                         Sending Request...
                       </>
                     ) : (
                       <>
-                        <Play className="w-4 h-4 mr-2" />
+                        <Play className="mr-2 h-4 w-4" />
                         Try It Now
                       </>
                     )}
                   </Button>
 
                   {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-red-700 mb-2">
-                        <XCircle className="w-5 h-5" />
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                      <div className="mb-2 flex items-center gap-2 text-red-700">
+                        <XCircle className="h-5 w-5" />
                         <span className="font-semibold">Error</span>
                       </div>
-                      <pre className="text-red-600 text-sm">{error}</pre>
+                      <pre className="text-sm text-red-600">{error}</pre>
                     </div>
                   )}
 
                   {response && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
+                    <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                      <div className="mb-2 flex items-center justify-between">
                         <div className="flex items-center gap-2 text-green-700">
-                          <CheckCircle className="w-5 h-5" />
+                          <CheckCircle className="h-5 w-5" />
                           <span className="font-semibold">Success</span>
                         </div>
                         <Button
@@ -606,10 +644,10 @@ export default function ApiDocsPage() {
                           size="sm"
                           onClick={() => copyToClipboard(JSON.stringify(response, null, 2))}
                         >
-                          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                         </Button>
                       </div>
-                      <pre className="text-green-800 text-sm overflow-auto max-h-96">
+                      <pre className="max-h-96 overflow-auto text-sm text-green-800">
                         {JSON.stringify(response, null, 2)}
                       </pre>
                     </div>
@@ -627,18 +665,18 @@ export default function ApiDocsPage() {
                       <TabsTrigger value="java">Java</TabsTrigger>
                     </TabsList>
 
-                    {Object.keys(LANGUAGE_TEMPLATES).map(lang => (
+                    {Object.keys(LANGUAGE_TEMPLATES).map((lang) => (
                       <TabsContent key={lang} value={lang}>
                         <div className="relative">
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="absolute top-2 right-2"
+                            className="absolute right-2 top-2"
                             onClick={() => copyToClipboard(generateCode(lang))}
                           >
-                            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                           </Button>
-                          <pre className="bg-muted p-4 rounded-lg overflow-auto text-sm font-mono">
+                          <pre className="overflow-auto rounded-lg bg-muted p-4 font-mono text-sm">
                             {generateCode(lang)}
                           </pre>
                         </div>
@@ -648,29 +686,31 @@ export default function ApiDocsPage() {
                 </TabsContent>
 
                 {/* Documentation Tab */}
-                <TabsContent value="docs" className="space-y-4 mt-4">
+                <TabsContent value="docs" className="mt-4 space-y-4">
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-semibold mb-2">Endpoint</h4>
+                      <h4 className="mb-2 font-semibold">Endpoint</h4>
                       <p className="text-muted-foreground">
-                        <code className="bg-muted px-2 py-1 rounded">{selectedEndpoint.method} {selectedEndpoint.path}</code>
+                        <code className="rounded bg-muted px-2 py-1">
+                          {selectedEndpoint.method} {selectedEndpoint.path}
+                        </code>
                       </p>
                     </div>
 
                     <Separator />
 
                     <div>
-                      <h4 className="font-semibold mb-2">Description</h4>
+                      <h4 className="mb-2 font-semibold">Description</h4>
                       <p className="text-muted-foreground">{selectedEndpoint.description}</p>
                     </div>
 
                     <Separator />
 
                     <div>
-                      <h4 className="font-semibold mb-2">Authentication</h4>
+                      <h4 className="mb-2 font-semibold">Authentication</h4>
                       <p className="text-muted-foreground">
-                        {selectedEndpoint.auth 
-                          ? 'This endpoint requires authentication via session cookie.' 
+                        {selectedEndpoint.auth
+                          ? 'This endpoint requires authentication via session cookie.'
                           : 'This endpoint does not require authentication.'}
                       </p>
                     </div>
@@ -679,23 +719,27 @@ export default function ApiDocsPage() {
                       <>
                         <Separator />
                         <div>
-                          <h4 className="font-semibold mb-2">Query Parameters</h4>
+                          <h4 className="mb-2 font-semibold">Query Parameters</h4>
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="border-b">
-                                <th className="text-left py-2">Parameter</th>
-                                <th className="text-left py-2">Type</th>
-                                <th className="text-left py-2">Required</th>
-                                <th className="text-left py-2">Description</th>
+                                <th className="py-2 text-left">Parameter</th>
+                                <th className="py-2 text-left">Type</th>
+                                <th className="py-2 text-left">Required</th>
+                                <th className="py-2 text-left">Description</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {selectedEndpoint.queryParams.map(param => (
+                              {selectedEndpoint.queryParams.map((param) => (
                                 <tr key={param.name} className="border-b">
-                                  <td className="py-2"><code>{param.name}</code></td>
+                                  <td className="py-2">
+                                    <code>{param.name}</code>
+                                  </td>
                                   <td className="py-2">{param.type}</td>
                                   <td className="py-2">{param.required ? 'Yes' : 'No'}</td>
-                                  <td className="py-2 text-muted-foreground">{param.description}</td>
+                                  <td className="py-2 text-muted-foreground">
+                                    {param.description}
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>
@@ -708,8 +752,8 @@ export default function ApiDocsPage() {
                       <>
                         <Separator />
                         <div>
-                          <h4 className="font-semibold mb-2">Request Body</h4>
-                          <pre className="bg-muted p-4 rounded-lg overflow-auto text-sm">
+                          <h4 className="mb-2 font-semibold">Request Body</h4>
+                          <pre className="overflow-auto rounded-lg bg-muted p-4 text-sm">
                             {JSON.stringify(selectedEndpoint.requestBody, null, 2)}
                           </pre>
                         </div>
@@ -719,9 +763,9 @@ export default function ApiDocsPage() {
                     <Separator />
 
                     <div>
-                      <h4 className="font-semibold mb-2">Response Format</h4>
-                      <pre className="bg-muted p-4 rounded-lg overflow-auto text-sm">
-{`{
+                      <h4 className="mb-2 font-semibold">Response Format</h4>
+                      <pre className="overflow-auto rounded-lg bg-muted p-4 text-sm">
+                        {`{
   "success": true,
   "data": { ... },
   "pagination": {
@@ -737,38 +781,50 @@ export default function ApiDocsPage() {
                     <Separator />
 
                     <div>
-                      <h4 className="font-semibold mb-2">Error Codes</h4>
+                      <h4 className="mb-2 font-semibold">Error Codes</h4>
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b">
-                            <th className="text-left py-2">Code</th>
-                            <th className="text-left py-2">Description</th>
+                            <th className="py-2 text-left">Code</th>
+                            <th className="py-2 text-left">Description</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr className="border-b">
                             <td className="py-2">400</td>
-                            <td className="py-2 text-muted-foreground">Bad Request - Invalid input data</td>
+                            <td className="py-2 text-muted-foreground">
+                              Bad Request - Invalid input data
+                            </td>
                           </tr>
                           <tr className="border-b">
                             <td className="py-2">401</td>
-                            <td className="py-2 text-muted-foreground">Unauthorized - Authentication required</td>
+                            <td className="py-2 text-muted-foreground">
+                              Unauthorized - Authentication required
+                            </td>
                           </tr>
                           <tr className="border-b">
                             <td className="py-2">403</td>
-                            <td className="py-2 text-muted-foreground">Forbidden - Insufficient permissions</td>
+                            <td className="py-2 text-muted-foreground">
+                              Forbidden - Insufficient permissions
+                            </td>
                           </tr>
                           <tr className="border-b">
                             <td className="py-2">404</td>
-                            <td className="py-2 text-muted-foreground">Not Found - Resource does not exist</td>
+                            <td className="py-2 text-muted-foreground">
+                              Not Found - Resource does not exist
+                            </td>
                           </tr>
                           <tr className="border-b">
                             <td className="py-2">409</td>
-                            <td className="py-2 text-muted-foreground">Conflict - Resource state conflict</td>
+                            <td className="py-2 text-muted-foreground">
+                              Conflict - Resource state conflict
+                            </td>
                           </tr>
                           <tr>
                             <td className="py-2">500</td>
-                            <td className="py-2 text-muted-foreground">Server Error - Internal server error</td>
+                            <td className="py-2 text-muted-foreground">
+                              Server Error - Internal server error
+                            </td>
                           </tr>
                         </tbody>
                       </table>
@@ -782,8 +838,8 @@ export default function ApiDocsPage() {
           {/* Rate Limit Info */}
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Clock className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Clock className="h-5 w-5" />
                 Rate Limiting
               </CardTitle>
             </CardHeader>
@@ -791,9 +847,9 @@ export default function ApiDocsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2">Category</th>
-                    <th className="text-left py-2">Limit</th>
-                    <th className="text-left py-2">Window</th>
+                    <th className="py-2 text-left">Category</th>
+                    <th className="py-2 text-left">Limit</th>
+                    <th className="py-2 text-left">Window</th>
                   </tr>
                 </thead>
                 <tbody>

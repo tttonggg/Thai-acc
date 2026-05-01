@@ -1,8 +1,8 @@
 // Phase E: UX Excellence - Component Exports
 
 // Virtual Scrolling
-export { VirtualTable, useVirtualList } from './virtual-scroll/virtual-table'
-export type { VirtualTableColumn } from './virtual-scroll/virtual-table'
+export { VirtualTable, useVirtualList } from './virtual-scroll/virtual-table';
+export type { VirtualTableColumn } from './virtual-scroll/virtual-table';
 
 // Keyboard Shortcuts
 export {
@@ -10,21 +10,18 @@ export {
   KeyboardShortcutsHelp,
   useTableNavigation,
   commonShortcuts,
-} from './keyboard-shortcuts/use-keyboard-shortcuts'
+} from './keyboard-shortcuts/use-keyboard-shortcuts';
 
 // Bulk Operations
 export {
   BulkActionsToolbar,
   createCommonBulkActions,
   useBulkSelection,
-} from './bulk-operations/bulk-actions-toolbar'
+} from './bulk-operations/bulk-actions-toolbar';
 
 // Advanced Filters
-export {
-  AdvancedFilter,
-  QuickFilterButton,
-} from './filters/advanced-filter'
-export type { FilterCondition, SavedFilterData } from './filters/advanced-filter'
+export { AdvancedFilter, QuickFilterButton } from './filters/advanced-filter';
+export type { FilterCondition, SavedFilterData } from './filters/advanced-filter';
 
 // WebSocket & Real-time
 export {
@@ -33,15 +30,15 @@ export {
   useCollaboration,
   DocumentLockIndicator,
   UserPresenceIndicator,
-} from './websocket/websocket-provider'
+} from './websocket/websocket-provider';
 
 // Notifications
 export {
   NotificationCenter,
   useNotifications,
   PersistentToast,
-} from './notifications/notification-center'
-export type { Notification, NotificationType } from './notifications/notification-center'
+} from './notifications/notification-center';
+export type { Notification, NotificationType } from './notifications/notification-center';
 
 // Mobile Optimization
 export {
@@ -54,7 +51,7 @@ export {
   MobileStepper,
   useIsMobile,
   ResponsiveContainer,
-} from './mobile/mobile-optimized-form'
+} from './mobile/mobile-optimized-form';
 
 // PWA
 export {
@@ -63,7 +60,7 @@ export {
   InstallPrompt,
   OfflineIndicator,
   UpdateNotification,
-} from './pwa/pwa-provider'
+} from './pwa/pwa-provider';
 
 // Offline Sync
 export {
@@ -71,7 +68,7 @@ export {
   useOfflineSync,
   SyncStatus,
   ConflictResolver,
-} from './offline-sync/offline-sync-provider'
+} from './offline-sync/offline-sync-provider';
 
 // Personalization
 export {
@@ -79,24 +76,24 @@ export {
   useUserPreferences,
   getDensityClass,
   ThemeToggle,
-} from './personalization/user-preferences'
-export type { UserPreferences } from './personalization/user-preferences'
+} from './personalization/user-preferences';
+export type { UserPreferences } from './personalization/user-preferences';
 
 export {
   RecentItemsList,
   RecentItemsSidebar,
   useRecentItems,
   QuickAccessCard,
-} from './personalization/recent-items'
-export type { RecentItem } from './personalization/recent-items'
+} from './personalization/recent-items';
+export type { RecentItem } from './personalization/recent-items';
 
 // Dashboard Customization
 export {
   DashboardCustomizer,
   presetWidgets,
   defaultDashboardLayout,
-} from './dashboard/dashboard-customizer'
-export type { DashboardWidget } from './dashboard/dashboard-customizer'
+} from './dashboard/dashboard-customizer';
+export type { DashboardWidget } from './dashboard/dashboard-customizer';
 
 // Enhanced Layout
-export { EnhancedSidebar } from './layout/enhanced-sidebar'
+export { EnhancedSidebar } from './layout/enhanced-sidebar';

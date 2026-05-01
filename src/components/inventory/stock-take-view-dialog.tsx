@@ -1,18 +1,18 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+} from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -20,9 +20,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Separator } from '@/components/ui/separator'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/table';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 import {
   ClipboardList,
   Package,
@@ -39,62 +39,62 @@ import {
   Calendar,
   Warehouse as WarehouseIcon,
   User,
-} from 'lucide-react'
+} from 'lucide-react';
 
 interface StockTakeLine {
-  id: string
-  productId: string
+  id: string;
+  productId: string;
   product: {
-    id: string
-    code: string
-    name: string
-    unit: string
-  }
-  expectedQty: number
-  actualQty: number
-  varianceQty: number
-  varianceValue: number
-  costPerUnit: number
-  notes: string | null
+    id: string;
+    code: string;
+    name: string;
+    unit: string;
+  };
+  expectedQty: number;
+  actualQty: number;
+  varianceQty: number;
+  varianceValue: number;
+  costPerUnit: number;
+  notes: string | null;
 }
 
 interface StockTake {
-  id: string
-  stockTakeNumber: string
-  status: string
-  takeDate: string
-  warehouseId: string
+  id: string;
+  stockTakeNumber: string;
+  status: string;
+  takeDate: string;
+  warehouseId: string;
   warehouse: {
-    id: string
-    code: string
-    name: string
-  }
-  createdBy: string
-  createdByName?: string | null
-  approvedBy?: string | null
-  approvedByName?: string | null
-  approvedAt?: string | null
-  journalEntryId?: string | null
+    id: string;
+    code: string;
+    name: string;
+  };
+  createdBy: string;
+  createdByName?: string | null;
+  approvedBy?: string | null;
+  approvedByName?: string | null;
+  approvedAt?: string | null;
+  journalEntryId?: string | null;
   journalEntry?: {
-    id: string
-    entryNo: string
+    id: string;
+    entryNo: string;
     lines?: {
-      account: { code: string; name: string }
-      debit: number
-      credit: number
-    }[]
-  } | null
-  notes?: string | null
-  lines: StockTakeLine[]
-  createdAt: string
-  updatedAt: string
+      account: { code: string; name: string };
+      debit: number;
+      credit: number;
+    }[];
+  } | null;
+  notes?: string | null;
+  lines: StockTakeLine[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface StockTakeViewDialogProps {
-  stockTakeId: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSuccess?: () => void
+  stockTakeId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -104,7 +104,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.E
   APPROVED: { label: 'อนุมัติแล้ว', color: 'bg-green-100 text-green-800', icon: CheckCircle2 },
   POSTED: { label: 'ลงบัญชีแล้ว', color: 'bg-emerald-100 text-emerald-800', icon: FileText },
   CANCELLED: { label: 'ยกเลิก', color: 'bg-red-100 text-red-800', icon: XCircle },
-}
+};
 
 export function StockTakeViewDialog({
   stockTakeId,
@@ -112,186 +112,190 @@ export function StockTakeViewDialog({
   onOpenChange,
   onSuccess,
 }: StockTakeViewDialogProps) {
-  const [stockTake, setStockTake] = useState<StockTake | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [approving, setApproving] = useState(false)
-  const [posting, setPosting] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const { toast } = useToast()
+  const [stockTake, setStockTake] = useState<StockTake | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [approving, setApproving] = useState(false);
+  const [posting, setPosting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (open && stockTakeId) {
-      fetchStockTake()
+      fetchStockTake();
     }
-  }, [open, stockTakeId])
+  }, [open, stockTakeId]);
 
   const fetchStockTake = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await fetch(`/api/stock-takes/${stockTakeId}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Fetch failed')
-      const result = await res.json()
-      setStockTake(result.data)
+      const res = await fetch(`/api/stock-takes/${stockTakeId}`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Fetch failed');
+      const result = await res.json();
+      setStockTake(result.data);
     } catch (error) {
       toast({
         title: 'ผิดพลาด',
         description: 'โหลดข้อมูลการตรวจนับสต็อกไม่สำเร็จ',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleApprove = async () => {
     if (!confirm('คุณต้องการอนุมัติการตรวจนับสต็อกนี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
-    setApproving(true)
+    setApproving(true);
     try {
-      const res = await fetch(`/api/stock-takes/${stockTakeId}/approve`, { credentials: 'include', 
+      const res = await fetch(`/api/stock-takes/${stockTakeId}/approve`, {
+        credentials: 'include',
         method: 'POST',
-      })
+      });
 
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || 'ไม่สามารถอนุมัติได้')
+        const error = await res.json();
+        throw new Error(error.error || 'ไม่สามารถอนุมัติได้');
       }
 
       toast({
         title: 'สำเร็จ',
         description: 'อนุมัติการตรวจนับสต็อกเรียบร้อยแล้ว',
-      })
+      });
 
-      onSuccess?.()
-      fetchStockTake()
+      onSuccess?.();
+      fetchStockTake();
     } catch (error) {
       toast({
         title: 'ผิดพลาด',
         description: error instanceof Error ? error.message : 'ไม่สามารถอนุมัติได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setApproving(false)
+      setApproving(false);
     }
-  }
+  };
 
   const handlePost = async () => {
     if (!confirm('คุณต้องการลงบัญชีการตรวจนับสต็อกนี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
-    setPosting(true)
+    setPosting(true);
     try {
-      const res = await fetch(`/api/stock-takes/${stockTakeId}/post`, { credentials: 'include', 
+      const res = await fetch(`/api/stock-takes/${stockTakeId}/post`, {
+        credentials: 'include',
         method: 'POST',
-      })
+      });
 
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || 'ไม่สามารถลงบัญชีได้')
+        const error = await res.json();
+        throw new Error(error.error || 'ไม่สามารถลงบัญชีได้');
       }
 
       toast({
         title: 'สำเร็จ',
         description: 'ลงบัญชีการตรวจนับสต็อกเรียบร้อยแล้ว',
-      })
+      });
 
-      onSuccess?.()
-      fetchStockTake()
+      onSuccess?.();
+      fetchStockTake();
     } catch (error) {
       toast({
         title: 'ผิดพลาด',
         description: error instanceof Error ? error.message : 'ไม่สามารถลงบัญชีได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setPosting(false)
+      setPosting(false);
     }
-  }
+  };
 
   const handleDelete = async () => {
     if (!confirm('คุณต้องการลบการตรวจนับสต็อกนี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
-    setDeleting(true)
+    setDeleting(true);
     try {
-      const res = await fetch(`/api/stock-takes/${stockTakeId}`, { credentials: 'include', 
+      const res = await fetch(`/api/stock-takes/${stockTakeId}`, {
+        credentials: 'include',
         method: 'DELETE',
-      })
+      });
 
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || 'ไม่สามารถลบได้')
+        const error = await res.json();
+        throw new Error(error.error || 'ไม่สามารถลบได้');
       }
 
       toast({
         title: 'สำเร็จ',
         description: 'ลบการตรวจนับสต็อกเรียบร้อยแล้ว',
-      })
+      });
 
-      onSuccess?.()
-      onOpenChange(false)
+      onSuccess?.();
+      onOpenChange(false);
     } catch (error) {
       toast({
         title: 'ผิดพลาด',
         description: error instanceof Error ? error.message : 'ไม่สามารถลบได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setDeleting(false)
+      setDeleting(false);
     }
-  }
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('th-TH', {
       style: 'currency',
       currency: 'THB',
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('th-TH', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    })
-  }
+    });
+  };
 
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[95vw] md:max-w-[1200px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-[1200px]">
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   if (!stockTake) {
-    return null
+    return null;
   }
 
-  const statusInfo = statusConfig[stockTake.status] || statusConfig.DRAFT
-  const StatusIcon = statusInfo.icon
+  const statusInfo = statusConfig[stockTake.status] || statusConfig.DRAFT;
+  const StatusIcon = statusInfo.icon;
 
   // Calculate statistics
-  const totalItems = stockTake.lines.length
-  const totalExpectedQty = stockTake.lines.reduce((sum, line) => sum + line.expectedQty, 0)
-  const totalActualQty = stockTake.lines.reduce((sum, line) => sum + line.actualQty, 0)
-  const totalVarianceQty = stockTake.lines.reduce((sum, line) => sum + line.varianceQty, 0)
-  const totalVarianceValue = stockTake.lines.reduce((sum, line) => sum + line.varianceValue, 0)
-  const accuracyRate = totalExpectedQty > 0
-    ? ((1 - Math.abs(totalVarianceQty) / totalExpectedQty) * 100).toFixed(2)
-    : '100.00'
+  const totalItems = stockTake.lines.length;
+  const totalExpectedQty = stockTake.lines.reduce((sum, line) => sum + line.expectedQty, 0);
+  const totalActualQty = stockTake.lines.reduce((sum, line) => sum + line.actualQty, 0);
+  const totalVarianceQty = stockTake.lines.reduce((sum, line) => sum + line.varianceQty, 0);
+  const totalVarianceValue = stockTake.lines.reduce((sum, line) => sum + line.varianceValue, 0);
+  const accuracyRate =
+    totalExpectedQty > 0
+      ? ((1 - Math.abs(totalVarianceQty) / totalExpectedQty) * 100).toFixed(2)
+      : '100.00';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[1200px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[1200px]">
         <VisuallyHidden>
           <DialogDescription>
             แสดงรายละเอียดการตรวจนับสต็อกทั้งหมดรวมทั้งผลต่าง สาเหตุ และสถานะ
@@ -345,7 +349,7 @@ export function StockTakeViewDialog({
                     <p className="font-medium">
                       {stockTake.approvedByName || stockTake.approvedBy}
                       {stockTake.approvedAt && (
-                        <span className="text-muted-foreground font-normal ml-2">
+                        <span className="ml-2 font-normal text-muted-foreground">
                           ({formatDate(stockTake.approvedAt)})
                         </span>
                       )}
@@ -357,7 +361,7 @@ export function StockTakeViewDialog({
           </Card>
 
           {/* Statistics Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs text-muted-foreground">รายการทั้งหมด</CardTitle>
@@ -393,15 +397,22 @@ export function StockTakeViewDialog({
                 <CardTitle className="text-xs text-muted-foreground">ผลต่างจำนวน</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`flex items-center gap-1 text-xl font-bold ${
-                  totalVarianceQty < 0 ? 'text-red-600' : totalVarianceQty > 0 ? 'text-green-600' : ''
-                }`}>
+                <div
+                  className={`flex items-center gap-1 text-xl font-bold ${
+                    totalVarianceQty < 0
+                      ? 'text-red-600'
+                      : totalVarianceQty > 0
+                        ? 'text-green-600'
+                        : ''
+                  }`}
+                >
                   {totalVarianceQty < 0 ? (
                     <TrendingDown className="h-4 w-4" />
                   ) : totalVarianceQty > 0 ? (
                     <TrendingUp className="h-4 w-4" />
                   ) : null}
-                  {totalVarianceQty > 0 ? '+' : ''}{totalVarianceQty.toFixed(2)}
+                  {totalVarianceQty > 0 ? '+' : ''}
+                  {totalVarianceQty.toFixed(2)}
                 </div>
               </CardContent>
             </Card>
@@ -411,10 +422,17 @@ export function StockTakeViewDialog({
                 <CardTitle className="text-xs text-muted-foreground">มูลค่าผลต่าง</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-lg font-bold ${
-                  totalVarianceValue < 0 ? 'text-red-600' : totalVarianceValue > 0 ? 'text-green-600' : ''
-                }`}>
-                  {totalVarianceValue > 0 ? '+' : ''}{formatCurrency(totalVarianceValue)}
+                <div
+                  className={`text-lg font-bold ${
+                    totalVarianceValue < 0
+                      ? 'text-red-600'
+                      : totalVarianceValue > 0
+                        ? 'text-green-600'
+                        : ''
+                  }`}
+                >
+                  {totalVarianceValue > 0 ? '+' : ''}
+                  {formatCurrency(totalVarianceValue)}
                 </div>
               </CardContent>
             </Card>
@@ -454,15 +472,29 @@ export function StockTakeViewDialog({
                       <TableCell>{line.product.name}</TableCell>
                       <TableCell className="text-right">{line.expectedQty.toFixed(2)}</TableCell>
                       <TableCell className="text-right">{line.actualQty.toFixed(2)}</TableCell>
-                      <TableCell className={`text-right font-medium ${
-                        line.varianceQty < 0 ? 'text-red-600' : line.varianceQty > 0 ? 'text-green-600' : ''
-                      }`}>
-                        {line.varianceQty > 0 ? '+' : ''}{line.varianceQty.toFixed(2)}
+                      <TableCell
+                        className={`text-right font-medium ${
+                          line.varianceQty < 0
+                            ? 'text-red-600'
+                            : line.varianceQty > 0
+                              ? 'text-green-600'
+                              : ''
+                        }`}
+                      >
+                        {line.varianceQty > 0 ? '+' : ''}
+                        {line.varianceQty.toFixed(2)}
                       </TableCell>
-                      <TableCell className={`text-right ${
-                        line.varianceValue < 0 ? 'text-red-600' : line.varianceValue > 0 ? 'text-green-600' : ''
-                      }`}>
-                        {line.varianceValue > 0 ? '+' : ''}{formatCurrency(line.varianceValue)}
+                      <TableCell
+                        className={`text-right ${
+                          line.varianceValue < 0
+                            ? 'text-red-600'
+                            : line.varianceValue > 0
+                              ? 'text-green-600'
+                              : ''
+                        }`}
+                      >
+                        {line.varianceValue > 0 ? '+' : ''}
+                        {formatCurrency(line.varianceValue)}
                       </TableCell>
                       <TableCell className="text-muted-foreground">{line.notes || '-'}</TableCell>
                     </TableRow>
@@ -476,7 +508,7 @@ export function StockTakeViewDialog({
           {stockTake.status === 'POSTED' && stockTake.journalEntry && (
             <Card className="bg-blue-50">
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-base">
                   <FileText className="h-4 w-4" />
                   บันทึกบัญชี
                 </CardTitle>
@@ -485,7 +517,7 @@ export function StockTakeViewDialog({
                 <div className="space-y-2">
                   <p className="text-sm font-medium">เลขที่: {stockTake.journalEntry.entryNo}</p>
                   {stockTake.journalEntry.lines && stockTake.journalEntry.lines.length > 0 && (
-                    <div className="mt-3 border rounded-lg overflow-hidden">
+                    <div className="mt-3 overflow-hidden rounded-lg border">
                       <Table>
                         <TableHeader>
                           <TableRow>
@@ -532,7 +564,7 @@ export function StockTakeViewDialog({
 
         {/* Footer Actions */}
         <Separator className="my-4" />
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <div className="text-xs text-muted-foreground">
             สร้างเมื่อ: {formatDate(stockTake.createdAt)}
           </div>
@@ -541,9 +573,9 @@ export function StockTakeViewDialog({
               <>
                 <Button variant="outline" size="sm" onClick={handleDelete} disabled={deleting}>
                   {deleting ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="mr-2 h-4 w-4" />
                   )}
                   ลบ
                 </Button>
@@ -553,9 +585,9 @@ export function StockTakeViewDialog({
             {stockTake.status === 'IN_PROGRESS' && (
               <Button variant="default" size="sm" onClick={handleApprove} disabled={approving}>
                 {approving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
                 )}
                 อนุมัติ
               </Button>
@@ -564,9 +596,9 @@ export function StockTakeViewDialog({
             {stockTake.status === 'APPROVED' && (
               <Button variant="default" size="sm" onClick={handlePost} disabled={posting}>
                 {posting ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <FileText className="h-4 w-4 mr-2" />
+                  <FileText className="mr-2 h-4 w-4" />
                 )}
                 ลงบัญชี
               </Button>
@@ -579,5 +611,5 @@ export function StockTakeViewDialog({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

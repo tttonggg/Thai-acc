@@ -1,37 +1,50 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { useToast } from '@/hooks/use-toast'
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
 
 interface User {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 interface Fund {
-  id: string
-  code: string
-  name: string
-  custodianId: string
-  glAccountId: string
-  maxAmount: number
-  currentBalance: number
-  isActive: boolean
+  id: string;
+  code: string;
+  name: string;
+  custodianId: string;
+  glAccountId: string;
+  maxAmount: number;
+  currentBalance: number;
+  isActive: boolean;
 }
 
 interface PettyCashFundEditDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  fund?: Fund | null
-  onSuccess: () => void
-  mode: 'create' | 'edit'
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  fund?: Fund | null;
+  onSuccess: () => void;
+  mode: 'create' | 'edit';
 }
 
 export function PettyCashFundEditDialog({
@@ -39,35 +52,35 @@ export function PettyCashFundEditDialog({
   onOpenChange,
   fund,
   onSuccess,
-  mode
+  mode,
 }: PettyCashFundEditDialogProps) {
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
-  const [users, setUsers] = useState<User[]>([])
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
   const [form, setForm] = useState({
     code: '',
     name: '',
     custodianId: '',
     glAccountId: '',
     maxAmount: '',
-    isActive: true
-  })
+    isActive: true,
+  });
 
   // Load users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch(`/api/users`, { credentials: 'include' })
-        const data = await res.json()
+        const res = await fetch(`/api/users`, { credentials: 'include' });
+        const data = await res.json();
         if (data.success || Array.isArray(data)) {
-          setUsers(Array.isArray(data) ? data : data.data || [])
+          setUsers(Array.isArray(data) ? data : data.data || []);
         }
       } catch (error) {
-        console.error('Failed to load users:', error)
+        console.error('Failed to load users:', error);
       }
-    }
-    fetchUsers()
-  }, [])
+    };
+    fetchUsers();
+  }, []);
 
   // Initialize form when fund changes
   useEffect(() => {
@@ -78,8 +91,8 @@ export function PettyCashFundEditDialog({
         custodianId: fund.custodianId,
         glAccountId: fund.glAccountId,
         maxAmount: fund.maxAmount.toString(),
-        isActive: fund.isActive
-      })
+        isActive: fund.isActive,
+      });
     } else if (mode === 'create') {
       setForm({
         code: '',
@@ -87,10 +100,10 @@ export function PettyCashFundEditDialog({
         custodianId: '',
         glAccountId: '',
         maxAmount: '',
-        isActive: true
-      })
+        isActive: true,
+      });
     }
-  }, [fund, mode, open])
+  }, [fund, mode, open]);
 
   const handleSubmit = async () => {
     // Validation
@@ -98,19 +111,19 @@ export function PettyCashFundEditDialog({
       toast({
         title: 'ข้อผิดพลาด',
         description: 'กรุณากรอกข้อมูลให้ครบถ้วน',
-        variant: 'destructive'
-      })
-      return
+        variant: 'destructive',
+      });
+      return;
     }
 
-    const maxAmount = parseFloat(form.maxAmount)
+    const maxAmount = parseFloat(form.maxAmount);
     if (isNaN(maxAmount) || maxAmount <= 0) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'วงเงินสูงสุดต้องมากกว่า 0',
-        variant: 'destructive'
-      })
-      return
+        variant: 'destructive',
+      });
+      return;
     }
 
     // Check if editing and maxAmount is less than current balance
@@ -118,56 +131,54 @@ export function PettyCashFundEditDialog({
       toast({
         title: 'ข้อผิดพลาด',
         description: `วงเงินสูงสุดไม่สามารถน้อยกว่ายอดคงเหลือปัจจุบัน (฿${fund.currentBalance.toLocaleString()})`,
-        variant: 'destructive'
-      })
-      return
+        variant: 'destructive',
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const url = mode === 'create'
-        ? '/api/petty-cash/funds'
-        : `/api/petty-cash/funds/${fund?.id}`
+      const url = mode === 'create' ? '/api/petty-cash/funds' : `/api/petty-cash/funds/${fund?.id}`;
 
-      const method = mode === 'create' ? 'POST' : 'PUT'
+      const method = mode === 'create' ? 'POST' : 'PUT';
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          maxAmount
-        })
-      })
+          maxAmount,
+        }),
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (data.success) {
         toast({
           title: mode === 'create' ? 'สร้างกองทุนสำเร็จ' : 'อัปเดตกองทุนสำเร็จ',
-          description: `${form.name}: ฿${maxAmount.toLocaleString()}`
-        })
-        onOpenChange(false)
-        onSuccess()
+          description: `${form.name}: ฿${maxAmount.toLocaleString()}`,
+        });
+        onOpenChange(false);
+        onSuccess();
       } else {
         toast({
           title: 'ข้อผิดพลาด',
           description: data.error || 'เกิดข้อผิดพลาด',
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
-      console.error('Error saving fund:', error)
+      console.error('Error saving fund:', error);
       toast({
         title: 'ข้อผิดพลาด',
         description: 'เกิดข้อผิดพลาดในการบันทึก',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -180,14 +191,13 @@ export function PettyCashFundEditDialog({
             <DialogDescription>
               {mode === 'create'
                 ? 'ดีไซน์แบบฟอร์มสำหรับสร้างกองทุนเงินสดย่อยใหม่ กรุณากรอกรหัส ชื่อ ผู้ถือกองทุน บัญชี GL และวงเงินสูงสุด'
-                : 'ดีไซน์แบบฟอร์มสำหรับแก้ไขข้อมูลกองทุนเงินสดย่อย สามารถแก้ไขชื่อ ผู้ถือกองทุน บัญชี GL วงเงินสูงสุดและสถานะได้'
-              }
+                : 'ดีไซน์แบบฟอร์มสำหรับแก้ไขข้อมูลกองทุนเงินสดย่อย สามารถแก้ไขชื่อ ผู้ถือกองทุน บัญชี GL วงเงินสูงสุดและสถานะได้'}
             </DialogDescription>
           </VisuallyHidden>
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <Label htmlFor="code">รหัส *</Label>
               <Input
@@ -211,7 +221,10 @@ export function PettyCashFundEditDialog({
 
           <div>
             <Label htmlFor="custodian">ผู้ถือกองทุน *</Label>
-            <Select value={form.custodianId} onValueChange={(v) => setForm({ ...form, custodianId: v })}>
+            <Select
+              value={form.custodianId}
+              onValueChange={(v) => setForm({ ...form, custodianId: v })}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="เลือกผู้ถือ" />
               </SelectTrigger>
@@ -225,7 +238,7 @@ export function PettyCashFundEditDialog({
             </Select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <Label htmlFor="maxAmount">วงเงินสูงสุด (฿) *</Label>
               <Input
@@ -250,9 +263,10 @@ export function PettyCashFundEditDialog({
           </div>
 
           {mode === 'edit' && fund && (
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="rounded-lg bg-gray-50 p-3">
               <p className="text-sm text-gray-600">
-                ยอดคงเหลือปัจจุบัน: <span className="font-semibold">฿{fund.currentBalance.toLocaleString()}</span>
+                ยอดคงเหลือปัจจุบัน:{' '}
+                <span className="font-semibold">฿{fund.currentBalance.toLocaleString()}</span>
               </p>
             </div>
           )}
@@ -275,11 +289,15 @@ export function PettyCashFundEditDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             ยกเลิก
           </Button>
-          <Button onClick={handleSubmit} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             {loading ? 'กำลังบันทึก...' : mode === 'create' ? 'สร้าง' : 'บันทึก'}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

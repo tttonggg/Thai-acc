@@ -1,21 +1,24 @@
-import { NextRequest } from 'next/server'
-import { requireAuth, apiError, unauthorizedError, notFoundError, forbiddenError } from '@/lib/api-auth'
-import { apiResponse } from '@/lib/api-utils'
-import { db } from '@/lib/db'
-import { logActivity } from '@/lib/activity-logger'
+import { NextRequest } from 'next/server';
+import {
+  requireAuth,
+  apiError,
+  unauthorizedError,
+  notFoundError,
+  forbiddenError,
+} from '@/lib/api-auth';
+import { apiResponse } from '@/lib/api-utils';
+import { db } from '@/lib/db';
+import { logActivity } from '@/lib/activity-logger';
 
 // POST /api/purchase-orders/[id]/confirm - Confirm PO from vendor
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
     // Only ADMIN or ACCOUNTANT can confirm POs
     if (user.role !== 'ADMIN' && user.role !== 'ACCOUNTANT') {
-      return forbiddenError('เฉพาะผู้ดูแลระบบหรือนักบัญชีเท่านั้นที่สามารถยืนยันใบสั่งซื้อได้')
+      return forbiddenError('เฉพาะผู้ดูแลระบบหรือนักบัญชีเท่านั้นที่สามารถยืนยันใบสั่งซื้อได้');
     }
 
     const purchaseOrder = await db.purchaseOrder.findUnique({
@@ -24,15 +27,15 @@ export async function POST(
         vendor: true,
         lines: true,
       },
-    })
+    });
 
     if (!purchaseOrder) {
-      return notFoundError('ไม่พบใบสั่งซื้อ')
+      return notFoundError('ไม่พบใบสั่งซื้อ');
     }
 
     // Validate status transition - only SENT can be confirmed
     if (purchaseOrder.status !== 'SENT') {
-      return apiError('สามารถยืนยันเฉพาะใบสั่งซื้อที่ส่งให้ผู้ขายแล้วเท่านั้น', 400)
+      return apiError('สามารถยืนยันเฉพาะใบสั่งซื้อที่ส่งให้ผู้ขายแล้วเท่านั้น', 400);
     }
 
     // Update status to CONFIRMED
@@ -47,11 +50,11 @@ export async function POST(
         vendor: true,
         lines: {
           include: {
-            product: true
-          }
+            product: true,
+          },
         },
       },
-    })
+    });
 
     // Log activity
     await logActivity({
@@ -63,17 +66,17 @@ export async function POST(
         orderNo: updated.orderNo,
         vendorName: updated.vendor.name,
       },
-    })
+    });
 
     return apiResponse({
       success: true,
       message: 'ยืนยันใบสั่งซื้อเรียบร้อยแล้ว',
       data: updated,
-    })
+    });
   } catch (error) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
-    return apiError('เกิดข้อผิดพลาดในการยืนยันใบสั่งซื้อ')
+    return apiError('เกิดข้อผิดพลาดในการยืนยันใบสั่งซื้อ');
   }
 }

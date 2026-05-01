@@ -1,36 +1,33 @@
 // Stock Transfer individual operations API (Agent 03: Inventory Engineer)
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { requireAuth } from '@/lib/api-utils'
-import { recordStockMovement } from '@/lib/inventory-service'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { requireAuth } from '@/lib/api-utils';
+import { recordStockMovement } from '@/lib/inventory-service';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
-    const { id } = await params
+    await requireAuth();
+    const { id } = await params;
 
     // Find all movements for this transfer
     const movements = await prisma.stockMovement.findMany({
       where: {
         referenceNo: id,
-        type: { in: ['TRANSFER_IN', 'TRANSFER_OUT'] }
+        type: { in: ['TRANSFER_IN', 'TRANSFER_OUT'] },
       },
       include: {
         product: true,
         warehouse: true,
       },
-      orderBy: { date: 'desc' }
-    })
+      orderBy: { date: 'desc' },
+    });
 
     if (movements.length === 0) {
-      return NextResponse.json({ success: false, error: 'ไม่พบการโอนสินค้า' }, { status: 404 })
+      return NextResponse.json({ success: false, error: 'ไม่พบการโอนสินค้า' }, { status: 404 });
     }
 
-    const outMovement = movements.find(m => m.type === 'TRANSFER_OUT')
-    const inMovement = movements.find(m => m.type === 'TRANSFER_IN')
+    const outMovement = movements.find((m) => m.type === 'TRANSFER_OUT');
+    const inMovement = movements.find((m) => m.type === 'TRANSFER_IN');
 
     return NextResponse.json({
       success: true,
@@ -43,22 +40,19 @@ export async function GET(
         fromWarehouse: outMovement?.warehouse,
         toWarehouse: inMovement?.warehouse,
         quantity: outMovement?.quantity || inMovement?.quantity,
-      }
-    })
+      },
+    });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
-    const { id } = await params
-    const body = await request.json()
-    const { action, receivedQuantity, notes } = body
+    await requireAuth();
+    const { id } = await params;
+    const body = await request.json();
+    const { action, receivedQuantity, notes } = body;
 
     if (action === 'complete') {
       // Get the transfer details first to find destination warehouse
@@ -74,32 +68,35 @@ export async function PUT(
         WHERE m1."referenceNo" = ${id}
         AND m1.type = 'TRANSFER_OUT'
         LIMIT 1
-      `
+      `;
 
       if (!transferData || transferData.length === 0) {
-        return NextResponse.json({ success: false, error: 'ไม่พบการโอนสินค้า' }, { status: 404 })
+        return NextResponse.json({ success: false, error: 'ไม่พบการโอนสินค้า' }, { status: 404 });
       }
 
-      const transfer = transferData[0]
+      const transfer = transferData[0];
 
       // Check if already completed
       const existingIn = await prisma.stockMovement.findFirst({
         where: {
           referenceNo: id,
-          type: 'TRANSFER_IN'
-        }
-      })
+          type: 'TRANSFER_IN',
+        },
+      });
 
       if (existingIn) {
-        return NextResponse.json({ success: false, error: 'การโอนสินค้านี้ได้รับยืนยันแล้ว' }, { status: 400 })
+        return NextResponse.json(
+          { success: false, error: 'การโอนสินค้านี้ได้รับยืนยันแล้ว' },
+          { status: 400 }
+        );
       }
 
       // Use received quantity or default to original quantity
-      const finalQuantity = receivedQuantity !== undefined ? receivedQuantity : transfer.quantity
+      const finalQuantity = receivedQuantity !== undefined ? receivedQuantity : transfer.quantity;
 
       // If received quantity is different, create adjustment at source
       if (finalQuantity !== transfer.quantity) {
-        const difference = transfer.quantity - finalQuantity
+        const difference = transfer.quantity - finalQuantity;
 
         if (difference > 0) {
           // Some items were damaged/lost - create adjustment at source warehouse
@@ -113,7 +110,7 @@ export async function PUT(
             referenceNo: `ADJ-${id}`,
             notes: `สูญหาย/เสียหายระหว่างการโอน: ${difference} หน่วย`,
             sourceChannel: 'WEB',
-          })
+          });
         }
       }
 
@@ -128,16 +125,16 @@ export async function PUT(
         referenceNo: id,
         notes: notes || 'รับสินค้าโอน',
         sourceChannel: 'WEB',
-      })
+      });
 
       return NextResponse.json({
         success: true,
         data: {
           transferNo: id,
           movement: result.movement,
-          message: 'ยืนยันการรับสินค้าโอนเรียบร้อยแล้ว'
-        }
-      })
+          message: 'ยืนยันการรับสินค้าโอนเรียบร้อยแล้ว',
+        },
+      });
     }
 
     if (action === 'cancel') {
@@ -145,19 +142,22 @@ export async function PUT(
       const movements = await prisma.stockMovement.findMany({
         where: {
           referenceNo: id,
-          type: { in: ['TRANSFER_IN', 'TRANSFER_OUT'] }
-        }
-      })
+          type: { in: ['TRANSFER_IN', 'TRANSFER_OUT'] },
+        },
+      });
 
-      const outMovement = movements.find(m => m.type === 'TRANSFER_OUT')
-      const inMovement = movements.find(m => m.type === 'TRANSFER_IN')
+      const outMovement = movements.find((m) => m.type === 'TRANSFER_OUT');
+      const inMovement = movements.find((m) => m.type === 'TRANSFER_IN');
 
       if (inMovement) {
-        return NextResponse.json({ success: false, error: 'ไม่สามารถยกเลิกการโอนที่ได้รับแล้วได้' }, { status: 400 })
+        return NextResponse.json(
+          { success: false, error: 'ไม่สามารถยกเลิกการโอนที่ได้รับแล้วได้' },
+          { status: 400 }
+        );
       }
 
       if (!outMovement) {
-        return NextResponse.json({ success: false, error: 'ไม่พบการโอนสินค้า' }, { status: 404 })
+        return NextResponse.json({ success: false, error: 'ไม่พบการโอนสินค้า' }, { status: 404 });
       }
 
       // Reverse the TRANSFER_OUT
@@ -171,16 +171,19 @@ export async function PUT(
         referenceNo: `CANCEL-${id}`,
         notes: 'ยกเลิกการโอนสินค้า',
         sourceChannel: 'WEB',
-      })
+      });
 
       return NextResponse.json({
         success: true,
-        message: 'ยกเลิกการโอนสินค้าเรียบร้อยแล้ว'
-      })
+        message: 'ยกเลิกการโอนสินค้าเรียบร้อยแล้ว',
+      });
     }
 
-    return NextResponse.json({ success: false, error: 'ไม่รองรับการดำเนินการนี้' }, { status: 400 })
+    return NextResponse.json(
+      { success: false, error: 'ไม่รองรับการดำเนินการนี้' },
+      { status: 400 }
+    );
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

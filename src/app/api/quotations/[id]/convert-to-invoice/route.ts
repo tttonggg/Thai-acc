@@ -1,20 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 // POST /api/quotations/[id]/convert-to-invoice - Convert quotation to invoice (APPROVED → CONVERTED)
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     // Only ADMIN and ACCOUNTANT can convert quotations
@@ -22,7 +16,7 @@ export async function POST(
       return NextResponse.json(
         { success: false, error: 'ไม่มีสิทธิแปลงใบเสนอราคา' },
         { status: 403 }
-      )
+      );
     }
 
     const quotation = await prisma.quotation.findUnique({
@@ -38,13 +32,10 @@ export async function POST(
           },
         },
       },
-    })
+    });
 
     if (!quotation) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบใบเสนอราคา' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบใบเสนอราคา' }, { status: 404 });
     }
 
     // Can only convert APPROVED quotations
@@ -55,7 +46,7 @@ export async function POST(
           error: 'สามารถแปลงเฉพาะใบเสนอราคาที่อยู่ในสถานะ ลูกค้าอนุมัติ',
         },
         { status: 400 }
-      )
+      );
     }
 
     // Check if already converted
@@ -66,7 +57,7 @@ export async function POST(
           error: 'ใบเสนอราคานี้ถูกแปลงเป็นใบกำกับภาษีแล้ว',
         },
         { status: 400 }
-      )
+      );
     }
 
     // Check if quotation is still valid
@@ -77,13 +68,13 @@ export async function POST(
           error: 'ใบเสนอราคาหมดอายุแล้ว กรุณาตรวจสอบวันหมดอายุ',
         },
         { status: 400 }
-      )
+      );
     }
 
     // Generate Invoice number
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
 
     const latestInvoice = await prisma.invoice.findFirst({
       where: {
@@ -94,17 +85,17 @@ export async function POST(
       orderBy: {
         invoiceNo: 'desc',
       },
-    })
+    });
 
-    let sequence = 1
+    let sequence = 1;
     if (latestInvoice) {
-      const match = latestInvoice.invoiceNo.match(/INV\d{6}-(\d{4})/)
+      const match = latestInvoice.invoiceNo.match(/INV\d{6}-(\d{4})/);
       if (match) {
-        sequence = parseInt(match[1]) + 1
+        sequence = parseInt(match[1]) + 1;
       }
     }
 
-    const invoiceNo = `INV${year}${month}-${String(sequence).padStart(4, '0')}`
+    const invoiceNo = `INV${year}${month}-${String(sequence).padStart(4, '0')}`;
 
     // Create Invoice from Quotation using transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -145,7 +136,7 @@ export async function POST(
             })),
           },
         },
-      })
+      });
 
       // Update Quotation status
       const updatedQuotation = await tx.quotation.update({
@@ -178,10 +169,10 @@ export async function POST(
             },
           },
         },
-      })
+      });
 
-      return { invoice, quotation: updatedQuotation }
-    })
+      return { invoice, quotation: updatedQuotation };
+    });
 
     return NextResponse.json({
       success: true,
@@ -190,15 +181,15 @@ export async function POST(
         quotation: result.quotation,
       },
       message: `แปลงใบเสนอราคาเป็นใบกำกับภาษีเรียบร้อยแล้ว (${result.invoice.invoiceNo})`,
-    })
+    });
   } catch (error) {
-    console.error('Quotation Convert Error:', error)
+    console.error('Quotation Convert Error:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการแปลงใบเสนอราคา',
       },
       { status: 500 }
-    )
+    );
   }
 }

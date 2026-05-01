@@ -20,13 +20,39 @@ const MINIMUM_SCORE = 3;
 
 // Common passwords to block (in addition to zxcvbn's dictionary)
 const BLOCKED_PASSWORDS = [
-  'password', '123456', '12345678', 'qwerty', 'abc123',
-  'monkey', 'letmein', 'dragon', '111111', 'baseball',
-  'iloveyou', 'trustno1', 'sunshine', 'princess', 'admin',
-  'welcome', 'shadow', 'ashley', 'football', 'jesus',
-  'michael', 'ninja', 'mustang', 'password1', '123456789',
-  'thaiaccounting', 'thaierp', 'accounting', 'ledger',
-  'admin123', 'root123', 'user123', 'pass123'
+  'password',
+  '123456',
+  '12345678',
+  'qwerty',
+  'abc123',
+  'monkey',
+  'letmein',
+  'dragon',
+  '111111',
+  'baseball',
+  'iloveyou',
+  'trustno1',
+  'sunshine',
+  'princess',
+  'admin',
+  'welcome',
+  'shadow',
+  'ashley',
+  'football',
+  'jesus',
+  'michael',
+  'ninja',
+  'mustang',
+  'password1',
+  '123456789',
+  'thaiaccounting',
+  'thaierp',
+  'accounting',
+  'ledger',
+  'admin123',
+  'root123',
+  'user123',
+  'pass123',
 ];
 
 /**
@@ -48,7 +74,7 @@ export function checkPasswordStrength(password: string): PasswordStrengthResult 
 
   // Check blocked passwords (case-insensitive)
   const lowerPassword = password.toLowerCase();
-  if (BLOCKED_PASSWORDS.some(blocked => lowerPassword.includes(blocked))) {
+  if (BLOCKED_PASSWORDS.some((blocked) => lowerPassword.includes(blocked))) {
     return {
       score: 0,
       feedback: {
@@ -65,7 +91,7 @@ export function checkPasswordStrength(password: string): PasswordStrengthResult 
 
   // Enhance feedback with Thai Accounting specific suggestions
   const suggestions = [...result.feedback.suggestions];
-  
+
   if (!/[A-Z]/.test(password)) {
     suggestions.push('Add uppercase letters');
   }
@@ -95,9 +121,10 @@ export function checkPasswordStrength(password: string): PasswordStrengthResult 
  */
 export function validatePasswordStrength(password: string): void {
   const result = checkPasswordStrength(password);
-  
+
   if (!result.isStrongEnough) {
-    const errorMessage = result.feedback.warning || 
+    const errorMessage =
+      result.feedback.warning ||
       `Password is too weak (score: ${result.score}/4). ${result.feedback.suggestions.join('. ')}`;
     throw new Error(errorMessage);
   }
@@ -108,12 +135,18 @@ export function validatePasswordStrength(password: string): void {
  */
 export function getPasswordStrengthLabel(score: number): string {
   switch (score) {
-    case 0: return 'Very Weak';
-    case 1: return 'Weak';
-    case 2: return 'Fair';
-    case 3: return 'Good';
-    case 4: return 'Strong';
-    default: return 'Unknown';
+    case 0:
+      return 'Very Weak';
+    case 1:
+      return 'Weak';
+    case 2:
+      return 'Fair';
+    case 3:
+      return 'Good';
+    case 4:
+      return 'Strong';
+    default:
+      return 'Unknown';
   }
 }
 
@@ -122,12 +155,18 @@ export function getPasswordStrengthLabel(score: number): string {
  */
 export function getPasswordStrengthColor(score: number): string {
   switch (score) {
-    case 0: return 'text-red-600';
-    case 1: return 'text-red-500';
-    case 2: return 'text-yellow-500';
-    case 3: return 'text-green-500';
-    case 4: return 'text-green-600';
-    default: return 'text-gray-500';
+    case 0:
+      return 'text-red-600';
+    case 1:
+      return 'text-red-500';
+    case 2:
+      return 'text-yellow-500';
+    case 3:
+      return 'text-green-500';
+    case 4:
+      return 'text-green-600';
+    default:
+      return 'text-gray-500';
   }
 }
 
@@ -139,35 +178,35 @@ export function generateStrongPassword(length: number = 16): string {
   const lowercase = 'abcdefghijklmnopqrstuvwxyz';
   const numbers = '0123456789';
   const special = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-  
+
   const all = uppercase + lowercase + numbers + special;
-  
+
   let password = '';
-  
+
   // Ensure at least one of each type
   password += uppercase[Math.floor(Math.random() * uppercase.length)];
   password += lowercase[Math.floor(Math.random() * lowercase.length)];
   password += numbers[Math.floor(Math.random() * numbers.length)];
   password += special[Math.floor(Math.random() * special.length)];
-  
+
   // Fill the rest randomly
   for (let i = 4; i < length; i++) {
     const char = all[Math.floor(Math.random() * all.length)];
     password += char;
   }
-  
+
   // Shuffle the password
-  return password.split('').sort(() => Math.random() - 0.5).join('');
+  return password
+    .split('')
+    .sort(() => Math.random() - 0.5)
+    .join('');
 }
 
 /**
  * Check if password has been used recently (would need password history table)
  * This is a placeholder - implement with actual password history
  */
-export async function isPasswordReused(
-  userId: string,
-  newPassword: string
-): Promise<boolean> {
+export async function isPasswordReused(userId: string, newPassword: string): Promise<boolean> {
   // In a real implementation, compare against hashed password history
   // For now, always return false
   return false;

@@ -7,13 +7,25 @@ import { prisma } from './db';
 import { createHash } from './encryption-service';
 import { encrypt, decrypt } from './encryption-service';
 
-export type AuditAction = 
-  | 'CREATE' | 'UPDATE' | 'DELETE' 
-  | 'LOGIN' | 'LOGOUT' | 'LOGIN_FAILED'
-  | 'POST' | 'VOID' | 'APPROVE' | 'REJECT'
-  | 'EXPORT' | 'IMPORT' | 'VIEW'
-  | 'MFA_SETUP' | 'MFA_DISABLE' | 'PASSWORD_RESET'
-  | 'SESSION_TERMINATED' | 'PRIVILEGE_ESCALATION';
+export type AuditAction =
+  | 'CREATE'
+  | 'UPDATE'
+  | 'DELETE'
+  | 'LOGIN'
+  | 'LOGOUT'
+  | 'LOGIN_FAILED'
+  | 'POST'
+  | 'VOID'
+  | 'APPROVE'
+  | 'REJECT'
+  | 'EXPORT'
+  | 'IMPORT'
+  | 'VIEW'
+  | 'MFA_SETUP'
+  | 'MFA_DISABLE'
+  | 'PASSWORD_RESET'
+  | 'SESSION_TERMINATED'
+  | 'PRIVILEGE_ESCALATION';
 
 export interface AuditLogEntry {
   userId: string;
@@ -28,17 +40,26 @@ export interface AuditLogEntry {
 
 // Fields that should be encrypted in audit logs
 const SENSITIVE_AUDIT_FIELDS = [
-  'password', 'mfaSecret', 'token', 'secret', 
-  'taxId', 'bankAccount', 'bankAccountNo',
-  'idCardNumber', 'socialSecurityNo', 'signature'
+  'password',
+  'mfaSecret',
+  'token',
+  'secret',
+  'taxId',
+  'bankAccount',
+  'bankAccountNo',
+  'idCardNumber',
+  'socialSecurityNo',
+  'signature',
 ];
 
 /**
  * Sanitize sensitive data before logging
  */
-function sanitizeForAudit(data: Record<string, unknown> | null | undefined): Record<string, unknown> | null {
+function sanitizeForAudit(
+  data: Record<string, unknown> | null | undefined
+): Record<string, unknown> | null {
   if (!data) return null;
-  
+
   const sanitized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(data)) {
     if (SENSITIVE_AUDIT_FIELDS.includes(key)) {
@@ -91,11 +112,11 @@ export async function logAudit(entry: AuditLogEntry): Promise<void> {
   try {
     const prevHash = await getLastHash();
     const timestamp = new Date();
-    
+
     // Sanitize sensitive data
     const sanitizedBefore = sanitizeForAudit(entry.beforeState);
     const sanitizedAfter = sanitizeForAudit(entry.afterState);
-    
+
     // Create tamper-evident hash
     const hash = createAuditHash(
       {
@@ -244,7 +265,7 @@ export async function getAuditLogs(filters: {
   total: number;
 }> {
   const where: Record<string, unknown> = {};
-  
+
   if (filters.userId) where.userId = filters.userId;
   if (filters.action) where.action = filters.action;
   if (filters.entityType) where.entityType = filters.entityType;
@@ -267,7 +288,7 @@ export async function getAuditLogs(filters: {
   ]);
 
   return {
-    logs: logs.map(log => ({
+    logs: logs.map((log) => ({
       id: log.id,
       timestamp: log.timestamp,
       userId: log.userId,
@@ -290,8 +311,15 @@ export async function getAuditLogs(filters: {
  */
 export async function logSecurityEvent(
   userId: string | null,
-  action: 'LOGIN' | 'LOGIN_FAILED' | 'LOGOUT' | 'MFA_SETUP' | 'MFA_DISABLE' | 
-          'PASSWORD_RESET' | 'SESSION_TERMINATED' | 'PRIVILEGE_ESCALATION',
+  action:
+    | 'LOGIN'
+    | 'LOGIN_FAILED'
+    | 'LOGOUT'
+    | 'MFA_SETUP'
+    | 'MFA_DISABLE'
+    | 'PASSWORD_RESET'
+    | 'SESSION_TERMINATED'
+    | 'PRIVILEGE_ESCALATION',
   details: Record<string, unknown>,
   ipAddress: string,
   userAgent: string

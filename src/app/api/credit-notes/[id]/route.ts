@@ -1,16 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError } from '@/lib/api-utils'
-import { db } from '@/lib/db'
-import { satangToBaht } from '@/lib/currency'
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  requireAuth,
+  apiResponse,
+  apiError,
+  unauthorizedError,
+  notFoundError,
+  forbiddenError,
+} from '@/lib/api-utils';
+import { db } from '@/lib/db';
+import { satangToBaht } from '@/lib/currency';
 
 // GET /api/credit-notes/[id] - Get single credit note
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
-    const { id } = await params
+    await requireAuth();
+    const { id } = await params;
 
     const creditNote = await db.creditNote.findUnique({
       where: { id },
@@ -21,16 +25,16 @@ export async function GET(
           include: {
             lines: {
               include: {
-                account: true
-              }
-            }
-          }
+                account: true,
+              },
+            },
+          },
         },
       },
-    })
+    });
 
     if (!creditNote) {
-      return notFoundError('ไม่พบใบลดหนี้')
+      return notFoundError('ไม่พบใบลดหนี้');
     }
 
     // Convert Satang to Baht for all monetary fields
@@ -40,56 +44,55 @@ export async function GET(
       vatAmount: satangToBaht(creditNote.vatAmount),
       totalAmount: satangToBaht(creditNote.totalAmount),
       // Convert journal entry lines if present
-      journalEntry: creditNote.journalEntry ? {
-        ...creditNote.journalEntry,
-        lines: creditNote.journalEntry.lines.map(line => ({
-          ...line,
-          debit: satangToBaht(line.debit),
-          credit: satangToBaht(line.credit),
-        }))
-      } : null,
-    }
+      journalEntry: creditNote.journalEntry
+        ? {
+            ...creditNote.journalEntry,
+            lines: creditNote.journalEntry.lines.map((line) => ({
+              ...line,
+              debit: satangToBaht(line.debit),
+              credit: satangToBaht(line.credit),
+            })),
+          }
+        : null,
+    };
 
-    return apiResponse(creditNoteInBaht)
+    return apiResponse(creditNoteInBaht);
   } catch (error) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
-    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลใบลดหนี้')
+    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลใบลดหนี้');
   }
 }
 
 // PUT /api/credit-notes/[id] - Update credit note (only cancelled status can be modified)
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
+    const user = await requireAuth();
 
     if (user.role === 'VIEWER') {
-      return forbiddenError()
+      return forbiddenError();
     }
 
-    const { id } = await params
+    const { id } = await params;
 
     const existing = await db.creditNote.findUnique({
       where: { id },
       include: {
-        journalEntry: true
-      }
-    })
+        journalEntry: true,
+      },
+    });
 
     if (!existing) {
-      return notFoundError('ไม่พบใบลดหนี้')
+      return notFoundError('ไม่พบใบลดหนี้');
     }
 
     // Only allow updating if not yet posted to journal
     if (existing.status === 'ISSUED' && existing.journalEntryId) {
-      return apiError('ไม่สามารถแก้ไขใบลดหนี้ที่ออกแล้ว', 403)
+      return apiError('ไม่สามารถแก้ไขใบลดหนี้ที่ออกแล้ว', 403);
     }
 
-    const body = await request.json()
+    const body = await request.json();
 
     // Allow updating notes and status only
     const updated = await db.creditNote.update({
@@ -102,14 +105,14 @@ export async function PUT(
         customer: true,
         invoice: true,
       },
-    })
+    });
 
-    return apiResponse(updated)
+    return apiResponse(updated);
   } catch (error) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
-    return apiError('เกิดข้อผิดพลาดในการแก้ไขใบลดหนี้')
+    return apiError('เกิดข้อผิดพลาดในการแก้ไขใบลดหนี้');
   }
 }
 
@@ -119,46 +122,46 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth()
+    const user = await requireAuth();
 
     if (user.role !== 'ADMIN' && user.role !== 'ACCOUNTANT') {
-      return forbiddenError()
+      return forbiddenError();
     }
 
-    const { id } = await params
+    const { id } = await params;
 
     const existing = await db.creditNote.findUnique({
       where: { id },
       include: {
-        journalEntry: true
-      }
-    })
+        journalEntry: true,
+      },
+    });
 
     if (!existing) {
-      return notFoundError('ไม่พบใบลดหนี้')
+      return notFoundError('ไม่พบใบลดหนี้');
     }
 
     // Only ISSUED status without journal entry can be deleted
     if (existing.status !== 'ISSUED') {
-      return forbiddenError('สามารถลบได้เฉพาะใบลดหนี้สถานะออกแล้วที่ยังไม่ได้ลงบัญชีเท่านั้น')
+      return forbiddenError('สามารถลบได้เฉพาะใบลดหนี้สถานะออกแล้วที่ยังไม่ได้ลงบัญชีเท่านั้น');
     }
 
     // Cannot delete if journal entry exists
     if (existing.journalEntryId) {
-      return apiError('ไม่สามารถลบใบลดหนี้ที่มีการลงบัญชีแล้ว', 403)
+      return apiError('ไม่สามารถลบใบลดหนี้ที่มีการลงบัญชีแล้ว', 403);
     }
 
     // Soft-delete
     await db.creditNote.update({
       where: { id },
-      data: { deletedAt: new Date(), isActive: false, deletedBy: user.id }
-    })
+      data: { deletedAt: new Date(), isActive: false, deletedBy: user.id },
+    });
 
-    return apiResponse({ message: 'ลบใบลดหนี้เรียบร้อยแล้ว' })
+    return apiResponse({ message: 'ลบใบลดหนี้เรียบร้อยแล้ว' });
   } catch (error) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
-    return apiError('เกิดข้อผิดพลาดในการลบใบลดหนี้')
+    return apiError('เกิดข้อผิดพลาดในการลบใบลดหนี้');
   }
 }

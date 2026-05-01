@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 // ============================================
 // 💰 Payroll Run Status Dialog
@@ -6,64 +6,89 @@
 // Manage payroll run status (Draft → Approved → Paid)
 // ============================================
 
-import { useState, useEffect } from 'react'
-import { CheckCircle, DollarSign, Users, AlertCircle, FileText } from 'lucide-react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/hooks/use-toast'
+import { useState, useEffect } from 'react';
+import { CheckCircle, DollarSign, Users, AlertCircle, FileText } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
-const fc = (n: number) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(n)
+const fc = (n: number) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(n);
 
 interface PayrollRun {
-  id: string
-  runNo: string
-  periodMonth: number
-  periodYear: number
-  paymentDate: string
-  totalBaseSalary: number
-  totalAdditions: number
-  totalDeductions: number
-  totalSsc: number
-  totalTax: number
-  totalNetPay: number
-  status: 'DRAFT' | 'APPROVED' | 'PAID'
-  payrolls: { id: string }[]
-  journalEntryId?: string | null
+  id: string;
+  runNo: string;
+  periodMonth: number;
+  periodYear: number;
+  paymentDate: string;
+  totalBaseSalary: number;
+  totalAdditions: number;
+  totalDeductions: number;
+  totalSsc: number;
+  totalTax: number;
+  totalNetPay: number;
+  status: 'DRAFT' | 'APPROVED' | 'PAID';
+  payrolls: { id: string }[];
+  journalEntryId?: string | null;
 }
 
 interface PayrollStatusDialogProps {
-  open: boolean
-  onClose: () => void
-  onSuccess: () => void
-  payrollRun: PayrollRun | null
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  payrollRun: PayrollRun | null;
 }
 
 const PAYROLL_STATUS: Record<string, { label: string; color: string }> = {
   DRAFT: { label: 'ร่าง', color: 'bg-gray-100 text-gray-600' },
   APPROVED: { label: 'อนุมัติ', color: 'bg-blue-100 text-blue-700' },
   PAID: { label: 'จ่ายแล้ว', color: 'bg-green-100 text-green-700' },
-}
+};
 
-const THAI_MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
+const THAI_MONTHS = [
+  'ม.ค.',
+  'ก.พ.',
+  'มี.ค.',
+  'เม.ย.',
+  'พ.ค.',
+  'มิ.ย.',
+  'ก.ค.',
+  'ส.ค.',
+  'ก.ย.',
+  'ต.ค.',
+  'พ.ย.',
+  'ธ.ค.',
+];
 
-export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }: PayrollStatusDialogProps) {
-  const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
+export function PayrollRunStatusDialog({
+  open,
+  onClose,
+  onSuccess,
+  payrollRun,
+}: PayrollStatusDialogProps) {
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleApprove = async () => {
-    if (!payrollRun) return
+    if (!payrollRun) return;
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const response = await window.fetch(`/api/payroll/${payrollRun.id}`, { credentials: 'include', 
+      const response = await window.fetch(`/api/payroll/${payrollRun.id}`, {
+        credentials: 'include',
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'approve' }),
-      })
+      });
 
-      const res = await response.json()
+      const res = await response.json();
 
       if (res.success) {
         toast({
@@ -71,54 +96,63 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
           description: res.data.journalEntry
             ? 'บันทึกบัญชีถูกสร้างเรียบร้อยแล้ว'
             : 'อัปเดตสถานะเรียบร้อยแล้ว',
-        })
-        onSuccess()
-        onClose()
+        });
+        onSuccess();
+        onClose();
       } else {
-        toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+        toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' });
       }
     } catch (error) {
-      toast({ title: 'ข้อผิดพลาด', description: 'ไม่สามารถอนุมัติงวดเงินเดือนได้', variant: 'destructive' })
+      toast({
+        title: 'ข้อผิดพลาด',
+        description: 'ไม่สามารถอนุมัติงวดเงินเดือนได้',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleMarkPaid = async () => {
-    if (!payrollRun) return
+    if (!payrollRun) return;
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const response = await window.fetch(`/api/payroll/${payrollRun.id}`, { credentials: 'include', 
+      const response = await window.fetch(`/api/payroll/${payrollRun.id}`, {
+        credentials: 'include',
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'markPaid' }),
-      })
+      });
 
-      const res = await response.json()
+      const res = await response.json();
 
       if (res.success) {
         toast({
           title: 'บันทึกสถานะจ่ายเงินเดือนแล้ว',
-        })
-        onSuccess()
-        onClose()
+        });
+        onSuccess();
+        onClose();
       } else {
-        toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
+        toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' });
       }
     } catch (error) {
-      toast({ title: 'ข้อผิดพลาด', description: 'ไม่สามารถบันทึกสถานะได้', variant: 'destructive' })
+      toast({
+        title: 'ข้อผิดพลาด',
+        description: 'ไม่สามารถบันทึกสถานะได้',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  if (!payrollRun) return null
+  if (!payrollRun) return null;
 
-  const statusInfo = PAYROLL_STATUS[payrollRun.status] || PAYROLL_STATUS.DRAFT
-  const canApprove = payrollRun.status === 'DRAFT'
-  const canMarkPaid = payrollRun.status === 'APPROVED'
+  const statusInfo = PAYROLL_STATUS[payrollRun.status] || PAYROLL_STATUS.DRAFT;
+  const canApprove = payrollRun.status === 'DRAFT';
+  const canMarkPaid = payrollRun.status === 'APPROVED';
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -129,7 +163,8 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
             รายละเอียดและสถานะงวดเงินเดือน
           </DialogTitle>
           <DialogDescription className="sr-only">
-            แสดงรายละเอียดงวดเงินเดือนสำหรับงวด {THAI_MONTHS[payrollRun.periodMonth - 1]} {payrollRun.periodYear + 543}
+            แสดงรายละเอียดงวดเงินเดือนสำหรับงวด {THAI_MONTHS[payrollRun.periodMonth - 1]}{' '}
+            {payrollRun.periodYear + 543}
             รวมถึงสถานะการอนุมัติการจ่ายเงิน รายละเอียดทางการเงิน เงินเดือน ประกันสังคม ภาษี
             และสถานะการบันทึกบัญชี
           </DialogDescription>
@@ -146,14 +181,14 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500">เลขที่รอบ</p>
-              <p className="text-lg font-semibold font-mono">{payrollRun.runNo}</p>
+              <p className="font-mono text-lg font-semibold">{payrollRun.runNo}</p>
             </div>
             <Badge className={`${statusInfo.color} text-sm`}>{statusInfo.label}</Badge>
           </div>
 
           {/* Summary Stats */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+            <div className="flex items-center gap-3 rounded-lg bg-blue-50 p-3">
               <Users className="h-8 w-8 text-blue-600" />
               <div>
                 <p className="text-xs text-gray-500">จำนวนพนักงาน</p>
@@ -161,7 +196,7 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+            <div className="flex items-center gap-3 rounded-lg bg-green-50 p-3">
               <DollarSign className="h-8 w-8 text-green-600" />
               <div>
                 <p className="text-xs text-gray-500">เงินได้สุทธิรวม</p>
@@ -171,7 +206,7 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
           </div>
 
           {/* Financial Details */}
-          <div className="space-y-3 border rounded-lg p-4">
+          <div className="space-y-3 rounded-lg border p-4">
             <h3 className="font-semibold text-gray-700">รายละเอียดทางการเงิน</h3>
 
             <div className="space-y-2 text-sm">
@@ -204,7 +239,7 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
                 <span>- ฿{fc(payrollRun.totalTax)}</span>
               </div>
 
-              <div className="border-t pt-2 mt-2">
+              <div className="mt-2 border-t pt-2">
                 <div className="flex justify-between text-base font-bold text-green-700">
                   <span>เงินได้สุทธิ</span>
                   <span>฿{fc(payrollRun.totalNetPay)}</span>
@@ -215,7 +250,7 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
 
           {/* Journal Entry Status */}
           {payrollRun.journalEntryId && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
+            <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-3">
               <CheckCircle className="h-5 w-5 text-green-600" />
               <span className="text-sm text-green-700">บันทึกบัญชีถูกสร้างแล้ว</span>
             </div>
@@ -223,11 +258,11 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
 
           {/* Warnings */}
           {payrollRun.status === 'DRAFT' && !payrollRun.journalEntryId && (
-            <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
-              <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
+            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 text-amber-600" />
               <div className="text-sm text-amber-700">
                 <p className="font-semibold">ยังไม่ได้อนุมัติ</p>
-                <p className="text-xs mt-1">
+                <p className="mt-1 text-xs">
                   เมื่ออนุมัติแล้ว ระบบจะสร้างบันทึกบัญชีสำหรับเงินเดือนโดยอัตโนมัติ
                 </p>
               </div>
@@ -236,7 +271,7 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
         </div>
 
         {/* Actions */}
-        <div className="flex justify-between pt-4 border-t">
+        <div className="flex justify-between border-t pt-4">
           <Button variant="outline" onClick={onClose} disabled={loading}>
             ปิด
           </Button>
@@ -248,9 +283,11 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
                 disabled={loading}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {loading ? 'กำลังอนุมัติ...' : (
+                {loading ? (
+                  'กำลังอนุมัติ...'
+                ) : (
                   <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="mr-2 h-4 w-4" />
                     อนุมัติ (สร้างบันทึกบัญชี)
                   </>
                 )}
@@ -263,9 +300,11 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
                 disabled={loading}
                 className="bg-green-600 hover:bg-green-700"
               >
-                {loading ? 'กำลังบันทึก...' : (
+                {loading ? (
+                  'กำลังบันทึก...'
+                ) : (
                   <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="mr-2 h-4 w-4" />
                     บันทึกว่าจ่ายแล้ว
                   </>
                 )}
@@ -275,5 +314,5 @@ export function PayrollRunStatusDialog({ open, onClose, onSuccess, payrollRun }:
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

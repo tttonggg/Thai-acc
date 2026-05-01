@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { z } from 'zod'
-import { requireAuth, getClientIp } from '@/lib/api-utils'
-import { logPost } from '@/lib/activity-logger'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { z } from 'zod';
+import { requireAuth, getClientIp } from '@/lib/api-utils';
+import { logPost } from '@/lib/activity-logger';
 
 /**
  * Validation schema for journal entry lines
@@ -13,7 +13,7 @@ const journalLineSchema = z.object({
   debit: z.number().min(0).default(0),
   credit: z.number().min(0).default(0),
   reference: z.string().optional(),
-})
+});
 
 /**
  * Validation schema for journal entry
@@ -28,20 +28,18 @@ const journalEntrySchema = z.object({
   isReversing: z.boolean().default(false),
   reversingId: z.string().optional(),
   notes: z.string().optional(),
-  lines: z
-    .array(journalLineSchema)
-    .min(2, 'ต้องมีอย่างน้อย 2 รายการ (เดบิตและเครดิต)'),
-})
+  lines: z.array(journalLineSchema).min(2, 'ต้องมีอย่างน้อย 2 รายการ (เดบิตและเครดิต)'),
+});
 
 /**
  * Generate journal entry number
  * Pattern: JV-YYYY-NNNN (e.g., JV-2567-0001)
  */
 async function generateJournalEntryNumber(): Promise<string> {
-  const now = new Date()
-  const thaiYear = now.getFullYear() + 543 // Convert to Buddhist year
+  const now = new Date();
+  const thaiYear = now.getFullYear() + 543; // Convert to Buddhist year
 
-  const prefix = `JV-${thaiYear}`
+  const prefix = `JV-${thaiYear}`;
 
   // Find last journal entry for this year
   const lastEntry = await prisma.journalEntry.findFirst({
@@ -56,16 +54,16 @@ async function generateJournalEntryNumber(): Promise<string> {
     select: {
       entryNo: true,
     },
-  })
+  });
 
-  let nextNum = 1
+  let nextNum = 1;
   if (lastEntry) {
-    const parts = lastEntry.entryNo.split('-')
-    const lastNum = parseInt(parts[parts.length - 1] || '0', 10)
-    nextNum = lastNum + 1
+    const parts = lastEntry.entryNo.split('-');
+    const lastNum = parseInt(parts[parts.length - 1] || '0', 10);
+    nextNum = lastNum + 1;
   }
 
-  return `${prefix}-${String(nextNum).padStart(4, '0')}`
+  return `${prefix}-${String(nextNum).padStart(4, '0')}`;
 }
 
 /**
@@ -76,24 +74,24 @@ async function generateJournalEntryNumber(): Promise<string> {
 export async function POST(request: NextRequest) {
   try {
     // Require authentication
-    const user = await requireAuth()
-    const ipAddress = getClientIp(request.headers)
+    const user = await requireAuth();
+    const ipAddress = getClientIp(request.headers);
 
     // Parse and validate request body
-    const body = await request.json()
-    const validatedData = journalEntrySchema.parse(body)
+    const body = await request.json();
+    const validatedData = journalEntrySchema.parse(body);
 
     // Calculate totals
-    let totalDebit = 0
-    let totalCredit = 0
+    let totalDebit = 0;
+    let totalCredit = 0;
 
     for (const line of validatedData.lines) {
-      totalDebit += line.debit
-      totalCredit += line.credit
+      totalDebit += line.debit;
+      totalCredit += line.credit;
     }
 
     // Validate debits equal credits (within 0.01 tolerance)
-    const difference = Math.abs(totalDebit - totalCredit)
+    const difference = Math.abs(totalDebit - totalCredit);
     if (difference > 0.01) {
       return NextResponse.json(
         {
@@ -106,12 +104,12 @@ export async function POST(request: NextRequest) {
           },
         },
         { status: 400 }
-      )
+      );
     }
 
     // Validate that at least one line has debit and one has credit
-    const hasDebit = validatedData.lines.some((line) => line.debit > 0)
-    const hasCredit = validatedData.lines.some((line) => line.credit > 0)
+    const hasDebit = validatedData.lines.some((line) => line.debit > 0);
+    const hasCredit = validatedData.lines.some((line) => line.credit > 0);
 
     if (!hasDebit || !hasCredit) {
       return NextResponse.json(
@@ -120,11 +118,11 @@ export async function POST(request: NextRequest) {
           error: 'ต้องมีทั้งรายการเดบิตและเครดิต',
         },
         { status: 400 }
-      )
+      );
     }
 
     // Verify all accounts exist
-    const accountIds = validatedData.lines.map((line) => line.accountId)
+    const accountIds = validatedData.lines.map((line) => line.accountId);
     const accounts = await prisma.chartOfAccount.findMany({
       where: {
         id: { in: accountIds },
@@ -136,7 +134,7 @@ export async function POST(request: NextRequest) {
         name: true,
         type: true,
       },
-    })
+    });
 
     if (accounts.length !== accountIds.length) {
       return NextResponse.json(
@@ -145,11 +143,11 @@ export async function POST(request: NextRequest) {
           error: 'พบบัญชีที่ไม่มีอยู่จริงหรือถูกปิดใช้งาน',
         },
         { status: 400 }
-      )
+      );
     }
 
     // Generate journal entry number
-    const entryNo = await generateJournalEntryNumber()
+    const entryNo = await generateJournalEntryNumber();
 
     // Create journal entry with lines
     const journalEntry = await prisma.journalEntry.create({
@@ -195,30 +193,35 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-    })
+    });
 
     // Log journal posting
-    await logPost(user.id, 'journal', journalEntry.id, {
-      entryNo: journalEntry.entryNo,
-      totalDebit: journalEntry.totalDebit,
-      totalCredit: journalEntry.totalCredit,
-      documentType: journalEntry.documentType,
-    }, ipAddress)
+    await logPost(
+      user.id,
+      'journal',
+      journalEntry.id,
+      {
+        entryNo: journalEntry.entryNo,
+        totalDebit: journalEntry.totalDebit,
+        totalCredit: journalEntry.totalCredit,
+        documentType: journalEntry.documentType,
+      },
+      ipAddress
+    );
 
     return NextResponse.json({
       success: true,
       journalId: journalEntry.id,
       entryNo: journalEntry.entryNo,
       data: journalEntry,
-    })
+    });
   } catch (error: any) {
-
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(
         { success: false, error: error.message || 'กรุณาเข้าสู่ระบบ' },
         { status: error.statusCode || 401 }
-      )
+      );
     }
 
     // Handle validation errors
@@ -230,7 +233,7 @@ export async function POST(request: NextRequest) {
           details: error.errors,
         },
         { status: 400 }
-      )
+      );
     }
 
     // Handle other errors
@@ -240,6 +243,6 @@ export async function POST(request: NextRequest) {
         error: error.message || 'เกิดข้อผิดพลาดในการลงบัญชี',
       },
       { status: 500 }
-    )
+    );
   }
 }

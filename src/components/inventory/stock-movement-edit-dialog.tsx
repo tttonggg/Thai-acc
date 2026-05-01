@@ -1,33 +1,40 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/hooks/use-toast'
-import { Loader2, AlertTriangle, RotateCcw } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, AlertTriangle, RotateCcw } from 'lucide-react';
 
 interface StockMovement {
-  id: string
-  type: string
-  quantity: number
-  unitCost: number
-  totalCost: number
-  date: string
-  notes: string | null
-  product: { code: string; name: string; unit: string }
-  warehouse: { code: string; name: string }
+  id: string;
+  type: string;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
+  date: string;
+  notes: string | null;
+  product: { code: string; name: string; unit: string };
+  warehouse: { code: string; name: string };
 }
 
 interface StockMovementEditDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  movement?: StockMovement | null
-  onSuccess: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  movement?: StockMovement | null;
+  onSuccess: () => void;
 }
 
 const MOVEMENT_TYPES: Record<string, { label: string; color: string }> = {
@@ -37,105 +44,110 @@ const MOVEMENT_TYPES: Record<string, { label: string; color: string }> = {
   TRANSFER_OUT: { label: 'โอนออก', color: 'bg-orange-100 text-orange-700' },
   ADJUST: { label: 'ปรับปรุง', color: 'bg-purple-100 text-purple-700' },
   COUNT: { label: 'นับสต็อก', color: 'bg-gray-100 text-gray-700' },
-}
+};
 
 export function StockMovementEditDialog({
   open,
   onOpenChange,
   movement,
-  onSuccess
+  onSuccess,
 }: StockMovementEditDialogProps) {
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
-  const [reversing, setReversing] = useState(false)
-  const [mode, setMode] = useState<'edit' | 'reverse'>('edit')
-  const [notes, setNotes] = useState('')
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [reversing, setReversing] = useState(false);
+  const [mode, setMode] = useState<'edit' | 'reverse'>('edit');
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     if (movement) {
-      setNotes(movement.notes || '')
-      setMode('edit')
-      setReversing(false)
+      setNotes(movement.notes || '');
+      setMode('edit');
+      setReversing(false);
     }
-  }, [movement, open])
+  }, [movement, open]);
 
-  if (!movement) return null
+  if (!movement) return null;
 
-  const mt = MOVEMENT_TYPES[movement.type] || { label: movement.type, color: 'bg-gray-100 text-gray-700' }
+  const mt = MOVEMENT_TYPES[movement.type] || {
+    label: movement.type,
+    color: 'bg-gray-100 text-gray-700',
+  };
 
   const handleSaveNotes = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await fetch(`/api/stock-movements/${movement.id}`, { credentials: 'include', 
+      const res = await fetch(`/api/stock-movements/${movement.id}`, {
+        credentials: 'include',
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notes }),
-      }).then(r => r.json())
+      }).then((r) => r.json());
 
       if (res.success) {
         toast({
           title: 'บันทึกหมายเหตุสำเร็จ',
-          description: 'อัปเดตหมายเหตุเรียบร้อยแล้ว'
-        })
-        onOpenChange(false)
-        onSuccess()
+          description: 'อัปเดตหมายเหตุเรียบร้อยแล้ว',
+        });
+        onOpenChange(false);
+        onSuccess();
       } else {
         toast({
           title: 'ข้อผิดพลาด',
           description: res.error,
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleReverse = async () => {
     if (!confirm(`ยืนยันที่จะยกเลิกการเคลื่อนไหวนี้?\n\nสร้างรายการย้อนกลับเพื่อแก้ไขสต็อก`)) {
-      return
+      return;
     }
 
-    setReversing(true)
+    setReversing(true);
     try {
-      const res = await fetch(`/api/stock-movements/${movement.id}`, { credentials: 'include', 
+      const res = await fetch(`/api/stock-movements/${movement.id}`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'reverse' }),
-      }).then(r => r.json())
+      }).then((r) => r.json());
 
       if (res.success) {
         toast({
           title: 'ยกเลิกการเคลื่อนไหวสำเร็จ',
-          description: res.data.message
-        })
-        onOpenChange(false)
-        onSuccess()
+          description: res.data.message,
+        });
+        onOpenChange(false);
+        onSuccess();
       } else {
         toast({
           title: 'ข้อผิดพลาด',
           description: res.error,
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setReversing(false)
+      setReversing(false);
     }
-  }
+  };
 
-  const canReverse = ['RECEIVE', 'ISSUE', 'ADJUST'].includes(movement.type)
+  const canReverse = ['RECEIVE', 'ISSUE', 'ADJUST'].includes(movement.type);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -151,15 +163,15 @@ export function StockMovementEditDialog({
 
         <div className="space-y-4 py-4">
           {/* Movement Info */}
-          <div className="bg-gray-50 p-3 rounded-lg space-y-2">
-            <div className="flex justify-between items-start">
+          <div className="space-y-2 rounded-lg bg-gray-50 p-3">
+            <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-semibold">{movement.product.name}</p>
-                <p className="text-xs text-gray-500 font-mono">{movement.product.code}</p>
+                <p className="font-mono text-xs text-gray-500">{movement.product.code}</p>
               </div>
               <Badge className={mt.color}>{mt.label}</Badge>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-1 gap-2 text-xs md:grid-cols-2">
               <div>
                 <span className="text-gray-500">คลัง:</span>
                 <span className="ml-1 font-medium">{movement.warehouse.name}</span>
@@ -171,20 +183,24 @@ export function StockMovementEditDialog({
                 </span>
               </div>
             </div>
-            <div className="flex justify-between items-center text-sm pt-2 border-t">
+            <div className="flex items-center justify-between border-t pt-2 text-sm">
               <span>จำนวน:</span>
-              <span className={`font-semibold ${
-                ['ISSUE', 'TRANSFER_OUT'].includes(movement.type) ? 'text-red-600' : 'text-green-600'
-              }`}>
+              <span
+                className={`font-semibold ${
+                  ['ISSUE', 'TRANSFER_OUT'].includes(movement.type)
+                    ? 'text-red-600'
+                    : 'text-green-600'
+                }`}
+              >
                 {['ISSUE', 'TRANSFER_OUT'].includes(movement.type) ? '-' : '+'}
                 {Math.abs(movement.quantity).toFixed(2)} {movement.product.unit}
               </span>
             </div>
-            <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center justify-between text-sm">
               <span>ต้นทุน/หน่วย:</span>
               <span className="font-medium">฿{movement.unitCost.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center justify-between text-sm">
               <span>มูลค่ารวม:</span>
               <span className="font-semibold">฿{movement.totalCost.toFixed(2)}</span>
             </div>
@@ -195,7 +211,7 @@ export function StockMovementEditDialog({
             <div className="flex gap-2">
               <button
                 onClick={() => setMode('edit')}
-                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
                   mode === 'edit'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -205,13 +221,13 @@ export function StockMovementEditDialog({
               </button>
               <button
                 onClick={() => setMode('reverse')}
-                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
                   mode === 'reverse'
                     ? 'bg-red-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                <RotateCcw className="h-4 w-4 mr-1 inline" />
+                <RotateCcw className="mr-1 inline h-4 w-4" />
                 ยกเลิกรายการ
               </button>
             </div>
@@ -232,12 +248,12 @@ export function StockMovementEditDialog({
           )}
 
           {mode === 'reverse' && (
-            <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                <AlertTriangle className="mt-0.5 h-4 w-4 text-yellow-600" />
                 <div className="text-sm text-yellow-800">
                   <p className="font-semibold">ยกเลิกการเคลื่อนไหวสินค้า</p>
-                  <p className="text-xs mt-1">
+                  <p className="mt-1 text-xs">
                     ระบบจะสร้างรายการย้อนกลับเพื่อแก้ไขสต็อกให้กลับเป็นค่าเดิม
                   </p>
                 </div>
@@ -260,7 +276,7 @@ export function StockMovementEditDialog({
               disabled={loading}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               บันทึกหมายเหตุ
             </Button>
           )}
@@ -270,12 +286,12 @@ export function StockMovementEditDialog({
               disabled={reversing}
               className="bg-red-600 hover:bg-red-700"
             >
-              {reversing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {reversing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               ยืนยันการยกเลิก
             </Button>
           )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

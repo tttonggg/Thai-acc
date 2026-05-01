@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +12,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '@/components/ui/alert-dialog';
 import {
   Dialog,
   DialogContent,
@@ -20,10 +20,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import {
   Download,
   Upload,
@@ -36,255 +36,258 @@ import {
   CheckCircle2,
   Loader2,
   Calendar,
-  RefreshCw
-} from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { formatThaiDate } from '@/lib/thai-accounting'
+  RefreshCw,
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { formatThaiDate } from '@/lib/thai-accounting';
 
 interface Backup {
-  filename: string
-  path: string
-  size: number
-  createdAt: string
-  modifiedAt: string
-  timestamp: string | null
+  filename: string;
+  path: string;
+  size: number;
+  createdAt: string;
+  modifiedAt: string;
+  timestamp: string | null;
 }
 
 interface BackupData {
-  backups: Backup[]
-  totalBackups: number
-  totalSize: number
-  lastBackup: string | null
-  databaseLocation: string
+  backups: Backup[];
+  totalBackups: number;
+  totalSize: number;
+  lastBackup: string | null;
+  databaseLocation: string;
 }
 
 export function BackupRestorePage() {
-  const [backupData, setBackupData] = useState<BackupData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [creatingBackup, setCreatingBackup] = useState(false)
-  const [restoring, setRestoring] = useState(false)
-  const [selectedBackup, setSelectedBackup] = useState<Backup | null>(null)
-  const [showRestoreDialog, setShowRestoreDialog] = useState(false)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [uploadFile, setUploadFile] = useState<File | null>(null)
-  const [showUploadDialog, setShowUploadDialog] = useState(false)
-  const { toast } = useToast()
+  const [backupData, setBackupData] = useState<BackupData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [creatingBackup, setCreatingBackup] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [selectedBackup, setSelectedBackup] = useState<Backup | null>(null);
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const { toast } = useToast();
 
   const fetchBackups = async () => {
     try {
-      setLoading(true)
-      const response = await fetch(`/api/admin/backups`, { credentials: 'include' })
-      const result = await response.json()
+      setLoading(true);
+      const response = await fetch(`/api/admin/backups`, { credentials: 'include' });
+      const result = await response.json();
 
       if (result.success) {
-        setBackupData(result.data)
+        setBackupData(result.data);
       } else {
         toast({
           variant: 'destructive',
           title: 'เกิดข้อผิดพลาด',
-          description: result.error
-        })
+          description: result.error,
+        });
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถดึงข้อมูลสำรองได้'
-      })
+        description: 'ไม่สามารถดึงข้อมูลสำรองได้',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchBackups()
-  }, [])
+    fetchBackups();
+  }, []);
 
   const handleCreateBackup = async () => {
     try {
-      setCreatingBackup(true)
-      const response = await fetch(`/api/admin/backup`, { credentials: 'include', 
-        method: 'POST'
-      })
-      const result = await response.json()
+      setCreatingBackup(true);
+      const response = await fetch(`/api/admin/backup`, { credentials: 'include', method: 'POST' });
+      const result = await response.json();
 
       if (result.success) {
         toast({
           title: 'สร้างข้อมูลสำรองสำเร็จ',
-          description: `สร้างข้อมูลสำรอง ${result.data.filename} เรียบร้อยแล้ว`
-        })
-        await fetchBackups()
+          description: `สร้างข้อมูลสำรอง ${result.data.filename} เรียบร้อยแล้ว`,
+        });
+        await fetchBackups();
       } else {
         toast({
           variant: 'destructive',
           title: 'เกิดข้อผิดพลาด',
-          description: result.error
-        })
+          description: result.error,
+        });
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถสร้างข้อมูลสำรองได้'
-      })
+        description: 'ไม่สามารถสร้างข้อมูลสำรองได้',
+      });
     } finally {
-      setCreatingBackup(false)
+      setCreatingBackup(false);
     }
-  }
+  };
 
   const handleRestore = async () => {
-    if (!selectedBackup) return
+    if (!selectedBackup) return;
 
     try {
-      setRestoring(true)
-      const response = await fetch(`/api/admin/restore`, { credentials: 'include', 
+      setRestoring(true);
+      const response = await fetch(`/api/admin/restore`, {
+        credentials: 'include',
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ filename: selectedBackup.filename })
-      })
-      const result = await response.json()
+        body: JSON.stringify({ filename: selectedBackup.filename }),
+      });
+      const result = await response.json();
 
       if (result.success) {
         toast({
           title: 'คืนค่าข้อมูลสำเร็จ',
-          description: `คืนค่าข้อมูลจาก ${selectedBackup.filename} เรียบร้อยแล้ว`
-        })
-        setShowRestoreDialog(false)
-        await fetchBackups()
+          description: `คืนค่าข้อมูลจาก ${selectedBackup.filename} เรียบร้อยแล้ว`,
+        });
+        setShowRestoreDialog(false);
+        await fetchBackups();
       } else {
         toast({
           variant: 'destructive',
           title: 'เกิดข้อผิดพลาด',
-          description: result.error
-        })
+          description: result.error,
+        });
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถคืนค่าข้อมูลได้'
-      })
+        description: 'ไม่สามารถคืนค่าข้อมูลได้',
+      });
     } finally {
-      setRestoring(false)
-      setSelectedBackup(null)
+      setRestoring(false);
+      setSelectedBackup(null);
     }
-  }
+  };
 
   const handleDelete = async () => {
-    if (!selectedBackup) return
+    if (!selectedBackup) return;
 
     try {
-      const response = await fetch(`/api/admin/backups`, { credentials: 'include', 
+      const response = await fetch(`/api/admin/backups`, {
+        credentials: 'include',
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ filename: selectedBackup.filename })
-      })
-      const result = await response.json()
+        body: JSON.stringify({ filename: selectedBackup.filename }),
+      });
+      const result = await response.json();
 
       if (result.success) {
         toast({
           title: 'ลบข้อมูลสำรองสำเร็จ',
-          description: `ลบ ${selectedBackup.filename} เรียบร้อยแล้ว`
-        })
-        setShowDeleteDialog(false)
-        await fetchBackups()
+          description: `ลบ ${selectedBackup.filename} เรียบร้อยแล้ว`,
+        });
+        setShowDeleteDialog(false);
+        await fetchBackups();
       } else {
         toast({
           variant: 'destructive',
           title: 'เกิดข้อผิดพลาด',
-          description: result.error
-        })
+          description: result.error,
+        });
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถลบข้อมูลสำรองได้'
-      })
+        description: 'ไม่สามารถลบข้อมูลสำรองได้',
+      });
     } finally {
-      setSelectedBackup(null)
+      setSelectedBackup(null);
     }
-  }
+  };
 
   const handleDownload = async (backup: Backup) => {
     try {
-      const response = await fetch(`/api/admin/backups/download/${backup.filename}`, { credentials: 'include' })
+      const response = await fetch(`/api/admin/backups/download/${backup.filename}`, {
+        credentials: 'include',
+      });
 
       if (!response.ok) {
-        throw new Error('ไม่สามารถดาวน์โหลดไฟล์ได้')
+        throw new Error('ไม่สามารถดาวน์โหลดไฟล์ได้');
       }
 
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = backup.filename
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = backup.filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
       toast({
         title: 'ดาวน์โหลดสำเร็จ',
-        description: `ดาวน์โหลด ${backup.filename} เรียบร้อยแล้ว`
-      })
+        description: `ดาวน์โหลด ${backup.filename} เรียบร้อยแล้ว`,
+      });
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถดาวน์โหลดไฟล์ได้'
-      })
+        description: 'ไม่สามารถดาวน์โหลดไฟล์ได้',
+      });
     }
-  }
+  };
 
   const handleFileUpload = async () => {
-    if (!uploadFile) return
+    if (!uploadFile) return;
 
     try {
-      const formData = new FormData()
-      formData.append('file', uploadFile)
+      const formData = new FormData();
+      formData.append('file', uploadFile);
 
-      const response = await fetch(`/api/admin/backups/upload`, { credentials: 'include', 
+      const response = await fetch(`/api/admin/backups/upload`, {
+        credentials: 'include',
         method: 'POST',
-        body: formData
-      })
+        body: formData,
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (result.success) {
         toast({
           title: 'อัปโหลดสำเร็จ',
-          description: `อัปโหลด ${uploadFile.name} เรียบร้อยแล้ว`
-        })
-        setShowUploadDialog(false)
-        setUploadFile(null)
-        await fetchBackups()
+          description: `อัปโหลด ${uploadFile.name} เรียบร้อยแล้ว`,
+        });
+        setShowUploadDialog(false);
+        setUploadFile(null);
+        await fetchBackups();
       } else {
         toast({
           variant: 'destructive',
           title: 'เกิดข้อผิดพลาด',
-          description: result.error
-        })
+          description: result.error,
+        });
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถอัปโหลดไฟล์ได้'
-      })
+        description: 'ไม่สามารถอัปโหลดไฟล์ได้',
+      });
     }
-  }
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
-    )
+    );
   }
 
   return (
@@ -292,56 +295,58 @@ export function BackupRestorePage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">สำรองและคืนค่าข้อมูล</h1>
-        <p className="text-gray-600 mt-2">จัดการข้อมูลสำรองของระบบ</p>
+        <p className="mt-2 text-gray-600">จัดการข้อมูลสำรองของระบบ</p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">ข้อมูลสำรองทั้งหมด</CardTitle>
-            <Database className="w-4 h-4 text-gray-600" />
+            <Database className="h-4 w-4 text-gray-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{backupData?.totalBackups || 0}</div>
-            <p className="text-xs text-gray-600 mt-1">ไฟล์</p>
+            <p className="mt-1 text-xs text-gray-600">ไฟล์</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">ขนาดรวม</CardTitle>
-            <HardDrive className="w-4 h-4 text-gray-600" />
+            <HardDrive className="h-4 w-4 text-gray-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{backupData?.totalSize.toFixed(2) || '0.00'} MB</div>
-            <p className="text-xs text-gray-600 mt-1">ดิสก์ที่ใช้</p>
+            <div className="text-2xl font-bold">
+              {backupData?.totalSize.toFixed(2) || '0.00'} MB
+            </div>
+            <p className="mt-1 text-xs text-gray-600">ดิสก์ที่ใช้</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">สำรองข้อมูลล่าสุด</CardTitle>
-            <Clock className="w-4 h-4 text-gray-600" />
+            <Clock className="h-4 w-4 text-gray-600" />
           </CardHeader>
           <CardContent>
             <div className="text-sm font-medium">
               {backupData?.lastBackup ? formatThaiDate(new Date(backupData.lastBackup)) : '-'}
             </div>
-            <p className="text-xs text-gray-600 mt-1">วันที่และเวลา</p>
+            <p className="mt-1 text-xs text-gray-600">วันที่และเวลา</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">ตำแหน่งฐานข้อมูล</CardTitle>
-            <FileText className="w-4 h-4 text-gray-600" />
+            <FileText className="h-4 w-4 text-gray-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-sm font-medium truncate" title={backupData?.databaseLocation}>
+            <div className="truncate text-sm font-medium" title={backupData?.databaseLocation}>
               {backupData?.databaseLocation?.split('/').slice(-2).join('/') || '-'}
             </div>
-            <p className="text-xs text-gray-600 mt-1">เส้นทางไฟล์</p>
+            <p className="mt-1 text-xs text-gray-600">เส้นทางไฟล์</p>
           </CardContent>
         </Card>
       </div>
@@ -355,32 +360,24 @@ export function BackupRestorePage() {
         >
           {creatingBackup ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               กำลังสร้าง...
             </>
           ) : (
             <>
-              <Database className="w-4 h-4 mr-2" />
+              <Database className="mr-2 h-4 w-4" />
               สร้างข้อมูลสำรอง
             </>
           )}
         </Button>
 
-        <Button
-          onClick={() => setShowUploadDialog(true)}
-          variant="outline"
-        >
-          <Upload className="w-4 h-4 mr-2" />
+        <Button onClick={() => setShowUploadDialog(true)} variant="outline">
+          <Upload className="mr-2 h-4 w-4" />
           อัปโหลดข้อมูลสำรอง
         </Button>
 
-        <Button
-          onClick={fetchBackups}
-          variant="ghost"
-          size="icon"
-          title="รีเฟรชรายการ"
-        >
-          <RefreshCw className="w-4 h-4" />
+        <Button onClick={fetchBackups} variant="ghost" size="icon" title="รีเฟรชรายการ">
+          <RefreshCw className="h-4 w-4" />
         </Button>
       </div>
 
@@ -391,8 +388,7 @@ export function BackupRestorePage() {
           <CardDescription>
             {backupData?.totalBackups === 0
               ? 'ยังไม่มีข้อมูลสำรอง สร้างข้อมูลสำรองแรกของคุณได้ที่นี่'
-              : `แสดง ${backupData?.totalBackups} ข้อมูลสำรอง`
-            }
+              : `แสดง ${backupData?.totalBackups} ข้อมูลสำรอง`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -401,21 +397,21 @@ export function BackupRestorePage() {
               {backupData.backups.map((backup) => (
                 <div
                   key={backup.filename}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-gray-50"
                 >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Database className="w-5 h-5 text-blue-600" />
+                  <div className="flex flex-1 items-center gap-4">
+                    <div className="rounded-lg bg-blue-100 p-2">
+                      <Database className="h-5 w-5 text-blue-600" />
                     </div>
                     <div className="flex-1">
                       <div className="font-medium text-gray-900">{backup.filename}</div>
-                      <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
+                      <div className="mt-1 flex items-center gap-4 text-sm text-gray-600">
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
+                          <Calendar className="h-3 w-3" />
                           {formatThaiDate(new Date(backup.createdAt))}
                         </span>
                         <span className="flex items-center gap-1">
-                          <HardDrive className="w-3 h-3" />
+                          <HardDrive className="h-3 w-3" />
                           {backup.size.toFixed(2)} MB
                         </span>
                       </div>
@@ -428,40 +424,40 @@ export function BackupRestorePage() {
                       size="sm"
                       title="ดาวน์โหลด"
                     >
-                      <Download className="w-4 h-4" />
+                      <Download className="h-4 w-4" />
                     </Button>
                     <Button
                       onClick={() => {
-                        setSelectedBackup(backup)
-                        setShowRestoreDialog(true)
+                        setSelectedBackup(backup);
+                        setShowRestoreDialog(true);
                       }}
                       variant="ghost"
                       size="sm"
                       title="คืนค่า"
                     >
-                      <RefreshCw className="w-4 h-4" />
+                      <RefreshCw className="h-4 w-4" />
                     </Button>
                     <Button
                       onClick={() => {
-                        setSelectedBackup(backup)
-                        setShowDeleteDialog(true)
+                        setSelectedBackup(backup);
+                        setShowDeleteDialog(true);
                       }}
                       variant="ghost"
                       size="sm"
                       title="ลบ"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-600 hover:bg-red-50 hover:text-red-700"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 text-gray-500">
-              <Database className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <div className="py-12 text-center text-gray-500">
+              <Database className="mx-auto mb-4 h-12 w-12 text-gray-400" />
               <p className="text-lg font-medium">ยังไม่มีข้อมูลสำรอง</p>
-              <p className="text-sm mt-2">คลิกปุ่ม "สร้างข้อมูลสำรอง" เพื่อเริ่มต้น</p>
+              <p className="mt-2 text-sm">คลิกปุ่ม "สร้างข้อมูลสำรอง" เพื่อเริ่มต้น</p>
             </div>
           )}
         </CardContent>
@@ -472,14 +468,14 @@ export function BackupRestorePage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-yellow-600" />
+              <AlertTriangle className="h-5 w-5 text-yellow-600" />
               ยืนยันการคืนค่าข้อมูล
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
               <p>
                 คุณกำลังจะคืนค่าข้อมูลจาก <strong>{selectedBackup?.filename}</strong>
               </p>
-              <p className="text-yellow-600 font-medium">
+              <p className="font-medium text-yellow-600">
                 ⚠️ การดำเนินการนี้จะแทนที่ข้อมูลทั้งหมดในระบบปัจจุบัน
               </p>
               <p className="text-sm text-gray-600">
@@ -491,15 +487,15 @@ export function BackupRestorePage() {
             <AlertDialogCancel disabled={restoring}>ยกเลิก</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
-                e.preventDefault()
-                handleRestore()
+                e.preventDefault();
+                handleRestore();
               }}
               disabled={restoring}
               className="bg-yellow-600 hover:bg-yellow-700"
             >
               {restoring ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   กำลังคืนค่า...
                 </>
               ) : (
@@ -515,7 +511,7 @@ export function BackupRestorePage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
+              <AlertTriangle className="h-5 w-5 text-red-600" />
               ยืนยันการลบข้อมูลสำรอง
             </AlertDialogTitle>
             <AlertDialogDescription>
@@ -528,8 +524,8 @@ export function BackupRestorePage() {
             <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
-                e.preventDefault()
-                handleDelete()
+                e.preventDefault();
+                handleDelete();
               }}
               className="bg-red-600 hover:bg-red-700"
             >
@@ -544,9 +540,7 @@ export function BackupRestorePage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>อัปโหลดข้อมูลสำรอง</DialogTitle>
-            <DialogDescription>
-              อัปโหลดไฟล์ข้อมูลสำรอง (.db) เพื่อเพิ่มลงในรายการ
-            </DialogDescription>
+            <DialogDescription>อัปโหลดไฟล์ข้อมูลสำรอง (.db) เพื่อเพิ่มลงในรายการ</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -558,24 +552,19 @@ export function BackupRestorePage() {
                 onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                 className="mt-2"
               />
-              <p className="text-xs text-gray-600 mt-1">
-                รองรับไฟล์ .db เท่านั้น
-              </p>
+              <p className="mt-1 text-xs text-gray-600">รองรับไฟล์ .db เท่านั้น</p>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
               ยกเลิก
             </Button>
-            <Button
-              onClick={handleFileUpload}
-              disabled={!uploadFile}
-            >
+            <Button onClick={handleFileUpload} disabled={!uploadFile}>
               อัปโหลด
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

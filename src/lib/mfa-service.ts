@@ -29,10 +29,7 @@ const failedAttempts = new Map<string, { count: number; lockedUntil?: Date }>();
 /**
  * Generate MFA secret and QR code for setup
  */
-export async function generateMFASetup(
-  userId: string,
-  email: string
-): Promise<MFASetupResult> {
+export async function generateMFASetup(userId: string, email: string): Promise<MFASetupResult> {
   // Generate secret
   const secret = speakeasy.generateSecret({
     name: `ThaiAccounting:${email}`,
@@ -42,7 +39,7 @@ export async function generateMFASetup(
 
   // Encrypt secret before storing
   const encryptedSecret = encrypt(secret.base32);
-  
+
   // Store encrypted secret (not enabled yet - needs verification)
   await prisma.user.update({
     where: { id: userId },
@@ -50,12 +47,14 @@ export async function generateMFASetup(
   });
 
   // Generate QR code
-  const otpauthUrl = secret.otpauth_url || speakeasy.otpauthURL({
-    secret: secret.ascii,
-    label: email,
-    issuer: 'Thai Accounting ERP',
-    encoding: 'ascii',
-  });
+  const otpauthUrl =
+    secret.otpauth_url ||
+    speakeasy.otpauthURL({
+      secret: secret.ascii,
+      label: email,
+      issuer: 'Thai Accounting ERP',
+      encoding: 'ascii',
+    });
 
   const qrCodeUrl = await QRCode.toDataURL(otpauthUrl);
 
@@ -69,10 +68,7 @@ export async function generateMFASetup(
 /**
  * Verify TOTP token during setup to enable MFA
  */
-export async function verifyAndEnableMFA(
-  userId: string,
-  token: string
-): Promise<boolean> {
+export async function verifyAndEnableMFA(userId: string, token: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { mfaSecret: true },
@@ -97,7 +93,7 @@ export async function verifyAndEnableMFA(
   if (verified) {
     await prisma.user.update({
       where: { id: userId },
-      data: { 
+      data: {
         mfaEnabled: true,
         mfaVerifiedAt: new Date(),
       },
@@ -113,10 +109,7 @@ export async function verifyAndEnableMFA(
 /**
  * Verify TOTP token during login
  */
-export async function verifyMFAToken(
-  userId: string,
-  token: string
-): Promise<MFAVerifyResult> {
+export async function verifyMFAToken(userId: string, token: string): Promise<MFAVerifyResult> {
   // Check for lockout
   const attemptInfo = failedAttempts.get(userId);
   if (attemptInfo?.lockedUntil && attemptInfo.lockedUntil > new Date()) {
@@ -170,10 +163,7 @@ export async function verifyMFAToken(
 /**
  * Disable MFA for a user
  */
-export async function disableMFA(
-  userId: string,
-  token: string
-): Promise<boolean> {
+export async function disableMFA(userId: string, token: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { mfaSecret: true, mfaEnabled: true },
@@ -199,7 +189,7 @@ export async function disableMFA(
   if (verified) {
     await prisma.user.update({
       where: { id: userId },
-      data: { 
+      data: {
         mfaEnabled: false,
         mfaSecret: null,
         mfaVerifiedAt: null,
@@ -238,10 +228,7 @@ export function generateBackupCodes(count: number = 10): string[] {
 /**
  * Validate backup code (should be stored hashed in database)
  */
-export function validateBackupCode(
-  inputCode: string,
-  hashedCodes: string[]
-): boolean {
+export function validateBackupCode(inputCode: string, hashedCodes: string[]): boolean {
   const inputHash = createHash(inputCode.toUpperCase().trim());
   return hashedCodes.includes(inputHash);
 }

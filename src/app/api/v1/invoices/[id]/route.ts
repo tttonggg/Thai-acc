@@ -8,17 +8,11 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
 // GET /api/v1/invoices/:id - Get single invoice
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', version: 'v1' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', version: 'v1' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -50,10 +44,7 @@ export async function GET(
     });
 
     if (!invoice) {
-      return NextResponse.json(
-        { error: 'Invoice not found', version: 'v1' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Invoice not found', version: 'v1' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -63,25 +54,16 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error fetching invoice (v1):', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch invoice', version: 'v1' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch invoice', version: 'v1' }, { status: 500 });
   }
 }
 
 // PUT /api/v1/invoices/:id - Update invoice
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', version: 'v1' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', version: 'v1' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -94,10 +76,7 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Invoice not found', version: 'v1' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Invoice not found', version: 'v1' }, { status: 404 });
     }
 
     if (existing.status !== 'DRAFT') {
@@ -133,25 +112,16 @@ export async function PUT(
     });
   } catch (error) {
     console.error('Error updating invoice (v1):', error);
-    return NextResponse.json(
-      { error: 'Failed to update invoice', version: 'v1' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update invoice', version: 'v1' }, { status: 500 });
   }
 }
 
 // DELETE /api/v1/invoices/:id - Delete (soft) invoice
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', version: 'v1' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', version: 'v1' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -163,10 +133,7 @@ export async function DELETE(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Invoice not found', version: 'v1' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Invoice not found', version: 'v1' }, { status: 404 });
     }
 
     // Soft delete
@@ -186,9 +153,6 @@ export async function DELETE(
     });
   } catch (error) {
     console.error('Error deleting invoice (v1):', error);
-    return NextResponse.json(
-      { error: 'Failed to delete invoice', version: 'v1' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete invoice', version: 'v1' }, { status: 500 });
   }
 }

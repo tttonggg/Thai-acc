@@ -1,7 +1,7 @@
 /**
  * Webhook Detail API
  * Phase D: API Mastery - Webhooks
- * 
+ *
  * Endpoints:
  * - GET /api/admin/webhooks/[id] - Get webhook details with history
  * - PUT /api/admin/webhooks/[id] - Update webhook
@@ -18,27 +18,18 @@ import {
 } from '@/lib/services/webhook-service';
 
 // GET /api/admin/webhooks/[id] - Get webhook details
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
     const webhook = await getWebhookWithHistory(id);
 
     if (!webhook) {
-      return NextResponse.json(
-        { error: 'Webhook not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
     }
 
     const stats = await getWebhookStats(id);
@@ -49,13 +40,13 @@ export async function GET(
         id: webhook.id,
         name: webhook.name,
         url: webhook.url,
-        events: webhook.events.split(',').map(e => e.trim()),
+        events: webhook.events.split(',').map((e) => e.trim()),
         isActive: webhook.isActive,
         retryCount: webhook.retryCount,
         createdAt: webhook.createdAt,
         updatedAt: webhook.updatedAt,
         stats,
-        deliveries: webhook.deliveries.map(d => ({
+        deliveries: webhook.deliveries.map((d) => ({
           id: d.id,
           event: d.event,
           success: d.success,
@@ -68,25 +59,16 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error fetching webhook:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch webhook' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch webhook' }, { status: 500 });
   }
 }
 
 // PUT /api/admin/webhooks/[id] - Update webhook
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -97,10 +79,7 @@ export async function PUT(
       try {
         new URL(body.url);
       } catch {
-        return NextResponse.json(
-          { error: 'Invalid URL' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
       }
     }
 
@@ -118,7 +97,7 @@ export async function PUT(
         id: webhook.id,
         name: webhook.name,
         url: webhook.url,
-        events: webhook.events.split(',').map(e => e.trim()),
+        events: webhook.events.split(',').map((e) => e.trim()),
         isActive: webhook.isActive,
         retryCount: webhook.retryCount,
         updatedAt: webhook.updatedAt,
@@ -126,25 +105,16 @@ export async function PUT(
     });
   } catch (error) {
     console.error('Error updating webhook:', error);
-    return NextResponse.json(
-      { error: 'Failed to update webhook' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update webhook' }, { status: 500 });
   }
 }
 
 // DELETE /api/admin/webhooks/[id] - Delete webhook
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -156,9 +126,6 @@ export async function DELETE(
     });
   } catch (error) {
     console.error('Error deleting webhook:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete webhook' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete webhook' }, { status: 500 });
   }
 }

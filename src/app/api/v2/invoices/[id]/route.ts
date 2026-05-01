@@ -1,7 +1,7 @@
 /**
  * API Version 2 - Single Invoice Endpoint
  * Phase D: API Mastery - API Versioning
- * 
+ *
  * v2 Improvements:
  * - Field selection
  * - Include relations
@@ -14,17 +14,11 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
 // GET /api/v2/invoices/:id - Get single invoice with enhanced features
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', version: 'v2' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', version: 'v2' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -37,7 +31,7 @@ export async function GET(
     // Build select
     const select: Record<string, boolean> = {};
     if (fieldsParam) {
-      const fields = fieldsParam.split(',').map(f => f.trim());
+      const fields = fieldsParam.split(',').map((f) => f.trim());
       for (const field of fields) {
         select[field] = true;
       }
@@ -47,7 +41,7 @@ export async function GET(
     // Build include
     const include: Record<string, any> = {};
     if (includeParam) {
-      const includes = includeParam.split(',').map(i => i.trim());
+      const includes = includeParam.split(',').map((i) => i.trim());
       for (const inc of includes) {
         switch (inc) {
           case 'customer':
@@ -115,18 +109,20 @@ export async function GET(
     });
 
     if (!invoice) {
-      return NextResponse.json(
-        { error: 'Invoice not found', version: 'v2' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Invoice not found', version: 'v2' }, { status: 404 });
     }
 
     // Calculate additional metrics
     const metrics = {
-      daysOutstanding: invoice.status === 'PAID' ? 0 :
-        Math.floor((Date.now() - new Date(invoice.invoiceDate).getTime()) / (1000 * 60 * 60 * 24)),
+      daysOutstanding:
+        invoice.status === 'PAID'
+          ? 0
+          : Math.floor(
+              (Date.now() - new Date(invoice.invoiceDate).getTime()) / (1000 * 60 * 60 * 24)
+            ),
       balanceDue: (invoice.totalAmount || 0) - (invoice.paidAmount || 0),
-      isOverdue: invoice.dueDate && new Date(invoice.dueDate) < new Date() && invoice.status !== 'PAID',
+      isOverdue:
+        invoice.dueDate && new Date(invoice.dueDate) < new Date() && invoice.status !== 'PAID',
     };
 
     return NextResponse.json({
@@ -138,25 +134,16 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error fetching invoice (v2):', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch invoice', version: 'v2' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch invoice', version: 'v2' }, { status: 500 });
   }
 }
 
 // PUT /api/v2/invoices/:id - Update invoice
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', version: 'v2' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', version: 'v2' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -169,10 +156,7 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Invoice not found', version: 'v2' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Invoice not found', version: 'v2' }, { status: 404 });
     }
 
     // Build update data
@@ -202,7 +186,10 @@ export async function PUT(
       updateData.subtotal = subtotal;
       updateData.vatAmount = vatAmount;
       updateData.totalAmount = subtotal + vatAmount;
-      updateData.netAmount = subtotal + vatAmount - (existing.lines as any[]).reduce((sum, l) => sum + (l.whtAmount || 0), 0);
+      updateData.netAmount =
+        subtotal +
+        vatAmount -
+        (existing.lines as any[]).reduce((sum, l) => sum + (l.whtAmount || 0), 0);
     }
 
     const invoice = await prisma.invoice.update({
@@ -223,25 +210,16 @@ export async function PUT(
     });
   } catch (error) {
     console.error('Error updating invoice (v2):', error);
-    return NextResponse.json(
-      { error: 'Failed to update invoice', version: 'v2' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update invoice', version: 'v2' }, { status: 500 });
   }
 }
 
 // DELETE /api/v2/invoices/:id - Delete (soft) invoice
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', version: 'v2' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', version: 'v2' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -255,10 +233,7 @@ export async function DELETE(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Invoice not found', version: 'v2' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Invoice not found', version: 'v2' }, { status: 404 });
     }
 
     // Soft delete with audit trail
@@ -280,9 +255,6 @@ export async function DELETE(
     });
   } catch (error) {
     console.error('Error deleting invoice (v2):', error);
-    return NextResponse.json(
-      { error: 'Failed to delete invoice', version: 'v2' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete invoice', version: 'v2' }, { status: 500 });
   }
 }

@@ -1,20 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 // POST /api/quotations/[id]/approve - Approve quotation (SENT → APPROVED)
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     // Only ADMIN and ACCOUNTANT can approve quotations
@@ -22,18 +16,15 @@ export async function POST(
       return NextResponse.json(
         { success: false, error: 'ไม่มีสิทธิอนุมัติใบเสนอราคา' },
         { status: 403 }
-      )
+      );
     }
 
     const quotation = await prisma.quotation.findUnique({
       where: { id: id },
-    })
+    });
 
     if (!quotation) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบใบเสนอราคา' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบใบเสนอราคา' }, { status: 404 });
     }
 
     // Can only approve SENT quotations
@@ -44,7 +35,7 @@ export async function POST(
           error: 'สามารถอนุมัติเฉพาะใบเสนอราคาที่อยู่ในสถานะ ส่งแล้ว',
         },
         { status: 400 }
-      )
+      );
     }
 
     // Check if quotation is still valid
@@ -55,7 +46,7 @@ export async function POST(
           error: 'ใบเสนอราคาหมดอายุแล้ว กรุณาตรวจสอบวันหมดอายุ',
         },
         { status: 400 }
-      )
+      );
     }
 
     // Update status to APPROVED
@@ -90,21 +81,21 @@ export async function POST(
           },
         },
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
       data: updatedQuotation,
       message: 'อนุมัติใบเสนอราคาเรียบร้อยแล้ว',
-    })
+    });
   } catch (error) {
-    console.error('Quotation Approve Error:', error)
+    console.error('Quotation Approve Error:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการอนุมัติใบเสนอราคา',
       },
       { status: 500 }
-    )
+    );
   }
 }

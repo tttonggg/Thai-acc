@@ -4,9 +4,6 @@ export {
   useCollaboration,
   DocumentLockIndicator,
   UserPresenceIndicator,
-} from './websocket-provider'
+} from './websocket-provider';
 
-export type {
-  WebSocketMessage,
-  CollaborationUser,
-} from './websocket-provider'
+export type { WebSocketMessage, CollaborationUser } from './websocket-provider';

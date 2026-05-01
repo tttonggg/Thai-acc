@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/api-utils'
-import { db } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-utils';
+import { db } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth()
+    const user = await requireAuth();
 
     // Test database connection
-    const creditNoteCount = await db.creditNote.count()
-    const debitNoteCount = await db.debitNote.count()
-    const stockTakeCount = await db.stockTake.count()
+    const creditNoteCount = await db.creditNote.count();
+    const debitNoteCount = await db.debitNote.count();
+    const stockTakeCount = await db.stockTake.count();
 
     return NextResponse.json({
       success: true,
@@ -24,13 +24,16 @@ export async function GET(request: NextRequest) {
         debitNoteCount,
         stockTakeCount,
       },
-    })
+    });
   } catch (error: any) {
-    console.error('Test API Error:', error)
-    return NextResponse.json({
-      success: false,
-      error: error.message || 'Unknown error',
-      stack: error.stack,
-    }, { status: 500 })
+    console.error('Test API Error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || 'Unknown error',
+        stack: error.stack,
+      },
+      { status: 500 }
+    );
   }
 }

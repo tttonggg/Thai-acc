@@ -9,40 +9,48 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type ThemeVariant = 'default' | 'mint' | 'lavender' | 'peach' | 'sky' | 'lemon' | 'coral' | 'professional';
+export type ThemeVariant =
+  | 'default'
+  | 'mint'
+  | 'lavender'
+  | 'peach'
+  | 'sky'
+  | 'lemon'
+  | 'coral'
+  | 'professional';
 
 export interface ThemeState {
   // Theme variant
   theme: ThemeVariant;
   setTheme: (theme: ThemeVariant) => void;
-  
+
   // Dark mode
   isDarkMode: boolean;
   toggleDarkMode: () => void;
   setDarkMode: (isDark: boolean) => void;
-  
+
   // Sidebar collapsed
   isSidebarCollapsed: boolean;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
-  
+
   // Menu group expansion
   expandedGroups: string[];
   toggleGroup: (group: string) => void;
   setExpandedGroups: (groups: string[]) => void;
-  
+
   // Accent color intensity
   accentIntensity: 'soft' | 'medium' | 'vibrant';
   setAccentIntensity: (intensity: 'soft' | 'medium' | 'vibrant') => void;
-  
+
   // Border radius preference
   borderRadius: 'sm' | 'md' | 'lg' | 'xl';
   setBorderRadius: (radius: 'sm' | 'md' | 'lg' | 'xl') => void;
-  
+
   // Animation enabled
   animationsEnabled: boolean;
   toggleAnimations: () => void;
-  
+
   // Initialize theme (for SSR/hydration)
   initializeTheme: () => void;
 }
@@ -61,7 +69,7 @@ export const useThemeStore = create<ThemeState>()(
           document.documentElement.style.setProperty('--theme-updated', Date.now().toString());
         }
       },
-      
+
       // Dark mode
       isDarkMode: false,
       toggleDarkMode: () => {
@@ -89,25 +97,26 @@ export const useThemeStore = create<ThemeState>()(
           document.documentElement.style.setProperty('--theme-updated', Date.now().toString());
         }
       },
-      
+
       // Sidebar
       isSidebarCollapsed: false,
       toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
       setSidebarCollapsed: (collapsed) => set({ isSidebarCollapsed: collapsed }),
-      
+
       // Menu groups
       expandedGroups: ['sales', 'purchase', 'inventory', 'accounting', 'reports'],
-      toggleGroup: (group) => set((state) => ({
-        expandedGroups: state.expandedGroups.includes(group)
-          ? state.expandedGroups.filter((g) => g !== group)
-          : [...state.expandedGroups, group],
-      })),
+      toggleGroup: (group) =>
+        set((state) => ({
+          expandedGroups: state.expandedGroups.includes(group)
+            ? state.expandedGroups.filter((g) => g !== group)
+            : [...state.expandedGroups, group],
+        })),
       setExpandedGroups: (groups) => set({ expandedGroups: groups }),
-      
+
       // Accent intensity
       accentIntensity: 'medium',
       setAccentIntensity: (intensity) => set({ accentIntensity: intensity }),
-      
+
       // Border radius
       borderRadius: 'lg',
       setBorderRadius: (radius) => {
@@ -118,31 +127,31 @@ export const useThemeStore = create<ThemeState>()(
           document.documentElement.style.setProperty('--radius', radiusMap[radius]);
         }
       },
-      
+
       // Animations
       animationsEnabled: true,
       toggleAnimations: () => set((state) => ({ animationsEnabled: !state.animationsEnabled })),
-      
+
       // Initialize theme - call this in useEffect on app mount
       initializeTheme: () => {
         if (typeof document === 'undefined') return;
-        
+
         const state = get();
-        
+
         // Apply theme attribute
         document.documentElement.setAttribute('data-theme', state.theme);
-        
+
         // Apply dark mode class
         if (state.isDarkMode) {
           document.documentElement.classList.add('dark');
         } else {
           document.documentElement.classList.remove('dark');
         }
-        
+
         // Apply border radius
         const radiusMap = { sm: '0.375rem', md: '0.5rem', lg: '0.75rem', xl: '1rem' };
         document.documentElement.style.setProperty('--radius', radiusMap[state.borderRadius]);
-        
+
         // Force reflow to ensure all CSS variables are recalculated
         document.documentElement.style.setProperty('--theme-updated', Date.now().toString());
       },
@@ -170,7 +179,10 @@ export const useThemeStore = create<ThemeState>()(
 );
 
 // Theme colors for UI display
-export const themeColors: Record<ThemeVariant, { name: string; nameTh: string; color: string; gradient: string }> = {
+export const themeColors: Record<
+  ThemeVariant,
+  { name: string; nameTh: string; color: string; gradient: string }
+> = {
   default: {
     name: 'Pink Blossom',
     nameTh: 'ชมพูพาสเทล',

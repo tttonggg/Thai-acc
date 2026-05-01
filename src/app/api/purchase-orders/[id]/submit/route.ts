@@ -1,19 +1,23 @@
-import { NextRequest } from 'next/server'
-import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError } from '@/lib/api-utils'
-import { db } from '@/lib/db'
-import { logActivity } from '@/lib/activity-logger'
+import { NextRequest } from 'next/server';
+import {
+  requireAuth,
+  apiResponse,
+  apiError,
+  unauthorizedError,
+  notFoundError,
+  forbiddenError,
+} from '@/lib/api-utils';
+import { db } from '@/lib/db';
+import { logActivity } from '@/lib/activity-logger';
 
 // POST /api/purchase-orders/[id]/submit - Submit PO to vendor
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
     if (user.role === 'VIEWER') {
-      return forbiddenError()
+      return forbiddenError();
     }
 
     const purchaseOrder = await db.purchaseOrder.findUnique({
@@ -22,25 +26,25 @@ export async function POST(
         vendor: true,
         lines: true,
       },
-    })
+    });
 
     if (!purchaseOrder) {
-      return notFoundError('ไม่พบใบสั่งซื้อ')
+      return notFoundError('ไม่พบใบสั่งซื้อ');
     }
 
     // Validate status transition
     if (purchaseOrder.status !== 'DRAFT' && purchaseOrder.status !== 'PENDING') {
-      return apiError('สามารถส่งเฉพาะใบสั่งซื้อที่อยู่ในสถานะร่างหรือรออนุมัติเท่านั้น', 400)
+      return apiError('สามารถส่งเฉพาะใบสั่งซื้อที่อยู่ในสถานะร่างหรือรออนุมัติเท่านั้น', 400);
     }
 
     // Validate vendor exists
     if (!purchaseOrder.vendor) {
-      return apiError('ไม่พบข้อมูลผู้ขาย', 400)
+      return apiError('ไม่พบข้อมูลผู้ขาย', 400);
     }
 
     // Validate lines exist
     if (!purchaseOrder.lines || purchaseOrder.lines.length === 0) {
-      return apiError('ใบสั่งซื้อต้องมีรายการสินค้าอย่างน้อย 1 รายการ', 400)
+      return apiError('ใบสั่งซื้อต้องมีรายการสินค้าอย่างน้อย 1 รายการ', 400);
     }
 
     // Update status to SENT (using OrderStatus enum value)
@@ -55,11 +59,11 @@ export async function POST(
         vendor: true,
         lines: {
           include: {
-            product: true
-          }
+            product: true,
+          },
         },
       },
-    })
+    });
 
     // Log activity
     await logActivity({
@@ -71,17 +75,17 @@ export async function POST(
         orderNo: updated.orderNo,
         vendorName: updated.vendor.name,
       },
-    })
+    });
 
     return apiResponse({
       success: true,
       message: 'ส่งใบสั่งซื้อให้ผู้ขายเรียบร้อยแล้ว',
       data: updated,
-    })
+    });
   } catch (error) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
-    return apiError('เกิดข้อผิดพลาดในการส่งใบสั่งซื้อ')
+    return apiError('เกิดข้อผิดพลาดในการส่งใบสั่งซื้อ');
   }
 }

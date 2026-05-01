@@ -1,22 +1,18 @@
-'use client'
+'use client';
 
-import { useState, useCallback } from 'react'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useState, useCallback } from 'react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Dialog,
   DialogContent,
@@ -24,54 +20,58 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Calendar } from '@/components/ui/calendar'
-import { format, parseISO } from 'date-fns'
-import { th } from 'date-fns/locale'
-import {
-  Filter,
-  X,
-  Save,
-  CalendarIcon,
-  Search,
-  Bookmark,
-} from 'lucide-react'
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
+import { format, parseISO } from 'date-fns';
+import { th } from 'date-fns/locale';
+import { Filter, X, Save, CalendarIcon, Search, Bookmark } from 'lucide-react';
 
-export type FilterOperator = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'startsWith' | 'endsWith' | 'in' | 'between'
+export type FilterOperator =
+  | 'eq'
+  | 'ne'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'contains'
+  | 'startsWith'
+  | 'endsWith'
+  | 'in'
+  | 'between';
 
 export interface FilterCondition {
-  field: string
-  operator: FilterOperator
-  value: unknown
-  value2?: unknown // For between operator
+  field: string;
+  operator: FilterOperator;
+  value: unknown;
+  value2?: unknown; // For between operator
 }
 
 export interface SavedFilterData {
-  id: string
-  name: string
-  filters: FilterCondition[]
-  sortField?: string
-  sortOrder?: 'asc' | 'desc'
-  isDefault?: boolean
+  id: string;
+  name: string;
+  filters: FilterCondition[];
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  isDefault?: boolean;
 }
 
 interface FilterField {
-  key: string
-  label: string
-  type: 'text' | 'number' | 'date' | 'select' | 'boolean' | 'dateRange'
-  options?: { label: string; value: string }[]
+  key: string;
+  label: string;
+  type: 'text' | 'number' | 'date' | 'select' | 'boolean' | 'dateRange';
+  options?: { label: string; value: string }[];
 }
 
 interface AdvancedFilterProps {
-  fields: FilterField[]
-  activeFilters: FilterCondition[]
-  savedFilters: SavedFilterData[]
-  onFilterChange: (filters: FilterCondition[]) => void
-  onSaveFilter: (name: string, filters: FilterCondition[]) => void
-  onDeleteFilter: (id: string) => void
-  onApplySavedFilter: (filter: SavedFilterData) => void
-  className?: string
+  fields: FilterField[];
+  activeFilters: FilterCondition[];
+  savedFilters: SavedFilterData[];
+  onFilterChange: (filters: FilterCondition[]) => void;
+  onSaveFilter: (name: string, filters: FilterCondition[]) => void;
+  onDeleteFilter: (id: string) => void;
+  onApplySavedFilter: (filter: SavedFilterData) => void;
+  className?: string;
 }
 
 const operatorLabels: Record<FilterOperator, string> = {
@@ -86,7 +86,7 @@ const operatorLabels: Record<FilterOperator, string> = {
   endsWith: 'ลงท้ายด้วย',
   in: 'อยู่ใน',
   between: 'ระหว่าง',
-}
+};
 
 export function AdvancedFilter({
   fields,
@@ -98,85 +98,89 @@ export function AdvancedFilter({
   onApplySavedFilter,
   className,
 }: AdvancedFilterProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
-  const [filterName, setFilterName] = useState('')
+  const [isOpen, setIsOpen] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [filterName, setFilterName] = useState('');
   const [newFilter, setNewFilter] = useState<FilterCondition>({
     field: fields[0]?.key || '',
     operator: 'contains',
     value: '',
-  })
-  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({})
+  });
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
 
   const handleAddFilter = () => {
-    let value = newFilter.value
-    let value2 = newFilter.value2
+    let value = newFilter.value;
+    let value2 = newFilter.value2;
     if (newFilter.operator === 'between' && dateRange.from && dateRange.to) {
-      value = dateRange.from.toISOString()
-      value2 = dateRange.to.toISOString()
+      value = dateRange.from.toISOString();
+      value2 = dateRange.to.toISOString();
     }
 
-    const updatedFilters = [...activeFilters, { ...newFilter, value, value2 }]
-    onFilterChange(updatedFilters)
-    setNewFilter({ field: fields[0]?.key || '', operator: 'contains', value: '' })
-    setDateRange({})
-  }
+    const updatedFilters = [...activeFilters, { ...newFilter, value, value2 }];
+    onFilterChange(updatedFilters);
+    setNewFilter({ field: fields[0]?.key || '', operator: 'contains', value: '' });
+    setDateRange({});
+  };
 
   const handleRemoveFilter = (index: number) => {
-    const updated = activeFilters.filter((_, i) => i !== index)
-    onFilterChange(updated)
-  }
+    const updated = activeFilters.filter((_, i) => i !== index);
+    onFilterChange(updated);
+  };
 
   const handleClearAll = () => {
-    onFilterChange([])
-  }
+    onFilterChange([]);
+  };
 
   const handleSave = () => {
     if (filterName.trim()) {
-      onSaveFilter(filterName, activeFilters)
-      setFilterName('')
-      setSaveDialogOpen(false)
+      onSaveFilter(filterName, activeFilters);
+      setFilterName('');
+      setSaveDialogOpen(false);
     }
-  }
+  };
 
   const getFieldLabel = (key: string) => {
-    return fields.find(f => f.key === key)?.label || key
-  }
+    return fields.find((f) => f.key === key)?.label || key;
+  };
 
   const getFieldType = (key: string) => {
-    return fields.find(f => f.key === key)?.type || 'text'
-  }
+    return fields.find((f) => f.key === key)?.type || 'text';
+  };
 
   const getFieldOptions = (key: string) => {
-    return fields.find(f => f.key === key)?.options || []
-  }
+    return fields.find((f) => f.key === key)?.options || [];
+  };
 
   const renderFilterValue = (filter: FilterCondition) => {
-    const fieldType = getFieldType(filter.field)
+    const fieldType = getFieldType(filter.field);
 
     if (fieldType === 'date' && typeof filter.value === 'string') {
-      return format(parseISO(filter.value), 'dd/MM/yyyy', { locale: th })
+      return format(parseISO(filter.value), 'dd/MM/yyyy', { locale: th });
     }
 
     if (fieldType === 'dateRange' && filter.operator === 'between') {
-      const from = filter.value ? format(parseISO(filter.value as string), 'dd/MM/yyyy', { locale: th }) : ''
-      const to = filter.value2 ? format(parseISO(filter.value2 as string), 'dd/MM/yyyy', { locale: th }) : ''
-      return `${from} - ${to}`
+      const from = filter.value
+        ? format(parseISO(filter.value as string), 'dd/MM/yyyy', { locale: th })
+        : '';
+      const to = filter.value2
+        ? format(parseISO(filter.value2 as string), 'dd/MM/yyyy', { locale: th })
+        : '';
+      return `${from} - ${to}`;
     }
 
     if (fieldType === 'select') {
-      const option = getFieldOptions(filter.field).find(o => o.value === filter.value)
-      return option?.label || filter.value
+      const option = getFieldOptions(filter.field).find((o) => o.value === filter.value);
+      return option?.label || filter.value;
     }
 
-    return String(filter.value)
-  }
+    return String(filter.value);
+  };
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn('space-y-2', className)}>
       {/* Active Filter Badges */}
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap items-center gap-2">
           {activeFilters.map((filter, index) => (
             <Badge key={index} variant="secondary" className="gap-1">
               <span className="font-medium">{getFieldLabel(filter.field)}</span>
@@ -186,7 +190,7 @@ export function AdvancedFilter({
                 onClick={() => handleRemoveFilter(index)}
                 className="ml-1 hover:text-destructive"
               >
-                <X className="w-3 h-3" />
+                <X className="h-3 w-3" />
               </button>
             </Badge>
           ))}
@@ -197,11 +201,11 @@ export function AdvancedFilter({
       )}
 
       {/* Filter Controls */}
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap items-center gap-2">
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
-              <Filter className="w-4 h-4" />
+              <Filter className="h-4 w-4" />
               กรอง
               {activeFilters.length > 0 && (
                 <Badge variant="secondary" className="ml-1 h-5 px-1.5">
@@ -237,7 +241,9 @@ export function AdvancedFilter({
                 <Label>เงื่อนไข</Label>
                 <Select
                   value={newFilter.operator}
-                  onValueChange={(v) => setNewFilter({ ...newFilter, operator: v as FilterOperator })}
+                  onValueChange={(v) =>
+                    setNewFilter({ ...newFilter, operator: v as FilterOperator })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -274,7 +280,10 @@ export function AdvancedFilter({
                   <div className="flex gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start text-left font-normal">
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {dateRange.from ? format(dateRange.from, 'dd/MM/yyyy') : 'จาก'}
                         </Button>
@@ -283,7 +292,7 @@ export function AdvancedFilter({
                         <Calendar
                           mode="single"
                           selected={dateRange.from}
-                          onSelect={(d) => setDateRange(prev => ({ ...prev, from: d }))}
+                          onSelect={(d) => setDateRange((prev) => ({ ...prev, from: d }))}
                           locale={th}
                         />
                       </PopoverContent>
@@ -291,7 +300,10 @@ export function AdvancedFilter({
                     {newFilter.operator === 'between' && (
                       <Popover>
                         <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full justify-start text-left font-normal">
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start text-left font-normal"
+                          >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {dateRange.to ? format(dateRange.to, 'dd/MM/yyyy') : 'ถึง'}
                           </Button>
@@ -300,7 +312,7 @@ export function AdvancedFilter({
                           <Calendar
                             mode="single"
                             selected={dateRange.to}
-                            onSelect={(d) => setDateRange(prev => ({ ...prev, to: d }))}
+                            onSelect={(d) => setDateRange((prev) => ({ ...prev, to: d }))}
                             locale={th}
                           />
                         </PopoverContent>
@@ -328,7 +340,7 @@ export function AdvancedFilter({
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="gap-2">
-                <Bookmark className="w-4 h-4" />
+                <Bookmark className="h-4 w-4" />
                 ตัวกรองที่บันทึก
               </Button>
             </PopoverTrigger>
@@ -338,22 +350,21 @@ export function AdvancedFilter({
                 {savedFilters.map((filter) => (
                   <div
                     key={filter.id}
-                    className="flex items-center justify-between p-2 rounded hover:bg-muted group"
+                    className="group flex items-center justify-between rounded p-2 hover:bg-muted"
                   >
-                    <button
-                      onClick={() => onApplySavedFilter(filter)}
-                      className="flex-1 text-left"
-                    >
+                    <button onClick={() => onApplySavedFilter(filter)} className="flex-1 text-left">
                       <span className="text-sm">{filter.name}</span>
                       {filter.isDefault && (
-                        <Badge variant="outline" className="ml-2 text-xs">ค่าเริ่มต้น</Badge>
+                        <Badge variant="outline" className="ml-2 text-xs">
+                          ค่าเริ่มต้น
+                        </Badge>
                       )}
                     </button>
                     <button
                       onClick={() => onDeleteFilter(filter.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive"
+                      className="p-1 opacity-0 hover:text-destructive group-hover:opacity-100"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
                 ))}
@@ -369,7 +380,7 @@ export function AdvancedFilter({
             onClick={() => setSaveDialogOpen(true)}
             className="gap-2"
           >
-            <Save className="w-4 h-4" />
+            <Save className="h-4 w-4" />
             บันทึกตัวกรอง
           </Button>
         )}
@@ -380,9 +391,7 @@ export function AdvancedFilter({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>บันทึกตัวกรอง</DialogTitle>
-            <DialogDescription>
-              ตั้งชื่อสำหรับตัวกรองนี้เพื่อใช้ในภายหลัง
-            </DialogDescription>
+            <DialogDescription>ตั้งชื่อสำหรับตัวกรองนี้เพื่อใช้ในภายหลัง</DialogDescription>
           </DialogHeader>
           <Input
             value={filterName}
@@ -398,16 +407,16 @@ export function AdvancedFilter({
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
 // Quick filter buttons component
 interface QuickFilterButtonProps {
-  label: string
-  isActive: boolean
-  onClick: () => void
-  count?: number
-  icon?: React.ReactNode
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+  count?: number;
+  icon?: React.ReactNode;
 }
 
 export function QuickFilterButton({
@@ -421,22 +430,24 @@ export function QuickFilterButton({
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors",
+        'flex items-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors',
         isActive
-          ? "bg-primary text-primary-foreground"
-          : "bg-muted hover:bg-muted/80 text-muted-foreground"
+          ? 'bg-primary text-primary-foreground'
+          : 'bg-muted text-muted-foreground hover:bg-muted/80'
       )}
     >
       {icon}
       <span>{label}</span>
       {count !== undefined && (
-        <span className={cn(
-          "px-1.5 py-0.5 rounded-full text-xs",
-          isActive ? "bg-primary-foreground/20" : "bg-background"
-        )}>
+        <span
+          className={cn(
+            'rounded-full px-1.5 py-0.5 text-xs',
+            isActive ? 'bg-primary-foreground/20' : 'bg-background'
+          )}
+        >
           {count}
         </span>
       )}
     </button>
-  )
+  );
 }

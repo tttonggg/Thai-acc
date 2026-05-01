@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { requireAuth } from '@/lib/api-utils'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { requireAuth } from '@/lib/api-utils';
 
 /**
  * GET /api/reports/trial-balance
@@ -10,15 +10,15 @@ import { requireAuth } from '@/lib/api-utils'
 export async function GET(request: NextRequest) {
   try {
     // Require authentication
-    await requireAuth()
+    await requireAuth();
 
     // Get query parameters for filtering
-    const searchParams = request.nextUrl.searchParams
-    const asOfDate = searchParams.get('asOfDate')
-    const accountId = searchParams.get('accountId')
+    const searchParams = request.nextUrl.searchParams;
+    const asOfDate = searchParams.get('asOfDate');
+    const accountId = searchParams.get('accountId');
 
     // Build date filter
-    const dateFilter = asOfDate ? new Date(asOfDate) : new Date()
+    const dateFilter = asOfDate ? new Date(asOfDate) : new Date();
 
     // Get all posted journal entries up to the specified date
     const whereClause: any = {
@@ -26,14 +26,14 @@ export async function GET(request: NextRequest) {
       date: {
         lte: dateFilter,
       },
-    }
+    };
 
     if (accountId) {
       whereClause.lines = {
         some: {
           accountId,
         },
-      }
+      };
     }
 
     // Fetch all journal entries with their lines
@@ -58,29 +58,29 @@ export async function GET(request: NextRequest) {
       orderBy: {
         date: 'asc',
       },
-    })
+    });
 
     // Calculate balances for each account
     const accountBalances = new Map<
       string,
       {
-        code: string
-        name: string
-        nameEn?: string | null
-        type: string
-        debit: number
-        credit: number
-        balance: number
+        code: string;
+        name: string;
+        nameEn?: string | null;
+        type: string;
+        debit: number;
+        credit: number;
+        balance: number;
       }
-    >()
+    >();
 
     // Process all journal lines
     for (const entry of journalEntries) {
       for (const line of entry.lines) {
-        if (!line.account.isActive) continue
+        if (!line.account.isActive) continue;
 
-        const accountId = line.accountId
-        const account = line.account
+        const accountId = line.accountId;
+        const account = line.account;
 
         if (!accountBalances.has(accountId)) {
           accountBalances.set(accountId, {
@@ -91,41 +91,41 @@ export async function GET(request: NextRequest) {
             debit: 0,
             credit: 0,
             balance: 0,
-          })
+          });
         }
 
-        const balance = accountBalances.get(accountId)!
-        balance.debit += line.debit
-        balance.credit += line.credit
+        const balance = accountBalances.get(accountId)!;
+        balance.debit += line.debit;
+        balance.credit += line.credit;
       }
     }
 
     // Calculate net balance for each account based on account type
     const accounts = Array.from(accountBalances.values()).map((account) => {
-      let balance = 0
-      let debitBalance = 0
-      let creditBalance = 0
+      let balance = 0;
+      let debitBalance = 0;
+      let creditBalance = 0;
 
       // For assets, expenses: normal balance is debit
       // For liabilities, equity, revenue: normal balance is credit
       if (account.type === 'ASSET' || account.type === 'EXPENSE') {
-        balance = account.debit - account.credit
+        balance = account.debit - account.credit;
         if (balance >= 0) {
-          debitBalance = balance
-          creditBalance = 0
+          debitBalance = balance;
+          creditBalance = 0;
         } else {
-          debitBalance = 0
-          creditBalance = Math.abs(balance)
+          debitBalance = 0;
+          creditBalance = Math.abs(balance);
         }
       } else {
         // LIABILITY, EQUITY, REVENUE
-        balance = account.credit - account.debit
+        balance = account.credit - account.debit;
         if (balance >= 0) {
-          debitBalance = 0
-          creditBalance = balance
+          debitBalance = 0;
+          creditBalance = balance;
         } else {
-          debitBalance = Math.abs(balance)
-          creditBalance = 0
+          debitBalance = Math.abs(balance);
+          creditBalance = 0;
         }
       }
 
@@ -137,15 +137,15 @@ export async function GET(request: NextRequest) {
         debit: debitBalance,
         credit: creditBalance,
         balance,
-      }
-    })
+      };
+    });
 
     // Sort by account code
-    accounts.sort((a, b) => a.code.localeCompare(b.code))
+    accounts.sort((a, b) => a.code.localeCompare(b.code));
 
     // Calculate totals
-    const totalDebit = accounts.reduce((sum, acc) => sum + acc.debit, 0)
-    const totalCredit = accounts.reduce((sum, acc) => sum + acc.credit, 0)
+    const totalDebit = accounts.reduce((sum, acc) => sum + acc.debit, 0);
+    const totalCredit = accounts.reduce((sum, acc) => sum + acc.credit, 0);
 
     return NextResponse.json({
       success: true,
@@ -156,15 +156,14 @@ export async function GET(request: NextRequest) {
         credit: totalCredit,
         isBalanced: Math.abs(totalDebit - totalCredit) < 0.01,
       },
-    })
+    });
   } catch (error: any) {
-
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(
         { success: false, error: error.message || 'กรุณาเข้าสู่ระบบ' },
         { status: error.statusCode || 401 }
-      )
+      );
     }
 
     // Handle other errors
@@ -174,6 +173,6 @@ export async function GET(request: NextRequest) {
         error: 'เกิดข้อผิดพลาดในการสร้างงบทดลอง',
       },
       { status: 500 }
-    )
+    );
   }
 }

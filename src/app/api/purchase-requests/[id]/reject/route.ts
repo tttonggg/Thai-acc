@@ -1,28 +1,33 @@
-import { NextRequest } from 'next/server'
-import { requireAuth, requireRole, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError } from '@/lib/api-utils'
-import { prisma } from '@/lib/db'
-import { logActivity } from '@/lib/activity-logger'
-import { z } from 'zod'
+import { NextRequest } from 'next/server';
+import {
+  requireAuth,
+  requireRole,
+  apiResponse,
+  apiError,
+  unauthorizedError,
+  notFoundError,
+  forbiddenError,
+} from '@/lib/api-utils';
+import { prisma } from '@/lib/db';
+import { logActivity } from '@/lib/activity-logger';
+import { z } from 'zod';
 
 // Validation schema for reject request
 const rejectSchema = z.object({
   reason: z.string().min(1, 'กรุณาระบุเหตุผลการปฏิเสธ'),
-})
+});
 
 // POST /api/purchase-requests/[id]/reject - Reject PR
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require ADMIN or ACCOUNTANT role
-    const user = await requireRole(['ADMIN', 'ACCOUNTANT'])
+    const user = await requireRole(['ADMIN', 'ACCOUNTANT']);
 
-    const { id } = await params
+    const { id } = await params;
 
     // Parse request body
-    const body = await request.json()
-    const validatedData = rejectSchema.parse(body)
+    const body = await request.json();
+    const validatedData = rejectSchema.parse(body);
 
     // Fetch PR with all relations
     const pr = await prisma.purchaseRequest.findUnique({
@@ -38,15 +43,15 @@ export async function POST(
         },
         departmentData: true,
       },
-    })
+    });
 
     if (!pr) {
-      return notFoundError('ไม่พบใบขอซื้อ')
+      return notFoundError('ไม่พบใบขอซื้อ');
     }
 
     // Validate status transition
     if (pr.status !== 'PENDING') {
-      return apiError('สามารถปฏิเสธเฉพาะใบขอซื้อที่อยู่ในสถานะรออนุมัติเท่านั้น', 400)
+      return apiError('สามารถปฏิเสธเฉพาะใบขอซื้อที่อยู่ในสถานะรออนุมัติเท่านั้น', 400);
     }
 
     // Update status to REJECTED using transaction
@@ -106,10 +111,10 @@ export async function POST(
             },
           },
         },
-      })
+      });
 
-      return updatedPR
-    })
+      return updatedPR;
+    });
 
     // Log activity
     await logActivity({
@@ -123,24 +128,24 @@ export async function POST(
         department: updated.departmentData?.name,
         reason: validatedData.reason,
       },
-    })
+    });
 
     return apiResponse({
       success: true,
       message: 'ปฏิเสธใบขอซื้อเรียบร้อยแล้ว',
       data: updated,
-    })
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return apiError(error.issues[0].message, 400)
+      return apiError(error.issues[0].message, 400);
     }
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
     if (error instanceof Error && error.message.includes('ไม่มีสิทธิ์เข้าถึง')) {
-      return forbiddenError()
+      return forbiddenError();
     }
-    console.error('Purchase Request Reject Error:', error)
-    return apiError('เกิดข้อผิดพลาดในการปฏิเสธใบขอซื้อ')
+    console.error('Purchase Request Reject Error:', error);
+    return apiError('เกิดข้อผิดพลาดในการปฏิเสธใบขอซื้อ');
   }
 }

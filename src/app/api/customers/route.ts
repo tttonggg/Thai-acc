@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { z } from 'zod'
-import { requireAuth, requireRole } from "@/lib/api-utils"
-import { AuthError } from "@/lib/api-auth"
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { z } from 'zod';
+import { requireAuth, requireRole } from '@/lib/api-utils';
+import { AuthError } from '@/lib/api-auth';
 
 // Validation schema
 const customerSchema = z.object({
@@ -25,22 +25,22 @@ const customerSchema = z.object({
   creditLimit: z.number().min(0).default(0),
   creditDays: z.number().int().min(0).default(30),
   notes: z.string().optional(),
-})
+});
 
 // GET - List customers (requires authentication)
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth()
+    await requireAuth();
 
-    const searchParams = request.nextUrl.searchParams
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = Math.min(100, parseInt(searchParams.get('limit') || '20'))
-    const search = searchParams.get('search')
-    const isActive = searchParams.get('isActive')
+    const searchParams = request.nextUrl.searchParams;
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = Math.min(100, parseInt(searchParams.get('limit') || '20'));
+    const search = searchParams.get('search');
+    const isActive = searchParams.get('isActive');
 
-    const skip = (page - 1) * limit
+    const skip = (page - 1) * limit;
 
-    const where: any = {}
+    const where: any = {};
 
     if (search) {
       where.OR = [
@@ -48,11 +48,11 @@ export async function GET(request: NextRequest) {
         { name: { contains: search } },
         { taxId: { contains: search } },
         { phone: { contains: search } },
-      ]
+      ];
     }
 
     if (isActive !== null && isActive !== undefined) {
-      where.isActive = isActive === 'true'
+      where.isActive = isActive === 'true';
     }
 
     const [customers, total] = await Promise.all([
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         take: limit,
       }),
       prisma.customer.count({ where }),
-    ])
+    ]);
 
     return NextResponse.json({
       success: true,
@@ -79,70 +79,70 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
-    })
+    });
   } catch (error: any) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
-      )
+      );
     }
-    console.error('Customers API error:', error)
+    console.error('Customers API error:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
-    )
+    );
   }
 }
 
 // POST - Create customer (requires authentication)
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth()
+    await requireAuth();
 
-    const body = await request.json()
-    const validatedData = customerSchema.parse(body)
-    
+    const body = await request.json();
+    const validatedData = customerSchema.parse(body);
+
     // Check if code already exists
     const existing = await prisma.customer.findUnique({
       where: { code: validatedData.code },
-    })
-    
+    });
+
     if (existing) {
       return NextResponse.json(
         { success: false, error: 'รหัสลูกค้านี้มีอยู่แล้วในระบบ' },
         { status: 400 }
-      )
+      );
     }
-    
+
     const customer = await prisma.customer.create({
       data: {
         ...validatedData,
         email: validatedData.email || null,
         isActive: true,
       },
-    })
-    
-    return NextResponse.json({ success: true, data: customer })
+    });
+
+    return NextResponse.json({ success: true, data: customer });
   } catch (error: any) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
-      )
+      );
     }
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
         { status: 400 }
-      )
+      );
     }
-    console.error('Create customer error:', error)
+    console.error('Create customer error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการสร้างลูกค้า' },
       { status: 500 }
-    )
+    );
   }
 }

@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-import { generateDocNumber } from '@/lib/api-utils'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { generateDocNumber } from '@/lib/api-utils';
+import { z } from 'zod';
 
 // Validation schema for PR line item
 const prLineSchema = z.object({
@@ -19,7 +19,7 @@ const prLineSchema = z.object({
   suggestedVendor: z.string().optional(),
   specUrl: z.string().optional(),
   notes: z.string().optional(),
-})
+});
 
 // Validation schema for PR
 const purchaseRequestSchema = z.object({
@@ -35,53 +35,50 @@ const purchaseRequestSchema = z.object({
   attachments: z.any().optional(),
   internalNotes: z.string().optional(),
   lines: z.array(prLineSchema).min(1, 'ต้องมีอย่างน้อย 1 รายการ'),
-})
+});
 
 // GET /api/purchase-requests - List all PRs
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status')
-    const departmentId = searchParams.get('departmentId')
-    const priority = searchParams.get('priority')
-    const search = searchParams.get('search')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const skip = (page - 1) * limit
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+    const departmentId = searchParams.get('departmentId');
+    const priority = searchParams.get('priority');
+    const search = searchParams.get('search');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const skip = (page - 1) * limit;
 
-    const where: any = {}
+    const where: any = {};
 
     if (status) {
-      where.status = status
+      where.status = status;
     }
 
     if (departmentId) {
-      where.departmentId = departmentId
+      where.departmentId = departmentId;
     }
 
     if (priority) {
-      where.priority = priority
+      where.priority = priority;
     }
 
     if (search) {
       where.OR = [
         { requestNo: { contains: search, mode: 'insensitive' } },
         { reason: { contains: search, mode: 'insensitive' } },
-      ]
+      ];
     }
 
     // Non-admin users can only see their own PRs
     if (!['ADMIN', 'ACCOUNTANT'].includes(session.user.role as string)) {
-      where.requestedBy = session.user.id
+      where.requestedBy = session.user.id;
     }
 
     const [prs, total] = await Promise.all([
@@ -151,7 +148,7 @@ export async function GET(request: NextRequest) {
         take: limit,
       }),
       prisma.purchaseRequest.count({ where }),
-    ])
+    ]);
 
     return NextResponse.json({
       success: true,
@@ -162,48 +159,42 @@ export async function GET(request: NextRequest) {
         limit,
         totalPages: Math.ceil(total / limit),
       },
-    })
+    });
   } catch (error) {
-    console.error('Purchase Requests Fetch Error:', error)
+    console.error('Purchase Requests Fetch Error:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการโหลดข้อมูล',
       },
       { status: 500 }
-    )
+    );
   }
 }
 
 // POST /api/purchase-requests - Create new PR
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
-    const body = await request.json()
-    const validatedData = purchaseRequestSchema.parse(body)
+    const body = await request.json();
+    const validatedData = purchaseRequestSchema.parse(body);
 
     // Generate PR number if not provided (transaction-safe via DocumentNumber table)
-    const requestNo = validatedData.requestNo || await generateDocNumber('PR', 'PR')
+    const requestNo = validatedData.requestNo || (await generateDocNumber('PR', 'PR'));
 
     // Check if department exists (if specified)
     if (validatedData.departmentId) {
       const department = await prisma.department.findUnique({
         where: { id: validatedData.departmentId },
-      })
+      });
 
       if (!department) {
-        return NextResponse.json(
-          { success: false, error: 'ไม่พบแผนก' },
-          { status: 400 }
-        )
+        return NextResponse.json({ success: false, error: 'ไม่พบแผนก' }, { status: 400 });
       }
     }
 
@@ -211,37 +202,31 @@ export async function POST(request: NextRequest) {
     if (validatedData.budgetId) {
       const budget = await prisma.departmentBudget.findUnique({
         where: { id: validatedData.budgetId },
-      })
+      });
 
       if (!budget) {
-        return NextResponse.json(
-          { success: false, error: 'ไม่พบงบประมาณ' },
-          { status: 400 }
-        )
+        return NextResponse.json({ success: false, error: 'ไม่พบงบประมาณ' }, { status: 400 });
       }
 
       if (budget.remainingAmount < validatedData.estimatedAmount) {
-        return NextResponse.json(
-          { success: false, error: 'งบประมาณไม่เพียงพอ' },
-          { status: 400 }
-        )
+        return NextResponse.json({ success: false, error: 'งบประมาณไม่เพียงพอ' }, { status: 400 });
       }
     }
 
     // Calculate amounts for each line
     const lines = validatedData.lines.map((line) => {
-      const subtotal = line.quantity * line.unitPrice
-      const discountAmount = subtotal * (line.discount / 100)
-      const afterDiscount = subtotal - discountAmount
-      const vatAmount = afterDiscount * (line.vatRate / 100)
-      const amount = afterDiscount + vatAmount
+      const subtotal = line.quantity * line.unitPrice;
+      const discountAmount = subtotal * (line.discount / 100);
+      const afterDiscount = subtotal - discountAmount;
+      const vatAmount = afterDiscount * (line.vatRate / 100);
+      const amount = afterDiscount + vatAmount;
 
       return {
         ...line,
         vatAmount: Math.round(vatAmount * 100) / 100,
         amount: Math.round(amount * 100) / 100,
-      }
-    })
+      };
+    });
 
     // Create PR with transaction
     const pr = await prisma.$transaction(async (tx) => {
@@ -252,7 +237,9 @@ export async function POST(request: NextRequest) {
           requestDate: validatedData.requestDate ? new Date(validatedData.requestDate) : new Date(),
           requestedBy: session.user.id,
           departmentId: validatedData.departmentId,
-          requiredDate: validatedData.requiredDate ? new Date(validatedData.requiredDate) : undefined,
+          requiredDate: validatedData.requiredDate
+            ? new Date(validatedData.requiredDate)
+            : undefined,
           reason: validatedData.reason,
           priority: validatedData.priority,
           budgetId: validatedData.budgetId,
@@ -295,10 +282,10 @@ export async function POST(request: NextRequest) {
             },
           },
         },
-      })
+      });
 
-      return purchaseRequest
-    })
+      return purchaseRequest;
+    });
 
     return NextResponse.json(
       {
@@ -307,9 +294,9 @@ export async function POST(request: NextRequest) {
         message: 'สร้างใบขอซื้อสำเร็จ',
       },
       { status: 201 }
-    )
+    );
   } catch (error) {
-    console.error('Purchase Request Creation Error:', error)
+    console.error('Purchase Request Creation Error:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -319,7 +306,7 @@ export async function POST(request: NextRequest) {
           details: error.issues,
         },
         { status: 400 }
-      )
+      );
     }
 
     return NextResponse.json(
@@ -328,6 +315,6 @@ export async function POST(request: NextRequest) {
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการสร้างใบขอซื้อ',
       },
       { status: 500 }
-    )
+    );
   }
 }

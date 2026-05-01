@@ -1,41 +1,41 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { requireRole } from '@/lib/api-utils'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { requireRole } from '@/lib/api-utils';
 
 // GET - Export activity logs to CSV (ADMIN only)
 export async function GET(request: NextRequest) {
   try {
-    await requireRole(['ADMIN'])
+    await requireRole(['ADMIN']);
 
-    const { searchParams } = new URL(request.url)
-    const dateFrom = searchParams.get('dateFrom')
-    const dateTo = searchParams.get('dateTo')
-    const action = searchParams.get('action')
-    const docModule = searchParams.get('module')
-    const status = searchParams.get('status')
+    const { searchParams } = new URL(request.url);
+    const dateFrom = searchParams.get('dateFrom');
+    const dateTo = searchParams.get('dateTo');
+    const action = searchParams.get('action');
+    const docModule = searchParams.get('module');
+    const status = searchParams.get('status');
 
     // Build where clause
-    const where: any = {}
+    const where: any = {};
 
     if (action) {
-      where.action = action
+      where.action = action;
     }
 
     if (docModule) {
-      where.module = docModule
+      where.module = docModule;
     }
 
     if (status && status !== 'all') {
-      where.status = status
+      where.status = status;
     }
 
     if (dateFrom || dateTo) {
-      where.createdAt = {}
+      where.createdAt = {};
       if (dateFrom) {
-        where.createdAt.gte = new Date(dateFrom)
+        where.createdAt.gte = new Date(dateFrom);
       }
       if (dateTo) {
-        where.createdAt.lte = new Date(dateTo)
+        where.createdAt.lte = new Date(dateTo);
       }
     }
 
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-    })
+    });
 
     // Convert to CSV
     const headers = [
@@ -67,10 +67,10 @@ export async function GET(request: NextRequest) {
       'Status',
       'Error Message',
       'Details',
-    ]
+    ];
 
     const rows = logs.map((log) => {
-      const details = log.details ? JSON.stringify(log.details) : ''
+      const details = log.details ? JSON.stringify(log.details) : '';
       return [
         log.createdAt.toISOString(),
         log.user.email,
@@ -83,10 +83,10 @@ export async function GET(request: NextRequest) {
         log.status,
         log.errorMessage || '',
         `"${details.replace(/"/g, '""')}"`, // Escape quotes in CSV
-      ].join(',')
-    })
+      ].join(',');
+    });
 
-    const csv = [headers.join(','), ...rows].join('\n')
+    const csv = [headers.join(','), ...rows].join('\n');
 
     // Return as CSV file
     return new NextResponse(csv, {
@@ -94,12 +94,12 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'text/csv; charset=utf-8',
         'Content-Disposition': `attachment; filename="activity-logs-${new Date().toISOString().split('T')[0]}.csv"`,
       },
-    })
+    });
   } catch (error: any) {
-    console.error('Error exporting activity logs:', error)
+    console.error('Error exporting activity logs:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการส่งออกข้อมูล' },
       { status: 500 }
-    )
+    );
   }
 }

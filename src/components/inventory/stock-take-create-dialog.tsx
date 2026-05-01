@@ -1,51 +1,51 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Loader2 } from 'lucide-react'
+} from '@/components/ui/select';
+import { Loader2 } from 'lucide-react';
 
 interface Warehouse {
-  id: string
-  code: string
-  name: string
-  type: string
-  location?: string
+  id: string;
+  code: string;
+  name: string;
+  type: string;
+  location?: string;
 }
 
 interface ProductStock {
-  productId: string
-  productCode: string
-  productName: string
-  unit: string
-  systemQuantity: number
-  unitCost: number
-  actualQuantity?: number
-  notes?: string
+  productId: string;
+  productCode: string;
+  productName: string;
+  unit: string;
+  systemQuantity: number;
+  unitCost: number;
+  actualQuantity?: number;
+  notes?: string;
 }
 
 interface StockTakeCreateDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSuccess: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
 }
 
 export function StockTakeCreateDialog({
@@ -53,39 +53,39 @@ export function StockTakeCreateDialog({
   onOpenChange,
   onSuccess,
 }: StockTakeCreateDialogProps) {
-  const { toast } = useToast()
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     warehouseId: '',
     date: new Date().toISOString().split('T')[0],
     notes: '',
-  })
-  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-  const [products, setProducts] = useState<ProductStock[]>([])
-  const [isLoadingWarehouses, setIsLoadingWarehouses] = useState(false)
-  const [isLoadingProducts, setIsLoadingProducts] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  });
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [products, setProducts] = useState<ProductStock[]>([]);
+  const [isLoadingWarehouses, setIsLoadingWarehouses] = useState(false);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Fetch warehouses on mount
   useEffect(() => {
     const fetchWarehouses = async () => {
-      setIsLoadingWarehouses(true)
+      setIsLoadingWarehouses(true);
       try {
-        const res = await fetch(`/api/warehouses`, { credentials: 'include' })
+        const res = await fetch(`/api/warehouses`, { credentials: 'include' });
         if (res.ok) {
-          const data = await res.json()
+          const data = await res.json();
           if (data.success) {
-            setWarehouses(data.data)
+            setWarehouses(data.data);
           }
         }
       } catch (error) {
-        console.error('Error fetching warehouses:', error)
+        console.error('Error fetching warehouses:', error);
       } finally {
-        setIsLoadingWarehouses(false)
+        setIsLoadingWarehouses(false);
       }
-    }
-    fetchWarehouses()
-  }, [])
+    };
+    fetchWarehouses();
+  }, []);
 
   // Reset form when dialog opens/closes
   useEffect(() => {
@@ -94,11 +94,11 @@ export function StockTakeCreateDialog({
         warehouseId: '',
         date: new Date().toISOString().split('T')[0],
         notes: '',
-      })
-      setProducts([])
-      setErrors({})
+      });
+      setProducts([]);
+      setErrors({});
     }
-  }, [open])
+  }, [open]);
 
   // Fetch current stock balances for selected warehouse
   const fetchStockBalances = async () => {
@@ -107,15 +107,17 @@ export function StockTakeCreateDialog({
         title: 'กรุณาเลือกคลังสินค้า',
         description: 'ต้องเลือกคลังสินค้าก่อนดึงข้อมูลสต็อก',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoadingProducts(true)
+    setIsLoadingProducts(true);
     try {
-      const res = await fetch(`/api/stock-balances?warehouseId=${formData.warehouseId}`, { credentials: 'include' })
+      const res = await fetch(`/api/stock-balances?warehouseId=${formData.warehouseId}`, {
+        credentials: 'include',
+      });
       if (res.ok) {
-        const data = await res.json()
+        const data = await res.json();
         if (data.success && data.data.balances) {
           const stockProducts: ProductStock[] = data.data.balances
             .filter((balance: any) => balance.quantity > 0) // Only products with stock
@@ -128,77 +130,77 @@ export function StockTakeCreateDialog({
               unitCost: balance.unitCost || balance.product.costPrice || 0,
               actualQuantity: balance.quantity, // Default to system quantity
               notes: '',
-            }))
+            }));
 
-          setProducts(stockProducts)
+          setProducts(stockProducts);
 
           toast({
             title: 'ดึงข้อมูลสำเร็จ',
             description: `พบ ${stockProducts.length} รายการสินค้า`,
-          })
+          });
         }
       }
     } catch (error) {
-      console.error('Error fetching stock balances:', error)
+      console.error('Error fetching stock balances:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถดึงข้อมูลสต็อกได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setIsLoadingProducts(false)
+      setIsLoadingProducts(false);
     }
-  }
+  };
 
   // Update product actual quantity
   const updateProductQuantity = (index: number, value: string) => {
-    const newProducts = [...products]
-    newProducts[index].actualQuantity = parseFloat(value) || 0
-    setProducts(newProducts)
-  }
+    const newProducts = [...products];
+    newProducts[index].actualQuantity = parseFloat(value) || 0;
+    setProducts(newProducts);
+  };
 
   // Update product notes
   const updateProductNotes = (index: number, value: string) => {
-    const newProducts = [...products]
-    newProducts[index].notes = value
-    setProducts(newProducts)
-  }
+    const newProducts = [...products];
+    newProducts[index].notes = value;
+    setProducts(newProducts);
+  };
 
   // Calculate variance for a product
   const calculateVariance = (product: ProductStock) => {
-    const actual = product.actualQuantity || 0
-    return actual - product.systemQuantity
-  }
+    const actual = product.actualQuantity || 0;
+    return actual - product.systemQuantity;
+  };
 
   // Validate form
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (!formData.warehouseId) {
-      newErrors.warehouseId = 'กรุณาเลือกคลังสินค้า'
+      newErrors.warehouseId = 'กรุณาเลือกคลังสินค้า';
     }
 
     if (!formData.date) {
-      newErrors.date = 'กรุณาระบุวันที่ตรวจนับ'
+      newErrors.date = 'กรุณาระบุวันที่ตรวจนับ';
     }
 
     if (products.length === 0) {
-      newErrors.products = 'กรุณาดึงข้อมูลสินค้าอย่างน้อย 1 รายการ'
+      newErrors.products = 'กรุณาดึงข้อมูลสินค้าอย่างน้อย 1 รายการ';
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // Submit stock take
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       const payload = {
@@ -211,63 +213,64 @@ export function StockTakeCreateDialog({
           actualQuantity: product.actualQuantity || 0,
           notes: product.notes,
         })),
-      }
+      };
 
-      const response = await fetch(`/api/stock-takes`, { credentials: 'include', 
+      const response = await fetch(`/api/stock-takes`, {
+        credentials: 'include',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-      })
+      });
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         toast({
           title: 'บันทึกสำเร็จ',
           description: `สร้างการตรวจนับสต็อก ${data.data.takeNo} เรียบร้อยแล้ว`,
-        })
-        onOpenChange(false)
-        onSuccess()
+        });
+        onOpenChange(false);
+        onSuccess();
       } else {
-        const error = await response.json()
+        const error = await response.json();
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: error.error || 'ไม่สามารถบันทึกข้อมูลได้',
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
-      console.error('Error creating stock take:', error)
+      console.error('Error creating stock take:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   // Calculate variance statistics
   const varianceStats = products.reduce(
     (acc, product) => {
-      const variance = calculateVariance(product)
-      const varianceValue = variance * product.unitCost
+      const variance = calculateVariance(product);
+      const varianceValue = variance * product.unitCost;
 
       return {
         totalVarianceQty: acc.totalVarianceQty + variance,
         totalVarianceValue: acc.totalVarianceValue + varianceValue,
         positiveVariance: variance > 0 ? acc.positiveVariance + 1 : acc.positiveVariance,
         negativeVariance: variance < 0 ? acc.negativeVariance + 1 : acc.negativeVariance,
-      }
+      };
     },
     { totalVarianceQty: 0, totalVarianceValue: 0, positiveVariance: 0, negativeVariance: 0 }
-  )
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-[900px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-[900px]">
         <VisuallyHidden>
           <DialogDescription>
             สร้างใบตรวจนับสต็อกสินค้าในคลังสินค้าเพื่อปรับปรุงจำนวนให้ตรงกับจริง
@@ -288,19 +291,22 @@ export function StockTakeCreateDialog({
                 <Select
                   value={formData.warehouseId}
                   onValueChange={(value) => {
-                    setFormData((prev) => ({ ...prev, warehouseId: value }))
-                    setProducts([]) // Reset products when warehouse changes
+                    setFormData((prev) => ({ ...prev, warehouseId: value }));
+                    setProducts([]); // Reset products when warehouse changes
                     if (errors.warehouseId) {
                       setErrors((prev) => {
-                        const newErrors = { ...prev }
-                        delete newErrors.warehouseId
-                        return newErrors
-                      })
+                        const newErrors = { ...prev };
+                        delete newErrors.warehouseId;
+                        return newErrors;
+                      });
                     }
                   }}
                   disabled={isLoadingWarehouses}
                 >
-                  <SelectTrigger id="warehouseId" className={errors.warehouseId ? 'border-red-500' : ''}>
+                  <SelectTrigger
+                    id="warehouseId"
+                    className={errors.warehouseId ? 'border-red-500' : ''}
+                  >
                     <SelectValue placeholder="เลือกคลังสินค้า" />
                   </SelectTrigger>
                   <SelectContent>
@@ -312,7 +318,7 @@ export function StockTakeCreateDialog({
                   </SelectContent>
                 </Select>
                 {errors.warehouseId && (
-                  <p className="text-sm text-red-500 mt-1">{errors.warehouseId}</p>
+                  <p className="mt-1 text-sm text-red-500">{errors.warehouseId}</p>
                 )}
               </div>
 
@@ -325,18 +331,18 @@ export function StockTakeCreateDialog({
                   type="date"
                   value={formData.date}
                   onChange={(e) => {
-                    setFormData((prev) => ({ ...prev, date: e.target.value }))
+                    setFormData((prev) => ({ ...prev, date: e.target.value }));
                     if (errors.date) {
                       setErrors((prev) => {
-                        const newErrors = { ...prev }
-                        delete newErrors.date
-                        return newErrors
-                      })
+                        const newErrors = { ...prev };
+                        delete newErrors.date;
+                        return newErrors;
+                      });
                     }
                   }}
                   className={errors.date ? 'border-red-500' : ''}
                 />
-                {errors.date && <p className="text-sm text-red-500 mt-1">{errors.date}</p>}
+                {errors.date && <p className="mt-1 text-sm text-red-500">{errors.date}</p>}
               </div>
             </div>
 
@@ -365,7 +371,7 @@ export function StockTakeCreateDialog({
             {/* Products table */}
             {products.length > 0 && (
               <div className="space-y-3">
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <Label>รายการสินค้า ({products.length} รายการ)</Label>
                   <Button
                     type="button"
@@ -383,7 +389,7 @@ export function StockTakeCreateDialog({
                 </div>
 
                 {/* Table header */}
-                <div className="grid grid-cols-12 gap-2 text-xs font-semibold text-gray-600 bg-gray-50 p-2 rounded">
+                <div className="grid grid-cols-12 gap-2 rounded bg-gray-50 p-2 text-xs font-semibold text-gray-600">
                   <div className="col-span-3">สินค้า</div>
                   <div className="col-span-2 text-center">สต็อกระบบ</div>
                   <div className="col-span-2 text-center">นับจริง</div>
@@ -393,21 +399,26 @@ export function StockTakeCreateDialog({
                 </div>
 
                 {/* Product rows */}
-                <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                <div className="max-h-[400px] space-y-2 overflow-y-auto">
                   {products.map((product, index) => {
-                    const variance = calculateVariance(product)
-                    const varianceValue = variance * product.unitCost
-                    const varianceColor = variance > 0 ? 'text-green-600' : variance < 0 ? 'text-red-600' : 'text-gray-600'
+                    const variance = calculateVariance(product);
+                    const varianceValue = variance * product.unitCost;
+                    const varianceColor =
+                      variance > 0
+                        ? 'text-green-600'
+                        : variance < 0
+                          ? 'text-red-600'
+                          : 'text-gray-600';
 
                     return (
                       <div
                         key={product.productId}
-                        className="grid grid-cols-12 gap-2 items-center p-2 border rounded hover:bg-gray-50"
+                        className="grid grid-cols-12 items-center gap-2 rounded border p-2 hover:bg-gray-50"
                       >
                         {/* Product info */}
                         <div className="col-span-3 space-y-1">
                           <p className="text-sm font-medium">{product.productCode}</p>
-                          <p className="text-xs text-gray-600 truncate">{product.productName}</p>
+                          <p className="truncate text-xs text-gray-600">{product.productName}</p>
                           <p className="text-xs text-gray-500">หน่วย: {product.unit}</p>
                         </div>
 
@@ -436,7 +447,8 @@ export function StockTakeCreateDialog({
                         {/* Variance */}
                         <div className="col-span-2 text-center">
                           <div className={`text-sm font-semibold ${varianceColor}`}>
-                            {variance > 0 ? '+' : ''}{variance.toFixed(2)}
+                            {variance > 0 ? '+' : ''}
+                            {variance.toFixed(2)}
                           </div>
                         </div>
 
@@ -458,12 +470,12 @@ export function StockTakeCreateDialog({
                           />
                         </div>
                       </div>
-                    )
+                    );
                   })}
                 </div>
 
                 {/* Variance summary */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
+                <div className="space-y-2 rounded-lg border border-blue-200 bg-blue-50 p-3">
                   <p className="text-sm font-semibold text-blue-800">สรุปผลต่าง</p>
                   <div className="grid grid-cols-2 gap-4 text-xs">
                     <div>
@@ -492,9 +504,7 @@ export function StockTakeCreateDialog({
               </div>
             )}
 
-            {errors.products && (
-              <p className="text-sm text-red-500">{errors.products}</p>
-            )}
+            {errors.products && <p className="text-sm text-red-500">{errors.products}</p>}
 
             {/* Notes */}
             <div>
@@ -509,7 +519,7 @@ export function StockTakeCreateDialog({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 mt-6">
+          <div className="mt-6 flex justify-end gap-2">
             <Button
               type="button"
               variant="outline"
@@ -532,5 +542,5 @@ export function StockTakeCreateDialog({
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

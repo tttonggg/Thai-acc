@@ -1,7 +1,7 @@
 /**
  * API Version 2 - Invoices Endpoint
  * Phase D: API Mastery - API Versioning
- * 
+ *
  * v2 Improvements over v1:
  * - GraphQL query support via ?query parameter
  * - Field selection with ?fields=id,invoiceNo,customer.name
@@ -31,34 +31,34 @@ const invoiceQuerySchema = z.object({
 
 // Field selection mapper
 const fieldMapping: Record<string, any> = {
-  'id': true,
-  'invoiceNo': true,
-  'invoiceDate': true,
-  'dueDate': true,
-  'customerId': true,
-  'status': true,
-  'subtotal': true,
-  'vatRate': true,
-  'vatAmount': true,
-  'totalAmount': true,
-  'discountAmount': true,
-  'discountPercent': true,
-  'withholdingAmount': true,
-  'netAmount': true,
-  'paidAmount': true,
-  'reference': true,
-  'poNumber': true,
-  'notes': true,
-  'createdAt': true,
-  'updatedAt': true,
-  'currencyId': true,
-  'exchangeRate': true,
-  'foreignAmount': true,
+  id: true,
+  invoiceNo: true,
+  invoiceDate: true,
+  dueDate: true,
+  customerId: true,
+  status: true,
+  subtotal: true,
+  vatRate: true,
+  vatAmount: true,
+  totalAmount: true,
+  discountAmount: true,
+  discountPercent: true,
+  withholdingAmount: true,
+  netAmount: true,
+  paidAmount: true,
+  reference: true,
+  poNumber: true,
+  notes: true,
+  createdAt: true,
+  updatedAt: true,
+  currencyId: true,
+  exchangeRate: true,
+  foreignAmount: true,
 };
 
 // Include relation mapper
 const includeMapping: Record<string, any> = {
-  'customer': {
+  customer: {
     select: {
       id: true,
       code: true,
@@ -70,7 +70,7 @@ const includeMapping: Record<string, any> = {
       email: true,
     },
   },
-  'lines': {
+  lines: {
     select: {
       id: true,
       lineNo: true,
@@ -91,7 +91,7 @@ const includeMapping: Record<string, any> = {
       vatAmount: true,
     },
   },
-  'journalEntry': {
+  journalEntry: {
     select: {
       id: true,
       entryNo: true,
@@ -101,7 +101,7 @@ const includeMapping: Record<string, any> = {
       status: true,
     },
   },
-  'currency': {
+  currency: {
     select: {
       id: true,
       code: true,
@@ -109,7 +109,7 @@ const includeMapping: Record<string, any> = {
       symbol: true,
     },
   },
-  'receiptAllocations': {
+  receiptAllocations: {
     select: {
       id: true,
       amount: true,
@@ -129,7 +129,7 @@ function parseFields(fieldsParam?: string): Record<string, boolean> {
   if (!fieldsParam) return fieldMapping;
 
   const fields: Record<string, boolean> = {};
-  const requestedFields = fieldsParam.split(',').map(f => f.trim());
+  const requestedFields = fieldsParam.split(',').map((f) => f.trim());
 
   for (const field of requestedFields) {
     if (fieldMapping[field]) {
@@ -148,7 +148,7 @@ function parseInclude(includeParam?: string): Record<string, any> {
   if (!includeParam) return {};
 
   const include: Record<string, any> = {};
-  const requestedIncludes = includeParam.split(',').map(i => i.trim());
+  const requestedIncludes = includeParam.split(',').map((i) => i.trim());
 
   for (const inc of requestedIncludes) {
     if (includeMapping[inc]) {
@@ -164,10 +164,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', version: 'v2' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', version: 'v2' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -187,10 +184,7 @@ export async function GET(req: NextRequest) {
           id: { gt: cursorData.id },
         };
       } catch {
-        return NextResponse.json(
-          { error: 'Invalid cursor', version: 'v2' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid cursor', version: 'v2' }, { status: 400 });
       }
     }
 
@@ -201,12 +195,13 @@ export async function GET(req: NextRequest) {
       ...cursorCondition,
       ...(params.status && { status: params.status }),
       ...(params.customerId && { customerId: params.customerId }),
-      ...(params.startDate && params.endDate && {
-        invoiceDate: {
-          gte: new Date(params.startDate),
-          lte: new Date(params.endDate),
-        },
-      }),
+      ...(params.startDate &&
+        params.endDate && {
+          invoiceDate: {
+            gte: new Date(params.startDate),
+            lte: new Date(params.endDate),
+          },
+        }),
     };
 
     // Build select and include
@@ -222,7 +217,9 @@ export async function GET(req: NextRequest) {
         ...(Object.keys(select).length > 0 && { select }),
         ...(Object.keys(include).length > 0 && { include }),
       }),
-      prisma.invoice.count({ where: { isActive: true, ...(params.status && { status: params.status }) } }),
+      prisma.invoice.count({
+        where: { isActive: true, ...(params.status && { status: params.status }) },
+      }),
       prisma.invoice.aggregate({
         where,
         _sum: {
@@ -236,9 +233,10 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Generate next cursor
-    const nextCursor = invoices.length === params.limit
-      ? Buffer.from(JSON.stringify({ id: invoices[invoices.length - 1].id })).toString('base64')
-      : null;
+    const nextCursor =
+      invoices.length === params.limit
+        ? Buffer.from(JSON.stringify({ id: invoices[invoices.length - 1].id })).toString('base64')
+        : null;
 
     return NextResponse.json({
       success: true,
@@ -263,10 +261,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching invoices (v2):', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch invoices', version: 'v2' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch invoices', version: 'v2' }, { status: 500 });
   }
 }
 
@@ -275,10 +270,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', version: 'v2' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', version: 'v2' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -394,27 +386,30 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      version: 'v2',
-      data: invoice,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        version: 'v2',
+        data: invoice,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating invoice (v2):', error);
-    return NextResponse.json(
-      { error: 'Failed to create invoice', version: 'v2' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create invoice', version: 'v2' }, { status: 500 });
   }
 }
 
 // Handle GraphQL query
 async function handleGraphQLQuery(query: string, user: any) {
   // Redirect to GraphQL endpoint
-  return NextResponse.json({
-    success: false,
-    version: 'v2',
-    message: 'Use POST /api/graphql for GraphQL queries',
-    documentation: '/api/docs',
-  }, { status: 400 });
+  return NextResponse.json(
+    {
+      success: false,
+      version: 'v2',
+      message: 'Use POST /api/graphql for GraphQL queries',
+      documentation: '/api/docs',
+    },
+    { status: 400 }
+  );
 }

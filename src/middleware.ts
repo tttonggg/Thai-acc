@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
   try {
     // Add security headers to all responses
     const response = NextResponse.next();
-  
+
     // Security Headers
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('X-Content-Type-Options', 'nosniff');
@@ -65,40 +65,60 @@ export async function middleware(request: NextRequest) {
         request.headers.get('x-session-id');
 
       if (!sessionId) {
-        return new NextResponse(
-          JSON.stringify({ error: 'Unauthorized' }),
-          {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
+        return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
       // Authenticated - let request pass through to serve static file from /public/uploads
     }
 
     // SPA Route handling - rewrite known SPA routes to the main page
     const spaRoutes = [
-      '/receipts', '/vendors', '/customers', '/invoices',
-      '/dashboard', '/accounts', '/journal', '/vat', '/wht',
-      '/purchase-orders', '/purchases', '/payments', '/credit-notes',
-      '/debit-notes', '/inventory', '/products', '/banking', '/assets',
-      '/payroll', '/leave', '/provident-fund', '/employees', '/petty-cash',
-      '/settings', '/admin', '/quotations', '/goods-receipt-notes',
-      '/purchase-requests', '/recurring', '/cash-flow', '/bank-statement-import'
-    ]
+      '/receipts',
+      '/vendors',
+      '/customers',
+      '/invoices',
+      '/dashboard',
+      '/accounts',
+      '/journal',
+      '/vat',
+      '/wht',
+      '/purchase-orders',
+      '/purchases',
+      '/payments',
+      '/credit-notes',
+      '/debit-notes',
+      '/inventory',
+      '/products',
+      '/banking',
+      '/assets',
+      '/payroll',
+      '/leave',
+      '/provident-fund',
+      '/employees',
+      '/petty-cash',
+      '/settings',
+      '/admin',
+      '/quotations',
+      '/goods-receipt-notes',
+      '/purchase-requests',
+      '/recurring',
+      '/cash-flow',
+      '/bank-statement-import',
+    ];
     if (spaRoutes.includes(pathname)) {
       // Rewrite to root page, preserving the original URL in browser
-      const url = new URL('/', request.url)
-      url.search = request.nextUrl.search
-      return NextResponse.rewrite(url)
+      const url = new URL('/', request.url);
+      url.search = request.nextUrl.search;
+      return NextResponse.rewrite(url);
     }
 
     // Rate limiting for authentication endpoints
     if (
       !isTest &&
       !isLocalDev &&
-      (pathname.startsWith('/api/auth/signin') ||
-        pathname.startsWith('/api/auth/callback'))
+      (pathname.startsWith('/api/auth/signin') || pathname.startsWith('/api/auth/callback'))
     ) {
       const result = await rateLimit(request, rateLimitPresets.strict);
       if (result) return result;
@@ -111,12 +131,10 @@ export async function middleware(request: NextRequest) {
         '/api/auth/signout',
         '/api/auth/session',
         '/api/csrf/token',
-        '/api/invoices',  // Allow invoice creation during testing
+        '/api/invoices', // Allow invoice creation during testing
       ];
 
-      const isPublic = publicRoutes.some((route) =>
-        pathname.startsWith(route)
-      );
+      const isPublic = publicRoutes.some((route) => pathname.startsWith(route));
 
       if (!isPublic) {
         const result = await rateLimit(request, rateLimitPresets.moderate);
@@ -216,26 +234,50 @@ export const config = {
     // Skip static files and _next
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
-}
+};
 
 // SPA routes that should be handled by the React SPA
 const spaRoutes = [
-  '/receipts', '/vendors', '/customers', '/invoices',
-  '/dashboard', '/accounts', '/journal', '/vat', '/wht',
-  '/purchase-orders', '/purchases', '/payments', '/credit-notes',
-  '/debit-notes', '/inventory', '/products', '/banking', '/assets',
-  '/payroll', '/leave', '/provident-fund', '/employees', '/petty-cash',
-  '/settings', '/admin', '/quotations', '/goods-receipt-notes',
-  '/purchase-requests', '/recurring', '/cash-flow', '/bank-statement-import'
-]
+  '/receipts',
+  '/vendors',
+  '/customers',
+  '/invoices',
+  '/dashboard',
+  '/accounts',
+  '/journal',
+  '/vat',
+  '/wht',
+  '/purchase-orders',
+  '/purchases',
+  '/payments',
+  '/credit-notes',
+  '/debit-notes',
+  '/inventory',
+  '/products',
+  '/banking',
+  '/assets',
+  '/payroll',
+  '/leave',
+  '/provident-fund',
+  '/employees',
+  '/petty-cash',
+  '/settings',
+  '/admin',
+  '/quotations',
+  '/goods-receipt-notes',
+  '/purchase-requests',
+  '/recurring',
+  '/cash-flow',
+  '/bank-statement-import',
+];
 
 // Intercept unknown paths and let the SPA handle them
 async function handleSPARoute(request: NextRequest, pathname: string) {
   // If it's a known SPA route but doesn't have a physical page
   if (spaRoutes.includes(pathname)) {
     // Rewrite to root page - the SPA will handle the routing based on URL
-    const url = new URL('/', request.url)
-    url.search = request.nextUrl.search
-    return NextResponse.rewrite(url)
+    const url = new URL('/', request.url);
+    url.search = request.nextUrl.search;
+    return NextResponse.rewrite(url);
   }
 }

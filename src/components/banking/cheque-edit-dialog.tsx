@@ -1,48 +1,61 @@
-'use client'
-import { useState, useEffect } from 'react'
+'use client';
+import { useState, useEffect } from 'react';
 
 // Helper function to translate cheque status
 function getStatusLabel(status: string): string {
   const statusMap: Record<string, string> = {
-    'ON_HAND': 'อยู่ในมือ',
-    'DEPOSITED': 'นำฝากแล้ว',
-    'CLEARED': 'เคลียร์แล้ว',
-    'BOUNCED': 'เช็คเด้ง',
-    'CANCELLED': 'ยกเลิก',
-  }
-  return statusMap[status] || status
+    ON_HAND: 'อยู่ในมือ',
+    DEPOSITED: 'นำฝากแล้ว',
+    CLEARED: 'เคลียร์แล้ว',
+    BOUNCED: 'เช็คเด้ง',
+    CANCELLED: 'ยกเลิก',
+  };
+  return statusMap[status] || status;
 }
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 interface BankAccount {
-  id: string
-  bankName: string
-  accountNumber: string
+  id: string;
+  bankName: string;
+  accountNumber: string;
 }
 
 interface Cheque {
-  id: string
-  chequeNo: string
-  type: 'RECEIVE' | 'PAY'
-  bankAccountId: string
-  amount: number
-  dueDate: string
-  payeeName: string | null
-  status: string
+  id: string;
+  chequeNo: string;
+  type: 'RECEIVE' | 'PAY';
+  bankAccountId: string;
+  amount: number;
+  dueDate: string;
+  payeeName: string | null;
+  status: string;
 }
 
 interface ChequeEditDialogProps {
-  open: boolean
-  onClose: () => void
-  onSuccess: () => void
-  cheque?: Cheque | null
-  bankAccounts: BankAccount[]
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  cheque?: Cheque | null;
+  bankAccounts: BankAccount[];
 }
 
 export function ChequeEditDialog({
@@ -59,9 +72,9 @@ export function ChequeEditDialog({
     amount: '',
     dueDate: '',
     payeeName: '',
-  })
-  const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
+  });
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (cheque) {
@@ -72,7 +85,7 @@ export function ChequeEditDialog({
         amount: cheque.amount?.toString() || '',
         dueDate: cheque.dueDate ? new Date(cheque.dueDate).toISOString().split('T')[0] : '',
         payeeName: cheque.payeeName || '',
-      })
+      });
     } else {
       setForm({
         chequeNo: '',
@@ -81,23 +94,23 @@ export function ChequeEditDialog({
         amount: '',
         dueDate: '',
         payeeName: '',
-      })
+      });
     }
-  }, [cheque, open])
+  }, [cheque, open]);
 
   const handleSubmit = async () => {
     if (!form.chequeNo || !form.bankAccountId || !form.amount || !form.dueDate) {
       toast({
         title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const url = cheque ? `/api/cheques/${cheque.id}` : '/api/cheques'
-      const method = 'PATCH'
+      const url = cheque ? `/api/cheques/${cheque.id}` : '/api/cheques';
+      const method = 'PATCH';
 
       const res = await fetch(url, {
         method,
@@ -106,31 +119,31 @@ export function ChequeEditDialog({
           ...form,
           amount: parseFloat(form.amount),
         }),
-      }).then((r) => r.json())
+      }).then((r) => r.json());
 
       if (res.success) {
         toast({
           title: cheque ? 'แก้ไขเช็คสำเร็จ' : 'เพิ่มเช็คสำเร็จ',
-        })
-        onSuccess()
-        onClose()
+        });
+        onSuccess();
+        onClose();
       } else {
         toast({
           title: 'ข้อผิดพลาด',
           description: res.error,
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'เกิดข้อผิดพลาดในการบันทึก',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -144,7 +157,7 @@ export function ChequeEditDialog({
           </VisuallyHidden>
         </DialogHeader>
         <div className="space-y-3 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <Label htmlFor="chequeNo">เลขที่เช็ค *</Label>
               <Input
@@ -156,7 +169,10 @@ export function ChequeEditDialog({
             </div>
             <div>
               <Label htmlFor="type">ประเภท *</Label>
-              <Select value={form.type} onValueChange={(v: 'RECEIVE' | 'PAY') => setForm({ ...form, type: v })}>
+              <Select
+                value={form.type}
+                onValueChange={(v: 'RECEIVE' | 'PAY') => setForm({ ...form, type: v })}
+              >
                 <SelectTrigger id="type">
                   <SelectValue />
                 </SelectTrigger>
@@ -169,7 +185,10 @@ export function ChequeEditDialog({
           </div>
           <div>
             <Label htmlFor="bankAccountId">บัญชีธนาคาร *</Label>
-            <Select value={form.bankAccountId} onValueChange={(v) => setForm({ ...form, bankAccountId: v })}>
+            <Select
+              value={form.bankAccountId}
+              onValueChange={(v) => setForm({ ...form, bankAccountId: v })}
+            >
               <SelectTrigger id="bankAccountId">
                 <SelectValue placeholder="เลือกบัญชี" />
               </SelectTrigger>
@@ -182,7 +201,7 @@ export function ChequeEditDialog({
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <Label htmlFor="amount">จำนวนเงิน *</Label>
               <Input
@@ -214,9 +233,10 @@ export function ChequeEditDialog({
             />
           </div>
           {cheque && cheque.status !== 'ON_HAND' && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3">
               <p className="text-sm text-yellow-800">
-                ⚠️ เช็คนี้ถูกประมวลผลแล้ว ({getStatusLabel(cheque.status)}) การแก้ไขอาจส่งผลต่อบันทึกบัญชี
+                ⚠️ เช็คนี้ถูกประมวลผลแล้ว ({getStatusLabel(cheque.status)})
+                การแก้ไขอาจส่งผลต่อบันทึกบัญชี
               </p>
             </div>
           )}
@@ -225,11 +245,15 @@ export function ChequeEditDialog({
           <Button variant="outline" onClick={onClose}>
             ยกเลิก
           </Button>
-          <Button onClick={handleSubmit} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             {loading ? 'กำลังบันทึก...' : cheque ? 'บันทึกการแก้ไข' : 'บันทึก'}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

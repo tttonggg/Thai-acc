@@ -3,10 +3,10 @@
 // เริ่มต้น scheduler เมื่อแอป start
 // ============================================
 
-import { startScheduler, getSchedulerStatus, stopScheduler } from './scheduler'
+import { startScheduler, getSchedulerStatus, stopScheduler } from './scheduler';
 
 // Flag to ensure we only initialize once
-let initialized = false
+let initialized = false;
 
 /**
  * Initialize the scheduler
@@ -14,35 +14,37 @@ let initialized = false
  */
 export function initializeScheduler(): void {
   if (initialized) {
-    console.log('[SchedulerInit] Already initialized')
-    return
+    console.log('[SchedulerInit] Already initialized');
+    return;
   }
 
-  initialized = true
+  initialized = true;
 
   // Start the scheduler
-  startScheduler()
+  startScheduler();
 
-  const status = getSchedulerStatus()
-  console.log(`[SchedulerInit] Initialized - running: ${status.isRunning}, check interval: ${status.checkIntervalMinutes} minutes`)
+  const status = getSchedulerStatus();
+  console.log(
+    `[SchedulerInit] Initialized - running: ${status.isRunning}, check interval: ${status.checkIntervalMinutes} minutes`
+  );
 
   // Handle graceful shutdown
   process.on('SIGTERM', () => {
-    console.log('[SchedulerInit] SIGTERM received, cleaning up...')
-    stopScheduler()
-    process.exit(0)
-  })
+    console.log('[SchedulerInit] SIGTERM received, cleaning up...');
+    stopScheduler();
+    process.exit(0);
+  });
 
   process.on('SIGINT', () => {
-    console.log('[SchedulerInit] SIGINT received, cleaning up...')
-    stopScheduler()
-    process.exit(0)
-  })
+    console.log('[SchedulerInit] SIGINT received, cleaning up...');
+    stopScheduler();
+    process.exit(0);
+  });
 }
 
 // Auto-initialize in non-test environments
 if (process.env.NODE_ENV !== 'test') {
-  initializeScheduler()
+  initializeScheduler();
 }
 
-export { getSchedulerStatus }
+export { getSchedulerStatus };

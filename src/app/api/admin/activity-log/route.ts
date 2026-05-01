@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { requireRole } from "@/lib/api-utils"
-import { AuthError } from "@/lib/api-auth"
-import { z } from 'zod'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { requireRole } from '@/lib/api-utils';
+import { AuthError } from '@/lib/api-auth';
+import { z } from 'zod';
 
 // Query schema for filtering
 const querySchema = z.object({
@@ -15,38 +15,38 @@ const querySchema = z.object({
   search: z.string().optional(),
   dateFrom: z.string().optional(),
   dateTo: z.string().optional(),
-})
+});
 
 // GET - List activity logs (ADMIN only)
 export async function GET(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole(['ADMIN'])
+    await requireRole(['ADMIN']);
 
-    const { searchParams } = new URL(request.url)
-    const query = querySchema.parse(Object.fromEntries(searchParams))
+    const { searchParams } = new URL(request.url);
+    const query = querySchema.parse(Object.fromEntries(searchParams));
 
-    const page = parseInt(query.page)
-    const limit = Math.min(parseInt(query.limit), 100) // Max 100 per page
-    const skip = (page - 1) * limit
+    const page = parseInt(query.page);
+    const limit = Math.min(parseInt(query.limit), 100); // Max 100 per page
+    const skip = (page - 1) * limit;
 
     // Build where clause
-    const where: any = {}
+    const where: any = {};
 
     if (query.userId) {
-      where.userId = query.userId
+      where.userId = query.userId;
     }
 
     if (query.action) {
-      where.action = query.action
+      where.action = query.action;
     }
 
     if (query.module) {
-      where.module = query.module
+      where.module = query.module;
     }
 
     if (query.status !== 'all') {
-      where.status = query.status
+      where.status = query.status;
     }
 
     if (query.search) {
@@ -54,16 +54,16 @@ export async function GET(request: NextRequest) {
         { action: { contains: query.search, mode: 'insensitive' } },
         { module: { contains: query.search, mode: 'insensitive' } },
         { errorMessage: { contains: query.search, mode: 'insensitive' } },
-      ]
+      ];
     }
 
     if (query.dateFrom || query.dateTo) {
-      where.createdAt = {}
+      where.createdAt = {};
       if (query.dateFrom) {
-        where.createdAt.gte = new Date(query.dateFrom)
+        where.createdAt.gte = new Date(query.dateFrom);
       }
       if (query.dateTo) {
-        where.createdAt.lte = new Date(query.dateTo)
+        where.createdAt.lte = new Date(query.dateTo);
       }
     }
 
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.activityLog.count({ where }),
-    ])
+    ]);
 
     return NextResponse.json({
       success: true,
@@ -97,32 +97,29 @@ export async function GET(request: NextRequest) {
         limit,
         totalPages: Math.ceil(total / limit),
       },
-    })
+    });
   } catch (error: any) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
-      )
+      );
     }
     if (error?.statusCode === 403) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์เข้าถึง' },
-        { status: 403 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
         { status: 400 }
-      )
+      );
     }
-    console.error('Error fetching activity logs:', error)
+    console.error('Error fetching activity logs:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -131,9 +128,9 @@ export async function POST(request: NextRequest) {
   try {
     // This endpoint is for internal use - called by other services
     // We still require authentication but not necessarily ADMIN role
-    const user = await requireRole(['ADMIN'])
+    const user = await requireRole(['ADMIN']);
 
-    const body = await request.json()
+    const body = await request.json();
 
     const log = await prisma.activityLog.create({
       data: {
@@ -156,30 +153,27 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
       data: log,
-    })
+    });
   } catch (error: any) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
-      )
+      );
     }
     if (error?.statusCode === 403) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์เข้าถึง' },
-        { status: 403 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
-    console.error('Error creating activity log:', error)
+    console.error('Error creating activity log:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการบันทึกกิจกรรม' },
       { status: 500 }
-    )
+    );
   }
 }

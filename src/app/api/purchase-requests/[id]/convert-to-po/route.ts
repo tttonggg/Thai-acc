@@ -1,8 +1,16 @@
-import { NextRequest } from 'next/server'
-import { requireAuth, requireRole, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError } from '@/lib/api-utils'
-import { prisma } from '@/lib/db'
-import { logActivity } from '@/lib/activity-logger'
-import { z } from 'zod'
+import { NextRequest } from 'next/server';
+import {
+  requireAuth,
+  requireRole,
+  apiResponse,
+  apiError,
+  unauthorizedError,
+  notFoundError,
+  forbiddenError,
+} from '@/lib/api-utils';
+import { prisma } from '@/lib/db';
+import { logActivity } from '@/lib/activity-logger';
+import { z } from 'zod';
 
 // Validation schema for convert to PO request
 const convertToPoSchema = z.object({
@@ -15,22 +23,19 @@ const convertToPoSchema = z.object({
   deliveryAddress: z.string().optional(),
   expectedDate: z.string().optional(),
   notes: z.string().optional(),
-})
+});
 
 // POST /api/purchase-requests/[id]/convert-to-po - Convert approved PR to PO
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require ADMIN or ACCOUNTANT role
-    const user = await requireRole(['ADMIN', 'ACCOUNTANT'])
+    const user = await requireRole(['ADMIN', 'ACCOUNTANT']);
 
-    const { id } = await params
+    const { id } = await params;
 
     // Parse request body
-    const body = await request.json()
-    const validatedData = convertToPoSchema.parse(body)
+    const body = await request.json();
+    const validatedData = convertToPoSchema.parse(body);
 
     // Fetch PR with all relations
     const pr = await prisma.purchaseRequest.findUnique({
@@ -53,35 +58,35 @@ export async function POST(
         },
         departmentData: true,
       },
-    })
+    });
 
     if (!pr) {
-      return notFoundError('ไม่พบใบขอซื้อ')
+      return notFoundError('ไม่พบใบขอซื้อ');
     }
 
     // Validate status transition
     if (pr.status !== 'APPROVED') {
-      return apiError('สามารถแปลงเป็นใบสั่งซื้อเฉพาะใบขอซื้อที่ได้รับการอนุมัติแล้วเท่านั้น', 400)
+      return apiError('สามารถแปลงเป็นใบสั่งซื้อเฉพาะใบขอซื้อที่ได้รับการอนุมัติแล้วเท่านั้น', 400);
     }
 
     // Check if PR is already converted
     if (pr.purchaseOrderId) {
-      return apiError('ใบขอซื้อนี้ถูกแปลงเป็นใบสั่งซื้อแล้ว', 400)
+      return apiError('ใบขอซื้อนี้ถูกแปลงเป็นใบสั่งซื้อแล้ว', 400);
     }
 
     // Validate vendor exists
     const vendor = await prisma.vendor.findUnique({
       where: { id: validatedData.vendorId },
-    })
+    });
 
     if (!vendor) {
-      return apiError('ไม่พบข้อมูลผู้ขาย', 400)
+      return apiError('ไม่พบข้อมูลผู้ขาย', 400);
     }
 
     // Generate PO number
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
 
     // Find latest PO number for this month
     const latestPO = await prisma.purchaseOrder.findFirst({
@@ -93,17 +98,17 @@ export async function POST(
       orderBy: {
         orderNo: 'desc',
       },
-    })
+    });
 
-    let sequence = 1
+    let sequence = 1;
     if (latestPO) {
-      const match = latestPO.orderNo.match(/PO\d{6}-(\d{4})/)
+      const match = latestPO.orderNo.match(/PO\d{6}-(\d{4})/);
       if (match) {
-        sequence = parseInt(match[1]) + 1
+        sequence = parseInt(match[1]) + 1;
       }
     }
 
-    const orderNo = `PO${year}${month}-${String(sequence).padStart(4, '0')}`
+    const orderNo = `PO${year}${month}-${String(sequence).padStart(4, '0')}`;
 
     // Convert PR to PO using transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -119,7 +124,9 @@ export async function POST(
           purchaseRequestId: id,
           shippingTerms: validatedData.shippingTerms,
           paymentTerms: validatedData.paymentTerms,
-          expectedDate: validatedData.expectedDate ? new Date(validatedData.expectedDate) : pr.requiredDate,
+          expectedDate: validatedData.expectedDate
+            ? new Date(validatedData.expectedDate)
+            : pr.requiredDate,
           notes: validatedData.notes,
           status: 'DRAFT',
           createdById: user.id,
@@ -162,7 +169,7 @@ export async function POST(
             },
           },
         },
-      })
+      });
 
       // Update PR status to CONVERTED
       const updatedPR = await tx.purchaseRequest.update({
@@ -224,13 +231,13 @@ export async function POST(
             },
           },
         },
-      })
+      });
 
       return {
         purchaseOrder,
         updatedPR,
-      }
-    })
+      };
+    });
 
     // Log activity
     await logActivity({
@@ -244,7 +251,7 @@ export async function POST(
         vendorName: result.purchaseOrder.vendor.name,
         lineCount: result.purchaseOrder.lines.length,
       },
-    })
+    });
 
     return apiResponse({
       success: true,
@@ -253,18 +260,18 @@ export async function POST(
         purchaseOrder: result.purchaseOrder,
         purchaseRequest: result.updatedPR,
       },
-    })
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return apiError('ข้อมูลไม่ถูกต้อง: ' + error.issues.map(e => e.message).join(', '), 400)
+      return apiError('ข้อมูลไม่ถูกต้อง: ' + error.issues.map((e) => e.message).join(', '), 400);
     }
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
     if (error instanceof Error && error.message.includes('ไม่มีสิทธิ์เข้าถึง')) {
-      return forbiddenError()
+      return forbiddenError();
     }
-    console.error('Purchase Request Convert to PO Error:', error)
-    return apiError('เกิดข้อผิดพลาดในการแปลงใบขอซื้อเป็นใบสั่งซื้อ')
+    console.error('Purchase Request Convert to PO Error:', error);
+    return apiError('เกิดข้อผิดพลาดในการแปลงใบขอซื้อเป็นใบสั่งซื้อ');
   }
 }

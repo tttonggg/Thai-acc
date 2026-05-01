@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Plus,
   Search,
@@ -19,15 +19,15 @@ import {
   User,
   Building2,
   TrendingUp,
-  Filter
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ScrollArea } from '@/components/ui/scroll-area'
+  Filter,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Table,
   TableBody,
@@ -35,79 +35,79 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 
 interface PurchaseRequest {
-  id: string
-  requestNo: string
-  requestDate: string
-  requiredDate?: string
-  reason?: string
-  priority: string
-  status: string
-  estimatedAmount: number
+  id: string;
+  requestNo: string;
+  requestDate: string;
+  requiredDate?: string;
+  reason?: string;
+  priority: string;
+  status: string;
+  estimatedAmount: number;
   requestedByUser: {
-    id: string
-    name: string
-    email: string
-  }
+    id: string;
+    name: string;
+    email: string;
+  };
   departmentData?: {
-    id: string
-    name: string
-    code: string
-  }
+    id: string;
+    name: string;
+    code: string;
+  };
   approvedByUser?: {
-    id: string
-    name: string
-    email: string
-  }
-  approvedAt?: string
-  approvalNotes?: string
+    id: string;
+    name: string;
+    email: string;
+  };
+  approvedAt?: string;
+  approvalNotes?: string;
   budget?: {
-    id: string
-    name: string
-    fiscalYear: number
-    remainingAmount: number
-  }
+    id: string;
+    name: string;
+    fiscalYear: number;
+    remainingAmount: number;
+  };
   purchaseOrder?: {
-    id: string
-    orderNo: string
-    status: string
-  }
+    id: string;
+    orderNo: string;
+    status: string;
+  };
   lines: Array<{
-    id: string
-    lineNo: number
-    description: string
-    quantity: number
-    unit: string
-    unitPrice: number
-    amount: number
+    id: string;
+    lineNo: number;
+    description: string;
+    quantity: number;
+    unit: string;
+    unitPrice: number;
+    amount: number;
     product?: {
-      id: string
-      code: string
-      name: string
-    }
-  }>
+      id: string;
+      code: string;
+      name: string;
+    };
+  }>;
   _count?: {
-    lines: number
-  }
+    lines: number;
+  };
 }
 
 // Status labels and colors
@@ -118,7 +118,7 @@ const statusLabels: Record<string, string> = {
   REJECTED: 'ปฏิเสธ',
   CANCELLED: 'ยกเลิก',
   CONVERTED: 'แปลงเป็น PO',
-}
+};
 
 const statusColors: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-800 border-gray-300',
@@ -127,7 +127,7 @@ const statusColors: Record<string, string> = {
   REJECTED: 'bg-red-100 text-red-800 border-red-300',
   CANCELLED: 'bg-gray-100 text-gray-800 border-gray-300',
   CONVERTED: 'bg-blue-100 text-blue-800 border-blue-300',
-}
+};
 
 // Priority labels and colors
 const priorityLabels: Record<string, string> = {
@@ -135,208 +135,211 @@ const priorityLabels: Record<string, string> = {
   HIGH: 'สูง',
   NORMAL: 'ปกติ',
   LOW: 'ต่ำ',
-}
+};
 
 const priorityColors: Record<string, string> = {
   URGENT: 'bg-red-100 text-red-800 border-red-300',
   HIGH: 'bg-orange-100 text-orange-800 border-orange-300',
   NORMAL: 'bg-blue-100 text-blue-800 border-blue-300',
   LOW: 'bg-gray-100 text-gray-800 border-gray-300',
-}
+};
 
 export function PurchaseRequestList() {
-  const [prs, setPrs] = useState<PurchaseRequest[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
-  const [filterDepartment, setFilterDepartment] = useState('all')
-  const [filterPriority, setFilterPriority] = useState('all')
-  const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0 })
-  const [selectedPR, setSelectedPR] = useState<PurchaseRequest | null>(null)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [processingAction, setProcessingAction] = useState<string | null>(null)
-  const [deletingPR, setDeletingPR] = useState<string | null>(null)
-  const { toast } = useToast()
+  const [prs, setPrs] = useState<PurchaseRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterDepartment, setFilterDepartment] = useState('all');
+  const [filterPriority, setFilterPriority] = useState('all');
+  const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0 });
+  const [selectedPR, setSelectedPR] = useState<PurchaseRequest | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [processingAction, setProcessingAction] = useState<string | null>(null);
+  const [deletingPR, setDeletingPR] = useState<string | null>(null);
+  const { toast } = useToast();
 
   // Fetch PRs
   useEffect(() => {
-    fetchPRs()
-  }, [pagination.page, pagination.limit])
+    fetchPRs();
+  }, [pagination.page, pagination.limit]);
 
   const fetchPRs = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
-      })
+      });
 
-      if (filterStatus !== 'all') params.append('status', filterStatus)
-      if (filterDepartment !== 'all') params.append('departmentId', filterDepartment)
-      if (filterPriority !== 'all') params.append('priority', filterPriority)
-      if (searchTerm) params.append('search', searchTerm)
+      if (filterStatus !== 'all') params.append('status', filterStatus);
+      if (filterDepartment !== 'all') params.append('departmentId', filterDepartment);
+      if (filterPriority !== 'all') params.append('priority', filterPriority);
+      if (searchTerm) params.append('search', searchTerm);
 
-      const res = await fetch(`/api/purchase-requests?${params}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Fetch failed')
+      const res = await fetch(`/api/purchase-requests?${params}`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Fetch failed');
 
-      const result = await res.json()
-      const prsData = result.data || []
+      const result = await res.json();
+      const prsData = result.data || [];
 
       if (!Array.isArray(prsData)) {
-        throw new Error('Invalid data format')
+        throw new Error('Invalid data format');
       }
 
-      setPrs(prsData)
-      setPagination(prev => ({
+      setPrs(prsData);
+      setPagination((prev) => ({
         ...prev,
         total: result.pagination?.total || 0,
-      }))
+      }));
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล'
-      setError(message)
+      const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล';
+      setError(message);
       toast({
         title: 'ข้อผิดพลาด',
         description: 'โหลดข้อมูลไม่สำเร็จ',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Filter PRs
-  const filteredPRs = (prs || []).filter(pr => {
+  const filteredPRs = (prs || []).filter((pr) => {
     const matchesSearch =
       !searchTerm ||
       pr.requestNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pr.reason?.toLowerCase().includes(searchTerm.toLowerCase())
+      pr.reason?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = filterStatus === 'all' || pr.status === filterStatus
+    const matchesStatus = filterStatus === 'all' || pr.status === filterStatus;
     const matchesDepartment =
-      filterDepartment === 'all' || pr.departmentData?.id === filterDepartment
-    const matchesPriority = filterPriority === 'all' || pr.priority === filterPriority
+      filterDepartment === 'all' || pr.departmentData?.id === filterDepartment;
+    const matchesPriority = filterPriority === 'all' || pr.priority === filterPriority;
 
-    return matchesSearch && matchesStatus && matchesDepartment && matchesPriority
-  })
+    return matchesSearch && matchesStatus && matchesDepartment && matchesPriority;
+  });
 
   // Action handlers
   const handleView = (pr: PurchaseRequest) => {
-    setSelectedPR(pr)
-    setIsViewDialogOpen(true)
-  }
+    setSelectedPR(pr);
+    setIsViewDialogOpen(true);
+  };
 
   const handleEdit = (prId: string) => {
     // TODO: Open edit dialog
     toast({
       title: 'แก้ไขใบขอซื้อ',
       description: 'ฟีเจอร์นี้จะเปิดใช้งานเร็วๆ นี้',
-    })
-  }
+    });
+  };
 
   const handleDelete = async (prId: string) => {
     if (!confirm('คุณต้องการลบใบขอซื้อนี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
-    setDeletingPR(prId)
+    setDeletingPR(prId);
     try {
-      const res = await fetch(`/api/purchase-requests/${prId}`, { credentials: 'include', 
+      const res = await fetch(`/api/purchase-requests/${prId}`, {
+        credentials: 'include',
         method: 'DELETE',
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'ลบไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'ลบไม่สำเร็จ');
       }
 
       toast({
         title: 'ลบสำเร็จ',
         description: 'ลบใบขอซื้อเรียบร้อยแล้ว',
-      })
+      });
 
-      fetchPRs()
+      fetchPRs();
     } catch (err) {
       toast({
         title: 'ลบไม่สำเร็จ',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setDeletingPR(null)
+      setDeletingPR(null);
     }
-  }
+  };
 
   const handleAction = async (prId: string, action: 'submit' | 'approve' | 'reject') => {
-    setProcessingAction(`${prId}-${action}`)
+    setProcessingAction(`${prId}-${action}`);
     try {
-      const res = await fetch(`/api/purchase-requests/${prId}`, { credentials: 'include', 
+      const res = await fetch(`/api/purchase-requests/${prId}`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'ดำเนินการไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'ดำเนินการไม่สำเร็จ');
       }
 
       const actionLabels = {
         submit: 'ส่งอนุมัติ',
         approve: 'อนุมัติ',
         reject: 'ปฏิเสธ',
-      }
+      };
 
       toast({
         title: 'สำเร็จ',
         description: `${actionLabels[action]}เรียบร้อยแล้ว`,
-      })
+      });
 
-      fetchPRs()
-      setIsViewDialogOpen(false)
+      fetchPRs();
+      setIsViewDialogOpen(false);
     } catch (err) {
       toast({
         title: 'ดำเนินการไม่สำเร็จ',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setProcessingAction(null)
+      setProcessingAction(null);
     }
-  }
+  };
 
   const handleConvertToPO = async (prId: string) => {
-    setProcessingAction(`${prId}-convert`)
+    setProcessingAction(`${prId}-convert`);
     try {
-      const res = await fetch(`/api/purchase-orders`, { credentials: 'include', 
+      const res = await fetch(`/api/purchase-orders`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ purchaseRequestId: prId }),
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'แปลงเป็น PO ไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'แปลงเป็น PO ไม่สำเร็จ');
       }
 
       toast({
         title: 'สำเร็จ',
         description: 'แปลงเป็นใบสั่งซื้อเรียบร้อยแล้ว',
-      })
+      });
 
-      fetchPRs()
-      setIsViewDialogOpen(false)
+      fetchPRs();
+      setIsViewDialogOpen(false);
     } catch (err) {
       toast({
         title: 'แปลงเป็น PO ไม่สำเร็จ',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setProcessingAction(null)
+      setProcessingAction(null);
     }
-  }
+  };
 
   // Loading UI
   if (loading) {
@@ -344,12 +347,12 @@ export function PurchaseRequestList() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="mb-2 h-8 w-64" />
             <Skeleton className="h-5 w-80" />
           </div>
           <Skeleton className="h-10 w-40" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i}>
               <CardContent className="p-4">
@@ -360,12 +363,12 @@ export function PurchaseRequestList() {
         </div>
         <Card>
           <CardContent className="p-4">
-            <Skeleton className="h-12 w-full mb-4" />
+            <Skeleton className="mb-4 h-12 w-full" />
             <Skeleton className="h-64 w-full" />
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Error UI
@@ -375,16 +378,16 @@ export function PurchaseRequestList() {
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>{error}</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   // Calculate stats
   const stats = {
-    draft: prs.filter(p => p.status === 'DRAFT').length,
-    pending: prs.filter(p => p.status === 'PENDING').length,
-    approved: prs.filter(p => p.status === 'APPROVED').length,
+    draft: prs.filter((p) => p.status === 'DRAFT').length,
+    pending: prs.filter((p) => p.status === 'PENDING').length,
+    approved: prs.filter((p) => p.status === 'APPROVED').length,
     totalAmount: prs.reduce((sum, p) => sum + (p.estimatedAmount || 0), 0),
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -392,16 +395,16 @@ export function PurchaseRequestList() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">ใบขอซื้อ (Purchase Request)</h1>
-          <p className="text-gray-500 mt-1">จัดการใบขอซื้อและขั้นตอนการอนุมัติ</p>
+          <p className="mt-1 text-gray-500">จัดการใบขอซื้อและขั้นตอนการอนุมัติ</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           สร้างใบขอซื้อ
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -453,9 +456,9 @@ export function PurchaseRequestList() {
       {/* Search & Filter */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="ค้นหาตามเลขที่ PR หรือเหตุผล..."
                 className="pl-10"
@@ -513,8 +516,8 @@ export function PurchaseRequestList() {
               <TableBody>
                 {filteredPRs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-gray-500">
-                      <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <TableCell colSpan={9} className="py-8 text-center text-gray-500">
+                      <ShoppingCart className="mx-auto mb-4 h-12 w-12 text-gray-300" />
                       <p>ไม่พบใบขอซื้อ</p>
                     </TableCell>
                   </TableRow>
@@ -522,9 +525,7 @@ export function PurchaseRequestList() {
                   filteredPRs.map((pr) => (
                     <TableRow key={pr.id} className="cursor-pointer hover:bg-gray-50">
                       <TableCell className="font-mono font-medium">{pr.requestNo}</TableCell>
-                      <TableCell>
-                        {new Date(pr.requestDate).toLocaleDateString('th-TH')}
-                      </TableCell>
+                      <TableCell>{new Date(pr.requestDate).toLocaleDateString('th-TH')}</TableCell>
                       <TableCell>
                         {pr.departmentData ? (
                           <div className="flex items-center gap-2">
@@ -542,7 +543,8 @@ export function PurchaseRequestList() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        ฿{(pr.estimatedAmount / 100).toLocaleString('th-TH', {
+                        ฿
+                        {(pr.estimatedAmount / 100).toLocaleString('th-TH', {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
@@ -588,7 +590,7 @@ export function PurchaseRequestList() {
                                 disabled={deletingPR === pr.id}
                               >
                                 {deletingPR === pr.id ? (
-                                  <Loader2 className="h-4 w-4 text-red-600 animate-spin" />
+                                  <Loader2 className="h-4 w-4 animate-spin text-red-600" />
                                 ) : (
                                   <Trash2 className="h-4 w-4 text-red-600" />
                                 )}
@@ -637,7 +639,7 @@ export function PurchaseRequestList() {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
@@ -645,7 +647,7 @@ export function PurchaseRequestList() {
             </DialogTitle>
             <DialogDescription>
               {selectedPR && (
-                <div className="flex items-center gap-4 mt-2">
+                <div className="mt-2 flex items-center gap-4">
                   <Badge className={statusColors[selectedPR.status]} variant="outline">
                     {statusLabels[selectedPR.status]}
                   </Badge>
@@ -695,9 +697,7 @@ export function PurchaseRequestList() {
                     <Building2 className="h-4 w-4" />
                     แผนก
                   </Label>
-                  <p className="text-sm font-medium">
-                    {selectedPR.departmentData?.name || '-'}
-                  </p>
+                  <p className="text-sm font-medium">{selectedPR.departmentData?.name || '-'}</p>
                 </div>
               </div>
 
@@ -705,13 +705,13 @@ export function PurchaseRequestList() {
               {selectedPR.reason && (
                 <div className="space-y-2">
                   <Label>เหตุผลการขอซื้อ</Label>
-                  <p className="text-sm bg-gray-50 p-3 rounded">{selectedPR.reason}</p>
+                  <p className="rounded bg-gray-50 p-3 text-sm">{selectedPR.reason}</p>
                 </div>
               )}
 
               {/* Budget Info */}
               {selectedPR.budget && (
-                <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="rounded-lg bg-blue-50 p-4">
                   <Label className="text-blue-900">งบประมาณ</Label>
                   <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -725,7 +725,8 @@ export function PurchaseRequestList() {
                     <div>
                       <span className="text-gray-600">งบคงเหลือ:</span>{' '}
                       <span className="font-medium">
-                        ฿{(selectedPR.budget.remainingAmount / 100).toLocaleString('th-TH', {
+                        ฿
+                        {(selectedPR.budget.remainingAmount / 100).toLocaleString('th-TH', {
                           minimumFractionDigits: 2,
                         })}
                       </span>
@@ -740,7 +741,7 @@ export function PurchaseRequestList() {
                   <Package className="h-4 w-4" />
                   รายการสินค้า ({selectedPR.lines?.length || 0} รายการ)
                 </Label>
-                <div className="border rounded-lg overflow-hidden">
+                <div className="overflow-hidden rounded-lg border">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -759,9 +760,7 @@ export function PurchaseRequestList() {
                             <div>
                               <p className="font-medium">{line.description}</p>
                               {line.product && (
-                                <p className="text-xs text-gray-500">
-                                  รหัส: {line.product.code}
-                                </p>
+                                <p className="text-xs text-gray-500">รหัส: {line.product.code}</p>
                               )}
                             </div>
                           </TableCell>
@@ -769,13 +768,15 @@ export function PurchaseRequestList() {
                             {line.quantity.toLocaleString('th-TH')} {line.unit}
                           </TableCell>
                           <TableCell className="text-right">
-                            ฿{line.unitPrice.toLocaleString('th-TH', {
+                            ฿
+                            {line.unitPrice.toLocaleString('th-TH', {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             })}
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            ฿{line.amount.toLocaleString('th-TH', {
+                            ฿
+                            {line.amount.toLocaleString('th-TH', {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             })}
@@ -789,7 +790,8 @@ export function PurchaseRequestList() {
                   <div className="text-right">
                     <p className="text-sm text-gray-600">วงเงินรวม</p>
                     <p className="text-2xl font-bold text-blue-600">
-                      ฿{(selectedPR.estimatedAmount / 100).toLocaleString('th-TH', {
+                      ฿
+                      {(selectedPR.estimatedAmount / 100).toLocaleString('th-TH', {
                         minimumFractionDigits: 2,
                       })}
                     </p>
@@ -799,8 +801,8 @@ export function PurchaseRequestList() {
 
               {/* Approval Info */}
               {selectedPR.approvedByUser && (
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <Label className="text-green-900 flex items-center gap-2">
+                <div className="rounded-lg bg-green-50 p-4">
+                  <Label className="flex items-center gap-2 text-green-900">
                     <CheckCircle2 className="h-4 w-4" />
                     ข้อมูลการอนุมัติ
                   </Label>
@@ -829,8 +831,8 @@ export function PurchaseRequestList() {
 
               {/* PO Reference */}
               {selectedPR.purchaseOrder && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <Label className="text-blue-900 flex items-center gap-2">
+                <div className="rounded-lg bg-blue-50 p-4">
+                  <Label className="flex items-center gap-2 text-blue-900">
                     <ShoppingCart className="h-4 w-4" />
                     อ้างอิงใบสั่งซื้อ
                   </Label>
@@ -853,12 +855,12 @@ export function PurchaseRequestList() {
               {selectedPR.notes && (
                 <div className="space-y-2">
                   <Label>หมายเหตุ</Label>
-                  <p className="text-sm bg-gray-50 p-3 rounded">{selectedPR.notes}</p>
+                  <p className="rounded bg-gray-50 p-3 text-sm">{selectedPR.notes}</p>
                 </div>
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2 pt-4 border-t">
+              <div className="flex flex-wrap gap-2 border-t pt-4">
                 {selectedPR.status === 'DRAFT' && (
                   <>
                     <Button
@@ -867,17 +869,14 @@ export function PurchaseRequestList() {
                       disabled={processingAction === `${selectedPR.id}-submit`}
                     >
                       {processingAction === `${selectedPR.id}-submit` ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <Send className="h-4 w-4 mr-2" />
+                        <Send className="mr-2 h-4 w-4" />
                       )}
                       ส่งอนุมัติ
                     </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleEdit(selectedPR.id)}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
+                    <Button variant="outline" onClick={() => handleEdit(selectedPR.id)}>
+                      <Edit className="mr-2 h-4 w-4" />
                       แก้ไข
                     </Button>
                   </>
@@ -890,9 +889,9 @@ export function PurchaseRequestList() {
                       disabled={processingAction === `${selectedPR.id}-approve`}
                     >
                       {processingAction === `${selectedPR.id}-approve` ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
                       )}
                       อนุมัติ
                     </Button>
@@ -902,9 +901,9 @@ export function PurchaseRequestList() {
                       disabled={processingAction === `${selectedPR.id}-reject`}
                     >
                       {processingAction === `${selectedPR.id}-reject` ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <XCircle className="h-4 w-4 mr-2" />
+                        <XCircle className="mr-2 h-4 w-4" />
                       )}
                       ปฏิเสธ
                     </Button>
@@ -917,9 +916,9 @@ export function PurchaseRequestList() {
                     disabled={processingAction === `${selectedPR.id}-convert`}
                   >
                     {processingAction === `${selectedPR.id}-convert` ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
-                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      <ShoppingCart className="mr-2 h-4 w-4" />
                     )}
                     แปลงเป็น PO
                   </Button>
@@ -930,5 +929,5 @@ export function PurchaseRequestList() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

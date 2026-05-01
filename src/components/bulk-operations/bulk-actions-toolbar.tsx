@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '@/components/ui/alert-dialog';
 import {
   Trash2,
   Download,
@@ -27,27 +27,27 @@ import {
   XCircle,
   FileOutput,
   Printer,
-} from 'lucide-react'
+} from 'lucide-react';
 
 export interface BulkAction {
-  id: string
-  label: string
-  icon?: React.ReactNode
-  onClick: (selectedIds: string[]) => void | Promise<void>
-  variant?: 'default' | 'destructive'
-  requiresConfirmation?: boolean
-  confirmationTitle?: string
-  confirmationMessage?: string
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+  onClick: (selectedIds: string[]) => void | Promise<void>;
+  variant?: 'default' | 'destructive';
+  requiresConfirmation?: boolean;
+  confirmationTitle?: string;
+  confirmationMessage?: string;
 }
 
 interface BulkActionsToolbarProps {
-  selectedCount: number
-  totalCount: number
-  actions: BulkAction[]
-  onSelectAll: () => void
-  onClearSelection: () => void
-  allSelected?: boolean
-  className?: string
+  selectedCount: number;
+  totalCount: number;
+  actions: BulkAction[];
+  onSelectAll: () => void;
+  onClearSelection: () => void;
+  allSelected?: boolean;
+  className?: string;
 }
 
 export function BulkActionsToolbar({
@@ -59,59 +59,47 @@ export function BulkActionsToolbar({
   allSelected = false,
   className,
 }: BulkActionsToolbarProps) {
-  const [confirmAction, setConfirmAction] = useState<BulkAction | null>(null)
+  const [confirmAction, setConfirmAction] = useState<BulkAction | null>(null);
 
   const handleActionClick = (action: BulkAction) => {
     if (action.requiresConfirmation) {
-      setConfirmAction(action)
+      setConfirmAction(action);
     } else {
       // Get selected IDs from context/parent
-      action.onClick([])
+      action.onClick([]);
     }
-  }
+  };
 
   const handleConfirm = () => {
     if (confirmAction) {
-      confirmAction.onClick([])
-      setConfirmAction(null)
+      confirmAction.onClick([]);
+      setConfirmAction(null);
     }
-  }
+  };
 
   if (selectedCount === 0) {
     return (
-      <div className={cn("flex items-center justify-between py-2", className)}>
+      <div className={cn('flex items-center justify-between py-2', className)}>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onSelectAll}
-            className="text-xs"
-          >
+          <Button variant="outline" size="sm" onClick={onSelectAll} className="text-xs">
             เลือกทั้งหมด ({totalCount})
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <>
       <div
         className={cn(
-          "flex items-center justify-between py-2 px-3 bg-primary/5 border rounded-lg animate-in fade-in slide-in-from-top-2",
+          'flex items-center justify-between rounded-lg border bg-primary/5 px-3 py-2 animate-in fade-in slide-in-from-top-2',
           className
         )}
       >
         <div className="flex items-center gap-4">
-          <span className="text-sm font-medium">
-            เลือกแล้ว {selectedCount} รายการ
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClearSelection}
-            className="text-xs h-7"
-          >
+          <span className="text-sm font-medium">เลือกแล้ว {selectedCount} รายการ</span>
+          <Button variant="ghost" size="sm" onClick={onClearSelection} className="h-7 text-xs">
             ยกเลิกการเลือก
           </Button>
         </div>
@@ -123,7 +111,7 @@ export function BulkActionsToolbar({
               variant={action.variant === 'destructive' ? 'destructive' : 'outline'}
               size="sm"
               onClick={() => handleActionClick(action)}
-              className="text-xs h-8"
+              className="h-8 text-xs"
             >
               {action.icon && <span className="mr-1">{action.icon}</span>}
               {action.label}
@@ -134,7 +122,7 @@ export function BulkActionsToolbar({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 px-2">
-                  <MoreHorizontal className="w-4 h-4" />
+                  <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -143,7 +131,7 @@ export function BulkActionsToolbar({
                     key={action.id}
                     onClick={() => handleActionClick(action)}
                     className={cn(
-                      action.variant === 'destructive' && "text-destructive focus:text-destructive"
+                      action.variant === 'destructive' && 'text-destructive focus:text-destructive'
                     )}
                   >
                     {action.icon && <span className="mr-2">{action.icon}</span>}
@@ -172,7 +160,7 @@ export function BulkActionsToolbar({
             <AlertDialogAction
               onClick={handleConfirm}
               className={cn(
-                confirmAction?.variant === 'destructive' && "bg-destructive hover:bg-destructive/90"
+                confirmAction?.variant === 'destructive' && 'bg-destructive hover:bg-destructive/90'
               )}
             >
               ยืนยัน
@@ -181,94 +169,92 @@ export function BulkActionsToolbar({
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }
 
 // Pre-defined common bulk actions
 export const createCommonBulkActions = (handlers: {
-  onDelete?: (ids: string[]) => void
-  onExport?: (ids: string[]) => void
-  onPrint?: (ids: string[]) => void
-  onStatusChange?: (ids: string[], status: string) => void
+  onDelete?: (ids: string[]) => void;
+  onExport?: (ids: string[]) => void;
+  onPrint?: (ids: string[]) => void;
+  onStatusChange?: (ids: string[], status: string) => void;
 }): BulkAction[] => {
-  const actions: BulkAction[] = []
+  const actions: BulkAction[] = [];
 
   if (handlers.onStatusChange) {
     actions.push({
       id: 'approve',
       label: 'อนุมัติ',
-      icon: <CheckCircle className="w-4 h-4" />,
+      icon: <CheckCircle className="h-4 w-4" />,
       onClick: (ids) => handlers.onStatusChange?.(ids, 'approved'),
-    })
+    });
     actions.push({
       id: 'reject',
       label: 'ไม่อนุมัติ',
-      icon: <XCircle className="w-4 h-4" />,
+      icon: <XCircle className="h-4 w-4" />,
       onClick: (ids) => handlers.onStatusChange?.(ids, 'rejected'),
-    })
+    });
   }
 
   if (handlers.onExport) {
     actions.push({
       id: 'export',
       label: 'ส่งออก Excel',
-      icon: <FileOutput className="w-4 h-4" />,
+      icon: <FileOutput className="h-4 w-4" />,
       onClick: handlers.onExport,
-    })
+    });
   }
 
   if (handlers.onPrint) {
     actions.push({
       id: 'print',
       label: 'พิมพ์',
-      icon: <Printer className="w-4 h-4" />,
+      icon: <Printer className="h-4 w-4" />,
       onClick: handlers.onPrint,
-    })
+    });
   }
 
   if (handlers.onDelete) {
     actions.push({
       id: 'delete',
       label: 'ลบ',
-      icon: <Trash2 className="w-4 h-4" />,
+      icon: <Trash2 className="h-4 w-4" />,
       variant: 'destructive',
       onClick: handlers.onDelete,
       requiresConfirmation: true,
       confirmationTitle: 'ยืนยันการลบ',
       confirmationMessage: `คุณแน่ใจหรือไม่ที่จะลบรายการที่เลือก? การดำเนินการนี้ไม่สามารถย้อนกลับได้`,
-    })
+    });
   }
 
-  return actions
-}
+  return actions;
+};
 
 // Hook for managing bulk selection
 export function useBulkSelection<T extends { id: string }>(items: T[]) {
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const toggleSelection = (id: string) => {
-    setSelectedIds(prev =>
-      prev.includes(id)
-        ? prev.filter(sid => sid !== id)
-        : [...prev, id]
-    )
-  }
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
+    );
+  };
 
   const selectAll = () => {
-    setSelectedIds(items.map(item => item.id))
-  }
+    setSelectedIds(items.map((item) => item.id));
+  };
 
   const clearSelection = () => {
-    setSelectedIds([])
-  }
+    setSelectedIds([]);
+  };
 
-  const isSelected = (id: string) => selectedIds.includes(id)
-  const allSelected = items.length > 0 && selectedIds.length === items.length
-  const someSelected = selectedIds.length > 0 && !allSelected
+  const isSelected = (id: string) => selectedIds.includes(id);
+  const allSelected = items.length > 0 && selectedIds.length === items.length;
+  const someSelected = selectedIds.length > 0 && !allSelected;
 
   return {
     selectedIds,
-    selectedItems: items.filter(item => selectedIds.includes(item.id)),
+    selectedItems: items.filter((item) => selectedIds.includes(item.id)),
     selectedCount: selectedIds.length,
     toggleSelection,
     selectAll,
@@ -277,5 +263,5 @@ export function useBulkSelection<T extends { id: string }>(items: T[]) {
     allSelected,
     someSelected,
     setSelectedIds,
-  }
+  };
 }

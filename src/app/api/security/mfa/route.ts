@@ -6,33 +6,27 @@
  * GET /api/security/mfa/status - Check MFA status
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/api-utils'
-import { generateMFASetup, verifyAndEnableMFA, disableMFA, isMFAEnabled } from '@/lib/mfa'
-import { logSecurityEvent } from '@/lib/audit-service'
-import { getClientIp } from '@/lib/api-utils'
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api-utils';
+import { generateMFASetup, verifyAndEnableMFA, disableMFA, isMFAEnabled } from '@/lib/mfa';
+import { logSecurityEvent } from '@/lib/audit-service';
+import { getClientIp } from '@/lib/api-utils';
 
 // POST - Setup MFA (generate secret and QR code)
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth()
-    const ipAddress = getClientIp(request.headers)
-    const userAgent = request.headers.get('user-agent') || 'unknown'
-    
-    const body = await request.json()
-    const { action, token } = body
+    const user = await requireAuth();
+    const ipAddress = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+
+    const body = await request.json();
+    const { action, token } = body;
 
     if (action === 'setup') {
       // Generate MFA setup
-      const result = await generateMFASetup(user.id, user.email)
-      
-      await logSecurityEvent(
-        user.id,
-        'MFA_SETUP',
-        { action: 'initiated' },
-        ipAddress,
-        userAgent
-      )
+      const result = await generateMFASetup(user.id, user.email);
+
+      await logSecurityEvent(user.id, 'MFA_SETUP', { action: 'initiated' }, ipAddress, userAgent);
 
       return NextResponse.json({
         success: true,
@@ -40,8 +34,8 @@ export async function POST(request: NextRequest) {
           secret: result.secret,
           qrCodeUrl: result.qrCodeUrl,
           otpauthUrl: result.otpauthUrl,
-        }
-      })
+        },
+      });
     }
 
     if (action === 'verify') {
@@ -50,11 +44,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { success: false, error: 'Verification token required' },
           { status: 400 }
-        )
+        );
       }
 
-      const verified = await verifyAndEnableMFA(user.id, token)
-      
+      const verified = await verifyAndEnableMFA(user.id, token);
+
       if (verified) {
         await logSecurityEvent(
           user.id,
@@ -62,17 +56,17 @@ export async function POST(request: NextRequest) {
           { action: 'enabled', success: true },
           ipAddress,
           userAgent
-        )
+        );
 
         return NextResponse.json({
           success: true,
-          message: 'MFA enabled successfully'
-        })
+          message: 'MFA enabled successfully',
+        });
       } else {
         return NextResponse.json(
           { success: false, error: 'Invalid verification code' },
           { status: 400 }
-        )
+        );
       }
     }
 
@@ -82,64 +76,55 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { success: false, error: 'Verification token required' },
           { status: 400 }
-        )
+        );
       }
 
-      const disabled = await disableMFA(user.id, token)
-      
+      const disabled = await disableMFA(user.id, token);
+
       if (disabled) {
-        await logSecurityEvent(
-          user.id,
-          'MFA_DISABLE',
-          { success: true },
-          ipAddress,
-          userAgent
-        )
+        await logSecurityEvent(user.id, 'MFA_DISABLE', { success: true }, ipAddress, userAgent);
 
         return NextResponse.json({
           success: true,
-          message: 'MFA disabled successfully'
-        })
+          message: 'MFA disabled successfully',
+        });
       } else {
         return NextResponse.json(
           { success: false, error: 'Invalid verification code' },
           { status: 400 }
-        )
+        );
       }
     }
 
-    return NextResponse.json(
-      { success: false, error: 'Invalid action' },
-      { status: 400 }
-    )
+    return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
   } catch (error: any) {
-    console.error('MFA API error:', error)
+    console.error('MFA API error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }
 
 // GET - Check MFA status
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth()
-    
-    const enabled = await isMFAEnabled(user.id)
-    
+    const user = await requireAuth();
+
+    const enabled = await isMFAEnabled(user.id);
+
     return NextResponse.json({
       success: true,
       data: {
         enabled,
         email: user.email,
-      }
-    })
+      },
+    });
   } catch (error: any) {
-    console.error('MFA status error:', error)
+    console.error('MFA status error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }

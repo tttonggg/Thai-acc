@@ -25,9 +25,7 @@ export const CSRF_EXEMPT_PATHS = [
  * Check if a request path is CSRF exempt
  */
 export function isCsrfExemptPath(path: string): boolean {
-  return CSRF_EXEMPT_PATHS.some(exemptPath =>
-    path.startsWith(exemptPath) || path === exemptPath
-  );
+  return CSRF_EXEMPT_PATHS.some((exemptPath) => path.startsWith(exemptPath) || path === exemptPath);
 }
 
 /**

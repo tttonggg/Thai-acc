@@ -3,7 +3,7 @@
  * Tests for Excel export functionality
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vitest';
 import {
   generateTrialBalanceExcel,
   generateIncomeStatementExcel,
@@ -12,7 +12,7 @@ import {
   generateAPAgingExcel,
   generateVATReportExcel,
   generateWHTReportExcel,
-} from '../excel-export'
+} from '../excel-export';
 
 describe('Excel Export Service', () => {
   describe('Trial Balance Export', () => {
@@ -44,17 +44,17 @@ describe('Excel Export Service', () => {
           isBalanced: false,
         },
         asOfDate: new Date().toISOString(),
-      }
+      };
 
-      const buffer = await generateTrialBalanceExcel(mockData)
+      const buffer = await generateTrialBalanceExcel(mockData);
 
-      expect(buffer).toBeInstanceOf(Buffer)
-      expect(buffer.length).toBeGreaterThan(0)
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(0);
       // Excel files should start with ZIP signature (PK)
-      expect(buffer[0]).toBe(0x50) // P
-      expect(buffer[1]).toBe(0x4b) // K
-    })
-  })
+      expect(buffer[0]).toBe(0x50); // P
+      expect(buffer[1]).toBe(0x4b); // K
+    });
+  });
 
   describe('Income Statement Export', () => {
     it('should generate Excel buffer for income statement', async () => {
@@ -76,16 +76,16 @@ describe('Excel Export Service', () => {
         totalRevenue: 100000,
         totalExpenses: 30000,
         netIncome: 70000,
-      }
+      };
 
-      const buffer = await generateIncomeStatementExcel(mockData)
+      const buffer = await generateIncomeStatementExcel(mockData);
 
-      expect(buffer).toBeInstanceOf(Buffer)
-      expect(buffer.length).toBeGreaterThan(0)
-      expect(buffer[0]).toBe(0x50) // P
-      expect(buffer[1]).toBe(0x4b) // K
-    })
-  })
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer[0]).toBe(0x50); // P
+      expect(buffer[1]).toBe(0x4b); // K
+    });
+  });
 
   describe('Balance Sheet Export', () => {
     it('should generate Excel buffer for balance sheet', async () => {
@@ -115,16 +115,16 @@ describe('Excel Export Service', () => {
         totalLiabilities: 30000,
         totalEquity: 20000,
         isBalanced: true,
-      }
+      };
 
-      const buffer = await generateBalanceSheetExcel(mockData)
+      const buffer = await generateBalanceSheetExcel(mockData);
 
-      expect(buffer).toBeInstanceOf(Buffer)
-      expect(buffer.length).toBeGreaterThan(0)
-      expect(buffer[0]).toBe(0x50) // P
-      expect(buffer[1]).toBe(0x4b) // K
-    })
-  })
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer[0]).toBe(0x50); // P
+      expect(buffer[1]).toBe(0x4b); // K
+    });
+  });
 
   describe('AR Aging Export', () => {
     it('should generate Excel buffer for AR aging', async () => {
@@ -151,16 +151,16 @@ describe('Excel Export Service', () => {
           total: 18500,
         },
         asOfDate: new Date().toISOString(),
-      }
+      };
 
-      const buffer = await generateARAgingExcel(mockData)
+      const buffer = await generateARAgingExcel(mockData);
 
-      expect(buffer).toBeInstanceOf(Buffer)
-      expect(buffer.length).toBeGreaterThan(0)
-      expect(buffer[0]).toBe(0x50) // P
-      expect(buffer[1]).toBe(0x4b) // K
-    })
-  })
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer[0]).toBe(0x50); // P
+      expect(buffer[1]).toBe(0x4b); // K
+    });
+  });
 
   describe('AP Aging Export', () => {
     it('should generate Excel buffer for AP aging', async () => {
@@ -187,16 +187,16 @@ describe('Excel Export Service', () => {
           total: 14700,
         },
         asOfDate: new Date().toISOString(),
-      }
+      };
 
-      const buffer = await generateAPAgingExcel(mockData)
+      const buffer = await generateAPAgingExcel(mockData);
 
-      expect(buffer).toBeInstanceOf(Buffer)
-      expect(buffer.length).toBeGreaterThan(0)
-      expect(buffer[0]).toBe(0x50) // P
-      expect(buffer[1]).toBe(0x4b) // K
-    })
-  })
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer[0]).toBe(0x50); // P
+      expect(buffer[1]).toBe(0x4b); // K
+    });
+  });
 
   describe('VAT Report Export', () => {
     it('should generate Excel buffer for VAT report', async () => {
@@ -223,16 +223,16 @@ describe('Excel Export Service', () => {
           payableVat: 8500,
         },
         year: 2025,
-      }
+      };
 
-      const buffer = await generateVATReportExcel(mockData)
+      const buffer = await generateVATReportExcel(mockData);
 
-      expect(buffer).toBeInstanceOf(Buffer)
-      expect(buffer.length).toBeGreaterThan(0)
-      expect(buffer[0]).toBe(0x50) // P
-      expect(buffer[1]).toBe(0x4b) // K
-    })
-  })
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer[0]).toBe(0x50); // P
+      expect(buffer[1]).toBe(0x4b); // K
+    });
+  });
 
   describe('WHT Report Export', () => {
     it('should generate Excel buffer for WHT report (PND3)', async () => {
@@ -256,15 +256,15 @@ describe('Excel Export Service', () => {
           withholdingTax: 2500,
           netPayment: 47500,
         },
-      }
+      };
 
-      const buffer = await generateWHTReportExcel(mockData)
+      const buffer = await generateWHTReportExcel(mockData);
 
-      expect(buffer).toBeInstanceOf(Buffer)
-      expect(buffer.length).toBeGreaterThan(0)
-      expect(buffer[0]).toBe(0x50) // P
-      expect(buffer[1]).toBe(0x4b) // K
-    })
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer[0]).toBe(0x50); // P
+      expect(buffer[1]).toBe(0x4b); // K
+    });
 
     it('should generate Excel buffer for WHT report (PND53)', async () => {
       const mockData = {
@@ -287,14 +287,14 @@ describe('Excel Export Service', () => {
           withholdingTax: 3000,
           netPayment: 97000,
         },
-      }
+      };
 
-      const buffer = await generateWHTReportExcel(mockData)
+      const buffer = await generateWHTReportExcel(mockData);
 
-      expect(buffer).toBeInstanceOf(Buffer)
-      expect(buffer.length).toBeGreaterThan(0)
-      expect(buffer[0]).toBe(0x50) // P
-      expect(buffer[1]).toBe(0x4b) // K
-    })
-  })
-})
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(0);
+      expect(buffer[0]).toBe(0x50); // P
+      expect(buffer[1]).toBe(0x4b); // K
+    });
+  });
+});

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { requireAuth } from '@/lib/api-utils'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { requireAuth } from '@/lib/api-utils';
+import { z } from 'zod';
 
 // Validation schema for template
 const templateSchema = z.object({
@@ -29,7 +29,7 @@ const templateSchema = z.object({
     outputFormat: z.string().optional(),
     notes: z.string().optional(),
   }),
-})
+});
 
 /**
  * POST /api/reports/templates
@@ -38,11 +38,11 @@ const templateSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Require authentication
-    const session = await requireAuth()
+    const session = await requireAuth();
 
     // Parse and validate request body
-    const body = await request.json()
-    const { name, config } = templateSchema.parse(body)
+    const body = await request.json();
+    const { name, config } = templateSchema.parse(body);
 
     // Create template using ScheduledReport model
     const template = await prisma.scheduledReport.create({
@@ -57,12 +57,12 @@ export async function POST(request: NextRequest) {
         createdBy: session.user?.id || 'system',
         time: '00:00',
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
       data: template,
-    })
+    });
   } catch (error: any) {
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
           error: 'ข้อมูลไม่ถูกต้อง: ' + error.issues.map((e) => e.message).join(', '),
         },
         { status: 400 }
-      )
+      );
     }
 
     // Handle auth errors
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: error.message || 'กรุณาเข้าสู่ระบบ' },
         { status: error.statusCode || 401 }
-      )
+      );
     }
 
     // Handle other errors
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         error: error.message || 'เกิดข้อผิดพลาดในการบันทึกเทมเพลต',
       },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Require authentication
-    await requireAuth()
+    await requireAuth();
 
     // Fetch all manual templates (schedule = 'manual')
     const templates = await prisma.scheduledReport.findMany({
@@ -111,19 +111,19 @@ export async function GET(request: NextRequest) {
       orderBy: {
         createdAt: 'desc',
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
       data: templates,
-    })
+    });
   } catch (error: any) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(
         { success: false, error: error.message || 'กรุณาเข้าสู่ระบบ' },
         { status: error.statusCode || 401 }
-      )
+      );
     }
 
     // Handle other errors
@@ -133,6 +133,6 @@ export async function GET(request: NextRequest) {
         error: error.message || 'เกิดข้อผิดพลาดในการดึงข้อมูลเทมเพลต',
       },
       { status: 500 }
-    )
+    );
   }
 }

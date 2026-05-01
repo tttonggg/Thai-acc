@@ -1,17 +1,12 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { 
-  FileText, 
-  Download, 
-  Printer,
-  Calculator
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useState, useEffect } from 'react';
+import { FileText, Download, Printer, Calculator } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
@@ -19,80 +14,83 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 
 interface WhtRecord {
-  id: string
-  date: string
-  docNo: string
-  name: string
-  income: number
-  rate: number
-  tax: number
-  incomeType?: string
+  id: string;
+  date: string;
+  docNo: string;
+  name: string;
+  income: number;
+  rate: number;
+  tax: number;
+  incomeType?: string;
 }
 
 interface WhtReport {
-  pnd3Records: WhtRecord[]
-  pnd53Records: WhtRecord[]
+  pnd3Records: WhtRecord[];
+  pnd53Records: WhtRecord[];
 }
 
 export function WhtReport() {
-  const [selectedMonth, setSelectedMonth] = useState('6')
-  const [selectedYear, setSelectedYear] = useState('2567')
-  const [selectedType, setSelectedType] = useState('pnd53')
-  const [data, setData] = useState<WhtReport | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const { toast } = useToast()
+  const [selectedMonth, setSelectedMonth] = useState('6');
+  const [selectedYear, setSelectedYear] = useState('2567');
+  const [selectedType, setSelectedType] = useState('pnd53');
+  const [data, setData] = useState<WhtReport | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchWhtReport = async () => {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
       try {
-        const month = parseInt(selectedMonth)
-        const year = parseInt(selectedYear)
-        const gregorianYear = year - 543
-        const startDate = new Date(gregorianYear, month - 1, 1)
-        const endDate = new Date(gregorianYear, month, 0)
-        const startDateStr = startDate.toISOString().split('T')[0]
-        const endDateStr = endDate.toISOString().split('T')[0]
-        
-        const res = await fetch(`/api/reports/wht?type=${selectedType.toUpperCase()}&startDate=${startDateStr}&endDate=${endDateStr}`, { credentials: 'include' })
-        if (!res.ok) throw new Error('Fetch failed')
-        const json = await res.json()
-        setData(json)
+        const month = parseInt(selectedMonth);
+        const year = parseInt(selectedYear);
+        const gregorianYear = year - 543;
+        const startDate = new Date(gregorianYear, month - 1, 1);
+        const endDate = new Date(gregorianYear, month, 0);
+        const startDateStr = startDate.toISOString().split('T')[0];
+        const endDateStr = endDate.toISOString().split('T')[0];
+
+        const res = await fetch(
+          `/api/reports/wht?type=${selectedType.toUpperCase()}&startDate=${startDateStr}&endDate=${endDateStr}`,
+          { credentials: 'include' }
+        );
+        if (!res.ok) throw new Error('Fetch failed');
+        const json = await res.json();
+        setData(json);
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล'
-        setError(message)
+        const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล';
+        setError(message);
         toast({
           title: 'ข้อผิดพลาด',
           description: 'โหลดข้อมูลไม่สำเร็จ',
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchWhtReport()
-  }, [selectedMonth, selectedYear, selectedType, toast])
+    };
+    fetchWhtReport();
+  }, [selectedMonth, selectedYear, selectedType, toast]);
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Skeleton className="h-8 w-80 mb-2" />
+            <Skeleton className="mb-2 h-8 w-80" />
             <Skeleton className="h-5 w-96" />
           </div>
           <div className="flex gap-2">
@@ -102,7 +100,7 @@ export function WhtReport() {
             <Skeleton className="h-10 w-24" />
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardContent className="p-6">
@@ -117,7 +115,7 @@ export function WhtReport() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -125,7 +123,7 @@ export function WhtReport() {
       <Alert variant="destructive">
         <AlertDescription>{error}</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   if (!data) {
@@ -133,25 +131,26 @@ export function WhtReport() {
       <Alert>
         <AlertDescription>ไม่พบข้อมูล</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   // Safely handle undefined/null arrays from API response
-  const pnd3Records = data.pnd3Records || []
-  const pnd53Records = data.pnd53Records || []
+  const pnd3Records = data.pnd3Records || [];
+  const pnd53Records = data.pnd53Records || [];
 
-  const totalPnd3 = pnd3Records.reduce((sum, r) => sum + (r.tax || 0), 0)
-  const totalPnd53 = pnd53Records.reduce((sum, r) => sum + (r.tax || 0), 0)
+  const totalPnd3 = pnd3Records.reduce((sum, r) => sum + (r.tax || 0), 0);
+  const totalPnd53 = pnd53Records.reduce((sum, r) => sum + (r.tax || 0), 0);
 
   // Convert Satang to Baht for display
-  const formatBaht = (satang: number) => (satang / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const formatBaht = (satang: number) =>
+    (satang / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank')
-    if (!printWindow) return
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
-    const monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน']
-    const monthName = monthNames[parseInt(selectedMonth) - 1] || selectedMonth
+    const monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน'];
+    const monthName = monthNames[parseInt(selectedMonth) - 1] || selectedMonth;
 
     const html = `
       <!DOCTYPE html>
@@ -197,7 +196,9 @@ export function WhtReport() {
               </tr>
             </thead>
             <tbody>
-              ${pnd3Records.map(r => `
+              ${pnd3Records
+                .map(
+                  (r) => `
                 <tr>
                   <td>${new Date(r.date).toLocaleDateString('th-TH')}</td>
                   <td>${r.docNo}</td>
@@ -206,7 +207,9 @@ export function WhtReport() {
                   <td class="text-right">${r.rate}%</td>
                   <td class="text-right">${formatBaht(r.tax || 0)}</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join('')}
             </tbody>
           </table>
         </div>
@@ -225,7 +228,9 @@ export function WhtReport() {
               </tr>
             </thead>
             <tbody>
-              ${pnd53Records.map(r => `
+              ${pnd53Records
+                .map(
+                  (r) => `
                 <tr>
                   <td>${new Date(r.date).toLocaleDateString('th-TH')}</td>
                   <td>${r.docNo}</td>
@@ -234,7 +239,9 @@ export function WhtReport() {
                   <td class="text-right">${r.rate}%</td>
                   <td class="text-right">${formatBaht(r.tax || 0)}</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join('')}
             </tbody>
           </table>
         </div>
@@ -242,17 +249,17 @@ export function WhtReport() {
         <script>window.onload = () => { window.print(); }</script>
       </body>
       </html>
-    `
-    printWindow.document.write(html)
-    printWindow.document.close()
-  }
+    `;
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">ภาษีหัก ณ ที่จ่าย</h1>
-          <p className="text-gray-500 mt-1">รายงานภาษีเงินได้หัก ณ ที่จ่าย (ภงด.3, ภงด.53)</p>
+          <p className="mt-1 text-gray-500">รายงานภาษีเงินได้หัก ณ ที่จ่าย (ภงด.3, ภงด.53)</p>
         </div>
         <div className="flex items-center gap-2">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
@@ -279,17 +286,17 @@ export function WhtReport() {
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={handlePrint}>
-            <Printer className="h-4 w-4 mr-2" />
+            <Printer className="mr-2 h-4 w-4" />
             พิมพ์
           </Button>
           <Button className="bg-blue-600 hover:bg-blue-700">
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             ส่งออก
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card className="border-l-4 border-l-purple-500">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -319,8 +326,12 @@ export function WhtReport() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">รวมภาษีที่ต้องยื่น</p>
-                <p className="text-2xl font-bold text-red-600">฿{formatBaht(totalPnd3 + totalPnd53)}</p>
-                <p className="text-xs text-gray-400">{pnd3Records.length + pnd53Records.length} รายการ</p>
+                <p className="text-2xl font-bold text-red-600">
+                  ฿{formatBaht(totalPnd3 + totalPnd53)}
+                </p>
+                <p className="text-xs text-gray-400">
+                  {pnd3Records.length + pnd53Records.length} รายการ
+                </p>
               </div>
               <Calculator className="h-10 w-10 text-red-200" />
             </div>
@@ -333,7 +344,7 @@ export function WhtReport() {
           <TabsTrigger value="pnd53">ภงด.53 - ค่าบริการ/ค่าเช่า</TabsTrigger>
           <TabsTrigger value="pnd3">ภงด.3 - เงินเดือน/ค่าจ้าง</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="pnd53">
           <Card>
             <CardHeader>
@@ -361,23 +372,33 @@ export function WhtReport() {
                       <TableCell>
                         <Badge variant="outline">{record.incomeType}</Badge>
                       </TableCell>
-                      <TableCell className="text-right">฿{formatBaht(record.income || 0)}</TableCell>
+                      <TableCell className="text-right">
+                        ฿{formatBaht(record.income || 0)}
+                      </TableCell>
                       <TableCell className="text-center">{record.rate}%</TableCell>
-                      <TableCell className="text-right text-teal-600 font-semibold">฿{formatBaht(record.tax || 0)}</TableCell>
+                      <TableCell className="text-right font-semibold text-teal-600">
+                        ฿{formatBaht(record.tax || 0)}
+                      </TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="bg-teal-50">
-                    <TableCell colSpan={4} className="font-semibold">รวม</TableCell>
-                    <TableCell className="text-right font-semibold">฿{formatBaht(pnd53Records.reduce((s, r) => s + (r.income || 0), 0))}</TableCell>
+                    <TableCell colSpan={4} className="font-semibold">
+                      รวม
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                      ฿{formatBaht(pnd53Records.reduce((s, r) => s + (r.income || 0), 0))}
+                    </TableCell>
                     <TableCell></TableCell>
-                    <TableCell className="text-right font-semibold text-teal-600">฿{formatBaht(totalPnd53)}</TableCell>
+                    <TableCell className="text-right font-semibold text-teal-600">
+                      ฿{formatBaht(totalPnd53)}
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="pnd3">
           <Card>
             <CardHeader>
@@ -401,16 +422,26 @@ export function WhtReport() {
                       <TableCell>{record.date}</TableCell>
                       <TableCell className="font-mono">{record.docNo}</TableCell>
                       <TableCell>{record.name}</TableCell>
-                      <TableCell className="text-right">฿{formatBaht(record.income || 0)}</TableCell>
+                      <TableCell className="text-right">
+                        ฿{formatBaht(record.income || 0)}
+                      </TableCell>
                       <TableCell className="text-center">{record.rate}%</TableCell>
-                      <TableCell className="text-right text-purple-600 font-semibold">฿{formatBaht(record.tax || 0)}</TableCell>
+                      <TableCell className="text-right font-semibold text-purple-600">
+                        ฿{formatBaht(record.tax || 0)}
+                      </TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="bg-purple-50">
-                    <TableCell colSpan={3} className="font-semibold">รวม</TableCell>
-                    <TableCell className="text-right font-semibold">฿{formatBaht(pnd3Records.reduce((s, r) => s + (r.income || 0), 0))}</TableCell>
+                    <TableCell colSpan={3} className="font-semibold">
+                      รวม
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                      ฿{formatBaht(pnd3Records.reduce((s, r) => s + (r.income || 0), 0))}
+                    </TableCell>
                     <TableCell></TableCell>
-                    <TableCell className="text-right font-semibold text-purple-600">฿{formatBaht(totalPnd3)}</TableCell>
+                    <TableCell className="text-right font-semibold text-purple-600">
+                      ฿{formatBaht(totalPnd3)}
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -419,5 +450,5 @@ export function WhtReport() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

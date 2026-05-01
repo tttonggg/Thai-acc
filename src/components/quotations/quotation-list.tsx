@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Plus,
   Search,
@@ -20,14 +20,14 @@ import {
   TrendingUp,
   Clock,
   AlertTriangle,
-  FileCheck
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+  FileCheck,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
@@ -35,62 +35,62 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { useToast } from '@/hooks/use-toast'
-import { getStatusBadgeProps } from '@/lib/status-badge'
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import { getStatusBadgeProps } from '@/lib/status-badge';
 
 interface Quotation {
-  id: string
-  quotationNo: string
-  quotationDate: string
-  validUntil: string
-  reference?: string
-  customerId: string
+  id: string;
+  quotationNo: string;
+  quotationDate: string;
+  validUntil: string;
+  reference?: string;
+  customerId: string;
   customer: {
-    id: string
-    name: string
-    taxId?: string
-  }
-  subtotal: number
-  discountAmount: number
-  vatAmount: number
-  totalAmount: number
-  status: string
-  notes?: string
-  terms?: string
-  invoiceId?: string
+    id: string;
+    name: string;
+    taxId?: string;
+  };
+  subtotal: number;
+  discountAmount: number;
+  vatAmount: number;
+  totalAmount: number;
+  status: string;
+  notes?: string;
+  terms?: string;
+  invoiceId?: string;
   invoice?: {
-    id: string
-    invoiceNo: string
-  }
+    id: string;
+    invoiceNo: string;
+  };
   lines: Array<{
-    id: string
-    lineNo: number
-    description: string
-    quantity: number
-    unit: string
-    unitPrice: number
-    amount: number
-  }>
+    id: string;
+    lineNo: number;
+    description: string;
+    quantity: number;
+    unit: string;
+    unitPrice: number;
+    amount: number;
+  }>;
   _count?: {
-    lines: number
-  }
+    lines: number;
+  };
 }
 
 // Status labels and colors (Thai)
@@ -103,167 +103,168 @@ const statusLabels: Record<string, string> = {
   EXPIRED: 'หมดอายุ',
   CONVERTED: 'แปลงเป็นใบกำกับภาษี',
   CANCELLED: 'ยกเลิก',
-}
+};
 
 // Helper function to get status badge
 const getStatusBadge = (status: string) => {
-  const config = getStatusBadgeProps(status)
-  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>
-}
+  const config = getStatusBadgeProps(status);
+  return <Badge variant={config.variant}>{statusLabels[status] || config.label}</Badge>;
+};
 
 export function QuotationList() {
-  const [quotations, setQuotations] = useState<Quotation[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
-  const [filterCustomer, setFilterCustomer] = useState('all')
-  const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0 })
-  const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [processingAction, setProcessingAction] = useState<string | null>(null)
-  const [deletingQuotation, setDeletingQuotation] = useState<string | null>(null)
-  const { toast } = useToast()
+  const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterCustomer, setFilterCustomer] = useState('all');
+  const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0 });
+  const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [processingAction, setProcessingAction] = useState<string | null>(null);
+  const [deletingQuotation, setDeletingQuotation] = useState<string | null>(null);
+  const { toast } = useToast();
 
   // Fetch quotations
   useEffect(() => {
-    fetchQuotations()
-  }, [pagination.page, pagination.limit])
+    fetchQuotations();
+  }, [pagination.page, pagination.limit]);
 
   const fetchQuotations = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
-      })
+      });
 
-      if (filterStatus !== 'all') params.append('status', filterStatus)
-      if (filterCustomer !== 'all') params.append('customerId', filterCustomer)
-      if (searchTerm) params.append('search', searchTerm)
+      if (filterStatus !== 'all') params.append('status', filterStatus);
+      if (filterCustomer !== 'all') params.append('customerId', filterCustomer);
+      if (searchTerm) params.append('search', searchTerm);
 
-      const res = await fetch(`/api/quotations?${params}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Fetch failed')
+      const res = await fetch(`/api/quotations?${params}`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Fetch failed');
 
-      const result = await res.json()
-      const quotationsData = result.data || []
+      const result = await res.json();
+      const quotationsData = result.data || [];
 
       if (!Array.isArray(quotationsData)) {
-        throw new Error('Invalid data format')
+        throw new Error('Invalid data format');
       }
 
-      setQuotations(quotationsData)
-      setPagination(prev => ({
+      setQuotations(quotationsData);
+      setPagination((prev) => ({
         ...prev,
         total: result.pagination?.total || 0,
-      }))
+      }));
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล'
-      setError(message)
+      const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล';
+      setError(message);
       toast({
         title: 'ข้อผิดพลาด',
         description: 'โหลดข้อมูลไม่สำเร็จ',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Filter quotations
-  const filteredQuotations = (quotations || []).filter(quotation => {
+  const filteredQuotations = (quotations || []).filter((quotation) => {
     const matchesSearch =
       !searchTerm ||
       quotation.quotationNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       quotation.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quotation.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      quotation.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = filterStatus === 'all' || quotation.status === filterStatus
-    const matchesCustomer =
-      filterCustomer === 'all' || quotation.customer?.id === filterCustomer
+    const matchesStatus = filterStatus === 'all' || quotation.status === filterStatus;
+    const matchesCustomer = filterCustomer === 'all' || quotation.customer?.id === filterCustomer;
 
-    return matchesSearch && matchesStatus && matchesCustomer
-  })
+    return matchesSearch && matchesStatus && matchesCustomer;
+  });
 
   // Check if quotation is expiring soon (within 7 days)
   const isExpiringSoon = (validUntil: string) => {
-    const today = new Date()
-    const expiryDate = new Date(validUntil)
-    const diffTime = expiryDate.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays > 0 && diffDays <= 7
-  }
+    const today = new Date();
+    const expiryDate = new Date(validUntil);
+    const diffTime = expiryDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 && diffDays <= 7;
+  };
 
   // Check if quotation is expired
   const isExpired = (validUntil: string) => {
-    const today = new Date()
-    const expiryDate = new Date(validUntil)
-    return expiryDate < today
-  }
+    const today = new Date();
+    const expiryDate = new Date(validUntil);
+    return expiryDate < today;
+  };
 
   // Action handlers
   const handleView = (quotation: Quotation) => {
-    setSelectedQuotation(quotation)
-    setIsViewDialogOpen(true)
-  }
+    setSelectedQuotation(quotation);
+    setIsViewDialogOpen(true);
+  };
 
   const handleEdit = (quotationId: string) => {
     // TODO: Open edit dialog
     toast({
       title: 'แก้ไขใบเสนอราคา',
       description: 'ฟีเจอร์นี้จะเปิดใช้งานเร็วๆ นี้',
-    })
-  }
+    });
+  };
 
   const handleDelete = async (quotationId: string) => {
     if (!confirm('คุณต้องการลบใบเสนอราคานี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
-    setDeletingQuotation(quotationId)
+    setDeletingQuotation(quotationId);
     try {
-      const res = await fetch(`/api/quotations/${quotationId}`, { credentials: 'include', 
+      const res = await fetch(`/api/quotations/${quotationId}`, {
+        credentials: 'include',
         method: 'DELETE',
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'ลบไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'ลบไม่สำเร็จ');
       }
 
       toast({
         title: 'ลบสำเร็จ',
         description: 'ลบใบเสนอราคาเรียบร้อยแล้ว',
-      })
+      });
 
-      fetchQuotations()
+      fetchQuotations();
     } catch (err) {
       toast({
         title: 'ลบไม่สำเร็จ',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setDeletingQuotation(null)
+      setDeletingQuotation(null);
     }
-  }
+  };
 
   const handleAction = async (
     quotationId: string,
     action: 'send' | 'approve' | 'reject' | 'revise'
   ) => {
-    setProcessingAction(`${quotationId}-${action}`)
+    setProcessingAction(`${quotationId}-${action}`);
     try {
-      const res = await fetch(`/api/quotations/${quotationId}`, { credentials: 'include', 
+      const res = await fetch(`/api/quotations/${quotationId}`, {
+        credentials: 'include',
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'ดำเนินการไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'ดำเนินการไม่สำเร็จ');
       }
 
       const actionLabels = {
@@ -271,55 +272,56 @@ export function QuotationList() {
         approve: 'อนุมัติ',
         reject: 'ปฏิเสธ',
         revise: 'แก้ไข',
-      }
+      };
 
       toast({
         title: 'สำเร็จ',
         description: `${actionLabels[action]}เรียบร้อยแล้ว`,
-      })
+      });
 
-      fetchQuotations()
-      setIsViewDialogOpen(false)
+      fetchQuotations();
+      setIsViewDialogOpen(false);
     } catch (err) {
       toast({
         title: 'ดำเนินการไม่สำเร็จ',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setProcessingAction(null)
+      setProcessingAction(null);
     }
-  }
+  };
 
   const handleConvertToInvoice = async (quotationId: string) => {
-    setProcessingAction(`${quotationId}-convert`)
+    setProcessingAction(`${quotationId}-convert`);
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/convert-to-invoice`, { credentials: 'include', 
+      const res = await fetch(`/api/quotations/${quotationId}/convert-to-invoice`, {
+        credentials: 'include',
         method: 'POST',
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'แปลงเป็นใบกำกับภาษีไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'แปลงเป็นใบกำกับภาษีไม่สำเร็จ');
       }
 
       toast({
         title: 'สำเร็จ',
         description: 'แปลงเป็นใบกำกับภาษีเรียบร้อยแล้ว',
-      })
+      });
 
-      fetchQuotations()
-      setIsViewDialogOpen(false)
+      fetchQuotations();
+      setIsViewDialogOpen(false);
     } catch (err) {
       toast({
         title: 'แปลงเป็นใบกำกับภาษีไม่สำเร็จ',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setProcessingAction(null)
+      setProcessingAction(null);
     }
-  }
+  };
 
   // Loading UI
   if (loading) {
@@ -327,12 +329,12 @@ export function QuotationList() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="mb-2 h-8 w-64" />
             <Skeleton className="h-5 w-80" />
           </div>
           <Skeleton className="h-10 w-40" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i}>
               <CardContent className="p-4">
@@ -343,12 +345,12 @@ export function QuotationList() {
         </div>
         <Card>
           <CardContent className="p-4">
-            <Skeleton className="h-12 w-full mb-4" />
+            <Skeleton className="mb-4 h-12 w-full" />
             <Skeleton className="h-64 w-full" />
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Error UI
@@ -358,17 +360,17 @@ export function QuotationList() {
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>{error}</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   // Calculate stats
   const stats = {
-    draft: quotations.filter(q => q.status === 'DRAFT').length,
-    sent: quotations.filter(q => q.status === 'SENT').length,
-    approved: quotations.filter(q => q.status === 'APPROVED').length,
-    expiring: quotations.filter(q => isExpiringSoon(q.validUntil)).length,
+    draft: quotations.filter((q) => q.status === 'DRAFT').length,
+    sent: quotations.filter((q) => q.status === 'SENT').length,
+    approved: quotations.filter((q) => q.status === 'APPROVED').length,
+    expiring: quotations.filter((q) => isExpiringSoon(q.validUntil)).length,
     totalAmount: quotations.reduce((sum, q) => sum + (q.totalAmount || 0), 0),
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -376,16 +378,16 @@ export function QuotationList() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">ใบเสนอราคา (Quotations)</h1>
-          <p className="text-gray-500 mt-1">จัดการใบเสนอราคาและการอนุมัติ</p>
+          <p className="mt-1 text-gray-500">จัดการใบเสนอราคาและการอนุมัติ</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           สร้างใบเสนอราคา
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -448,9 +450,9 @@ export function QuotationList() {
       {/* Search & Filter */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="ค้นหาตามเลขที่ เลขที่อ้างอิง หรือชื่อลูกค้า..."
                 className="pl-10"
@@ -497,23 +499,18 @@ export function QuotationList() {
               <TableBody>
                 {filteredQuotations.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                      <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <TableCell colSpan={8} className="py-8 text-center text-gray-500">
+                      <FileText className="mx-auto mb-4 h-12 w-12 text-gray-300" />
                       <p>ไม่พบใบเสนอราคา</p>
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredQuotations.map((quotation) => (
-                    <TableRow
-                      key={quotation.id}
-                      className="cursor-pointer hover:bg-gray-50"
-                    >
+                    <TableRow key={quotation.id} className="cursor-pointer hover:bg-gray-50">
                       <TableCell className="font-mono font-medium">
                         {quotation.quotationNo}
                         {quotation.reference && (
-                          <div className="text-xs text-gray-500">
-                            Ref: {quotation.reference}
-                          </div>
+                          <div className="text-xs text-gray-500">Ref: {quotation.reference}</div>
                         )}
                       </TableCell>
                       <TableCell>
@@ -526,7 +523,8 @@ export function QuotationList() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        ฿{(quotation.totalAmount / 100).toLocaleString('th-TH', {
+                        ฿
+                        {(quotation.totalAmount / 100).toLocaleString('th-TH', {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
@@ -539,29 +537,26 @@ export function QuotationList() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Calendar className="h-3 w-3 text-gray-400" />
-                          <span>
-                            {new Date(quotation.validUntil).toLocaleDateString('th-TH')}
-                          </span>
+                          <span>{new Date(quotation.validUntil).toLocaleDateString('th-TH')}</span>
                           {isExpiringSoon(quotation.validUntil) &&
                             quotation.status !== 'EXPIRED' && (
-                              <Badge className="bg-orange-100 text-orange-800 border-orange-300">
-                                <AlertTriangle className="h-3 w-3 mr-1" />
+                              <Badge className="border-orange-300 bg-orange-100 text-orange-800">
+                                <AlertTriangle className="mr-1 h-3 w-3" />
                                 ใกล้หมดอายุ
                               </Badge>
                             )}
-                          {isExpired(quotation.validUntil) &&
-                            quotation.status !== 'EXPIRED' && (
-                              <Badge className="bg-red-100 text-red-800 border-red-300">
-                                หมดอายุ
-                              </Badge>
-                            )}
+                          {isExpired(quotation.validUntil) && quotation.status !== 'EXPIRED' && (
+                            <Badge className="border-red-300 bg-red-100 text-red-800">
+                              หมดอายุ
+                            </Badge>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
                         {getStatusBadge(quotation.status)}
                         {quotation.invoiceId && (
-                          <div className="text-xs text-green-600 mt-1">
-                            <FileCheck className="h-3 w-3 inline mr-1" />
+                          <div className="mt-1 text-xs text-green-600">
+                            <FileCheck className="mr-1 inline h-3 w-3" />
                             {quotation.invoice?.invoiceNo}
                           </div>
                         )}
@@ -602,7 +597,7 @@ export function QuotationList() {
                                   disabled={deletingQuotation === quotation.id}
                                 >
                                   {deletingQuotation === quotation.id ? (
-                                    <Loader2 className="h-4 w-4 text-red-600 animate-spin" />
+                                    <Loader2 className="h-4 w-4 animate-spin text-red-600" />
                                   ) : (
                                     <Trash2 className="h-4 w-4 text-red-600" />
                                   )}
@@ -652,7 +647,7 @@ export function QuotationList() {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
@@ -660,24 +655,22 @@ export function QuotationList() {
             </DialogTitle>
             <DialogDescription>
               {selectedQuotation && (
-                <div className="flex items-center gap-4 mt-2">
+                <div className="mt-2 flex items-center gap-4">
                   {getStatusBadge(selectedQuotation.status)}
                   {isExpiringSoon(selectedQuotation.validUntil) &&
                     selectedQuotation.status !== 'EXPIRED' && (
-                      <Badge className="bg-orange-100 text-orange-800 border-orange-300">
-                        <AlertTriangle className="h-3 w-3 mr-1" />
+                      <Badge className="border-orange-300 bg-orange-100 text-orange-800">
+                        <AlertTriangle className="mr-1 h-3 w-3" />
                         ใกล้หมดอายุ
                       </Badge>
                     )}
                   {isExpired(selectedQuotation.validUntil) &&
                     selectedQuotation.status !== 'EXPIRED' && (
-                      <Badge className="bg-red-100 text-red-800 border-red-300">
-                        หมดอายุแล้ว
-                      </Badge>
+                      <Badge className="border-red-300 bg-red-100 text-red-800">หมดอายุแล้ว</Badge>
                     )}
                   {selectedQuotation.invoiceId && (
-                    <Badge className="bg-teal-100 text-teal-800 border-teal-300">
-                      <FileCheck className="h-3 w-3 mr-1" />
+                    <Badge className="border-teal-300 bg-teal-100 text-teal-800">
+                      <FileCheck className="mr-1 h-3 w-3" />
                       แปลงเป็น {selectedQuotation.invoice?.invoiceNo}
                     </Badge>
                   )}
@@ -722,7 +715,7 @@ export function QuotationList() {
                   <p className="text-sm font-medium">
                     {selectedQuotation.customer?.name}
                     {selectedQuotation.customer?.taxId && (
-                      <span className="text-gray-500 ml-2">
+                      <span className="ml-2 text-gray-500">
                         ({selectedQuotation.customer.taxId})
                       </span>
                     )}
@@ -733,7 +726,7 @@ export function QuotationList() {
               {/* Line Items */}
               <div className="space-y-2">
                 <Label>รายการสินค้า/บริการ ({selectedQuotation.lines?.length || 0} รายการ)</Label>
-                <div className="border rounded-lg overflow-hidden">
+                <div className="overflow-hidden rounded-lg border">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -753,13 +746,15 @@ export function QuotationList() {
                             {line.quantity.toLocaleString('th-TH')} {line.unit}
                           </TableCell>
                           <TableCell className="text-right">
-                            ฿{(line.unitPrice / 100).toLocaleString('th-TH', {
+                            ฿
+                            {(line.unitPrice / 100).toLocaleString('th-TH', {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             })}
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            ฿{(line.amount / 100).toLocaleString('th-TH', {
+                            ฿
+                            {(line.amount / 100).toLocaleString('th-TH', {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             })}
@@ -770,7 +765,7 @@ export function QuotationList() {
                   </Table>
                 </div>
                 <div className="flex justify-end">
-                  <div className="text-right space-y-2">
+                  <div className="space-y-2 text-right">
                     {selectedQuotation.discountAmount > 0 && (
                       <div className="text-sm">
                         <span className="text-gray-600">มูลค่าก่อนส่วนลด:</span>{' '}
@@ -787,10 +782,9 @@ export function QuotationList() {
                         <span>ส่วนลด:</span>{' '}
                         <span className="font-medium">
                           -฿
-                          {(selectedQuotation.discountAmount / 100).toLocaleString(
-                            'th-TH',
-                            { minimumFractionDigits: 2 }
-                          )}
+                          {(selectedQuotation.discountAmount / 100).toLocaleString('th-TH', {
+                            minimumFractionDigits: 2,
+                          })}
                         </span>
                       </div>
                     )}
@@ -805,7 +799,7 @@ export function QuotationList() {
                         </span>
                       </div>
                     )}
-                    <div className="text-lg font-bold text-blue-600 pt-2 border-t">
+                    <div className="border-t pt-2 text-lg font-bold text-blue-600">
                       ยอดรวมสุทธิ:{' '}
                       <span>
                         ฿
@@ -822,7 +816,7 @@ export function QuotationList() {
               {selectedQuotation.terms && (
                 <div className="space-y-2">
                   <Label>เงื่อนไข</Label>
-                  <p className="text-sm bg-gray-50 p-3 rounded whitespace-pre-wrap">
+                  <p className="whitespace-pre-wrap rounded bg-gray-50 p-3 text-sm">
                     {selectedQuotation.terms}
                   </p>
                 </div>
@@ -832,30 +826,28 @@ export function QuotationList() {
               {selectedQuotation.notes && (
                 <div className="space-y-2">
                   <Label>หมายเหตุ</Label>
-                  <p className="text-sm bg-gray-50 p-3 rounded">{selectedQuotation.notes}</p>
+                  <p className="rounded bg-gray-50 p-3 text-sm">{selectedQuotation.notes}</p>
                 </div>
               )}
 
               {/* Invoice Reference */}
               {selectedQuotation.invoiceId && (
-                <div className="bg-teal-50 p-4 rounded-lg">
-                  <Label className="text-teal-900 flex items-center gap-2">
+                <div className="rounded-lg bg-teal-50 p-4">
+                  <Label className="flex items-center gap-2 text-teal-900">
                     <FileCheck className="h-4 w-4" />
                     อ้างอิงใบกำกับภาษี
                   </Label>
                   <div className="mt-2 text-sm">
                     <p>
                       <span className="text-gray-600">เลขที่ใบกำกับภาษี:</span>{' '}
-                      <span className="font-medium">
-                        {selectedQuotation.invoice?.invoiceNo}
-                      </span>
+                      <span className="font-medium">{selectedQuotation.invoice?.invoiceNo}</span>
                     </p>
                   </div>
                 </div>
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2 pt-4 border-t">
+              <div className="flex flex-wrap gap-2 border-t pt-4">
                 {selectedQuotation.status === 'DRAFT' && (
                   <>
                     <Button
@@ -864,17 +856,14 @@ export function QuotationList() {
                       disabled={processingAction === `${selectedQuotation.id}-send`}
                     >
                       {processingAction === `${selectedQuotation.id}-send` ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <Send className="h-4 w-4 mr-2" />
+                        <Send className="mr-2 h-4 w-4" />
                       )}
                       ส่งเสนอราคา
                     </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleEdit(selectedQuotation.id)}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
+                    <Button variant="outline" onClick={() => handleEdit(selectedQuotation.id)}>
+                      <Edit className="mr-2 h-4 w-4" />
                       แก้ไข
                     </Button>
                   </>
@@ -887,9 +876,9 @@ export function QuotationList() {
                       disabled={processingAction === `${selectedQuotation.id}-approve`}
                     >
                       {processingAction === `${selectedQuotation.id}-approve` ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
                       )}
                       อนุมัติ
                     </Button>
@@ -899,9 +888,9 @@ export function QuotationList() {
                       disabled={processingAction === `${selectedQuotation.id}-reject`}
                     >
                       {processingAction === `${selectedQuotation.id}-reject` ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <XCircle className="h-4 w-4 mr-2" />
+                        <XCircle className="mr-2 h-4 w-4" />
                       )}
                       ปฏิเสธ
                     </Button>
@@ -911,9 +900,9 @@ export function QuotationList() {
                       disabled={processingAction === `${selectedQuotation.id}-revise`}
                     >
                       {processingAction === `${selectedQuotation.id}-revise` ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <RefreshCw className="h-4 w-4 mr-2" />
+                        <RefreshCw className="mr-2 h-4 w-4" />
                       )}
                       ขอแก้ไข
                     </Button>
@@ -928,9 +917,9 @@ export function QuotationList() {
                       disabled={processingAction === `${selectedQuotation.id}-convert`}
                     >
                       {processingAction === `${selectedQuotation.id}-convert` ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <FileCheck className="h-4 w-4 mr-2" />
+                        <FileCheck className="mr-2 h-4 w-4" />
                       )}
                       แปลงเป็นใบกำกับภาษี
                     </Button>
@@ -941,5 +930,5 @@ export function QuotationList() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

@@ -1,7 +1,7 @@
 /**
  * API Analytics Middleware for Thai Accounting ERP
  * Phase D: API Mastery - API Analytics
- * 
+ *
  * Tracks all API requests for analytics dashboard
  */
 
@@ -11,32 +11,29 @@ import { logRequest } from '@/lib/services/analytics-service';
 /**
  * Analytics middleware wrapper for API routes
  */
-export function withAnalytics(
-  handler: (req: NextRequest) => Promise<NextResponse>
-) {
+export function withAnalytics(handler: (req: NextRequest) => Promise<NextResponse>) {
   return async (req: NextRequest): Promise<NextResponse> => {
     const startTime = Date.now();
-    
+
     // Get request details
     const url = new URL(req.url);
     const apiVersion = url.pathname.match(/\/api\/(v\d+)\//)?.[1] || 'v1';
-    
+
     // Execute handler
     const response = await handler(req);
-    
+
     // Calculate duration
     const duration = Date.now() - startTime;
-    
+
     // Get user info from headers (set by auth middleware)
     const userId = req.headers.get('x-user-id') || undefined;
     const sessionId = req.headers.get('x-session-id') || undefined;
-    
+
     // Get client info
-    const ipAddress = req.headers.get('x-forwarded-for') ||
-                     req.headers.get('x-real-ip') ||
-                     'unknown';
+    const ipAddress =
+      req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     const userAgent = req.headers.get('user-agent') || undefined;
-    
+
     // Log request asynchronously (don't wait)
     logRequest({
       userId,
@@ -50,10 +47,10 @@ export function withAnalytics(
       ipAddress: ipAddress.toString().split(',')[0].trim(),
       userAgent,
       error: response.status >= 400 ? await getErrorMessage(response) : undefined,
-    }).catch(err => {
+    }).catch((err) => {
       console.error('Analytics logging error:', err);
     });
-    
+
     return response;
   };
 }
@@ -83,27 +80,26 @@ export function withAnalyticsHandler(
 ) {
   return async (req: NextRequest, context: { params: any }): Promise<NextResponse> => {
     const startTime = Date.now();
-    
+
     // Get request details
     const url = new URL(req.url);
     const apiVersion = url.pathname.match(/\/api\/(v\d+)\//)?.[1] || 'v1';
-    
+
     // Execute handler
     const response = await handler(req, context);
-    
+
     // Calculate duration
     const duration = Date.now() - startTime;
-    
+
     // Get user info from headers (set by auth middleware)
     const userId = req.headers.get('x-user-id') || undefined;
     const sessionId = req.headers.get('x-session-id') || undefined;
-    
+
     // Get client info
-    const ipAddress = req.headers.get('x-forwarded-for') ||
-                     req.headers.get('x-real-ip') ||
-                     'unknown';
+    const ipAddress =
+      req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     const userAgent = req.headers.get('user-agent') || undefined;
-    
+
     // Log request asynchronously (don't wait)
     logRequest({
       userId,
@@ -117,10 +113,10 @@ export function withAnalyticsHandler(
       ipAddress: ipAddress.toString().split(',')[0].trim(),
       userAgent,
       error: response.status >= 400 ? await getErrorMessage(response) : undefined,
-    }).catch(err => {
+    }).catch((err) => {
       console.error('Analytics logging error:', err);
     });
-    
+
     return response;
   };
 }
@@ -130,11 +126,14 @@ export function withAnalyticsHandler(
  * Use this to wrap your route handlers
  */
 export function createAnalyticsWrapper() {
-  const requests = new Map<string, {
-    count: number;
-    totalDuration: number;
-    errors: number;
-  }>();
+  const requests = new Map<
+    string,
+    {
+      count: number;
+      totalDuration: number;
+      errors: number;
+    }
+  >();
 
   return {
     track(path: string, duration: number, statusCode: number) {

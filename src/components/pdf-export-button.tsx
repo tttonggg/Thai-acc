@@ -5,72 +5,67 @@
  * Usage examples for different document types
  */
 
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Download, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react';
+import { Download, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/components/ui/dropdown-menu';
 
 interface PDFExportButtonProps {
-  documentType: 'invoice' | 'receipt' | 'journal-entry'
-  documentId: string
-  documentNumber?: string
+  documentType: 'invoice' | 'receipt' | 'journal-entry';
+  documentId: string;
+  documentNumber?: string;
 }
 
 export function PDFExportButton({
   documentType,
   documentId,
-  documentNumber
+  documentNumber,
 }: PDFExportButtonProps) {
-  const [isExporting, setIsExporting] = useState(false)
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
-    setIsExporting(true)
+    setIsExporting(true);
     try {
-      const endpoint = `/api/${documentType}s/${documentId}/export/pdf`
-      const response = await fetch(endpoint)
+      const endpoint = `/api/${documentType}s/${documentId}/export/pdf`;
+      const response = await fetch(endpoint);
 
       if (!response.ok) {
-        throw new Error('Failed to generate PDF')
+        throw new Error('Failed to generate PDF');
       }
 
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
 
       // Generate filename
       const filename = documentNumber
         ? `${documentType}-${documentNumber}.pdf`
-        : `${documentType}-${documentId}.pdf`
-      a.download = filename
+        : `${documentType}-${documentId}.pdf`;
+      a.download = filename;
 
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (error) {
-      console.error('Error exporting PDF:', error)
+      console.error('Error exporting PDF:', error);
       // You could add a toast notification here
-      alert('Failed to export PDF. Please try again.')
+      alert('Failed to export PDF. Please try again.');
     } finally {
-      setIsExporting(false)
+      setIsExporting(false);
     }
-  }
+  };
 
   return (
-    <Button
-      onClick={handleExport}
-      disabled={isExporting}
-      variant="outline"
-      size="sm"
-    >
+    <Button onClick={handleExport} disabled={isExporting} variant="outline" size="sm">
       {isExporting ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -83,7 +78,7 @@ export function PDFExportButton({
         </>
       )}
     </Button>
-  )
+  );
 }
 
 /**
@@ -115,63 +110,58 @@ export function PDFExportButton({
  */
 
 interface ReportExportButtonProps {
-  reportType: 'trial-balance' | 'income-statement' | 'balance-sheet'
-  startDate?: string
-  endDate?: string
-  filename?: string
+  reportType: 'trial-balance' | 'income-statement' | 'balance-sheet';
+  startDate?: string;
+  endDate?: string;
+  filename?: string;
 }
 
 export function ReportExportButton({
   reportType,
   startDate,
   endDate,
-  filename
+  filename,
 }: ReportExportButtonProps) {
-  const [isExporting, setIsExporting] = useState(false)
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
-    setIsExporting(true)
+    setIsExporting(true);
     try {
       // Build query parameters
-      const params = new URLSearchParams()
-      if (startDate) params.append('startDate', startDate)
-      if (endDate) params.append('endDate', endDate)
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
 
-      const endpoint = `/api/reports/${reportType}/export/pdf?${params.toString()}`
-      const response = await fetch(endpoint)
+      const endpoint = `/api/reports/${reportType}/export/pdf?${params.toString()}`;
+      const response = await fetch(endpoint);
 
       if (!response.ok) {
-        throw new Error('Failed to generate PDF')
+        throw new Error('Failed to generate PDF');
       }
 
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
 
       // Use custom filename or generate default
-      const defaultFilename = `${reportType}-${endDate || new Date().toISOString().split('T')[0]}.pdf`
-      a.download = filename || defaultFilename
+      const defaultFilename = `${reportType}-${endDate || new Date().toISOString().split('T')[0]}.pdf`;
+      a.download = filename || defaultFilename;
 
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (error) {
-      console.error('Error exporting report:', error)
-      alert('Failed to export report. Please try again.')
+      console.error('Error exporting report:', error);
+      alert('Failed to export report. Please try again.');
     } finally {
-      setIsExporting(false)
+      setIsExporting(false);
     }
-  }
+  };
 
   return (
-    <Button
-      onClick={handleExport}
-      disabled={isExporting}
-      variant="outline"
-      size="sm"
-    >
+    <Button onClick={handleExport} disabled={isExporting} variant="outline" size="sm">
       {isExporting ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -184,7 +174,7 @@ export function ReportExportButton({
         </>
       )}
     </Button>
-  )
+  );
 }
 
 /**
@@ -231,70 +221,75 @@ export function ReportExportButton({
  */
 
 interface ExportDropdownProps {
-  invoiceId: string
-  invoiceNo: string
+  invoiceId: string;
+  invoiceNo: string;
 }
 
 export function ExportDropdown({ invoiceId, invoiceNo }: ExportDropdownProps) {
-  const [isExporting, setIsExporting] = useState(false)
-  const [exportType, setExportType] = useState<string | null>(null)
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportType, setExportType] = useState<string | null>(null);
 
   const handleExport = async (type: 'pdf' | 'excel' | 'email') => {
-    setIsExporting(true)
-    setExportType(type)
+    setIsExporting(true);
+    setExportType(type);
 
     try {
       switch (type) {
         case 'pdf':
           // Export as PDF
-          const pdfResponse = await fetch(`/api/invoices/${invoiceId}/export/pdf`, { credentials: 'include' })
-          if (!pdfResponse.ok) throw new Error('Failed to generate PDF')
+          const pdfResponse = await fetch(`/api/invoices/${invoiceId}/export/pdf`, {
+            credentials: 'include',
+          });
+          if (!pdfResponse.ok) throw new Error('Failed to generate PDF');
 
-          const pdfBlob = await pdfResponse.blob()
-          const pdfUrl = window.URL.createObjectURL(pdfBlob)
-          const a = document.createElement('a')
-          a.href = pdfUrl
-          a.download = `invoice-${invoiceNo}.pdf`
-          document.body.appendChild(a)
-          a.click()
-          window.URL.revokeObjectURL(pdfUrl)
-          document.body.removeChild(a)
-          break
+          const pdfBlob = await pdfResponse.blob();
+          const pdfUrl = window.URL.createObjectURL(pdfBlob);
+          const a = document.createElement('a');
+          a.href = pdfUrl;
+          a.download = `invoice-${invoiceNo}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(pdfUrl);
+          document.body.removeChild(a);
+          break;
 
         case 'excel':
           // Export as Excel (if you have that endpoint)
-          const excelResponse = await fetch(`/api/invoices/${invoiceId}/export/excel`, { credentials: 'include' })
-          if (!excelResponse.ok) throw new Error('Failed to generate Excel')
+          const excelResponse = await fetch(`/api/invoices/${invoiceId}/export/excel`, {
+            credentials: 'include',
+          });
+          if (!excelResponse.ok) throw new Error('Failed to generate Excel');
 
-          const excelBlob = await excelResponse.blob()
-          const excelUrl = window.URL.createObjectURL(excelBlob)
-          const b = document.createElement('a')
-          b.href = excelUrl
-          b.download = `invoice-${invoiceNo}.xlsx`
-          document.body.appendChild(b)
-          b.click()
-          window.URL.revokeObjectURL(excelUrl)
-          document.body.removeChild(b)
-          break
+          const excelBlob = await excelResponse.blob();
+          const excelUrl = window.URL.createObjectURL(excelBlob);
+          const b = document.createElement('a');
+          b.href = excelUrl;
+          b.download = `invoice-${invoiceNo}.xlsx`;
+          document.body.appendChild(b);
+          b.click();
+          window.URL.revokeObjectURL(excelUrl);
+          document.body.removeChild(b);
+          break;
 
         case 'email':
           // Send via email (if you have that endpoint)
-          const emailResponse = await fetch(`/api/invoices/${invoiceId}/email`, { credentials: 'include', 
-            method: 'POST'
-          })
-          if (!emailResponse.ok) throw new Error('Failed to send email')
+          const emailResponse = await fetch(`/api/invoices/${invoiceId}/email`, {
+            credentials: 'include',
+            method: 'POST',
+          });
+          if (!emailResponse.ok) throw new Error('Failed to send email');
 
-          alert('Invoice sent successfully!')
-          break
+          alert('Invoice sent successfully!');
+          break;
       }
     } catch (error) {
-      console.error('Error exporting:', error)
-      alert('Failed to export. Please try again.')
+      console.error('Error exporting:', error);
+      alert('Failed to export. Please try again.');
     } finally {
-      setIsExporting(false)
-      setExportType(null)
+      setIsExporting(false);
+      setExportType(null);
     }
-  }
+  };
 
   return (
     <DropdownMenu>
@@ -330,5 +325,5 @@ export function ExportDropdown({ invoiceId, invoiceNo }: ExportDropdownProps) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

@@ -1,25 +1,25 @@
 // Asset Revaluation Service - Thai TFRS Compliant
 // Handles asset revaluation with journal entry creation
-import prisma from '@/lib/db'
-import { generateDocNumber } from '@/lib/api-utils'
+import prisma from '@/lib/db';
+import { generateDocNumber } from '@/lib/api-utils';
 
 export interface RevaluationInput {
-  assetId: string
-  newFairValue: number // มูลค่ายุติธรรมใหม่ (สตางค์)
-  revalDate: Date
-  notes?: string
-  userId: string
+  assetId: string;
+  newFairValue: number; // มูลค่ายุติธรรมใหม่ (สตางค์)
+  revalDate: Date;
+  notes?: string;
+  userId: string;
 }
 
 export interface RevaluationResult {
-  id: string
-  oldCost: number
-  oldAccumDep: number
-  newCost: number
-  newAccumDep: number
-  revalGain: number
-  revalLoss: number
-  journalEntryId: string
+  id: string;
+  oldCost: number;
+  oldAccumDep: number;
+  newCost: number;
+  newAccumDep: number;
+  revalGain: number;
+  revalLoss: number;
+  journalEntryId: string;
 }
 
 /**
@@ -32,42 +32,42 @@ export function calculateNewValues(
   oldAccumDep: number,
   newFairValue: number
 ): {
-  newCost: number
-  newAccumDep: number
-  revalGain: number
-  revalLoss: number
+  newCost: number;
+  newAccumDep: number;
+  revalGain: number;
+  revalLoss: number;
 } {
-  const oldNetBookValue = oldCost - oldAccumDep
-  const netChange = newFairValue - oldNetBookValue
+  const oldNetBookValue = oldCost - oldAccumDep;
+  const netChange = newFairValue - oldNetBookValue;
 
-  let newCost = oldCost
-  let newAccumDep = oldAccumDep
-  let revalGain = 0
-  let revalLoss = 0
+  let newCost = oldCost;
+  let newAccumDep = oldAccumDep;
+  let revalGain = 0;
+  let revalLoss = 0;
 
   if (netChange > 0) {
     // Revaluation gain: increases both cost and net book value
-    revalGain = netChange
-    newCost = oldCost + netChange
+    revalGain = netChange;
+    newCost = oldCost + netChange;
     // Accumulated depreciation stays the same (we don't reset it on gain)
-    newAccumDep = oldAccumDep
+    newAccumDep = oldAccumDep;
   } else if (netChange < 0) {
     // Revaluation loss: decreases net book value
-    revalLoss = Math.abs(netChange)
+    revalLoss = Math.abs(netChange);
     // First reduce accumulated depreciation, then reduce cost if needed
-    const absNetChange = Math.abs(netChange)
+    const absNetChange = Math.abs(netChange);
     if (absNetChange <= oldAccumDep) {
       // Can fully absorb in accumulated depreciation
-      newAccumDep = oldAccumDep - absNetChange
-      newCost = oldCost
+      newAccumDep = oldAccumDep - absNetChange;
+      newCost = oldCost;
     } else {
       // Need to also reduce cost
-      newCost = oldCost - (absNetChange - oldAccumDep)
-      newAccumDep = 0
+      newCost = oldCost - (absNetChange - oldAccumDep);
+      newAccumDep = 0;
     }
   }
 
-  return { newCost, newAccumDep, revalGain, revalLoss }
+  return { newCost, newAccumDep, revalGain, revalLoss };
 }
 
 /**
@@ -79,12 +79,12 @@ export async function getAssetRevaluations(assetId: string) {
     orderBy: { revalDate: 'desc' },
     include: {
       asset: {
-        select: { code: true, name: true }
-      }
-    }
-  })
+        select: { code: true, name: true },
+      },
+    },
+  });
 
-  return revaluations
+  return revaluations;
 }
 
 /**
@@ -103,7 +103,7 @@ export async function getAssetRevaluations(assetId: string) {
  *   Cr. Asset Cost (reduce it)
  */
 export async function createRevaluation(input: RevaluationInput): Promise<RevaluationResult> {
-  const { assetId, newFairValue, revalDate, notes, userId } = input
+  const { assetId, newFairValue, revalDate, notes, userId } = input;
 
   // Get current asset with latest depreciation
   const asset = await prisma.asset.findUnique({
@@ -112,43 +112,43 @@ export async function createRevaluation(input: RevaluationInput): Promise<Revalu
       schedules: {
         where: { posted: true },
         orderBy: { date: 'desc' },
-        take: 1
-      }
-    }
-  })
+        take: 1,
+      },
+    },
+  });
 
   if (!asset) {
-    throw new Error('ไม่พบสินทรัพย์')
+    throw new Error('ไม่พบสินทรัพย์');
   }
 
-  const oldCost = asset.purchaseCost
-  const oldAccumDep = asset.schedules[0]?.accumulated || 0
+  const oldCost = asset.purchaseCost;
+  const oldAccumDep = asset.schedules[0]?.accumulated || 0;
 
   // Calculate new values
   const { newCost, newAccumDep, revalGain, revalLoss } = calculateNewValues(
     oldCost,
     oldAccumDep,
     newFairValue
-  )
+  );
 
   // Create journal entry and revaluation record in transaction
   const result = await prisma.$transaction(async (tx) => {
     // Generate journal entry number
-    const journalNo = await generateDocNumber('JOURNAL_ENTRY', 'JE')
+    const journalNo = await generateDocNumber('JOURNAL_ENTRY', 'JE');
 
-    const isGain = revalGain > 0
-    const isLoss = revalLoss > 0
+    const isGain = revalGain > 0;
+    const isLoss = revalLoss > 0;
 
     // Build journal lines based on gain or loss
     const journalLines: Array<{
-      lineNo: number
-      accountId: string
-      description: string
-      debit: number
-      credit: number
-    }> = []
+      lineNo: number;
+      accountId: string;
+      description: string;
+      debit: number;
+      credit: number;
+    }> = [];
 
-    let lineNo = 1
+    let lineNo = 1;
 
     if (isGain) {
       // Dr. Accumulated Depreciation (reduce it) - Dr. side
@@ -157,8 +157,8 @@ export async function createRevaluation(input: RevaluationInput): Promise<Revalu
         accountId: asset.accumDepAccountId,
         description: `ปรับลดค่าเสื่อมราคาสะสม - ${asset.name}`,
         debit: oldAccumDep - newAccumDep, // Reduction amount
-        credit: 0
-      })
+        credit: 0,
+      });
 
       // Dr. Asset Cost (increase it) - Dr. side
       journalLines.push({
@@ -166,8 +166,8 @@ export async function createRevaluation(input: RevaluationInput): Promise<Revalu
         accountId: asset.glAccountId,
         description: `ปรับเพิ่มราคาทุนสินทรัพย์ - ${asset.name}`,
         debit: newCost - oldCost, // Increase amount
-        credit: 0
-      })
+        credit: 0,
+      });
 
       // Cr. Revaluation Reserve (equity) - Cr. side
       // Use a revaluation reserve account - if not exists, could use 3100 series
@@ -176,8 +176,8 @@ export async function createRevaluation(input: RevaluationInput): Promise<Revalu
         accountId: asset.glAccountId, // Fallback: use asset account temporarily
         description: `สำรองจากการตีราคาสินทรัพย์ - ${asset.name}`,
         debit: 0,
-        credit: revalGain
-      })
+        credit: revalGain,
+      });
     } else if (isLoss) {
       // Dr. Revaluation Loss (expense) - Dr. side
       journalLines.push({
@@ -185,8 +185,8 @@ export async function createRevaluation(input: RevaluationInput): Promise<Revalu
         accountId: asset.depExpenseAccountId, // Fallback to depreciation expense account
         description: `ขาดทุนจากการตีราคาสินทรัพย์ - ${asset.name}`,
         debit: revalLoss,
-        credit: 0
-      })
+        credit: 0,
+      });
 
       // Dr. Accumulated Depreciation (reduce it) - Dr. side
       journalLines.push({
@@ -194,8 +194,8 @@ export async function createRevaluation(input: RevaluationInput): Promise<Revalu
         accountId: asset.accumDepAccountId,
         description: `ปรับลดค่าเสื่อมราคาสะสม - ${asset.name}`,
         debit: oldAccumDep - newAccumDep,
-        credit: 0
-      })
+        credit: 0,
+      });
 
       // Cr. Asset Cost (reduce it) - Cr. side
       journalLines.push({
@@ -203,16 +203,16 @@ export async function createRevaluation(input: RevaluationInput): Promise<Revalu
         accountId: asset.glAccountId,
         description: `ปรับลดราคาทุนสินทรัพย์ - ${asset.name}`,
         debit: 0,
-        credit: oldCost - newCost
-      })
+        credit: oldCost - newCost,
+      });
     }
 
     // Verify journal entry balances
-    const totalDebit = journalLines.reduce((sum, l) => sum + l.debit, 0)
-    const totalCredit = journalLines.reduce((sum, l) => sum + l.credit, 0)
+    const totalDebit = journalLines.reduce((sum, l) => sum + l.debit, 0);
+    const totalCredit = journalLines.reduce((sum, l) => sum + l.credit, 0);
 
     if (totalDebit !== totalCredit) {
-      throw new Error(`Journal entry does not balance: Dr=${totalDebit}, Cr=${totalCredit}`)
+      throw new Error(`Journal entry does not balance: Dr=${totalDebit}, Cr=${totalCredit}`);
     }
 
     // Create journal entry
@@ -228,10 +228,10 @@ export async function createRevaluation(input: RevaluationInput): Promise<Revalu
         totalDebit,
         totalCredit,
         lines: {
-          create: journalLines
-        }
-      }
-    })
+          create: journalLines,
+        },
+      },
+    });
 
     // Create revaluation record
     const revaluation = await tx.assetRevaluation.create({
@@ -246,9 +246,9 @@ export async function createRevaluation(input: RevaluationInput): Promise<Revalu
         revalLoss,
         journalEntryId: journalEntry.id,
         notes,
-        createdBy: userId
-      }
-    })
+        createdBy: userId,
+      },
+    });
 
     return {
       id: revaluation.id,
@@ -258,9 +258,9 @@ export async function createRevaluation(input: RevaluationInput): Promise<Revalu
       newAccumDep,
       revalGain,
       revalLoss,
-      journalEntryId: journalEntry.id
-    }
-  })
+      journalEntryId: journalEntry.id,
+    };
+  });
 
-  return result
+  return result;
 }

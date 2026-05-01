@@ -1,4 +1,4 @@
-import { db } from './db'
+import { db } from './db';
 
 /**
  * Petty Cash Service
@@ -6,14 +6,14 @@ import { db } from './db'
  */
 
 export interface CreateVoucherJournalEntryParams {
-  voucherId: string
-  voucherNo: string
-  voucherDate: Date
-  amount: number
-  payee: string
-  description: string
-  glExpenseAccountId: string
-  pettyCashFundAccountId: string
+  voucherId: string;
+  voucherNo: string;
+  voucherDate: Date;
+  amount: number;
+  payee: string;
+  description: string;
+  glExpenseAccountId: string;
+  pettyCashFundAccountId: string;
 }
 
 /**
@@ -33,13 +33,13 @@ export async function createVoucherJournalEntry(params: CreateVoucherJournalEntr
       description,
       glExpenseAccountId,
       pettyCashFundAccountId,
-    } = params
+    } = params;
 
     // Generate journal entry number
-    const entryNo = await generateJournalEntryNumber(voucherDate, tx)
+    const entryNo = await generateJournalEntryNumber(voucherDate, tx);
 
     // Create description in Thai
-    const journalDescription = `เบิกเงินสดย่อย ${voucherNo} - ${description}`
+    const journalDescription = `เบิกเงินสดย่อย ${voucherNo} - ${description}`;
 
     // Create journal entry with lines
     const journalEntry = await tx.journalEntry.create({
@@ -76,10 +76,10 @@ export async function createVoucherJournalEntry(params: CreateVoucherJournalEntr
           ],
         },
       },
-    })
+    });
 
-    return journalEntry
-  })
+    return journalEntry;
+  });
 }
 
 /**
@@ -87,10 +87,10 @@ export async function createVoucherJournalEntry(params: CreateVoucherJournalEntr
  * Format: JV-YYYYMM-NNNN
  */
 async function generateJournalEntryNumber(date: Date, tx: any): Promise<string> {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
 
-  const prefix = `JV-${year}${month}`
+  const prefix = `JV-${year}${month}`;
 
   const lastEntry = await tx.journalEntry.findFirst({
     where: {
@@ -99,13 +99,13 @@ async function generateJournalEntryNumber(date: Date, tx: any): Promise<string> 
       },
     },
     orderBy: { entryNo: 'desc' },
-  })
+  });
 
-  let nextNum = 1
+  let nextNum = 1;
   if (lastEntry) {
-    const lastNum = parseInt(lastEntry.entryNo.split('-')[2] || '0')
-    nextNum = lastNum + 1
+    const lastNum = parseInt(lastEntry.entryNo.split('-')[2] || '0');
+    nextNum = lastNum + 1;
   }
 
-  return `${prefix}-${String(nextNum).padStart(4, '0')}`
+  return `${prefix}-${String(nextNum).padStart(4, '0')}`;
 }

@@ -1,7 +1,7 @@
 /**
  * API Analytics Service for Thai Accounting ERP
  * Phase D: API Mastery - API Analytics
- * 
+ *
  * Features:
  * - Request logging
  * - Metrics calculation (p50, p95, p99)
@@ -157,8 +157,8 @@ export async function getMetrics(range: TimeRange = '24h'): Promise<ApiMetrics> 
 
   // Calculate basic metrics
   const totalRequests = logs.length;
-  const errorRequests = logs.filter(l => l.statusCode >= 400).length;
-  const durations = logs.map(l => l.duration).sort((a, b) => a - b);
+  const errorRequests = logs.filter((l) => l.statusCode >= 400).length;
+  const durations = logs.map((l) => l.duration).sort((a, b) => a - b);
   const totalDuration = durations.reduce((a, b) => a + b, 0);
 
   // Calculate percentiles
@@ -179,7 +179,7 @@ export async function getMetrics(range: TimeRange = '24h'): Promise<ApiMetrics> 
     where: { id: { in: userIds } },
     select: { id: true, name: true, email: true },
   });
-  const userMap = new Map(users.map(u => [u.id, u.name || u.email]));
+  const userMap = new Map(users.map((u) => [u.id, u.name || u.email]));
 
   const topUsers = Array.from(userCounts.entries())
     .sort((a, b) => b[1] - a[1])
@@ -312,7 +312,7 @@ export async function getVersionUsage() {
     },
   });
 
-  return logs.map(l => ({
+  return logs.map((l) => ({
     version: l.apiVersion,
     requestCount: l._count.apiVersion,
   }));
@@ -402,7 +402,7 @@ export async function exportAnalytics(
       'userId',
       'ipAddress',
     ];
-    const rows = logs.map(log => [
+    const rows = logs.map((log) => [
       log.timestamp.toISOString(),
       log.method,
       log.path,
@@ -411,7 +411,7 @@ export async function exportAnalytics(
       log.userId || 'Anonymous',
       log.ipAddress,
     ]);
-    return [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    return [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
   }
 
   return JSON.stringify(logs, null, 2);

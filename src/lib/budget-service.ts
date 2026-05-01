@@ -1,8 +1,8 @@
 // B4. Budgeting Service
 // บริการงบประมาณ
 
-import { prisma } from "@/lib/db"
-import type { Budget, BudgetAlert } from "@prisma/client"
+import { prisma } from '@/lib/db';
+import type { Budget, BudgetAlert } from '@prisma/client';
 
 /**
  * Create or update budget
@@ -16,16 +16,12 @@ export async function setBudget(
   notes?: string
 ): Promise<Budget> {
   // Calculate current actual spending
-  const startDate = new Date(year, 0, 1)
-  const endDate = new Date(year, 11, 31, 23, 59, 59)
+  const startDate = new Date(year, 0, 1);
+  const endDate = new Date(year, 11, 31, 23, 59, 59);
 
-  const actualSpending = await calculateActualSpending(
-    accountId,
-    startDate,
-    endDate
-  )
+  const actualSpending = await calculateActualSpending(accountId, startDate, endDate);
 
-  const variance = amount - actualSpending
+  const variance = amount - actualSpending;
 
   return prisma.budget.upsert({
     where: {
@@ -48,7 +44,7 @@ export async function setBudget(
       alertAt,
       notes,
     },
-  })
+  });
 }
 
 /**
@@ -64,33 +60,33 @@ export async function calculateActualSpending(
   // For revenue accounts, sum credits minus debits
   const account = await prisma.chartOfAccount.findUnique({
     where: { id: accountId },
-  })
+  });
 
-  if (!account) return 0
+  if (!account) return 0;
 
   const lines = await prisma.journalLine.findMany({
     where: {
       accountId,
       entry: {
         date: { gte: startDate, lte: endDate },
-        status: "POSTED",
+        status: 'POSTED',
         deletedAt: null,
       },
     },
-  })
+  });
 
-  const totalDebit = lines.reduce((sum, line) => sum + line.debit, 0)
-  const totalCredit = lines.reduce((sum, line) => sum + line.credit, 0)
+  const totalDebit = lines.reduce((sum, line) => sum + line.debit, 0);
+  const totalCredit = lines.reduce((sum, line) => sum + line.credit, 0);
 
   // For expense accounts, positive when debited
   // For revenue accounts, positive when credited
-  if (account.type === "EXPENSE") {
-    return totalDebit - totalCredit
-  } else if (account.type === "REVENUE") {
-    return totalCredit - totalDebit
+  if (account.type === 'EXPENSE') {
+    return totalDebit - totalCredit;
+  } else if (account.type === 'REVENUE') {
+    return totalCredit - totalDebit;
   } else {
     // For assets and liabilities, consider absolute movement
-    return Math.abs(totalDebit - totalCredit)
+    return Math.abs(totalDebit - totalCredit);
   }
 }
 
@@ -101,26 +97,22 @@ export async function calculateActualSpending(
 export async function updateAllBudgetActuals(year: number): Promise<void> {
   const budgets = await prisma.budget.findMany({
     where: { year },
-  })
+  });
 
-  const startDate = new Date(year, 0, 1)
-  const endDate = new Date(year, 11, 31, 23, 59, 59)
+  const startDate = new Date(year, 0, 1);
+  const endDate = new Date(year, 11, 31, 23, 59, 59);
 
   for (const budget of budgets) {
-    const actual = await calculateActualSpending(
-      budget.accountId,
-      startDate,
-      endDate
-    )
-    const variance = budget.amount - actual
+    const actual = await calculateActualSpending(budget.accountId, startDate, endDate);
+    const variance = budget.amount - actual;
 
     await prisma.budget.update({
       where: { id: budget.id },
       data: { actual, variance },
-    })
+    });
 
     // Check for alerts
-    await checkBudgetAlert(budget.id)
+    await checkBudgetAlert(budget.id);
   }
 }
 
@@ -132,11 +124,11 @@ export async function checkBudgetAlert(budgetId: string): Promise<void> {
   const budget = await prisma.budget.findUnique({
     where: { id: budgetId },
     include: { account: true },
-  })
+  });
 
-  if (!budget) return
+  if (!budget) return;
 
-  const usagePercent = (budget.actual / budget.amount) * 100
+  const usagePercent = (budget.actual / budget.amount) * 100;
 
   // Check if we've hit the alert threshold
   if (usagePercent >= budget.alertAt && !budget.isAlerted) {
@@ -144,15 +136,15 @@ export async function checkBudgetAlert(budgetId: string): Promise<void> {
     await prisma.budgetAlert.create({
       data: {
         budgetId: budget.id,
-        alertType: "APPROACHING_LIMIT",
+        alertType: 'APPROACHING_LIMIT',
         message: `งบประมาณ ${budget.account.name} ใช้ไปแล้ว ${usagePercent.toFixed(1)}% (แจ้งเตือนที่ ${budget.alertAt}%)`,
       },
-    })
+    });
 
     await prisma.budget.update({
       where: { id: budgetId },
       data: { isAlerted: true },
-    })
+    });
   }
 
   // Check if over budget
@@ -161,19 +153,19 @@ export async function checkBudgetAlert(budgetId: string): Promise<void> {
     const existingAlert = await prisma.budgetAlert.findFirst({
       where: {
         budgetId: budget.id,
-        alertType: "OVER_BUDGET",
+        alertType: 'OVER_BUDGET',
         acknowledged: false,
       },
-    })
+    });
 
     if (!existingAlert) {
       await prisma.budgetAlert.create({
         data: {
           budgetId: budget.id,
-          alertType: "OVER_BUDGET",
+          alertType: 'OVER_BUDGET',
           message: `งบประมาณ ${budget.account.name} เกินงบประมาณแล้ว! ใช้ไป ${(budget.actual / 100).toLocaleString()} บาท จากงบ ${(budget.amount / 100).toLocaleString()} บาท`,
         },
-      })
+      });
     }
   }
 }
@@ -193,7 +185,7 @@ export async function acknowledgeBudgetAlert(
       acknowledgedBy: userId,
       acknowledgedAt: new Date(),
     },
-  })
+  });
 }
 
 /**
@@ -201,51 +193,51 @@ export async function acknowledgeBudgetAlert(
  * รายงานเปรียบเทียบงบประมาณกับผลการใช้จริง
  */
 export interface BudgetVsActualReport {
-  year: number
-  startDate: Date
-  endDate: Date
+  year: number;
+  startDate: Date;
+  endDate: Date;
   accounts: Array<{
-    accountId: string
-    accountCode: string
-    accountName: string
-    accountType: string
-    budget: number
-    actual: number
-    variance: number
-    variancePercent: number
-    usagePercent: number
-    status: "UNDER" | "ON_TRACK" | "OVER" | "CRITICAL"
-  }>
+    accountId: string;
+    accountCode: string;
+    accountName: string;
+    accountType: string;
+    budget: number;
+    actual: number;
+    variance: number;
+    variancePercent: number;
+    usagePercent: number;
+    status: 'UNDER' | 'ON_TRACK' | 'OVER' | 'CRITICAL';
+  }>;
   summary: {
-    totalBudget: number
-    totalActual: number
-    totalVariance: number
-    overBudgetCount: number
-    criticalCount: number
-  }
+    totalBudget: number;
+    totalActual: number;
+    totalVariance: number;
+    overBudgetCount: number;
+    criticalCount: number;
+  };
 }
 
 export async function generateBudgetVsActualReport(
   year: number,
   accountType?: string
 ): Promise<BudgetVsActualReport> {
-  const startDate = new Date(year, 0, 1)
-  const endDate = new Date(year, 11, 31, 23, 59, 59)
+  const startDate = new Date(year, 0, 1);
+  const endDate = new Date(year, 11, 31, 23, 59, 59);
 
   // Get all budgets for the year
   const budgets = await prisma.budget.findMany({
     where: { year },
     include: { account: true },
-  })
+  });
 
   // Get all expense/revenue accounts
   const where: { isActive: boolean; isDetail: boolean; type?: string } = {
     isActive: true,
     isDetail: true,
-  }
-  if (accountType) where.type = accountType
+  };
+  if (accountType) where.type = accountType;
 
-  const accounts = await prisma.chartOfAccount.findMany({ where })
+  const accounts = await prisma.chartOfAccount.findMany({ where });
 
   const report: BudgetVsActualReport = {
     year,
@@ -259,27 +251,27 @@ export async function generateBudgetVsActualReport(
       overBudgetCount: 0,
       criticalCount: 0,
     },
-  }
+  };
 
   for (const account of accounts) {
-    const budget = budgets.find((b) => b.accountId === account.id)
-    const budgetAmount = budget?.amount || 0
+    const budget = budgets.find((b) => b.accountId === account.id);
+    const budgetAmount = budget?.amount || 0;
 
     // Calculate actual
-    const actual = await calculateActualSpending(account.id, startDate, endDate)
-    const variance = budgetAmount - actual
-    const variancePercent = budgetAmount > 0 ? (variance / budgetAmount) * 100 : 0
-    const usagePercent = budgetAmount > 0 ? (actual / budgetAmount) * 100 : 0
+    const actual = await calculateActualSpending(account.id, startDate, endDate);
+    const variance = budgetAmount - actual;
+    const variancePercent = budgetAmount > 0 ? (variance / budgetAmount) * 100 : 0;
+    const usagePercent = budgetAmount > 0 ? (actual / budgetAmount) * 100 : 0;
 
-    let status: "UNDER" | "ON_TRACK" | "OVER" | "CRITICAL" = "UNDER"
+    let status: 'UNDER' | 'ON_TRACK' | 'OVER' | 'CRITICAL' = 'UNDER';
     if (usagePercent >= 100) {
-      status = "OVER"
-      report.summary.overBudgetCount++
+      status = 'OVER';
+      report.summary.overBudgetCount++;
     } else if (usagePercent >= 90) {
-      status = "CRITICAL"
-      report.summary.criticalCount++
+      status = 'CRITICAL';
+      report.summary.criticalCount++;
     } else if (usagePercent >= 75) {
-      status = "ON_TRACK"
+      status = 'ON_TRACK';
     }
 
     report.accounts.push({
@@ -293,16 +285,15 @@ export async function generateBudgetVsActualReport(
       variancePercent,
       usagePercent,
       status,
-    })
+    });
 
-    report.summary.totalBudget += budgetAmount
-    report.summary.totalActual += actual
+    report.summary.totalBudget += budgetAmount;
+    report.summary.totalActual += actual;
   }
 
-  report.summary.totalVariance =
-    report.summary.totalBudget - report.summary.totalActual
+  report.summary.totalVariance = report.summary.totalBudget - report.summary.totalActual;
 
-  return report
+  return report;
 }
 
 /**
@@ -311,50 +302,47 @@ export async function generateBudgetVsActualReport(
  */
 export interface VarianceAnalysis {
   favorable: Array<{
-    accountId: string
-    accountName: string
-    budget: number
-    actual: number
-    savings: number
-    savingsPercent: number
-  }>
+    accountId: string;
+    accountName: string;
+    budget: number;
+    actual: number;
+    savings: number;
+    savingsPercent: number;
+  }>;
   unfavorable: Array<{
-    accountId: string
-    accountName: string
-    budget: number
-    actual: number
-    overrun: number
-    overrunPercent: number
-  }>
+    accountId: string;
+    accountName: string;
+    budget: number;
+    actual: number;
+    overrun: number;
+    overrunPercent: number;
+  }>;
   trends: Array<{
-    accountId: string
-    accountName: string
+    accountId: string;
+    accountName: string;
     monthData: Array<{
-      month: number
-      budget: number
-      actual: number
-    }>
-  }>
+      month: number;
+      budget: number;
+      actual: number;
+    }>;
+  }>;
 }
 
-export async function generateVarianceAnalysis(
-  year: number
-): Promise<VarianceAnalysis> {
+export async function generateVarianceAnalysis(year: number): Promise<VarianceAnalysis> {
   const budgets = await prisma.budget.findMany({
     where: { year },
     include: { account: true },
-  })
+  });
 
   const analysis: VarianceAnalysis = {
     favorable: [],
     unfavorable: [],
     trends: [],
-  }
+  };
 
   for (const budget of budgets) {
-    const variance = budget.amount - budget.actual
-    const variancePercent =
-      budget.amount > 0 ? (variance / budget.amount) * 100 : 0
+    const variance = budget.amount - budget.actual;
+    const variancePercent = budget.amount > 0 ? (variance / budget.amount) * 100 : 0;
 
     if (variance > 0) {
       // Under budget (favorable for expenses)
@@ -365,7 +353,7 @@ export async function generateVarianceAnalysis(
         actual: budget.actual,
         savings: variance,
         savingsPercent: variancePercent,
-      })
+      });
     } else if (variance < 0) {
       // Over budget (unfavorable)
       analysis.unfavorable.push({
@@ -375,34 +363,30 @@ export async function generateVarianceAnalysis(
         actual: budget.actual,
         overrun: Math.abs(variance),
         overrunPercent: Math.abs(variancePercent),
-      })
+      });
     }
 
     // Calculate monthly trend
-    const monthData = []
+    const monthData = [];
     for (let month = 1; month <= 12; month++) {
-      const monthStart = new Date(year, month - 1, 1)
-      const monthEnd = new Date(year, month, 0, 23, 59, 59)
-      const actual = await calculateActualSpending(
-        budget.accountId,
-        monthStart,
-        monthEnd
-      )
+      const monthStart = new Date(year, month - 1, 1);
+      const monthEnd = new Date(year, month, 0, 23, 59, 59);
+      const actual = await calculateActualSpending(budget.accountId, monthStart, monthEnd);
       monthData.push({
         month,
         budget: Math.round(budget.amount / 12), // Assuming even distribution
         actual,
-      })
+      });
     }
 
     analysis.trends.push({
       accountId: budget.accountId,
       accountName: budget.account.name,
       monthData,
-    })
+    });
   }
 
-  return analysis
+  return analysis;
 }
 
 /**
@@ -416,25 +400,23 @@ export async function copyBudgetsFromPreviousYear(
 ): Promise<number> {
   const sourceBudgets = await prisma.budget.findMany({
     where: { year: sourceYear },
-  })
+  });
 
-  let copiedCount = 0
+  let copiedCount = 0;
   for (const budget of sourceBudgets) {
-    const adjustedAmount = Math.round(
-      budget.amount * (1 + adjustmentPercent / 100)
-    )
+    const adjustedAmount = Math.round(budget.amount * (1 + adjustmentPercent / 100));
 
     await setBudget(
       targetYear,
       budget.accountId,
       adjustedAmount,
       budget.alertAt,
-      `คัดลอกจากปี ${sourceYear}${adjustmentPercent !== 0 ? ` (ปรับ ${adjustmentPercent > 0 ? "+" : ""}${adjustmentPercent}%)` : ""}`
-    )
-    copiedCount++
+      `คัดลอกจากปี ${sourceYear}${adjustmentPercent !== 0 ? ` (ปรับ ${adjustmentPercent > 0 ? '+' : ''}${adjustmentPercent}%)` : ''}`
+    );
+    copiedCount++;
   }
 
-  return copiedCount
+  return copiedCount;
 }
 
 /**
@@ -455,8 +437,8 @@ export async function getActiveAlerts(): Promise<
         },
       },
     },
-    orderBy: { triggeredAt: "desc" },
-  })
+    orderBy: { triggeredAt: 'desc' },
+  });
 }
 
 /**
@@ -470,17 +452,17 @@ export async function initializeYearBudgets(
   // Get all expense accounts
   const accounts = await prisma.chartOfAccount.findMany({
     where: {
-      type: "EXPENSE",
+      type: 'EXPENSE',
       isActive: true,
       isDetail: true,
     },
-  })
+  });
 
-  let createdCount = 0
+  let createdCount = 0;
   for (const account of accounts) {
     const existing = await prisma.budget.findUnique({
       where: { year_accountId: { year, accountId: account.id } },
-    })
+    });
 
     if (!existing) {
       await prisma.budget.create({
@@ -491,10 +473,10 @@ export async function initializeYearBudgets(
           actual: 0,
           variance: defaultBudget,
         },
-      })
-      createdCount++
+      });
+      createdCount++;
     }
   }
 
-  return createdCount
+  return createdCount;
 }

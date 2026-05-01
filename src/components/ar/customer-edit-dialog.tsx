@@ -1,50 +1,47 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import {
-  Card,
-  CardContent,
-} from '@/components/ui/card'
+} from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Switch } from '@/components/ui/switch'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { useToast } from '@/hooks/use-toast';
 
 interface Customer {
-  id: string
-  code: string
-  name: string
-  taxId: string
-  address: string
-  phone: string
-  email: string
-  creditLimit: number
-  paymentTerms: number
-  contactPerson: string
-  status: 'active' | 'inactive'
+  id: string;
+  code: string;
+  name: string;
+  taxId: string;
+  address: string;
+  phone: string;
+  email: string;
+  creditLimit: number;
+  paymentTerms: number;
+  contactPerson: string;
+  status: 'active' | 'inactive';
 }
 
 interface CustomerEditDialogProps {
-  customer: Customer | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSuccess: () => void
+  customer: Customer | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
 }
 
 export function CustomerEditDialog({
@@ -53,7 +50,7 @@ export function CustomerEditDialog({
   onOpenChange,
   onSuccess,
 }: CustomerEditDialogProps) {
-  const { toast } = useToast()
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     taxId: '',
@@ -64,10 +61,10 @@ export function CustomerEditDialog({
     paymentTerms: 30,
     contactPerson: '',
     status: 'active' as 'active' | 'inactive',
-  })
-  const [hasTransactions, setHasTransactions] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  });
+  const [hasTransactions, setHasTransactions] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Pre-populate form when customer data changes
   useEffect(() => {
@@ -82,60 +79,62 @@ export function CustomerEditDialog({
         paymentTerms: customer.paymentTerms || 30,
         contactPerson: customer.contactPerson || '',
         status: customer.status || 'active',
-      })
+      });
       // Check if customer has transactions (this would be an API call in real implementation)
-      checkCustomerTransactions(customer.id)
+      checkCustomerTransactions(customer.id);
     }
-  }, [customer])
+  }, [customer]);
 
   const checkCustomerTransactions = async (customerId: string) => {
     try {
       // API call to check if customer has transactions
-      const response = await fetch(`/api/customers/${customerId}/has-transactions`, { credentials: 'include' })
+      const response = await fetch(`/api/customers/${customerId}/has-transactions`, {
+        credentials: 'include',
+      });
       if (response.ok) {
-        const data = await response.json()
-        setHasTransactions(data.hasTransactions)
+        const data = await response.json();
+        setHasTransactions(data.hasTransactions);
       }
     } catch (error) {
-      console.error('Error checking customer transactions:', error)
+      console.error('Error checking customer transactions:', error);
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     // Name required
     if (!formData.name.trim()) {
-      newErrors.name = 'กรุณาระบุชื่อ'
+      newErrors.name = 'กรุณาระบุชื่อ';
     }
 
     // Tax ID validation (must be 13 digits if provided)
     if (formData.taxId && !/^\d{13}$/.test(formData.taxId.replace(/-/g, ''))) {
-      newErrors.taxId = 'เลขประจำตัวผู้เสียภาษีต้องมี 13 หลัก'
+      newErrors.taxId = 'เลขประจำตัวผู้เสียภาษีต้องมี 13 หลัก';
     }
 
     // Email format validation
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'รูปแบบอีเมลไม่ถูกต้อง'
+      newErrors.email = 'รูปแบบอีเมลไม่ถูกต้อง';
     }
 
     // Credit limit validation
     if (formData.creditLimit < 0) {
-      newErrors.creditLimit = 'วงเงินเครดิตต้องไม่น้อยกว่า 0'
+      newErrors.creditLimit = 'วงเงินเครดิตต้องไม่น้อยกว่า 0';
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!customer) return
+    if (!customer) return;
 
     // Validate form
     if (!validateForm()) {
-      return
+      return;
     }
 
     // Check if trying to deactivate customer with transactions
@@ -144,67 +143,66 @@ export function CustomerEditDialog({
         title: 'ไม่สามารถระงับลูกค้าได้',
         description: 'ไม่สามารถระงับลูกค้าที่มีรายการแล้ว',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/customers/${customer.id}`, { credentials: 'include', 
+      const response = await fetch(`/api/customers/${customer.id}`, {
+        credentials: 'include',
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
-      })
+      });
 
       if (response.ok) {
         toast({
           title: 'บันทึกสำเร็จ',
           description: 'แก้ไขข้อมูลลูกค้าเรียบร้อยแล้ว',
-        })
-        onOpenChange(false)
-        onSuccess()
+        });
+        onOpenChange(false);
+        onSuccess();
       } else {
-        const error = await response.json()
+        const error = await response.json();
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: error.message || 'ไม่สามารถบันทึกข้อมูลได้',
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
-      console.error('Error updating customer:', error)
+      console.error('Error updating customer:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleInputChange = (field: string, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field when user starts typing
     if (errors[field]) {
       setErrors((prev) => {
-        const newErrors = { ...prev }
-        delete newErrors[field]
-        return newErrors
-      })
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <VisuallyHidden>
-          <DialogDescription>
-            Edit customer information dialog
-          </DialogDescription>
+          <DialogDescription>Edit customer information dialog</DialogDescription>
         </VisuallyHidden>
         <DialogHeader>
           <DialogTitle>แก้ไขข้อมูลลูกค้า</DialogTitle>
@@ -213,7 +211,7 @@ export function CustomerEditDialog({
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             {/* Customer Code (Read-only) */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="code" className="text-right">
                 รหัสลูกค้า
               </Label>
@@ -226,7 +224,7 @@ export function CustomerEditDialog({
             </div>
 
             {/* Name (Required) */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="name" className="text-right">
                 ชื่อลูกค้า <span className="text-red-500">*</span>
               </Label>
@@ -238,14 +236,12 @@ export function CustomerEditDialog({
                   placeholder="ชื่อบริษัท/ห้างหุ้นส่วน"
                   className={errors.name ? 'border-red-500' : ''}
                 />
-                {errors.name && (
-                  <p className="text-sm text-red-500">{errors.name}</p>
-                )}
+                {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
               </div>
             </div>
 
             {/* Tax ID */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="taxId" className="text-right">
                 เลขประจำตัวผู้เสียภาษี
               </Label>
@@ -258,14 +254,12 @@ export function CustomerEditDialog({
                   maxLength={13}
                   className={errors.taxId ? 'border-red-500' : ''}
                 />
-                {errors.taxId && (
-                  <p className="text-sm text-red-500">{errors.taxId}</p>
-                )}
+                {errors.taxId && <p className="text-sm text-red-500">{errors.taxId}</p>}
               </div>
             </div>
 
             {/* Address */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="address" className="text-right">
                 ที่อยู่
               </Label>
@@ -279,7 +273,7 @@ export function CustomerEditDialog({
             </div>
 
             {/* Phone */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="phone" className="text-right">
                 เบอร์โทรศัพท์
               </Label>
@@ -293,7 +287,7 @@ export function CustomerEditDialog({
             </div>
 
             {/* Email */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="email" className="text-right">
                 อีเมล
               </Label>
@@ -306,14 +300,12 @@ export function CustomerEditDialog({
                   placeholder="email@company.co.th"
                   className={errors.email ? 'border-red-500' : ''}
                 />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email}</p>
-                )}
+                {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
               </div>
             </div>
 
             {/* Credit Limit */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="creditLimit" className="text-right">
                 วงเงินเครดิต
               </Label>
@@ -328,14 +320,12 @@ export function CustomerEditDialog({
                   step="0.01"
                   className={errors.creditLimit ? 'border-red-500' : ''}
                 />
-                {errors.creditLimit && (
-                  <p className="text-sm text-red-500">{errors.creditLimit}</p>
-                )}
+                {errors.creditLimit && <p className="text-sm text-red-500">{errors.creditLimit}</p>}
               </div>
             </div>
 
             {/* Payment Terms */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="paymentTerms" className="text-right">
                 เครดิต (วัน)
               </Label>
@@ -351,7 +341,7 @@ export function CustomerEditDialog({
             </div>
 
             {/* Contact Person */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="contactPerson" className="text-right">
                 ผู้ติดต่อ
               </Label>
@@ -365,7 +355,7 @@ export function CustomerEditDialog({
             </div>
 
             {/* Status */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="status" className="text-right">
                 สถานะ
               </Label>
@@ -382,15 +372,13 @@ export function CustomerEditDialog({
                   {formData.status === 'active' ? 'ใช้งาน' : 'ระงับการใช้งาน'}
                 </Label>
                 {hasTransactions && formData.status === 'active' && (
-                  <p className="text-sm text-gray-500 ml-2">
-                    (ไม่สามารถระงับได้เนื่องจากมีรายการ)
-                  </p>
+                  <p className="ml-2 text-sm text-gray-500">(ไม่สามารถระงับได้เนื่องจากมีรายการ)</p>
                 )}
               </div>
             </div>
           </CardContent>
 
-          <div className="flex justify-end gap-2 mt-6">
+          <div className="mt-6 flex justify-end gap-2">
             <Button
               type="button"
               variant="outline"
@@ -406,5 +394,5 @@ export function CustomerEditDialog({
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

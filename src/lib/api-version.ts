@@ -1,7 +1,7 @@
 /**
  * API Version Management
  * Phase D: API Mastery - API Versioning
- * 
+ *
  * Features:
  * - URL-based versioning (/api/v1/, /api/v2/)
  * - Deprecation warnings
@@ -104,10 +104,7 @@ export function generateDeprecationHeader(version: string): string | null {
 /**
  * Version middleware - adds version headers and deprecation warnings
  */
-export function addVersionHeaders(
-  response: NextResponse,
-  version: string
-): NextResponse {
+export function addVersionHeaders(response: NextResponse, version: string): NextResponse {
   // Add API version header
   response.headers.set('X-API-Version', version);
   response.headers.set('X-API-Latest-Version', LATEST_VERSION);
@@ -120,10 +117,7 @@ export function addVersionHeaders(
   }
 
   // Add link to latest version
-  response.headers.set(
-    'Link',
-    `</api/${LATEST_VERSION}>; rel="latest-version"`
-  );
+  response.headers.set('Link', `</api/${LATEST_VERSION}>; rel="latest-version"`);
 
   return response;
 }
@@ -143,16 +137,25 @@ export function createVersionedResponse(
 /**
  * Get migration guide for a version transition
  */
-export function getMigrationGuide(fromVersion: string, toVersion: string): {
+export function getMigrationGuide(
+  fromVersion: string,
+  toVersion: string
+): {
   steps: string[];
   breakingChanges: string[];
   newFeatures: string[];
 } {
-  const guide: Record<string, Record<string, {
-    steps: string[];
-    breakingChanges: string[];
-    newFeatures: string[];
-  }>> = {
+  const guide: Record<
+    string,
+    Record<
+      string,
+      {
+        steps: string[];
+        breakingChanges: string[];
+        newFeatures: string[];
+      }
+    >
+  > = {
     v1: {
       v2: {
         steps: [
@@ -179,11 +182,13 @@ export function getMigrationGuide(fromVersion: string, toVersion: string): {
     },
   };
 
-  return guide[fromVersion]?.[toVersion] || {
-    steps: ['Contact support for migration assistance'],
-    breakingChanges: [],
-    newFeatures: [],
-  };
+  return (
+    guide[fromVersion]?.[toVersion] || {
+      steps: ['Contact support for migration assistance'],
+      breakingChanges: [],
+      newFeatures: [],
+    }
+  );
 }
 
 /**
@@ -198,11 +203,13 @@ export async function versionMiddleware(request: NextRequest) {
   }
 
   // Skip versioned routes and special routes
-  if (pathname.match(/^\/api\/v\d+\//) ||
-      pathname.startsWith('/api/auth/') ||
-      pathname.startsWith('/api/graphql') ||
-      pathname.startsWith('/api/docs') ||
-      pathname.startsWith('/api/analytics')) {
+  if (
+    pathname.match(/^\/api\/v\d+\//) ||
+    pathname.startsWith('/api/auth/') ||
+    pathname.startsWith('/api/graphql') ||
+    pathname.startsWith('/api/docs') ||
+    pathname.startsWith('/api/analytics')
+  ) {
     return NextResponse.next();
   }
 
@@ -213,7 +220,7 @@ export async function versionMiddleware(request: NextRequest) {
     const newPath = pathname.replace('/api/', `/api/${versionOverride}/`);
     const url = request.nextUrl.clone();
     url.pathname = newPath;
-    
+
     const response = NextResponse.rewrite(url);
     return addVersionHeaders(response, versionOverride);
   }
@@ -221,7 +228,7 @@ export async function versionMiddleware(request: NextRequest) {
   // Default to latest version for unversioned routes
   const response = NextResponse.next();
   response.headers.set('X-API-Latest-Version', LATEST_VERSION);
-  
+
   // Add deprecation warning for unversioned API usage
   if (pathname.startsWith('/api/') && !pathname.includes('/v')) {
     response.headers.set(

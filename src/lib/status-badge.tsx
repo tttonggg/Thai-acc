@@ -3,11 +3,11 @@
  * Ensures consistent badge colors and labels across all modules
  */
 
-import { Badge, BadgeProps } from '@/components/ui/badge'
+import { Badge, BadgeProps } from '@/components/ui/badge';
 
 export interface StatusConfig {
-  variant: BadgeProps['variant']
-  label: string
+  variant: BadgeProps['variant'];
+  label: string;
 }
 
 /**
@@ -74,14 +74,14 @@ export const statusConfig: Record<string, StatusConfig> = {
 
   // Payment-specific states
   UNPAID: { variant: 'outline', label: 'ยังไม่จ่าย' },
-}
+};
 
 /**
  * Get status badge props for a given status
  * Falls back to secondary variant and original status text if not found
  */
 export function getStatusBadgeProps(status: string): StatusConfig {
-  return statusConfig[status] || { variant: 'secondary', label: status }
+  return statusConfig[status] || { variant: 'secondary', label: status };
 }
 
 /**
@@ -89,13 +89,9 @@ export function getStatusBadgeProps(status: string): StatusConfig {
  * Renders a standardized badge for any status
  */
 export function StatusBadge({ status }: { status: string }) {
-  const config = getStatusBadgeProps(status)
+  const config = getStatusBadgeProps(status);
 
-  return (
-    <Badge variant={config.variant}>
-      {config.label}
-    </Badge>
-  )
+  return <Badge variant={config.variant}>{config.label}</Badge>;
 }
 
 /**
@@ -106,5 +102,5 @@ export function useStatusBadge() {
   return {
     getStatusBadgeProps,
     statusConfig,
-  }
+  };
 }

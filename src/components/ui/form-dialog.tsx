@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,23 +8,23 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 export interface FormDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title: string
-  description?: string
-  children: React.ReactNode
-  onSubmit: (e: React.FormEvent) => void | Promise<void>
-  loading?: boolean
-  submitLabel?: string
-  cancelLabel?: string
-  showFooter?: boolean
-  disableSubmit?: boolean
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  onSubmit: (e: React.FormEvent) => void | Promise<void>;
+  loading?: boolean;
+  submitLabel?: string;
+  cancelLabel?: string;
+  showFooter?: boolean;
+  disableSubmit?: boolean;
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
 const maxWidthClasses = {
@@ -33,7 +33,7 @@ const maxWidthClasses = {
   lg: 'sm:max-w-lg',
   xl: 'sm:max-w-xl',
   '2xl': 'sm:max-w-2xl',
-}
+};
 
 export function FormDialog({
   open,
@@ -50,9 +50,9 @@ export function FormDialog({
   maxWidth = 'lg',
 }: FormDialogProps) {
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await onSubmit(e)
-  }
+    e.preventDefault();
+    await onSubmit(e);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -76,8 +76,8 @@ export function FormDialog({
               >
                 {cancelLabel}
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading || disableSubmit}
                 aria-label={loading ? 'กำลังบันทึก' : submitLabel}
               >
@@ -95,5 +95,5 @@ export function FormDialog({
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

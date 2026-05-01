@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 // ============================================
 // 📦 Stock Take Management Page
@@ -6,73 +6,94 @@
 // Tabs: Stock Takes List | Variance Report
 // ============================================
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Package, ClipboardCheck, AlertCircle, CheckCircle2, Clock,
-  Plus, RefreshCw, Search, Filter, Eye, Check, Play, X,
-  Calendar, Building2
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
+  Package,
+  ClipboardCheck,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  Plus,
+  RefreshCw,
+  Search,
+  Filter,
+  Eye,
+  Check,
+  Play,
+  X,
+  Calendar,
+  Building2,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table'
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface StockTake {
-  id: string
-  stockTakeNumber: string
-  takeDate: string
+  id: string;
+  stockTakeNumber: string;
+  takeDate: string;
   warehouse: {
-    id: string
-    code: string
-    name: string
-  }
-  status: 'DRAFT' | 'IN_PROGRESS' | 'PENDING_APPROVAL' | 'APPROVED' | 'POSTED' | 'CANCELLED'
-  createdBy: string
-  createdByName?: string
-  approvedBy?: string
-  approvedByName?: string
-  approvedAt?: string
-  notes?: string
-  lines: StockTakeLine[]
-  totalVariance: number
-  createdAt: string
+    id: string;
+    code: string;
+    name: string;
+  };
+  status: 'DRAFT' | 'IN_PROGRESS' | 'PENDING_APPROVAL' | 'APPROVED' | 'POSTED' | 'CANCELLED';
+  createdBy: string;
+  createdByName?: string;
+  approvedBy?: string;
+  approvedByName?: string;
+  approvedAt?: string;
+  notes?: string;
+  lines: StockTakeLine[];
+  totalVariance: number;
+  createdAt: string;
 }
 
 interface StockTakeLine {
-  id: string
+  id: string;
   product: {
-    code: string
-    name: string
-    unit: string
-  }
-  expectedQty: number
-  actualQty: number
-  varianceQty: number
-  varianceValue: number
-  costPerUnit: number
-  notes?: string
+    code: string;
+    name: string;
+    unit: string;
+  };
+  expectedQty: number;
+  actualQty: number;
+  varianceQty: number;
+  varianceValue: number;
+  costPerUnit: number;
+  notes?: string;
 }
 
 interface Warehouse {
-  id: string
-  code: string
-  name: string
+  id: string;
+  code: string;
+  name: string;
 }
 
 interface StockTakeStats {
-  totalTakes: number
-  pendingApproval: number
-  totalVarianceValue: number
+  totalTakes: number;
+  pendingApproval: number;
+  totalVarianceValue: number;
 }
 
 // ─── Status Configuration ─────────────────────────────────────────────────────
@@ -84,160 +105,186 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   APPROVED: { label: 'อนุมัติแล้ว', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
   POSTED: { label: 'โพสต์แล้ว', color: 'bg-purple-100 text-purple-700', icon: CheckCircle2 },
   CANCELLED: { label: 'ยกเลิก', color: 'bg-red-100 text-red-700', icon: X },
-}
+};
 
-const fc = (n: number) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
-const fd = (d: string) => new Date(d).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: '2-digit' })
+const fc = (n: number) =>
+  new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+const fd = (d: string) =>
+  new Date(d).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: '2-digit' });
 
 // ─── Stock Takes List Tab ─────────────────────────────────────────────────────
 
 function StockTakesListTab() {
-  const [stockTakes, setStockTakes] = useState<StockTake[]>([])
-  const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState<StockTakeStats>({ totalTakes: 0, pendingApproval: 0, totalVarianceValue: 0 })
-  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-  const [showAdd, setShowAdd] = useState(false)
+  const [stockTakes, setStockTakes] = useState<StockTake[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<StockTakeStats>({
+    totalTakes: 0,
+    pendingApproval: 0,
+    totalVarianceValue: 0,
+  });
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [showAdd, setShowAdd] = useState(false);
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState<string>('ALL')
-  const [warehouseFilter, setWarehouseFilter] = useState<string>('ALL')
-  const [startDate, setStartDate] = useState<string>('')
-  const [endDate, setEndDate] = useState<string>('')
-  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [warehouseFilter, setWarehouseFilter] = useState<string>('ALL');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   const fetchAll = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const params = new URLSearchParams()
-      if (statusFilter !== 'ALL') params.append('status', statusFilter)
-      if (warehouseFilter !== 'ALL') params.append('warehouseId', warehouseFilter)
-      if (startDate) params.append('startDate', startDate)
-      if (endDate) params.append('endDate', endDate)
-      if (searchQuery) params.append('search', searchQuery)
+      const params = new URLSearchParams();
+      if (statusFilter !== 'ALL') params.append('status', statusFilter);
+      if (warehouseFilter !== 'ALL') params.append('warehouseId', warehouseFilter);
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (searchQuery) params.append('search', searchQuery);
 
       const [takesRes, whRes] = await Promise.all([
-        window.fetch(`/api/stock-takes?${params.toString()}`, { credentials: 'include' }).then(r => r.json()),
-        window.fetch(`/api/warehouses`, { credentials: 'include' }).then(r => r.json()),
-      ])
+        window
+          .fetch(`/api/stock-takes?${params.toString()}`, { credentials: 'include' })
+          .then((r) => r.json()),
+        window.fetch(`/api/warehouses`, { credentials: 'include' }).then((r) => r.json()),
+      ]);
 
       if (takesRes.success) {
-        const data = takesRes.data.data || takesRes.data
-        setStockTakes(data)
+        const data = takesRes.data.data || takesRes.data;
+        setStockTakes(data);
 
         // Calculate stats
-        const totalTakes = data.length
-        const pendingApproval = data.filter((t: StockTake) => t.status === 'PENDING_APPROVAL').length
-        const totalVarianceValue = data.reduce((sum: number, t: StockTake) => sum + (t.totalVariance || 0), 0)
+        const totalTakes = data.length;
+        const pendingApproval = data.filter(
+          (t: StockTake) => t.status === 'PENDING_APPROVAL'
+        ).length;
+        const totalVarianceValue = data.reduce(
+          (sum: number, t: StockTake) => sum + (t.totalVariance || 0),
+          0
+        );
 
-        setStats({ totalTakes, pendingApproval, totalVarianceValue })
+        setStats({ totalTakes, pendingApproval, totalVarianceValue });
       }
       if (whRes.success) {
-        setWarehouses(whRes.data)
+        setWarehouses(whRes.data);
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [statusFilter, warehouseFilter, startDate, endDate, searchQuery])
+  }, [statusFilter, warehouseFilter, startDate, endDate, searchQuery]);
 
-  useEffect(() => { fetchAll() }, [fetchAll])
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   const handleApprove = async (stockTake: StockTake) => {
     if (!confirm(`ยืนยันที่จะอนุมัติการตรวจนับเลขที่ ${stockTake.stockTakeNumber}?`)) {
-      return
+      return;
     }
 
     try {
-      const res = await window.fetch(`/api/stock-takes/${stockTake.id}/approve`, { credentials: 'include', 
-        method: 'POST',
-      }).then(r => r.json())
+      const res = await window
+        .fetch(`/api/stock-takes/${stockTake.id}/approve`, {
+          credentials: 'include',
+          method: 'POST',
+        })
+        .then((r) => r.json());
 
       if (res.success) {
         toast({
           title: 'อนุมัติสำเร็จ',
-          description: `การตรวจนับ ${stockTake.stockTakeNumber} ได้รับอนุมัติแล้ว`
-        })
-        fetchAll()
+          description: `การตรวจนับ ${stockTake.stockTakeNumber} ได้รับอนุมัติแล้ว`,
+        });
+        fetchAll();
       } else {
         toast({
           title: 'ไม่สามารถอนุมัติได้',
           description: res.error,
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'เกิดข้อผิดพลาดในการอนุมัติ',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   const handlePost = async (stockTake: StockTake) => {
-    if (!confirm(`ยืนยันที่จะโพสต์การตรวจนับเลขที่ ${stockTake.stockTakeNumber}?\n\nการดำเนินการนี้จะสร้างสมุดรายวันจัดทำคลังสินค้า`)) {
-      return
+    if (
+      !confirm(
+        `ยืนยันที่จะโพสต์การตรวจนับเลขที่ ${stockTake.stockTakeNumber}?\n\nการดำเนินการนี้จะสร้างสมุดรายวันจัดทำคลังสินค้า`
+      )
+    ) {
+      return;
     }
 
     try {
-      const res = await window.fetch(`/api/stock-takes/${stockTake.id}/post`, { credentials: 'include', 
-        method: 'POST',
-      }).then(r => r.json())
+      const res = await window
+        .fetch(`/api/stock-takes/${stockTake.id}/post`, { credentials: 'include', method: 'POST' })
+        .then((r) => r.json());
 
       if (res.success) {
         toast({
           title: 'โพสต์สำเร็จ',
-          description: `การตรวจนับ ${stockTake.stockTakeNumber} ถูกโพสต์เรียบร้อยแล้ว`
-        })
-        fetchAll()
+          description: `การตรวจนับ ${stockTake.stockTakeNumber} ถูกโพสต์เรียบร้อยแล้ว`,
+        });
+        fetchAll();
       } else {
         toast({
           title: 'ไม่สามารถโพสต์ได้',
           description: res.error,
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'เกิดข้อผิดพลาดในการโพสต์',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   const handleCancel = async (stockTake: StockTake) => {
-    if (!confirm(`ยืนยันที่จะยกเลิกการตรวจนับเลขที่ ${stockTake.stockTakeNumber}?\n\nการดำเนินการนี้ไม่สามารถย้อนกลับได้`)) {
-      return
+    if (
+      !confirm(
+        `ยืนยันที่จะยกเลิกการตรวจนับเลขที่ ${stockTake.stockTakeNumber}?\n\nการดำเนินการนี้ไม่สามารถย้อนกลับได้`
+      )
+    ) {
+      return;
     }
 
     try {
-      const res = await window.fetch(`/api/stock-takes/${stockTake.id}`, { credentials: 'include', 
-        method: 'DELETE',
-      }).then(r => r.json())
+      const res = await window
+        .fetch(`/api/stock-takes/${stockTake.id}`, { credentials: 'include', method: 'DELETE' })
+        .then((r) => r.json());
 
       if (res.success) {
         toast({
           title: 'ยกเลิกสำเร็จ',
-          description: `การตรวจนับ ${stockTake.stockTakeNumber} ถูกยกเลิกแล้ว`
-        })
-        fetchAll()
+          description: `การตรวจนับ ${stockTake.stockTakeNumber} ถูกยกเลิกแล้ว`,
+        });
+        fetchAll();
       } else {
         toast({
           title: 'ไม่สามารถยกเลิกได้',
           description: res.error,
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'เกิดข้อผิดพลาดในการยกเลิก',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -245,7 +292,7 @@ function StockTakesListTab() {
         <Skeleton className="h-32 w-full rounded-xl" />
         <Skeleton className="h-64 w-full rounded-xl" />
       </div>
-    )
+    );
   }
 
   return (
@@ -279,7 +326,9 @@ function StockTakesListTab() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500">ผลต่างรวม</p>
-                <p className={`text-2xl font-bold ${stats.totalVarianceValue < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                <p
+                  className={`text-2xl font-bold ${stats.totalVarianceValue < 0 ? 'text-red-600' : 'text-green-600'}`}
+                >
                   ฿{fc(Math.abs(stats.totalVarianceValue))}
                 </p>
               </div>
@@ -349,12 +398,15 @@ function StockTakesListTab() {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <ClipboardCheck className="h-4 w-4" />
               รายการตรวจนับสต็อก
             </CardTitle>
-            <Button size="sm" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
-              <Plus className="h-4 w-4 mr-1" />
+            <Button
+              size="sm"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+            >
+              <Plus className="mr-1 h-4 w-4" />
               เพิ่มการตรวจนับ
             </Button>
           </div>
@@ -374,14 +426,14 @@ function StockTakesListTab() {
             <TableBody>
               {stockTakes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={6} className="py-8 text-center text-gray-400">
                     ไม่พบรายการตรวจนับสต็อก
                   </TableCell>
                 </TableRow>
               ) : (
                 stockTakes.map((take) => {
-                  const statusConfig = STATUS_CONFIG[take.status] || STATUS_CONFIG.DRAFT
-                  const StatusIcon = statusConfig.icon
+                  const statusConfig = STATUS_CONFIG[take.status] || STATUS_CONFIG.DRAFT;
+                  const StatusIcon = statusConfig.icon;
 
                   return (
                     <TableRow key={take.id}>
@@ -391,24 +443,29 @@ function StockTakesListTab() {
                       <TableCell className="text-sm">{fd(take.takeDate)}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
-                          <Building2 className="h-3 w-3 mr-1" />
+                          <Building2 className="mr-1 h-3 w-3" />
                           {take.warehouse.code}
                         </Badge>
                         <span className="ml-2 text-sm text-gray-600">{take.warehouse.name}</span>
                       </TableCell>
                       <TableCell>
                         <Badge className={statusConfig.color}>
-                          <StatusIcon className="h-3 w-3 mr-1" />
+                          <StatusIcon className="mr-1 h-3 w-3" />
                           {statusConfig.label}
                         </Badge>
                       </TableCell>
-                      <TableCell className={`text-right font-semibold ${
-                        take.totalVariance < 0 ? 'text-red-600' : take.totalVariance > 0 ? 'text-green-600' : 'text-gray-600'
-                      }`}>
+                      <TableCell
+                        className={`text-right font-semibold ${
+                          take.totalVariance < 0
+                            ? 'text-red-600'
+                            : take.totalVariance > 0
+                              ? 'text-green-600'
+                              : 'text-gray-600'
+                        }`}
+                      >
                         {take.totalVariance !== 0 && (
                           <>
-                            {take.totalVariance < 0 ? '-' : '+'}
-                            ฿{fc(Math.abs(take.totalVariance))}
+                            {take.totalVariance < 0 ? '-' : '+'}฿{fc(Math.abs(take.totalVariance))}
                           </>
                         )}
                         {take.totalVariance === 0 && '—'}
@@ -459,7 +516,7 @@ function StockTakesListTab() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })
               )}
             </TableBody>
@@ -467,26 +524,28 @@ function StockTakesListTab() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 // ─── Variance Report Tab ───────────────────────────────────────────────────────
 
 function VarianceReportTab() {
-  const [variances, setVariances] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [warehouseFilter, setWarehouseFilter] = useState<string>('ALL')
-  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+  const [variances, setVariances] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [warehouseFilter, setWarehouseFilter] = useState<string>('ALL');
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
 
   const fetchAll = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const params = new URLSearchParams()
-      if (warehouseFilter !== 'ALL') params.append('warehouseId', warehouseFilter)
+      const params = new URLSearchParams();
+      if (warehouseFilter !== 'ALL') params.append('warehouseId', warehouseFilter);
 
-      const res = await window.fetch(`/api/stock-takes?${params.toString()}`, { credentials: 'include' }).then(r => r.json())
+      const res = await window
+        .fetch(`/api/stock-takes?${params.toString()}`, { credentials: 'include' })
+        .then((r) => r.json());
       if (res.success) {
-        const data = res.data.data || res.data
+        const data = res.data.data || res.data;
         // Flatten all lines from all stock takes
         const allLines = data.flatMap((take: StockTake) =>
           take.lines.map((line) => ({
@@ -496,23 +555,27 @@ function VarianceReportTab() {
             warehouse: take.warehouse,
             status: take.status,
           }))
-        )
-        setVariances(allLines)
+        );
+        setVariances(allLines);
       }
 
-      const whRes = await window.fetch(`/api/warehouses`, { credentials: 'include' }).then(r => r.json())
+      const whRes = await window
+        .fetch(`/api/warehouses`, { credentials: 'include' })
+        .then((r) => r.json());
       if (whRes.success) {
-        setWarehouses(whRes.data)
+        setWarehouses(whRes.data);
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [warehouseFilter])
+  }, [warehouseFilter]);
 
-  useEffect(() => { fetchAll() }, [fetchAll])
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   if (loading) {
-    return <Skeleton className="h-64 w-full rounded-xl" />
+    return <Skeleton className="h-64 w-full rounded-xl" />;
   }
 
   return (
@@ -541,7 +604,7 @@ function VarianceReportTab() {
       {/* Variance Report Table */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-base">
             <AlertCircle className="h-4 w-4" />
             รายงานผลต่างการตรวจนับ
           </CardTitle>
@@ -563,7 +626,7 @@ function VarianceReportTab() {
             <TableBody>
               {variances.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-gray-400 py-8">
+                  <TableCell colSpan={8} className="py-8 text-center text-gray-400">
                     ไม่พบรายการผลต่าง
                   </TableCell>
                 </TableRow>
@@ -583,11 +646,21 @@ function VarianceReportTab() {
                         {line.warehouse.code}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">{fc(line.expectedQty)} {line.product.unit}</TableCell>
-                    <TableCell className="text-right">{fc(line.actualQty)} {line.product.unit}</TableCell>
-                    <TableCell className={`text-right font-semibold ${
-                      line.varianceQty < 0 ? 'text-red-600' : line.varianceQty > 0 ? 'text-green-600' : 'text-gray-600'
-                    }`}>
+                    <TableCell className="text-right">
+                      {fc(line.expectedQty)} {line.product.unit}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {fc(line.actualQty)} {line.product.unit}
+                    </TableCell>
+                    <TableCell
+                      className={`text-right font-semibold ${
+                        line.varianceQty < 0
+                          ? 'text-red-600'
+                          : line.varianceQty > 0
+                            ? 'text-green-600'
+                            : 'text-gray-600'
+                      }`}
+                    >
                       {line.varianceQty !== 0 && (
                         <>
                           {line.varianceQty < 0 ? '-' : '+'}
@@ -596,13 +669,18 @@ function VarianceReportTab() {
                       )}
                       {line.varianceQty === 0 && '—'}
                     </TableCell>
-                    <TableCell className={`text-right font-semibold ${
-                      line.varianceValue < 0 ? 'text-red-600' : line.varianceValue > 0 ? 'text-green-600' : 'text-gray-600'
-                    }`}>
+                    <TableCell
+                      className={`text-right font-semibold ${
+                        line.varianceValue < 0
+                          ? 'text-red-600'
+                          : line.varianceValue > 0
+                            ? 'text-green-600'
+                            : 'text-gray-600'
+                      }`}
+                    >
                       {line.varianceValue !== 0 && (
                         <>
-                          {line.varianceValue < 0 ? '-' : '+'}
-                          ฿{fc(Math.abs(line.varianceValue))}
+                          {line.varianceValue < 0 ? '-' : '+'}฿{fc(Math.abs(line.varianceValue))}
                         </>
                       )}
                       {line.varianceValue === 0 && '—'}
@@ -615,22 +693,22 @@ function VarianceReportTab() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function StockTakePage() {
-  const [tab, setTab] = useState<'list' | 'variance'>('list')
+  const [tab, setTab] = useState<'list' | 'variance'>('list');
   const tabs = [
     { id: 'list' as const, label: 'รายการตรวจนับ', icon: ClipboardCheck },
     { id: 'variance' as const, label: 'รายงานผลต่าง', icon: AlertCircle },
-  ]
+  ];
 
   return (
     <div className="space-y-0">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">การตรวจนับสต็อก (Stock Take)</h1>
           <p className="text-sm text-gray-500">ระบบตรวจนับสินค้าคงคลังและรายงานผลต่าง</p>
@@ -638,16 +716,16 @@ export function StockTakePage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b mb-6">
+      <div className="mb-6 border-b">
         <nav className="flex gap-1">
           {tabs.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
                 tab === t.id
-                  ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50/50'
+                  ? 'border-blue-600 bg-blue-50/50 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:bg-gray-50/50 hover:text-gray-700'
               }`}
             >
               <t.icon className="h-4 w-4" />
@@ -661,5 +739,5 @@ export function StockTakePage() {
       {tab === 'list' && <StockTakesListTab />}
       {tab === 'variance' && <VarianceReportTab />}
     </div>
-  )
+  );
 }

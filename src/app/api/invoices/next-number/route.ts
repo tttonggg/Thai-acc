@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { requireAuth } from '@/lib/api-utils'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { requireAuth } from '@/lib/api-utils';
 
 /**
  * GET /api/invoices/next-number
@@ -10,14 +10,14 @@ import { requireAuth } from '@/lib/api-utils'
 export async function GET(request: NextRequest) {
   try {
     // Require authentication
-    await requireAuth()
+    await requireAuth();
 
     // Get current Thai year (Buddhist era)
-    const now = new Date()
-    const thaiYear = now.getFullYear() + 543 // Convert to Buddhist year
+    const now = new Date();
+    const thaiYear = now.getFullYear() + 543; // Convert to Buddhist year
 
     // Build prefix pattern
-    const prefix = `INV-${thaiYear}`
+    const prefix = `INV-${thaiYear}`;
 
     // Find last invoice number for this year
     const lastInvoice = await prisma.invoice.findFirst({
@@ -32,31 +32,30 @@ export async function GET(request: NextRequest) {
       select: {
         invoiceNo: true,
       },
-    })
+    });
 
-    let nextNum = 1
+    let nextNum = 1;
     if (lastInvoice) {
       // Extract the number part from the last invoice
-      const parts = lastInvoice.invoiceNo.split('-')
-      const lastNum = parseInt(parts[parts.length - 1] || '0', 10)
-      nextNum = lastNum + 1
+      const parts = lastInvoice.invoiceNo.split('-');
+      const lastNum = parseInt(parts[parts.length - 1] || '0', 10);
+      nextNum = lastNum + 1;
     }
 
     // Format the invoice number with zero padding
-    const invoiceNo = `${prefix}-${String(nextNum).padStart(4, '0')}`
+    const invoiceNo = `${prefix}-${String(nextNum).padStart(4, '0')}`;
 
     return NextResponse.json({
       success: true,
       invoiceNo,
-    })
+    });
   } catch (error: any) {
-
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(
         { success: false, error: error.message || 'กรุณาเข้าสู่ระบบ' },
         { status: error.statusCode || 401 }
-      )
+      );
     }
 
     // Handle other errors
@@ -66,6 +65,6 @@ export async function GET(request: NextRequest) {
         error: 'เกิดข้อผิดพลาดในการสร้างเลขที่ใบกำกับภาษี',
       },
       { status: 500 }
-    )
+    );
   }
 }

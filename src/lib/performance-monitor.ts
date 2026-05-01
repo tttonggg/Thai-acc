@@ -46,12 +46,7 @@ class PerformanceMonitor {
     return Date.now();
   }
 
-  endRequest(
-    startTime: number,
-    path: string,
-    method: string,
-    statusCode: number
-  ): number {
+  endRequest(startTime: number, path: string, method: string, statusCode: number): number {
     const duration = Date.now() - startTime;
 
     // Safely get memory usage only in Node.js server environment
@@ -59,10 +54,12 @@ class PerformanceMonitor {
     let memoryUsage: NodeJS.MemoryUsage | undefined;
     try {
       // Check for Node.js environment (not Edge, not browser)
-      if (typeof process !== 'undefined' &&
-          process.versions &&
-          process.versions.node &&
-          typeof process.memoryUsage === 'function') {
+      if (
+        typeof process !== 'undefined' &&
+        process.versions &&
+        process.versions.node &&
+        typeof process.memoryUsage === 'function'
+      ) {
         memoryUsage = process.memoryUsage();
       }
     } catch {
@@ -139,9 +136,7 @@ class PerformanceMonitor {
     let filteredMetrics = this.metrics;
 
     if (path) {
-      filteredMetrics = this.metrics.filter(
-        (m) => m.path === path || m.path.startsWith(path)
-      );
+      filteredMetrics = this.metrics.filter((m) => m.path === path || m.path.startsWith(path));
     }
 
     if (filteredMetrics.length === 0) {
@@ -160,9 +155,7 @@ class PerformanceMonitor {
       p95: sortedDurations[Math.floor(sortedDurations.length * 0.95)],
       p99: sortedDurations[Math.floor(sortedDurations.length * 0.99)],
       successRate:
-        (filteredMetrics.filter((m) => m.statusCode < 400).length /
-          filteredMetrics.length) *
-        100,
+        (filteredMetrics.filter((m) => m.statusCode < 400).length / filteredMetrics.length) * 100,
     };
   }
 
@@ -181,10 +174,7 @@ class PerformanceMonitor {
     avgDuration: number;
     count: number;
   }> {
-    const pathMap = new Map<
-      string,
-      { totalDuration: number; count: number }
-    >();
+    const pathMap = new Map<string, { totalDuration: number; count: number }>();
 
     this.metrics.forEach((m) => {
       const existing = pathMap.get(m.path) || {

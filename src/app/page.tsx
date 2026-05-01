@@ -1,62 +1,58 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
-import { signOut } from 'next-auth/react'
-import { useAuthStore } from '@/stores/auth-store'
-import { KeeratiSidebar } from '@/components/layout/keerati-sidebar'
-import { Dashboard } from '@/components/dashboard/dashboard'
-import { EntityManagement } from '@/components/entities/entity-management'
-import { CurrencyManagement } from '@/components/currencies/currency-management'
-import { ChartOfAccounts } from '@/components/accounts/chart-of-accounts'
-import { JournalEntry } from '@/components/journal/journal-entry'
-import { InvoiceList } from '@/components/invoices/invoice-list'
-import { InvoiceDetailPage } from '@/components/invoices/invoice-detail-page'
-import { VatReport } from '@/components/vat/vat-report'
-import { WhtWithTabs } from '@/components/wht/wht-with-tabs'
-import { CustomerList } from '@/components/ar/customer-list'
-import { VendorList } from '@/components/ap/vendor-list'
-import { PaymentList } from '@/components/payments/payment-list'
-import { CreditNoteList } from '@/components/credit-notes/credit-note-list'
-import { DebitNoteList } from '@/components/debit-notes/debit-note-list'
-import { InventoryPage } from '@/components/inventory/inventory-page'
-import { BankingPage } from '@/components/banking/banking-page'
-import { AssetsPage } from '@/components/assets/assets-page'
-import { PayrollPage } from '@/components/payroll/payroll-page'
-import { ProvidentFundManagement } from '@/components/payroll/provident-fund-management'
-import { LeaveManagement } from '@/components/leave/leave-management'
-import { PettyCashPage } from '@/components/petty-cash/petty-cash-page'
-import { ProductsPage } from '@/components/products/products-page'
-import { StockTakePage } from '@/components/stock-takes/stock-take-page'
-import { PurchaseRequestList } from '@/components/purchase-requests/purchase-request-list'
-import { PurchaseOrderList } from '@/components/purchase-orders/purchase-order-list'
-import { PurchaseList } from '@/components/purchases/purchase-list'
-import { QuotationList } from '@/components/quotations/quotation-list'
-import { GoodsReceiptNotesList } from '@/components/goods-receipt-notes'
-import { ReceiptList } from '@/components/receipts/receipt-list'
-import { Reports } from '@/components/reports/reports'
-import { CashFlowReport } from '@/components/reports/cash-flow-report'
-import { PeriodManagement } from '@/components/accounting-periods/period-management'
-import { BudgetManagement } from '@/components/budgets/budget-management'
-import { Settings } from '@/components/settings/settings'
-import { LoginPage } from '@/components/auth/login-page'
-import { UserManagement } from '@/components/auth/user-management'
-import { PermissionGuard } from '@/components/auth/permission-guard'
-import { eventBus, EVENTS } from '@/lib/events'
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from '@/components/ui/sheet'
-import { DataExportPage } from '@/components/admin/data-export-page'
-import { BackupRestorePage } from '@/components/admin/backup-restore-page'
-import { DataImportPage } from '@/components/admin/data-import-page'
-import { ActivityLogPage } from '@/components/admin/activity-log-page'
-import { RoleManagement } from '@/components/admin/role-management/role-management'
-import { ApproverConfig } from '@/components/admin/approver-config/approver-config'
-import { WebhookManagement, ApiAnalytics } from '@/components/admin'
-import { RecurringDocuments } from '@/components/recurring/recurring-documents'
-import { SSOFiling } from '@/components/payroll/sso-filing'
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { signOut } from 'next-auth/react';
+import { useAuthStore } from '@/stores/auth-store';
+import { KeeratiSidebar } from '@/components/layout/keerati-sidebar';
+import { Dashboard } from '@/components/dashboard/dashboard';
+import { EntityManagement } from '@/components/entities/entity-management';
+import { CurrencyManagement } from '@/components/currencies/currency-management';
+import { ChartOfAccounts } from '@/components/accounts/chart-of-accounts';
+import { JournalEntry } from '@/components/journal/journal-entry';
+import { InvoiceList } from '@/components/invoices/invoice-list';
+import { InvoiceDetailPage } from '@/components/invoices/invoice-detail-page';
+import { VatReport } from '@/components/vat/vat-report';
+import { WhtWithTabs } from '@/components/wht/wht-with-tabs';
+import { CustomerList } from '@/components/ar/customer-list';
+import { VendorList } from '@/components/ap/vendor-list';
+import { PaymentList } from '@/components/payments/payment-list';
+import { CreditNoteList } from '@/components/credit-notes/credit-note-list';
+import { DebitNoteList } from '@/components/debit-notes/debit-note-list';
+import { InventoryPage } from '@/components/inventory/inventory-page';
+import { BankingPage } from '@/components/banking/banking-page';
+import { AssetsPage } from '@/components/assets/assets-page';
+import { PayrollPage } from '@/components/payroll/payroll-page';
+import { ProvidentFundManagement } from '@/components/payroll/provident-fund-management';
+import { LeaveManagement } from '@/components/leave/leave-management';
+import { PettyCashPage } from '@/components/petty-cash/petty-cash-page';
+import { ProductsPage } from '@/components/products/products-page';
+import { StockTakePage } from '@/components/stock-takes/stock-take-page';
+import { PurchaseRequestList } from '@/components/purchase-requests/purchase-request-list';
+import { PurchaseOrderList } from '@/components/purchase-orders/purchase-order-list';
+import { PurchaseList } from '@/components/purchases/purchase-list';
+import { QuotationList } from '@/components/quotations/quotation-list';
+import { GoodsReceiptNotesList } from '@/components/goods-receipt-notes';
+import { ReceiptList } from '@/components/receipts/receipt-list';
+import { Reports } from '@/components/reports/reports';
+import { CashFlowReport } from '@/components/reports/cash-flow-report';
+import { PeriodManagement } from '@/components/accounting-periods/period-management';
+import { BudgetManagement } from '@/components/budgets/budget-management';
+import { Settings } from '@/components/settings/settings';
+import { LoginPage } from '@/components/auth/login-page';
+import { UserManagement } from '@/components/auth/user-management';
+import { PermissionGuard } from '@/components/auth/permission-guard';
+import { eventBus, EVENTS } from '@/lib/events';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { DataExportPage } from '@/components/admin/data-export-page';
+import { BackupRestorePage } from '@/components/admin/backup-restore-page';
+import { DataImportPage } from '@/components/admin/data-import-page';
+import { ActivityLogPage } from '@/components/admin/activity-log-page';
+import { RoleManagement } from '@/components/admin/role-management/role-management';
+import { ApproverConfig } from '@/components/admin/approver-config/approver-config';
+import { WebhookManagement, ApiAnalytics } from '@/components/admin';
+import { RecurringDocuments } from '@/components/recurring/recurring-documents';
+import { SSOFiling } from '@/components/payroll/sso-filing';
 import {
   Loader2,
   LayoutDashboard,
@@ -87,7 +83,7 @@ import {
   BarChart,
   Menu,
   Shield,
-} from 'lucide-react'
+} from 'lucide-react';
 
 export type Module =
   | 'dashboard'
@@ -136,102 +132,102 @@ export type Module =
   | 'entities'
   | 'currencies'
   | 'accounting-periods'
-  | 'budgets'
+  | 'budgets';
 
 export default function Home() {
-  const { data: session, status } = useSession()
-  const store = useAuthStore()
-  const [activeModule, setActiveModule] = useState<Module>('dashboard')
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { data: session, status } = useSession();
+  const store = useAuthStore();
+  const [activeModule, setActiveModule] = useState<Module>('dashboard');
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Fetch permissions on mount and store in auth - MUST be at top level
   useEffect(() => {
-    const { setUser, setPermissions } = useAuthStore.getState()
+    const { setUser, setPermissions } = useAuthStore.getState();
     async function loadPermissions() {
       try {
-        const permsRes = await fetch('/api/admin/permissions/my')
-        const permsData = await permsRes.json()
-        const perms = permsData.data?.permissions || []
-        setPermissions(perms)
+        const permsRes = await fetch('/api/admin/permissions/my');
+        const permsData = await permsRes.json();
+        const perms = permsData.data?.permissions || [];
+        setPermissions(perms);
       } catch (e) {
-        console.error('Failed to load permissions', e)
+        console.error('Failed to load permissions', e);
       }
     }
     if (session?.user) {
-      const userRole = session.user.role as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER'
+      const userRole = session.user.role as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER';
       setUser({
         id: session.user.id,
         email: session.user.email || '',
         name: session.user.name || null,
         role: userRole,
         isActive: true,
-      })
-      loadPermissions()
+      });
+      loadPermissions();
     }
-  }, [session])
+  }, [session]);
 
   // Sync URL with activeModule using history API (doesn't trigger Next.js routing)
   useEffect(() => {
     if (status === 'authenticated') {
       // Map module to URL path
       const moduleToPath: Record<Module, string> = {
-        'dashboard': '/',
-        'accounts': '/accounts',
-        'journal': '/journal',
-        'invoices': '/invoices',
-        'quotations': '/quotations',
-        'receipts': '/receipts',
-        'vat': '/vat',
-        'wht': '/wht',
-        'customers': '/customers',
-        'vendors': '/vendors',
+        dashboard: '/',
+        accounts: '/accounts',
+        journal: '/journal',
+        invoices: '/invoices',
+        quotations: '/quotations',
+        receipts: '/receipts',
+        vat: '/vat',
+        wht: '/wht',
+        customers: '/customers',
+        vendors: '/vendors',
         'purchase-requests': '/purchase-requests',
         'purchase-orders': '/purchase-orders',
-        'purchases': '/purchases',
+        purchases: '/purchases',
         'goods-receipt-notes': '/goods-receipt-notes',
-        'payments': '/payments',
+        payments: '/payments',
         'credit-notes': '/credit-notes',
         'debit-notes': '/debit-notes',
-        'inventory': '/inventory',
-        'products': '/products',
-        'warehouses': '/warehouses',
+        inventory: '/inventory',
+        products: '/products',
+        warehouses: '/warehouses',
         'stock-takes': '/stock-takes',
-        'banking': '/banking',
-        'assets': '/assets',
-        'payroll': '/payroll',
-        'leave': '/leave',
+        banking: '/banking',
+        assets: '/assets',
+        payroll: '/payroll',
+        leave: '/leave',
         'provident-fund': '/provident-fund',
-        'employees': '/employees',
+        employees: '/employees',
         'petty-cash': '/petty-cash',
         'sso-filing': '/sso-filing',
-        'reports': '/reports',
-        'settings': '/settings',
-        'users': '/users',
+        reports: '/reports',
+        settings: '/settings',
+        users: '/users',
         'data-export': '/data-export',
         'data-import': '/data-import',
         'backup-restore': '/backup-restore',
         'activity-log': '/activity-log',
-        'webhooks': '/webhooks',
+        webhooks: '/webhooks',
         'api-analytics': '/api-analytics',
         'role-management': '/role-management',
-        'recurring': '/recurring',
+        recurring: '/recurring',
         'cash-flow': '/cash-flow',
         'invoice-detail': '/invoices',
         'approver-config': '/approver-config',
-        'entities': '/entities',
-        'currencies': '/currencies',
+        entities: '/entities',
+        currencies: '/currencies',
         'accounting-periods': '/accounting-periods',
-        'budgets': '/budgets',
-      }
+        budgets: '/budgets',
+      };
 
       // Update URL when activeModule changes (using history API to avoid Next.js routing)
-      const targetPath = moduleToPath[activeModule]
+      const targetPath = moduleToPath[activeModule];
       if (targetPath && window.location.pathname !== targetPath) {
-        window.history.pushState({ path: targetPath }, '', targetPath)
+        window.history.pushState({ path: targetPath }, '', targetPath);
       }
     }
-  }, [activeModule, status])
+  }, [activeModule, status]);
 
   // Initialize activeModule from URL on mount and handle browser navigation
   useEffect(() => {
@@ -282,236 +278,232 @@ export default function Home() {
         '/currencies': 'currencies',
         '/accounting-periods': 'accounting-periods',
         '/budgets': 'budgets',
-      }
+      };
 
       const handlePopState = () => {
-        const pathname = window.location.pathname
+        const pathname = window.location.pathname;
 
         // Check if it's an invoice detail URL
-        const invoiceDetailMatch = pathname.match(/^\/invoices\/([^\/]+)$/)
+        const invoiceDetailMatch = pathname.match(/^\/invoices\/([^\/]+)$/);
         if (invoiceDetailMatch) {
-          const invoiceId = invoiceDetailMatch[1]
-          setActiveModule('invoice-detail')
-          setSelectedInvoiceId(invoiceId)
-          return
+          const invoiceId = invoiceDetailMatch[1];
+          setActiveModule('invoice-detail');
+          setSelectedInvoiceId(invoiceId);
+          return;
         }
 
-        const moduleFromPath = pathToModule[pathname] || 'dashboard'
-        setActiveModule(moduleFromPath)
-        setSelectedInvoiceId(null)
-      }
+        const moduleFromPath = pathToModule[pathname] || 'dashboard';
+        setActiveModule(moduleFromPath);
+        setSelectedInvoiceId(null);
+      };
 
       // Set initial module from current URL
-      handlePopState()
+      handlePopState();
 
       // Listen for browser back/forward navigation
-      window.addEventListener('popstate', handlePopState)
-      return () => window.removeEventListener('popstate', handlePopState)
+      window.addEventListener('popstate', handlePopState);
+      return () => window.removeEventListener('popstate', handlePopState);
     }
-  }, [status])
+  }, [status]);
 
   // Listen for invoice detail view events from child components
   useEffect(() => {
     const handleViewDetail = (invoiceId: string) => {
-      setActiveModule('invoice-detail')
-      setSelectedInvoiceId(invoiceId)
-      window.history.pushState({ path: `/invoices/${invoiceId}` }, '', `/invoices/${invoiceId}`)
-    }
-    eventBus.on(EVENTS.INVOICE_VIEW_DETAIL, handleViewDetail)
-    return () => eventBus.off(EVENTS.INVOICE_VIEW_DETAIL, handleViewDetail)
-  }, [])
+      setActiveModule('invoice-detail');
+      setSelectedInvoiceId(invoiceId);
+      window.history.pushState({ path: `/invoices/${invoiceId}` }, '', `/invoices/${invoiceId}`);
+    };
+    eventBus.on(EVENTS.INVOICE_VIEW_DETAIL, handleViewDetail);
+    return () => eventBus.off(EVENTS.INVOICE_VIEW_DETAIL, handleViewDetail);
+  }, []);
 
   // Loading state
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto" />
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
           <p className="mt-4 text-gray-600">กำลังโหลด...</p>
         </div>
       </div>
-    )
+    );
   }
 
   // Not authenticated - show login page
   if (status === 'unauthenticated' || !session) {
-    return <LoginPage />
+    return <LoginPage />;
   }
 
   // Authenticated - show main app
-  const userRole = session.user?.role as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER'
+  const userRole = session.user?.role as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER';
 
   const renderModule = () => {
     switch (activeModule) {
       case 'dashboard':
-        return <Dashboard setActiveModule={setActiveModule} />
+        return <Dashboard setActiveModule={setActiveModule} />;
       case 'accounts':
-        return <ChartOfAccounts />
+        return <ChartOfAccounts />;
       case 'journal':
-        return <JournalEntry />
+        return <JournalEntry />;
       case 'invoices':
-        return <InvoiceList />
+        return <InvoiceList />;
       case 'invoice-detail':
         return selectedInvoiceId ? (
           <InvoiceDetailPage
             invoiceId={selectedInvoiceId}
             onBack={() => {
-              setActiveModule('invoices')
-              setSelectedInvoiceId(null)
-              window.history.pushState({ path: '/invoices' }, '', '/invoices')
+              setActiveModule('invoices');
+              setSelectedInvoiceId(null);
+              window.history.pushState({ path: '/invoices' }, '', '/invoices');
             }}
             onEdit={(invoiceId) => {
               // Open edit dialog
               // This will be handled by the InvoiceList component
-              window.location.href = `/invoices?edit=${invoiceId}`
+              window.location.href = `/invoices?edit=${invoiceId}`;
             }}
           />
-        ) : null
+        ) : null;
       case 'quotations':
-        return <QuotationList />
+        return <QuotationList />;
       case 'receipts':
-        return <ReceiptList />
+        return <ReceiptList />;
       case 'vat':
-        return <VatReport />
+        return <VatReport />;
       case 'wht':
-        return <WhtWithTabs />
+        return <WhtWithTabs />;
 
       case 'customers':
-        return <CustomerList />
+        return <CustomerList />;
       case 'vendors':
-        return <VendorList />
+        return <VendorList />;
       case 'purchase-requests':
-        return <PurchaseRequestList />
+        return <PurchaseRequestList />;
       case 'purchase-orders':
-        return <PurchaseOrderList />
+        return <PurchaseOrderList />;
       case 'purchases':
-        return <PurchaseList />
+        return <PurchaseList />;
       case 'goods-receipt-notes':
-        return <GoodsReceiptNotesList />
+        return <GoodsReceiptNotesList />;
       case 'payments':
-        return <PaymentList />
+        return <PaymentList />;
       case 'credit-notes':
-        return <CreditNoteList />
+        return <CreditNoteList />;
       case 'debit-notes':
-        return <DebitNoteList />
+        return <DebitNoteList />;
       case 'inventory':
-        return <InventoryPage key="inventory" />
+        return <InventoryPage key="inventory" />;
       case 'products':
-        return <ProductsPage key="products" />
+        return <ProductsPage key="products" />;
       case 'warehouses':
-        return <InventoryPage key="warehouses" initialTab="warehouses" />
+        return <InventoryPage key="warehouses" initialTab="warehouses" />;
       case 'stock-takes':
         return (
           <PermissionGuard permission="INVENTORY_VIEW">
             <StockTakePage />
           </PermissionGuard>
-        )
+        );
       case 'banking':
-        return <BankingPage />
+        return <BankingPage />;
       case 'assets':
-        return <AssetsPage />
+        return <AssetsPage />;
       case 'payroll':
-        return <PayrollPage key="payroll" initialTab="runs" />
+        return <PayrollPage key="payroll" initialTab="runs" />;
       case 'leave':
-        return <LeaveManagement />
+        return <LeaveManagement />;
       case 'provident-fund':
-        return <ProvidentFundManagement />
+        return <ProvidentFundManagement />;
       case 'employees':
-        return <PayrollPage key="employees" initialTab="employees" />
+        return <PayrollPage key="employees" initialTab="employees" />;
       case 'petty-cash':
-        return <PettyCashPage />
+        return <PettyCashPage />;
       case 'sso-filing':
-        return <SSOFiling />
+        return <SSOFiling />;
       case 'reports':
-        return <Reports />
+        return <Reports />;
       case 'settings':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
             <Settings />
           </PermissionGuard>
-        )
+        );
       case 'users':
         return (
           <PermissionGuard permission="USER_MANAGEMENT">
             <UserManagement />
           </PermissionGuard>
-        )
+        );
       case 'data-export':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
             <DataExportPage />
           </PermissionGuard>
-        )
+        );
       case 'data-import':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
             <DataImportPage />
           </PermissionGuard>
-        )
+        );
       case 'backup-restore':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
             <BackupRestorePage />
           </PermissionGuard>
-        )
+        );
       case 'activity-log':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
             <ActivityLogPage />
           </PermissionGuard>
-        )
+        );
       case 'webhooks':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
             <WebhookManagement />
           </PermissionGuard>
-        )
+        );
       case 'api-analytics':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
             <ApiAnalytics />
           </PermissionGuard>
-        )
+        );
       case 'role-management':
-        return (
-          <RoleManagement />
-        )
+        return <RoleManagement />;
       case 'approver-config':
-        return (
-          <ApproverConfig />
-        )
+        return <ApproverConfig />;
       case 'entities':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
             <EntityManagement />
           </PermissionGuard>
-        )
+        );
       case 'currencies':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
             <CurrencyManagement />
           </PermissionGuard>
-        )
+        );
       case 'accounting-periods':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
             <PeriodManagement />
           </PermissionGuard>
-        )
+        );
       case 'budgets':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
             <BudgetManagement />
           </PermissionGuard>
-        )
+        );
       case 'recurring':
-        return <RecurringDocuments />
+        return <RecurringDocuments />;
       case 'cash-flow':
-        return <CashFlowReport />
+        return <CashFlowReport />;
       default:
-        return <Dashboard />
+        return <Dashboard />;
     }
-  }
+  };
 
   // Filter menu items based on role
   const getMenuItems = () => {
@@ -543,29 +535,29 @@ export default function Home() {
       { id: 'activity-log' as Module, label: 'บันทึกกิจกรรม', icon: Activity, adminOnly: true },
       { id: 'webhooks' as Module, label: 'Webhooks', icon: Webhook, adminOnly: true },
       { id: 'api-analytics' as Module, label: 'API Analytics', icon: BarChart, adminOnly: true },
-    ]
+    ];
 
     if (userRole === 'ADMIN') {
-      return allItems
+      return allItems;
     }
 
-    return allItems.filter(item => !item.adminOnly)
-  }
+    return allItems.filter((item) => !item.adminOnly);
+  };
 
   return (
     <div className="flex h-screen bg-slate-950">
       {/* Mobile Hamburger Menu */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
+      <div className="fixed left-4 top-4 z-50 md:hidden">
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild>
             <button
-              className="p-2 bg-background border border-border rounded-lg shadow-sm"
+              className="rounded-lg border border-border bg-background p-2 shadow-sm"
               aria-label="เปิดเมนู"
             >
               <Menu size={24} className="text-foreground" />
             </button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-80">
+          <SheetContent side="left" className="w-80 p-0">
             <KeeratiSidebar
               activeModule={activeModule}
               setActiveModule={setActiveModule}
@@ -592,12 +584,10 @@ export default function Home() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-[var(--background)] md:pt-0 pt-16">
+      <div className="flex flex-1 flex-col overflow-hidden bg-[var(--background)] pt-16 md:pt-0">
         {/* Content Area */}
-        <main className="flex-1 overflow-auto p-6">
-          {renderModule()}
-        </main>
+        <main className="flex-1 overflow-auto p-6">{renderModule()}</main>
       </div>
     </div>
-  )
+  );
 }

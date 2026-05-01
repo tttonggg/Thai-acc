@@ -1,18 +1,18 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -20,69 +20,63 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import {
-  Package,
-  DollarSign,
-  Warehouse,
-  History,
-  FileText
-} from 'lucide-react'
+} from '@/components/ui/table';
+import { Package, DollarSign, Warehouse, History, FileText } from 'lucide-react';
 
 interface Product {
-  id: string
-  code: string
-  name: string
-  nameEn?: string
-  description?: string
-  category?: string
-  unit: string
-  type: 'PRODUCT' | 'SERVICE'
-  salePrice: number
-  costPrice: number
-  vatRate: number
-  vatType: 'EXCLUSIVE' | 'INCLUSIVE' | 'NONE'
-  isInventory: boolean
-  quantity: number
-  minQuantity: number
-  incomeType?: string
-  costingMethod: 'WEIGHTED_AVERAGE' | 'FIFO'
-  isActive: boolean
-  notes?: string
-  createdAt?: string
-  updatedAt?: string
+  id: string;
+  code: string;
+  name: string;
+  nameEn?: string;
+  description?: string;
+  category?: string;
+  unit: string;
+  type: 'PRODUCT' | 'SERVICE';
+  salePrice: number;
+  costPrice: number;
+  vatRate: number;
+  vatType: 'EXCLUSIVE' | 'INCLUSIVE' | 'NONE';
+  isInventory: boolean;
+  quantity: number;
+  minQuantity: number;
+  incomeType?: string;
+  costingMethod: 'WEIGHTED_AVERAGE' | 'FIFO';
+  isActive: boolean;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface StockBalance {
-  id: string
-  warehouseId: string
-  warehouseName: string
-  quantity: number
-  unitCost: number
-  totalValue: number
+  id: string;
+  warehouseId: string;
+  warehouseName: string;
+  quantity: number;
+  unitCost: number;
+  totalValue: number;
 }
 
 interface ProductViewDialogProps {
-  product: Product | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  product: Product | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const typeLabels: Record<string, string> = {
   PRODUCT: 'สินค้า',
   SERVICE: 'บริการ',
-}
+};
 
 const vatTypeLabels: Record<string, string> = {
   EXCLUSIVE: 'ยังไม่รวม VAT',
   INCLUSIVE: 'รวม VAT แล้ว',
   NONE: 'ไม่มี VAT',
-}
+};
 
 const costingMethodLabels: Record<string, string> = {
   WEIGHTED_AVERAGE: 'ต้นทุนเฉลี่ยถ่วงน้ำหนัก (WAC)',
   FIFO: 'เข้าก่อนออกก่อน (FIFO)',
-}
+};
 
 const incomeTypeLabels: Record<string, string> = {
   service: 'ค่าบริการ (3%)',
@@ -90,69 +84,67 @@ const incomeTypeLabels: Record<string, string> = {
   professional: 'ค่าบริการวิชาชีพ (3%)',
   contract: 'ค่าจ้างทำของ (1%)',
   advertising: 'ค่าโฆษณา (2%)',
-}
+};
 
-export function ProductViewDialog({
-  product,
-  open,
-  onOpenChange,
-}: ProductViewDialogProps) {
-  const [stockBalances, setStockBalances] = useState<StockBalance[]>([])
-  const [loadingStock, setLoadingStock] = useState(false)
+export function ProductViewDialog({ product, open, onOpenChange }: ProductViewDialogProps) {
+  const [stockBalances, setStockBalances] = useState<StockBalance[]>([]);
+  const [loadingStock, setLoadingStock] = useState(false);
 
   useEffect(() => {
     if (open && product?.isInventory) {
-      fetchStockBalances()
+      fetchStockBalances();
     }
-  }, [open, product])
+  }, [open, product]);
 
   const fetchStockBalances = async () => {
-    if (!product) return
+    if (!product) return;
 
-    setLoadingStock(true)
+    setLoadingStock(true);
     try {
-      const res = await fetch(`/api/stock-balances?productId=${product.id}`, { credentials: 'include' })
+      const res = await fetch(`/api/stock-balances?productId=${product.id}`, {
+        credentials: 'include',
+      });
       if (res.ok) {
-        const json = await res.json()
-        const data = json?.data ?? json ?? []
-        setStockBalances(Array.isArray(data) ? data : [])
+        const json = await res.json();
+        const data = json?.data ?? json ?? [];
+        setStockBalances(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      console.error('Error fetching stock balances:', error)
+      console.error('Error fetching stock balances:', error);
     } finally {
-      setLoadingStock(false)
+      setLoadingStock(false);
     }
-  }
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('th-TH', {
       style: 'currency',
-      currency: 'THB'
-    }).format(amount)
-  }
+      currency: 'THB',
+    }).format(amount);
+  };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return '-'
+    if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('th-TH', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    })
-  }
+    });
+  };
 
-  if (!product) return null
+  if (!product) return null;
 
   const stockLevel = product.isInventory
     ? product.quantity <= 0
       ? { color: 'bg-red-500', label: 'หมดสต็อก' }
       : product.quantity <= product.minQuantity
-      ? { color: 'bg-yellow-100 text-yellow-800', label: 'ต่ำ' }
-      : { color: 'bg-green-100 text-green-800', label: 'ปกติ' }
-    : null
+        ? { color: 'bg-yellow-100 text-yellow-800', label: 'ต่ำ' }
+        : { color: 'bg-green-100 text-green-800', label: 'ปกติ' }
+    : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-[900px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-[900px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
@@ -168,9 +160,7 @@ export function ProductViewDialog({
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-xl font-semibold">{product.name}</h3>
-              {product.nameEn && (
-                <p className="text-muted-foreground">{product.nameEn}</p>
-              )}
+              {product.nameEn && <p className="text-muted-foreground">{product.nameEn}</p>}
             </div>
             <div className="flex flex-col items-end gap-2">
               <Badge className="font-mono">{product.code}</Badge>
@@ -183,7 +173,7 @@ export function ProductViewDialog({
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <Package className="h-4 w-4" />
                 ข้อมูลพื้นฐาน
               </CardTitle>
@@ -210,7 +200,7 @@ export function ProductViewDialog({
 
               {product.description && (
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">รายละเอียด</p>
+                  <p className="mb-1 text-sm text-muted-foreground">รายละเอียด</p>
                   <p className="text-sm">{product.description}</p>
                 </div>
               )}
@@ -220,7 +210,7 @@ export function ProductViewDialog({
           {/* Pricing Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <DollarSign className="h-4 w-4" />
                 ข้อมูลราคา
               </CardTitle>
@@ -250,12 +240,17 @@ export function ProductViewDialog({
               </div>
 
               {product.costPrice > 0 && (
-                <div className="pt-2 border-t">
+                <div className="border-t pt-2">
                   <p className="text-sm text-muted-foreground">กำไรขั้นต้น</p>
                   <p className="text-lg font-semibold">
                     {formatCurrency(product.salePrice - product.costPrice)}{' '}
                     <span className="text-sm font-normal text-muted-foreground">
-                      ({(((product.salePrice - product.costPrice) / product.salePrice) * 100).toFixed(2)}%)
+                      (
+                      {(
+                        ((product.salePrice - product.costPrice) / product.salePrice) *
+                        100
+                      ).toFixed(2)}
+                      %)
                     </span>
                   </p>
                 </div>
@@ -272,7 +267,9 @@ export function ProductViewDialog({
               <CardContent>
                 <div>
                   <p className="text-sm text-muted-foreground">ประเภทรายได้</p>
-                  <p className="font-medium">{incomeTypeLabels[product.incomeType] || product.incomeType}</p>
+                  <p className="font-medium">
+                    {incomeTypeLabels[product.incomeType] || product.incomeType}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -282,7 +279,7 @@ export function ProductViewDialog({
           {product.isInventory && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-base">
                   <Warehouse className="h-4 w-4" />
                   ข้อมูลสต็อก
                 </CardTitle>
@@ -299,9 +296,7 @@ export function ProductViewDialog({
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">สถานะสต็อก</p>
-                    {stockLevel && (
-                      <Badge className={stockLevel.color}>{stockLevel.label}</Badge>
-                    )}
+                    {stockLevel && <Badge className={stockLevel.color}>{stockLevel.label}</Badge>}
                   </div>
                 </div>
 
@@ -314,7 +309,7 @@ export function ProductViewDialog({
 
                 {/* Stock Balance by Warehouse */}
                 <div>
-                  <p className="text-sm font-medium mb-3">สต็อกแยกตามคลังสินค้า</p>
+                  <p className="mb-3 text-sm font-medium">สต็อกแยกตามคลังสินค้า</p>
                   {loadingStock ? (
                     <div className="space-y-2">
                       <Skeleton className="h-12 w-full" />
@@ -359,7 +354,7 @@ export function ProductViewDialog({
           {(product.notes || product.createdAt || product.updatedAt) && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-base">
                   <History className="h-4 w-4" />
                   ข้อมูลเพิ่มเติม
                 </CardTitle>
@@ -367,7 +362,7 @@ export function ProductViewDialog({
               <CardContent className="space-y-4">
                 {product.notes && (
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">หมายเหตุ</p>
+                    <p className="mb-1 text-sm text-muted-foreground">หมายเหตุ</p>
                     <p className="text-sm">{product.notes}</p>
                   </div>
                 )}
@@ -389,11 +384,9 @@ export function ProductViewDialog({
 
         {/* Footer */}
         <div className="flex justify-end pt-4">
-          <Button onClick={() => onOpenChange(false)}>
-            ปิด
-          </Button>
+          <Button onClick={() => onOpenChange(false)}>ปิด</Button>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

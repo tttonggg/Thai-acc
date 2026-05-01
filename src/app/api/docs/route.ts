@@ -1,7 +1,7 @@
 /**
  * OpenAPI/Swagger Documentation Endpoint
  * Phase D: API Mastery - OpenAPI Spec
- * 
+ *
  * Endpoint: /api/docs
  */
 
@@ -102,7 +102,10 @@ const openApiSpec = {
           {
             name: 'type',
             in: 'query',
-            schema: { type: 'string', enum: ['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE'] },
+            schema: {
+              type: 'string',
+              enum: ['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE'],
+            },
           },
         ],
         responses: {
@@ -638,10 +641,7 @@ const openApiSpec = {
       },
     },
   },
-  security: [
-    { bearerAuth: [] },
-    { sessionAuth: [] },
-  ],
+  security: [{ bearerAuth: [] }, { sessionAuth: [] }],
 };
 
 // GET /api/docs - Get OpenAPI spec
@@ -650,10 +650,7 @@ export async function GET(req: NextRequest) {
     // Optionally require authentication for docs in production
     const session = await auth();
     if (process.env.NODE_ENV === 'production' && !session) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     // Return OpenAPI spec
@@ -664,10 +661,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error serving OpenAPI spec:', error);
-    return NextResponse.json(
-      { error: 'Failed to load API documentation' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to load API documentation' }, { status: 500 });
   }
 }
 

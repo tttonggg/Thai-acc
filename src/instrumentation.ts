@@ -61,7 +61,6 @@ export async function register() {
     }
   }
   */
-
   // Initialize OpenTelemetry if configured (only in Node.js server runtime)
   // DISABLED: OpenTelemetry code causing build errors in Next.js 16 + Turbopack
   // To enable: Set OTEL_EXPORTER_OTLP_ENDPOINT environment variable

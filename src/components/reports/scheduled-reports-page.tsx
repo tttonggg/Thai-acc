@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Clock,
   Play,
@@ -16,11 +16,11 @@ import {
   Loader2,
   Download,
   Eye,
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/hooks/use-toast'
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -28,52 +28,52 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { formatThaiDate } from '@/lib/thai-accounting'
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { formatThaiDate } from '@/lib/thai-accounting';
 
 interface ScheduledReport {
-  id: string
-  name: string
-  reportType: string
-  schedule: string
-  dayOfWeek?: number | null
-  dayOfMonth?: number | null
-  monthOfYear?: number | null
-  time: string
-  enabled: boolean
-  recipients: string
-  outputFormat: string
-  emailSubject?: string | null
-  emailBody?: string | null
-  createdAt: string
-  updatedAt: string
-  nextRunDate?: Date | null
-  lastRunStatus?: string | null
-  lastRunAt?: Date | null
-  runs: ScheduledReportRun[]
+  id: string;
+  name: string;
+  reportType: string;
+  schedule: string;
+  dayOfWeek?: number | null;
+  dayOfMonth?: number | null;
+  monthOfYear?: number | null;
+  time: string;
+  enabled: boolean;
+  recipients: string;
+  outputFormat: string;
+  emailSubject?: string | null;
+  emailBody?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  nextRunDate?: Date | null;
+  lastRunStatus?: string | null;
+  lastRunAt?: Date | null;
+  runs: ScheduledReportRun[];
 }
 
 interface ScheduledReportRun {
-  id: string
-  status: string
-  runAt: string
-  errorMessage?: string | null
-  fileUrl?: string | null
-  fileSize?: number | null
-  generatedRecords?: number | null
-  createdAt: string
+  id: string;
+  status: string;
+  runAt: string;
+  errorMessage?: string | null;
+  fileUrl?: string | null;
+  fileSize?: number | null;
+  generatedRecords?: number | null;
+  createdAt: string;
 }
 
 const REPORT_TYPES = [
@@ -88,14 +88,14 @@ const REPORT_TYPES = [
   { value: 'INVENTORY_REPORT', label: 'รายงานสต็อกสินค้า (Inventory Report)' },
   { value: 'SALES_REPORT', label: 'รายงานยอดขาย (Sales Report)' },
   { value: 'PURCHASE_REPORT', label: 'รายงานการซื้อ (Purchase Report)' },
-]
+];
 
 const SCHEDULE_TYPES = [
   { value: 'daily', label: 'รายวัน (Daily)' },
   { value: 'weekly', label: 'รายสัปดาห์ (Weekly)' },
   { value: 'monthly', label: 'รายเดือน (Monthly)' },
   { value: 'quarterly', label: 'รายไตรมาส (Quarterly)' },
-]
+];
 
 const DAYS_OF_WEEK = [
   { value: 0, label: 'อาทิตย์ (Sunday)' },
@@ -105,18 +105,18 @@ const DAYS_OF_WEEK = [
   { value: 4, label: 'พฤหัสบดี (Thursday)' },
   { value: 5, label: 'ศุกร์ (Friday)' },
   { value: 6, label: 'เสาร์ (Saturday)' },
-]
+];
 
 export function ScheduledReportsPage() {
-  const [reports, setReports] = useState<ScheduledReport[]>([])
-  const [loading, setLoading] = useState(true)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingReport, setEditingReport] = useState<ScheduledReport | null>(null)
-  const [viewingRuns, setViewingRuns] = useState<ScheduledReport | null>(null)
-  const [runHistory, setRunHistory] = useState<ScheduledReportRun[]>([])
-  const [saving, setSaving] = useState(false)
-  const [runningReport, setRunningReport] = useState<string | null>(null)
-  const { toast } = useToast()
+  const [reports, setReports] = useState<ScheduledReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingReport, setEditingReport] = useState<ScheduledReport | null>(null);
+  const [viewingRuns, setViewingRuns] = useState<ScheduledReport | null>(null);
+  const [runHistory, setRunHistory] = useState<ScheduledReportRun[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [runningReport, setRunningReport] = useState<string | null>(null);
+  const { toast } = useToast();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -132,52 +132,54 @@ export function ScheduledReportsPage() {
     outputFormat: 'PDF',
     emailSubject: '',
     emailBody: '',
-  })
+  });
 
   useEffect(() => {
-    fetchReports()
-  }, [])
+    fetchReports();
+  }, []);
 
   const fetchReports = async () => {
     try {
-      const response = await fetch(`/api/reports/scheduled`, { credentials: 'include' })
-      const result = await response.json()
+      const response = await fetch(`/api/reports/scheduled`, { credentials: 'include' });
+      const result = await response.json();
 
       if (result.success) {
-        setReports(result.data)
+        setReports(result.data);
       } else {
         toast({
           variant: 'destructive',
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถดึงข้อมูลรายงานที่กำหนดเวลาได้',
-        })
+        });
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const fetchRunHistory = async (reportId: string) => {
     try {
-      const response = await fetch(`/api/reports/scheduled/${reportId}/runs`, { credentials: 'include' })
-      const result = await response.json()
+      const response = await fetch(`/api/reports/scheduled/${reportId}/runs`, {
+        credentials: 'include',
+      });
+      const result = await response.json();
 
       if (result.success) {
-        setRunHistory(result.data)
+        setRunHistory(result.data);
       }
     } catch (error) {
-      console.error('Error fetching run history:', error)
+      console.error('Error fetching run history:', error);
     }
-  }
+  };
 
   const handleCreate = () => {
-    setEditingReport(null)
+    setEditingReport(null);
     setFormData({
       name: '',
       reportType: '',
@@ -191,12 +193,12 @@ export function ScheduledReportsPage() {
       outputFormat: 'PDF',
       emailSubject: '',
       emailBody: '',
-    })
-    setDialogOpen(true)
-  }
+    });
+    setDialogOpen(true);
+  };
 
   const handleEdit = (report: ScheduledReport) => {
-    setEditingReport(report)
+    setEditingReport(report);
     setFormData({
       name: report.name,
       reportType: report.reportType,
@@ -210,27 +212,27 @@ export function ScheduledReportsPage() {
       outputFormat: report.outputFormat,
       emailSubject: report.emailSubject || '',
       emailBody: report.emailBody || '',
-    })
-    setDialogOpen(true)
-  }
+    });
+    setDialogOpen(true);
+  };
 
   const handleSave = async () => {
-    setSaving(true)
+    setSaving(true);
 
     try {
       const url = editingReport
         ? `/api/reports/scheduled/${editingReport.id}`
-        : '/api/reports/scheduled'
+        : '/api/reports/scheduled';
 
-      const method = editingReport ? 'PUT' : 'POST'
+      const method = editingReport ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (result.success) {
         toast({
@@ -238,187 +240,189 @@ export function ScheduledReportsPage() {
           description: editingReport
             ? 'อัปเดตรายงานที่กำหนดเวลาเรียบร้อยแล้ว'
             : 'สร้างรายงานที่กำหนดเวลาเรียบร้อยแล้ว',
-        })
-        setDialogOpen(false)
-        fetchReports()
+        });
+        setDialogOpen(false);
+        fetchReports();
       } else {
         toast({
           variant: 'destructive',
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถบันทึกข้อมูลได้',
-        })
+        });
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
-      })
+      });
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const handleDelete = async (id: string) => {
     if (!confirm('คุณต้องการลบรายงานที่กำหนดเวลานี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
     try {
-      const response = await fetch(`/api/reports/scheduled/${id}`, { credentials: 'include', 
+      const response = await fetch(`/api/reports/scheduled/${id}`, {
+        credentials: 'include',
         method: 'DELETE',
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (result.success) {
         toast({
           title: 'ลบสำเร็จ',
           description: 'ลบรายงานที่กำหนดเวลาเรียบร้อยแล้ว',
-        })
-        fetchReports()
+        });
+        fetchReports();
       } else {
         toast({
           variant: 'destructive',
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถลบข้อมูลได้',
-        })
+        });
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
-      })
+      });
     }
-  }
+  };
 
   const handleRunNow = async (id: string) => {
-    setRunningReport(id)
+    setRunningReport(id);
 
     try {
-      const response = await fetch(`/api/reports/scheduled/${id}/run`, { credentials: 'include', 
+      const response = await fetch(`/api/reports/scheduled/${id}/run`, {
+        credentials: 'include',
         method: 'POST',
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (result.success) {
         toast({
           title: 'รันสำเร็จ',
           description: 'สร้างรายงานเรียบร้อยแล้ว',
-        })
-        fetchReports()
+        });
+        fetchReports();
       } else {
         toast({
           variant: 'destructive',
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถรันรายงานได้',
-        })
+        });
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
-      })
+      });
     } finally {
-      setRunningReport(null)
+      setRunningReport(null);
     }
-  }
+  };
 
   const handleToggleEnabled = async (report: ScheduledReport) => {
     try {
-      const response = await fetch(`/api/reports/scheduled/${report.id}`, { credentials: 'include', 
+      const response = await fetch(`/api/reports/scheduled/${report.id}`, {
+        credentials: 'include',
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: !report.enabled }),
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (result.success) {
-        fetchReports()
+        fetchReports();
       } else {
         toast({
           variant: 'destructive',
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถอัปเดตสถานะได้',
-        })
+        });
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
-      })
+      });
     }
-  }
+  };
 
   const handleViewRuns = (report: ScheduledReport) => {
-    setViewingRuns(report)
-    fetchRunHistory(report.id)
-  }
+    setViewingRuns(report);
+    fetchRunHistory(report.id);
+  };
 
   const getScheduleLabel = (report: ScheduledReport) => {
-    const dayNames = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส']
+    const dayNames = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
 
     switch (report.schedule) {
       case 'daily':
-        return `รายวัน เวลา ${report.time}`
+        return `รายวัน เวลา ${report.time}`;
       case 'weekly':
-        return `ทุก${dayNames[report.dayOfWeek || 1]} เวลา ${report.time}`
+        return `ทุก${dayNames[report.dayOfWeek || 1]} เวลา ${report.time}`;
       case 'monthly':
-        return `ทุกวันที่ ${report.dayOfMonth} เวลา ${report.time}`
+        return `ทุกวันที่ ${report.dayOfMonth} เวลา ${report.time}`;
       case 'quarterly':
-        return `ไตรมาส ${Math.ceil((report.monthOfYear || 1) / 3)} เวลา ${report.time}`
+        return `ไตรมาส ${Math.ceil((report.monthOfYear || 1) / 3)} เวลา ${report.time}`;
       default:
-        return report.schedule
+        return report.schedule;
     }
-  }
+  };
 
   const getStatusBadge = (status?: string | null) => {
-    if (!status)
-      return <Badge variant="outline">ยังไม่รัน</Badge>
+    if (!status) return <Badge variant="outline">ยังไม่รัน</Badge>;
 
     switch (status) {
       case 'success':
         return (
           <Badge variant="default" className="bg-green-500">
-            <CheckCircle2 className="w-3 h-3 mr-1" />
+            <CheckCircle2 className="mr-1 h-3 w-3" />
             สำเร็จ
           </Badge>
-        )
+        );
       case 'failed':
         return (
           <Badge variant="destructive">
-            <XCircle className="w-3 h-3 mr-1" />
+            <XCircle className="mr-1 h-3 w-3" />
             ล้มเหลว
           </Badge>
-        )
+        );
       case 'pending':
         return (
           <Badge variant="secondary">
-            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
             กำลังดำเนินการ
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status}</Badge>;
     }
-  }
+  };
 
   const formatFileSize = (bytes?: number | null) => {
-    if (!bytes) return '-'
-    return (bytes / 1024).toFixed(2) + ' KB'
-  }
+    if (!bytes) return '-';
+    return (bytes / 1024).toFixed(2) + ' KB';
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
-    )
+    );
   }
 
   return (
@@ -426,12 +430,12 @@ export function ScheduledReportsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">รายงานอัตโนมัติตามกำหนดเวลา</h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="mt-2 text-muted-foreground">
             จัดการรายงานที่สร้างและส่งอีเมลอัตโนมัติตามกำหนดเวลา
           </p>
         </div>
         <Button onClick={handleCreate} className="gap-2">
-          <Plus className="w-4 h-4" />
+          <Plus className="h-4 w-4" />
           สร้างกำหนดการ
         </Button>
       </div>
@@ -440,14 +444,15 @@ export function ScheduledReportsPage() {
         {reports.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <Clock className="w-16 h-16 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">ไม่มีรายงานที่กำหนดเวลา</h3>
-              <p className="text-muted-foreground text-center mb-4">
-                คุณยังไม่ได้สร้างรายงานอัตโนมัติ<br />
+              <Clock className="mb-4 h-16 w-16 text-muted-foreground" />
+              <h3 className="mb-2 text-lg font-semibold">ไม่มีรายงานที่กำหนดเวลา</h3>
+              <p className="mb-4 text-center text-muted-foreground">
+                คุณยังไม่ได้สร้างรายงานอัตโนมัติ
+                <br />
                 คลิกปุ่ม "สร้างกำหนดการ" เพื่อเริ่มต้น
               </p>
               <Button onClick={handleCreate} className="gap-2">
-                <Plus className="w-4 h-4" />
+                <Plus className="h-4 w-4" />
                 สร้างกำหนดการ
               </Button>
             </CardContent>
@@ -478,7 +483,7 @@ export function ScheduledReportsPage() {
                       onClick={() => handleEdit(report)}
                       title="แก้ไข"
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -488,9 +493,9 @@ export function ScheduledReportsPage() {
                       title="รันทันที"
                     >
                       {runningReport === report.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Play className="w-4 h-4" />
+                        <Play className="h-4 w-4" />
                       )}
                     </Button>
                     <Button
@@ -499,7 +504,7 @@ export function ScheduledReportsPage() {
                       onClick={() => handleDelete(report.id)}
                       title="ลบ"
                     >
-                      <Trash2 className="w-4 h-4 text-destructive" />
+                      <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
                 </div>
@@ -509,7 +514,7 @@ export function ScheduledReportsPage() {
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-muted-foreground">กำหนดการ</p>
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">{getScheduleLabel(report)}</span>
                     </div>
                   </div>
@@ -517,8 +522,8 @@ export function ScheduledReportsPage() {
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-muted-foreground">ผู้รับอีเมล</p>
                     <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm truncate">{report.recipients}</span>
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="truncate text-sm">{report.recipients}</span>
                     </div>
                   </div>
 
@@ -527,7 +532,7 @@ export function ScheduledReportsPage() {
                     <div className="flex items-center gap-2">
                       {report.lastRunAt ? (
                         <>
-                          <Clock className="w-4 h-4 text-muted-foreground" />
+                          <Clock className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm">
                             {formatThaiDate(new Date(report.lastRunAt))}
                           </span>
@@ -547,7 +552,7 @@ export function ScheduledReportsPage() {
                 </div>
 
                 {report.nextRunDate && (
-                  <div className="mt-4 pt-4 border-t">
+                  <div className="mt-4 border-t pt-4">
                     <p className="text-sm text-muted-foreground">
                       รันครั้งต่อไป:{' '}
                       <span className="font-medium text-foreground">
@@ -558,14 +563,14 @@ export function ScheduledReportsPage() {
                 )}
 
                 {report.runs.length > 0 && (
-                  <div className="mt-4 pt-4 border-t">
+                  <div className="mt-4 border-t pt-4">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleViewRuns(report)}
                       className="gap-2"
                     >
-                      <Eye className="w-4 h-4" />
+                      <Eye className="h-4 w-4" />
                       ดูประวัติการรัน ({report.runs.length} ครั้ง)
                     </Button>
                   </div>
@@ -578,7 +583,7 @@ export function ScheduledReportsPage() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingReport ? 'แก้ไขรายงานที่กำหนดเวลา' : 'สร้างรายงานที่กำหนดเวลา'}
@@ -764,13 +769,11 @@ export function ScheduledReportsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="enabled">สถานะ</Label>
-                <div className="flex items-center space-x-2 h-10">
+                <div className="flex h-10 items-center space-x-2">
                   <Switch
                     id="enabled"
                     checked={formData.enabled}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, enabled: checked })
-                    }
+                    onCheckedChange={(checked) => setFormData({ ...formData, enabled: checked })}
                   />
                   <Label htmlFor="enabled" className="cursor-pointer">
                     {formData.enabled ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
@@ -787,9 +790,7 @@ export function ScheduledReportsPage() {
                 onChange={(e) => setFormData({ ...formData, recipients: e.target.value })}
                 placeholder="email1@example.com, email2@example.com"
               />
-              <p className="text-xs text-muted-foreground">
-                คั่นด้วยจุลภาค (,) หากมีหลายอีเมล
-              </p>
+              <p className="text-xs text-muted-foreground">คั่นด้วยจุลภาค (,) หากมีหลายอีเมล</p>
             </div>
 
             <div className="space-y-2">
@@ -821,7 +822,7 @@ export function ScheduledReportsPage() {
             <Button onClick={handleSave} disabled={saving}>
               {saving ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   กำลังบันทึก
                 </>
               ) : (
@@ -834,7 +835,7 @@ export function ScheduledReportsPage() {
 
       {/* Run History Dialog */}
       <Dialog open={!!viewingRuns} onOpenChange={() => setViewingRuns(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>ประวัติการรัน</DialogTitle>
             <DialogDescription>
@@ -844,14 +845,12 @@ export function ScheduledReportsPage() {
 
           <div className="space-y-4 py-4">
             {runHistory.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                ไม่มีประวัติการรัน
-              </div>
+              <div className="py-8 text-center text-muted-foreground">ไม่มีประวัติการรัน</div>
             ) : (
               runHistory.map((run) => (
                 <div
                   key={run.id}
-                  className="flex items-start justify-between p-4 border rounded-lg"
+                  className="flex items-start justify-between rounded-lg border p-4"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -871,7 +870,7 @@ export function ScheduledReportsPage() {
                   </div>
                   {run.fileUrl && (
                     <Button variant="outline" size="sm" className="gap-2">
-                      <Download className="w-4 h-4" />
+                      <Download className="h-4 w-4" />
                       ดาวน์โหลด
                     </Button>
                   )}
@@ -888,5 +887,5 @@ export function ScheduledReportsPage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

@@ -1,29 +1,33 @@
-import { NextRequest } from "next/server"
-import { db } from "@/lib/db"
-import { purchaseInvoiceSchema } from "@/lib/validations"
-import { requireAuth, apiResponse, apiError, unauthorizedError, notFoundError, forbiddenError } from "@/lib/api-utils"
-import { AuthError } from "@/lib/api-auth"
+import { NextRequest } from 'next/server';
+import { db } from '@/lib/db';
+import { purchaseInvoiceSchema } from '@/lib/validations';
+import {
+  requireAuth,
+  apiResponse,
+  apiError,
+  unauthorizedError,
+  notFoundError,
+  forbiddenError,
+} from '@/lib/api-utils';
+import { AuthError } from '@/lib/api-auth';
 
 // GET /api/purchases/[id] - Get single purchase invoice
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
-    const { id } = await params
-    
+    await requireAuth();
+    const { id } = await params;
+
     const purchase = await db.purchaseInvoice.findUnique({
       where: { id },
       include: {
         vendor: true,
         lines: {
-          orderBy: { lineNo: "asc" },
+          orderBy: { lineNo: 'asc' },
           include: {
             product: {
-              select: { id: true, code: true, name: true, unit: true }
-            }
-          }
+              select: { id: true, code: true, name: true, unit: true },
+            },
+          },
         },
         payments: {
           select: {
@@ -31,71 +35,68 @@ export async function GET(
             paymentNo: true,
             paymentDate: true,
             amount: true,
-          }
+          },
         },
         journalEntry: {
           select: {
             id: true,
             entryNo: true,
             status: true,
-          }
-        }
-      }
-    })
-    
+          },
+        },
+      },
+    });
+
     if (!purchase) {
-      return notFoundError("ไม่พบใบซื้อ")
+      return notFoundError('ไม่พบใบซื้อ');
     }
-    
-    return apiResponse(purchase)
+
+    return apiResponse(purchase);
   } catch (error) {
     if (error instanceof AuthError) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
-    return apiError("เกิดข้อผิดพลาดในการดึงข้อมูลใบซื้อ")
+    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลใบซื้อ');
   }
 }
 
 // PUT /api/purchases/[id] - Update purchase invoice (draft only)
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
-    if (user.role === "VIEWER") {
-      return apiError("ไม่มีสิทธิ์แก้ไขใบซื้อ", 403)
+    if (user.role === 'VIEWER') {
+      return apiError('ไม่มีสิทธิ์แก้ไขใบซื้อ', 403);
     }
 
-    const body = await request.json()
-    const validatedData = purchaseInvoiceSchema.parse(body)
+    const body = await request.json();
+    const validatedData = purchaseInvoiceSchema.parse(body);
 
     // Check if purchase exists and is draft
     const existing = await db.purchaseInvoice.findUnique({
       where: { id },
       include: {
-        lines: true
-      }
-    })
+        lines: true,
+      },
+    });
 
     if (!existing) {
-      return notFoundError("ไม่พบใบซื้อ")
+      return notFoundError('ไม่พบใบซื้อ');
     }
 
     // Only allow editing DRAFT status
-    if (existing.status !== "DRAFT") {
-      return apiError("แก้ไขได้เฉพาะใบซื้อที่เป็นสถานะร่างเท่านั้น", 403)
+    if (existing.status !== 'DRAFT') {
+      return apiError('แก้ไขได้เฉพาะใบซื้อที่เป็นสถานะร่างเท่านั้น', 403);
     }
 
     // Verify vendor exists
     const vendor = await db.vendor.findUnique({
-      where: { id: validatedData.vendorId }
-    })
+      where: { id: validatedData.vendorId },
+    });
 
     if (!vendor) {
-      return apiError("ไม่พบผู้ขาย")
+      return apiError('ไม่พบผู้ขาย');
     }
 
     // Calculate totals
@@ -104,12 +105,12 @@ export async function PUT(
       validatedData.discountAmount,
       0,
       validatedData.withholdingRate
-    )
+    );
 
     // Delete existing lines
     await db.purchaseInvoiceLine.deleteMany({
-      where: { purchaseId: id }
-    })
+      where: { purchaseId: id },
+    });
 
     // Update purchase invoice
     const purchase = await db.purchaseInvoice.update({
@@ -141,28 +142,30 @@ export async function PUT(
             unit: line.unit,
             unitPrice: Math.round(line.unitPrice * 100),
             discount: Math.round(line.discount * 100),
-            amount: Math.round(((line.quantity * line.unitPrice) - line.discount) * 100),
+            amount: Math.round((line.quantity * line.unitPrice - line.discount) * 100),
             vatRate: line.vatRate,
-            vatAmount: Math.round((((line.quantity * line.unitPrice) - line.discount) * (line.vatRate / 100)) * 100),
+            vatAmount: Math.round(
+              (line.quantity * line.unitPrice - line.discount) * (line.vatRate / 100) * 100
+            ),
             notes: line.notes,
-          }))
-        }
+          })),
+        },
       },
       include: {
         vendor: true,
-        lines: true
-      }
-    })
+        lines: true,
+      },
+    });
 
-    return apiResponse(purchase)
+    return apiResponse(purchase);
   } catch (error) {
-    if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
-      return unauthorizedError()
+    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+      return unauthorizedError();
     }
-    if (error instanceof Error && error.name === "ZodError") {
-      return apiError("ข้อมูลไม่ถูกต้อง")
+    if (error instanceof Error && error.name === 'ZodError') {
+      return apiError('ข้อมูลไม่ถูกต้อง');
     }
-    return apiError("เกิดข้อผิดพลาดในการแก้ไขใบซื้อ")
+    return apiError('เกิดข้อผิดพลาดในการแก้ไขใบซื้อ');
   }
 }
 
@@ -172,54 +175,54 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
-    if (user.role !== "ADMIN" && user.role !== "ACCOUNTANT") {
-      return apiError("เฉพาะผู้ดูแลระบบหรือนักบัญชีเท่านั้นที่สามารถลบใบซื้อได้", 403)
+    if (user.role !== 'ADMIN' && user.role !== 'ACCOUNTANT') {
+      return apiError('เฉพาะผู้ดูแลระบบหรือนักบัญชีเท่านั้นที่สามารถลบใบซื้อได้', 403);
     }
 
     const existing = await db.purchaseInvoice.findUnique({
       where: { id },
       include: {
-        payments: true
-      }
-    })
+        payments: true,
+      },
+    });
 
     if (!existing) {
-      return notFoundError("ไม่พบใบซื้อ")
+      return notFoundError('ไม่พบใบซื้อ');
     }
 
     // Only DRAFT status
     if (existing.status !== 'DRAFT') {
-      return forbiddenError('สามารถลบได้เฉพาะใบซื้อสถานะร่างเท่านั้น')
+      return forbiddenError('สามารถลบได้เฉพาะใบซื้อสถานะร่างเท่านั้น');
     }
 
     // Creator or ADMIN only
     if (user.role !== 'ADMIN' && existing.createdById !== user.id) {
-      return forbiddenError('ไม่มีสิทธิ์ลบใบซื้อนี้')
+      return forbiddenError('ไม่มีสิทธิ์ลบใบซื้อนี้');
     }
 
     if (existing.payments.length > 0) {
-      return apiError("ไม่สามารถลบใบซื้อที่มีการจ่ายเงินแล้วได้")
+      return apiError('ไม่สามารถลบใบซื้อที่มีการจ่ายเงินแล้วได้');
     }
 
     // Soft-delete + cascade children
     await db.$transaction([
       db.purchaseInvoiceLine.deleteMany({ where: { purchaseId: id } }),
       db.paymentAllocation.deleteMany({ where: { invoiceId: id } }),
-      db.vatRecord.deleteMany({ where: { referenceId: id, documentType: "PURCHASE" } }),
+      db.vatRecord.deleteMany({ where: { referenceId: id, documentType: 'PURCHASE' } }),
       db.purchaseInvoice.update({
         where: { id },
-        data: { deletedAt: new Date(), isActive: false, deletedBy: user.id }
+        data: { deletedAt: new Date(), isActive: false, deletedBy: user.id },
       }),
-    ])
+    ]);
 
-    return apiResponse({ message: "ลบใบซื้อสำเร็จ" })
+    return apiResponse({ message: 'ลบใบซื้อสำเร็จ' });
   } catch (error) {
-    if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
-      return unauthorizedError()
+    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+      return unauthorizedError();
     }
-    return apiError("เกิดข้อผิดพลาดในการลบใบซื้อ")
+    return apiError('เกิดข้อผิดพลาดในการลบใบซื้อ');
   }
 }

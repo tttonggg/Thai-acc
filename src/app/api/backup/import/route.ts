@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requireRole } from '@/lib/api-utils'
-import { prisma } from '@/lib/db'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from 'next/server';
+import { requireRole } from '@/lib/api-utils';
+import { prisma } from '@/lib/db';
+import { z } from 'zod';
 
 // Validation schemas for import data
 const accountImportSchema = z.object({
@@ -16,7 +16,7 @@ const accountImportSchema = z.object({
   isSystem: z.boolean().optional(),
   isActive: z.boolean(),
   notes: z.string().nullable().optional(),
-})
+});
 
 const customerImportSchema = z.object({
   id: z.string(),
@@ -40,7 +40,7 @@ const customerImportSchema = z.object({
   creditDays: z.number().int().default(30),
   isActive: z.boolean().default(true),
   notes: z.string().nullable().optional(),
-})
+});
 
 const vendorImportSchema = z.object({
   id: z.string(),
@@ -66,7 +66,7 @@ const vendorImportSchema = z.object({
   creditDays: z.number().int().default(30),
   isActive: z.boolean().default(true),
   notes: z.string().nullable().optional(),
-})
+});
 
 const companyImportSchema = z.object({
   name: z.string(),
@@ -84,25 +84,28 @@ const companyImportSchema = z.object({
   website: z.string().nullable().optional(),
   logo: z.string().nullable().optional(),
   fiscalYearStart: z.number().int().min(1).max(12).default(1),
-})
+});
 
 export async function POST(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole(['ADMIN'])
+    await requireRole(['ADMIN']);
 
-    const backup = await request.json()
+    const backup = await request.json();
 
     if (!backup.data) {
-      return NextResponse.json({
-        success: false,
-        error: 'รูปแบบไฟล์สำรองข้อมูลไม่ถูกต้อง'
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'รูปแบบไฟล์สำรองข้อมูลไม่ถูกต้อง',
+        },
+        { status: 400 }
+      );
     }
 
-    let accountsImported = 0
-    let customersImported = 0
-    let vendorsImported = 0
+    let accountsImported = 0;
+    let customersImported = 0;
+    let vendorsImported = 0;
 
     // Use transaction to ensure data consistency
     await prisma.$transaction(async (tx) => {
@@ -110,14 +113,26 @@ export async function POST(request: NextRequest) {
       if (backup.data.accounts && Array.isArray(backup.data.accounts)) {
         for (const account of backup.data.accounts) {
           // Validate and sanitize account data
-          const validated = accountImportSchema.parse(account)
+          const validated = accountImportSchema.parse(account);
 
           // Only use validated fields
-          const { id, code, name, nameEn, type, level, parentId, isDetail, isSystem, isActive, notes } = validated
+          const {
+            id,
+            code,
+            name,
+            nameEn,
+            type,
+            level,
+            parentId,
+            isDetail,
+            isSystem,
+            isActive,
+            notes,
+          } = validated;
 
           // Additional validation
           if (!code || !name || !type) {
-            throw new Error(`Invalid account data: ${JSON.stringify(account)}`)
+            throw new Error(`Invalid account data: ${JSON.stringify(account)}`);
           }
 
           await tx.chartOfAccount.upsert({
@@ -146,22 +161,44 @@ export async function POST(request: NextRequest) {
               isSystem: isSystem || false,
               isActive,
               notes: notes?.trim() || null,
-            }
-          })
-          accountsImported++
+            },
+          });
+          accountsImported++;
         }
       }
 
       // Import customers with field validation
       if (backup.data.customers && Array.isArray(backup.data.customers)) {
         for (const customer of backup.data.customers) {
-          const validated = customerImportSchema.parse(customer)
+          const validated = customerImportSchema.parse(customer);
 
           if (!validated.code || !validated.name) {
-            throw new Error(`Invalid customer data: ${JSON.stringify(customer)}`)
+            throw new Error(`Invalid customer data: ${JSON.stringify(customer)}`);
           }
 
-          const { id, code, name, nameEn, taxId, branchCode, address, subDistrict, district, province, postalCode, phone, fax, email, website, contactName, contactPhone, creditLimit, creditDays, isActive, notes } = validated
+          const {
+            id,
+            code,
+            name,
+            nameEn,
+            taxId,
+            branchCode,
+            address,
+            subDistrict,
+            district,
+            province,
+            postalCode,
+            phone,
+            fax,
+            email,
+            website,
+            contactName,
+            contactPhone,
+            creditLimit,
+            creditDays,
+            isActive,
+            notes,
+          } = validated;
 
           await tx.customer.upsert({
             where: { id },
@@ -209,22 +246,46 @@ export async function POST(request: NextRequest) {
               creditDays,
               isActive,
               notes: notes?.trim() || null,
-            }
-          })
-          customersImported++
+            },
+          });
+          customersImported++;
         }
       }
 
       // Import vendors with field validation
       if (backup.data.vendors && Array.isArray(backup.data.vendors)) {
         for (const vendor of backup.data.vendors) {
-          const validated = vendorImportSchema.parse(vendor)
+          const validated = vendorImportSchema.parse(vendor);
 
           if (!validated.code || !validated.name) {
-            throw new Error(`Invalid vendor data: ${JSON.stringify(vendor)}`)
+            throw new Error(`Invalid vendor data: ${JSON.stringify(vendor)}`);
           }
 
-          const { id, code, name, nameEn, taxId, branchCode, address, subDistrict, district, province, postalCode, phone, fax, email, website, contactName, contactPhone, bankName, bankAccount, bankAccountName, creditDays, isActive, notes } = validated
+          const {
+            id,
+            code,
+            name,
+            nameEn,
+            taxId,
+            branchCode,
+            address,
+            subDistrict,
+            district,
+            province,
+            postalCode,
+            phone,
+            fax,
+            email,
+            website,
+            contactName,
+            contactPhone,
+            bankName,
+            bankAccount,
+            bankAccountName,
+            creditDays,
+            isActive,
+            notes,
+          } = validated;
 
           await tx.vendor.upsert({
             where: { id },
@@ -276,21 +337,21 @@ export async function POST(request: NextRequest) {
               creditDays,
               isActive,
               notes: notes?.trim() || null,
-            }
-          })
-          vendorsImported++
+            },
+          });
+          vendorsImported++;
         }
       }
 
       // Import company info with field validation
       if (backup.data.company) {
-        const validated = companyImportSchema.parse(backup.data.company)
+        const validated = companyImportSchema.parse(backup.data.company);
 
         if (!validated.name) {
-          throw new Error('Company name is required')
+          throw new Error('Company name is required');
         }
 
-        const existingCompany = await tx.company.findFirst()
+        const existingCompany = await tx.company.findFirst();
 
         const companyData = {
           name: validated.name.trim(),
@@ -308,20 +369,20 @@ export async function POST(request: NextRequest) {
           website: validated.website?.trim() || null,
           logo: validated.logo || null,
           fiscalYearStart: validated.fiscalYearStart,
-        }
+        };
 
         if (existingCompany) {
           await tx.company.update({
             where: { id: existingCompany.id },
-            data: companyData
-          })
+            data: companyData,
+          });
         } else {
           await tx.company.create({
-            data: companyData
-          })
+            data: companyData,
+          });
         }
       }
-    })
+    });
 
     return NextResponse.json({
       success: true,
@@ -329,23 +390,28 @@ export async function POST(request: NextRequest) {
       imported: {
         accounts: accountsImported,
         customers: customersImported,
-        vendors: vendorsImported
-      }
-    })
+        vendors: vendorsImported,
+      },
+    });
   } catch (error) {
-
     // Provide user-friendly error messages
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        success: false,
-        error: 'รูปแบบข้อมูลไม่ถูกต้อง',
-        details: error.issues
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'รูปแบบข้อมูลไม่ถูกต้อง',
+          details: error.issues,
+        },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'นำเข้าข้อมูลไม่สำเร็จ กรุณาลองใหม่'
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'นำเข้าข้อมูลไม่สำเร็จ กรุณาลองใหม่',
+      },
+      { status: 500 }
+    );
   }
 }

@@ -24,12 +24,12 @@
  */
 export function bahtToSatang(baht: number): number {
   if (isNaN(baht)) {
-    throw new Error('Cannot convert NaN to Satang')
+    throw new Error('Cannot convert NaN to Satang');
   }
   if (baht < 0) {
-    throw new Error('Cannot convert negative amount to Satang')
+    throw new Error('Cannot convert negative amount to Satang');
   }
-  return Math.round(baht * 100)
+  return Math.round(baht * 100);
 }
 
 /**
@@ -40,10 +40,10 @@ export function bahtToSatang(baht: number): number {
  */
 export function satangToBaht(satang: number | null | undefined): number {
   if (satang === null || satang === undefined || isNaN(satang)) {
-    return 0
+    return 0;
   }
   // Allow negative values (for credit balances, etc) - just convert
-  return satang / 100
+  return satang / 100;
 }
 
 /**
@@ -54,11 +54,11 @@ export function satangToBaht(satang: number | null | undefined): number {
  * Use for: Displaying monetary values in UI components
  */
 export function formatBaht(satang: number): string {
-  const baht = satangToBaht(satang)
+  const baht = satangToBaht(satang);
   return `฿${baht.toLocaleString('th-TH', {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 /**
@@ -69,7 +69,7 @@ export function formatBaht(satang: number): string {
  * Use for: Populating form input fields where user needs to edit the value
  */
 export function satangToInput(satang: number): number {
-  return satangToBaht(satang)
+  return satangToBaht(satang);
 }
 
 /**
@@ -80,7 +80,7 @@ export function satangToInput(satang: number): number {
  * Use for: Converting form input values before saving to database
  */
 export function inputToSatang(input: number): number {
-  return bahtToSatang(input)
+  return bahtToSatang(input);
 }
 
 /**
@@ -91,10 +91,7 @@ export function inputToSatang(input: number): number {
  * Use for: Runtime validation of database values
  */
 export function isValidSatang(value: unknown): value is number {
-  return typeof value === 'number' &&
-    Number.isInteger(value) &&
-    !isNaN(value) &&
-    value >= 0
+  return typeof value === 'number' && Number.isInteger(value) && !isNaN(value) && value >= 0;
 }
 
 /**
@@ -105,9 +102,7 @@ export function isValidSatang(value: unknown): value is number {
  * Use for: Validating user input before conversion to Satang
  */
 export function isValidBaht(value: unknown): value is number {
-  return typeof value === 'number' &&
-    !isNaN(value) &&
-    value >= 0
+  return typeof value === 'number' && !isNaN(value) && value >= 0;
 }
 
 /**
@@ -118,7 +113,7 @@ export function isValidBaht(value: unknown): value is number {
  * Use for: Fixing floating point arithmetic errors (e.g., 10050.999999999 → 10050)
  */
 export function roundSatang(satang: number): number {
-  return Math.round(satang)
+  return Math.round(satang);
 }
 
 /**
@@ -131,7 +126,7 @@ export function roundSatang(satang: number): number {
  * Example: calculatePercent(10000, 7) = 700 (7% of 100.00 Baht)
  */
 export function calculatePercent(satang: number, percent: number): number {
-  return Math.round((satang * percent) / 100)
+  return Math.round((satang * percent) / 100);
 }
 
 /**
@@ -143,7 +138,7 @@ export function calculatePercent(satang: number, percent: number): number {
  * Use for: Safe addition that handles floating point precision
  */
 export function addSatang(a: number, b: number): number {
-  return Math.round(a + b)
+  return Math.round(a + b);
 }
 
 /**
@@ -155,5 +150,5 @@ export function addSatang(a: number, b: number): number {
  * Use for: Safe subtraction that handles floating point precision
  */
 export function subtractSatang(a: number, b: number): number {
-  return Math.round(a - b)
+  return Math.round(a - b);
 }

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/db'
-import { requireAuth } from '@/lib/api-utils'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { requireAuth } from '@/lib/api-utils';
+import { z } from 'zod';
 
 // Validation schema for custom report configuration
 const customReportSchema = z.object({
@@ -33,7 +33,7 @@ const customReportSchema = z.object({
   filterAccountTo: z.string().optional(),
   outputFormat: z.enum(['preview', 'pdf', 'excel']).default('preview'),
   notes: z.string().optional(),
-})
+});
 
 /**
  * POST /api/reports/custom
@@ -42,111 +42,111 @@ const customReportSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Require authentication
-    await requireAuth()
+    await requireAuth();
 
     // Parse and validate request body
-    const body = await request.json()
-    const config = customReportSchema.parse(body)
+    const body = await request.json();
+    const config = customReportSchema.parse(body);
 
     // Build date filter
-    const dateFilter = config.dateTo ? new Date(config.dateTo) : new Date()
-    dateFilter.setHours(23, 59, 59, 999)
+    const dateFilter = config.dateTo ? new Date(config.dateTo) : new Date();
+    dateFilter.setHours(23, 59, 59, 999);
 
-    let reportData: any = {}
+    let reportData: any = {};
 
     // Generate report based on type
     switch (config.reportType) {
       case 'TRIAL_BALANCE':
-        reportData = await generateTrialBalance(config, dateFilter)
-        break
+        reportData = await generateTrialBalance(config, dateFilter);
+        break;
       case 'BALANCE_SHEET':
-        reportData = await generateBalanceSheet(config, dateFilter)
-        break
+        reportData = await generateBalanceSheet(config, dateFilter);
+        break;
       case 'INCOME_STATEMENT':
-        reportData = await generateIncomeStatement(config, dateFilter)
-        break
+        reportData = await generateIncomeStatement(config, dateFilter);
+        break;
       case 'AGING_AR':
-        reportData = await generateAgingAR(config, dateFilter)
-        break
+        reportData = await generateAgingAR(config, dateFilter);
+        break;
       case 'AGING_AP':
-        reportData = await generateAgingAP(config, dateFilter)
-        break
+        reportData = await generateAgingAP(config, dateFilter);
+        break;
       case 'STOCK_REPORT':
-        reportData = await generateStockReport(config, dateFilter)
-        break
+        reportData = await generateStockReport(config, dateFilter);
+        break;
       default:
-        throw new Error('Invalid report type')
+        throw new Error('Invalid report type');
     }
 
     // Apply column filters
-    reportData = applyColumnFilters(reportData, config)
+    reportData = applyColumnFilters(reportData, config);
 
     // Handle output format
     if (config.outputFormat === 'preview') {
       return NextResponse.json({
         success: true,
         data: reportData,
-      })
+      });
     } else if (config.outputFormat === 'pdf') {
       // For PDF, redirect to the appropriate PDF export endpoint
-      const endpoint = getReportEndpoint(config.reportType)
-      const url = new URL(endpoint, request.url)
-      url.searchParams.set('asOfDate', dateFilter.toISOString())
+      const endpoint = getReportEndpoint(config.reportType);
+      const url = new URL(endpoint, request.url);
+      url.searchParams.set('asOfDate', dateFilter.toISOString());
 
       // Pass filter parameters
       if (config.filterAccountType) {
-        url.searchParams.set('accountType', config.filterAccountType)
+        url.searchParams.set('accountType', config.filterAccountType);
       }
       if (config.filterAccountFrom) {
-        url.searchParams.set('accountFrom', config.filterAccountFrom)
+        url.searchParams.set('accountFrom', config.filterAccountFrom);
       }
       if (config.filterAccountTo) {
-        url.searchParams.set('accountTo', config.filterAccountTo)
+        url.searchParams.set('accountTo', config.filterAccountTo);
       }
 
       // Fetch PDF from export endpoint
-      const pdfResponse = await fetch(url.toString())
-      const pdfBlob = await pdfResponse.blob()
+      const pdfResponse = await fetch(url.toString());
+      const pdfBlob = await pdfResponse.blob();
 
       return new NextResponse(pdfBlob, {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="${config.reportName}.pdf"`,
         },
-      })
+      });
     } else if (config.outputFormat === 'excel') {
       // For Excel, redirect to the appropriate Excel export endpoint
-      const endpoint = `${getReportEndpoint(config.reportType)}/export/excel`
-      const url = new URL(endpoint, request.url)
-      url.searchParams.set('asOfDate', dateFilter.toISOString())
+      const endpoint = `${getReportEndpoint(config.reportType)}/export/excel`;
+      const url = new URL(endpoint, request.url);
+      url.searchParams.set('asOfDate', dateFilter.toISOString());
 
       // Pass filter parameters
       if (config.filterAccountType) {
-        url.searchParams.set('accountType', config.filterAccountType)
+        url.searchParams.set('accountType', config.filterAccountType);
       }
       if (config.filterAccountFrom) {
-        url.searchParams.set('accountFrom', config.filterAccountFrom)
+        url.searchParams.set('accountFrom', config.filterAccountFrom);
       }
       if (config.filterAccountTo) {
-        url.searchParams.set('accountTo', config.filterAccountTo)
+        url.searchParams.set('accountTo', config.filterAccountTo);
       }
 
       // Fetch Excel from export endpoint
-      const excelResponse = await fetch(url.toString())
-      const excelBlob = await excelResponse.blob()
+      const excelResponse = await fetch(url.toString());
+      const excelBlob = await excelResponse.blob();
 
       return new NextResponse(excelBlob, {
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           'Content-Disposition': `attachment; filename="${config.reportName}.xlsx"`,
         },
-      })
+      });
     }
 
     return NextResponse.json({
       success: true,
       data: reportData,
-    })
+    });
   } catch (error: any) {
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
           error: 'ข้อมูลไม่ถูกต้อง: ' + error.issues.map((e) => e.message).join(', '),
         },
         { status: 400 }
-      )
+      );
     }
 
     // Handle auth errors
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: error.message || 'กรุณาเข้าสู่ระบบ' },
         { status: error.statusCode || 401 }
-      )
+      );
     }
 
     // Handle other errors
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
         error: error.message || 'เกิดข้อผิดพลาดในการสร้างรายงาน',
       },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -187,13 +187,13 @@ async function generateTrialBalance(config: any, dateFilter: Date) {
     date: {
       lte: dateFilter,
     },
-  }
+  };
 
   // Add date range filter
   if (config.dateFrom) {
-    const fromDate = new Date(config.dateFrom)
-    fromDate.setHours(0, 0, 0, 0)
-    whereClause.date.gte = fromDate
+    const fromDate = new Date(config.dateFrom);
+    fromDate.setHours(0, 0, 0, 0);
+    whereClause.date.gte = fromDate;
   }
 
   // Fetch journal entries
@@ -218,29 +218,29 @@ async function generateTrialBalance(config: any, dateFilter: Date) {
     orderBy: {
       date: 'asc',
     },
-  })
+  });
 
   // Calculate balances
-  const accountBalances = new Map<string, any>()
+  const accountBalances = new Map<string, any>();
 
   for (const entry of journalEntries) {
     for (const line of entry.lines) {
-      if (!line.account.isActive) continue
+      if (!line.account.isActive) continue;
 
-      const accountId = line.accountId
-      const account = line.account
+      const accountId = line.accountId;
+      const account = line.account;
 
       // Apply account type filter
       if (config.filterAccountType && account.type !== config.filterAccountType) {
-        continue
+        continue;
       }
 
       // Apply account range filter
       if (config.filterAccountFrom && account.code < config.filterAccountFrom) {
-        continue
+        continue;
       }
       if (config.filterAccountTo && account.code > config.filterAccountTo) {
-        continue
+        continue;
       }
 
       if (!accountBalances.has(accountId)) {
@@ -252,38 +252,38 @@ async function generateTrialBalance(config: any, dateFilter: Date) {
           debit: 0,
           credit: 0,
           balance: 0,
-        })
+        });
       }
 
-      const balance = accountBalances.get(accountId)!
-      balance.debit += line.debit
-      balance.credit += line.credit
+      const balance = accountBalances.get(accountId)!;
+      balance.debit += line.debit;
+      balance.credit += line.credit;
     }
   }
 
   // Calculate net balance for each account
   const accounts = Array.from(accountBalances.values()).map((account) => {
-    let balance = 0
-    let debitBalance = 0
-    let creditBalance = 0
+    let balance = 0;
+    let debitBalance = 0;
+    let creditBalance = 0;
 
     if (account.type === 'ASSET' || account.type === 'EXPENSE') {
-      balance = account.debit - account.credit
+      balance = account.debit - account.credit;
       if (balance >= 0) {
-        debitBalance = balance
-        creditBalance = 0
+        debitBalance = balance;
+        creditBalance = 0;
       } else {
-        debitBalance = 0
-        creditBalance = Math.abs(balance)
+        debitBalance = 0;
+        creditBalance = Math.abs(balance);
       }
     } else {
-      balance = account.credit - account.debit
+      balance = account.credit - account.debit;
       if (balance >= 0) {
-        debitBalance = 0
-        creditBalance = balance
+        debitBalance = 0;
+        creditBalance = balance;
       } else {
-        debitBalance = Math.abs(balance)
-        creditBalance = 0
+        debitBalance = Math.abs(balance);
+        creditBalance = 0;
       }
     }
 
@@ -295,20 +295,20 @@ async function generateTrialBalance(config: any, dateFilter: Date) {
       debit: debitBalance,
       credit: creditBalance,
       balance,
-    }
-  })
+    };
+  });
 
   // Filter out zero balances if requested
   const filteredAccounts = config.includeZeroBalances
     ? accounts
-    : accounts.filter((acc) => Math.abs(acc.balance) > 0.01)
+    : accounts.filter((acc) => Math.abs(acc.balance) > 0.01);
 
   // Sort by account code
-  filteredAccounts.sort((a, b) => a.code.localeCompare(b.code))
+  filteredAccounts.sort((a, b) => a.code.localeCompare(b.code));
 
   // Calculate totals
-  const totalDebit = filteredAccounts.reduce((sum, acc) => sum + acc.debit, 0)
-  const totalCredit = filteredAccounts.reduce((sum, acc) => sum + acc.credit, 0)
+  const totalDebit = filteredAccounts.reduce((sum, acc) => sum + acc.debit, 0);
+  const totalCredit = filteredAccounts.reduce((sum, acc) => sum + acc.credit, 0);
 
   return {
     reportType: 'TRIAL_BALANCE',
@@ -319,7 +319,7 @@ async function generateTrialBalance(config: any, dateFilter: Date) {
       credit: totalCredit,
       isBalanced: Math.abs(totalDebit - totalCredit) < 0.01,
     },
-  }
+  };
 }
 
 /**
@@ -349,39 +349,39 @@ async function generateBalanceSheet(config: any, dateFilter: Date) {
         },
       },
     },
-  })
+  });
 
-  const assetMap = new Map<string, any>()
-  const liabilityMap = new Map<string, any>()
-  const equityMap = new Map<string, any>()
+  const assetMap = new Map<string, any>();
+  const liabilityMap = new Map<string, any>();
+  const equityMap = new Map<string, any>();
 
   for (const entry of journalEntries) {
     for (const line of entry.lines) {
-      const account = line.account
-      if (!account.isActive) continue
+      const account = line.account;
+      if (!account.isActive) continue;
 
       // Apply account type filter
       if (config.filterAccountType && account.type !== config.filterAccountType) {
-        continue
+        continue;
       }
 
       // Apply account range filter
       if (config.filterAccountFrom && account.code < config.filterAccountFrom) {
-        continue
+        continue;
       }
       if (config.filterAccountTo && account.code > config.filterAccountTo) {
-        continue
+        continue;
       }
 
-      let targetMap: Map<string, any>
+      let targetMap: Map<string, any>;
       if (account.type === 'ASSET') {
-        targetMap = assetMap
+        targetMap = assetMap;
       } else if (account.type === 'LIABILITY') {
-        targetMap = liabilityMap
+        targetMap = liabilityMap;
       } else if (account.type === 'EQUITY') {
-        targetMap = equityMap
+        targetMap = equityMap;
       } else {
-        continue
+        continue;
       }
 
       if (!targetMap.has(account.id)) {
@@ -390,14 +390,14 @@ async function generateBalanceSheet(config: any, dateFilter: Date) {
           name: account.name,
           nameEn: account.nameEn,
           amount: 0,
-        })
+        });
       }
 
-      const balance = targetMap.get(account.id)!
+      const balance = targetMap.get(account.id)!;
       if (account.type === 'ASSET') {
-        balance.amount += line.debit - line.credit
+        balance.amount += line.debit - line.credit;
       } else {
-        balance.amount += line.credit - line.debit
+        balance.amount += line.credit - line.debit;
       }
     }
   }
@@ -414,7 +414,7 @@ async function generateBalanceSheet(config: any, dateFilter: Date) {
         isActive: true,
       },
     },
-  })
+  });
 
   const expenseEntries = await prisma.journalLine.findMany({
     where: {
@@ -427,19 +427,19 @@ async function generateBalanceSheet(config: any, dateFilter: Date) {
         isActive: true,
       },
     },
-  })
+  });
 
-  let totalRevenue = 0
+  let totalRevenue = 0;
   for (const line of revenueEntries) {
-    totalRevenue += line.credit - line.debit
+    totalRevenue += line.credit - line.debit;
   }
 
-  let totalExpenses = 0
+  let totalExpenses = 0;
   for (const line of expenseEntries) {
-    totalExpenses += line.debit - line.credit
+    totalExpenses += line.debit - line.credit;
   }
 
-  const retainedEarnings = totalRevenue - totalExpenses
+  const retainedEarnings = totalRevenue - totalExpenses;
 
   if (Math.abs(retainedEarnings) > 0.01) {
     equityMap.set('RETAINED_EARNINGS', {
@@ -447,24 +447,24 @@ async function generateBalanceSheet(config: any, dateFilter: Date) {
       name: 'กำไรสุทธิสะสม (Retained Earnings)',
       nameEn: 'Retained Earnings',
       amount: retainedEarnings,
-    })
+    });
   }
 
   const assets = Array.from(assetMap.values())
     .filter((acc) => config.includeZeroBalances || Math.abs(acc.amount) > 0.01)
-    .sort((a, b) => a.code.localeCompare(b.code))
+    .sort((a, b) => a.code.localeCompare(b.code));
 
   const liabilities = Array.from(liabilityMap.values())
     .filter((acc) => config.includeZeroBalances || Math.abs(acc.amount) > 0.01)
-    .sort((a, b) => a.code.localeCompare(b.code))
+    .sort((a, b) => a.code.localeCompare(b.code));
 
   const equity = Array.from(equityMap.values())
     .filter((acc) => config.includeZeroBalances || Math.abs(acc.amount) > 0.01)
-    .sort((a, b) => a.code.localeCompare(b.code))
+    .sort((a, b) => a.code.localeCompare(b.code));
 
-  const totalAssets = assets.reduce((sum, acc) => sum + acc.amount, 0)
-  const totalLiabilities = liabilities.reduce((sum, acc) => sum + acc.amount, 0)
-  const totalEquity = equity.reduce((sum, acc) => sum + acc.amount, 0)
+  const totalAssets = assets.reduce((sum, acc) => sum + acc.amount, 0);
+  const totalLiabilities = liabilities.reduce((sum, acc) => sum + acc.amount, 0);
+  const totalEquity = equity.reduce((sum, acc) => sum + acc.amount, 0);
 
   return {
     reportType: 'BALANCE_SHEET',
@@ -478,7 +478,7 @@ async function generateBalanceSheet(config: any, dateFilter: Date) {
       equity: totalEquity,
       isBalanced: Math.abs(totalAssets - (totalLiabilities + totalEquity)) < 0.01,
     },
-  }
+  };
 }
 
 /**
@@ -490,12 +490,12 @@ async function generateIncomeStatement(config: any, dateFilter: Date) {
     date: {
       lte: dateFilter,
     },
-  }
+  };
 
   if (config.dateFrom) {
-    const fromDate = new Date(config.dateFrom)
-    fromDate.setHours(0, 0, 0, 0)
-    whereClause.date.gte = fromDate
+    const fromDate = new Date(config.dateFrom);
+    fromDate.setHours(0, 0, 0, 0);
+    whereClause.date.gte = fromDate;
   }
 
   const journalEntries = await prisma.journalEntry.findMany({
@@ -516,15 +516,15 @@ async function generateIncomeStatement(config: any, dateFilter: Date) {
         },
       },
     },
-  })
+  });
 
-  const revenueMap = new Map<string, any>()
-  const expenseMap = new Map<string, any>()
+  const revenueMap = new Map<string, any>();
+  const expenseMap = new Map<string, any>();
 
   for (const entry of journalEntries) {
     for (const line of entry.lines) {
-      const account = line.account
-      if (!account.isActive) continue
+      const account = line.account;
+      if (!account.isActive) continue;
 
       if (account.type === 'REVENUE') {
         if (!revenueMap.has(account.id)) {
@@ -533,10 +533,10 @@ async function generateIncomeStatement(config: any, dateFilter: Date) {
             name: account.name,
             nameEn: account.nameEn,
             amount: 0,
-          })
+          });
         }
-        const revenue = revenueMap.get(account.id)!
-        revenue.amount += line.credit - line.debit
+        const revenue = revenueMap.get(account.id)!;
+        revenue.amount += line.credit - line.debit;
       } else if (account.type === 'EXPENSE') {
         if (!expenseMap.has(account.id)) {
           expenseMap.set(account.id, {
@@ -544,25 +544,25 @@ async function generateIncomeStatement(config: any, dateFilter: Date) {
             name: account.name,
             nameEn: account.nameEn,
             amount: 0,
-          })
+          });
         }
-        const expense = expenseMap.get(account.id)!
-        expense.amount += line.debit - line.credit
+        const expense = expenseMap.get(account.id)!;
+        expense.amount += line.debit - line.credit;
       }
     }
   }
 
   const revenues = Array.from(revenueMap.values())
     .filter((acc) => config.includeZeroBalances || Math.abs(acc.amount) > 0.01)
-    .sort((a, b) => a.code.localeCompare(b.code))
+    .sort((a, b) => a.code.localeCompare(b.code));
 
   const expenses = Array.from(expenseMap.values())
     .filter((acc) => config.includeZeroBalances || Math.abs(acc.amount) > 0.01)
-    .sort((a, b) => a.code.localeCompare(b.code))
+    .sort((a, b) => a.code.localeCompare(b.code));
 
-  const totalRevenue = revenues.reduce((sum, acc) => sum + acc.amount, 0)
-  const totalExpenses = expenses.reduce((sum, acc) => sum + acc.amount, 0)
-  const netIncome = totalRevenue - totalExpenses
+  const totalRevenue = revenues.reduce((sum, acc) => sum + acc.amount, 0);
+  const totalExpenses = expenses.reduce((sum, acc) => sum + acc.amount, 0);
+  const netIncome = totalRevenue - totalExpenses;
 
   return {
     reportType: 'INCOME_STATEMENT',
@@ -574,7 +574,7 @@ async function generateIncomeStatement(config: any, dateFilter: Date) {
       expenses: totalExpenses,
       netIncome,
     },
-  }
+  };
 }
 
 /**
@@ -590,7 +590,7 @@ async function generateAgingAR(config: any, dateFilter: Date) {
         },
       },
     },
-  })
+  });
 
   const agingData = customers.map((customer) => {
     const agingBuckets = {
@@ -599,27 +599,29 @@ async function generateAgingAR(config: any, dateFilter: Date) {
       days60: 0,
       days90: 0,
       days90Plus: 0,
-    }
+    };
 
-    let totalOutstanding = 0
+    let totalOutstanding = 0;
 
     for (const invoice of customer.invoices) {
-      const invoiceDate = new Date(invoice.date)
-      const daysOverdue = Math.floor((dateFilter.getTime() - invoiceDate.getTime()) / (1000 * 60 * 60 * 24))
-      const outstandingAmount = invoice.totalAmount - (invoice.paidAmount || 0)
+      const invoiceDate = new Date(invoice.date);
+      const daysOverdue = Math.floor(
+        (dateFilter.getTime() - invoiceDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const outstandingAmount = invoice.totalAmount - (invoice.paidAmount || 0);
 
-      totalOutstanding += outstandingAmount
+      totalOutstanding += outstandingAmount;
 
       if (daysOverdue <= 0) {
-        agingBuckets.current += outstandingAmount
+        agingBuckets.current += outstandingAmount;
       } else if (daysOverdue <= 30) {
-        agingBuckets.days30 += outstandingAmount
+        agingBuckets.days30 += outstandingAmount;
       } else if (daysOverdue <= 60) {
-        agingBuckets.days60 += outstandingAmount
+        agingBuckets.days60 += outstandingAmount;
       } else if (daysOverdue <= 90) {
-        agingBuckets.days90 += outstandingAmount
+        agingBuckets.days90 += outstandingAmount;
       } else {
-        agingBuckets.days90Plus += outstandingAmount
+        agingBuckets.days90Plus += outstandingAmount;
       }
     }
 
@@ -629,14 +631,14 @@ async function generateAgingAR(config: any, dateFilter: Date) {
       customerName: customer.name,
       ...agingBuckets,
       totalOutstanding,
-    }
-  })
+    };
+  });
 
   return {
     reportType: 'AGING_AR',
     asOfDate: dateFilter.toISOString(),
     customers: agingData.filter((c) => config.includeZeroBalances || c.totalOutstanding > 0),
-  }
+  };
 }
 
 /**
@@ -652,7 +654,7 @@ async function generateAgingAP(config: any, dateFilter: Date) {
         },
       },
     },
-  })
+  });
 
   const agingData = vendors.map((vendor) => {
     const agingBuckets = {
@@ -661,27 +663,29 @@ async function generateAgingAP(config: any, dateFilter: Date) {
       days60: 0,
       days90: 0,
       days90Plus: 0,
-    }
+    };
 
-    let totalOutstanding = 0
+    let totalOutstanding = 0;
 
     for (const invoice of vendor.purchaseInvoices) {
-      const invoiceDate = new Date(invoice.date)
-      const daysOverdue = Math.floor((dateFilter.getTime() - invoiceDate.getTime()) / (1000 * 60 * 60 * 24))
-      const outstandingAmount = invoice.totalAmount - (invoice.paidAmount || 0)
+      const invoiceDate = new Date(invoice.date);
+      const daysOverdue = Math.floor(
+        (dateFilter.getTime() - invoiceDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const outstandingAmount = invoice.totalAmount - (invoice.paidAmount || 0);
 
-      totalOutstanding += outstandingAmount
+      totalOutstanding += outstandingAmount;
 
       if (daysOverdue <= 0) {
-        agingBuckets.current += outstandingAmount
+        agingBuckets.current += outstandingAmount;
       } else if (daysOverdue <= 30) {
-        agingBuckets.days30 += outstandingAmount
+        agingBuckets.days30 += outstandingAmount;
       } else if (daysOverdue <= 60) {
-        agingBuckets.days60 += outstandingAmount
+        agingBuckets.days60 += outstandingAmount;
       } else if (daysOverdue <= 90) {
-        agingBuckets.days90 += outstandingAmount
+        agingBuckets.days90 += outstandingAmount;
       } else {
-        agingBuckets.days90Plus += outstandingAmount
+        agingBuckets.days90Plus += outstandingAmount;
       }
     }
 
@@ -691,14 +695,14 @@ async function generateAgingAP(config: any, dateFilter: Date) {
       vendorName: vendor.name,
       ...agingBuckets,
       totalOutstanding,
-    }
-  })
+    };
+  });
 
   return {
     reportType: 'AGING_AP',
     asOfDate: dateFilter.toISOString(),
     vendors: agingData.filter((v) => config.includeZeroBalances || v.totalOutstanding > 0),
-  }
+  };
 }
 
 /**
@@ -724,7 +728,7 @@ async function generateStockReport(config: any, dateFilter: Date) {
         },
       },
     },
-  })
+  });
 
   const stockData = stockBalances.map((stock) => ({
     productCode: stock.product.code,
@@ -735,10 +739,10 @@ async function generateStockReport(config: any, dateFilter: Date) {
     quantity: stock.quantity,
     unitCost: stock.unitCost,
     totalValue: stock.quantity * stock.unitCost,
-  }))
+  }));
 
-  const totalQuantity = stockData.reduce((sum, item) => sum + item.quantity, 0)
-  const totalValue = stockData.reduce((sum, item) => sum + item.totalValue, 0)
+  const totalQuantity = stockData.reduce((sum, item) => sum + item.quantity, 0);
+  const totalValue = stockData.reduce((sum, item) => sum + item.totalValue, 0);
 
   return {
     reportType: 'STOCK_REPORT',
@@ -748,7 +752,7 @@ async function generateStockReport(config: any, dateFilter: Date) {
       totalQuantity,
       totalValue,
     },
-  }
+  };
 }
 
 /**
@@ -757,7 +761,7 @@ async function generateStockReport(config: any, dateFilter: Date) {
 function applyColumnFilters(data: any, config: any) {
   // For now, we'll return all data and let the frontend handle column display
   // This function can be enhanced to strip unwanted columns from the response
-  return data
+  return data;
 }
 
 /**
@@ -771,7 +775,7 @@ function getReportEndpoint(reportType: string): string {
     AGING_AR: '/api/reports/aging-ar',
     AGING_AP: '/api/reports/aging-ap',
     STOCK_REPORT: '/api/reports/stock',
-  }
+  };
 
-  return endpoints[reportType] || '/api/reports/trial-balance'
+  return endpoints[reportType] || '/api/reports/trial-balance';
 }

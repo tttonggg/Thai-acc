@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -19,26 +19,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, AlertCircle, Info } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, AlertCircle, Info } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // WHT Categories for PND.53
 const WHT_CATEGORIES = [
@@ -48,9 +43,9 @@ const WHT_CATEGORIES = [
   { value: 'CONTRACT', label: 'ค่าจ้างทำของ', rate: 1 },
   { value: 'ADVERTISING', label: 'ค่าโฆษณา', rate: 2 },
   { value: 'NONE', label: 'ไม่หักภาษี', rate: 0 },
-] as const
+] as const;
 
-type WHTCategory = typeof WHT_CATEGORIES[number]['value']
+type WHTCategory = (typeof WHT_CATEGORIES)[number]['value'];
 
 const formSchema = z.object({
   vendorId: z.string().min(1, 'กรุณาเลือกผู้ขาย'),
@@ -61,42 +56,46 @@ const formSchema = z.object({
   chequeDate: z.string().optional(),
   amount: z.number().min(0, 'จำนวนเงินต้องไม่น้อยกว่า 0'),
   notes: z.string().optional(),
-  allocations: z.array(z.object({
-    invoiceId: z.string(),
-    invoiceNo: z.string(),
-    amount: z.number().min(0),
-    whtCategory: z.string().optional(),
-    whtRate: z.number().min(0).max(100),
-    whtAmount: z.number().min(0),
-  })).min(1, 'ต้องมีการจัดจ่ายอย่างน้อย 1 รายการ'),
-})
+  allocations: z
+    .array(
+      z.object({
+        invoiceId: z.string(),
+        invoiceNo: z.string(),
+        amount: z.number().min(0),
+        whtCategory: z.string().optional(),
+        whtRate: z.number().min(0).max(100),
+        whtAmount: z.number().min(0),
+      })
+    )
+    .min(1, 'ต้องมีการจัดจ่ายอย่างน้อย 1 รายการ'),
+});
 
-type FormValues = z.infer<typeof formSchema>
+type FormValues = z.infer<typeof formSchema>;
 
 interface UnpaidInvoice {
-  id: string
-  invoiceNo: string
-  invoiceDate: string
-  totalAmount: number
-  balance: number
+  id: string;
+  invoiceNo: string;
+  invoiceDate: string;
+  totalAmount: number;
+  balance: number;
 }
 
 interface PaymentFormProps {
-  open: boolean
-  onClose: () => void
-  onSuccess: () => void
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
 }
 
 export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
-  const [vendors, setVendors] = useState<any[]>([])
-  const [bankAccounts, setBankAccounts] = useState<any[]>([])
-  const [unpaidInvoices, setUnpaidInvoices] = useState<UnpaidInvoice[]>([])
-  const [apBalance, setApBalance] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [quickFillInvoiceId, setQuickFillInvoiceId] = useState<string>('')
-  const [customAmount, setCustomAmount] = useState<string>('')
-  const { toast } = useToast()
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [bankAccounts, setBankAccounts] = useState<any[]>([]);
+  const [unpaidInvoices, setUnpaidInvoices] = useState<UnpaidInvoice[]>([]);
+  const [apBalance, setApBalance] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [quickFillInvoiceId, setQuickFillInvoiceId] = useState<string>('');
+  const [customAmount, setCustomAmount] = useState<string>('');
+  const { toast } = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -106,83 +105,85 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
       amount: 0,
       allocations: [],
     },
-  })
+  });
 
-  const selectedVendor = form.watch('vendorId')
-  const paymentMethod = form.watch('paymentMethod')
-  const amount = form.watch('amount') || 0
+  const selectedVendor = form.watch('vendorId');
+  const paymentMethod = form.watch('paymentMethod');
+  const amount = form.watch('amount') || 0;
 
   // Load vendors and bank accounts on mount
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
         const [vendorsRes, banksRes] = await Promise.all([
           fetch(`/api/vendors?isActive=true`, { credentials: 'include' }),
           fetch(`/api/bank-accounts`, { credentials: 'include' }),
-        ])
+        ]);
 
         if (vendorsRes.ok) {
-          const vendorsData = await vendorsRes.json()
-          setVendors(vendorsData.data || vendorsData)
+          const vendorsData = await vendorsRes.json();
+          setVendors(vendorsData.data || vendorsData);
         }
 
         if (banksRes.ok) {
-          const banksData = await banksRes.json()
-          setBankAccounts(banksData.data || banksData)
+          const banksData = await banksRes.json();
+          setBankAccounts(banksData.data || banksData);
         }
       } catch (error) {
-        console.error('Error loading data:', error)
+        console.error('Error loading data:', error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    if (open) fetchData()
-  }, [open])
+    };
+    if (open) fetchData();
+  }, [open]);
 
   // Load unpaid invoices when vendor is selected
   useEffect(() => {
     const loadUnpaidInvoices = async () => {
       if (!selectedVendor) {
-        setUnpaidInvoices([])
-        setApBalance(0)
-        return
+        setUnpaidInvoices([]);
+        setApBalance(0);
+        return;
       }
 
       try {
-        const res = await fetch(`/api/payments/unpaid-invoices?vendorId=${selectedVendor}`, { credentials: 'include' })
+        const res = await fetch(`/api/payments/unpaid-invoices?vendorId=${selectedVendor}`, {
+          credentials: 'include',
+        });
         if (res.ok) {
-          const response = await res.json()
+          const response = await res.json();
           // API returns { success: true, data: { invoices: [...], totalAPBalance: ..., vendorId: ... } }
           if (response.success && response.data) {
-            setUnpaidInvoices(response.data.invoices || [])
-            setApBalance(response.data.totalAPBalance || 0)
+            setUnpaidInvoices(response.data.invoices || []);
+            setApBalance(response.data.totalAPBalance || 0);
           } else {
             // Fallback for backward compatibility
-            setUnpaidInvoices(response.invoices || [])
-            setApBalance(response.totalAPBalance || 0)
+            setUnpaidInvoices(response.invoices || []);
+            setApBalance(response.totalAPBalance || 0);
           }
         } else {
-          console.error('API returned error:', res.status, res.statusText)
+          console.error('API returned error:', res.status, res.statusText);
         }
       } catch (error) {
-        console.error('Error loading unpaid invoices:', error)
+        console.error('Error loading unpaid invoices:', error);
       }
-    }
-    loadUnpaidInvoices()
-  }, [selectedVendor])
+    };
+    loadUnpaidInvoices();
+  }, [selectedVendor]);
 
   // Auto-allocate to oldest invoices
   const handleAutoAllocate = () => {
-    if (unpaidInvoices.length === 0 || amount <= 0) return
+    if (unpaidInvoices.length === 0 || amount <= 0) return;
 
-    let remaining = amount
-    const allocations: any[] = []
+    let remaining = amount;
+    const allocations: any[] = [];
 
     for (const invoice of unpaidInvoices) {
-      if (remaining <= 0) break
+      if (remaining <= 0) break;
 
-      const allocateAmount = Math.min(remaining, invoice.balance)
+      const allocateAmount = Math.min(remaining, invoice.balance);
       allocations.push({
         invoiceId: invoice.id,
         invoiceNo: invoice.invoiceNo,
@@ -190,13 +191,13 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
         whtCategory: 'SERVICE', // Default to service
         whtRate: 3, // Default 3%
         whtAmount: Math.round((allocateAmount * 3) / 100),
-      })
+      });
 
-      remaining -= allocateAmount
+      remaining -= allocateAmount;
     }
 
-    form.setValue('allocations', allocations)
-  }
+    form.setValue('allocations', allocations);
+  };
 
   // Pay Full - Select all unpaid invoices with full balance
   const handlePayFull = () => {
@@ -205,12 +206,12 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
         title: 'ไม่มีใบซื้อค้างจ่าย',
         description: 'กรุณาเลือกผู้ขายที่มียอดค้างจ่าย',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + inv.balance, 0)
-    form.setValue('amount', totalUnpaid)
+    const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + inv.balance, 0);
+    form.setValue('amount', totalUnpaid);
 
     const newAllocations = unpaidInvoices.map((invoice) => ({
       invoiceId: invoice.id,
@@ -219,51 +220,57 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
       whtCategory: 'SERVICE' as WHTCategory,
       whtRate: 3,
       whtAmount: Math.round((invoice.balance * 3) / 100),
-    }))
-    form.setValue('allocations', newAllocations)
+    }));
+    form.setValue('allocations', newAllocations);
 
     toast({
       title: 'เลือกจ่ายเต็มจำนวน',
-      description: 'ยอดรวม ' + unpaidInvoices.length + ' ใบ = ฿' + totalUnpaid.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-    })
-  }
+      description:
+        'ยอดรวม ' +
+        unpaidInvoices.length +
+        ' ใบ = ฿' +
+        totalUnpaid.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    });
+  };
 
   // Update allocation amount
   const updateAllocationAmount = (index: number, value: number) => {
-    const allocations = form.getValues('allocations')
-    allocations[index].amount = value
-    allocations[index].whtAmount = Math.round((value * allocations[index].whtRate) / 100)
-    form.setValue('allocations', allocations)
-  }
+    const allocations = form.getValues('allocations');
+    allocations[index].amount = value;
+    allocations[index].whtAmount = Math.round((value * allocations[index].whtRate) / 100);
+    form.setValue('allocations', allocations);
+  };
 
   // Update WHT category and rate
   const updateWHTCategory = (index: number, category: WHTCategory) => {
-    const allocations = form.getValues('allocations')
-    allocations[index].whtCategory = category
+    const allocations = form.getValues('allocations');
+    allocations[index].whtCategory = category;
 
     // Auto-populate rate based on category
-    const categoryConfig = WHT_CATEGORIES.find(c => c.value === category)
+    const categoryConfig = WHT_CATEGORIES.find((c) => c.value === category);
     if (categoryConfig) {
-      allocations[index].whtRate = categoryConfig.rate
-      allocations[index].whtAmount = Math.round((allocations[index].amount * categoryConfig.rate) / 100)
+      allocations[index].whtRate = categoryConfig.rate;
+      allocations[index].whtAmount = Math.round(
+        (allocations[index].amount * categoryConfig.rate) / 100
+      );
     }
 
-    form.setValue('allocations', allocations)
-  }
+    form.setValue('allocations', allocations);
+  };
 
   // Update WHT rate manually
   const updateWHTRate = (index: number, rate: number) => {
-    const allocations = form.getValues('allocations')
-    allocations[index].whtRate = rate
-    allocations[index].whtAmount = Math.round((allocations[index].amount * rate) / 100)
-    form.setValue('allocations', allocations)
-  }
+    const allocations = form.getValues('allocations');
+    allocations[index].whtRate = rate;
+    allocations[index].whtAmount = Math.round((allocations[index].amount * rate) / 100);
+    form.setValue('allocations', allocations);
+  };
 
   // Calculate totals
-  const allocations = form.watch('allocations') || []
-  const totalAllocated = allocations.reduce((sum, a) => sum + (a.amount || 0), 0)
-  const totalWHT = allocations.reduce((sum, a) => sum + (a.whtAmount || 0), 0)
-  const unallocated = Math.max(0, amount - totalAllocated)
+  const allocations = form.watch('allocations') || [];
+  const totalAllocated = allocations.reduce((sum, a) => sum + (a.amount || 0), 0);
+  const totalWHT = allocations.reduce((sum, a) => sum + (a.whtAmount || 0), 0);
+  const unallocated = Math.max(0, amount - totalAllocated);
 
   const validateForm = (values: FormValues): boolean => {
     // Validate vendor selected
@@ -271,8 +278,8 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
       toast({
         title: 'กรุณาเลือกผู้ขาย',
         variant: 'destructive',
-      })
-      return false
+      });
+      return false;
     }
 
     // Validate amount > 0
@@ -280,18 +287,21 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
       toast({
         title: 'กรุณาระบุจำนวนเงินมากกว่า 0',
         variant: 'destructive',
-      })
-      return false
+      });
+      return false;
     }
 
     // Validate bank account for transfer/cheque
-    if ((values.paymentMethod === 'TRANSFER' || values.paymentMethod === 'CHEQUE') && !values.bankAccountId) {
+    if (
+      (values.paymentMethod === 'TRANSFER' || values.paymentMethod === 'CHEQUE') &&
+      !values.bankAccountId
+    ) {
       toast({
         title: 'กรุณาเลือกบัญชีธนาคาร',
         description: 'วิธีการจ่ายเงินแบบโอนเงินหรือเช็คต้องระบุบัญชีธนาคาร',
         variant: 'destructive',
-      })
-      return false
+      });
+      return false;
     }
 
     // Validate cheque number for cheque payment
@@ -299,8 +309,8 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
       toast({
         title: 'กรุณาระบุเลขที่เช็ค',
         variant: 'destructive',
-      })
-      return false
+      });
+      return false;
     }
 
     // Validate at least 1 allocation
@@ -308,8 +318,8 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
       toast({
         title: 'กรุณาจัดจ่ายอย่างน้อย 1 รายการ',
         variant: 'destructive',
-      })
-      return false
+      });
+      return false;
     }
 
     // Validate totalAllocated <= amount
@@ -318,57 +328,56 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
         title: 'ยอดจัดจ่ายเกินกว่ายอดจ่ายเงิน',
         description: `จัดจ่ายรวม: ฿${(totalAllocated / 100).toLocaleString()} เกินกว่ายอดจ่าย: ฿${(values.amount / 100).toLocaleString()}`,
         variant: 'destructive',
-      })
-      return false
+      });
+      return false;
     }
 
-    return true
-  }
+    return true;
+  };
 
   const onSubmit = async (values: FormValues) => {
-    if (submitting) return
+    if (submitting) return;
 
     // Client-side validation
-    if (!validateForm(values)) return
+    if (!validateForm(values)) return;
 
-    setSubmitting(true)
+    setSubmitting(true);
     try {
-      const res = await fetch(`/api/payments`, { credentials: 'include', 
+      const res = await fetch(`/api/payments`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
-      })
+      });
 
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || 'เกิดข้อผิดพลาด')
+        const error = await res.json();
+        throw new Error(error.error || 'เกิดข้อผิดพลาด');
       }
 
       toast({
         title: 'สร้างใบจ่ายเงินสำเร็จ',
         description: `สร้างใบจ่ายเงินเรียบร้อยแล้ว`,
-      })
-      form.reset()
-      onSuccess()
+      });
+      form.reset();
+      onSuccess();
     } catch (error) {
       toast({
         title: 'สร้างใบจ่ายเงินไม่สำเร็จ',
         description: error instanceof Error ? error.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>สร้างใบจ่ายเงิน</DialogTitle>
-          <DialogDescription>
-            บันทึกการจ่ายเงินเจ้าหนี้และจัดจ่ายใบซื้อ
-          </DialogDescription>
+          <DialogDescription>บันทึกการจ่ายเงินเจ้าหนี้และจัดจ่ายใบซื้อ</DialogDescription>
         </DialogHeader>
 
         {loading ? (
@@ -384,7 +393,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                   <CardTitle className="text-lg">รายละเอียดการจ่ายเงิน</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="vendorId"
@@ -393,13 +402,17 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                           <FormLabel htmlFor="vendorId">ผู้ขาย</FormLabel>
                           <Select
                             onValueChange={(value) => {
-                              field.onChange(value)
-                              form.setValue('allocations', [])
+                              field.onChange(value);
+                              form.setValue('allocations', []);
                             }}
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="!h-11 text-base" id="vendorId" aria-label="เลือกผู้ขาย">
+                              <SelectTrigger
+                                className="!h-11 text-base"
+                                id="vendorId"
+                                aria-label="เลือกผู้ขาย"
+                              >
                                 <SelectValue placeholder="เลือกผู้ขาย" />
                               </SelectTrigger>
                             </FormControl>
@@ -423,7 +436,12 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                         <FormItem>
                           <FormLabel htmlFor="paymentDate">วันที่จ่ายเงิน</FormLabel>
                           <FormControl>
-                            <Input id="paymentDate" type="date" {...field} aria-label="เลือกวันที่จ่ายเงิน" />
+                            <Input
+                              id="paymentDate"
+                              type="date"
+                              {...field}
+                              aria-label="เลือกวันที่จ่ายเงิน"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -431,7 +449,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="paymentMethod"
@@ -440,7 +458,11 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                           <FormLabel htmlFor="paymentMethod">วิธีจ่าย</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
-                              <SelectTrigger className="!h-11 text-base" id="paymentMethod" aria-label="เลือกวิธีจ่ายเงิน">
+                              <SelectTrigger
+                                className="!h-11 text-base"
+                                id="paymentMethod"
+                                aria-label="เลือกวิธีจ่ายเงิน"
+                              >
                                 <SelectValue />
                               </SelectTrigger>
                             </FormControl>
@@ -466,7 +488,11 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                             <FormLabel htmlFor="bankAccountId">บัญชีธนาคาร</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
-                                <SelectTrigger className="!h-11 text-base" id="bankAccountId" aria-label="เลือกบัญชีธนาคาร">
+                                <SelectTrigger
+                                  className="!h-11 text-base"
+                                  id="bankAccountId"
+                                  aria-label="เลือกบัญชีธนาคาร"
+                                >
                                   <SelectValue placeholder="เลือกบัญชี" />
                                 </SelectTrigger>
                               </FormControl>
@@ -486,7 +512,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                   </div>
 
                   {paymentMethod === 'CHEQUE' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <FormField
                         control={form.control}
                         name="chequeNo"
@@ -508,7 +534,12 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                           <FormItem>
                             <FormLabel htmlFor="chequeDate">วันที่เช็ค</FormLabel>
                             <FormControl>
-                              <Input id="chequeDate" type="date" {...field} aria-label="เลือกวันที่เช็ค" />
+                              <Input
+                                id="chequeDate"
+                                type="date"
+                                {...field}
+                                aria-label="เลือกวันที่เช็ค"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -524,7 +555,8 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                       <FormItem>
                         <FormLabel htmlFor="amount">จำนวนเงินรวม</FormLabel>
                         <FormControl>
-                          <Input className="!h-11 text-base bg-gray-100"
+                          <Input
+                            className="!h-11 bg-gray-100 text-base"
                             id="amount"
                             type="number"
                             step="0.01"
@@ -534,7 +566,7 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                             aria-label="จำนวนเงินรวม"
                           />
                         </FormControl>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           ใช้ปุ่มด้านบนเพื่อเลือกยอดที่ต้องการชำระ
                         </p>
                         <FormMessage />
@@ -544,8 +576,10 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
 
                   {/* Quick-Fill Helper Section */}
                   {selectedVendor && unpaidInvoices.length > 0 && (
-                    <div className="flex flex-wrap gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <span className="text-sm text-blue-800 self-center">จำนวนเงินที่ต้องการชำระ:</span>
+                    <div className="flex flex-wrap gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                      <span className="self-center text-sm text-blue-800">
+                        จำนวนเงินที่ต้องการชำระ:
+                      </span>
 
                       {/* Option 1: Pay Full */}
                       <Button
@@ -553,12 +587,15 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                         variant="default"
                         size="sm"
                         onClick={() => {
-                          const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + inv.balance, 0)
-                          form.setValue('amount', totalUnpaid)
-                          setQuickFillInvoiceId('')
-                          setCustomAmount('')
+                          const totalUnpaid = unpaidInvoices.reduce(
+                            (sum, inv) => sum + inv.balance,
+                            0
+                          );
+                          form.setValue('amount', totalUnpaid);
+                          setQuickFillInvoiceId('');
+                          setCustomAmount('');
                         }}
-                        className="flex-1 min-w-[150px]"
+                        className="min-w-[150px] flex-1"
                       >
                         จ่ายเต็มจำนวน ({unpaidInvoices.length} ใบ)
                       </Button>
@@ -566,24 +603,28 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                       {/* Option 2: Select Invoice */}
                       <Select
                         onValueChange={(invoiceId) => {
-                          setQuickFillInvoiceId(invoiceId)
-                          setCustomAmount('')
+                          setQuickFillInvoiceId(invoiceId);
+                          setCustomAmount('');
                           if (invoiceId) {
-                            const invoice = unpaidInvoices.find((inv: any) => inv.id === invoiceId)
+                            const invoice = unpaidInvoices.find((inv: any) => inv.id === invoiceId);
                             if (invoice) {
-                              form.setValue('amount', invoice.balance)
+                              form.setValue('amount', invoice.balance);
                             }
                           }
                         }}
                         value={quickFillInvoiceId}
                       >
-                        <SelectTrigger className="flex-[2] min-w-[200px]">
+                        <SelectTrigger className="min-w-[200px] flex-[2]">
                           <SelectValue placeholder="เลือกใบแจ้ง/ใบวาซื้อ..." />
                         </SelectTrigger>
                         <SelectContent>
                           {unpaidInvoices.map((invoice: any) => (
                             <SelectItem key={invoice.id} value={invoice.id}>
-                              {invoice.invoiceNo} - ค้างจ่าย ฿{(invoice.balance / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              {invoice.invoiceNo} - ค้างจ่าย ฿
+                              {(invoice.balance / 100).toLocaleString('th-TH', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -595,21 +636,22 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                         placeholder="ระบุจำนวน"
                         value={customAmount}
                         onChange={(e) => {
-                          setCustomAmount(e.target.value)
-                          setQuickFillInvoiceId('')
-                          const parsed = parseFloat(e.target.value) || 0
-                          form.setValue('amount', Math.round(parsed * 100))
+                          setCustomAmount(e.target.value);
+                          setQuickFillInvoiceId('');
+                          const parsed = parseFloat(e.target.value) || 0;
+                          form.setValue('amount', Math.round(parsed * 100));
                         }}
-                        className="flex-[2] min-w-[150px]"
+                        className="min-w-[150px] flex-[2]"
                       />
                     </div>
                   )}
 
                   {selectedVendor && apBalance > 0 && (
-                    <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+                    <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-3">
                       <AlertCircle className="h-4 w-4 text-blue-600" />
                       <span className="text-sm text-blue-800">
-ยอดค้างจ่าย: ฿{(apBalance / 100).toLocaleString()}                      </span>
+                        ยอดค้างจ่าย: ฿{(apBalance / 100).toLocaleString()}{' '}
+                      </span>
                     </div>
                   )}
                 </CardContent>
@@ -625,12 +667,12 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                              <Info className="h-4 w-4 cursor-help text-gray-400" />
                             </TooltipTrigger>
                             <TooltipContent className="max-w-md" side="right">
                               <div className="space-y-2">
                                 <p className="font-medium">อัตราหัก ณ ที่จ่าย ตาม PND.53:</p>
-                                <ul className="text-sm space-y-1">
+                                <ul className="space-y-1 text-sm">
                                   <li>• ค่าบริการ (Service): 3%</li>
                                   <li>• ค่าเช่า (Rent): 5%</li>
                                   <li>• ค่าบริการวิชาชีพ (Professional): 3%</li>
@@ -665,47 +707,65 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                   </CardHeader>
                   <CardContent>
                     {unpaidInvoices.length === 0 ? (
-                      <p className="text-sm text-gray-500 text-center py-4">
-ไม่มีใบซื้อค้างจ่าย                    </p>
+                      <p className="py-4 text-center text-sm text-gray-500">ไม่มีใบซื้อค้างจ่าย </p>
                     ) : (
                       <div className="space-y-3">
                         {unpaidInvoices.map((invoice) => (
-                          <div key={invoice.id} className="border rounded-lg p-3 space-y-2">
+                          <div key={invoice.id} className="space-y-2 rounded-lg border p-3">
                             <div className="flex items-center justify-between">
                               <div>
                                 <span className="font-medium">{invoice.invoiceNo}</span>
-                                <span className="text-sm text-gray-500 ml-2">
+                                <span className="ml-2 text-sm text-gray-500">
                                   {new Date(invoice.invoiceDate).toLocaleDateString('th-TH')}
                                 </span>
                               </div>
                               <Badge variant="outline">
-ค้างจ่าย ฿{invoice.balance.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}                              </Badge>
+                                ค้างจ่าย ฿
+                                {invoice.balance.toLocaleString('th-TH', {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}{' '}
+                              </Badge>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
                               <div>
-                                <label htmlFor={`allocate-${invoice.id}`} className="text-xs text-gray-500">จัดจ่าย</label>
-                                <Input className="!h-11 text-base"
+                                <label
+                                  htmlFor={`allocate-${invoice.id}`}
+                                  className="text-xs text-gray-500"
+                                >
+                                  จัดจ่าย
+                                </label>
+                                <Input
+                                  className="!h-11 text-base"
                                   id={`allocate-${invoice.id}`}
                                   type="number"
                                   step="0.01"
                                   placeholder="0.00"
-                                  value={allocations.find(a => a.invoiceId === invoice.id)?.amount || ''}
+                                  value={
+                                    allocations.find((a) => a.invoiceId === invoice.id)?.amount ||
+                                    ''
+                                  }
                                   onChange={(e) => {
-                                    const value = Math.round(parseFloat(e.target.value) * 100) || 0
-                                    const index = allocations.findIndex(a => a.invoiceId === invoice.id)
+                                    const value = Math.round(parseFloat(e.target.value) * 100) || 0;
+                                    const index = allocations.findIndex(
+                                      (a) => a.invoiceId === invoice.id
+                                    );
                                     if (index >= 0) {
-                                      updateAllocationAmount(index, value)
+                                      updateAllocationAmount(index, value);
                                     } else if (value > 0) {
-                                      const newAllocations = [...allocations, {
-                                        invoiceId: invoice.id,
-                                        invoiceNo: invoice.invoiceNo,
-                                        amount: value,
-                                        whtCategory: 'SERVICE',
-                                        whtRate: 3,
-                                        whtAmount: Math.round((value * 3) / 100),
-                                      }]
-                                      form.setValue('allocations', newAllocations)
+                                      const newAllocations = [
+                                        ...allocations,
+                                        {
+                                          invoiceId: invoice.id,
+                                          invoiceNo: invoice.invoiceNo,
+                                          amount: value,
+                                          whtCategory: 'SERVICE',
+                                          whtRate: 3,
+                                          whtAmount: Math.round((value * 3) / 100),
+                                        },
+                                      ];
+                                      form.setValue('allocations', newAllocations);
                                     }
                                   }}
                                   aria-label={`จำนวนเงินจัดจ่ายสำหรับ ${invoice.invoiceNo}`}
@@ -713,30 +773,48 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                               </div>
 
                               <div>
-                                <label htmlFor={`whtCategory-${invoice.id}`} className="text-xs text-gray-500">หมวดหมู่ WHT</label>
+                                <label
+                                  htmlFor={`whtCategory-${invoice.id}`}
+                                  className="text-xs text-gray-500"
+                                >
+                                  หมวดหมู่ WHT
+                                </label>
                                 <Select
-                                  value={allocations.find(a => a.invoiceId === invoice.id)?.whtCategory || 'SERVICE'}
+                                  value={
+                                    allocations.find((a) => a.invoiceId === invoice.id)
+                                      ?.whtCategory || 'SERVICE'
+                                  }
                                   onValueChange={(value) => {
-                                    const category = value as WHTCategory
-                                    const index = allocations.findIndex(a => a.invoiceId === invoice.id)
+                                    const category = value as WHTCategory;
+                                    const index = allocations.findIndex(
+                                      (a) => a.invoiceId === invoice.id
+                                    );
                                     if (index >= 0) {
-                                      updateWHTCategory(index, category)
+                                      updateWHTCategory(index, category);
                                     } else {
-                                      const categoryConfig = WHT_CATEGORIES.find(c => c.value === category)
-                                      const newAllocations = [...allocations, {
-                                        invoiceId: invoice.id,
-                                        invoiceNo: invoice.invoiceNo,
-                                        amount: 0,
-                                        whtCategory: category,
-                                        whtRate: categoryConfig?.rate || 0,
-                                        whtAmount: 0,
-                                      }]
-                                      form.setValue('allocations', newAllocations)
+                                      const categoryConfig = WHT_CATEGORIES.find(
+                                        (c) => c.value === category
+                                      );
+                                      const newAllocations = [
+                                        ...allocations,
+                                        {
+                                          invoiceId: invoice.id,
+                                          invoiceNo: invoice.invoiceNo,
+                                          amount: 0,
+                                          whtCategory: category,
+                                          whtRate: categoryConfig?.rate || 0,
+                                          whtAmount: 0,
+                                        },
+                                      ];
+                                      form.setValue('allocations', newAllocations);
                                     }
                                   }}
                                   aria-label="เลือกหมวดหมู่หัก ณ ที่จ่าย"
                                 >
-                                  <SelectTrigger className="!h-11 text-base" id={`whtCategory-${invoice.id}`}>
+                                  <SelectTrigger
+                                    className="!h-11 text-base"
+                                    id={`whtCategory-${invoice.id}`}
+                                  >
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -750,24 +828,39 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
                               </div>
 
                               <div>
-                                <label htmlFor={`whtRate-${invoice.id}`} className="text-xs text-gray-500">อัตรา %</label>
-                                <Input className="!h-11 text-base"
+                                <label
+                                  htmlFor={`whtRate-${invoice.id}`}
+                                  className="text-xs text-gray-500"
+                                >
+                                  อัตรา %
+                                </label>
+                                <Input
+                                  className="!h-11 text-base"
                                   id={`whtRate-${invoice.id}`}
                                   type="text"
                                   readOnly
-                                  value={`${allocations.find(a => a.invoiceId === invoice.id)?.whtRate || 0}%`}
+                                  value={`${allocations.find((a) => a.invoiceId === invoice.id)?.whtRate || 0}%`}
                                   aria-label="อัตราหัก ณ ที่จ่าย"
                                 />
                               </div>
 
                               <div>
-                                <label htmlFor={`whtAmount-${invoice.id}`} className="text-xs text-gray-500">WHT จำนวน</label>
-                                <Input className="!h-11 text-base"
+                                <label
+                                  htmlFor={`whtAmount-${invoice.id}`}
+                                  className="text-xs text-gray-500"
+                                >
+                                  WHT จำนวน
+                                </label>
+                                <Input
+                                  className="!h-11 text-base"
                                   id={`whtAmount-${invoice.id}`}
                                   type="text"
                                   readOnly
                                   value={
-                                    ((allocations.find(a => a.invoiceId === invoice.id)?.whtAmount || 0) / 100).toLocaleString() || '0.00'
+                                    (
+                                      (allocations.find((a) => a.invoiceId === invoice.id)
+                                        ?.whtAmount || 0) / 100
+                                    ).toLocaleString() || '0.00'
                                   }
                                   aria-label="จำนวนภาษีหัก ณ ที่จ่าย"
                                 />
@@ -780,18 +873,24 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
 
                     {/* Totals */}
                     {allocations.length > 0 && (
-                      <div className="mt-4 pt-4 border-t space-y-2">
+                      <div className="mt-4 space-y-2 border-t pt-4">
                         <div className="flex justify-between text-sm">
                           <span>จัดจ่ายรวม:</span>
-                          <span className="font-medium">฿{(totalAllocated / 100).toLocaleString()}</span>
+                          <span className="font-medium">
+                            ฿{(totalAllocated / 100).toLocaleString()}
+                          </span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span>หัก ณ ที่จ่ายรวม:</span>
-                          <span className="font-medium text-amber-600">-฿{(totalWHT / 100).toLocaleString()}</span>
+                          <span className="font-medium text-amber-600">
+                            -฿{(totalWHT / 100).toLocaleString()}
+                          </span>
                         </div>
-                        <div className="flex justify-between text-base font-semibold pt-2 border-t">
+                        <div className="flex justify-between border-t pt-2 text-base font-semibold">
                           <span>จ่ายสุทธิ:</span>
-                          <span className="text-green-600">฿{((totalAllocated - totalWHT) / 100).toLocaleString()}</span>
+                          <span className="text-green-600">
+                            ฿{((totalAllocated - totalWHT) / 100).toLocaleString()}
+                          </span>
                         </div>
                         <div className="flex justify-between text-sm text-gray-600">
                           <span>คงเหลือ (เครดิตเจ้าหนี้):</span>
@@ -820,11 +919,23 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
 
               {/* Actions */}
               <div className="flex justify-end gap-3">
-                <Button type="button" variant="outline" onClick={onClose} disabled={submitting} aria-busy={submitting}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={submitting}
+                  aria-busy={submitting}
+                >
                   ยกเลิก
                 </Button>
-                <Button type="submit" disabled={submitting || allocations.length === 0} aria-busy={submitting}>
-                  {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />}
+                <Button
+                  type="submit"
+                  disabled={submitting || allocations.length === 0}
+                  aria-busy={submitting}
+                >
+                  {submitting && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                  )}
                   บันทึก
                 </Button>
               </div>
@@ -833,5 +944,5 @@ export function PaymentForm({ open, onClose, onSuccess }: PaymentFormProps) {
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

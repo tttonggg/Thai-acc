@@ -66,7 +66,11 @@ export async function paginate<T>(
 /**
  * Apply sorting to a Prisma query
  */
-export function applySorting(query: any, orderBy?: string, orderDirection: 'asc' | 'desc' = 'asc'): any {
+export function applySorting(
+  query: any,
+  orderBy?: string,
+  orderDirection: 'asc' | 'desc' = 'asc'
+): any {
   if (!orderBy) return query;
 
   // Handle nested sorting (e.g., "customer.name")
@@ -89,11 +93,7 @@ export function applySorting(query: any, orderBy?: string, orderDirection: 'asc'
 /**
  * Find a record by ID or throw NotFoundError
  */
-export async function findByIdOrThrow<T>(
-  model: any,
-  id: string,
-  include?: any
-): Promise<T> {
+export async function findByIdOrThrow<T>(model: any, id: string, include?: any): Promise<T> {
   const record = await model.findUnique({
     where: { id },
     include,
@@ -160,8 +160,10 @@ export async function transactionWithRetry<T>(
     } catch (error: any) {
       // Retry on deadlock (code P2034)
       if (error.code === 'P2034' && attempt < maxRetries) {
-        console.warn(`[Transaction] Deadlock detected, retrying (attempt ${attempt + 1}/${maxRetries})`);
-        await new Promise(resolve => setTimeout(resolve, 100 * attempt)); // Exponential backoff
+        console.warn(
+          `[Transaction] Deadlock detected, retrying (attempt ${attempt + 1}/${maxRetries})`
+        );
+        await new Promise((resolve) => setTimeout(resolve, 100 * attempt)); // Exponential backoff
         continue;
       }
       throw error;
@@ -178,9 +180,7 @@ export async function executeTransaction<T>(
   prisma: PrismaClient,
   operations: ((tx: PrismaClient) => Promise<any>)[]
 ): Promise<T[]> {
-  return await prisma.$transaction(
-    operations.map((op) => async (tx) => await op(tx))
-  );
+  return await prisma.$transaction(operations.map((op) => async (tx) => await op(tx)));
 }
 
 // ============================================================================
@@ -200,9 +200,7 @@ export async function upsertBatch<T>(
   }>
 ): Promise<T[]> {
   const results = await prisma.$transaction(
-    records.map((record) =>
-      (prisma as any)[model].upsert(record)
-    )
+    records.map((record) => (prisma as any)[model].upsert(record))
   );
 
   return results as T[];
@@ -211,10 +209,7 @@ export async function upsertBatch<T>(
 /**
  * Delete multiple records by IDs
  */
-export async function deleteManyByIds(
-  model: any,
-  ids: string[]
-): Promise<{ count: number }> {
+export async function deleteManyByIds(model: any, ids: string[]): Promise<{ count: number }> {
   return await model.deleteMany({
     where: {
       id: { in: ids },
@@ -266,11 +261,7 @@ export function buildWhereClause(filters: Record<string, any>): any {
 /**
  * Build date range filter
  */
-export function buildDateRangeFilter(
-  field: string,
-  startDate?: Date,
-  endDate?: Date
-): any {
+export function buildDateRangeFilter(field: string, startDate?: Date, endDate?: Date): any {
   const filter: any = {};
 
   if (startDate) {
@@ -291,10 +282,7 @@ export function buildDateRangeFilter(
 /**
  * Check if a record exists
  */
-export async function exists(
-  model: any,
-  where: any
-): Promise<boolean> {
+export async function exists(model: any, where: any): Promise<boolean> {
   const count = await model.count({ where });
   return count > 0;
 }
@@ -340,11 +328,7 @@ export async function isUnique(
 /**
  * Get sum of a field
  */
-export async function sumField(
-  model: any,
-  field: string,
-  where?: any
-): Promise<number> {
+export async function sumField(model: any, field: string, where?: any): Promise<number> {
   const result = await model.aggregate({
     where,
     _sum: { [field]: true },
@@ -356,11 +340,7 @@ export async function sumField(
 /**
  * Get average of a field
  */
-export async function averageField(
-  model: any,
-  field: string,
-  where?: any
-): Promise<number> {
+export async function averageField(model: any, field: string, where?: any): Promise<number> {
   const result = await model.aggregate({
     where,
     _avg: { [field]: true },
@@ -391,10 +371,7 @@ export async function countByField(
 /**
  * Soft delete a record (set deletedAt timestamp)
  */
-export async function softDelete(
-  model: any,
-  id: string
-): Promise<any> {
+export async function softDelete(model: any, id: string): Promise<any> {
   return await model.update({
     where: { id },
     data: { deletedAt: new Date() },

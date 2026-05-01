@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Plus,
   Search,
@@ -18,13 +18,13 @@ import {
   Pause,
   History,
   Repeat,
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
@@ -32,50 +32,50 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 
 interface RecurringDocument {
-  id: string
-  type: 'INVOICE' | 'EXPENSE' | 'RECEIPT'
-  title: string
-  description?: string
-  frequency: 'MONTHLY' | 'QUARTERLY' | 'YEARLY'
-  dayOfMonth: number
-  startDate: string
-  endDate?: string
-  nextRunAt: string
-  lastRunAt?: string
-  isActive: boolean
-  referenceId?: string
+  id: string;
+  type: 'INVOICE' | 'EXPENSE' | 'RECEIPT';
+  title: string;
+  description?: string;
+  frequency: 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
+  dayOfMonth: number;
+  startDate: string;
+  endDate?: string;
+  nextRunAt: string;
+  lastRunAt?: string;
+  isActive: boolean;
+  referenceId?: string;
   _count?: {
-    runs: number
-  }
-  runs?: RecurringRun[]
+    runs: number;
+  };
+  runs?: RecurringRun[];
 }
 
 interface RecurringRun {
-  id: string
-  runAt: string
-  status: 'PENDING' | 'COMPLETED' | 'FAILED'
-  documentId?: string
-  error?: string
+  id: string;
+  runAt: string;
+  status: 'PENDING' | 'COMPLETED' | 'FAILED';
+  documentId?: string;
+  error?: string;
 }
 
 // Status labels
@@ -83,40 +83,40 @@ const typeLabels: Record<string, string> = {
   INVOICE: 'ใบกำกับภาษี',
   EXPENSE: 'ค่าใช้จ่าย',
   RECEIPT: 'ใบเสร็จ',
-}
+};
 
 const frequencyLabels: Record<string, string> = {
   MONTHLY: 'รายเดือน',
   QUARTERLY: 'รายไตรมาส',
   YEARLY: 'รายปี',
-}
+};
 
 // Helper to get status badge variant
 function getStatusBadge(isActive: boolean) {
   return isActive ? (
-    <Badge className="bg-green-100 text-green-800 border-green-300">
-      <CheckCircle2 className="h-3 w-3 mr-1" />
+    <Badge className="border-green-300 bg-green-100 text-green-800">
+      <CheckCircle2 className="mr-1 h-3 w-3" />
       Active
     </Badge>
   ) : (
-    <Badge className="bg-gray-100 text-gray-600 border-gray-300">
-      <Pause className="h-3 w-3 mr-1" />
+    <Badge className="border-gray-300 bg-gray-100 text-gray-600">
+      <Pause className="mr-1 h-3 w-3" />
       Paused
     </Badge>
-  )
+  );
 }
 
 // Helper to get run status badge
 function getRunStatusBadge(status: string) {
   switch (status) {
     case 'COMPLETED':
-      return <Badge className="bg-green-100 text-green-800 border-green-300">สำเร็จ</Badge>
+      return <Badge className="border-green-300 bg-green-100 text-green-800">สำเร็จ</Badge>;
     case 'FAILED':
-      return <Badge className="bg-red-100 text-red-800 border-red-300">ล้มเหลว</Badge>
+      return <Badge className="border-red-300 bg-red-100 text-red-800">ล้มเหลว</Badge>;
     case 'PENDING':
-      return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">รอดำเนินการ</Badge>
+      return <Badge className="border-yellow-300 bg-yellow-100 text-yellow-800">รอดำเนินการ</Badge>;
     default:
-      return <Badge variant="secondary">{status}</Badge>
+      return <Badge variant="secondary">{status}</Badge>;
   }
 }
 
@@ -124,33 +124,33 @@ function getRunStatusBadge(status: string) {
 function getTypeBadge(type: string) {
   switch (type) {
     case 'INVOICE':
-      return <Badge className="bg-blue-100 text-blue-800 border-blue-300">ใบกำกับภาษี</Badge>
+      return <Badge className="border-blue-300 bg-blue-100 text-blue-800">ใบกำกับภาษี</Badge>;
     case 'EXPENSE':
-      return <Badge className="bg-orange-100 text-orange-800 border-orange-300">ค่าใช้จ่าย</Badge>
+      return <Badge className="border-orange-300 bg-orange-100 text-orange-800">ค่าใช้จ่าย</Badge>;
     case 'RECEIPT':
-      return <Badge className="bg-teal-100 text-teal-800 border-teal-300">ใบเสร็จ</Badge>
+      return <Badge className="border-teal-300 bg-teal-100 text-teal-800">ใบเสร็จ</Badge>;
     default:
-      return <Badge variant="secondary">{type}</Badge>
+      return <Badge variant="secondary">{type}</Badge>;
   }
 }
 
 export function RecurringDocuments() {
-  const [documents, setDocuments] = useState<RecurringDocument[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState<string>('all')
-  const [filterActive, setFilterActive] = useState<string>('all')
-  const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0 })
-  const [selectedDocument, setSelectedDocument] = useState<RecurringDocument | null>(null)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
-  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false)
-  const [editingDocument, setEditingDocument] = useState<RecurringDocument | null>(null)
-  const [runHistory, setRunHistory] = useState<RecurringRun[]>([])
-  const [loadingHistory, setLoadingHistory] = useState(false)
-  const [processingAction, setProcessingAction] = useState<string | null>(null)
-  const { toast } = useToast()
+  const [documents, setDocuments] = useState<RecurringDocument[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<string>('all');
+  const [filterActive, setFilterActive] = useState<string>('all');
+  const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0 });
+  const [selectedDocument, setSelectedDocument] = useState<RecurringDocument | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
+  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const [editingDocument, setEditingDocument] = useState<RecurringDocument | null>(null);
+  const [runHistory, setRunHistory] = useState<RecurringRun[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [processingAction, setProcessingAction] = useState<string | null>(null);
+  const { toast } = useToast();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -162,99 +162,99 @@ export function RecurringDocuments() {
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
     isActive: true,
-  })
-  const [formSubmitting, setFormSubmitting] = useState(false)
+  });
+  const [formSubmitting, setFormSubmitting] = useState(false);
 
   // Fetch documents
   useEffect(() => {
-    fetchDocuments()
-  }, [pagination.page, pagination.limit, filterType, filterActive])
+    fetchDocuments();
+  }, [pagination.page, pagination.limit, filterType, filterActive]);
 
   const fetchDocuments = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
-      })
+      });
 
-      if (filterType !== 'all') params.append('type', filterType)
-      if (filterActive !== 'all') params.append('isActive', filterActive)
+      if (filterType !== 'all') params.append('type', filterType);
+      if (filterActive !== 'all') params.append('isActive', filterActive);
 
-      const res = await fetch(`/api/recurring?${params}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Fetch failed')
+      const res = await fetch(`/api/recurring?${params}`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Fetch failed');
 
-      const result = await res.json()
-      const data = result.data || []
+      const result = await res.json();
+      const data = result.data || [];
 
       if (!Array.isArray(data)) {
-        throw new Error('Invalid data format')
+        throw new Error('Invalid data format');
       }
 
-      setDocuments(data)
-      setPagination(prev => ({
+      setDocuments(data);
+      setPagination((prev) => ({
         ...prev,
         total: result.pagination?.total || 0,
-      }))
+      }));
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล'
-      setError(message)
+      const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล';
+      setError(message);
       toast({
         title: 'ข้อผิดพลาด',
         description: 'โหลดข้อมูลไม่สำเร็จ',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Fetch run history
   const fetchRunHistory = async (documentId: string) => {
-    setLoadingHistory(true)
+    setLoadingHistory(true);
     try {
-      const res = await fetch(`/api/recurring/${documentId}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Fetch failed')
+      const res = await fetch(`/api/recurring/${documentId}`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Fetch failed');
 
-      const result = await res.json()
-      setRunHistory(result.data?.runs || [])
+      const result = await res.json();
+      setRunHistory(result.data?.runs || []);
     } catch (err) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'โหลดประวัติไม่สำเร็จ',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoadingHistory(false)
+      setLoadingHistory(false);
     }
-  }
+  };
 
   // Filter documents
-  const filteredDocuments = (documents || []).filter(doc => {
+  const filteredDocuments = (documents || []).filter((doc) => {
     const matchesSearch =
       !searchTerm ||
       doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      doc.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesSearch
-  })
+    return matchesSearch;
+  });
 
   // Action handlers
   const handleView = async (document: RecurringDocument) => {
-    setSelectedDocument(document)
-    setIsViewDialogOpen(true)
-    await fetchRunHistory(document.id)
-  }
+    setSelectedDocument(document);
+    setIsViewDialogOpen(true);
+    await fetchRunHistory(document.id);
+  };
 
   const handleViewHistory = async (document: RecurringDocument) => {
-    setSelectedDocument(document)
-    setIsHistoryDialogOpen(true)
-    await fetchRunHistory(document.id)
-  }
+    setSelectedDocument(document);
+    setIsHistoryDialogOpen(true);
+    await fetchRunHistory(document.id);
+  };
 
   const handleEdit = (document: RecurringDocument) => {
-    setEditingDocument(document)
+    setEditingDocument(document);
     setFormData({
       type: document.type,
       title: document.title,
@@ -264,156 +264,157 @@ export function RecurringDocuments() {
       startDate: new Date(document.startDate).toISOString().split('T')[0],
       endDate: document.endDate ? new Date(document.endDate).toISOString().split('T')[0] : '',
       isActive: document.isActive,
-    })
-    setIsFormDialogOpen(true)
-  }
+    });
+    setIsFormDialogOpen(true);
+  };
 
   const handleToggleActive = async (document: RecurringDocument) => {
-    setProcessingAction(`toggle-${document.id}`)
+    setProcessingAction(`toggle-${document.id}`);
     try {
-      const res = await fetch(`/api/recurring/${document.id}`, { credentials: 'include', 
+      const res = await fetch(`/api/recurring/${document.id}`, {
+        credentials: 'include',
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: !document.isActive }),
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'อัพเดทไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'อัพเดทไม่สำเร็จ');
       }
 
       toast({
         title: 'สำเร็จ',
         description: document.isActive ? 'ระงับการทำซ้ำแล้ว' : 'เปิดใช้งานแล้ว',
-      })
+      });
 
-      fetchDocuments()
+      fetchDocuments();
     } catch (err) {
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setProcessingAction(null)
+      setProcessingAction(null);
     }
-  }
+  };
 
   const handleRunNow = async (document: RecurringDocument) => {
     if (!confirm(`ต้องการสร้างเอกสารจาก "${document.title}" ทันทีใช่หรือไม่?`)) {
-      return
+      return;
     }
 
-    setProcessingAction(`run-${document.id}`)
+    setProcessingAction(`run-${document.id}`);
     try {
-      const res = await fetch(`/api/recurring/process`, { credentials: 'include', 
+      const res = await fetch(`/api/recurring/process`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'ดำเนินการไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'ดำเนินการไม่สำเร็จ');
       }
 
       toast({
         title: 'สำเร็จ',
         description: 'สร้างเอกสารเรียบร้อยแล้ว กรุณาตรวจสอบในรายการ',
-      })
+      });
 
-      fetchDocuments()
-      fetchRunHistory(document.id)
+      fetchDocuments();
+      fetchRunHistory(document.id);
     } catch (err) {
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setProcessingAction(null)
+      setProcessingAction(null);
     }
-  }
+  };
 
   const handleDelete = async (documentId: string) => {
     if (!confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
-    setProcessingAction(`delete-${documentId}`)
+    setProcessingAction(`delete-${documentId}`);
     try {
-      const res = await fetch(`/api/recurring/${documentId}`, { credentials: 'include', 
+      const res = await fetch(`/api/recurring/${documentId}`, {
+        credentials: 'include',
         method: 'DELETE',
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'ลบไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'ลบไม่สำเร็จ');
       }
 
       toast({
         title: 'ลบสำเร็จ',
         description: 'ลบรายการเรียบร้อยแล้ว',
-      })
+      });
 
-      fetchDocuments()
+      fetchDocuments();
     } catch (err) {
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setProcessingAction(null)
+      setProcessingAction(null);
     }
-  }
+  };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setFormSubmitting(true)
+    e.preventDefault();
+    setFormSubmitting(true);
 
     try {
       const payload = {
         ...formData,
         dayOfMonth: parseInt(formData.dayOfMonth),
         endDate: formData.endDate || null,
-      }
+      };
 
-      const url = editingDocument
-        ? `/api/recurring/${editingDocument.id}`
-        : '/api/recurring'
+      const url = editingDocument ? `/api/recurring/${editingDocument.id}` : '/api/recurring';
 
-      const method = editingDocument ? 'PATCH' : 'POST'
+      const method = editingDocument ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      })
+      });
 
       if (!res.ok) {
-        const result = await res.json()
-        throw new Error(result.error || 'บันทึกไม่สำเร็จ')
+        const result = await res.json();
+        throw new Error(result.error || 'บันทึกไม่สำเร็จ');
       }
 
       toast({
         title: 'สำเร็จ',
         description: editingDocument ? 'อัพเดทเรียบร้อยแล้ว' : 'สร้างเรายการเรียบร้อยแล้ว',
-      })
+      });
 
-      setIsFormDialogOpen(false)
-      setEditingDocument(null)
-      resetForm()
-      fetchDocuments()
+      setIsFormDialogOpen(false);
+      setEditingDocument(null);
+      resetForm();
+      fetchDocuments();
     } catch (err) {
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: err instanceof Error ? err.message : 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setFormSubmitting(false)
+      setFormSubmitting(false);
     }
-  }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -425,14 +426,14 @@ export function RecurringDocuments() {
       startDate: new Date().toISOString().split('T')[0],
       endDate: '',
       isActive: true,
-    })
-  }
+    });
+  };
 
   const openNewForm = () => {
-    setEditingDocument(null)
-    resetForm()
-    setIsFormDialogOpen(true)
-  }
+    setEditingDocument(null);
+    resetForm();
+    setIsFormDialogOpen(true);
+  };
 
   // Loading UI
   if (loading && documents.length === 0) {
@@ -440,12 +441,12 @@ export function RecurringDocuments() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="mb-2 h-8 w-64" />
             <Skeleton className="h-5 w-80" />
           </div>
           <Skeleton className="h-10 w-40" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardContent className="p-4">
@@ -456,12 +457,12 @@ export function RecurringDocuments() {
         </div>
         <Card>
           <CardContent className="p-4">
-            <Skeleton className="h-12 w-full mb-4" />
+            <Skeleton className="mb-4 h-12 w-full" />
             <Skeleton className="h-64 w-full" />
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Error UI
@@ -471,20 +472,20 @@ export function RecurringDocuments() {
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>{error}</AlertDescription>
       </Alert>
-    )
+    );
   }
 
   // Calculate stats
   const stats = {
-    active: documents.filter(d => d.isActive).length,
-    paused: documents.filter(d => !d.isActive).length,
-    dueToday: documents.filter(d => {
-      if (!d.isActive || !d.nextRunAt) return false
-      const today = new Date().toDateString()
-      return new Date(d.nextRunAt).toDateString() === today
+    active: documents.filter((d) => d.isActive).length,
+    paused: documents.filter((d) => !d.isActive).length,
+    dueToday: documents.filter((d) => {
+      if (!d.isActive || !d.nextRunAt) return false;
+      const today = new Date().toDateString();
+      return new Date(d.nextRunAt).toDateString() === today;
     }).length,
     total: documents.length,
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -492,16 +493,16 @@ export function RecurringDocuments() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">เอกสารประจำ (Recurring Documents)</h1>
-          <p className="text-gray-500 mt-1">จัดการเอกสารที่สร้างอัตโนมัติตามรอบระยะเวลา</p>
+          <p className="mt-1 text-gray-500">จัดการเอกสารที่สร้างอัตโนมัติตามรอบระยะเวลา</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700" onClick={openNewForm}>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           สร้างรายการใหม่
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -551,9 +552,9 @@ export function RecurringDocuments() {
       {/* Search & Filter */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="ค้นหาตามชื่อหรือรายละเอียด..."
                 className="pl-10"
@@ -606,8 +607,8 @@ export function RecurringDocuments() {
               <TableBody>
                 {filteredDocuments.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                      <Repeat className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <TableCell colSpan={8} className="py-8 text-center text-gray-500">
+                      <Repeat className="mx-auto mb-4 h-12 w-12 text-gray-300" />
                       <p>ไม่พบรายการ</p>
                     </TableCell>
                   </TableRow>
@@ -617,7 +618,7 @@ export function RecurringDocuments() {
                       <TableCell>
                         <div className="font-medium">{doc.title}</div>
                         {doc.description && (
-                          <div className="text-xs text-gray-500 truncate max-w-[200px]">
+                          <div className="max-w-[200px] truncate text-xs text-gray-500">
                             {doc.description}
                           </div>
                         )}
@@ -629,9 +630,7 @@ export function RecurringDocuments() {
                           {frequencyLabels[doc.frequency]} วันที่ {doc.dayOfMonth}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        {new Date(doc.startDate).toLocaleDateString('th-TH')}
-                      </TableCell>
+                      <TableCell>{new Date(doc.startDate).toLocaleDateString('th-TH')}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Clock className="h-3 w-3 text-gray-400" />
@@ -642,9 +641,7 @@ export function RecurringDocuments() {
                       </TableCell>
                       <TableCell>{getStatusBadge(doc.isActive)}</TableCell>
                       <TableCell className="text-center">
-                        <Badge variant="secondary">
-                          {doc._count?.runs || 0} ครั้ง
-                        </Badge>
+                        <Badge variant="secondary">{doc._count?.runs || 0} ครั้ง</Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-center gap-1">
@@ -776,7 +773,8 @@ export function RecurringDocuments() {
                 <div className="space-y-1">
                   <Label className="text-xs text-gray-500">ความถี่</Label>
                   <p className="font-medium">
-                    {frequencyLabels[selectedDocument.frequency]} วันที่ {selectedDocument.dayOfMonth}
+                    {frequencyLabels[selectedDocument.frequency]} วันที่{' '}
+                    {selectedDocument.dayOfMonth}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -814,12 +812,12 @@ export function RecurringDocuments() {
               {selectedDocument.description && (
                 <div className="space-y-1">
                   <Label className="text-xs text-gray-500">รายละเอียด</Label>
-                  <p className="text-sm bg-gray-50 p-3 rounded">{selectedDocument.description}</p>
+                  <p className="rounded bg-gray-50 p-3 text-sm">{selectedDocument.description}</p>
                 </div>
               )}
 
-              <div className="pt-4 border-t">
-                <div className="flex items-center justify-between mb-2">
+              <div className="border-t pt-4">
+                <div className="mb-2 flex items-center justify-between">
                   <Label>ประวัติการทำงาน ({runHistory.length} ครั้ง)</Label>
                 </div>
                 {loadingHistory ? (
@@ -827,14 +825,14 @@ export function RecurringDocuments() {
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
                 ) : runHistory.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-4">ยังไม่มีประวัติ</p>
+                  <p className="py-4 text-center text-sm text-gray-500">ยังไม่มีประวัติ</p>
                 ) : (
                   <ScrollArea className="h-[200px]">
                     <div className="space-y-2">
                       {runHistory.slice(0, 10).map((run) => (
                         <div
                           key={run.id}
-                          className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                          className="flex items-center justify-between rounded bg-gray-50 p-2"
                         >
                           <div className="flex items-center gap-2">
                             {run.status === 'COMPLETED' && (
@@ -878,8 +876,8 @@ export function RecurringDocuments() {
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : runHistory.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <History className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <div className="py-8 text-center text-gray-500">
+              <History className="mx-auto mb-4 h-12 w-12 text-gray-300" />
               <p>ยังไม่มีประวัติการทำงาน</p>
             </div>
           ) : (
@@ -888,7 +886,7 @@ export function RecurringDocuments() {
                 {runHistory.map((run) => (
                   <div
                     key={run.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
                   >
                     <div className="flex items-center gap-3">
                       {run.status === 'COMPLETED' && (
@@ -914,22 +912,23 @@ export function RecurringDocuments() {
       </Dialog>
 
       {/* Create/Edit Form Dialog */}
-      <Dialog open={isFormDialogOpen} onOpenChange={(open) => {
-        setIsFormDialogOpen(open)
-        if (!open) {
-          setEditingDocument(null)
-          resetForm()
-        }
-      }}>
+      <Dialog
+        open={isFormDialogOpen}
+        onOpenChange={(open) => {
+          setIsFormDialogOpen(open);
+          if (!open) {
+            setEditingDocument(null);
+            resetForm();
+          }
+        }}
+      >
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {editingDocument ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
               {editingDocument ? 'แก้ไขรายการ' : 'สร้างรายการใหม่'}
             </DialogTitle>
-            <DialogDescription>
-              กำหนดรอบการสร้างเอกสารอัตโนมัติ
-            </DialogDescription>
+            <DialogDescription>กำหนดรอบการสร้างเอกสารอัตโนมัติ</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -938,7 +937,9 @@ export function RecurringDocuments() {
                 <Label htmlFor="type">ประเภทเอกสาร</Label>
                 <Select
                   value={formData.type}
-                  onValueChange={(value) => setFormData({ ...formData, type: value as typeof formData.type })}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, type: value as typeof formData.type })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -955,7 +956,9 @@ export function RecurringDocuments() {
                 <Label htmlFor="frequency">ความถี่</Label>
                 <Select
                   value={formData.frequency}
-                  onValueChange={(value) => setFormData({ ...formData, frequency: value as typeof formData.frequency })}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, frequency: value as typeof formData.frequency })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -1043,20 +1046,20 @@ export function RecurringDocuments() {
               <Label htmlFor="isActive">เปิดใช้งานทันที</Label>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t">
+            <div className="flex justify-end gap-2 border-t pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setIsFormDialogOpen(false)
-                  setEditingDocument(null)
-                  resetForm()
+                  setIsFormDialogOpen(false);
+                  setEditingDocument(null);
+                  resetForm();
                 }}
               >
                 ยกเลิก
               </Button>
               <Button type="submit" disabled={formSubmitting}>
-                {formSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {formSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {editingDocument ? 'บันทึกการแก้ไข' : 'สร้างรายการ'}
               </Button>
             </div>
@@ -1064,5 +1067,5 @@ export function RecurringDocuments() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

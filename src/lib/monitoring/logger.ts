@@ -44,7 +44,7 @@ const baseLogger = pino(loggerConfig);
  */
 export function createLogger(context: Record<string, unknown> = {}) {
   const correlationId = context.correlationId || randomUUID();
-  
+
   return baseLogger.child({
     correlationId,
     ...context,
@@ -54,12 +54,12 @@ export function createLogger(context: Record<string, unknown> = {}) {
 /**
  * Get request logger with correlation ID
  */
-export function getRequestLogger(req: { headers: { [key: string]: string | string[] | undefined } }) {
-  const correlationId = 
-    req.headers['x-correlation-id'] ||
-    req.headers['x-request-id'] ||
-    randomUUID();
-  
+export function getRequestLogger(req: {
+  headers: { [key: string]: string | string[] | undefined };
+}) {
+  const correlationId =
+    req.headers['x-correlation-id'] || req.headers['x-request-id'] || randomUUID();
+
   return createLogger({ correlationId });
 }
 
@@ -89,14 +89,17 @@ export function logRequest(
   logger: pino.Logger
 ) {
   const duration = Date.now() - startTime;
-  
-  logger.info({
-    type: 'request',
-    method: req.method,
-    url: req.url,
-    statusCode: res.statusCode,
-    duration,
-    userAgent: req.headers['user-agent'],
-    referer: req.headers.referer,
-  }, 'Request completed');
+
+  logger.info(
+    {
+      type: 'request',
+      method: req.method,
+      url: req.url,
+      statusCode: res.statusCode,
+      duration,
+      userAgent: req.headers['user-agent'],
+      referer: req.headers.referer,
+    },
+    'Request completed'
+  );
 }

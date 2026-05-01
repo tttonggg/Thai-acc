@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { z } from 'zod';
 
 // Validation schema for update
 const departmentUpdateSchema = z.object({
@@ -14,21 +14,15 @@ const departmentUpdateSchema = z.object({
   location: z.string().optional(),
   isActive: z.boolean().optional(),
   notes: z.string().optional(),
-})
+});
 
 // GET /api/departments/[id] - Get single department
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     const department = await prisma.department.findUnique({
@@ -77,80 +71,65 @@ export async function GET(
           take: 10,
         },
       },
-    })
+    });
 
     if (!department) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบแผนก' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบแผนก' }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
       data: department,
-    })
+    });
   } catch (error) {
-    console.error('Department Fetch Error:', error)
+    console.error('Department Fetch Error:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการโหลดข้อมูล',
       },
       { status: 500 }
-    )
+    );
   }
 }
 
 // PUT /api/departments/[id] - Update department
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     // Only ADMIN and ACCOUNTANT can update departments
     if (!['ADMIN', 'ACCOUNTANT'].includes(session.user.role as string)) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์แก้ไขแผนก' },
-        { status: 403 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์แก้ไขแผนก' }, { status: 403 });
     }
 
     // Check if department exists
     const existing = await prisma.department.findUnique({
       where: { id: id },
-    })
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบแผนก' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบแผนก' }, { status: 404 });
     }
 
-    const body = await request.json()
-    const validatedData = departmentUpdateSchema.parse(body)
+    const body = await request.json();
+    const validatedData = departmentUpdateSchema.parse(body);
 
     // Check if new code conflicts with existing department
     if (validatedData.code && validatedData.code !== existing.code) {
       const codeExists = await prisma.department.findUnique({
         where: { code: validatedData.code },
-      })
+      });
 
       if (codeExists) {
         return NextResponse.json(
           { success: false, error: 'รหัสแผนกนี้มีอยู่แล้ว' },
           { status: 400 }
-        )
+        );
       }
     }
 
@@ -164,18 +143,15 @@ export async function PUT(
           return NextResponse.json(
             { success: false, error: 'แผนกไม่สามารถเป็นแผนกแม่ของตัวเองได้' },
             { status: 400 }
-          )
+          );
         }
 
         const parent = await prisma.department.findUnique({
           where: { id: validatedData.parentId },
-        })
+        });
 
         if (!parent) {
-          return NextResponse.json(
-            { success: false, error: 'ไม่พบแผนกแม่' },
-            { status: 400 }
-          )
+          return NextResponse.json({ success: false, error: 'ไม่พบแผนกแม่' }, { status: 400 });
         }
       }
     }
@@ -187,13 +163,10 @@ export async function PUT(
       } else {
         const manager = await prisma.user.findUnique({
           where: { id: validatedData.managerId },
-        })
+        });
 
         if (!manager) {
-          return NextResponse.json(
-            { success: false, error: 'ไม่พบผู้จัดการ' },
-            { status: 400 }
-          )
+          return NextResponse.json({ success: false, error: 'ไม่พบผู้จัดการ' }, { status: 400 });
         }
       }
     }
@@ -224,15 +197,15 @@ export async function PUT(
           },
         },
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
       data: department,
       message: 'อัปเดตแผนกสำเร็จ',
-    })
+    });
   } catch (error) {
-    console.error('Department Update Error:', error)
+    console.error('Department Update Error:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -242,7 +215,7 @@ export async function PUT(
           details: error.issues,
         },
         { status: 400 }
-      )
+      );
     }
 
     return NextResponse.json(
@@ -251,7 +224,7 @@ export async function PUT(
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการอัปเดตแผนก',
       },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -261,21 +234,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     // Only ADMIN can delete departments
     if (session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์ลบแผนก' },
-        { status: 403 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์ลบแผนก' }, { status: 403 });
     }
 
     // Check if department exists
@@ -290,13 +257,10 @@ export async function DELETE(
           },
         },
       },
-    })
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบแผนก' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบแผนก' }, { status: 404 });
     }
 
     // Check if department has child departments
@@ -304,7 +268,7 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: 'ไม่สามารถลบแผนกที่มีแผนกย่อยได้' },
         { status: 400 }
-      )
+      );
     }
 
     // Check if department has purchase requests or budgets
@@ -312,25 +276,25 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: 'ไม่สามารถลบแผนกที่มีข้อมูลอ้างอิงได้' },
         { status: 400 }
-      )
+      );
     }
 
     await prisma.department.delete({
       where: { id: id },
-    })
+    });
 
     return NextResponse.json({
       success: true,
       message: 'ลบแผนกสำเร็จ',
-    })
+    });
   } catch (error) {
-    console.error('Department Deletion Error:', error)
+    console.error('Department Deletion Error:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการลบแผนก',
       },
       { status: 500 }
-    )
+    );
   }
 }

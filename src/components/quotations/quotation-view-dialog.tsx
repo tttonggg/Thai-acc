@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   X,
   Loader2,
@@ -12,17 +12,12 @@ import {
   XCircle,
   Edit,
   Trash2,
-  AlertCircle
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+  AlertCircle,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -30,9 +25,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Separator } from '@/components/ui/separator'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/table';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,80 +37,88 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+} from '@/components/ui/alert-dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface QuotationLine {
-  id: string
-  lineNo: number
-  description: string
-  quantity: number
-  unit: string
-  unitPrice: number
-  discount: number
-  vatRate: number
-  vatAmount: number
-  amount: number
-  notes?: string
+  id: string;
+  lineNo: number;
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  discount: number;
+  vatRate: number;
+  vatAmount: number;
+  amount: number;
+  notes?: string;
   product?: {
-    id: string
-    code: string
-    name: string
-  }
+    id: string;
+    code: string;
+    name: string;
+  };
 }
 
 interface QuotationCustomer {
-  id: string
-  code: string
-  name: string
-  taxId?: string
-  address?: string
-  phone?: string
+  id: string;
+  code: string;
+  name: string;
+  taxId?: string;
+  address?: string;
+  phone?: string;
 }
 
 interface QuotationInvoice {
-  id: string
-  invoiceNo: string
-  status: string
+  id: string;
+  invoiceNo: string;
+  status: string;
 }
 
 interface Quotation {
-  id: string
-  quotationNo: string
-  quotationDate: string
-  validUntil: string
-  version: number
-  status: 'DRAFT' | 'SENT' | 'APPROVED' | 'REJECTED' | 'REVISED' | 'EXPIRED' | 'CONVERTED' | 'CANCELLED'
-  customer: QuotationCustomer
-  contactPerson?: string
-  reference?: string
-  subtotal: number
-  discountAmount: number
-  discountPercent: number
-  vatRate: number
-  vatAmount: number
-  totalAmount: number
-  submittedAt?: string
-  approvedAt?: string
-  approvedBy?: string
-  rejectedAt?: string
-  rejectedReason?: string
-  revisedAt?: string
-  invoice?: QuotationInvoice
-  terms?: string
-  notes?: string
-  internalNotes?: string
-  lines: QuotationLine[]
-  createdAt: string
+  id: string;
+  quotationNo: string;
+  quotationDate: string;
+  validUntil: string;
+  version: number;
+  status:
+    | 'DRAFT'
+    | 'SENT'
+    | 'APPROVED'
+    | 'REJECTED'
+    | 'REVISED'
+    | 'EXPIRED'
+    | 'CONVERTED'
+    | 'CANCELLED';
+  customer: QuotationCustomer;
+  contactPerson?: string;
+  reference?: string;
+  subtotal: number;
+  discountAmount: number;
+  discountPercent: number;
+  vatRate: number;
+  vatAmount: number;
+  totalAmount: number;
+  submittedAt?: string;
+  approvedAt?: string;
+  approvedBy?: string;
+  rejectedAt?: string;
+  rejectedReason?: string;
+  revisedAt?: string;
+  invoice?: QuotationInvoice;
+  terms?: string;
+  notes?: string;
+  internalNotes?: string;
+  lines: QuotationLine[];
+  createdAt: string;
 }
 
 interface QuotationViewDialogProps {
-  quotationId: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onEdit?: () => void
-  onDelete?: () => void
-  onRefresh?: () => void
+  quotationId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onRefresh?: () => void;
 }
 
 const statusLabels: Record<string, string> = {
@@ -127,7 +130,7 @@ const statusLabels: Record<string, string> = {
   EXPIRED: 'หมดอายุ',
   CONVERTED: 'แปลงเป็นใบแจ้งหนี้',
   CANCELLED: 'ยกเลิก',
-}
+};
 
 const statusColors: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-800',
@@ -138,7 +141,7 @@ const statusColors: Record<string, string> = {
   EXPIRED: 'bg-gray-200 text-gray-700',
   CONVERTED: 'bg-purple-100 text-purple-800',
   CANCELLED: 'bg-red-100 text-red-800',
-}
+};
 
 export function QuotationViewDialog({
   quotationId,
@@ -146,40 +149,40 @@ export function QuotationViewDialog({
   onOpenChange,
   onEdit,
   onDelete,
-  onRefresh
+  onRefresh,
 }: QuotationViewDialogProps) {
-  const [quotation, setQuotation] = useState<Quotation | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [actionLoading, setActionLoading] = useState(false)
-  const [printing, setPrinting] = useState(false)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const { toast } = useToast()
+  const [quotation, setQuotation] = useState<Quotation | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [printing, setPrinting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (open && quotationId) {
-      fetchQuotation()
+      fetchQuotation();
     }
-  }, [open, quotationId])
+  }, [open, quotationId]);
 
   const fetchQuotation = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const res = await fetch(`/api/quotations/${quotationId}`, { credentials: 'include' })
-      const result = await res.json()
+      const res = await fetch(`/api/quotations/${quotationId}`, { credentials: 'include' });
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'ไม่สามารถดึงข้อมูลใบเสนอราคาได้')
+        throw new Error(result.error || 'ไม่สามารถดึงข้อมูลใบเสนอราคาได้');
       }
 
-      setQuotation(result.data)
+      setQuotation(result.data);
     } catch (err: any) {
-      setError(err.message || 'เกิดข้อผิดพลาด')
+      setError(err.message || 'เกิดข้อผิดพลาด');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('th-TH', {
@@ -187,16 +190,16 @@ export function QuotationViewDialog({
       currency: 'THB',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(amount / 100) // Convert from Satang to Baht
-  }
+    }).format(amount / 100); // Convert from Satang to Baht
+  };
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('th-TH', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    })
-  }
+    });
+  };
 
   const formatDateTime = (dateString: string): string => {
     return new Date(dateString).toLocaleString('th-TH', {
@@ -205,258 +208,264 @@ export function QuotationViewDialog({
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    })
-  }
+    });
+  };
 
   const isExpired = () => {
-    if (!quotation) return false
-    return new Date(quotation.validUntil) < new Date()
-  }
+    if (!quotation) return false;
+    return new Date(quotation.validUntil) < new Date();
+  };
 
   const isExpiringSoon = () => {
-    if (!quotation) return false
+    if (!quotation) return false;
     const daysUntilExpiry = Math.ceil(
       (new Date(quotation.validUntil).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-    )
-    return daysUntilExpiry > 0 && daysUntilExpiry <= 7
-  }
+    );
+    return daysUntilExpiry > 0 && daysUntilExpiry <= 7;
+  };
 
   const handleSend = async () => {
-    if (!quotation) return
+    if (!quotation) return;
 
-    setActionLoading(true)
+    setActionLoading(true);
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/send`, { credentials: 'include', 
+      const res = await fetch(`/api/quotations/${quotationId}/send`, {
+        credentials: 'include',
         method: 'POST',
-      })
+      });
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'ไม่สามารถส่งใบเสนอราคาได้')
+        throw new Error(result.error || 'ไม่สามารถส่งใบเสนอราคาได้');
       }
 
       toast({
         title: 'ส่งใบเสนอราคาเรียบร้อยแล้ว',
         description: `เลขที่ ${quotation.quotationNo}`,
-      })
+      });
 
-      fetchQuotation()
-      onRefresh?.()
+      fetchQuotation();
+      onRefresh?.();
     } catch (err: any) {
       toast({
         title: 'ส่งใบเสนอราคาไม่สำเร็จ',
         description: err.message || 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setActionLoading(false)
+      setActionLoading(false);
     }
-  }
+  };
 
   const handleApprove = async () => {
-    if (!quotation) return
+    if (!quotation) return;
 
-    setActionLoading(true)
+    setActionLoading(true);
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/approve`, { credentials: 'include', 
+      const res = await fetch(`/api/quotations/${quotationId}/approve`, {
+        credentials: 'include',
         method: 'POST',
-      })
+      });
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'ไม่สามารถอนุมัติใบเสนอราคาได้')
+        throw new Error(result.error || 'ไม่สามารถอนุมัติใบเสนอราคาได้');
       }
 
       toast({
         title: 'อนุมัติใบเสนอราคาเรียบร้อยแล้ว',
         description: `เลขที่ ${quotation.quotationNo}`,
-      })
+      });
 
-      fetchQuotation()
-      onRefresh?.()
+      fetchQuotation();
+      onRefresh?.();
     } catch (err: any) {
       toast({
         title: 'อนุมัติใบเสนอราคาไม่สำเร็จ',
         description: err.message || 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setActionLoading(false)
+      setActionLoading(false);
     }
-  }
+  };
 
   const handleReject = async () => {
-    if (!quotation) return
+    if (!quotation) return;
 
-    const reason = prompt('กรุณาระบุเหตุผลการปฏิเสธ:')
+    const reason = prompt('กรุณาระบุเหตุผลการปฏิเสธ:');
 
     if (!reason || reason.trim() === '') {
       toast({
         title: 'กรุณาระบุเหตุผล',
         description: 'ต้องระบุเหตุผลในการปฏิเสธใบเสนอราคา',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setActionLoading(true)
+    setActionLoading(true);
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/reject`, { credentials: 'include', 
+      const res = await fetch(`/api/quotations/${quotationId}/reject`, {
+        credentials: 'include',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ reason }),
-      })
+      });
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'ไม่สามารถปฏิเสธใบเสนอราคาได้')
+        throw new Error(result.error || 'ไม่สามารถปฏิเสธใบเสนอราคาได้');
       }
 
       toast({
         title: 'ปฏิเสธใบเสนอราคาเรียบร้อยแล้ว',
         description: `เลขที่ ${quotation.quotationNo}`,
-      })
+      });
 
-      fetchQuotation()
-      onRefresh?.()
+      fetchQuotation();
+      onRefresh?.();
     } catch (err: any) {
       toast({
         title: 'ปฏิเสธใบเสนอราคาไม่สำเร็จ',
         description: err.message || 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setActionLoading(false)
+      setActionLoading(false);
     }
-  }
+  };
 
   const handleConvertToInvoice = async () => {
-    if (!quotation) return
+    if (!quotation) return;
 
     if (!confirm('ต้องการแปลงใบเสนอราคานี้เป็นใบแจ้งหนี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
-    setActionLoading(true)
+    setActionLoading(true);
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/convert-to-invoice`, { credentials: 'include', 
+      const res = await fetch(`/api/quotations/${quotationId}/convert-to-invoice`, {
+        credentials: 'include',
         method: 'POST',
-      })
+      });
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'ไม่สามารถแปลงเป็นใบแจ้งหนี้ได้')
+        throw new Error(result.error || 'ไม่สามารถแปลงเป็นใบแจ้งหนี้ได้');
       }
 
       toast({
         title: 'แปลงเป็นใบแจ้งหนี้เรียบร้อยแล้ว',
         description: result.data?.invoiceNo || 'สำเร็จ',
-      })
+      });
 
-      fetchQuotation()
-      onRefresh?.()
+      fetchQuotation();
+      onRefresh?.();
     } catch (err: any) {
       toast({
         title: 'แปลงเป็นใบแจ้งหนี้ไม่สำเร็จ',
         description: err.message || 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setActionLoading(false)
+      setActionLoading(false);
     }
-  }
+  };
 
   const handleCancel = async () => {
-    if (!quotation) return
+    if (!quotation) return;
 
     if (!confirm('ต้องการยกเลิกใบเสนอราคานี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
-    setActionLoading(true)
+    setActionLoading(true);
     try {
-      const res = await fetch(`/api/quotations/${quotationId}/cancel`, { credentials: 'include', 
+      const res = await fetch(`/api/quotations/${quotationId}/cancel`, {
+        credentials: 'include',
         method: 'POST',
-      })
+      });
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'ไม่สามารถยกเลิกใบเสนอราคาได้')
+        throw new Error(result.error || 'ไม่สามารถยกเลิกใบเสนอราคาได้');
       }
 
       toast({
         title: 'ยกเลิกใบเสนอราคาเรียบร้อยแล้ว',
         description: `เลขที่ ${quotation.quotationNo}`,
-      })
+      });
 
-      fetchQuotation()
-      onRefresh?.()
+      fetchQuotation();
+      onRefresh?.();
     } catch (err: any) {
       toast({
         title: 'ยกเลิกใบเสนอราคาไม่สำเร็จ',
         description: err.message || 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setActionLoading(false)
+      setActionLoading(false);
     }
-  }
+  };
 
   const handleDelete = async () => {
-    if (!quotation) return
+    if (!quotation) return;
 
-    setActionLoading(true)
+    setActionLoading(true);
     try {
-      const res = await fetch(`/api/quotations/${quotationId}`, { credentials: 'include', 
+      const res = await fetch(`/api/quotations/${quotationId}`, {
+        credentials: 'include',
         method: 'DELETE',
-      })
+      });
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'ไม่สามารถลบใบเสนอราคาได้')
+        throw new Error(result.error || 'ไม่สามารถลบใบเสนอราคาได้');
       }
 
       toast({
         title: 'ลบใบเสนอราคาเรียบร้อยแล้ว',
         description: `เลขที่ ${quotation.quotationNo}`,
-      })
+      });
 
-      setShowDeleteDialog(false)
-      onOpenChange(false)
-      onDelete?.()
-      onRefresh?.()
+      setShowDeleteDialog(false);
+      onOpenChange(false);
+      onDelete?.();
+      onRefresh?.();
     } catch (err: any) {
       toast({
         title: 'ลบใบเสนอราคาไม่สำเร็จ',
         description: err.message || 'กรุณาลองอีกครั้ง',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setActionLoading(false)
+      setActionLoading(false);
     }
-  }
+  };
 
   const handlePrint = () => {
-    if (!quotation) return
+    if (!quotation) return;
 
-    setPrinting(true)
-    const printWindow = window.open('', '_blank')
+    setPrinting(true);
+    const printWindow = window.open('', '_blank');
     if (!printWindow) {
       toast({
         title: 'ไม่สามารถเปิดหน้าต่างได้',
         description: 'กรุณาอนุญาตให้เปิดหน้าต่างใหม่',
-        variant: 'destructive'
-      })
-      setPrinting(false)
-      return
+        variant: 'destructive',
+      });
+      setPrinting(false);
+      return;
     }
 
     const html = `
@@ -520,7 +529,9 @@ export function QuotationViewDialog({
             </tr>
           </thead>
           <tbody>
-            ${quotation.lines.map((line, index) => `
+            ${quotation.lines
+              .map(
+                (line, index) => `
               <tr>
                 <td>${line.lineNo}</td>
                 <td>
@@ -533,7 +544,9 @@ export function QuotationViewDialog({
                 <td class="text-right">${line.vatRate > 0 ? `${line.vatRate}%` : '-'}</td>
                 <td class="text-right">${formatCurrency(line.amount)}</td>
               </tr>
-            `).join('')}
+            `
+              )
+              .join('')}
           </tbody>
         </table>
 
@@ -542,12 +555,16 @@ export function QuotationViewDialog({
             <span>มูลค่าก่อน VAT</span>
             <span>${formatCurrency(quotation.subtotal)}</span>
           </div>
-          ${quotation.discountAmount > 0 ? `
+          ${
+            quotation.discountAmount > 0
+              ? `
           <div class="summary-row">
             <span>ส่วนลด (${quotation.discountPercent}%)</span>
             <span>-${formatCurrency(quotation.discountAmount)}</span>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
           <div class="summary-row">
             <span>ยอดหลังหักส่วนลด</span>
             <span>${formatCurrency(quotation.subtotal - quotation.discountAmount)}</span>
@@ -568,33 +585,33 @@ export function QuotationViewDialog({
         <script>window.onload = () => { setTimeout(() => { window.print(); }, 500); }</script>
       </body>
       </html>
-    `
+    `;
 
-    printWindow.document.write(html)
-    printWindow.document.close()
-    setTimeout(() => setPrinting(false), 1000)
-  }
+    printWindow.document.write(html);
+    printWindow.document.close();
+    setTimeout(() => setPrinting(false), 1000);
+  };
 
   const handleDownload = async () => {
     try {
       toast({
         title: 'กำลังดาวน์โหลด',
         description: 'กำลังสร้างไฟล์ PDF...',
-      })
-      handlePrint()
+      });
+      handlePrint();
     } catch (error) {
       toast({
         title: 'ดาวน์โหลดไม่สำเร็จ',
         description: 'กรุณาลองอีกครั้ง',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-4xl">
           <VisuallyHidden>
             <DialogTitle>กำลังโหลดข้อมูลใบเสนอราคา</DialogTitle>
           </VisuallyHidden>
@@ -604,7 +621,7 @@ export function QuotationViewDialog({
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   if (error || !quotation) {
@@ -614,50 +631,46 @@ export function QuotationViewDialog({
           <VisuallyHidden>
             <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบเสนอราคา</DialogTitle>
           </VisuallyHidden>
-          <div className="text-center py-12 text-red-600">
+          <div className="py-12 text-center text-red-600">
             เกิดข้อผิดพลาด: {error || 'ไม่พบข้อมูล'}
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
-  const canEdit = ['DRAFT', 'REVISED', 'REJECTED'].includes(quotation.status)
-  const canDelete = quotation.status === 'DRAFT'
-  const canSend = ['DRAFT', 'REVISED', 'REJECTED'].includes(quotation.status)
-  const canApprove = quotation.status === 'SENT'
-  const canReject = quotation.status === 'SENT'
-  const canConvert = quotation.status === 'APPROVED'
-  const canCancel = ['DRAFT', 'SENT', 'REVISED'].includes(quotation.status)
+  const canEdit = ['DRAFT', 'REVISED', 'REJECTED'].includes(quotation.status);
+  const canDelete = quotation.status === 'DRAFT';
+  const canSend = ['DRAFT', 'REVISED', 'REJECTED'].includes(quotation.status);
+  const canApprove = quotation.status === 'SENT';
+  const canReject = quotation.status === 'SENT';
+  const canConvert = quotation.status === 'APPROVED';
+  const canCancel = ['DRAFT', 'SENT', 'REVISED'].includes(quotation.status);
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[95vw] md:max-w-5xl max-h-[90vh] overflow-y-auto print:max-h-none print:overflow-visible">
+        <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-5xl print:max-h-none print:overflow-visible">
           <DialogHeader className="print:hidden">
             <div className="flex items-center justify-between">
               <div>
-                <DialogTitle className="text-xl">
-                  ใบเสนอราคา - {quotation.quotationNo}
-                </DialogTitle>
-                <div className="flex items-center gap-2 mt-2">
+                <DialogTitle className="text-xl">ใบเสนอราคา - {quotation.quotationNo}</DialogTitle>
+                <div className="mt-2 flex items-center gap-2">
                   <Badge className={statusColors[quotation.status]}>
                     {statusLabels[quotation.status]}
                   </Badge>
                   {quotation.version > 1 && (
-                    <Badge variant="outline">
-                      รุ่นที่ {quotation.version}
-                    </Badge>
+                    <Badge variant="outline">รุ่นที่ {quotation.version}</Badge>
                   )}
                   {isExpired() && quotation.status !== 'EXPIRED' && (
                     <Badge variant="destructive">
-                      <AlertCircle className="h-3 w-3 mr-1" />
+                      <AlertCircle className="mr-1 h-3 w-3" />
                       หมดอายุ
                     </Badge>
                   )}
                   {isExpiringSoon() && !isExpired() && (
                     <Badge variant="outline" className="border-orange-500 text-orange-700">
-                      <AlertCircle className="h-3 w-3 mr-1" />
+                      <AlertCircle className="mr-1 h-3 w-3" />
                       ใกล้หมดอายุ
                     </Badge>
                   )}
@@ -676,9 +689,9 @@ export function QuotationViewDialog({
                   disabled={printing || actionLoading}
                 >
                   {printing ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="mr-2 h-4 w-4" />
                   )}
                   ดาวน์โหลด
                 </Button>
@@ -689,9 +702,9 @@ export function QuotationViewDialog({
                   disabled={printing || actionLoading}
                 >
                   {printing ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <Printer className="h-4 w-4 mr-2" />
+                    <Printer className="mr-2 h-4 w-4" />
                   )}
                   พิมพ์
                 </Button>
@@ -702,18 +715,16 @@ export function QuotationViewDialog({
           {/* Print Content */}
           <div className="space-y-6 print:space-y-4" id="quotation-content">
             {/* Header */}
-            <div className="flex justify-between items-start border-b pb-4">
+            <div className="flex items-start justify-between border-b pb-4">
               <div>
                 <h1 className="text-2xl font-bold">ใบเสนอราคา</h1>
-                <p className="text-lg text-muted-foreground mt-1">{quotation.quotationNo}</p>
+                <p className="mt-1 text-lg text-muted-foreground">{quotation.quotationNo}</p>
                 {quotation.version > 1 && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    รุ่นที่ {quotation.version}
-                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">รุ่นที่ {quotation.version}</p>
                 )}
               </div>
               <div className="text-right">
-                <div className="flex items-center gap-2 justify-end mb-2">
+                <div className="mb-2 flex items-center justify-end gap-2">
                   <Badge className={statusColors[quotation.status]}>
                     {statusLabels[quotation.status]}
                   </Badge>
@@ -726,22 +737,22 @@ export function QuotationViewDialog({
             {/* Customer Info */}
             <Card>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">ลูกค้า</p>
-                    <p className="font-semibold text-lg">{quotation.customer.name}</p>
+                    <p className="mb-1 text-sm text-muted-foreground">ลูกค้า</p>
+                    <p className="text-lg font-semibold">{quotation.customer.name}</p>
                     <p className="text-sm text-muted-foreground">{quotation.customer.code}</p>
                     {quotation.customer.taxId && (
                       <p className="text-sm">เลขประจำตัวผู้เสียภาษี: {quotation.customer.taxId}</p>
                     )}
                     {quotation.customer.address && (
-                      <p className="text-sm mt-2">{quotation.customer.address}</p>
+                      <p className="mt-2 text-sm">{quotation.customer.address}</p>
                     )}
                     {quotation.customer.phone && (
                       <p className="text-sm">โทร: {quotation.customer.phone}</p>
                     )}
                     {quotation.contactPerson && (
-                      <p className="text-sm mt-1">ผู้ติดต่อ: {quotation.contactPerson}</p>
+                      <p className="mt-1 text-sm">ผู้ติดต่อ: {quotation.contactPerson}</p>
                     )}
                   </div>
                   <div className="space-y-2 text-sm">
@@ -799,7 +810,7 @@ export function QuotationViewDialog({
               <Card className="border-red-200 bg-red-50">
                 <CardContent className="pt-6">
                   <div>
-                    <p className="text-sm font-medium text-red-800 mb-1">เหตุผลการปฏิเสธ</p>
+                    <p className="mb-1 text-sm font-medium text-red-800">เหตุผลการปฏิเสธ</p>
                     <p className="text-sm text-red-700">{quotation.rejectedReason}</p>
                   </div>
                 </CardContent>
@@ -812,11 +823,12 @@ export function QuotationViewDialog({
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-purple-800 mb-1">
+                      <p className="mb-1 text-sm font-medium text-purple-800">
                         แปลงเป็นใบแจ้งหนี้แล้ว
                       </p>
                       <p className="text-sm text-purple-700">
-                        เลขที่ {quotation.invoice.invoiceNo} ({statusLabels[quotation.invoice.status]})
+                        เลขที่ {quotation.invoice.invoiceNo} (
+                        {statusLabels[quotation.invoice.status]})
                       </p>
                     </div>
                     <Button
@@ -824,10 +836,10 @@ export function QuotationViewDialog({
                       size="sm"
                       onClick={() => {
                         // TODO: Open invoice view dialog
-                        window.open(`/invoices?id=${quotation.invoice?.id}`, '_blank')
+                        window.open(`/invoices?id=${quotation.invoice?.id}`, '_blank');
                       }}
                     >
-                      <FileText className="h-4 w-4 mr-2" />
+                      <FileText className="mr-2 h-4 w-4" />
                       ดูใบแจ้งหนี้
                     </Button>
                   </div>
@@ -867,13 +879,17 @@ export function QuotationViewDialog({
                             )}
                             <p className="font-medium">{line.description}</p>
                             {line.notes && (
-                              <p className="text-xs text-muted-foreground mt-1">{line.notes}</p>
+                              <p className="mt-1 text-xs text-muted-foreground">{line.notes}</p>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">{line.quantity.toLocaleString()}</TableCell>
+                        <TableCell className="text-right">
+                          {line.quantity.toLocaleString()}
+                        </TableCell>
                         <TableCell>{line.unit}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(line.unitPrice)}</TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(line.unitPrice)}
+                        </TableCell>
                         <TableCell className="text-right">
                           {line.discount > 0 ? formatCurrency(line.discount) : '-'}
                         </TableCell>
@@ -894,7 +910,7 @@ export function QuotationViewDialog({
             <Card>
               <CardContent className="pt-6">
                 <div className="flex justify-end">
-                  <div className="w-full md:w-1/2 space-y-2">
+                  <div className="w-full space-y-2 md:w-1/2">
                     <div className="flex justify-between text-sm">
                       <span>มูลค่าก่อน VAT</span>
                       <span>{formatCurrency(quotation.subtotal)}</span>
@@ -935,20 +951,26 @@ export function QuotationViewDialog({
                   <div className="space-y-4">
                     {quotation.terms && (
                       <div>
-                        <p className="text-sm font-medium mb-1">เงื่อนไข</p>
-                        <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.terms}</p>
+                        <p className="mb-1 text-sm font-medium">เงื่อนไข</p>
+                        <p className="whitespace-pre-line text-sm text-muted-foreground">
+                          {quotation.terms}
+                        </p>
                       </div>
                     )}
                     {quotation.notes && (
                       <div>
-                        <p className="text-sm font-medium mb-1">หมายเหตุ</p>
-                        <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.notes}</p>
+                        <p className="mb-1 text-sm font-medium">หมายเหตุ</p>
+                        <p className="whitespace-pre-line text-sm text-muted-foreground">
+                          {quotation.notes}
+                        </p>
                       </div>
                     )}
                     {quotation.internalNotes && (
                       <div>
-                        <p className="text-sm font-medium mb-1">บันทึกภายใน</p>
-                        <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.internalNotes}</p>
+                        <p className="mb-1 text-sm font-medium">บันทึกภายใน</p>
+                        <p className="whitespace-pre-line text-sm text-muted-foreground">
+                          {quotation.internalNotes}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -1004,12 +1026,8 @@ export function QuotationViewDialog({
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-2 print:hidden">
               {canEdit && onEdit && (
-                <Button
-                  variant="outline"
-                  onClick={onEdit}
-                  disabled={actionLoading}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
+                <Button variant="outline" onClick={onEdit} disabled={actionLoading}>
+                  <Edit className="mr-2 h-4 w-4" />
                   แก้ไข
                 </Button>
               )}
@@ -1019,85 +1037,61 @@ export function QuotationViewDialog({
                   onClick={() => setShowDeleteDialog(true)}
                   disabled={actionLoading}
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="mr-2 h-4 w-4" />
                   ลบ
                 </Button>
               )}
               {canSend && (
-                <Button
-                  variant="default"
-                  onClick={handleSend}
-                  disabled={actionLoading}
-                >
+                <Button variant="default" onClick={handleSend} disabled={actionLoading}>
                   {actionLoading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className="mr-2 h-4 w-4" />
                   )}
                   ส่งใบเสนอราคา
                 </Button>
               )}
               {canApprove && (
-                <Button
-                  variant="default"
-                  onClick={handleApprove}
-                  disabled={actionLoading}
-                >
+                <Button variant="default" onClick={handleApprove} disabled={actionLoading}>
                   {actionLoading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="mr-2 h-4 w-4" />
                   )}
                   อนุมัติ
                 </Button>
               )}
               {canReject && (
-                <Button
-                  variant="outline"
-                  onClick={handleReject}
-                  disabled={actionLoading}
-                >
+                <Button variant="outline" onClick={handleReject} disabled={actionLoading}>
                   {actionLoading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <XCircle className="h-4 w-4 mr-2" />
+                    <XCircle className="mr-2 h-4 w-4" />
                   )}
                   ปฏิเสธ
                 </Button>
               )}
               {canConvert && (
-                <Button
-                  variant="default"
-                  onClick={handleConvertToInvoice}
-                  disabled={actionLoading}
-                >
+                <Button variant="default" onClick={handleConvertToInvoice} disabled={actionLoading}>
                   {actionLoading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <FileText className="h-4 w-4 mr-2" />
+                    <FileText className="mr-2 h-4 w-4" />
                   )}
                   แปลงเป็นใบแจ้งหนี้
                 </Button>
               )}
               {canCancel && (
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={actionLoading}
-                >
+                <Button variant="outline" onClick={handleCancel} disabled={actionLoading}>
                   {actionLoading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <XCircle className="h-4 w-4 mr-2" />
+                    <XCircle className="mr-2 h-4 w-4" />
                   )}
                   ยกเลิก
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                onClick={() => onOpenChange(false)}
-                disabled={actionLoading}
-              >
+              <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={actionLoading}>
                 ปิด
               </Button>
             </div>
@@ -1124,7 +1118,7 @@ export function QuotationViewDialog({
             >
               {actionLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   กำลังลบ...
                 </>
               ) : (
@@ -1135,5 +1129,5 @@ export function QuotationViewDialog({
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }

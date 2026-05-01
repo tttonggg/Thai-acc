@@ -49,10 +49,7 @@ export async function generateCsrfToken(sessionId: string): Promise<string> {
  * Validate CSRF token
  * Marks token as used after validation (one-time use)
  */
-export async function validateCsrfToken(
-  token: string,
-  sessionId: string
-): Promise<boolean> {
+export async function validateCsrfToken(token: string, sessionId: string): Promise<boolean> {
   if (!token || !sessionId) return false;
 
   const csrfToken = await prisma.csrfToken.findUnique({
@@ -77,10 +74,7 @@ export async function validateCsrfToken(
  * Validate CSRF token without marking as used
  * Use for non-critical operations
  */
-export async function peekCsrfToken(
-  token: string,
-  sessionId: string
-): Promise<boolean> {
+export async function peekCsrfToken(token: string, sessionId: string): Promise<boolean> {
   if (!token || !sessionId) return false;
 
   const csrfToken = await prisma.csrfToken.findUnique({
@@ -101,10 +95,7 @@ export async function peekCsrfToken(
 export async function cleanupExpiredTokens(): Promise<number> {
   const result = await prisma.csrfToken.deleteMany({
     where: {
-      OR: [
-        { expiresAt: { lt: new Date() } },
-        { used: true },
-      ],
+      OR: [{ expiresAt: { lt: new Date() } }, { used: true }],
     },
   });
 

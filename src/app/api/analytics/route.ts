@@ -1,7 +1,7 @@
 /**
  * API Analytics Dashboard Endpoint
  * Phase D: API Mastery - API Analytics
- * 
+ *
  * Endpoints:
  * - GET /api/analytics - Get analytics dashboard data
  * - GET /api/analytics?path=/api/invoices - Get metrics for specific path
@@ -18,10 +18,7 @@ export async function GET(req: NextRequest) {
     // Check authentication - only ADMIN and ACCOUNTANT can access analytics
     const session = await auth();
     if (!session?.user || !['ADMIN', 'ACCOUNTANT'].includes(session.user.role as string)) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -43,10 +40,7 @@ export async function GET(req: NextRequest) {
     if (view === 'ratelimits') {
       const identifier = searchParams.get('identifier');
       if (!identifier) {
-        return NextResponse.json(
-          { error: 'identifier required' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'identifier required' }, { status: 400 });
       }
       const usage = await getRateLimitUsage(identifier);
       return NextResponse.json({
@@ -61,10 +55,7 @@ export async function GET(req: NextRequest) {
       const endDate = new Date(endDateParam);
 
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        return NextResponse.json(
-          { error: 'Invalid date format' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid date format' }, { status: 400 });
       }
 
       const metrics = await getApiMetrics(startDate, endDate, path);
@@ -82,9 +73,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching analytics:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch analytics' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
   }
 }

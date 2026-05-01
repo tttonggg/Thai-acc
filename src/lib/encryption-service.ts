@@ -42,7 +42,7 @@ export function encrypt(value: string | null | undefined): string | null {
 export function decrypt(encryptedValue: string | null | undefined): string | null {
   if (!encryptedValue) return null;
   if (!encryptedValue.startsWith('enc:')) return encryptedValue; // Not encrypted
-  
+
   try {
     const ciphertext = encryptedValue.substring(4); // Remove 'enc:' prefix
     const decrypted = CryptoJS.AES.decrypt(ciphertext, KEY, {

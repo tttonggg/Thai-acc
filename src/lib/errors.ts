@@ -70,11 +70,7 @@ export class ForbiddenError extends AppError {
 export class ValidationError extends AppError {
   public readonly fields?: Record<string, string>;
 
-  constructor(
-    message: string,
-    fields?: Record<string, string>,
-    context?: Record<string, any>
-  ) {
+  constructor(message: string, fields?: Record<string, string>, context?: Record<string, any>) {
     super(message, 400, true, context);
     this.name = 'ValidationError';
     this.fields = fields;
@@ -95,9 +91,7 @@ export class ValidationError extends AppError {
 
 export class NotFoundError extends AppError {
   constructor(resource: string, identifier?: string) {
-    const message = identifier
-      ? `${resource} not found: ${identifier}`
-      : `${resource} not found`;
+    const message = identifier ? `${resource} not found: ${identifier}` : `${resource} not found`;
     super(message, 404, true, { resource, identifier });
     this.name = 'NotFoundError';
     Object.setPrototypeOf(this, NotFoundError.prototype);
@@ -118,10 +112,7 @@ export class ConflictError extends AppError {
 
 export class DuplicateRecordError extends ConflictError {
   constructor(resource: string, field: string, value: string) {
-    super(
-      `${resource} with ${field} '${value}' already exists`,
-      { resource, field, value }
-    );
+    super(`${resource} with ${field} '${value}' already exists`, { resource, field, value });
     this.name = 'DuplicateRecordError';
     Object.setPrototypeOf(this, DuplicateRecordError.prototype);
   }
@@ -181,10 +172,11 @@ export class AccountingError extends BusinessLogicError {
 
 export class DebitCreditMismatchError extends AccountingError {
   constructor(debitTotal: number, creditTotal: number) {
-    super(
-      `Journal entry must balance: debits (${debitTotal}) ≠ credits (${creditTotal})`,
-      { debitTotal, creditTotal, difference: Math.abs(debitTotal - creditTotal) }
-    );
+    super(`Journal entry must balance: debits (${debitTotal}) ≠ credits (${creditTotal})`, {
+      debitTotal,
+      creditTotal,
+      difference: Math.abs(debitTotal - creditTotal),
+    });
     this.name = 'DebitCreditMismatchError';
     Object.setPrototypeOf(this, DebitCreditMismatchError.prototype);
   }
@@ -207,12 +199,7 @@ export class InsufficientStockError extends BusinessLogicError {
 
 export class RateLimitError extends AppError {
   constructor(retryAfter?: number) {
-    super(
-      'Too many requests. Please try again later.',
-      429,
-      true,
-      { retryAfter }
-    );
+    super('Too many requests. Please try again later.', 429, true, { retryAfter });
     this.name = 'RateLimitError';
     Object.setPrototypeOf(this, RateLimitError.prototype);
   }
@@ -225,12 +212,7 @@ export class RateLimitError extends AppError {
 export class ServiceUnavailableError extends AppError {
   constructor(service: string, reason?: string) {
     const reasonText = reason ? `: ${reason}` : '';
-    super(
-      `${service} is currently unavailable${reasonText}`,
-      503,
-      true,
-      { service, reason }
-    );
+    super(`${service} is currently unavailable${reasonText}`, 503, true, { service, reason });
     this.name = 'ServiceUnavailableError';
     Object.setPrototypeOf(this, ServiceUnavailableError.prototype);
   }

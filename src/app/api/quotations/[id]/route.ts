@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { z } from 'zod';
 
 const updateQuotationSchema = z.object({
   validUntil: z.string().optional(),
@@ -14,21 +14,15 @@ const updateQuotationSchema = z.object({
   notes: z.string().optional(),
   internalNotes: z.string().optional(),
   // Note: lines update is complex, handled separately
-})
+});
 
 // GET /api/quotations/[id] - Get single quotation
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     const quotation = await prisma.quotation.findUnique({
@@ -66,81 +60,69 @@ export async function GET(
           },
         },
       },
-    })
+    });
 
     if (!quotation) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบใบเสนอราคา' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบใบเสนอราคา' }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
       data: quotation,
-    })
+    });
   } catch (error) {
-    console.error('Quotation Fetch Error:', error)
+    console.error('Quotation Fetch Error:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการโหลดข้อมูล',
       },
       { status: 500 }
-    )
+    );
   }
 }
 
 // PUT /api/quotations/[id] - Update quotation (DRAFT or REVISED only)
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     // Check if user can edit
     if (!['ADMIN', 'ACCOUNTANT'].includes(session.user.role as string)) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิแก้ไข' },
-        { status: 403 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่มีสิทธิแก้ไข' }, { status: 403 });
     }
 
     const quotation = await prisma.quotation.findUnique({
       where: { id: id },
-    })
+    });
 
     if (!quotation) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบใบเสนอราคา' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบใบเสนอราคา' }, { status: 404 });
     }
 
     // Can only edit DRAFT or REVISED quotations
     if (!['DRAFT', 'REVISED', 'REJECTED'].includes(quotation.status)) {
       return NextResponse.json(
-        { success: false, error: 'สามารถแก้ไขเฉพาะใบเสนอราคาที่อยู่ในสถานะ ร่าง, แก้ไขแล้ว, หรือ ปฏิเสธ' },
+        {
+          success: false,
+          error: 'สามารถแก้ไขเฉพาะใบเสนอราคาที่อยู่ในสถานะ ร่าง, แก้ไขแล้ว, หรือ ปฏิเสธ',
+        },
         { status: 400 }
-      )
+      );
     }
 
-    const body = await request.json()
-    const validatedData = updateQuotationSchema.parse(body)
+    const body = await request.json();
+    const validatedData = updateQuotationSchema.parse(body);
 
     // Update version if REVISED
     const updateData: any = {
       ...validatedData,
       updatedById: session.user.id,
-    }
+    };
 
     if (quotation.status === 'REVISED') {
       // Increment version when editing revised quotation
@@ -151,10 +133,10 @@ export async function PUT(
         orderBy: {
           version: 'desc',
         },
-      })
+      });
 
       if (latestVersion) {
-        updateData.version = (latestVersion.version || 0) + 1
+        updateData.version = (latestVersion.version || 0) + 1;
       }
     }
 
@@ -184,15 +166,15 @@ export async function PUT(
           },
         },
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
       data: updatedQuotation,
       message: 'แก้ไขใบเสนอราคาเรียบร้อยแล้ว',
-    })
+    });
   } catch (error) {
-    console.error('Quotation Update Error:', error)
+    console.error('Quotation Update Error:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -202,7 +184,7 @@ export async function PUT(
           details: error.issues,
         },
         { status: 400 }
-      )
+      );
     }
 
     return NextResponse.json(
@@ -211,7 +193,7 @@ export async function PUT(
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการแก้ไขใบเสนอราคา',
       },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -221,32 +203,23 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่ได้รับอนุญาต' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     // Only ADMIN and ACCOUNTANT can delete
     if (!['ADMIN', 'ACCOUNTANT'].includes(session.user.role as string)) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิลบ' },
-        { status: 403 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่มีสิทธิลบ' }, { status: 403 });
     }
 
     const quotation = await prisma.quotation.findUnique({
       where: { id: id },
-    })
+    });
 
     if (!quotation) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่พบใบเสนอราคา' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบใบเสนอราคา' }, { status: 404 });
     }
 
     // Can only delete DRAFT quotations
@@ -254,7 +227,7 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: 'สามารถลบเฉพาะใบเสนอราคาที่อยู่ในสถานะ ร่าง' },
         { status: 400 }
-      )
+      );
     }
 
     // Soft delete
@@ -264,20 +237,20 @@ export async function DELETE(
         deletedAt: new Date(),
         deletedBy: session.user.id,
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
       message: 'ลบใบเสนอราคาเรียบร้อยแล้ว',
-    })
+    });
   } catch (error) {
-    console.error('Quotation Delete Error:', error)
+    console.error('Quotation Delete Error:', error);
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : 'ข้อผิดพลาดในการลบใบเสนอราคา',
       },
       { status: 500 }
-    )
+    );
   }
 }

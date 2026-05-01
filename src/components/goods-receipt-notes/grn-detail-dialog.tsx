@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import { useState, useEffect } from 'react';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import {
   Loader2,
   FileText,
@@ -11,18 +11,18 @@ import {
   AlertCircle,
   CheckCircle2,
   Edit,
-  ExternalLink
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
+  ExternalLink,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -30,65 +30,65 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Separator } from '@/components/ui/separator'
-import { useToast } from '@/hooks/use-toast'
-import { formatThaiDate, formatCurrency } from '@/lib/thai-accounting'
+} from '@/components/ui/table';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { formatThaiDate, formatCurrency } from '@/lib/thai-accounting';
 
 interface GRNLine {
-  id: string
-  lineNo: number
-  productId?: string
-  description: string
-  orderedQty: number
-  receivedQty: number
-  unit: string
-  unitPrice: number
-  vatRate: number
-  vatAmount: number
-  amount: number
+  id: string;
+  lineNo: number;
+  productId?: string;
+  description: string;
+  orderedQty: number;
+  receivedQty: number;
+  unit: string;
+  unitPrice: number;
+  vatRate: number;
+  vatAmount: number;
+  amount: number;
   product?: {
-    code: string
-    name: string
-  }
+    code: string;
+    name: string;
+  };
 }
 
 interface GoodsReceiptNote {
-  id: string
-  grnNo: string
-  orderNo: string
-  orderDate: string
-  receivedDate: string
+  id: string;
+  grnNo: string;
+  orderNo: string;
+  orderDate: string;
+  receivedDate: string;
   vendor: {
-    code: string
-    name: string
-    taxId?: string
-    address?: string
-  }
-  status: 'RECEIVED' | 'INSPECTED' | 'POSTED' | 'CANCELLED'
-  subtotal: number
-  discountAmount: number
-  vatRate: number
-  vatAmount: number
-  totalAmount: number
-  notes?: string
-  lines: GRNLine[]
+    code: string;
+    name: string;
+    taxId?: string;
+    address?: string;
+  };
+  status: 'RECEIVED' | 'INSPECTED' | 'POSTED' | 'CANCELLED';
+  subtotal: number;
+  discountAmount: number;
+  vatRate: number;
+  vatAmount: number;
+  totalAmount: number;
+  notes?: string;
+  lines: GRNLine[];
   purchaseInvoices?: Array<{
-    invoiceNo: string
-    invoiceDate: string
-    totalAmount: number
-  }>
+    invoiceNo: string;
+    invoiceDate: string;
+    totalAmount: number;
+  }>;
   journalEntry?: {
-    entryNo: string
-    status: string
-  }
+    entryNo: string;
+    status: string;
+  };
 }
 
 interface GRNDetailDialogProps {
-  grnId: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onEdit?: () => void
+  grnId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onEdit?: () => void;
 }
 
 const statusLabels: Record<string, string> = {
@@ -96,93 +96,93 @@ const statusLabels: Record<string, string> = {
   INSPECTED: 'ตรวจสอบแล้ว',
   POSTED: 'ลงบัญชีแล้ว',
   CANCELLED: 'ยกเลิก',
-}
+};
 
 const statusColors: Record<string, string> = {
   RECEIVED: 'bg-blue-100 text-blue-800',
   INSPECTED: 'bg-yellow-100 text-yellow-800',
   POSTED: 'bg-green-100 text-green-800',
   CANCELLED: 'bg-red-100 text-red-800',
-}
+};
 
 export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetailDialogProps) {
-  const [grn, setGRN] = useState<GoodsReceiptNote | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [printing, setPrinting] = useState(false)
-  const { toast } = useToast()
+  const [grn, setGRN] = useState<GoodsReceiptNote | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [printing, setPrinting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (open && grnId) {
-      fetchGRN()
+      fetchGRN();
     }
-  }, [open, grnId])
+  }, [open, grnId]);
 
   const fetchGRN = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const res = await fetch(`/api/grn/${grnId}`, { credentials: 'include' })
-      const result = await res.json()
+      const res = await fetch(`/api/grn/${grnId}`, { credentials: 'include' });
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'ไม่สามารถดึงข้อมูลใบรับสินค้าได้')
+        throw new Error(result.error || 'ไม่สามารถดึงข้อมูลใบรับสินค้าได้');
       }
 
-      setGRN(result.data)
+      setGRN(result.data);
     } catch (err: any) {
-      setError(err.message || 'เกิดข้อผิดพลาด')
+      setError(err.message || 'เกิดข้อผิดพลาด');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const calculateVariance = (orderedQty: number, receivedQty: number): number => {
-    return receivedQty - orderedQty
-  }
+    return receivedQty - orderedQty;
+  };
 
   const getVarianceBadge = (orderedQty: number, receivedQty: number) => {
-    const variance = calculateVariance(orderedQty, receivedQty)
+    const variance = calculateVariance(orderedQty, receivedQty);
 
     if (variance === 0) {
       return (
-        <Badge variant="outline" className="text-green-600 border-green-600">
-          <CheckCircle2 className="h-3 w-3 mr-1" />
+        <Badge variant="outline" className="border-green-600 text-green-600">
+          <CheckCircle2 className="mr-1 h-3 w-3" />
           ครบถ้วน
         </Badge>
-      )
+      );
     }
 
     if (variance > 0) {
       return (
-        <Badge variant="outline" className="text-orange-600 border-orange-600">
-          <AlertCircle className="h-3 w-3 mr-1" />
+        <Badge variant="outline" className="border-orange-600 text-orange-600">
+          <AlertCircle className="mr-1 h-3 w-3" />
           รับเกิน (+{variance.toLocaleString()})
         </Badge>
-      )
+      );
     }
 
     return (
-      <Badge variant="outline" className="text-red-600 border-red-600">
-        <AlertCircle className="h-3 w-3 mr-1" />
+      <Badge variant="outline" className="border-red-600 text-red-600">
+        <AlertCircle className="mr-1 h-3 w-3" />
         รับขาด ({variance.toLocaleString()})
       </Badge>
-    )
-  }
+    );
+  };
 
   const handlePrint = () => {
-    if (!grn) return
+    if (!grn) return;
 
-    setPrinting(true)
-    const printWindow = window.open('', '_blank')
+    setPrinting(true);
+    const printWindow = window.open('', '_blank');
     if (!printWindow) {
       toast({
         title: 'ไม่สามารถเปิดหน้าต่างได้',
         description: 'กรุณาอนุญาตให้เปิดหน้าต่างใหม่',
-        variant: 'destructive'
-      })
-      setPrinting(false)
-      return
+        variant: 'destructive',
+      });
+      setPrinting(false);
+      return;
     }
 
     const html = `
@@ -243,9 +243,10 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
             </tr>
           </thead>
           <tbody>
-            ${grn.lines.map((line, index) => {
-              const variance = calculateVariance(line.orderedQty, line.receivedQty)
-              return `
+            ${grn.lines
+              .map((line, index) => {
+                const variance = calculateVariance(line.orderedQty, line.receivedQty);
+                return `
               <tr>
                 <td>${index + 1}</td>
                 <td>
@@ -259,7 +260,9 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
                 <td class="text-right">${formatCurrency(line.unitPrice)}</td>
                 <td class="text-right">${formatCurrency(line.amount)}</td>
               </tr>
-            `}).join('')}
+            `;
+              })
+              .join('')}
           </tbody>
         </table>
 
@@ -268,12 +271,16 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
             <span>มูลค่าก่อน VAT</span>
             <span>${formatCurrency(grn.subtotal)}</span>
           </div>
-          ${grn.discountAmount > 0 ? `
+          ${
+            grn.discountAmount > 0
+              ? `
           <div class="summary-row">
             <span>ส่วนลด</span>
             <span>-${formatCurrency(grn.discountAmount)}</span>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
           <div class="summary-row">
             <span>VAT (${grn.vatRate}%)</span>
             <span>${formatCurrency(grn.vatAmount)}</span>
@@ -289,33 +296,33 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
         <script>window.onload = () => { setTimeout(() => { window.print(); }, 500); }</script>
       </body>
       </html>
-    `
+    `;
 
-    printWindow.document.write(html)
-    printWindow.document.close()
-    setTimeout(() => setPrinting(false), 1000)
-  }
+    printWindow.document.write(html);
+    printWindow.document.close();
+    setTimeout(() => setPrinting(false), 1000);
+  };
 
   const handleDownload = async () => {
     try {
       toast({
         title: 'กำลังดาวน์โหลด',
         description: 'กำลังสร้างไฟล์ PDF...',
-      })
-      handlePrint()
+      });
+      handlePrint();
     } catch (error) {
       toast({
         title: 'ดาวน์โหลดไม่สำเร็จ',
         description: 'กรุณาลองอีกครั้ง',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[95vw] md:max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-5xl">
           <VisuallyHidden>
             <DialogTitle>กำลังโหลดข้อมูลใบรับสินค้า</DialogTitle>
             <DialogDescription>กำลังดึงข้อมูลใบรับสินค้าจากระบบ</DialogDescription>
@@ -326,7 +333,7 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   if (error || !grn) {
@@ -337,69 +344,51 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
             <DialogTitle>เกิดข้อผิดพลาดในการโหลดข้อมูลใบรับสินค้า</DialogTitle>
             <DialogDescription>ไม่สามารถดึงข้อมูลใบรับสินค้าได้ กรุณาลองใหม่</DialogDescription>
           </VisuallyHidden>
-          <div className="text-center py-12 text-red-600">
+          <div className="py-12 text-center text-red-600">
             เกิดข้อผิดพลาด: {error || 'ไม่พบข้อมูล'}
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-6xl max-h-[90vh] overflow-y-auto print:max-h-none print:overflow-visible">
+      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-6xl print:max-h-none print:overflow-visible">
         <DialogHeader className="print:hidden">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <DialogTitle className="text-xl flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2 text-xl">
                 <Package className="h-5 w-5" />
                 ใบรับสินค้า (GRN) - {grn.grnNo}
               </DialogTitle>
-              <div className="flex items-center gap-2 mt-2 flex-wrap">
-                <Badge className={statusColors[grn.status]}>
-                  {statusLabels[grn.status]}
-                </Badge>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Badge className={statusColors[grn.status]}>{statusLabels[grn.status]}</Badge>
                 {grn.journalEntry && (
-                  <Badge variant="outline">
-                    บันทึกบัญชี: {grn.journalEntry.entryNo}
-                  </Badge>
+                  <Badge variant="outline">บันทึกบัญชี: {grn.journalEntry.entryNo}</Badge>
                 )}
               </div>
             </div>
             <div className="flex gap-2">
               {onEdit && grn.status !== 'POSTED' && grn.status !== 'CANCELLED' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onEdit}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" onClick={onEdit}>
+                  <Edit className="mr-2 h-4 w-4" />
                   แก้ไข
                 </Button>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownload}
-                disabled={printing}
-              >
+              <Button variant="outline" size="sm" onClick={handleDownload} disabled={printing}>
                 {printing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <Download className="h-4 w-4 mr-2" />
+                  <Download className="mr-2 h-4 w-4" />
                 )}
                 ดาวน์โหลด
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePrint}
-                disabled={printing}
-              >
+              <Button variant="outline" size="sm" onClick={handlePrint} disabled={printing}>
                 {printing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <Printer className="h-4 w-4 mr-2" />
+                  <Printer className="mr-2 h-4 w-4" />
                 )}
                 พิมพ์
               </Button>
@@ -412,17 +401,19 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
           {/* PO Relationship Card */}
           <Card className="border-l-4 border-l-blue-500">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <FileText className="h-4 w-4" />
                 ความสัมพันธ์กับเอกสารอื่น
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">เลขที่ Purchase Order</p>
                   <p className="font-mono font-semibold">{grn.orderNo}</p>
-                  <p className="text-xs text-muted-foreground">วันที่สั่งซื้อ: {formatThaiDate(grn.orderDate)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    วันที่สั่งซื้อ: {formatThaiDate(grn.orderDate)}
+                  </p>
                 </div>
                 {grn.purchaseInvoices && grn.purchaseInvoices.length > 0 && (
                   <div className="space-y-1">
@@ -449,16 +440,16 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
               <CardTitle className="text-base">ข้อมูลผู้ขาย</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">ชื่อผู้ขาย</p>
-                  <p className="font-semibold text-lg">{grn.vendor.name}</p>
+                  <p className="mb-1 text-sm text-muted-foreground">ชื่อผู้ขาย</p>
+                  <p className="text-lg font-semibold">{grn.vendor.name}</p>
                   <p className="text-sm text-muted-foreground">{grn.vendor.code}</p>
                   {grn.vendor.taxId && (
-                    <p className="text-sm mt-1">เลขประจำตัวผู้เสียภาษี: {grn.vendor.taxId}</p>
+                    <p className="mt-1 text-sm">เลขประจำตัวผู้เสียภาษี: {grn.vendor.taxId}</p>
                   )}
                   {grn.vendor.address && (
-                    <p className="text-sm mt-2 text-muted-foreground">{grn.vendor.address}</p>
+                    <p className="mt-2 text-sm text-muted-foreground">{grn.vendor.address}</p>
                   )}
                 </div>
                 <div className="space-y-2 text-sm">
@@ -500,7 +491,7 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
                   </TableHeader>
                   <TableBody>
                     {grn.lines.map((line, index) => {
-                      const variance = calculateVariance(line.orderedQty, line.receivedQty)
+                      const variance = calculateVariance(line.orderedQty, line.receivedQty);
                       return (
                         <TableRow key={line.id}>
                           <TableCell>{index + 1}</TableCell>
@@ -534,7 +525,7 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
                             {formatCurrency(line.amount)}
                           </TableCell>
                         </TableRow>
-                      )
+                      );
                     })}
                   </TableBody>
                 </Table>
@@ -546,7 +537,7 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
           <Card>
             <CardContent className="pt-6">
               <div className="flex justify-end">
-                <div className="w-full md:w-1/2 space-y-2">
+                <div className="w-full space-y-2 md:w-1/2">
                   <div className="flex justify-between text-sm">
                     <span>มูลค่าก่อน VAT</span>
                     <span>{formatCurrency(grn.subtotal)}</span>
@@ -585,7 +576,7 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
             <Card>
               <CardContent className="pt-6">
                 <div>
-                  <p className="text-sm font-medium mb-1">หมายเหตุ</p>
+                  <p className="mb-1 text-sm font-medium">หมายเหตุ</p>
                   <p className="text-sm text-muted-foreground">{grn.notes}</p>
                 </div>
               </CardContent>
@@ -606,10 +597,10 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
                   <Button
                     onClick={() => {
                       // Navigate to create purchase invoice
-                      window.location.href = `/purchases/new?grnId=${grn.id}`
+                      window.location.href = `/purchases/new?grnId=${grn.id}`;
                     }}
                   >
-                    <FileText className="h-4 w-4 mr-2" />
+                    <FileText className="mr-2 h-4 w-4" />
                     สร้างใบกำกับภาษีซื้อ
                   </Button>
                 </div>
@@ -625,5 +616,5 @@ export function GRNDetailDialog({ grnId, open, onOpenChange, onEdit }: GRNDetail
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

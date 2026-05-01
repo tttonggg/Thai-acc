@@ -1,29 +1,36 @@
-'use client'
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
-import { useToast } from '@/hooks/use-toast'
+'use client';
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
 
 interface BankAccount {
-  id: string
-  code: string
-  bankName: string
-  branchName: string
-  accountNumber: string
-  accountName: string
-  glAccountId: string
-  isActive: boolean
+  id: string;
+  code: string;
+  bankName: string;
+  branchName: string;
+  accountNumber: string;
+  accountName: string;
+  glAccountId: string;
+  isActive: boolean;
 }
 
 interface BankAccountEditDialogProps {
-  open: boolean
-  onClose: () => void
-  onSuccess: () => void
-  account?: BankAccount | null
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  account?: BankAccount | null;
 }
 
 export function BankAccountEditDialog({
@@ -40,9 +47,9 @@ export function BankAccountEditDialog({
     accountName: '',
     glAccountId: '',
     isActive: true,
-  })
-  const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
+  });
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (account) {
@@ -54,7 +61,7 @@ export function BankAccountEditDialog({
         accountName: account.accountName || '',
         glAccountId: account.glAccountId || '',
         isActive: account.isActive !== undefined ? account.isActive : true,
-      })
+      });
     } else {
       setForm({
         code: '',
@@ -64,53 +71,53 @@ export function BankAccountEditDialog({
         accountName: '',
         glAccountId: '',
         isActive: true,
-      })
+      });
     }
-  }, [account, open])
+  }, [account, open]);
 
   const handleSubmit = async () => {
     if (!form.code || !form.bankName || !form.accountNumber || !form.glAccountId) {
       toast({
         title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const url = account ? `/api/bank-accounts/${account.id}` : '/api/bank-accounts'
-      const method = account ? 'PATCH' : 'POST'
+      const url = account ? `/api/bank-accounts/${account.id}` : '/api/bank-accounts';
+      const method = account ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
-      }).then((r) => r.json())
+      }).then((r) => r.json());
 
       if (res.success) {
         toast({
           title: account ? 'แก้ไขบัญชีธนาคารสำเร็จ' : 'เพิ่มบัญชีธนาคารสำเร็จ',
-        })
-        onSuccess()
-        onClose()
+        });
+        onSuccess();
+        onClose();
       } else {
         toast({
           title: 'ข้อผิดพลาด',
           description: res.error,
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'เกิดข้อผิดพลาดในการบันทึก',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -124,7 +131,7 @@ export function BankAccountEditDialog({
           </VisuallyHidden>
         </DialogHeader>
         <div className="space-y-3 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <Label htmlFor="code">รหัส *</Label>
               <Input
@@ -153,7 +160,7 @@ export function BankAccountEditDialog({
               placeholder="สาขาถนนสุขุมวิท"
             />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <Label htmlFor="accountNumber">เลขที่บัญชี *</Label>
               <Input
@@ -187,9 +194,7 @@ export function BankAccountEditDialog({
               <Checkbox
                 id="isActive"
                 checked={form.isActive}
-                onCheckedChange={(checked) =>
-                  setForm({ ...form, isActive: checked as boolean })
-                }
+                onCheckedChange={(checked) => setForm({ ...form, isActive: checked as boolean })}
               />
               <Label htmlFor="isActive" className="cursor-pointer">
                 บัญชีใช้งานอยู่
@@ -201,11 +206,15 @@ export function BankAccountEditDialog({
           <Button variant="outline" onClick={onClose}>
             ยกเลิก
           </Button>
-          <Button onClick={handleSubmit} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             {loading ? 'กำลังบันทึก...' : account ? 'บันทึกการแก้ไข' : 'บันทึก'}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

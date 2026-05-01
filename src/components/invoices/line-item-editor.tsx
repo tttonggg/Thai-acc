@@ -1,107 +1,93 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import {
-  Pencil,
-  Save,
-  X,
-  History,
-  Loader2,
-  AlertCircle,
-  CheckCircle2,
-  Trash2
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog'
+import { useState, useEffect, useCallback } from 'react';
+import { Pencil, Save, X, History, Loader2, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
-import { formatThaiDate, formatCurrency } from '@/lib/thai-accounting'
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { formatThaiDate, formatCurrency } from '@/lib/thai-accounting';
 
 // ============================================
 // Types
 // ============================================
 
-export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIAL' | 'PAID' | 'CANCELLED'
+export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIAL' | 'PAID' | 'CANCELLED';
 
 export interface Product {
-  id: string
-  code: string
-  name: string
-  unit?: string
+  id: string;
+  code: string;
+  name: string;
+  unit?: string;
 }
 
 export interface InvoiceLineWithProduct {
-  id: string
-  lineNo: number
-  description: string
-  quantity: number
-  unit: string
-  unitPrice: number
-  discount: number
-  vatRate: number
-  vatAmount: number
-  amount: number
-  productId?: string | null
-  product?: Product | null
-  auditTrail?: AuditEntry[]
+  id: string;
+  lineNo: number;
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  discount: number;
+  vatRate: number;
+  vatAmount: number;
+  amount: number;
+  productId?: string | null;
+  product?: Product | null;
+  auditTrail?: AuditEntry[];
 }
 
 export interface AuditEntry {
-  id: string
-  action: string
-  field?: string
-  oldValue?: string | null
-  newValue?: string | null
-  beforeQuantity?: number | null
-  afterQuantity?: number | null
-  quantityDiff?: number | null
-  beforeUnitPrice?: number | null
-  afterUnitPrice?: number | null
-  unitPriceDiff?: number | null
-  beforeDiscount?: number | null
-  afterDiscount?: number | null
-  discountDiff?: number | null
-  beforeDescription?: string | null
-  afterDescription?: string | null
-  changeReason?: string | null
-  changedById: string
-  changedByName?: string
-  createdAt: Date | string
+  id: string;
+  action: string;
+  field?: string;
+  oldValue?: string | null;
+  newValue?: string | null;
+  beforeQuantity?: number | null;
+  afterQuantity?: number | null;
+  quantityDiff?: number | null;
+  beforeUnitPrice?: number | null;
+  afterUnitPrice?: number | null;
+  unitPriceDiff?: number | null;
+  beforeDiscount?: number | null;
+  afterDiscount?: number | null;
+  discountDiff?: number | null;
+  beforeDescription?: string | null;
+  afterDescription?: string | null;
+  changeReason?: string | null;
+  changedById: string;
+  changedByName?: string;
+  createdAt: Date | string;
 }
 
 export interface LineUpdateData {
-  description?: string
-  quantity?: number
-  unit?: string
-  unitPrice?: number
-  discount?: number
-  changeReason?: string
+  description?: string;
+  quantity?: number;
+  unit?: string;
+  unitPrice?: number;
+  discount?: number;
+  changeReason?: string;
 }
 
 export interface LineItemEditorProps {
-  line: InvoiceLineWithProduct
-  invoiceId: string
-  invoiceStatus: InvoiceStatus
-  onUpdate: (lineId: string, data: LineUpdateData) => Promise<void>
-  onDelete?: (lineId: string) => Promise<void>
-  canEdit: boolean
-  showAuditButton?: boolean
-  products?: Product[]
-  editMode?: 'inline' | 'dialog'
+  line: InvoiceLineWithProduct;
+  invoiceId: string;
+  invoiceStatus: InvoiceStatus;
+  onUpdate: (lineId: string, data: LineUpdateData) => Promise<void>;
+  onDelete?: (lineId: string) => Promise<void>;
+  canEdit: boolean;
+  showAuditButton?: boolean;
+  products?: Product[];
+  editMode?: 'inline' | 'dialog';
 }
 
 // ============================================
@@ -117,17 +103,17 @@ export function LineItemEditor({
   canEdit,
   showAuditButton = true,
   products = [],
-  editMode = 'inline'
+  editMode = 'inline',
 }: LineItemEditorProps) {
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   // State
-  const [isEditing, setIsEditing] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [showAuditDialog, setShowAuditDialog] = useState(false)
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [auditHistory, setAuditHistory] = useState<AuditEntry[]>([])
-  const [loadingAudit, setLoadingAudit] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showAuditDialog, setShowAuditDialog] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [auditHistory, setAuditHistory] = useState<AuditEntry[]>([]);
+  const [loadingAudit, setLoadingAudit] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -136,14 +122,14 @@ export function LineItemEditor({
     unit: line.unit,
     unitPrice: line.unitPrice,
     discount: line.discount,
-    changeReason: ''
-  })
+    changeReason: '',
+  });
 
   // Validation errors
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Check if line has been edited before
-  const hasEdits = (line.auditTrail?.length ?? 0) > 0
+  const hasEdits = (line.auditTrail?.length ?? 0) > 0;
 
   // ============================================
   // Effects
@@ -156,143 +142,144 @@ export function LineItemEditor({
       unit: line.unit,
       unitPrice: line.unitPrice,
       discount: line.discount,
-      changeReason: ''
-    })
-  }, [line])
+      changeReason: '',
+    });
+  }, [line]);
 
   // Warn when trying to navigate with unsaved changes
   useEffect(() => {
     if (hasUnsavedChanges) {
       const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-        e.preventDefault()
-        e.returnValue = ''
-      }
-      window.addEventListener('beforeunload', handleBeforeUnload)
-      return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+        e.preventDefault();
+        e.returnValue = '';
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }
-  }, [hasUnsavedChanges])
+  }, [hasUnsavedChanges]);
 
   // ============================================
   // Helpers
   // ============================================
 
   const calculateTotals = useCallback(() => {
-    const beforeDiscount = formData.quantity * formData.unitPrice
-    const discountAmount = beforeDiscount * (formData.discount / 100)
-    const afterDiscount = beforeDiscount - discountAmount
-    const vatAmount = afterDiscount * (line.vatRate / 100)
-    const amount = afterDiscount
+    const beforeDiscount = formData.quantity * formData.unitPrice;
+    const discountAmount = beforeDiscount * (formData.discount / 100);
+    const afterDiscount = beforeDiscount - discountAmount;
+    const vatAmount = afterDiscount * (line.vatRate / 100);
+    const amount = afterDiscount;
 
-    return { amount, vatAmount }
-  }, [formData.quantity, formData.unitPrice, formData.discount, line.vatRate])
+    return { amount, vatAmount };
+  }, [formData.quantity, formData.unitPrice, formData.discount, line.vatRate]);
 
-  const { amount: calculatedAmount, vatAmount: calculatedVat } = calculateTotals()
+  const { amount: calculatedAmount, vatAmount: calculatedVat } = calculateTotals();
 
   // ============================================
   // Validation
   // ============================================
 
   const validateField = (field: keyof typeof formData, value: any) => {
-    const newErrors = { ...errors }
+    const newErrors = { ...errors };
 
     switch (field) {
       case 'description':
         if (!value || !value.trim()) {
-          newErrors.description = 'กรุณาระบุรายการสินค้า'
+          newErrors.description = 'กรุณาระบุรายการสินค้า';
         } else {
-          delete newErrors.description
+          delete newErrors.description;
         }
-        break
+        break;
 
       case 'quantity':
         if (value <= 0) {
-          newErrors.quantity = 'จำนวนต้องมากกว่า 0'
+          newErrors.quantity = 'จำนวนต้องมากกว่า 0';
         } else if (!Number.isInteger(value)) {
-          newErrors.quantity = 'จำนวนต้องเป็นจำนวนเต็ม'
+          newErrors.quantity = 'จำนวนต้องเป็นจำนวนเต็ม';
         } else {
-          delete newErrors.quantity
+          delete newErrors.quantity;
         }
-        break
+        break;
 
       case 'unitPrice':
         if (value < 0) {
-          newErrors.unitPrice = 'ราคาต่อหน่วยต้องไม่ติดลบ'
+          newErrors.unitPrice = 'ราคาต่อหน่วยต้องไม่ติดลบ';
         } else {
-          delete newErrors.unitPrice
+          delete newErrors.unitPrice;
         }
-        break
+        break;
 
       case 'discount':
         if (value < 0) {
-          newErrors.discount = 'ส่วนลดต้องไม่ติดลบ'
+          newErrors.discount = 'ส่วนลดต้องไม่ติดลบ';
         } else if (value > 100) {
-          newErrors.discount = 'ส่วนลดต้องไม่เกิน 100%'
+          newErrors.discount = 'ส่วนลดต้องไม่เกิน 100%';
         } else {
-          delete newErrors.discount
+          delete newErrors.discount;
         }
-        break
+        break;
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const validateForm = (): boolean => {
-    let isValid = true
+    let isValid = true;
 
     if (!formData.description.trim()) {
-      setErrors(prev => ({ ...prev, description: 'กรุณาระบุรายการสินค้า' }))
-      isValid = false
+      setErrors((prev) => ({ ...prev, description: 'กรุณาระบุรายการสินค้า' }));
+      isValid = false;
     }
 
     if (formData.quantity <= 0) {
-      setErrors(prev => ({ ...prev, quantity: 'จำนวนต้องมากกว่า 0' }))
-      isValid = false
+      setErrors((prev) => ({ ...prev, quantity: 'จำนวนต้องมากกว่า 0' }));
+      isValid = false;
     }
 
     if (formData.unitPrice < 0) {
-      setErrors(prev => ({ ...prev, unitPrice: 'ราคาต่อหน่วยต้องไม่ติดลบ' }))
-      isValid = false
+      setErrors((prev) => ({ ...prev, unitPrice: 'ราคาต่อหน่วยต้องไม่ติดลบ' }));
+      isValid = false;
     }
 
     if (formData.discount < 0 || formData.discount > 100) {
-      setErrors(prev => ({ ...prev, discount: 'ส่วนลดต้องอยู่ระหว่าง 0-100%' }))
-      isValid = false
+      setErrors((prev) => ({ ...prev, discount: 'ส่วนลดต้องอยู่ระหว่าง 0-100%' }));
+      isValid = false;
     }
 
-    return isValid
-  }
+    return isValid;
+  };
 
   // ============================================
   // Actions
   // ============================================
 
   const handleFieldChange = (field: keyof typeof formData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    setHasUnsavedChanges(true)
-    validateField(field, value)
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+    validateField(field, value);
+  };
 
   const handleStartEdit = () => {
     if (!canEdit) {
       toast({
         title: 'ไม่สามารถแก้ไขได้',
-        description: invoiceStatus !== 'DRAFT'
-          ? 'เฉพาะใบกำกับภาษีสถานะร่างเท่านั้นที่สามารถแก้ไขได้ (Thai Tax Compliance)'
-          : 'คุณไม่มีสิทธิ์แก้ไขรายการ',
+        description:
+          invoiceStatus !== 'DRAFT'
+            ? 'เฉพาะใบกำกับภาษีสถานะร่างเท่านั้นที่สามารถแก้ไขได้ (Thai Tax Compliance)'
+            : 'คุณไม่มีสิทธิ์แก้ไขรายการ',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setIsEditing(true)
-    setHasUnsavedChanges(false)
-  }
+    setIsEditing(true);
+    setHasUnsavedChanges(false);
+  };
 
   const handleCancel = () => {
     if (hasUnsavedChanges) {
       if (!confirm('มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการยกเลิกหรือไม่?')) {
-        return
+        return;
       }
     }
 
@@ -303,12 +290,12 @@ export function LineItemEditor({
       unit: line.unit,
       unitPrice: line.unitPrice,
       discount: line.discount,
-      changeReason: ''
-    })
-    setErrors({})
-    setIsEditing(false)
-    setHasUnsavedChanges(false)
-  }
+      changeReason: '',
+    });
+    setErrors({});
+    setIsEditing(false);
+    setHasUnsavedChanges(false);
+  };
 
   const handleSave = async () => {
     if (!validateForm()) {
@@ -316,11 +303,11 @@ export function LineItemEditor({
         title: 'กรุณาตรวจสอบข้อมูล',
         description: 'มีข้อมูลที่ต้องกรอกไม่ครบถ้วน',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setIsSaving(true)
+    setIsSaving(true);
 
     try {
       const updateData: LineUpdateData = {
@@ -329,7 +316,7 @@ export function LineItemEditor({
         unit: formData.unit,
         unitPrice: formData.unitPrice,
         discount: formData.discount,
-      }
+      };
 
       // Only include change reason if something actually changed
       const hasChanges =
@@ -337,87 +324,89 @@ export function LineItemEditor({
         formData.quantity !== line.quantity ||
         formData.unit !== line.unit ||
         formData.unitPrice !== line.unitPrice ||
-        formData.discount !== line.discount
+        formData.discount !== line.discount;
 
       if (hasChanges && formData.changeReason.trim()) {
-        updateData.changeReason = formData.changeReason
+        updateData.changeReason = formData.changeReason;
       }
 
-      await onUpdate(line.id, updateData)
+      await onUpdate(line.id, updateData);
 
       toast({
         title: 'บันทึกสำเร็จ',
         description: 'อัปเดตรายการสินค้าเรียบร้อยแล้ว',
-      })
+      });
 
-      setIsEditing(false)
-      setHasUnsavedChanges(false)
+      setIsEditing(false);
+      setHasUnsavedChanges(false);
     } catch (error: any) {
-      console.error('Error saving line:', error)
+      console.error('Error saving line:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: error.message || 'ไม่สามารถบันทึกรายการได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const handleDelete = async () => {
-    if (!onDelete) return
+    if (!onDelete) return;
 
     if (!confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
-      return
+      return;
     }
 
     try {
-      await onDelete(line.id)
+      await onDelete(line.id);
       toast({
         title: 'ลบสำเร็จ',
         description: 'ลบรายการสินค้าเรียบร้อยแล้ว',
-      })
+      });
     } catch (error: any) {
-      console.error('Error deleting line:', error)
+      console.error('Error deleting line:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: error.message || 'ไม่สามารถลบรายการได้',
         variant: 'destructive',
-      })
+      });
     }
-  }
+  };
 
   const fetchAuditHistory = async () => {
-    setLoadingAudit(true)
+    setLoadingAudit(true);
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/lines/${line.id}`, { credentials: 'include' })
-      const result = await response.json()
+      const response = await fetch(`/api/invoices/${invoiceId}/lines/${line.id}`, {
+        credentials: 'include',
+      });
+      const result = await response.json();
 
       if (response.ok) {
-        setAuditHistory(result.data?.auditTrail || [])
+        setAuditHistory(result.data?.auditTrail || []);
       } else {
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: result.error || 'ไม่สามารถดึงประวัติการแก้ไขได้',
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
-      console.error('Error fetching audit history:', error)
+      console.error('Error fetching audit history:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถดึงประวัติการแก้ไขได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoadingAudit(false)
+      setLoadingAudit(false);
     }
-  }
+  };
 
   const handleOpenAuditDialog = () => {
-    setShowAuditDialog(true)
-    fetchAuditHistory()
-  }
+    setShowAuditDialog(true);
+    fetchAuditHistory();
+  };
 
   // ============================================
   // Render
@@ -427,12 +416,12 @@ export function LineItemEditor({
     // View Mode - Read-only display
     return (
       <>
-        <div className="flex items-center justify-between gap-2 p-3 hover:bg-muted/50 rounded-lg transition-colors">
-          <div className="flex-1 grid grid-cols-12 gap-3 items-center text-sm">
+        <div className="flex items-center justify-between gap-2 rounded-lg p-3 transition-colors hover:bg-muted/50">
+          <div className="grid flex-1 grid-cols-12 items-center gap-3 text-sm">
             {/* Line number and description */}
             <div className="col-span-4">
               <div className="flex items-center gap-2">
-                <span className="text-muted-foreground text-xs">#{line.lineNo}</span>
+                <span className="text-xs text-muted-foreground">#{line.lineNo}</span>
                 <span className="font-medium">{line.description}</span>
                 {hasEdits && (
                   <Badge variant="secondary" className="text-xs">
@@ -441,26 +430,20 @@ export function LineItemEditor({
                 )}
               </div>
               {line.product && (
-                <div className="text-xs text-muted-foreground mt-1">
+                <div className="mt-1 text-xs text-muted-foreground">
                   {line.product.code} - {line.product.name}
                 </div>
               )}
             </div>
 
             {/* Quantity */}
-            <div className="col-span-1 text-center">
-              {line.quantity.toLocaleString('th-TH')}
-            </div>
+            <div className="col-span-1 text-center">{line.quantity.toLocaleString('th-TH')}</div>
 
             {/* Unit */}
-            <div className="col-span-1">
-              {line.unit}
-            </div>
+            <div className="col-span-1">{line.unit}</div>
 
             {/* Unit Price */}
-            <div className="col-span-1 text-right">
-              {formatCurrency(line.unitPrice)}
-            </div>
+            <div className="col-span-1 text-right">{formatCurrency(line.unitPrice)}</div>
 
             {/* Discount */}
             <div className="col-span-1 text-center">
@@ -468,9 +451,7 @@ export function LineItemEditor({
             </div>
 
             {/* Amount */}
-            <div className="col-span-2 text-right font-medium">
-              {formatCurrency(line.amount)}
-            </div>
+            <div className="col-span-2 text-right font-medium">{formatCurrency(line.amount)}</div>
 
             {/* VAT */}
             <div className="col-span-1 text-right text-xs text-muted-foreground">
@@ -520,7 +501,7 @@ export function LineItemEditor({
 
         {/* Audit History Dialog */}
         <Dialog open={showAuditDialog} onOpenChange={setShowAuditDialog}>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-h-[80vh] max-w-3xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <History className="h-5 w-5" />
@@ -534,9 +515,7 @@ export function LineItemEditor({
                 <span className="ml-2 text-muted-foreground">กำลังโหลด...</span>
               </div>
             ) : auditHistory.length === 0 ? (
-              <div className="text-center text-muted-foreground py-8">
-                ไม่มีประวัติการแก้ไข
-              </div>
+              <div className="py-8 text-center text-muted-foreground">ไม่มีประวัติการแก้ไข</div>
             ) : (
               <div className="space-y-3">
                 {auditHistory.map((entry) => (
@@ -547,14 +526,14 @@ export function LineItemEditor({
           </DialogContent>
         </Dialog>
       </>
-    )
+    );
   }
 
   // Edit Mode - Inline
   return (
-    <div className="border-2 border-primary rounded-lg p-4 bg-background">
+    <div className="rounded-lg border-2 border-primary bg-background p-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Badge variant="outline">แก้ไขรายการ #{line.lineNo}</Badge>
           {hasUnsavedChanges && (
@@ -565,13 +544,8 @@ export function LineItemEditor({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCancel}
-            disabled={isSaving}
-          >
-            <X className="h-4 w-4 mr-1" />
+          <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSaving}>
+            <X className="mr-1 h-4 w-4" />
             ยกเลิก
           </Button>
           <Button
@@ -582,12 +556,12 @@ export function LineItemEditor({
           >
             {isSaving ? (
               <>
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                 กำลังบันทึก...
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-1" />
+                <Save className="mr-1 h-4 w-4" />
                 บันทึก
               </>
             )}
@@ -596,7 +570,7 @@ export function LineItemEditor({
       </div>
 
       {/* Edit Form */}
-      <div className="grid grid-cols-12 gap-3 items-start">
+      <div className="grid grid-cols-12 items-start gap-3">
         {/* Description */}
         <div className="col-span-4 space-y-1">
           <Label className="text-sm">
@@ -610,7 +584,7 @@ export function LineItemEditor({
             onBlur={() => validateField('description', formData.description)}
           />
           {errors.description && (
-            <p className="text-xs text-destructive flex items-center gap-1">
+            <p className="flex items-center gap-1 text-xs text-destructive">
               <AlertCircle className="h-3 w-3" />
               {errors.description}
             </p>
@@ -631,18 +605,13 @@ export function LineItemEditor({
             className={errors.quantity ? 'border-destructive' : ''}
             onBlur={() => validateField('quantity', formData.quantity)}
           />
-          {errors.quantity && (
-            <p className="text-xs text-destructive">{errors.quantity}</p>
-          )}
+          {errors.quantity && <p className="text-xs text-destructive">{errors.quantity}</p>}
         </div>
 
         {/* Unit */}
         <div className="col-span-1 space-y-1">
           <Label className="text-sm">หน่วย</Label>
-          <Select
-            value={formData.unit}
-            onValueChange={(value) => handleFieldChange('unit', value)}
-          >
+          <Select value={formData.unit} onValueChange={(value) => handleFieldChange('unit', value)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -673,9 +642,7 @@ export function LineItemEditor({
             className={errors.unitPrice ? 'border-destructive' : ''}
             onBlur={() => validateField('unitPrice', formData.unitPrice)}
           />
-          {errors.unitPrice && (
-            <p className="text-xs text-destructive">{errors.unitPrice}</p>
-          )}
+          {errors.unitPrice && <p className="text-xs text-destructive">{errors.unitPrice}</p>}
         </div>
 
         {/* Discount */}
@@ -692,17 +659,17 @@ export function LineItemEditor({
               className={errors.discount ? 'border-destructive' : ''}
               onBlur={() => validateField('discount', formData.discount)}
             />
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+              %
+            </span>
           </div>
-          {errors.discount && (
-            <p className="text-xs text-destructive">{errors.discount}</p>
-          )}
+          {errors.discount && <p className="text-xs text-destructive">{errors.discount}</p>}
         </div>
 
         {/* Calculated Amount */}
         <div className="col-span-2 space-y-1">
           <Label className="text-sm">จำนวนเงิน</Label>
-          <div className="p-2 bg-muted rounded text-right font-medium">
+          <div className="rounded bg-muted p-2 text-right font-medium">
             {formatCurrency(calculatedAmount)}
           </div>
         </div>
@@ -710,7 +677,7 @@ export function LineItemEditor({
         {/* VAT Amount */}
         <div className="col-span-1 space-y-1">
           <Label className="text-sm">VAT {line.vatRate}%</Label>
-          <div className="p-2 bg-muted rounded text-right text-sm">
+          <div className="rounded bg-muted p-2 text-right text-sm">
             {formatCurrency(calculatedVat)}
           </div>
         </div>
@@ -727,7 +694,7 @@ export function LineItemEditor({
       </div>
 
       {/* Summary */}
-      <div className="mt-4 p-3 bg-muted/50 rounded-lg text-sm space-y-1">
+      <div className="mt-4 space-y-1 rounded-lg bg-muted/50 p-3 text-sm">
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">ยอดรวม:</span>
           <span className="font-medium">{formatCurrency(calculatedAmount + calculatedVat)}</span>
@@ -738,7 +705,7 @@ export function LineItemEditor({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // ============================================
@@ -746,22 +713,22 @@ export function LineItemEditor({
 // ============================================
 
 interface AuditHistoryEntryProps {
-  entry: AuditEntry
+  entry: AuditEntry;
 }
 
 function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
   const getActionBadge = () => {
     switch (entry.action) {
       case 'CREATED':
-        return <Badge variant="default">สร้าง</Badge>
+        return <Badge variant="default">สร้าง</Badge>;
       case 'UPDATED':
-        return <Badge variant="secondary">แก้ไข</Badge>
+        return <Badge variant="secondary">แก้ไข</Badge>;
       case 'DELETED':
-        return <Badge variant="destructive">ลบ</Badge>
+        return <Badge variant="destructive">ลบ</Badge>;
       default:
-        return <Badge variant="outline">{entry.action}</Badge>
+        return <Badge variant="outline">{entry.action}</Badge>;
     }
-  }
+  };
 
   const getFieldName = () => {
     const fieldNames: Record<string, string> = {
@@ -771,60 +738,77 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
       unitPrice: 'ราคาต่อหน่วย',
       discount: 'ส่วนลด',
       SUMMARY: 'หลายฟิลด์',
-    }
-    return fieldNames[entry.field || ''] || entry.field
-  }
+    };
+    return fieldNames[entry.field || ''] || entry.field;
+  };
 
   const renderChangeValue = () => {
     if (entry.field === 'quantity' && entry.beforeQuantity !== undefined) {
       return (
         <div className="flex items-center gap-2">
-          <span className="line-through text-muted-foreground">{entry.beforeQuantity}</span>
+          <span className="text-muted-foreground line-through">{entry.beforeQuantity}</span>
           <span className="text-muted-foreground">→</span>
-          <span className={`font-medium ${entry.quantityDiff && entry.quantityDiff > 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <span
+            className={`font-medium ${entry.quantityDiff && entry.quantityDiff > 0 ? 'text-green-600' : 'text-red-600'}`}
+          >
             {entry.afterQuantity}
           </span>
           {entry.quantityDiff !== undefined && entry.quantityDiff !== 0 && (
-            <span className={`text-xs ${entry.quantityDiff > 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ({entry.quantityDiff > 0 ? '+' : ''}{entry.quantityDiff})
+            <span
+              className={`text-xs ${entry.quantityDiff > 0 ? 'text-green-600' : 'text-red-600'}`}
+            >
+              ({entry.quantityDiff > 0 ? '+' : ''}
+              {entry.quantityDiff})
             </span>
           )}
         </div>
-      )
+      );
     }
 
     if (entry.field === 'unitPrice' && entry.beforeUnitPrice !== undefined) {
       return (
         <div className="flex items-center gap-2">
-          <span className="line-through text-muted-foreground">{formatCurrency(entry.beforeUnitPrice)}</span>
+          <span className="text-muted-foreground line-through">
+            {formatCurrency(entry.beforeUnitPrice)}
+          </span>
           <span className="text-muted-foreground">→</span>
-          <span className={`font-medium ${entry.unitPriceDiff && entry.unitPriceDiff > 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <span
+            className={`font-medium ${entry.unitPriceDiff && entry.unitPriceDiff > 0 ? 'text-green-600' : 'text-red-600'}`}
+          >
             {formatCurrency(entry.afterUnitPrice || 0)}
           </span>
           {entry.unitPriceDiff !== undefined && entry.unitPriceDiff !== 0 && (
-            <span className={`text-xs ${entry.unitPriceDiff > 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ({entry.unitPriceDiff > 0 ? '+' : ''}{formatCurrency(entry.unitPriceDiff)})
+            <span
+              className={`text-xs ${entry.unitPriceDiff > 0 ? 'text-green-600' : 'text-red-600'}`}
+            >
+              ({entry.unitPriceDiff > 0 ? '+' : ''}
+              {formatCurrency(entry.unitPriceDiff)})
             </span>
           )}
         </div>
-      )
+      );
     }
 
     if (entry.field === 'discount' && entry.beforeDiscount !== undefined) {
       return (
         <div className="flex items-center gap-2">
-          <span className="line-through text-muted-foreground">{entry.beforeDiscount}%</span>
+          <span className="text-muted-foreground line-through">{entry.beforeDiscount}%</span>
           <span className="text-muted-foreground">→</span>
-          <span className={`font-medium ${entry.discountDiff && entry.discountDiff > 0 ? 'text-red-600' : 'text-green-600'}`}>
+          <span
+            className={`font-medium ${entry.discountDiff && entry.discountDiff > 0 ? 'text-red-600' : 'text-green-600'}`}
+          >
             {entry.afterDiscount}%
           </span>
           {entry.discountDiff !== undefined && entry.discountDiff !== 0 && (
-            <span className={`text-xs ${entry.discountDiff > 0 ? 'text-red-600' : 'text-green-600'}`}>
-              ({entry.discountDiff > 0 ? '+' : ''}{entry.discountDiff}%)
+            <span
+              className={`text-xs ${entry.discountDiff > 0 ? 'text-red-600' : 'text-green-600'}`}
+            >
+              ({entry.discountDiff > 0 ? '+' : ''}
+              {entry.discountDiff}%)
             </span>
           )}
         </div>
-      )
+      );
     }
 
     if (entry.field === 'description') {
@@ -833,7 +817,7 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
           {entry.beforeDescription && (
             <div className="text-sm">
               <span className="text-muted-foreground">ก่อนแก้ไข:</span>
-              <div className="line-through text-muted-foreground">{entry.beforeDescription}</div>
+              <div className="text-muted-foreground line-through">{entry.beforeDescription}</div>
             </div>
           )}
           {entry.afterDescription && (
@@ -843,7 +827,7 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
             </div>
           )}
         </div>
-      )
+      );
     }
 
     // Default display
@@ -851,39 +835,31 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
       <div className="flex items-center gap-2">
         {entry.oldValue && (
           <>
-            <span className="line-through text-muted-foreground">{entry.oldValue}</span>
+            <span className="text-muted-foreground line-through">{entry.oldValue}</span>
             <span className="text-muted-foreground">→</span>
           </>
         )}
-        {entry.newValue && (
-          <span className="font-medium text-green-700">{entry.newValue}</span>
-        )}
+        {entry.newValue && <span className="font-medium text-green-700">{entry.newValue}</span>}
       </div>
-    )
-  }
+    );
+  };
 
   return (
-    <div className="border rounded-lg p-3 space-y-2">
+    <div className="space-y-2 rounded-lg border p-3">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {getActionBadge()}
-          {entry.field && (
-            <span className="text-sm font-medium">{getFieldName()}</span>
-          )}
+          {entry.field && <span className="text-sm font-medium">{getFieldName()}</span>}
         </div>
-        <div className="text-xs text-muted-foreground">
-          {formatThaiDate(entry.createdAt)}
-        </div>
+        <div className="text-xs text-muted-foreground">{formatThaiDate(entry.createdAt)}</div>
       </div>
 
       {/* Change Details */}
-      <div className="pl-4 border-l-2 border-muted">
-        {renderChangeValue()}
-      </div>
+      <div className="border-l-2 border-muted pl-4">{renderChangeValue()}</div>
 
       {/* User & Reason */}
-      <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2 border-t">
+      <div className="flex items-center gap-4 border-t pt-2 text-sm text-muted-foreground">
         <div>
           โดย: <span className="font-medium">{entry.changedByName || entry.changedById}</span>
         </div>
@@ -894,7 +870,7 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 // ============================================
@@ -907,5 +883,5 @@ export type {
   InvoiceLineWithProduct,
   InvoiceStatus,
   Product,
-  LineItemEditorProps
-}
+  LineItemEditorProps,
+};

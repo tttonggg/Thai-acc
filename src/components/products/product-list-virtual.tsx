@@ -1,52 +1,55 @@
-'use client'
+'use client';
 
-import { useState, useCallback } from 'react'
-import { VirtualTable, VirtualTableColumn } from '@/components/virtual-scroll'
-import { BulkActionsToolbar, useBulkSelection } from '@/components/bulk-operations/bulk-actions-toolbar'
-import { AdvancedFilter, FilterCondition } from '@/components/filters/advanced-filter'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Plus, FileEdit, Eye, Trash2 } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+import { useState, useCallback } from 'react';
+import { VirtualTable, VirtualTableColumn } from '@/components/virtual-scroll';
+import {
+  BulkActionsToolbar,
+  useBulkSelection,
+} from '@/components/bulk-operations/bulk-actions-toolbar';
+import { AdvancedFilter, FilterCondition } from '@/components/filters/advanced-filter';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Plus, FileEdit, Eye, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Product {
-  id: string
-  code: string
-  name: string
-  category?: string
-  type: 'PRODUCT' | 'SERVICE'
-  unit: string
-  salePrice: number
-  costPrice: number
-  quantity: number
-  isActive: boolean
-  isInventory: boolean
+  id: string;
+  code: string;
+  name: string;
+  category?: string;
+  type: 'PRODUCT' | 'SERVICE';
+  unit: string;
+  salePrice: number;
+  costPrice: number;
+  quantity: number;
+  isActive: boolean;
+  isInventory: boolean;
 }
 
 interface ProductListVirtualProps {
-  products: Product[]
-  onAdd?: () => void
-  onEdit: (product: Product) => void
-  onView: (product: Product) => void
-  onDelete: (ids: string[]) => void
-  onExport: (ids: string[]) => void
-  onStatusChange: (ids: string[], isActive: boolean) => void
+  products: Product[];
+  onAdd?: () => void;
+  onEdit: (product: Product) => void;
+  onView: (product: Product) => void;
+  onDelete: (ids: string[]) => void;
+  onExport: (ids: string[]) => void;
+  onStatusChange: (ids: string[], isActive: boolean) => void;
 }
 
 const categoryColors: Record<string, string> = {
-  'สินค้าสำเร็จรูป': 'bg-blue-100 text-blue-800',
-  'วัตถุดิบ': 'bg-green-100 text-green-800',
-  'สินค้ากึ่งสำเร็จรูป': 'bg-yellow-100 text-yellow-800',
-  'บริการ': 'bg-purple-100 text-purple-800',
-  'อื่นๆ': 'bg-gray-100 text-gray-800',
-}
+  สินค้าสำเร็จรูป: 'bg-blue-100 text-blue-800',
+  วัตถุดิบ: 'bg-green-100 text-green-800',
+  สินค้ากึ่งสำเร็จรูป: 'bg-yellow-100 text-yellow-800',
+  บริการ: 'bg-purple-100 text-purple-800',
+  อื่นๆ: 'bg-gray-100 text-gray-800',
+};
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('th-TH', {
     style: 'currency',
     currency: 'THB',
-  }).format(amount)
-}
+  }).format(amount);
+};
 
 export function ProductListVirtual({
   products,
@@ -57,10 +60,13 @@ export function ProductListVirtual({
   onExport,
   onStatusChange,
 }: ProductListVirtualProps) {
-  const [activeFilters, setActiveFilters] = useState<FilterCondition[]>([])
-  const [savedFilters, setSavedFilters] = useState<{ id: string; name: string; filters: FilterCondition[] }[]>([])
-  const { selectedIds, selectedCount, toggleSelection, selectAll, clearSelection, isSelected } = useBulkSelection(products)
-  const { toast } = useToast()
+  const [activeFilters, setActiveFilters] = useState<FilterCondition[]>([]);
+  const [savedFilters, setSavedFilters] = useState<
+    { id: string; name: string; filters: FilterCondition[] }[]
+  >([]);
+  const { selectedIds, selectedCount, toggleSelection, selectAll, clearSelection, isSelected } =
+    useBulkSelection(products);
+  const { toast } = useToast();
 
   const columns: VirtualTableColumn<Product>[] = [
     {
@@ -81,14 +87,14 @@ export function ProductListVirtual({
       width: 120,
       sortable: true,
       formatter: (value) => {
-        const category = value as string
-        if (!category) return '-'
-        const colorClass = categoryColors[category] || 'bg-gray-100 text-gray-800'
+        const category = value as string;
+        if (!category) return '-';
+        const colorClass = categoryColors[category] || 'bg-gray-100 text-gray-800';
         return (
           <Badge variant="secondary" className={colorClass}>
             {category}
           </Badge>
-        )
+        );
       },
     },
     {
@@ -97,9 +103,7 @@ export function ProductListVirtual({
       width: 80,
       sortable: true,
       formatter: (value) => (
-        <Badge variant="outline">
-          {value === 'PRODUCT' ? 'สินค้า' : 'บริการ'}
-        </Badge>
+        <Badge variant="outline">{value === 'PRODUCT' ? 'สินค้า' : 'บริการ'}</Badge>
       ),
     },
     {
@@ -131,9 +135,9 @@ export function ProductListVirtual({
       sortable: true,
       align: 'right',
       formatter: (value, row) => {
-        const product = row as Product
-        if (!product.isInventory) return '-'
-        return (value as number).toFixed(2)
+        const product = row as Product;
+        if (!product.isInventory) return '-';
+        return (value as number).toFixed(2);
       },
     },
     {
@@ -142,12 +146,15 @@ export function ProductListVirtual({
       width: 80,
       sortable: true,
       formatter: (value) => (
-        <Badge variant={value ? 'default' : 'secondary'} className={value ? 'bg-green-100 text-green-800' : ''}>
+        <Badge
+          variant={value ? 'default' : 'secondary'}
+          className={value ? 'bg-green-100 text-green-800' : ''}
+        >
           {value ? 'ใช้งาน' : 'ระงับ'}
         </Badge>
       ),
     },
-  ]
+  ];
 
   const filterFields = [
     { key: 'code', label: 'รหัสสินค้า', type: 'text' as const },
@@ -183,19 +190,19 @@ export function ProductListVirtual({
       ],
     },
     { key: 'salePrice', label: 'ราคาขาย', type: 'number' as const },
-  ]
+  ];
 
   const handleSaveFilter = (name: string, filters: FilterCondition[]) => {
-    setSavedFilters([...savedFilters, { id: crypto.randomUUID(), name, filters }])
+    setSavedFilters([...savedFilters, { id: crypto.randomUUID(), name, filters }]);
     toast({
       title: 'บันทึกตัวกรองสำเร็จ',
       description: `ตัวกรอง "${name}" ถูกบันทึกไว้แล้ว`,
-    })
-  }
+    });
+  };
 
   const handleDeleteFilter = (id: string) => {
-    setSavedFilters(savedFilters.filter((f) => f.id !== id))
-  }
+    setSavedFilters(savedFilters.filter((f) => f.id !== id));
+  };
 
   const bulkActions = [
     {
@@ -226,37 +233,39 @@ export function ProductListVirtual({
       confirmationTitle: 'ยืนยันการลบ',
       confirmationMessage: `คุณแน่ใจหรือไม่ที่จะลบ ${selectedCount} สินค้าที่เลือก?`,
     },
-  ]
+  ];
 
   // Apply filters
   const filteredProducts = products.filter((product) => {
     return activeFilters.every((filter) => {
-      const value = product[filter.field as keyof Product]
-      const filterValue = filter.value
+      const value = product[filter.field as keyof Product];
+      const filterValue = filter.value;
 
       switch (filter.operator) {
         case 'eq':
-          return String(value) === String(filterValue)
+          return String(value) === String(filterValue);
         case 'contains':
-          return String(value).toLowerCase().includes(String(filterValue).toLowerCase())
+          return String(value).toLowerCase().includes(String(filterValue).toLowerCase());
         case 'gt':
-          return Number(value) > Number(filterValue)
+          return Number(value) > Number(filterValue);
         case 'lt':
-          return Number(value) < Number(filterValue)
+          return Number(value) < Number(filterValue);
         default:
-          return true
+          return true;
       }
-    })
-  })
+    });
+  });
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">รายการสินค้าและบริการ ({filteredProducts.length} รายการ)</h2>
+        <h2 className="text-lg font-semibold">
+          รายการสินค้าและบริการ ({filteredProducts.length} รายการ)
+        </h2>
         {onAdd && (
           <Button onClick={onAdd}>
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             เพิ่มสินค้า/บริการ
           </Button>
         )}
@@ -292,9 +301,11 @@ export function ProductListVirtual({
         emptyMessage="ไม่พบสินค้า/บริการ"
       />
 
-      <div className="flex justify-between items-center text-sm text-muted-foreground">
-        <span>แสดง {filteredProducts.length} จาก {products.length} รายการ</span>
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>
+          แสดง {filteredProducts.length} จาก {products.length} รายการ
+        </span>
       </div>
     </div>
-  )
+  );
 }

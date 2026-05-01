@@ -1,37 +1,50 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/hooks/use-toast'
-import { Loader2, AlertTriangle, Info } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, AlertTriangle, Info } from 'lucide-react';
 
 interface StockBalance {
-  id: string
-  product: { id: string; code: string; name: string; unit: string }
-  warehouse: { id: string; code: string; name: string }
-  quantity: number
-  unitCost: number
-  totalCost: number
+  id: string;
+  product: { id: string; code: string; name: string; unit: string };
+  warehouse: { id: string; code: string; name: string };
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
 }
 
 interface Warehouse {
-  id: string
-  code: string
-  name: string
+  id: string;
+  code: string;
+  name: string;
 }
 
 interface StockAdjustmentDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  balance?: StockBalance | null
-  warehouses: Warehouse[]
-  onSuccess: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  balance?: StockBalance | null;
+  warehouses: Warehouse[];
+  onSuccess: () => void;
 }
 
 const ADJUSTMENT_REASONS = [
@@ -42,17 +55,17 @@ const ADJUSTMENT_REASONS = [
   { value: 'expiry', label: 'หมดอายุ', color: 'bg-purple-100 text-purple-700' },
   { value: 'quality', label: 'คุณภาพไม่ได้มาตรฐาน', color: 'bg-yellow-100 text-yellow-700' },
   { value: 'other', label: 'อื่นๆ', color: 'bg-gray-100 text-gray-700' },
-]
+];
 
 export function StockAdjustmentDialog({
   open,
   onOpenChange,
   balance,
   warehouses,
-  onSuccess
+  onSuccess,
 }: StockAdjustmentDialogProps) {
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     productId: '',
     warehouseId: '',
@@ -61,7 +74,7 @@ export function StockAdjustmentDialog({
     reason: 'count',
     notes: '',
     unitCost: 0,
-  })
+  });
 
   useEffect(() => {
     if (balance) {
@@ -73,41 +86,41 @@ export function StockAdjustmentDialog({
         reason: 'count',
         notes: '',
         unitCost: balance.unitCost,
-      })
+      });
     }
-  }, [balance, open])
+  }, [balance, open]);
 
-  const quantityDiff = formData.newQuantity !== ''
-    ? parseFloat(formData.newQuantity) - formData.currentQuantity
-    : 0
+  const quantityDiff =
+    formData.newQuantity !== '' ? parseFloat(formData.newQuantity) - formData.currentQuantity : 0;
 
-  const isIncrease = quantityDiff > 0
-  const isSignificant = Math.abs(quantityDiff) >= formData.currentQuantity * 0.1 // 10% threshold
+  const isIncrease = quantityDiff > 0;
+  const isSignificant = Math.abs(quantityDiff) >= formData.currentQuantity * 0.1; // 10% threshold
 
   const handleSubmit = async () => {
     if (formData.newQuantity === '') {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'กรุณาระบุจำนวนใหม่',
-        variant: 'destructive'
-      })
-      return
+        variant: 'destructive',
+      });
+      return;
     }
 
-    const newQty = parseFloat(formData.newQuantity)
+    const newQty = parseFloat(formData.newQuantity);
 
     if (newQty < 0) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'จำนวนสินค้าต้องไม่ติดลบ',
-        variant: 'destructive'
-      })
-      return
+        variant: 'destructive',
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await fetch(`/api/stock-movements`, { credentials: 'include', 
+      const res = await fetch(`/api/stock-movements`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -116,36 +129,36 @@ export function StockAdjustmentDialog({
           type: 'ADJUST',
           quantity: Math.abs(quantityDiff),
           unitCost: formData.unitCost,
-          notes: `${ADJUSTMENT_REASONS.find(r => r.value === formData.reason)?.label || 'ปรับปรุง'}: ${formData.notes || '-'}`,
+          notes: `${ADJUSTMENT_REASONS.find((r) => r.value === formData.reason)?.label || 'ปรับปรุง'}: ${formData.notes || '-'}`,
         }),
-      }).then(r => r.json())
+      }).then((r) => r.json());
 
       if (res.success) {
         toast({
           title: 'ปรับปรุงสต็อกสำเร็จ',
-          description: `ปรับจำนวนเป็น ${newQty} หน่วยเรียบร้อยแล้ว`
-        })
-        onOpenChange(false)
-        onSuccess()
+          description: `ปรับจำนวนเป็น ${newQty} หน่วยเรียบร้อยแล้ว`,
+        });
+        onOpenChange(false);
+        onSuccess();
       } else {
         toast({
           title: 'ข้อผิดพลาด',
           description: res.error,
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
         title: 'ข้อผิดพลาด',
         description: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const selectedWarehouse = warehouses.find(w => w.id === formData.warehouseId)
+  const selectedWarehouse = warehouses.find((w) => w.id === formData.warehouseId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -161,21 +174,21 @@ export function StockAdjustmentDialog({
 
         <div className="space-y-4 py-4">
           {balance && (
-            <div className="bg-gray-50 p-3 rounded-lg space-y-2">
-              <div className="flex justify-between items-start">
+            <div className="space-y-2 rounded-lg bg-gray-50 p-3">
+              <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-semibold">{balance.product.name}</p>
-                  <p className="text-xs text-gray-500 font-mono">{balance.product.code}</p>
+                  <p className="font-mono text-xs text-gray-500">{balance.product.code}</p>
                 </div>
                 <Badge variant="outline">{selectedWarehouse?.name}</Badge>
               </div>
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">จำนวนปัจจุบัน:</span>
                 <span className="font-semibold text-blue-600">
                   {formData.currentQuantity.toFixed(2)} {balance.product.unit}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">ต้นทุน/หน่วย (WAC):</span>
                 <span className="font-semibold">฿{formData.unitCost.toFixed(2)}</span>
               </div>
@@ -216,22 +229,25 @@ export function StockAdjustmentDialog({
           </div>
 
           {quantityDiff !== 0 && (
-            <div className={`p-3 rounded-lg border ${
-              isIncrease ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'
-            }`}>
+            <div
+              className={`rounded-lg border p-3 ${
+                isIncrease ? 'border-green-200 bg-green-50' : 'border-orange-200 bg-orange-50'
+              }`}
+            >
               <div className="flex items-center gap-2">
                 <Info className={`h-4 w-4 ${isIncrease ? 'text-green-600' : 'text-orange-600'}`} />
                 <span className="text-sm font-medium">
-                  {isIncrease ? 'เพิ่ม' : 'ลด'} {Math.abs(quantityDiff).toFixed(2)} {balance?.product.unit}
+                  {isIncrease ? 'เพิ่ม' : 'ลด'} {Math.abs(quantityDiff).toFixed(2)}{' '}
+                  {balance?.product.unit}
                 </span>
               </div>
             </div>
           )}
 
           {isSignificant && Math.abs(quantityDiff) > 0 && (
-            <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                <AlertTriangle className="mt-0.5 h-4 w-4 text-yellow-600" />
                 <div className="text-xs text-yellow-800">
                   <p className="font-semibold">การปรับปรุงจำนวนมาก</p>
                   <p>การปรับปรุงนี้จะส่งผลต่อต้นทุนเฉลี่ย (WAC) และต้นทุนขายสินค้า (COGS)</p>
@@ -253,7 +269,7 @@ export function StockAdjustmentDialog({
               <SelectContent>
                 {ADJUSTMENT_REASONS.map((reason) => (
                   <SelectItem key={reason.value} value={reason.value}>
-                    <span className={`px-2 py-0.5 rounded text-xs ${reason.color}`}>
+                    <span className={`rounded px-2 py-0.5 text-xs ${reason.color}`}>
                       {reason.label}
                     </span>
                   </SelectItem>
@@ -275,11 +291,7 @@ export function StockAdjustmentDialog({
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             ยกเลิก
           </Button>
           <Button
@@ -287,11 +299,11 @@ export function StockAdjustmentDialog({
             disabled={loading || formData.newQuantity === ''}
             className="bg-blue-600 hover:bg-blue-700"
           >
-            {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             ยืนยันการปรับปรุง
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

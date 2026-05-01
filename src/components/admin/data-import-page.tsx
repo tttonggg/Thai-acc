@@ -1,62 +1,77 @@
-'use client'
+'use client';
 
-import { useState, useCallback } from 'react'
-import { Upload, FileText, CheckCircle, XCircle, AlertCircle, Download, History } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { FileUpload } from '@/components/ui/file-upload'
-import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog'
+import { useState, useCallback } from 'react';
+import {
+  Upload,
+  FileText,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Download,
+  History,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FileUpload } from '@/components/ui/file-upload';
+import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 
-type DataType = 'customers' | 'vendors' | 'products' | 'accounts'
+type DataType = 'customers' | 'vendors' | 'products' | 'accounts';
 
 interface ImportPreview {
-  action: 'create' | 'update' | 'error'
-  data?: any
-  error?: string
+  action: 'create' | 'update' | 'error';
+  data?: any;
+  error?: string;
 }
 
 interface ImportResult {
-  success: boolean
-  dryRun?: boolean
-  totalRecords: number
-  validCount?: number
-  errorCount?: number
-  created?: number
-  updated?: number
-  errors?: number
-  preview?: ImportPreview[]
-  importErrors?: Array<{ row: number; error: string; data?: any }>
+  success: boolean;
+  dryRun?: boolean;
+  totalRecords: number;
+  validCount?: number;
+  errorCount?: number;
+  created?: number;
+  updated?: number;
+  errors?: number;
+  preview?: ImportPreview[];
+  importErrors?: Array<{ row: number; error: string; data?: any }>;
 }
 
 interface ImportHistory {
-  id: string
-  dataType: string
-  fileName: string
-  fileType: string
-  totalRecords: number
-  createdCount: number
-  updatedCount: number
-  errorCount: number
-  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
-  errorMessage?: string
-  createdAt: string
+  id: string;
+  dataType: string;
+  fileName: string;
+  fileType: string;
+  totalRecords: number;
+  createdCount: number;
+  updatedCount: number;
+  errorCount: number;
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  errorMessage?: string;
+  createdAt: string;
   importedBy?: {
-    name: string
-    email: string
-  }
+    name: string;
+    email: string;
+  };
 }
 
 const dataTypeLabels: Record<DataType, string> = {
@@ -64,174 +79,189 @@ const dataTypeLabels: Record<DataType, string> = {
   vendors: 'ผู้ขาย (Vendors)',
   products: 'สินค้า (Products)',
   accounts: 'ผังบัญชี (Chart of Accounts)',
-}
+};
 
 const dataTypeExamples: Record<DataType, string> = {
-  customers: 'code,name,taxId,address,phone,email\nC001,บริษัท ก. จำกัด,1234567890123,123 ถ.สุขุมวิท,02-123-4567,contact@example.com',
-  vendors: 'code,name,taxId,address,phone,email\nV001,บริษัท ค. จำกัด,9876543210987,456 ถ.พหลโยธิน,02-765-4321,supplier@example.com',
-  products: 'code,name,category,unit,salePrice,costPrice,vatRate\nP001,สินค้า A,หมวด A,ชิ้น,100,75,7',
+  customers:
+    'code,name,taxId,address,phone,email\nC001,บริษัท ก. จำกัด,1234567890123,123 ถ.สุขุมวิท,02-123-4567,contact@example.com',
+  vendors:
+    'code,name,taxId,address,phone,email\nV001,บริษัท ค. จำกัด,9876543210987,456 ถ.พหลโยธิน,02-765-4321,supplier@example.com',
+  products:
+    'code,name,category,unit,salePrice,costPrice,vatRate\nP001,สินค้า A,หมวด A,ชิ้น,100,75,7',
   accounts: 'code,name,type,level,isDetail\n1000,สินทรัพย์,ASSET,1,false',
-}
+};
 
 export function DataImportPage() {
-  const [dataType, setDataType] = useState<DataType>('customers')
-  const [files, setFiles] = useState<File[]>([])
-  const [skipDuplicates, setSkipDuplicates] = useState(false)
-  const [updateExisting, setUpdateExisting] = useState(true)
-  const [isDryRun, setIsDryRun] = useState(true)
-  const [isValidating, setIsValidating] = useState(false)
-  const [isImporting, setIsImporting] = useState(false)
-  const [previewResult, setPreviewResult] = useState<ImportResult | null>(null)
-  const [importResult, setImportResult] = useState<ImportResult | null>(null)
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const [importHistory, setImportHistory] = useState<ImportHistory[]>([])
-  const [loadingHistory, setLoadingHistory] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [dataType, setDataType] = useState<DataType>('customers');
+  const [files, setFiles] = useState<File[]>([]);
+  const [skipDuplicates, setSkipDuplicates] = useState(false);
+  const [updateExisting, setUpdateExisting] = useState(true);
+  const [isDryRun, setIsDryRun] = useState(true);
+  const [isValidating, setIsValidating] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [previewResult, setPreviewResult] = useState<ImportResult | null>(null);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [importHistory, setImportHistory] = useState<ImportHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadHistory = useCallback(async () => {
-    setLoadingHistory(true)
-    setError(null)
+    setLoadingHistory(true);
+    setError(null);
     try {
-      const response = await fetch(`/api/admin/import`, { credentials: 'include' })
-      const result = await response.json()
+      const response = await fetch(`/api/admin/import`, { credentials: 'include' });
+      const result = await response.json();
 
       if (result.success) {
-        setImportHistory(result.data)
+        setImportHistory(result.data);
       } else {
-        setError(result.error || 'ไม่สามารถดึงประวัติการนำเข้าได้')
+        setError(result.error || 'ไม่สามารถดึงประวัติการนำเข้าได้');
       }
     } catch (err) {
-      setError('เกิดข้อผิดพลาดในการเชื่อมต่อ')
-      console.error(err)
+      setError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      console.error(err);
     } finally {
-      setLoadingHistory(false)
+      setLoadingHistory(false);
     }
-  }, [])
+  }, []);
 
   // Load history on mount
   useState(() => {
-    loadHistory()
-  })
+    loadHistory();
+  });
 
   const handleFileSelect = (selectedFiles: File[]) => {
-    setFiles(selectedFiles)
-    setPreviewResult(null)
-    setImportResult(null)
-    setError(null)
-  }
+    setFiles(selectedFiles);
+    setPreviewResult(null);
+    setImportResult(null);
+    setError(null);
+  };
 
   const handleValidate = async () => {
     if (files.length === 0) {
-      setError('กรุณาเลือกไฟล์')
-      return
+      setError('กรุณาเลือกไฟล์');
+      return;
     }
 
-    setIsValidating(true)
-    setError(null)
-    setPreviewResult(null)
+    setIsValidating(true);
+    setError(null);
+    setPreviewResult(null);
 
     try {
-      const formData = new FormData()
-      formData.append('file', files[0])
-      formData.append('dataType', dataType)
-      formData.append('skipDuplicates', skipDuplicates.toString())
-      formData.append('updateExisting', updateExisting.toString())
-      formData.append('dryRun', 'true')
+      const formData = new FormData();
+      formData.append('file', files[0]);
+      formData.append('dataType', dataType);
+      formData.append('skipDuplicates', skipDuplicates.toString());
+      formData.append('updateExisting', updateExisting.toString());
+      formData.append('dryRun', 'true');
 
-      const response = await fetch(`/api/admin/import`, { credentials: 'include', 
+      const response = await fetch(`/api/admin/import`, {
+        credentials: 'include',
         method: 'POST',
         body: formData,
-      })
+      });
 
-      const result: ImportResult = await response.json()
+      const result: ImportResult = await response.json();
 
       if (result.success) {
-        setPreviewResult(result)
+        setPreviewResult(result);
       } else {
-        setError(result.error || 'เกิดข้อผิดพลาดในการตรวจสอบ')
+        setError(result.error || 'เกิดข้อผิดพลาดในการตรวจสอบ');
       }
     } catch (err) {
-      setError('เกิดข้อผิดพลาดในการเชื่อมต่อ')
-      console.error(err)
+      setError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      console.error(err);
     } finally {
-      setIsValidating(false)
+      setIsValidating(false);
     }
-  }
+  };
 
   const handleImport = async () => {
     if (files.length === 0) {
-      setError('กรุณาเลือกไฟล์')
-      return
+      setError('กรุณาเลือกไฟล์');
+      return;
     }
 
-    setIsImporting(true)
-    setError(null)
-    setImportResult(null)
-    setShowConfirmDialog(false)
+    setIsImporting(true);
+    setError(null);
+    setImportResult(null);
+    setShowConfirmDialog(false);
 
     try {
-      const formData = new FormData()
-      formData.append('file', files[0])
-      formData.append('dataType', dataType)
-      formData.append('skipDuplicates', skipDuplicates.toString())
-      formData.append('updateExisting', updateExisting.toString())
-      formData.append('dryRun', 'false')
+      const formData = new FormData();
+      formData.append('file', files[0]);
+      formData.append('dataType', dataType);
+      formData.append('skipDuplicates', skipDuplicates.toString());
+      formData.append('updateExisting', updateExisting.toString());
+      formData.append('dryRun', 'false');
 
-      const response = await fetch(`/api/admin/import`, { credentials: 'include', 
+      const response = await fetch(`/api/admin/import`, {
+        credentials: 'include',
         method: 'POST',
         body: formData,
-      })
+      });
 
-      const result: ImportResult = await response.json()
+      const result: ImportResult = await response.json();
 
       if (result.success) {
-        setImportResult(result)
-        setFiles([])
-        setPreviewResult(null)
+        setImportResult(result);
+        setFiles([]);
+        setPreviewResult(null);
         // Reload history
-        await loadHistory()
+        await loadHistory();
       } else {
-        setError(result.error || 'เกิดข้อผิดพลาดในการนำเข้า')
+        setError(result.error || 'เกิดข้อผิดพลาดในการนำเข้า');
       }
     } catch (err) {
-      setError('เกิดข้อผิดพลาดในการเชื่อมต่อ')
-      console.error(err)
+      setError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      console.error(err);
     } finally {
-      setIsImporting(false)
+      setIsImporting(false);
     }
-  }
+  };
 
   const handleConfirmImport = () => {
-    setShowConfirmDialog(true)
-  }
+    setShowConfirmDialog(true);
+  };
 
   const downloadTemplate = () => {
-    const csv = dataTypeExamples[dataType]
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = `${dataType}_template.csv`
-    link.click()
-  }
+    const csv = dataTypeExamples[dataType];
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${dataType}_template.csv`;
+    link.click();
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'COMPLETED':
-        return <Badge className="bg-green-500"><CheckCircle className="h-3 w-3 mr-1" />สำเร็จ</Badge>
+        return (
+          <Badge className="bg-green-500">
+            <CheckCircle className="mr-1 h-3 w-3" />
+            สำเร็จ
+          </Badge>
+        );
       case 'FAILED':
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />ล้มเหลว</Badge>
+        return (
+          <Badge variant="destructive">
+            <XCircle className="mr-1 h-3 w-3" />
+            ล้มเหลว
+          </Badge>
+        );
       case 'PROCESSING':
-        return <Badge className="bg-blue-500">กำลังประมวลผล</Badge>
+        return <Badge className="bg-blue-500">กำลังประมวลผล</Badge>;
       default:
-        return <Badge variant="outline">รอดำเนินการ</Badge>
+        return <Badge variant="outline">รอดำเนินการ</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">นำเข้าข้อมูล</h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="mt-2 text-muted-foreground">
           นำเข้าข้อมูลจากไฟล์ CSV หรือ JSON เพื่อเพิ่มหรืออัปเดตข้อมูลในระบบ
         </p>
       </div>
@@ -239,11 +269,11 @@ export function DataImportPage() {
       <Tabs defaultValue="import" className="space-y-4">
         <TabsList>
           <TabsTrigger value="import">
-            <Upload className="h-4 w-4 mr-2" />
+            <Upload className="mr-2 h-4 w-4" />
             นำเข้าข้อมูล
           </TabsTrigger>
           <TabsTrigger value="history" onClick={loadHistory}>
-            <History className="h-4 w-4 mr-2" />
+            <History className="mr-2 h-4 w-4" />
             ประวัติการนำเข้า
           </TabsTrigger>
         </TabsList>
@@ -253,19 +283,15 @@ export function DataImportPage() {
           <Card>
             <CardHeader>
               <CardTitle>เลือกประเภทข้อมูล</CardTitle>
-              <CardDescription>
-                เลือกประเภทข้อมูลที่ต้องการนำเข้า
-              </CardDescription>
+              <CardDescription>เลือกประเภทข้อมูลที่ต้องการนำเข้า</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {(Object.keys(dataTypeLabels) as DataType[]).map((type) => (
                   <Card
                     key={type}
                     className={`cursor-pointer transition-all ${
-                      dataType === type
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'hover:border-gray-400'
+                      dataType === type ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'
                     }`}
                     onClick={() => setDataType(type)}
                   >
@@ -273,11 +299,9 @@ export function DataImportPage() {
                       <div className="flex items-center gap-3">
                         <FileText className="h-5 w-5 text-blue-600" />
                         <div className="flex-1">
-                          <p className="font-medium text-sm">{dataTypeLabels[type]}</p>
+                          <p className="text-sm font-medium">{dataTypeLabels[type]}</p>
                         </div>
-                        {dataType === type && (
-                          <CheckCircle className="h-5 w-5 text-blue-600" />
-                        )}
+                        {dataType === type && <CheckCircle className="h-5 w-5 text-blue-600" />}
                       </div>
                     </CardContent>
                   </Card>
@@ -290,9 +314,7 @@ export function DataImportPage() {
           <Card>
             <CardHeader>
               <CardTitle>อัปโหลดไฟล์</CardTitle>
-              <CardDescription>
-                รองรับไฟล์ CSV และ JSON (ขนาดสูงสุด 5MB)
-              </CardDescription>
+              <CardDescription>รองรับไฟล์ CSV และ JSON (ขนาดสูงสุด 5MB)</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <FileUpload
@@ -305,7 +327,7 @@ export function DataImportPage() {
 
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={downloadTemplate}>
-                  <Download className="h-4 w-4 mr-2" />
+                  <Download className="mr-2 h-4 w-4" />
                   ดาวน์โหลดไฟล์ตัวอย่าง
                 </Button>
                 <span className="text-sm text-muted-foreground">
@@ -319,9 +341,7 @@ export function DataImportPage() {
           <Card>
             <CardHeader>
               <CardTitle>ตัวเลือกการนำเข้า</CardTitle>
-              <CardDescription>
-                กำหนดวิธีการจัดการกับข้อมูลที่มีอยู่แล้ว
-              </CardDescription>
+              <CardDescription>กำหนดวิธีการจัดการกับข้อมูลที่มีอยู่แล้ว</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
@@ -370,12 +390,12 @@ export function DataImportPage() {
             >
               {isValidating ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
                   กำลังตรวจสอบ...
                 </>
               ) : (
                 <>
-                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <CheckCircle className="mr-2 h-4 w-4" />
                   ตรวจสอบข้อมูล
                 </>
               )}
@@ -390,12 +410,12 @@ export function DataImportPage() {
               >
                 {isImporting ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
                     กำลังนำเข้า...
                   </>
                 ) : (
                   <>
-                    <Upload className="h-4 w-4 mr-2" />
+                    <Upload className="mr-2 h-4 w-4" />
                     นำเข้าข้อมูล
                   </>
                 )}
@@ -417,9 +437,9 @@ export function DataImportPage() {
               <CardHeader>
                 <CardTitle>ผลการตรวจสอบ</CardTitle>
                 <CardDescription>
-                  ทั้งหมด {previewResult.totalRecords} รายการ |
-                  ถูกต้อง {previewResult.validCount || 0} รายการ |
-                  ผิดพลาด {previewResult.errorCount || 0} รายการ
+                  ทั้งหมด {previewResult.totalRecords} รายการ | ถูกต้อง{' '}
+                  {previewResult.validCount || 0} รายการ | ผิดพลาด {previewResult.errorCount || 0}{' '}
+                  รายการ
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -427,22 +447,22 @@ export function DataImportPage() {
                   {previewResult.preview.slice(0, 10).map((item, index) => (
                     <div
                       key={index}
-                      className={`flex items-start gap-3 p-3 rounded-lg ${
+                      className={`flex items-start gap-3 rounded-lg p-3 ${
                         item.action === 'error'
-                          ? 'bg-red-50 border border-red-200'
+                          ? 'border border-red-200 bg-red-50'
                           : item.action === 'update'
-                          ? 'bg-yellow-50 border border-yellow-200'
-                          : 'bg-green-50 border border-green-200'
+                            ? 'border border-yellow-200 bg-yellow-50'
+                            : 'border border-green-200 bg-green-50'
                       }`}
                     >
                       {item.action === 'error' ? (
-                        <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <XCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
                       ) : item.action === 'update' ? (
-                        <AlertCircle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                        <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-500" />
                       ) : (
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
                       )}
-                      <div className="flex-1 min-w-0">
+                      <div className="min-w-0 flex-1">
                         {item.error ? (
                           <p className="text-sm text-red-700">{item.error}</p>
                         ) : (
@@ -468,39 +488,35 @@ export function DataImportPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <p className="text-sm text-blue-600 font-medium">ทั้งหมด</p>
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                    <div className="rounded-lg bg-blue-50 p-4">
+                      <p className="text-sm font-medium text-blue-600">ทั้งหมด</p>
                       <p className="text-2xl font-bold text-blue-700">
                         {importResult.totalRecords}
                       </p>
                     </div>
-                    <div className="p-4 bg-green-50 rounded-lg">
-                      <p className="text-sm text-green-600 font-medium">สร้างใหม่</p>
+                    <div className="rounded-lg bg-green-50 p-4">
+                      <p className="text-sm font-medium text-green-600">สร้างใหม่</p>
                       <p className="text-2xl font-bold text-green-700">
                         {importResult.created || 0}
                       </p>
                     </div>
-                    <div className="p-4 bg-yellow-50 rounded-lg">
-                      <p className="text-sm text-yellow-600 font-medium">อัปเดต</p>
+                    <div className="rounded-lg bg-yellow-50 p-4">
+                      <p className="text-sm font-medium text-yellow-600">อัปเดต</p>
                       <p className="text-2xl font-bold text-yellow-700">
                         {importResult.updated || 0}
                       </p>
                     </div>
-                    <div className="p-4 bg-red-50 rounded-lg">
-                      <p className="text-sm text-red-600 font-medium">ผิดพลาด</p>
-                      <p className="text-2xl font-bold text-red-700">
-                        {importResult.errors || 0}
-                      </p>
+                    <div className="rounded-lg bg-red-50 p-4">
+                      <p className="text-sm font-medium text-red-600">ผิดพลาด</p>
+                      <p className="text-2xl font-bold text-red-700">{importResult.errors || 0}</p>
                     </div>
                   </div>
 
                   {importResult.success && (
                     <Alert>
                       <CheckCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        การนำเข้าข้อมูลเสร็จสมบูรณ์!
-                      </AlertDescription>
+                      <AlertDescription>การนำเข้าข้อมูลเสร็จสมบูรณ์!</AlertDescription>
                     </Alert>
                   )}
                 </div>
@@ -528,17 +544,15 @@ export function DataImportPage() {
           <Card>
             <CardHeader>
               <CardTitle>ประวัติการนำเข้าข้อมูล</CardTitle>
-              <CardDescription>
-                ดูประวัติการนำเข้าข้อมูลทั้งหมด
-              </CardDescription>
+              <CardDescription>ดูประวัติการนำเข้าข้อมูลทั้งหมด</CardDescription>
             </CardHeader>
             <CardContent>
               {loadingHistory ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                  <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
                 </div>
               ) : importHistory.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="py-8 text-center text-muted-foreground">
                   ไม่พบประวัติการนำเข้าข้อมูล
                 </div>
               ) : (
@@ -565,16 +579,16 @@ export function DataImportPage() {
                           {dataTypeLabels[importItem.dataType as DataType] || importItem.dataType}
                         </TableCell>
                         <TableCell className="text-sm">{importItem.fileName}</TableCell>
-                        <TableCell className="text-sm text-right">
+                        <TableCell className="text-right text-sm">
                           {importItem.totalRecords}
                         </TableCell>
-                        <TableCell className="text-sm text-right text-green-600">
+                        <TableCell className="text-right text-sm text-green-600">
                           {importItem.createdCount}
                         </TableCell>
-                        <TableCell className="text-sm text-right text-yellow-600">
+                        <TableCell className="text-right text-sm text-yellow-600">
                           {importItem.updatedCount}
                         </TableCell>
-                        <TableCell className="text-sm text-right text-red-600">
+                        <TableCell className="text-right text-sm text-red-600">
                           {importItem.errorCount}
                         </TableCell>
                         <TableCell>{getStatusBadge(importItem.status)}</TableCell>
@@ -588,5 +602,5 @@ export function DataImportPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

@@ -1,32 +1,35 @@
-'use client'
+'use client';
 
-import { useState, useCallback } from 'react'
-import { VirtualTable, VirtualTableColumn } from '@/components/virtual-scroll'
-import { BulkActionsToolbar, useBulkSelection } from '@/components/bulk-operations/bulk-actions-toolbar'
-import { AdvancedFilter, FilterCondition } from '@/components/filters/advanced-filter'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { format } from 'date-fns'
-import { th } from 'date-fns/locale'
-import { FileEdit, Eye, Printer } from 'lucide-react'
+import { useState, useCallback } from 'react';
+import { VirtualTable, VirtualTableColumn } from '@/components/virtual-scroll';
+import {
+  BulkActionsToolbar,
+  useBulkSelection,
+} from '@/components/bulk-operations/bulk-actions-toolbar';
+import { AdvancedFilter, FilterCondition } from '@/components/filters/advanced-filter';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+import { th } from 'date-fns/locale';
+import { FileEdit, Eye, Printer } from 'lucide-react';
 
 interface Invoice {
-  id: string
-  invoiceNo: string
-  invoiceDate: Date
-  customerName: string
-  totalAmount: number
-  status: 'DRAFT' | 'ISSUED' | 'PARTIAL' | 'PAID' | 'CANCELLED'
+  id: string;
+  invoiceNo: string;
+  invoiceDate: Date;
+  customerName: string;
+  totalAmount: number;
+  status: 'DRAFT' | 'ISSUED' | 'PARTIAL' | 'PAID' | 'CANCELLED';
 }
 
 interface InvoiceListVirtualProps {
-  invoices: Invoice[]
-  onEdit: (invoice: Invoice) => void
-  onView: (invoice: Invoice) => void
-  onPrint: (invoice: Invoice) => void
-  onDelete: (ids: string[]) => void
-  onStatusChange: (ids: string[], status: string) => void
-  onExport: (ids: string[]) => void
+  invoices: Invoice[];
+  onEdit: (invoice: Invoice) => void;
+  onView: (invoice: Invoice) => void;
+  onPrint: (invoice: Invoice) => void;
+  onDelete: (ids: string[]) => void;
+  onStatusChange: (ids: string[], status: string) => void;
+  onExport: (ids: string[]) => void;
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -35,14 +38,14 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   PARTIAL: { label: 'รับชำระบางส่วน', color: 'bg-yellow-100 text-yellow-800' },
   PAID: { label: 'ชำระเต็มจำนวน', color: 'bg-green-100 text-green-800' },
   CANCELLED: { label: 'ยกเลิก', color: 'bg-red-100 text-red-800' },
-}
+};
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('th-TH', {
     style: 'currency',
     currency: 'THB',
-  }).format(amount / 100)
-}
+  }).format(amount / 100);
+};
 
 export function InvoiceListVirtual({
   invoices,
@@ -53,9 +56,12 @@ export function InvoiceListVirtual({
   onStatusChange,
   onExport,
 }: InvoiceListVirtualProps) {
-  const [activeFilters, setActiveFilters] = useState<FilterCondition[]>([])
-  const [savedFilters, setSavedFilters] = useState<{ id: string; name: string; filters: FilterCondition[] }[]>([])
-  const { selectedIds, selectedCount, toggleSelection, selectAll, clearSelection, isSelected } = useBulkSelection(invoices)
+  const [activeFilters, setActiveFilters] = useState<FilterCondition[]>([]);
+  const [savedFilters, setSavedFilters] = useState<
+    { id: string; name: string; filters: FilterCondition[] }[]
+  >([]);
+  const { selectedIds, selectedCount, toggleSelection, selectAll, clearSelection, isSelected } =
+    useBulkSelection(invoices);
 
   const columns: VirtualTableColumn<Invoice>[] = [
     {
@@ -91,22 +97,22 @@ export function InvoiceListVirtual({
       width: 120,
       sortable: true,
       formatter: (value) => {
-        const config = statusConfig[value as string] || { label: value, color: '' }
+        const config = statusConfig[value as string] || { label: value, color: '' };
         return (
           <Badge variant="secondary" className={config.color}>
             {config.label}
           </Badge>
-        )
+        );
       },
     },
-  ]
+  ];
 
   const filterFields = [
     { key: 'invoiceNo', label: 'เลขที่ใบกำกับภาษี', type: 'text' as const },
     { key: 'customerName', label: 'ชื่อลูกค้า', type: 'text' as const },
-    { 
-      key: 'status', 
-      label: 'สถานะ', 
+    {
+      key: 'status',
+      label: 'สถานะ',
       type: 'select' as const,
       options: [
         { label: 'ร่าง', value: 'DRAFT' },
@@ -117,15 +123,15 @@ export function InvoiceListVirtual({
       ],
     },
     { key: 'invoiceDate', label: 'วันที่', type: 'dateRange' as const },
-  ]
+  ];
 
   const handleSaveFilter = (name: string, filters: FilterCondition[]) => {
-    setSavedFilters([...savedFilters, { id: crypto.randomUUID(), name, filters }])
-  }
+    setSavedFilters([...savedFilters, { id: crypto.randomUUID(), name, filters }]);
+  };
 
   const handleDeleteFilter = (id: string) => {
-    setSavedFilters(savedFilters.filter((f) => f.id !== id))
-  }
+    setSavedFilters(savedFilters.filter((f) => f.id !== id));
+  };
 
   const bulkActions = [
     {
@@ -156,28 +162,28 @@ export function InvoiceListVirtual({
       confirmationTitle: 'ยืนยันการลบ',
       confirmationMessage: `คุณแน่ใจหรือไม่ที่จะลบ ${selectedCount} ใบกำกับภาษีที่เลือก?`,
     },
-  ]
+  ];
 
   // Apply filters
   const filteredInvoices = invoices.filter((invoice) => {
     return activeFilters.every((filter) => {
-      const value = invoice[filter.field as keyof Invoice]
-      const filterValue = filter.value
+      const value = invoice[filter.field as keyof Invoice];
+      const filterValue = filter.value;
 
       switch (filter.operator) {
         case 'eq':
-          return value === filterValue
+          return value === filterValue;
         case 'contains':
-          return String(value).toLowerCase().includes(String(filterValue).toLowerCase())
+          return String(value).toLowerCase().includes(String(filterValue).toLowerCase());
         case 'gt':
-          return Number(value) > Number(filterValue)
+          return Number(value) > Number(filterValue);
         case 'lt':
-          return Number(value) < Number(filterValue)
+          return Number(value) < Number(filterValue);
         default:
-          return true
+          return true;
       }
-    })
-  })
+    });
+  });
 
   return (
     <div className="space-y-4">
@@ -211,9 +217,11 @@ export function InvoiceListVirtual({
         emptyMessage="ไม่พบใบกำกับภาษี"
       />
 
-      <div className="flex justify-between items-center text-sm text-muted-foreground">
-        <span>แสดง {filteredInvoices.length} จาก {invoices.length} รายการ</span>
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>
+          แสดง {filteredInvoices.length} จาก {invoices.length} รายการ
+        </span>
       </div>
     </div>
-  )
+  );
 }

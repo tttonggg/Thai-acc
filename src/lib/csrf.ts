@@ -17,7 +17,7 @@ export async function generateCsrfToken(sessionId: string): Promise<string> {
   await cleanupExpiredTokens();
 
   const token = generateSecureToken(CSRF_TOKEN_LENGTH);
-  
+
   await prisma.csrfToken.create({
     data: {
       token,
@@ -32,10 +32,7 @@ export async function generateCsrfToken(sessionId: string): Promise<string> {
 /**
  * Validate CSRF token
  */
-export async function validateCsrfToken(
-  token: string,
-  sessionId: string
-): Promise<boolean> {
+export async function validateCsrfToken(token: string, sessionId: string): Promise<boolean> {
   if (!token || !sessionId) return false;
 
   const csrfToken = await prisma.csrfToken.findUnique({
@@ -60,10 +57,7 @@ export async function validateCsrfToken(
  * Validate CSRF token without marking as used
  * Use for non-critical operations
  */
-export async function peekCsrfToken(
-  token: string,
-  sessionId: string
-): Promise<boolean> {
+export async function peekCsrfToken(token: string, sessionId: string): Promise<boolean> {
   if (!token || !sessionId) return false;
 
   const csrfToken = await prisma.csrfToken.findUnique({
@@ -84,10 +78,7 @@ export async function peekCsrfToken(
 export async function cleanupExpiredTokens(): Promise<number> {
   const result = await prisma.csrfToken.deleteMany({
     where: {
-      OR: [
-        { expiresAt: { lt: new Date() } },
-        { used: true },
-      ],
+      OR: [{ expiresAt: { lt: new Date() } }, { used: true }],
     },
   });
 
@@ -119,9 +110,7 @@ export const CSRF_EXEMPT_PATHS = [
  * Check if a request path is CSRF exempt
  */
 export function isCsrfExemptPath(path: string): boolean {
-  return CSRF_EXEMPT_PATHS.some(exemptPath => 
-    path.startsWith(exemptPath) || path === exemptPath
-  );
+  return CSRF_EXEMPT_PATHS.some((exemptPath) => path.startsWith(exemptPath) || path === exemptPath);
 }
 
 /**
@@ -151,7 +140,7 @@ export async function validateCsrfForRequest(
   sessionId: string
 ): Promise<{ valid: boolean; error?: string }> {
   const method = request.method.toUpperCase();
-  
+
   // Skip for safe methods
   if (!CSRF_PROTECTED_METHODS.includes(method)) {
     return { valid: true };

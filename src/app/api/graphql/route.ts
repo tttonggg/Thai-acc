@@ -1,7 +1,7 @@
 /**
  * GraphQL API Route for Thai Accounting ERP
  * Phase D: API Mastery - GraphQL Layer
- * 
+ *
  * Endpoint: /api/graphql
  * Features:
  * - Apollo Server integration
@@ -30,20 +30,20 @@ const MAX_QUERY_DEPTH = 10;
  */
 function calculateComplexity(query: string): number {
   let complexity = 0;
-  
+
   // Count fields (each field adds complexity)
   const fieldMatches = query.match(/\w+(?=\s*[{:\(])/g) || [];
   complexity += fieldMatches.length * 1;
-  
+
   // Count nested selections (deeper nesting = more complexity)
   const depth = (query.match(/{/g) || []).length;
   complexity += depth * 5;
-  
+
   // Connection queries are more expensive
   if (query.includes('Connection')) {
     complexity += 10;
   }
-  
+
   return complexity;
 }
 
@@ -53,7 +53,7 @@ function calculateComplexity(query: string): number {
 function calculateDepth(query: string): number {
   let maxDepth = 0;
   let currentDepth = 0;
-  
+
   for (const char of query) {
     if (char === '{') {
       currentDepth++;
@@ -62,7 +62,7 @@ function calculateDepth(query: string): number {
       currentDepth--;
     }
   }
-  
+
   return maxDepth;
 }
 
@@ -88,42 +88,44 @@ const server = new ApolloServer({
 const handler = startServerAndCreateNextHandler(server, {
   context: async (req: NextRequest) => {
     // Get client IP
-    const ipAddress = req.headers.get('x-forwarded-for') || 
-                      req.headers.get('x-real-ip') || 
-                      'unknown';
-    
+    const ipAddress =
+      req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+
     const userAgent = req.headers.get('user-agent') || 'unknown';
 
     // Check query complexity before processing
-    const body = await req.clone().json().catch(() => ({}));
+    const body = await req
+      .clone()
+      .json()
+      .catch(() => ({}));
     if (body.query) {
       const complexity = calculateComplexity(body.query);
       const depth = calculateDepth(body.query);
 
       if (complexity > MAX_QUERY_COMPLEXITY) {
-        throw new GraphQLError(
-          `Query too complex: ${complexity} (max: ${MAX_QUERY_COMPLEXITY})`,
-          { extensions: { code: 'QUERY_TOO_COMPLEX' } }
-        );
+        throw new GraphQLError(`Query too complex: ${complexity} (max: ${MAX_QUERY_COMPLEXITY})`, {
+          extensions: { code: 'QUERY_TOO_COMPLEX' },
+        });
       }
 
       if (depth > MAX_QUERY_DEPTH) {
-        throw new GraphQLError(
-          `Query too deep: ${depth} (max: ${MAX_QUERY_DEPTH})`,
-          { extensions: { code: 'QUERY_TOO_DEEP' } }
-        );
+        throw new GraphQLError(`Query too deep: ${depth} (max: ${MAX_QUERY_DEPTH})`, {
+          extensions: { code: 'QUERY_TOO_DEEP' },
+        });
       }
     }
 
     // Get session from NextAuth
     const session = await auth();
-    
+
     return {
-      user: session?.user ? {
-        id: session.user.id as string,
-        email: session.user.email as string,
-        role: session.user.role as string,
-      } : undefined,
+      user: session?.user
+        ? {
+            id: session.user.id as string,
+            email: session.user.email as string,
+            role: session.user.role as string,
+          }
+        : undefined,
       loaders: createDataLoaders(),
       ipAddress: ipAddress.toString(),
       userAgent,

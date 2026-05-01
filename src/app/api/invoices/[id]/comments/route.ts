@@ -1,39 +1,33 @@
-import { db } from "@/lib/db"
-import { z } from "zod"
-import {
-  invoiceCommentSchema,
-  updateInvoiceCommentSchema,
-} from "@/lib/validations"
-import { apiResponse, notFoundError, apiError } from "@/lib/api-utils"
-import { requireAuth } from "@/lib/api-utils"
+import { db } from '@/lib/db';
+import { z } from 'zod';
+import { invoiceCommentSchema, updateInvoiceCommentSchema } from '@/lib/validations';
+import { apiResponse, notFoundError, apiError } from '@/lib/api-utils';
+import { requireAuth } from '@/lib/api-utils';
 
 // GET /api/invoices/[id]/comments - List comments with threading
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
     // Check if invoice exists
     const invoice = await db.invoice.findUnique({
-      where: { id }
-    })
+      where: { id },
+    });
 
     if (!invoice) {
-      return notFoundError("ไม่พบใบกำกับภาษี")
+      return notFoundError('ไม่พบใบกำกับภาษี');
     }
 
     // IDOR Protection: Check ownership - only ADMIN can access any invoice
-    if (user.role !== "ADMIN" && invoice.createdById && invoice.createdById !== user.id) {
-      return apiError("ไม่มีสิทธิ์เข้าถึงข้อมูล", 403)
+    if (user.role !== 'ADMIN' && invoice.createdById && invoice.createdById !== user.id) {
+      return apiError('ไม่มีสิทธิ์เข้าถึงข้อมูล', 403);
     }
 
     // Parse query parameters
-    const url = new URL(request.url)
-    const includeResolved = url.searchParams.get("includeResolved") !== "false"
-    const limit = parseInt(url.searchParams.get("limit") || "50")
+    const url = new URL(request.url);
+    const includeResolved = url.searchParams.get('includeResolved') !== 'false';
+    const limit = parseInt(url.searchParams.get('limit') || '50');
 
     // Fetch comments with threading support
     const comments = await db.invoiceComment.findMany({
@@ -41,28 +35,28 @@ export async function GET(
         invoiceId: id,
         parentId: null, // Only top-level comments
         // Hide internal comments from non-ADMIN users
-        ...(user.role !== "ADMIN" ? { isInternal: false } : {}),
+        ...(user.role !== 'ADMIN' ? { isInternal: false } : {}),
         // Filter resolved comments if requested
-        ...(includeResolved === false ? { resolved: false } : {})
+        ...(includeResolved === false ? { resolved: false } : {}),
       },
       include: {
         replies: {
           include: {
-            replies: true // Support 2-level threading
+            replies: true, // Support 2-level threading
           },
-          orderBy: { createdAt: "asc" }
+          orderBy: { createdAt: 'asc' },
         },
         invoice: {
           select: {
-            invoiceNo: true
-          }
-        }
+            invoiceNo: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: "desc"
+        createdAt: 'desc',
       },
-      take: Math.min(limit, 100)
-    })
+      take: Math.min(limit, 100),
+    });
 
     // Fetch user details for each comment
     const commentsWithUsers = await Promise.all(
@@ -73,95 +67,92 @@ export async function GET(
             id: true,
             name: true,
             email: true,
-            role: true
-          }
-        })
+            role: true,
+          },
+        });
 
         // Fetch mentioned users
         const mentionedUsers = await Promise.all(
           (comment.mentions || []).map(async (userId) => {
             const u = await db.user.findUnique({
               where: { id: userId },
-              select: { id: true, name: true, email: true }
-            })
-            return u
+              select: { id: true, name: true, email: true },
+            });
+            return u;
           })
-        )
+        );
 
         return {
           ...comment,
           user: commentUser,
           mentionedUsers: mentionedUsers.filter(Boolean),
-          replyCount: comment.replies.length
-        }
+          replyCount: comment.replies.length,
+        };
       })
-    )
+    );
 
     return apiResponse({
       comments: commentsWithUsers,
       pagination: {
         limit,
-        count: commentsWithUsers.length
-      }
-    })
+        count: commentsWithUsers.length,
+      },
+    });
   } catch (error) {
-    if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
-      return unauthorizedError()
+    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+      return unauthorizedError();
     }
-    return apiError("เกิดข้อผิดพลาดในการดึงข้อมูลคอมเมนต์")
+    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลคอมเมนต์');
   }
 }
 
 // POST /api/invoices/[id]/comments - Add comment with threading, mentions, and attachments
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
     // Check if invoice exists
     const invoice = await db.invoice.findUnique({
-      where: { id }
-    })
+      where: { id },
+    });
 
     if (!invoice) {
-      return notFoundError("ไม่พบใบกำกับภาษี")
+      return notFoundError('ไม่พบใบกำกับภาษี');
     }
 
     // IDOR Protection: Check ownership - only ADMIN can comment on any invoice
-    if (user.role !== "ADMIN" && invoice.createdById && invoice.createdById !== user.id) {
-      return apiError("ไม่มีสิทธิ์แสดงความคิดเห็น", 403)
+    if (user.role !== 'ADMIN' && invoice.createdById && invoice.createdById !== user.id) {
+      return apiError('ไม่มีสิทธิ์แสดงความคิดเห็น', 403);
     }
 
-    if (user.role === "VIEWER") {
-      return apiError("ไม่มีสิทธิ์แสดงความคิดเห็น", 403)
+    if (user.role === 'VIEWER') {
+      return apiError('ไม่มีสิทธิ์แสดงความคิดเห็น', 403);
     }
 
-    const body = await request.json()
+    const body = await request.json();
 
     // VIEWER cannot add internal comments
-    if (body.isInternal && user.role === "VIEWER") {
-      return apiError("ไม่มีสิทธิ์เพิ่มความคิดเห็นภายใน", 403)
+    if (body.isInternal && user.role === 'VIEWER') {
+      return apiError('ไม่มีสิทธิ์เพิ่มความคิดเห็นภายใน', 403);
     }
 
-    const validatedData = invoiceCommentSchema.parse(body)
+    const validatedData = invoiceCommentSchema.parse(body);
 
     // If parentId is provided, check if parent comment exists
     if (validatedData.parentId) {
       const parentComment = await db.invoiceComment.findUnique({
         where: { id: validatedData.parentId },
-        select: { id: true, invoiceId: true }
-      })
+        select: { id: true, invoiceId: true },
+      });
 
       if (!parentComment || parentComment.invoiceId !== id) {
-        return apiError("ไม่พบความคิดเห็นหลัก", 404)
+        return apiError('ไม่พบความคิดเห็นหลัก', 404);
       }
     }
 
     // Get client IP for audit log
-    const clientIp = getClientIp(request.headers)
+    const clientIp = getClientIp(request.headers);
 
     // Create comment with transaction
     const comment = await db.$transaction(async (tx) => {
@@ -179,11 +170,11 @@ export async function POST(
         include: {
           invoice: {
             select: {
-              invoiceNo: true
-            }
-          }
-        }
-      })
+              invoiceNo: true,
+            },
+          },
+        },
+      });
 
       // Create notifications for mentions
       if (validatedData.mentions && validatedData.mentions.length > 0) {
@@ -192,17 +183,17 @@ export async function POST(
             userId,
             commentId: newComment.id,
             invoiceId: id,
-            type: 'MENTION'
-          }))
-        })
+            type: 'MENTION',
+          })),
+        });
       }
 
       // If this is a reply, notify parent comment author
       if (validatedData.parentId) {
         const parentComment = await tx.invoiceComment.findUnique({
           where: { id: validatedData.parentId },
-          select: { userId: true }
-        })
+          select: { userId: true },
+        });
 
         if (parentComment && parentComment.userId !== user.id) {
           await tx.commentNotification.create({
@@ -210,9 +201,9 @@ export async function POST(
               userId: parentComment.userId,
               commentId: newComment.id,
               invoiceId: id,
-              type: 'REPLY'
-            }
-          })
+              type: 'REPLY',
+            },
+          });
         }
       }
 
@@ -226,31 +217,31 @@ export async function POST(
           afterState: {
             content: newComment.content,
             isInternal: newComment.isInternal,
-            parentId: newComment.parentId
+            parentId: newComment.parentId,
           },
-          ipAddress: clientIp
-        }
-      })
+          ipAddress: clientIp,
+        },
+      });
 
-      return newComment
-    })
+      return newComment;
+    });
 
     // Log activity
     await db.activityLog.create({
       data: {
         userId: user.id,
-        action: "COMMENT",
-        module: "invoices",
+        action: 'COMMENT',
+        module: 'invoices',
         recordId: id,
         details: {
           commentId: comment.id,
           isInternal: comment.isInternal,
           parentId: comment.parentId,
-          mentions: comment.mentions?.length || 0
+          mentions: comment.mentions?.length || 0,
         },
-        status: "success"
-      }
-    })
+        status: 'success',
+      },
+    });
 
     // Return comment with user info
     const commentWithUser = {
@@ -259,18 +250,18 @@ export async function POST(
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
-    }
+        role: user.role,
+      },
+    };
 
-    return apiResponse(commentWithUser)
+    return apiResponse(commentWithUser);
   } catch (error) {
-    if (error instanceof Error && error.message.includes("ไม่ได้รับอนุญาต")) {
-      return unauthorizedError()
+    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+      return unauthorizedError();
     }
     if (error instanceof z.ZodError) {
-      return apiError("ข้อมูลไม่ถูกต้อง: " + error.issues[0].message)
+      return apiError('ข้อมูลไม่ถูกต้อง: ' + error.issues[0].message);
     }
-    return apiError("เกิดข้อผิดพลาดในการเพิ่มคอมเมนต์")
+    return apiError('เกิดข้อผิดพลาดในการเพิ่มคอมเมนต์');
   }
 }

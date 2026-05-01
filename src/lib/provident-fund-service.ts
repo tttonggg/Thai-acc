@@ -2,21 +2,21 @@
 // กองทุนสำรองเลี้ยงชีพ / Provident Fund Service
 // ============================================
 
-import prisma from './db'
+import prisma from './db';
 
 export interface CreateProvidentFundInput {
-  name: string
-  employeeRate: number
-  employerRate: number
-  maxMonthly?: number
+  name: string;
+  employeeRate: number;
+  employerRate: number;
+  maxMonthly?: number;
 }
 
 export interface AddContributionInput {
-  providentFundId: string
-  employeeId: string
-  payrollRunId: string
-  employeePortion: number
-  employerPortion: number
+  providentFundId: string;
+  employeeId: string;
+  payrollRunId: string;
+  employeePortion: number;
+  employerPortion: number;
 }
 
 /**
@@ -31,7 +31,7 @@ export async function createProvidentFund(data: CreateProvidentFundInput) {
       maxMonthly: data.maxMonthly,
       isActive: true,
     },
-  })
+  });
 }
 
 /**
@@ -44,7 +44,7 @@ export async function listProvidentFunds() {
     include: {
       _count: { select: { contributions: true } },
     },
-  })
+  });
 }
 
 /**
@@ -60,16 +60,16 @@ export function calculateContribution(
   employerRate: number,
   maxMonthly?: number | null
 ): { employeePortion: number; employerPortion: number } {
-  let employeePortion = Math.round(salary * (employeeRate / 100))
-  let employerPortion = Math.round(salary * (employerRate / 100))
+  let employeePortion = Math.round(salary * (employeeRate / 100));
+  let employerPortion = Math.round(salary * (employerRate / 100));
 
   // Apply monthly cap if specified
   if (maxMonthly) {
-    employeePortion = Math.min(employeePortion, maxMonthly)
-    employerPortion = Math.min(employerPortion, maxMonthly)
+    employeePortion = Math.min(employeePortion, maxMonthly);
+    employerPortion = Math.min(employerPortion, maxMonthly);
   }
 
-  return { employeePortion, employerPortion }
+  return { employeePortion, employerPortion };
 }
 
 /**
@@ -84,7 +84,7 @@ export async function addContribution(data: AddContributionInput) {
       employeePortion: data.employeePortion,
       employerPortion: data.employerPortion,
     },
-  })
+  });
 }
 
 /**
@@ -97,7 +97,7 @@ export async function getEmployeeContributions(employeeId: string) {
       providentFund: true,
     },
     orderBy: { createdAt: 'desc' },
-  })
+  });
 }
 
 /**
@@ -109,5 +109,5 @@ export async function getContributionsByPayrollRun(payrollRunId: string) {
     include: {
       providentFund: true,
     },
-  })
+  });
 }

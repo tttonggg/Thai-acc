@@ -1,32 +1,39 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, requireRole, apiError, notFoundError, unauthorizedError, forbiddenError } from '@/lib/api-auth'
-import { apiResponse } from '@/lib/api-utils'
-import { z } from 'zod'
-import { db } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  requireAuth,
+  requireRole,
+  apiError,
+  notFoundError,
+  unauthorizedError,
+  forbiddenError,
+} from '@/lib/api-auth';
+import { apiResponse } from '@/lib/api-utils';
+import { z } from 'zod';
+import { db } from '@/lib/db';
 
 // Validation schema for updating stock take
 const updateStockTakeSchema = z.object({
-  date: z.string().transform((val) => new Date(val)).optional(),
+  date: z
+    .string()
+    .transform((val) => new Date(val))
+    .optional(),
   warehouseId: z.string().optional(),
   notes: z.string().optional(),
   status: z.enum(['DRAFT', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
-})
+});
 
 // Validation schema for stock take lines
 const stockTakeLineSchema = z.object({
   productId: z.string().min(1, 'ต้องระบุสินค้า'),
   actualQuantity: z.number().min(0, 'จำนวนนับจริงต้องไม่ติดลบ'),
   notes: z.string().optional(),
-})
+});
 
 // GET /api/stock-takes/[id] - Get single stock take
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
-    const { id } = await params
+    await requireAuth();
+    const { id } = await params;
 
     const stockTake = await db.stockTake.findUnique({
       where: { id },
@@ -43,61 +50,58 @@ export async function GET(
           },
         },
       },
-    })
+    });
 
     if (!stockTake) {
-      return notFoundError('ไม่พบการตรวจนับสต็อก')
+      return notFoundError('ไม่พบการตรวจนับสต็อก');
     }
 
-    return apiResponse(stockTake)
+    return apiResponse(stockTake);
   } catch (error: any) {
     if (error.name === 'AuthError') {
-      return unauthorizedError()
+      return unauthorizedError();
     }
-    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลการตรวจนับสต็อก')
+    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลการตรวจนับสต็อก');
   }
 }
 
 // PUT /api/stock-takes/[id] - Update stock take
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
     if (user.role === 'VIEWER') {
-      return forbiddenError('ไม่มีสิทธิ์แก้ไขการตรวจนับสต็อก')
+      return forbiddenError('ไม่มีสิทธิ์แก้ไขการตรวจนับสต็อก');
     }
 
     const existing = await db.stockTake.findUnique({
       where: { id },
-    })
+    });
 
     if (!existing) {
-      return notFoundError('ไม่พบการตรวจนับสต็อก')
+      return notFoundError('ไม่พบการตรวจนับสต็อก');
     }
 
     if (existing.status === 'COMPLETED') {
-      return apiError('ไม่สามารถแก้ไขการตรวจนับสต็อกที่เสร็จสมบูรณ์แล้วได้')
+      return apiError('ไม่สามารถแก้ไขการตรวจนับสต็อกที่เสร็จสมบูรณ์แล้วได้');
     }
 
     if (existing.status === 'CANCELLED') {
-      return apiError('ไม่สามารถแก้ไขการตรวจนับสต็อกที่ยกเลิกแล้วได้')
+      return apiError('ไม่สามารถแก้ไขการตรวจนับสต็อกที่ยกเลิกแล้วได้');
     }
 
-    const body = await request.json()
+    const body = await request.json();
 
     // Check if updating lines
     if (body.lines) {
-      const validatedLines = z.array(stockTakeLineSchema).parse(body.lines)
+      const validatedLines = z.array(stockTakeLineSchema).parse(body.lines);
 
       // Delete existing lines and recreate
       await db.$transaction(async (tx) => {
         await tx.stockTakeLine.deleteMany({
           where: { takeId: id },
-        })
+        });
 
         // Recreate lines with updated actual quantities
         for (const line of validatedLines) {
@@ -109,19 +113,19 @@ export async function PUT(
                 warehouseId: existing.warehouseId,
               },
             },
-          })
+          });
 
-          const systemQty = balance?.quantity || 0
-          const actualQty = line.actualQuantity
-          const variance = actualQty - systemQty
+          const systemQty = balance?.quantity || 0;
+          const actualQty = line.actualQuantity;
+          const variance = actualQty - systemQty;
 
           // Calculate variance value
           const product = await tx.product.findUnique({
             where: { id: line.productId },
-          })
+          });
 
-          const unitCost = product?.cost || 0
-          const varianceValue = variance * unitCost
+          const unitCost = product?.cost || 0;
+          const varianceValue = variance * unitCost;
 
           await tx.stockTakeLine.create({
             data: {
@@ -133,9 +137,9 @@ export async function PUT(
               varianceValue: varianceValue,
               notes: line.notes,
             },
-          })
+          });
         }
-      })
+      });
 
       // Fetch updated stock take
       const updatedStockTake = await db.stockTake.findUnique({
@@ -148,13 +152,13 @@ export async function PUT(
             },
           },
         },
-      })
+      });
 
-      return apiResponse(updatedStockTake)
+      return apiResponse(updatedStockTake);
     }
 
     // Update header fields only
-    const validatedData = updateStockTakeSchema.parse(body)
+    const validatedData = updateStockTakeSchema.parse(body);
 
     const stockTake = await db.stockTake.update({
       where: { id },
@@ -172,64 +176,61 @@ export async function PUT(
           },
         },
       },
-    })
+    });
 
-    return apiResponse(stockTake)
+    return apiResponse(stockTake);
   } catch (error: any) {
     if (error.name === 'AuthError') {
-      return unauthorizedError()
+      return unauthorizedError();
     }
     if (error.name === 'ZodError') {
-      return apiError('ข้อมูลไม่ถูกต้อง')
+      return apiError('ข้อมูลไม่ถูกต้อง');
     }
-    console.error('Stock Take Update Error:', error)
-    return apiError(error.message || 'เกิดข้อผิดพลาดในการแก้ไขการตรวจนับสต็อก')
+    console.error('Stock Take Update Error:', error);
+    return apiError(error.message || 'เกิดข้อผิดพลาดในการแก้ไขการตรวจนับสต็อก');
   }
 }
 
 // DELETE /api/stock-takes/[id] - Cancel stock take
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireAuth()
-    const { id } = await params
+    const user = await requireAuth();
+    const { id } = await params;
 
     if (user.role !== 'ADMIN' && user.role !== 'ACCOUNTANT') {
-      return forbiddenError('ไม่มีสิทธิ์ยกเลิกการตรวจนับสต็อก')
+      return forbiddenError('ไม่มีสิทธิ์ยกเลิกการตรวจนับสต็อก');
     }
 
     const existing = await db.stockTake.findUnique({
       where: { id },
-    })
+    });
 
     if (!existing) {
-      return notFoundError('ไม่พบการตรวจนับสต็อก')
+      return notFoundError('ไม่พบการตรวจนับสต็อก');
     }
 
     if (existing.status === 'CANCELLED') {
-      return apiError('การตรวจนับสต็อกนี้ถูกยกเลิกแล้ว')
+      return apiError('การตรวจนับสต็อกนี้ถูกยกเลิกแล้ว');
     }
 
     if (existing.status === 'COMPLETED') {
-      return apiError('ไม่สามารถยกเลิกการตรวจนับสต็อกที่เสร็จสมบูรณ์แล้วได้')
+      return apiError('ไม่สามารถยกเลิกการตรวจนับสต็อกที่เสร็จสมบูรณ์แล้วได้');
     }
 
     // Update status to cancelled
     const stockTake = await db.stockTake.update({
       where: { id },
       data: { status: 'CANCELLED' },
-    })
+    });
 
     return apiResponse({
       message: 'ยกเลิกการตรวจนับสต็อกสำเร็จ',
       stockTake,
-    })
+    });
   } catch (error: any) {
     if (error.name === 'AuthError') {
-      return unauthorizedError()
+      return unauthorizedError();
     }
-    return apiError('เกิดข้อผิดพลาดในการยกเลิกการตรวจนับสต็อก')
+    return apiError('เกิดข้อผิดพลาดในการยกเลิกการตรวจนับสต็อก');
   }
 }

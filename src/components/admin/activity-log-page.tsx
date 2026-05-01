@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
   Activity,
   Filter,
@@ -17,48 +17,48 @@ import {
   FileText,
   MapPin,
   Loader2,
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
-import { formatThaiDate } from '@/lib/thai-accounting'
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { formatThaiDate } from '@/lib/thai-accounting';
 
 interface ActivityLogEntry {
-  id: string
-  userId: string
-  action: string
-  module: string
-  recordId: string | null
-  details: any
-  ipAddress: string | null
-  status: string
-  errorMessage: string | null
-  createdAt: string
+  id: string;
+  userId: string;
+  action: string;
+  module: string;
+  recordId: string | null;
+  details: any;
+  ipAddress: string | null;
+  status: string;
+  errorMessage: string | null;
+  createdAt: string;
   user: {
-    id: string
-    email: string
-    name: string | null
-    role: string
-  }
+    id: string;
+    email: string;
+    name: string | null;
+    role: string;
+  };
 }
 
 interface ActivityLogResponse {
-  success: boolean
-  data: ActivityLogEntry[]
+  success: boolean;
+  data: ActivityLogEntry[];
   meta: {
-    total: number
-    page: number
-    limit: number
-    totalPages: number
-  }
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 const ACTIONS = [
@@ -70,7 +70,7 @@ const ACTIONS = [
   { value: 'POST', label: 'ลงบัญชี' },
   { value: 'VIEW', label: 'ดูข้อมูล' },
   { value: 'EXPORT', label: 'ส่งออก' },
-]
+];
 
 const MODULES = [
   { value: 'auth', label: 'การยืนยันตัวตน' },
@@ -84,45 +84,45 @@ const MODULES = [
   { value: 'petty-cash', label: 'เงินสดย่อย' },
   { value: 'journal', label: 'บันทึกบัญชี' },
   { value: 'reports', label: 'รายงาน' },
-]
+];
 
 export function ActivityLogPage() {
-  const { toast } = useToast()
-  const [logs, setLogs] = useState<ActivityLogEntry[]>([])
-  const [loading, setLoading] = useState(true)
-  const [autoRefresh, setAutoRefresh] = useState(false)
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
+  const { toast } = useToast();
+  const [logs, setLogs] = useState<ActivityLogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   // Filters
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(50)
-  const [totalPages, setTotalPages] = useState(1)
-  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(50);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
-  const [search, setSearch] = useState('')
-  const [selectedUser, setSelectedUser] = useState('')
-  const [selectedAction, setSelectedAction] = useState('')
-  const [selectedModule, setSelectedModule] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState('all')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
+  const [search, setSearch] = useState('');
+  const [selectedUser, setSelectedUser] = useState('');
+  const [selectedAction, setSelectedAction] = useState('');
+  const [selectedModule, setSelectedModule] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   useEffect(() => {
-    fetchLogs()
-  }, [page, limit, selectedAction, selectedModule, selectedStatus, dateFrom, dateTo])
+    fetchLogs();
+  }, [page, limit, selectedAction, selectedModule, selectedStatus, dateFrom, dateTo]);
 
   useEffect(() => {
     if (autoRefresh) {
       const interval = setInterval(() => {
-        fetchLogs()
-      }, 30000) // Refresh every 30 seconds
+        fetchLogs();
+      }, 30000); // Refresh every 30 seconds
 
-      return () => clearInterval(interval)
+      return () => clearInterval(interval);
     }
-  }, [autoRefresh, page, limit, selectedAction, selectedModule, selectedStatus, dateFrom, dateTo])
+  }, [autoRefresh, page, limit, selectedAction, selectedModule, selectedStatus, dateFrom, dateTo]);
 
   const fetchLogs = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -134,45 +134,45 @@ export function ActivityLogPage() {
         ...(search && { search }),
         ...(dateFrom && { dateFrom }),
         ...(dateTo && { dateTo }),
-      })
+      });
 
-      const response = await fetch(`/api/admin/activity-log?${params}`, { credentials: 'include' })
-      const data: ActivityLogResponse = await response.json()
+      const response = await fetch(`/api/admin/activity-log?${params}`, { credentials: 'include' });
+      const data: ActivityLogResponse = await response.json();
 
       if (data.success) {
-        setLogs(data.data)
-        setTotal(data.meta.total)
-        setTotalPages(data.meta.totalPages)
+        setLogs(data.data);
+        setTotal(data.meta.total);
+        setTotalPages(data.meta.totalPages);
       } else {
-        throw new Error(data.error || 'Failed to fetch logs')
+        throw new Error(data.error || 'Failed to fetch logs');
       }
     } catch (error) {
-      console.error('Failed to fetch activity logs:', error)
+      console.error('Failed to fetch activity logs:', error);
       toast({
         title: 'โหลดข้อมูลไม่สำเร็จ',
         description: 'ไม่สามารถดึงข้อมูลบันทึกกิจกรรมได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSearch = () => {
-    setPage(1)
-    fetchLogs()
-  }
+    setPage(1);
+    fetchLogs();
+  };
 
   const handleClearFilters = () => {
-    setSearch('')
-    setSelectedUser('')
-    setSelectedAction('')
-    setSelectedModule('')
-    setSelectedStatus('all')
-    setDateFrom('')
-    setDateTo('')
-    setPage(1)
-  }
+    setSearch('');
+    setSelectedUser('');
+    setSelectedAction('');
+    setSelectedModule('');
+    setSelectedStatus('all');
+    setDateFrom('');
+    setDateTo('');
+    setPage(1);
+  };
 
   const handleExport = async () => {
     try {
@@ -182,98 +182,100 @@ export function ActivityLogPage() {
         ...(selectedStatus && selectedStatus !== 'all' && { status: selectedStatus }),
         ...(dateFrom && { dateFrom }),
         ...(dateTo && { dateTo }),
-      })
+      });
 
-      const response = await fetch(`/api/admin/activity-log/export?${params}`, { credentials: 'include' })
+      const response = await fetch(`/api/admin/activity-log/export?${params}`, {
+        credentials: 'include',
+      });
 
       if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `activity-logs-${new Date().toISOString().split('T')[0]}.csv`
-        a.click()
-        window.URL.revokeObjectURL(url)
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `activity-logs-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
 
         toast({
           title: 'ส่งออกสำเร็จ',
           description: 'ดาวน์โหลดบันทึกกิจกรรมเรียบร้อยแล้ว',
-        })
+        });
       } else {
-        throw new Error('Export failed')
+        throw new Error('Export failed');
       }
     } catch (error) {
-      console.error('Failed to export logs:', error)
+      console.error('Failed to export logs:', error);
       toast({
         title: 'ส่งออกไม่สำเร็จ',
         description: 'ไม่สามารถส่งออกข้อมูลได้',
         variant: 'destructive',
-      })
+      });
     }
-  }
+  };
 
   const toggleRow = (id: string) => {
     setExpandedRows((prev) => {
-      const newSet = new Set(prev)
+      const newSet = new Set(prev);
       if (newSet.has(id)) {
-        newSet.delete(id)
+        newSet.delete(id);
       } else {
-        newSet.add(id)
+        newSet.add(id);
       }
-      return newSet
-    })
-  }
+      return newSet;
+    });
+  };
 
   const getActionLabel = (action: string) => {
-    const found = ACTIONS.find((a) => a.value === action)
-    return found?.label || action
-  }
+    const found = ACTIONS.find((a) => a.value === action);
+    return found?.label || action;
+  };
 
   const getModuleLabel = (module: string) => {
-    const found = MODULES.find((m) => m.value === module)
-    return found?.label || module
-  }
+    const found = MODULES.find((m) => m.value === module);
+    return found?.label || module;
+  };
 
   const getStatusBadge = (status: string) => {
     if (status === 'success') {
       return (
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-          <CheckCircle className="h-3 w-3 mr-1" />
+        <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+          <CheckCircle className="mr-1 h-3 w-3" />
           สำเร็จ
         </span>
-      )
+      );
     }
     return (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-        <XCircle className="h-3 w-3 mr-1" />
+      <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800">
+        <XCircle className="mr-1 h-3 w-3" />
         ล้มเหลว
       </span>
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-            <Activity className="h-6 w-6 mr-2" />
+          <h1 className="flex items-center text-2xl font-bold text-gray-800">
+            <Activity className="mr-2 h-6 w-6" />
             บันทึกกิจกรรม
           </h1>
-          <p className="text-gray-500 mt-1">ติดตามและตรวจสอบกิจกรรมของผู้ใช้ในระบบ</p>
+          <p className="mt-1 text-gray-500">ติดตามและตรวจสอบกิจกรรมของผู้ใช้ในระบบ</p>
         </div>
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={autoRefresh ? 'bg-blue-50 border-blue-300' : ''}
+            className={autoRefresh ? 'border-blue-300 bg-blue-50' : ''}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`mr-2 h-4 w-4 ${autoRefresh ? 'animate-spin' : ''}`} />
             อัตโนมัติ ({autoRefresh ? '30 วินาที' : 'ปิด'})
           </Button>
           <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             ส่งออก CSV
           </Button>
         </div>
@@ -284,25 +286,25 @@ export function ActivityLogPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-base flex items-center">
-                <Filter className="h-4 w-4 mr-2" />
+              <CardTitle className="flex items-center text-base">
+                <Filter className="mr-2 h-4 w-4" />
                 ตัวกรอง
               </CardTitle>
               <CardDescription>กรองและค้นหาบันทึกกิจกรรม</CardDescription>
             </div>
             <Button variant="ghost" size="sm" onClick={handleClearFilters}>
-              <X className="h-4 w-4 mr-1" />
+              <X className="mr-1 h-4 w-4" />
               ล้างตัวกรอง
             </Button>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Search */}
             <div className="lg:col-span-2">
-              <label className="text-sm font-medium mb-1 block">ค้นหา</label>
+              <label className="mb-1 block text-sm font-medium">ค้นหา</label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                 <Input
                   placeholder="ค้นหาตาม Action, Module, ข้อความ..."
                   value={search}
@@ -315,7 +317,7 @@ export function ActivityLogPage() {
 
             {/* Action Filter */}
             <div>
-              <label className="text-sm font-medium mb-1 block">ประเภทการกระทำ</label>
+              <label className="mb-1 block text-sm font-medium">ประเภทการกระทำ</label>
               <Select value={selectedAction} onValueChange={setSelectedAction}>
                 <SelectTrigger>
                   <SelectValue placeholder="ทั้งหมด" />
@@ -333,7 +335,7 @@ export function ActivityLogPage() {
 
             {/* Module Filter */}
             <div>
-              <label className="text-sm font-medium mb-1 block">โมดูล</label>
+              <label className="mb-1 block text-sm font-medium">โมดูล</label>
               <Select value={selectedModule} onValueChange={setSelectedModule}>
                 <SelectTrigger>
                   <SelectValue placeholder="ทั้งหมด" />
@@ -351,7 +353,7 @@ export function ActivityLogPage() {
 
             {/* Status Filter */}
             <div>
-              <label className="text-sm font-medium mb-1 block">สถานะ</label>
+              <label className="mb-1 block text-sm font-medium">สถานะ</label>
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                 <SelectTrigger>
                   <SelectValue placeholder="ทั้งหมด" />
@@ -366,27 +368,19 @@ export function ActivityLogPage() {
 
             {/* Date Range */}
             <div>
-              <label className="text-sm font-medium mb-1 block">วันที่ตั้งแต่</label>
-              <Input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-              />
+              <label className="mb-1 block text-sm font-medium">วันที่ตั้งแต่</label>
+              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-1 block">วันที่ถึง</label>
-              <Input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-              />
+              <label className="mb-1 block text-sm font-medium">วันที่ถึง</label>
+              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
             </div>
 
             {/* Search Button */}
             <div className="flex items-end">
               <Button onClick={handleSearch} className="w-full">
-                <Search className="h-4 w-4 mr-2" />
+                <Search className="mr-2 h-4 w-4" />
                 ค้นหา
               </Button>
             </div>
@@ -400,7 +394,10 @@ export function ActivityLogPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base">รายการกิจกรรม ({total.toLocaleString()})</CardTitle>
-              <CardDescription>แสดงผล {Math.min((page - 1) * limit + 1, total)} - {Math.min(page * limit, total)} จาก {total.toLocaleString()} รายการ</CardDescription>
+              <CardDescription>
+                แสดงผล {Math.min((page - 1) * limit + 1, total)} - {Math.min(page * limit, total)}{' '}
+                จาก {total.toLocaleString()} รายการ
+              </CardDescription>
             </div>
             <div className="flex items-center space-x-2">
               <Select value={limit.toString()} onValueChange={(v) => setLimit(parseInt(v))}>
@@ -423,33 +420,31 @@ export function ActivityLogPage() {
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
             </div>
           ) : logs.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              ไม่พบบันทึกกิจกรรม
-            </div>
+            <div className="py-12 text-center text-gray-500">ไม่พบบันทึกกิจกรรม</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                       วันที่/เวลา
                     </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                       ผู้ใช้
                     </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                       การกระทำ
                     </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                       โมดูล
                     </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                       IP Address
                     </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                       สถานะ
                     </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                       รายละเอียด
                     </th>
                   </tr>
@@ -457,10 +452,10 @@ export function ActivityLogPage() {
                 <tbody className="divide-y divide-gray-200">
                   {logs.map((log) => (
                     <>
-                      <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="py-3 px-4">
+                      <tr key={log.id} className="transition-colors hover:bg-gray-50">
+                        <td className="px-4 py-3">
                           <div className="flex items-center text-sm">
-                            <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                            <Calendar className="mr-2 h-4 w-4 text-gray-400" />
                             <div>
                               <div className="font-medium text-gray-900">
                                 {formatThaiDate(log.createdAt)}
@@ -471,42 +466,36 @@ export function ActivityLogPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="px-4 py-3">
                           <div className="flex items-center text-sm">
-                            <User className="h-4 w-4 text-gray-400 mr-2" />
+                            <User className="mr-2 h-4 w-4 text-gray-400" />
                             <div>
                               <div className="font-medium text-gray-900">
                                 {log.user.name || '-'}
                               </div>
-                              <div className="text-xs text-gray-500">
-                                {log.user.email}
-                              </div>
-                              <div className="text-xs text-blue-600">
-                                {log.user.role}
-                              </div>
+                              <div className="text-xs text-gray-500">{log.user.email}</div>
+                              <div className="text-xs text-blue-600">{log.user.role}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                        <td className="px-4 py-3">
+                          <span className="inline-flex items-center rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
                             {getActionLabel(log.action)}
                           </span>
                         </td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                        <td className="px-4 py-3">
+                          <span className="inline-flex items-center rounded bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
                             {getModuleLabel(log.module)}
                           </span>
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="px-4 py-3">
                           <div className="flex items-center text-sm text-gray-600">
-                            <MapPin className="h-4 w-4 text-gray-400 mr-1" />
+                            <MapPin className="mr-1 h-4 w-4 text-gray-400" />
                             {log.ipAddress || '-'}
                           </div>
                         </td>
-                        <td className="py-3 px-4">
-                          {getStatusBadge(log.status)}
-                        </td>
-                        <td className="py-3 px-4">
+                        <td className="px-4 py-3">{getStatusBadge(log.status)}</td>
+                        <td className="px-4 py-3">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -523,26 +512,32 @@ export function ActivityLogPage() {
                       </tr>
                       {expandedRows.has(log.id) && (
                         <tr key={`${log.id}-details`}>
-                          <td colSpan={7} className="px-4 py-4 bg-gray-50">
+                          <td colSpan={7} className="bg-gray-50 px-4 py-4">
                             <div className="space-y-3">
                               {log.recordId && (
                                 <div>
-                                  <span className="text-xs font-semibold text-gray-600 uppercase">Record ID: </span>
-                                  <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                                  <span className="text-xs font-semibold uppercase text-gray-600">
+                                    Record ID:{' '}
+                                  </span>
+                                  <span className="rounded bg-gray-100 px-2 py-1 font-mono text-sm">
                                     {log.recordId}
                                   </span>
                                 </div>
                               )}
                               {log.errorMessage && (
                                 <div>
-                                  <span className="text-xs font-semibold text-red-600 uppercase">Error: </span>
-                                  <p className="text-sm text-red-700 mt-1">{log.errorMessage}</p>
+                                  <span className="text-xs font-semibold uppercase text-red-600">
+                                    Error:{' '}
+                                  </span>
+                                  <p className="mt-1 text-sm text-red-700">{log.errorMessage}</p>
                                 </div>
                               )}
                               {log.details && Object.keys(log.details).length > 0 && (
                                 <div>
-                                  <span className="text-xs font-semibold text-gray-600 uppercase">Details: </span>
-                                  <pre className="mt-2 text-xs bg-gray-900 text-green-400 p-3 rounded overflow-x-auto">
+                                  <span className="text-xs font-semibold uppercase text-gray-600">
+                                    Details:{' '}
+                                  </span>
+                                  <pre className="mt-2 overflow-x-auto rounded bg-gray-900 p-3 text-xs text-green-400">
                                     {JSON.stringify(log.details, null, 2)}
                                   </pre>
                                 </div>
@@ -560,7 +555,7 @@ export function ActivityLogPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t">
+            <div className="mt-4 flex items-center justify-between border-t pt-4">
               <div className="text-sm text-gray-600">
                 หน้า {page} จาก {totalPages}
               </div>
@@ -587,5 +582,5 @@ export function ActivityLogPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

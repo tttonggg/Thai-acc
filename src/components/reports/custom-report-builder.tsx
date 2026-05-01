@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   FileText,
   Download,
@@ -15,22 +15,22 @@ import {
   Columns,
   Calendar,
   FileOutput,
-  Sparkles
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+  Sparkles,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -38,9 +38,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 // Report configuration schema
 const customReportSchema = z.object({
@@ -72,9 +72,9 @@ const customReportSchema = z.object({
   filterAccountTo: z.string().optional(),
   outputFormat: z.enum(['preview', 'pdf', 'excel']).default('preview'),
   notes: z.string().optional(),
-})
+});
 
-type CustomReportForm = z.infer<typeof customReportSchema>
+type CustomReportForm = z.infer<typeof customReportSchema>;
 
 const reportTypes = [
   { value: 'TRIAL_BALANCE', label: 'งบทดลอง', icon: FileText },
@@ -83,7 +83,7 @@ const reportTypes = [
   { value: 'AGING_AR', label: 'รายงานลูกหนี้เก่า', icon: FileText },
   { value: 'AGING_AP', label: 'รายงานเจ้าหนี้เก่า', icon: FileText },
   { value: 'STOCK_REPORT', label: 'รายงานสต็อก', icon: FileText },
-]
+];
 
 const accountTypes = [
   { value: 'ASSET', label: 'สินทรัพย์ (Assets)' },
@@ -91,18 +91,19 @@ const accountTypes = [
   { value: 'EQUITY', label: 'ทุน (Equity)' },
   { value: 'REVENUE', label: 'รายได้ (Revenue)' },
   { value: 'EXPENSE', label: 'ค่าใช้จ่าย (Expenses)' },
-]
+];
 
 export function CustomReportBuilder() {
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
-  const [templateName, setTemplateName] = useState('')
-  const [reportData, setReportData] = useState<any>(null)
-  const { toast } = useToast()
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [reportData, setReportData] = useState<any>(null);
+  const { toast } = useToast();
 
   // Convert Satang to Baht for display
-  const formatBaht = (satang: number) => (satang / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const formatBaht = (satang: number) =>
+    (satang / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const form = useForm<CustomReportForm>({
     resolver: zodResolver(customReportSchema),
@@ -123,64 +124,68 @@ export function CustomReportBuilder() {
       columnVariance: false,
       outputFormat: 'preview',
     },
-  })
+  });
 
-  const selectedReportType = form.watch('reportType')
-  const outputFormat = form.watch('outputFormat')
+  const selectedReportType = form.watch('reportType');
+  const outputFormat = form.watch('outputFormat');
 
   // Update report name based on type
   useEffect(() => {
-    const reportType = reportTypes.find((r) => r.value === selectedReportType)
+    const reportType = reportTypes.find((r) => r.value === selectedReportType);
     if (reportType && !form.getValues('reportName')) {
-      form.setValue('reportName', `${reportType.label} - ${new Date().toLocaleDateString('th-TH')}`)
+      form.setValue(
+        'reportName',
+        `${reportType.label} - ${new Date().toLocaleDateString('th-TH')}`
+      );
     }
-  }, [selectedReportType, form])
+  }, [selectedReportType, form]);
 
   const handleGenerate = async (data: CustomReportForm) => {
-    setIsGenerating(true)
+    setIsGenerating(true);
     try {
-      const response = await fetch(`/api/reports/custom`, { credentials: 'include', 
+      const response = await fetch(`/api/reports/custom`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || 'ไม่สามารถสร้างรายงานได้')
+        throw new Error(result.error || 'ไม่สามารถสร้างรายงานได้');
       }
 
       if (data.outputFormat === 'preview') {
         // Show preview in dialog
-        setReportData(result.data)
+        setReportData(result.data);
       } else {
         // Download file
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `${data.reportName}.${data.outputFormat === 'pdf' ? 'pdf' : 'xlsx'}`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${data.reportName}.${data.outputFormat === 'pdf' ? 'pdf' : 'xlsx'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
 
         toast({
           title: 'ส่งออกรายงานสำเร็จ',
           description: `ดาวน์โหลด ${data.reportName} เรียบร้อยแล้ว`,
-        })
+        });
       }
     } catch (error: any) {
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: error.message || 'ไม่สามารถสร้างรายงานได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
 
   const handleSaveTemplate = async () => {
     if (!templateName.trim()) {
@@ -188,62 +193,59 @@ export function CustomReportBuilder() {
         title: 'กรุณาระบุชื่อเทมเพลต',
         description: 'ต้องระบุชื่อเทมเพลตก่อนบันทึก',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setIsSaving(true)
+    setIsSaving(true);
     try {
-      const config = form.getValues()
-      const response = await fetch(`/api/reports/templates`, { credentials: 'include', 
+      const config = form.getValues();
+      const response = await fetch(`/api/reports/templates`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: templateName,
           config,
         }),
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || 'ไม่สามารถบันทึกเทมเพลตได้')
+        throw new Error(result.error || 'ไม่สามารถบันทึกเทมเพลตได้');
       }
 
       toast({
         title: 'บันทึกเทมเพลตสำเร็จ',
         description: `บันทึก ${templateName} เรียบร้อยแล้ว`,
-      })
+      });
 
-      setShowTemplateDialog(false)
-      setTemplateName('')
+      setShowTemplateDialog(false);
+      setTemplateName('');
     } catch (error: any) {
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: error.message || 'ไม่สามารถบันทึกเทมเพลตได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-gray-800">
             <Sparkles className="h-6 w-6 text-blue-600" />
             สร้างรายงานแบบกำหนดเอง
           </h1>
-          <p className="text-gray-500 mt-1">สร้างรายงานตามความต้องการของคุณ</p>
+          <p className="mt-1 text-gray-500">สร้างรายงานตามความต้องการของคุณ</p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setShowTemplateDialog(true)}
-          className="gap-2"
-        >
+        <Button variant="outline" onClick={() => setShowTemplateDialog(true)} className="gap-2">
           <Save className="h-4 w-4" />
           บันทึกเป็นเทมเพลต
         </Button>
@@ -259,23 +261,21 @@ export function CustomReportBuilder() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
               {reportTypes.map((type) => {
-                const Icon = type.icon
+                const Icon = type.icon;
                 return (
                   <Card
                     key={type.value}
                     className={`cursor-pointer transition-all hover:shadow-md ${
-                      selectedReportType === type.value
-                        ? 'ring-2 ring-blue-600 bg-blue-50'
-                        : ''
+                      selectedReportType === type.value ? 'bg-blue-50 ring-2 ring-blue-600' : ''
                     }`}
                     onClick={() => form.setValue('reportType', type.value as any)}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${
                             selectedReportType === type.value
                               ? 'bg-blue-600 text-white'
                               : 'bg-gray-100 text-gray-600'
@@ -284,7 +284,7 @@ export function CustomReportBuilder() {
                           <Icon className="h-5 w-5" />
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-sm">{type.label}</p>
+                          <p className="text-sm font-medium">{type.label}</p>
                           <p className="text-xs text-gray-500">
                             {type.value.replace(/_/g, ' ').toLowerCase()}
                           </p>
@@ -292,7 +292,7 @@ export function CustomReportBuilder() {
                       </div>
                     </CardContent>
                   </Card>
-                )
+                );
               })}
             </div>
 
@@ -305,7 +305,7 @@ export function CustomReportBuilder() {
                 className="mt-1"
               />
               {form.formState.errors.reportName && (
-                <p className="text-sm text-red-600 mt-1">
+                <p className="mt-1 text-sm text-red-600">
                   {form.formState.errors.reportName.message}
                 </p>
               )}
@@ -323,29 +323,19 @@ export function CustomReportBuilder() {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Date Range */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="dateFrom">จากวันที่</Label>
-                <Input
-                  id="dateFrom"
-                  type="date"
-                  {...form.register('dateFrom')}
-                  className="mt-1"
-                />
+                <Input id="dateFrom" type="date" {...form.register('dateFrom')} className="mt-1" />
               </div>
               <div>
                 <Label htmlFor="dateTo">ถึงวันที่</Label>
-                <Input
-                  id="dateTo"
-                  type="date"
-                  {...form.register('dateTo')}
-                  className="mt-1"
-                />
+                <Input id="dateTo" type="date" {...form.register('dateTo')} className="mt-1" />
               </div>
             </div>
 
             {/* Checkboxes */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="comparePrevious"
@@ -402,7 +392,7 @@ export function CustomReportBuilder() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="columnAccountCode"
@@ -459,9 +449,7 @@ export function CustomReportBuilder() {
                 <Checkbox
                   id="columnDebits"
                   checked={form.watch('columnDebits')}
-                  onCheckedChange={(checked) =>
-                    form.setValue('columnDebits', checked as boolean)
-                  }
+                  onCheckedChange={(checked) => form.setValue('columnDebits', checked as boolean)}
                 />
                 <Label htmlFor="columnDebits" className="cursor-pointer">
                   เดบิต
@@ -472,9 +460,7 @@ export function CustomReportBuilder() {
                 <Checkbox
                   id="columnCredits"
                   checked={form.watch('columnCredits')}
-                  onCheckedChange={(checked) =>
-                    form.setValue('columnCredits', checked as boolean)
-                  }
+                  onCheckedChange={(checked) => form.setValue('columnCredits', checked as boolean)}
                 />
                 <Label htmlFor="columnCredits" className="cursor-pointer">
                   เครดิต
@@ -498,9 +484,7 @@ export function CustomReportBuilder() {
                 <Checkbox
                   id="columnBudget"
                   checked={form.watch('columnBudget')}
-                  onCheckedChange={(checked) =>
-                    form.setValue('columnBudget', checked as boolean)
-                  }
+                  onCheckedChange={(checked) => form.setValue('columnBudget', checked as boolean)}
                 />
                 <Label htmlFor="columnBudget" className="cursor-pointer">
                   งบประมาณ
@@ -511,9 +495,7 @@ export function CustomReportBuilder() {
                 <Checkbox
                   id="columnVariance"
                   checked={form.watch('columnVariance')}
-                  onCheckedChange={(checked) =>
-                    form.setValue('columnVariance', checked as boolean)
-                  }
+                  onCheckedChange={(checked) => form.setValue('columnVariance', checked as boolean)}
                 />
                 <Label htmlFor="columnVariance" className="cursor-pointer">
                   ผลต่าง
@@ -554,7 +536,7 @@ export function CustomReportBuilder() {
             </div>
 
             {/* Account Range */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="filterAccountFrom">จากรหัสบัญชี</Label>
                 <Input
@@ -600,7 +582,7 @@ export function CustomReportBuilder() {
           <CardContent>
             <div className="flex flex-wrap gap-4">
               <div
-                className={`flex items-center space-x-2 p-4 border rounded-lg cursor-pointer transition-all ${
+                className={`flex cursor-pointer items-center space-x-2 rounded-lg border p-4 transition-all ${
                   outputFormat === 'preview'
                     ? 'border-blue-600 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300'
@@ -619,7 +601,7 @@ export function CustomReportBuilder() {
               </div>
 
               <div
-                className={`flex items-center space-x-2 p-4 border rounded-lg cursor-pointer transition-all ${
+                className={`flex cursor-pointer items-center space-x-2 rounded-lg border p-4 transition-all ${
                   outputFormat === 'pdf'
                     ? 'border-blue-600 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300'
@@ -638,7 +620,7 @@ export function CustomReportBuilder() {
               </div>
 
               <div
-                className={`flex items-center space-x-2 p-4 border rounded-lg cursor-pointer transition-all ${
+                className={`flex cursor-pointer items-center space-x-2 rounded-lg border p-4 transition-all ${
                   outputFormat === 'excel'
                     ? 'border-blue-600 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300'
@@ -669,12 +651,12 @@ export function CustomReportBuilder() {
           >
             {isGenerating ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 กำลังสร้างรายงาน...
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4 mr-2" />
+                <Sparkles className="mr-2 h-4 w-4" />
                 สร้างรายงาน
               </>
             )}
@@ -687,9 +669,7 @@ export function CustomReportBuilder() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>บันทึกเป็นเทมเพลต</DialogTitle>
-            <DialogDescription>
-              บันทึกการตั้งค่ารายงานนี้เพื่อใช้งานในภายหลัง
-            </DialogDescription>
+            <DialogDescription>บันทึกการตั้งค่ารายงานนี้เพื่อใช้งานในภายหลัง</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -707,13 +687,20 @@ export function CustomReportBuilder() {
             <div className="space-y-2">
               <Label>การตั้งค่าที่จะบันทึก</Label>
               <div className="space-y-1 text-sm text-gray-600">
-                <p>• ประเภทรายงาน: {reportTypes.find((r) => r.value === selectedReportType)?.label}</p>
-                <p>• คอลัมน์ที่เลือก: {[
-                  form.watch('columnAccountCode') && 'รหัสบัญชี',
-                  form.watch('columnAccountName') && 'ชื่อบัญชี',
-                  form.watch('columnDebits') && 'เดบิต',
-                  form.watch('columnCredits') && 'เครดิต',
-                ].filter(Boolean).join(', ')}</p>
+                <p>
+                  • ประเภทรายงาน: {reportTypes.find((r) => r.value === selectedReportType)?.label}
+                </p>
+                <p>
+                  • คอลัมน์ที่เลือก:{' '}
+                  {[
+                    form.watch('columnAccountCode') && 'รหัสบัญชี',
+                    form.watch('columnAccountName') && 'ชื่อบัญชี',
+                    form.watch('columnDebits') && 'เดบิต',
+                    form.watch('columnCredits') && 'เครดิต',
+                  ]
+                    .filter(Boolean)
+                    .join(', ')}
+                </p>
               </div>
             </div>
           </div>
@@ -725,12 +712,12 @@ export function CustomReportBuilder() {
             <Button onClick={handleSaveTemplate} disabled={isSaving}>
               {isSaving ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   กำลังบันทึก...
                 </>
               ) : (
                 <>
-                  <Save className="h-4 w-4 mr-2" />
+                  <Save className="mr-2 h-4 w-4" />
                   บันทึกเทมเพลต
                 </>
               )}
@@ -742,7 +729,7 @@ export function CustomReportBuilder() {
       {/* Report Preview Dialog */}
       {reportData && (
         <Dialog open={!!reportData} onOpenChange={() => setReportData(null)}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+          <DialogContent className="max-h-[80vh] max-w-4xl overflow-auto">
             <DialogHeader>
               <DialogTitle>{form.getValues('reportName')}</DialogTitle>
             </DialogHeader>
@@ -754,7 +741,10 @@ export function CustomReportBuilder() {
                   <CardContent className="pt-4">
                     <p className="text-sm text-gray-500">รวมเดบิต</p>
                     <p className="text-2xl font-bold text-blue-600">
-                      ฿{reportData.totals?.debit !== undefined ? formatBaht(reportData.totals.debit) : '0.00'}
+                      ฿
+                      {reportData.totals?.debit !== undefined
+                        ? formatBaht(reportData.totals.debit)
+                        : '0.00'}
                     </p>
                   </CardContent>
                 </Card>
@@ -762,7 +752,10 @@ export function CustomReportBuilder() {
                   <CardContent className="pt-4">
                     <p className="text-sm text-gray-500">รวมเครดิต</p>
                     <p className="text-2xl font-bold text-green-600">
-                      ฿{reportData.totals?.credit !== undefined ? formatBaht(reportData.totals.credit) : '0.00'}
+                      ฿
+                      {reportData.totals?.credit !== undefined
+                        ? formatBaht(reportData.totals.credit)
+                        : '0.00'}
                     </p>
                   </CardContent>
                 </Card>
@@ -786,16 +779,16 @@ export function CustomReportBuilder() {
                   <thead>
                     <tr className="border-b bg-gray-50">
                       {form.watch('columnAccountCode') && (
-                        <th className="text-left py-2 px-4">รหัสบัญชี</th>
+                        <th className="px-4 py-2 text-left">รหัสบัญชี</th>
                       )}
                       {form.watch('columnAccountName') && (
-                        <th className="text-left py-2 px-4">ชื่อบัญชี</th>
+                        <th className="px-4 py-2 text-left">ชื่อบัญชี</th>
                       )}
                       {form.watch('columnDebits') && (
-                        <th className="text-right py-2 px-4">เดบิต</th>
+                        <th className="px-4 py-2 text-right">เดบิต</th>
                       )}
                       {form.watch('columnCredits') && (
-                        <th className="text-right py-2 px-4">เครดิต</th>
+                        <th className="px-4 py-2 text-right">เครดิต</th>
                       )}
                     </tr>
                   </thead>
@@ -803,18 +796,18 @@ export function CustomReportBuilder() {
                     {reportData.accounts?.map((account: any, index: number) => (
                       <tr key={index} className="border-b hover:bg-gray-50">
                         {form.watch('columnAccountCode') && (
-                          <td className="py-2 px-4 font-mono">{account.code}</td>
+                          <td className="px-4 py-2 font-mono">{account.code}</td>
                         )}
                         {form.watch('columnAccountName') && (
-                          <td className="py-2 px-4">{account.name}</td>
+                          <td className="px-4 py-2">{account.name}</td>
                         )}
                         {form.watch('columnDebits') && (
-                          <td className="py-2 px-4 text-right text-blue-600">
+                          <td className="px-4 py-2 text-right text-blue-600">
                             {account.debit > 0 ? `฿${formatBaht(account.debit)}` : '-'}
                           </td>
                         )}
                         {form.watch('columnCredits') && (
-                          <td className="py-2 px-4 text-right text-green-600">
+                          <td className="px-4 py-2 text-right text-green-600">
                             {account.credit > 0 ? `฿${formatBaht(account.credit)}` : '-'}
                           </td>
                         )}
@@ -829,12 +822,14 @@ export function CustomReportBuilder() {
               <Button variant="outline" onClick={() => setReportData(null)}>
                 ปิด
               </Button>
-              <Button onClick={() => {
-                const data = form.getValues()
-                form.setValue('outputFormat', 'pdf')
-                handleGenerate(data)
-              }}>
-                <Download className="h-4 w-4 mr-2" />
+              <Button
+                onClick={() => {
+                  const data = form.getValues();
+                  form.setValue('outputFormat', 'pdf');
+                  handleGenerate(data);
+                }}
+              >
+                <Download className="mr-2 h-4 w-4" />
                 ดาวน์โหลด PDF
               </Button>
             </DialogFooter>
@@ -842,5 +837,5 @@ export function CustomReportBuilder() {
         </Dialog>
       )}
     </div>
-  )
+  );
 }

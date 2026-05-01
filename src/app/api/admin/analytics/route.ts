@@ -1,7 +1,7 @@
 /**
  * API Analytics Endpoint
  * Phase D: API Mastery - API Analytics
- * 
+ *
  * Endpoints:
  * - GET /api/admin/analytics - Get API metrics and analytics
  */
@@ -22,10 +22,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -78,10 +75,7 @@ export async function GET(req: NextRequest) {
       }
 
       default:
-        return NextResponse.json(
-          { error: 'Invalid analytics type' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid analytics type' }, { status: 400 });
     }
   } catch (error: any) {
     console.error('Error fetching analytics:', error);
@@ -95,10 +89,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (error?.statusCode === 403) {
-      return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์เข้าถึง' },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
 
     return NextResponse.json(

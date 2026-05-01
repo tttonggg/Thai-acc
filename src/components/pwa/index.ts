@@ -4,4 +4,4 @@ export {
   InstallPrompt,
   OfflineIndicator,
   UpdateNotification,
-} from './pwa-provider'
+} from './pwa-provider';

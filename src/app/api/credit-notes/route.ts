@@ -1,15 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, apiResponse, apiError, unauthorizedError, forbiddenError, generateDocNumber } from '@/lib/api-utils'
-import { db } from '@/lib/db'
-import { z } from 'zod'
-import { bahtToSatang, satangToBaht } from '@/lib/currency'
-import { checkPeriodStatus } from '@/lib/period-service'
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  requireAuth,
+  apiResponse,
+  apiError,
+  unauthorizedError,
+  forbiddenError,
+  generateDocNumber,
+} from '@/lib/api-utils';
+import { db } from '@/lib/db';
+import { z } from 'zod';
+import { bahtToSatang, satangToBaht } from '@/lib/currency';
+import { checkPeriodStatus } from '@/lib/period-service';
 
 // Wrapper that properly handles auth with request context
 async function requireAuthWithRequest(request: NextRequest): Promise<any> {
   // Import the requireAuth that accepts request from api-auth
-  const { requireAuth: requireAuthWithReq } = await import('@/lib/api-auth')
-  return requireAuthWithReq(request)
+  const { requireAuth: requireAuthWithReq } = await import('@/lib/api-auth');
+  return requireAuthWithReq(request);
 }
 
 // Validation schema for credit note line
@@ -24,7 +31,7 @@ const creditNoteLineSchema = z.object({
   vatRate: z.number().min(0).max(100).default(7),
   vatAmount: z.number().min(0).default(0),
   returnStock: z.boolean().default(false),
-})
+});
 
 // Validation schema for credit note
 const creditNoteSchema = z.object({
@@ -38,38 +45,38 @@ const creditNoteSchema = z.object({
   totalAmount: z.number().min(0).default(0),
   notes: z.string().optional(),
   lines: z.array(creditNoteLineSchema).min(1, 'ต้องมีอย่างน้อย 1 รายการ'),
-})
+});
 
 // GET /api/credit-notes - List credit notes
 export async function GET(request: NextRequest) {
   try {
-    await requireAuthWithRequest(request)
+    await requireAuthWithRequest(request);
 
-    const searchParams = request.nextUrl.searchParams
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = Math.min(100, parseInt(searchParams.get('limit') || '20'))
-    const status = searchParams.get('status')
-    const customerId = searchParams.get('customerId')
-    const startDate = searchParams.get('startDate')
-    const endDate = searchParams.get('endDate')
-    const search = searchParams.get('search')
+    const searchParams = request.nextUrl.searchParams;
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = Math.min(100, parseInt(searchParams.get('limit') || '20'));
+    const status = searchParams.get('status');
+    const customerId = searchParams.get('customerId');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const search = searchParams.get('search');
 
-    const skip = (page - 1) * limit
+    const skip = (page - 1) * limit;
 
-    const where: any = {}
+    const where: any = {};
 
     if (status) {
-      where.status = status
+      where.status = status;
     }
 
     if (customerId) {
-      where.customerId = customerId
+      where.customerId = customerId;
     }
 
     if (startDate || endDate) {
-      where.creditNoteDate = {}
-      if (startDate) where.creditNoteDate.gte = new Date(startDate)
-      if (endDate) where.creditNoteDate.lte = new Date(endDate)
+      where.creditNoteDate = {};
+      if (startDate) where.creditNoteDate.gte = new Date(startDate);
+      if (endDate) where.creditNoteDate.lte = new Date(endDate);
     }
 
     if (search) {
@@ -77,7 +84,7 @@ export async function GET(request: NextRequest) {
         { creditNoteNo: { contains: search } },
         { customer: { name: { contains: search } } },
         { notes: { contains: search } },
-      ]
+      ];
     }
 
     // Fetch credit notes without customer first to avoid null relationship errors
@@ -86,7 +93,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           invoice: {
-            select: { id: true, invoiceNo: true }
+            select: { id: true, invoiceNo: true },
           },
         },
         orderBy: { creditNoteDate: 'desc' },
@@ -94,30 +101,33 @@ export async function GET(request: NextRequest) {
         take: limit,
       }),
       db.creditNote.count({ where }),
-    ])
+    ]);
 
     // Fetch customers separately for credit notes that have them
-    const customerIds = creditNotes.map((cn: any) => cn.customerId).filter((id: string) => id != null)
-    const customers = customerIds.length > 0
-      ? await db.customer.findMany({
-          where: {
-            id: { in: customerIds }
-          },
-          select: { id: true, code: true, name: true, taxId: true }
-        })
-      : []
+    const customerIds = creditNotes
+      .map((cn: any) => cn.customerId)
+      .filter((id: string) => id != null);
+    const customers =
+      customerIds.length > 0
+        ? await db.customer.findMany({
+            where: {
+              id: { in: customerIds },
+            },
+            select: { id: true, code: true, name: true, taxId: true },
+          })
+        : [];
 
     // Create a map for quick customer lookup
-    const customerMap = new Map(customers.map((c: any) => [c.id, c]))
+    const customerMap = new Map(customers.map((c: any) => [c.id, c]));
 
     // Attach customers to credit notes
     const creditNotesWithCustomers = creditNotes.map((cn: any) => ({
       ...cn,
-      customer: cn.customerId ? customerMap.get(cn.customerId) || null : null
-    }))
+      customer: cn.customerId ? customerMap.get(cn.customerId) || null : null,
+    }));
 
     // Filter out credit notes with null customers (data integrity issue)
-    const validCreditNotes = creditNotesWithCustomers.filter((cn: any) => cn.customer !== null)
+    const validCreditNotes = creditNotesWithCustomers.filter((cn: any) => cn.customer !== null);
 
     // Transform data to match frontend interface (flatten customer.name to customerName)
     const transformedCreditNotes = validCreditNotes.map((cn: any) => {
@@ -133,9 +143,9 @@ export async function GET(request: NextRequest) {
           creditNoteDate: cn.creditNoteDate ? cn.creditNoteDate.toISOString() : '',
           createdAt: cn.createdAt ? cn.createdAt.toISOString() : '',
           updatedAt: cn.updatedAt ? cn.updatedAt.toISOString() : '',
-        }
+        };
       } catch (err) {
-        console.error('Error transforming credit note:', cn.id, err)
+        console.error('Error transforming credit note:', cn.id, err);
         return {
           ...cn,
           customerName: '',
@@ -144,9 +154,9 @@ export async function GET(request: NextRequest) {
           creditNoteDate: '',
           createdAt: '',
           updatedAt: '',
-        }
+        };
       }
-    })
+    });
 
     return Response.json({
       success: true,
@@ -157,98 +167,96 @@ export async function GET(request: NextRequest) {
         total: validCreditNotes.length, // Use actual count after filtering
         totalPages: Math.ceil(validCreditNotes.length / limit),
       },
-    })
+    });
   } catch (error) {
-    console.error('Credit Notes API Error:', error)
+    console.error('Credit Notes API Error:', error);
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
-      return unauthorizedError()
+      return unauthorizedError();
     }
     if (error instanceof Error) {
-      console.error('Error message:', error.message)
-      console.error('Error stack:', error.stack)
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
     }
-    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลใบลดหนี้')
+    return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลใบลดหนี้');
   }
 }
 
 // POST /api/credit-notes - Create credit note
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuthWithRequest(request)
+    const user = await requireAuthWithRequest(request);
 
     if (user.role === 'VIEWER') {
-      return apiError('ไม่มีสิทธิ์สร้างใบลดหนี้', 403)
+      return apiError('ไม่มีสิทธิ์สร้างใบลดหนี้', 403);
     }
 
-    const body = await request.json()
-    const validatedData = creditNoteSchema.parse(body)
+    const body = await request.json();
+    const validatedData = creditNoteSchema.parse(body);
 
     // Verify customer exists
     const customer = await db.customer.findUnique({
-      where: { id: validatedData.customerId }
-    })
+      where: { id: validatedData.customerId },
+    });
 
     if (!customer) {
-      return apiError('ไม่พบลูกค้า')
+      return apiError('ไม่พบลูกค้า');
     }
 
     // If invoice is provided, verify it exists and belongs to customer
     if (validatedData.invoiceId) {
       const invoice = await db.invoice.findUnique({
-        where: { id: validatedData.invoiceId }
-      })
+        where: { id: validatedData.invoiceId },
+      });
 
       if (!invoice) {
-        return apiError('ไม่พบใบกำกับภาษี')
+        return apiError('ไม่พบใบกำกับภาษี');
       }
 
       if (invoice.customerId !== validatedData.customerId) {
-        return apiError('ใบกำกับภาษีไม่ตรงกับลูกค้า')
+        return apiError('ใบกำกับภาษีไม่ตรงกับลูกค้า');
       }
     }
 
     // B1. Period Locking - Check if period is open for credit note date
-    const periodCheck = await checkPeriodStatus(validatedData.creditNoteDate)
+    const periodCheck = await checkPeriodStatus(validatedData.creditNoteDate);
     if (!periodCheck.isValid) {
-      return apiError(periodCheck.error || "ไม่สามารถออกใบลดหนี้ในงวดที่ปิดแล้ว")
+      return apiError(periodCheck.error || 'ไม่สามารถออกใบลดหนี้ในงวดที่ปิดแล้ว');
     }
 
     // Generate credit note number
-    const creditNoteNo = await generateDocNumber('CREDIT_NOTE', 'CN')
+    const creditNoteNo = await generateDocNumber('CREDIT_NOTE', 'CN');
 
     // Create credit note with status ISSUED (no draft for credit notes in Thai accounting)
     const creditNote = await db.$transaction(async (tx) => {
       // Get system settings for configurable account IDs
-      const settings = await tx.systemSettings.findFirst()
+      const settings = await tx.systemSettings.findFirst();
 
       // Look up required accounts by code
-      const [
-        salesReturnsAccount,
-        vatOutputAccount,
-        arAccount
-      ] = await Promise.all([
+      const [salesReturnsAccount, vatOutputAccount, arAccount] = await Promise.all([
         // Sales Returns and Allowances (4xxx) - Default to '4130'
         tx.chartOfAccount.findFirst({
-          where: { code: settings?.salesReturnsAccountId || '4130' }
+          where: { code: settings?.salesReturnsAccountId || '4130' },
         }),
         // VAT Output (2xxx) - Default to '2132'
         tx.chartOfAccount.findFirst({
-          where: { code: settings?.vatOutputAccountId || '2132' }
+          where: { code: settings?.vatOutputAccountId || '2132' },
         }),
         // Accounts Receivable (1xxx) - Default to '1121'
         tx.chartOfAccount.findFirst({
-          where: { code: settings?.arAccountId || '1121' }
-        })
-      ])
+          where: { code: settings?.arAccountId || '1121' },
+        }),
+      ]);
 
       if (!salesReturnsAccount) {
-        throw new Error(`Sales returns account not found: ${settings?.salesReturnsAccountId || '4130'}`)
+        throw new Error(
+          `Sales returns account not found: ${settings?.salesReturnsAccountId || '4130'}`
+        );
       }
       if (!vatOutputAccount) {
-        throw new Error(`VAT output account not found: ${settings?.vatOutputAccountId || '2132'}`)
+        throw new Error(`VAT output account not found: ${settings?.vatOutputAccountId || '2132'}`);
       }
       if (!arAccount) {
-        throw new Error(`AR account not found: ${settings?.arAccountId || '1121'}`)
+        throw new Error(`AR account not found: ${settings?.arAccountId || '1121'}`);
       }
 
       const note = await tx.creditNote.create({
@@ -269,7 +277,7 @@ export async function POST(request: NextRequest) {
           customer: true,
           invoice: true,
         },
-      })
+      });
 
       // Credit Note Accounting Entry:
       // Debit Sales Returns (4xxx) - Reverse revenue
@@ -312,27 +320,27 @@ export async function POST(request: NextRequest) {
             ],
           },
         },
-      })
+      });
 
       // Update credit note with journal entry ID
       await tx.creditNote.update({
         where: { id: note.id },
-        data: { journalEntryId: journalEntry.id }
-      })
+        data: { journalEntryId: journalEntry.id },
+      });
 
-      return note
-    })
+      return note;
+    });
 
     // ✅ OPTIMIZED: Handle stock returns in batch (outside transaction)
     // Filter lines that need stock return
-    const returnLines = validatedData.lines.filter(line => line.returnStock && line.productId)
+    const returnLines = validatedData.lines.filter((line) => line.returnStock && line.productId);
 
     if (returnLines.length > 0) {
       try {
         // Get or create default warehouse ONCE (not in loop)
         let warehouse = await db.warehouse.findFirst({
-          where: { type: 'MAIN', isActive: true }
-        })
+          where: { type: 'MAIN', isActive: true },
+        });
 
         if (!warehouse) {
           warehouse = await db.warehouse.create({
@@ -341,32 +349,34 @@ export async function POST(request: NextRequest) {
               name: 'คลังสินค้าหลัก',
               type: 'MAIN',
               location: 'หลัก',
-              isActive: true
-            }
-          })
+              isActive: true,
+            },
+          });
         }
 
         // Batch create all stock movements in parallel
-        await Promise.all(returnLines.map(line =>
-          db.stockMovement.create({
-            data: {
-              productId: line.productId!,
-              warehouseId: warehouse.id,
-              type: 'RETURN',
-              quantity: line.quantity,
-              unitCost: line.unitPrice,
-              totalCost: line.quantity * line.unitPrice,
-              date: validatedData.creditNoteDate,
-              referenceId: creditNote.id,
-              referenceNo: creditNoteNo,
-              notes: `คืนสินค้าจากใบลดหนี้ ${creditNoteNo}`,
-              sourceChannel: 'CREDIT_NOTE',
-            }
-          })
-        ))
+        await Promise.all(
+          returnLines.map((line) =>
+            db.stockMovement.create({
+              data: {
+                productId: line.productId!,
+                warehouseId: warehouse.id,
+                type: 'RETURN',
+                quantity: line.quantity,
+                unitCost: line.unitPrice,
+                totalCost: line.quantity * line.unitPrice,
+                date: validatedData.creditNoteDate,
+                referenceId: creditNote.id,
+                referenceNo: creditNoteNo,
+                notes: `คืนสินค้าจากใบลดหนี้ ${creditNoteNo}`,
+                sourceChannel: 'CREDIT_NOTE',
+              },
+            })
+          )
+        );
       } catch (stockError) {
         // Log but don't fail the credit note
-        console.error('Stock return error:', stockError)
+        console.error('Stock return error:', stockError);
       }
     }
 
@@ -377,7 +387,7 @@ export async function POST(request: NextRequest) {
         customer: true,
         invoice: true,
       },
-    })
+    });
 
     // Convert Satang to Baht for response
     const creditNoteInBaht = {
@@ -385,11 +395,11 @@ export async function POST(request: NextRequest) {
       subtotal: satangToBaht(completeCreditNote.subtotal),
       vatAmount: satangToBaht(completeCreditNote.vatAmount),
       totalAmount: satangToBaht(completeCreditNote.totalAmount),
-    }
+    };
 
-    return apiResponse({ success: true, data: creditNoteInBaht }, 201)
+    return apiResponse({ success: true, data: creditNoteInBaht }, 201);
   } catch (error) {
-    console.error('Credit Note Creation Error:', error)
-    return unauthorizedError()
+    console.error('Credit Note Creation Error:', error);
+    return unauthorizedError();
   }
 }

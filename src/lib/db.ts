@@ -4,21 +4,24 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const prismaInstance = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development'
-    ? [
-        {
-          emit: 'event',
-          level: 'query',
-        },
-        'error',
-        'warn',
-      ]
-    : ['error'],
+const prismaInstance =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log:
+      process.env.NODE_ENV === 'development'
+        ? [
+            {
+              emit: 'event',
+              level: 'query',
+            },
+            'error',
+            'warn',
+          ]
+        : ['error'],
 
-  // Enable query logging for PostgreSQL performance monitoring
-  // In production, only log slow queries
-});
+    // Enable query logging for PostgreSQL performance monitoring
+    // In production, only log slow queries
+  });
 
 // Track query performance in development
 if (process.env.NODE_ENV === 'development') {

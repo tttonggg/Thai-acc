@@ -1,47 +1,47 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog'
-import { Switch } from '@/components/ui/switch'
-import { useToast } from '@/hooks/use-toast'
-import { Loader2 } from 'lucide-react'
+} from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 interface Account {
-  id: string
-  code: string
-  name: string
-  nameEn?: string | null
-  type: string
-  level: number
-  parentId: string | null
-  isDetail: boolean
-  isActive: boolean
-  notes?: string | null
+  id: string;
+  code: string;
+  name: string;
+  nameEn?: string | null;
+  type: string;
+  level: number;
+  parentId: string | null;
+  isDetail: boolean;
+  isActive: boolean;
+  notes?: string | null;
 }
 
 interface AccountEditDialogProps {
-  account: Account | null
-  parentAccount: Account | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSuccess: () => void
+  account: Account | null;
+  parentAccount: Account | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
 }
 
 const accountTypeLabels = {
@@ -50,7 +50,7 @@ const accountTypeLabels = {
   EQUITY: 'ทุน',
   REVENUE: 'รายได้',
   EXPENSE: 'ค่าใช้จ่าย',
-}
+};
 
 export function AccountEditDialog({
   account,
@@ -59,7 +59,7 @@ export function AccountEditDialog({
   onOpenChange,
   onSuccess,
 }: AccountEditDialogProps) {
-  const { toast } = useToast()
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     code: '',
     name: '',
@@ -69,37 +69,37 @@ export function AccountEditDialog({
     isDetail: true,
     isActive: true,
     notes: '',
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [accounts, setAccounts] = useState<Account[]>([])
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [accounts, setAccounts] = useState<Account[]>([]);
 
-  const isEditMode = !!account
-  const title = isEditMode ? 'แก้ไขบัญชี' : 'เพิ่มบัญชีใหม่'
+  const isEditMode = !!account;
+  const title = isEditMode ? 'แก้ไขบัญชี' : 'เพิ่มบัญชีใหม่';
   const description = isEditMode
     ? 'แก้ไขข้อมูลบัญชีในระบบ'
     : parentAccount
-    ? `เพิ่มบัญชีย่อยใต้ ${parentAccount.code} - ${parentAccount.name}`
-    : 'เพิ่มบัญชีใหม่ในระบบ'
+      ? `เพิ่มบัญชีย่อยใต้ ${parentAccount.code} - ${parentAccount.name}`
+      : 'เพิ่มบัญชีใหม่ในระบบ';
 
   // Fetch accounts for parent selection
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const response = await fetch(`/api/accounts`, { credentials: 'include' })
+        const response = await fetch(`/api/accounts`, { credentials: 'include' });
         if (response.ok) {
-          const data = await response.json()
-          setAccounts(data)
+          const data = await response.json();
+          setAccounts(data);
         }
       } catch (error) {
-        console.error('Failed to fetch accounts:', error)
+        console.error('Failed to fetch accounts:', error);
       }
-    }
+    };
 
     if (open) {
-      fetchAccounts()
+      fetchAccounts();
     }
-  }, [open])
+  }, [open]);
 
   // Pre-populate form when account data changes
   useEffect(() => {
@@ -113,10 +113,10 @@ export function AccountEditDialog({
         isDetail: account.isDetail ?? true,
         isActive: account.isActive ?? true,
         notes: account.notes || '',
-      })
+      });
     } else if (parentAccount) {
       // Set default values for new child account
-      const childCode = `${parentAccount.code}1`
+      const childCode = `${parentAccount.code}1`;
       setFormData({
         code: childCode,
         name: '',
@@ -126,7 +126,7 @@ export function AccountEditDialog({
         isDetail: parentAccount.level >= 3, // Auto-set based on parent level
         isActive: true,
         notes: '',
-      })
+      });
     } else {
       // Reset form for new top-level account
       setFormData({
@@ -138,49 +138,47 @@ export function AccountEditDialog({
         isDetail: true,
         isActive: true,
         notes: '',
-      })
+      });
     }
-    setErrors({})
-  }, [account, parentAccount, open])
+    setErrors({});
+  }, [account, parentAccount, open]);
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     // Code required
     if (!formData.code.trim()) {
-      newErrors.code = 'กรุณาระบุรหัสบัญชี'
+      newErrors.code = 'กรุณาระบุรหัสบัญชี';
     }
 
     // Name required
     if (!formData.name.trim()) {
-      newErrors.name = 'กรุณาระบุชื่อบัญชี'
+      newErrors.name = 'กรุณาระบุชื่อบัญชี';
     }
 
     // Type required
     if (!formData.type) {
-      newErrors.type = 'กรุณาระบุประเภทบัญชี'
+      newErrors.type = 'กรุณาระบุประเภทบัญชี';
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Validate form
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
-      const url = isEditMode
-        ? `/api/accounts/${account?.id}`
-        : '/api/accounts'
+      const url = isEditMode ? `/api/accounts/${account?.id}` : '/api/accounts';
 
-      const method = isEditMode ? 'PUT' : 'POST'
+      const method = isEditMode ? 'PUT' : 'POST';
 
       const payload = isEditMode
         ? {
@@ -197,11 +195,12 @@ export function AccountEditDialog({
             nameEn: formData.nameEn || null,
             type: formData.type,
             level: formData.code.length,
-            parentId: (formData.parentId && formData.parentId !== '__none__') ? formData.parentId : null,
+            parentId:
+              formData.parentId && formData.parentId !== '__none__' ? formData.parentId : null,
             isDetail: formData.isDetail,
             isActive: true,
             notes: formData.notes || null,
-          }
+          };
 
       const response = await fetch(url, {
         method,
@@ -209,57 +208,53 @@ export function AccountEditDialog({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-      })
+      });
 
       if (response.ok) {
         toast({
           title: isEditMode ? 'แก้ไขสำเร็จ' : 'เพิ่มบัญชีสำเร็จ',
-          description: isEditMode
-            ? 'แก้ไขข้อมูลบัญชีเรียบร้อยแล้ว'
-            : 'เพิ่มบัญชีใหม่เรียบร้อยแล้ว',
-        })
-        onOpenChange(false)
-        onSuccess()
+          description: isEditMode ? 'แก้ไขข้อมูลบัญชีเรียบร้อยแล้ว' : 'เพิ่มบัญชีใหม่เรียบร้อยแล้ว',
+        });
+        onOpenChange(false);
+        onSuccess();
       } else {
-        const error = await response.json()
+        const error = await response.json();
         toast({
           title: 'เกิดข้อผิดพลาด',
           description: error.error || 'ไม่สามารถบันทึกข้อมูลได้',
           variant: 'destructive',
-        })
+        });
       }
     } catch (error) {
-      console.error('Error saving account:', error)
+      console.error('Error saving account:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field when user starts typing
     if (errors[field]) {
       setErrors((prev) => {
-        const newErrors = { ...prev }
-        delete newErrors[field]
-        return newErrors
-      })
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
-  }
+  };
 
   // Filter parent accounts (only show header accounts and not the current account)
-  const parentAccounts = accounts.filter(
-    (a) => !a.isDetail && a.id !== account?.id
-  )
+  const parentAccounts = accounts.filter((a) => !a.isDetail && a.id !== account?.id);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -268,7 +263,7 @@ export function AccountEditDialog({
         <form onSubmit={handleSubmit}>
           <div className="space-y-6 py-4">
             {/* Account Code */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="code" className="text-right">
                 รหัสบัญชี <span className="text-red-500">*</span>
               </Label>
@@ -281,14 +276,12 @@ export function AccountEditDialog({
                   disabled={isEditMode}
                   className={errors.code ? 'border-red-500' : ''}
                 />
-                {errors.code && (
-                  <p className="text-sm text-red-500">{errors.code}</p>
-                )}
+                {errors.code && <p className="text-sm text-red-500">{errors.code}</p>}
               </div>
             </div>
 
             {/* Account Name (Thai) */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="name" className="text-right">
                 ชื่อบัญชี <span className="text-red-500">*</span>
               </Label>
@@ -300,14 +293,12 @@ export function AccountEditDialog({
                   placeholder="ชื่อบัญชีภาษาไทย"
                   className={errors.name ? 'border-red-500' : ''}
                 />
-                {errors.name && (
-                  <p className="text-sm text-red-500">{errors.name}</p>
-                )}
+                {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
               </div>
             </div>
 
             {/* Account Name (English) */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="nameEn" className="text-right">
                 ชื่อบัญชี (Eng)
               </Label>
@@ -322,21 +313,17 @@ export function AccountEditDialog({
             </div>
 
             {/* Account Type */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="type" className="text-right">
                 ประเภทบัญชี <span className="text-red-500">*</span>
               </Label>
               <div className="col-span-3 space-y-2">
                 <Select
                   value={formData.type}
-                  onValueChange={(v) =>
-                    handleInputChange('type', v as Account['type'])
-                  }
+                  onValueChange={(v) => handleInputChange('type', v as Account['type'])}
                   disabled={isEditMode}
                 >
-                  <SelectTrigger
-                    className={errors.type ? 'border-red-500' : ''}
-                  >
+                  <SelectTrigger className={errors.type ? 'border-red-500' : ''}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -347,15 +334,13 @@ export function AccountEditDialog({
                     <SelectItem value="EXPENSE">ค่าใช้จ่าย</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.type && (
-                  <p className="text-sm text-red-500">{errors.type}</p>
-                )}
+                {errors.type && <p className="text-sm text-red-500">{errors.type}</p>}
               </div>
             </div>
 
             {/* Parent Account (only for new accounts) */}
             {!isEditMode && (
-              <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
                 <Label htmlFor="parentId" className="text-right">
                   บัญชีหลัก
                 </Label>
@@ -382,27 +367,21 @@ export function AccountEditDialog({
             )}
 
             {/* Account Detail Type */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="isDetail" className="text-right">
                 ประเภทบัญชี
               </Label>
               <div className="col-span-3">
                 <Select
                   value={formData.isDetail ? 'detail' : 'header'}
-                  onValueChange={(v) =>
-                    handleInputChange('isDetail', v === 'detail')
-                  }
+                  onValueChange={(v) => handleInputChange('isDetail', v === 'detail')}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="detail">
-                      บัญชีรายละเอียด (สามารถลงบัญชีได้)
-                    </SelectItem>
-                    <SelectItem value="header">
-                      บัญชีหมวด (สำหรับจัดกลุ่ม)
-                    </SelectItem>
+                    <SelectItem value="detail">บัญชีรายละเอียด (สามารถลงบัญชีได้)</SelectItem>
+                    <SelectItem value="header">บัญชีหมวด (สำหรับจัดกลุ่ม)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -410,7 +389,7 @@ export function AccountEditDialog({
 
             {/* Active Status (only for edit mode) */}
             {isEditMode && (
-              <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
                 <Label htmlFor="isActive" className="text-right">
                   สถานะ
                 </Label>
@@ -418,9 +397,7 @@ export function AccountEditDialog({
                   <Switch
                     id="isActive"
                     checked={formData.isActive}
-                    onCheckedChange={(checked) =>
-                      handleInputChange('isActive', checked)
-                    }
+                    onCheckedChange={(checked) => handleInputChange('isActive', checked)}
                   />
                   <Label htmlFor="isActive" className="cursor-pointer">
                     {formData.isActive ? 'ใช้งาน' : 'ระงับการใช้งาน'}
@@ -430,7 +407,7 @@ export function AccountEditDialog({
             )}
 
             {/* Notes */}
-            <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-4">
               <Label htmlFor="notes" className="text-right">
                 หมายเหตุ
               </Label>
@@ -446,7 +423,7 @@ export function AccountEditDialog({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 mt-6">
+          <div className="mt-6 flex justify-end gap-2">
             <Button
               type="button"
               variant="outline"
@@ -458,7 +435,7 @@ export function AccountEditDialog({
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   กำลังบันทึก...
                 </>
               ) : (
@@ -469,5 +446,5 @@ export function AccountEditDialog({
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

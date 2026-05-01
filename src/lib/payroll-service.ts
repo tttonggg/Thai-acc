@@ -8,10 +8,10 @@
  * Rate: 5% of salary, capped at ฿495/month (per Thai Social Security Act, ceiling = ฿9,900)
  */
 export function calculateSSC(baseSalary: number): number {
-  const sscRate = 0.05
-  const sscCeiling = 9900 // ฿9,900 per month (correct Thai SSC ceiling)
-  const maxSSC = sscCeiling * sscRate // ฿495
-  return Math.min(baseSalary * sscRate, maxSSC)
+  const sscRate = 0.05;
+  const sscCeiling = 9900; // ฿9,900 per month (correct Thai SSC ceiling)
+  const maxSSC = sscCeiling * sscRate; // ฿495
+  return Math.min(baseSalary * sscRate, maxSSC);
 }
 
 /**
@@ -21,32 +21,32 @@ export function calculateSSC(baseSalary: number): number {
  */
 export function calculatePND1(annualIncome: number): number {
   // Personal allowance: ฿60,000
-  const personalAllowance = 60_000
-  const taxableIncome = Math.max(0, annualIncome - personalAllowance)
+  const personalAllowance = 60_000;
+  const taxableIncome = Math.max(0, annualIncome - personalAllowance);
 
-  let tax = 0
+  let tax = 0;
   // Progressive rates 2024 (Thailand)
   const brackets = [
-    { limit: 150_000, rate: 0 },       // 0 - 150,000 = 0%
-    { limit: 300_000, rate: 0.05 },     // 150,001 - 300,000 = 5%
-    { limit: 500_000, rate: 0.10 },     // 300,001 - 500,000 = 10%
-    { limit: 750_000, rate: 0.15 },     // 500,001 - 750,000 = 15%
-    { limit: 1_000_000, rate: 0.20 },   // 750,001 - 1,000,000 = 20%
-    { limit: 2_000_000, rate: 0.25 },   // 1,000,001 - 2,000,000 = 25%
-    { limit: 5_000_000, rate: 0.30 },   // 2,000,001 - 5,000,000 = 30%
-    { limit: Infinity, rate: 0.35 },    // > 5,000,000 = 35%
-  ]
+    { limit: 150_000, rate: 0 }, // 0 - 150,000 = 0%
+    { limit: 300_000, rate: 0.05 }, // 150,001 - 300,000 = 5%
+    { limit: 500_000, rate: 0.1 }, // 300,001 - 500,000 = 10%
+    { limit: 750_000, rate: 0.15 }, // 500,001 - 750,000 = 15%
+    { limit: 1_000_000, rate: 0.2 }, // 750,001 - 1,000,000 = 20%
+    { limit: 2_000_000, rate: 0.25 }, // 1,000,001 - 2,000,000 = 25%
+    { limit: 5_000_000, rate: 0.3 }, // 2,000,001 - 5,000,000 = 30%
+    { limit: Infinity, rate: 0.35 }, // > 5,000,000 = 35%
+  ];
 
-  let previousLimit = 0
+  let previousLimit = 0;
   for (const bracket of brackets) {
-    if (taxableIncome <= previousLimit) break
-    const taxableInBracket = Math.min(taxableIncome, bracket.limit) - previousLimit
-    tax += taxableInBracket * bracket.rate
-    previousLimit = bracket.limit
+    if (taxableIncome <= previousLimit) break;
+    const taxableInBracket = Math.min(taxableIncome, bracket.limit) - previousLimit;
+    tax += taxableInBracket * bracket.rate;
+    previousLimit = bracket.limit;
   }
 
   // Return monthly PND1
-  return Math.round(tax / 12)
+  return Math.round(tax / 12);
 }
 
 /**
@@ -54,30 +54,30 @@ export function calculatePND1(annualIncome: number): number {
  * Returns breakdown of all components.
  */
 export function calculateEmployeePayroll(params: {
-  baseSalary: number
-  additions?: number    // OT, bonus, allowances
-  deductions?: number   // absence deductions
-  isYearEnd?: boolean   // if true, use December bonus income
+  baseSalary: number;
+  additions?: number; // OT, bonus, allowances
+  deductions?: number; // absence deductions
+  isYearEnd?: boolean; // if true, use December bonus income
 }): {
-  baseSalary: number
-  additions: number
-  deductions: number
-  grossSalary: number
-  socialSecurity: number   // employee portion (deducted from gross)
-  withholdingTax: number   // PND1
-  netPay: number
+  baseSalary: number;
+  additions: number;
+  deductions: number;
+  grossSalary: number;
+  socialSecurity: number; // employee portion (deducted from gross)
+  withholdingTax: number; // PND1
+  netPay: number;
 } {
-  const { baseSalary, additions = 0, deductions = 0 } = params
-  const grossSalary = baseSalary + additions - deductions
+  const { baseSalary, additions = 0, deductions = 0 } = params;
+  const grossSalary = baseSalary + additions - deductions;
 
   // SSC on base salary only (per Thai SSC regulations)
-  const socialSecurity = calculateSSC(baseSalary)
+  const socialSecurity = calculateSSC(baseSalary);
 
   // PND1 on annual gross (simplified: monthly gross × 12)
-  const annualGross = grossSalary * 12
-  const withholdingTax = calculatePND1(annualGross)
+  const annualGross = grossSalary * 12;
+  const withholdingTax = calculatePND1(annualGross);
 
-  const netPay = grossSalary - socialSecurity - withholdingTax
+  const netPay = grossSalary - socialSecurity - withholdingTax;
 
   return {
     baseSalary,
@@ -87,7 +87,7 @@ export function calculateEmployeePayroll(params: {
     socialSecurity,
     withholdingTax,
     netPay: Math.max(0, netPay),
-  }
+  };
 }
 
 /**
@@ -95,7 +95,7 @@ export function calculateEmployeePayroll(params: {
  * This is an additional expense to the company
  */
 export function calculateEmployerSSC(baseSalary: number): number {
-  return calculateSSC(baseSalary)
+  return calculateSSC(baseSalary);
 }
 
 /**
@@ -106,69 +106,69 @@ export function calculateEmployerSSC(baseSalary: number): number {
  * - Credit: WHT Payable (2131) - Income tax withheld (PND1)
  * - Credit: Wages Payable (2140) - Net salary payable
  */
-export async function createPayrollJournalEntry(
-  payrollRunId: string,
-  userId?: string
-) {
-  const prisma = (await import('@/lib/db')).default
+export async function createPayrollJournalEntry(payrollRunId: string, userId?: string) {
+  const prisma = (await import('@/lib/db')).default;
 
   return await prisma.$transaction(async (tx) => {
     const payrollRun = await tx.payrollRun.findUnique({
       where: { id: payrollRunId },
-      include: { payrolls: true }
-    })
+      include: { payrolls: true },
+    });
 
     if (!payrollRun) {
-      throw new Error(`Payroll run ${payrollRunId} not found`)
+      throw new Error(`Payroll run ${payrollRunId} not found`);
     }
 
     if (payrollRun.journalEntryId) {
-      throw new Error('Payroll already has journal entry')
+      throw new Error('Payroll already has journal entry');
     }
 
     // Get required accounts
     const salaryExpenseAccount = await tx.chartOfAccount.findUnique({
-      where: { code: '5310' } // เงินเดือนและค่าจ้าง
-    })
+      where: { code: '5310' }, // เงินเดือนและค่าจ้าง
+    });
     const sscPayableAccount = await tx.chartOfAccount.findUnique({
-      where: { code: '2133' } // ประกันสังคมต้องจ่าย
-    })
+      where: { code: '2133' }, // ประกันสังคมต้องจ่าย
+    });
     const whtPayableAccount = await tx.chartOfAccount.findUnique({
-      where: { code: '2131' } // ภาษีเงินได้หัก ณ ที่จ่าย
-    })
+      where: { code: '2131' }, // ภาษีเงินได้หัก ณ ที่จ่าย
+    });
     const wagesPayableAccount = await tx.chartOfAccount.findUnique({
-      where: { code: '2140' } // เงินเดือนต้องจ่าย
-    })
+      where: { code: '2140' }, // เงินเดือนต้องจ่าย
+    });
 
     if (!salaryExpenseAccount || !sscPayableAccount || !whtPayableAccount || !wagesPayableAccount) {
-      throw new Error('Required payroll accounts not found in chart of accounts')
+      throw new Error('Required payroll accounts not found in chart of accounts');
     }
 
     // Calculate totals
-    const totalGrossSalary = payrollRun.totalBaseSalary + payrollRun.totalAdditions - payrollRun.totalDeductions
-    const totalEmployeeSSC = payrollRun.totalSsc
+    const totalGrossSalary =
+      payrollRun.totalBaseSalary + payrollRun.totalAdditions - payrollRun.totalDeductions;
+    const totalEmployeeSSC = payrollRun.totalSsc;
     const totalEmployerSSC = payrollRun.payrolls.reduce((sum, p) => {
-      const empSSC = calculateEmployerSSC(p.baseSalary)
-      return sum + empSSC
-    }, 0)
-    const totalWHT = payrollRun.totalTax
-    const totalNetPay = payrollRun.totalNetPay
+      const empSSC = calculateEmployerSSC(p.baseSalary);
+      return sum + empSSC;
+    }, 0);
+    const totalWHT = payrollRun.totalTax;
+    const totalNetPay = payrollRun.totalNetPay;
 
     // Calculate debit amount (gross salary + employer SSC)
-    const totalDebit = totalGrossSalary + totalEmployerSSC
+    const totalDebit = totalGrossSalary + totalEmployerSSC;
 
     // Verify double-entry balance
-    const totalCredit = totalEmployeeSSC + totalWHT + totalNetPay
+    const totalCredit = totalEmployeeSSC + totalWHT + totalNetPay;
     if (Math.abs(totalDebit - totalCredit) > 0.01) {
-      throw new Error(`Payroll journal entry not balanced: Debit=${totalDebit}, Credit=${totalCredit}`)
+      throw new Error(
+        `Payroll journal entry not balanced: Debit=${totalDebit}, Credit=${totalCredit}`
+      );
     }
 
     // Generate journal entry number
-    const count = await tx.journalEntry.count()
-    const entryNo = `PAY-${payrollRun.periodYear}${String(payrollRun.periodMonth).padStart(2, '0')}-${String(count + 1).padStart(4, '0')}`
+    const count = await tx.journalEntry.count();
+    const entryNo = `PAY-${payrollRun.periodYear}${String(payrollRun.periodMonth).padStart(2, '0')}-${String(count + 1).padStart(4, '0')}`;
 
     // Create journal entry
-    let lineNo = 1
+    let lineNo = 1;
     const journalEntry = await tx.journalEntry.create({
       data: {
         entryNo,
@@ -216,48 +216,45 @@ export async function createPayrollJournalEntry(
               description: `เงินเดือนต้องจ่าย ${payrollRun.periodMonth}/${payrollRun.periodYear}`,
               debit: 0,
               credit: totalNetPay,
-            }
-          ]
-        }
-      }
-    })
+            },
+          ],
+        },
+      },
+    });
 
     // Update payroll run with journal entry ID
     await tx.payrollRun.update({
       where: { id: payrollRunId },
-      data: { journalEntryId: journalEntry.id }
-    })
+      data: { journalEntryId: journalEntry.id },
+    });
 
-    return journalEntry
-  })
+    return journalEntry;
+  });
 }
 
 /**
  * Add provident fund contributions to a payroll run
  * Called automatically when processing payroll with a provident fund
  */
-export async function addProvidentFundContributions(
-  payrollRunId: string,
-  providentFundId: string
-) {
-  const prisma = (await import('@/lib/db')).default
+export async function addProvidentFundContributions(payrollRunId: string, providentFundId: string) {
+  const prisma = (await import('@/lib/db')).default;
 
   return await prisma.$transaction(async (tx) => {
     const payrollRun = await tx.payrollRun.findUnique({
       where: { id: payrollRunId },
-      include: { payrolls: true }
-    })
+      include: { payrolls: true },
+    });
 
     if (!payrollRun) {
-      throw new Error(`Payroll run ${payrollRunId} not found`)
+      throw new Error(`Payroll run ${payrollRunId} not found`);
     }
 
     const fund = await tx.providentFund.findUnique({
-      where: { id: providentFundId }
-    })
+      where: { id: providentFundId },
+    });
 
     if (!fund) {
-      throw new Error(`Provident fund ${providentFundId} not found`)
+      throw new Error(`Provident fund ${providentFundId} not found`);
     }
 
     // Create contributions for each employee
@@ -268,7 +265,7 @@ export async function addProvidentFundContributions(
           fund.employeeRate,
           fund.employerRate,
           fund.maxMonthly
-        )
+        );
 
         return await tx.providentFundContribution.create({
           data: {
@@ -278,10 +275,10 @@ export async function addProvidentFundContributions(
             employeePortion,
             employerPortion,
           },
-        })
+        });
       })
-    )
+    );
 
-    return contributions
-  })
+    return contributions;
+  });
 }

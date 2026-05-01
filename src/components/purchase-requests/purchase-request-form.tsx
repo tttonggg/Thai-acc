@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { format } from 'date-fns'
-import { Plus, Trash2, Save, Send, Loader2, Search } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { format } from 'date-fns';
+import { Plus, Trash2, Save, Send, Loader2, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -18,14 +18,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -33,50 +33,50 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useToast } from '@/components/ui/use-toast'
-import { cn } from '@/lib/utils'
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useToast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
 
 // Types
-type RequestPriority = 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW'
+type RequestPriority = 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW';
 
 interface Product {
-  id: string
-  code: string
-  name: string
-  unit: string
-  salePrice: number
-  costPrice: number
+  id: string;
+  code: string;
+  name: string;
+  unit: string;
+  salePrice: number;
+  costPrice: number;
 }
 
 interface Department {
-  id: string
-  name: string
-  code: string
+  id: string;
+  name: string;
+  code: string;
 }
 
 interface DepartmentBudget {
-  id: string
-  name: string
-  fiscalYear: number
-  remainingAmount: number
-  allocatedAmount: number
+  id: string;
+  name: string;
+  fiscalYear: number;
+  remainingAmount: number;
+  allocatedAmount: number;
 }
 
 interface Vendor {
-  id: string
-  name: string
-  code: string
+  id: string;
+  name: string;
+  code: string;
 }
 
 // Form Schema
@@ -90,7 +90,7 @@ const prLineSchema = z.object({
   vatRate: z.number().min(0).max(100).default(7),
   suggestedVendor: z.string().optional(),
   notes: z.string().optional(),
-})
+});
 
 const purchaseRequestFormSchema = z.object({
   requestDate: z.string(),
@@ -102,14 +102,14 @@ const purchaseRequestFormSchema = z.object({
   notes: z.string().optional(),
   internalNotes: z.string().optional(),
   lines: z.array(prLineSchema).min(1, 'ต้องมีอย่างน้อย 1 รายการ'),
-})
+});
 
-type PurchaseRequestFormValues = z.infer<typeof purchaseRequestFormSchema>
+type PurchaseRequestFormValues = z.infer<typeof purchaseRequestFormSchema>;
 
 interface PurchaseRequestFormProps {
-  initialData?: Partial<PurchaseRequestFormValues>
-  onSuccess?: () => void
-  onCancel?: () => void
+  initialData?: Partial<PurchaseRequestFormValues>;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 export function PurchaseRequestForm({
@@ -117,14 +117,14 @@ export function PurchaseRequestForm({
   onSuccess,
   onCancel,
 }: PurchaseRequestFormProps) {
-  const [loading, setLoading] = useState(false)
-  const [products, setProducts] = useState<Product[]>([])
-  const [departments, setDepartments] = useState<Department[]>([])
-  const [budgets, setBudgets] = useState<DepartmentBudget[]>([])
-  const [vendors, setVendors] = useState<Vendor[]>([])
-  const [selectedDepartment, setSelectedDepartment] = useState<string>('')
-  const [submitting, setSubmitting] = useState<'draft' | 'submit' | null>(null)
-  const { toast } = useToast()
+  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [budgets, setBudgets] = useState<DepartmentBudget[]>([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
+  const [submitting, setSubmitting] = useState<'draft' | 'submit' | null>(null);
+  const { toast } = useToast();
 
   const form = useForm<PurchaseRequestFormValues>({
     resolver: zodResolver(purchaseRequestFormSchema),
@@ -143,54 +143,60 @@ export function PurchaseRequestForm({
       ],
       ...initialData,
     },
-  })
+  });
 
   // Fetch data
   useEffect(() => {
     Promise.all([
-      fetch(`/api/products`, { credentials: 'include' }).then(r => r.json()).then(d => setProducts(d.data || [])),
-      fetch(`/api/departments`, { credentials: 'include' }).then(r => r.json()).then(d => setDepartments(d.data || [])),
-      fetch(`/api/vendors`, { credentials: 'include' }).then(r => r.json()).then(d => setVendors(d.data || [])),
-    ])
-  }, [])
+      fetch(`/api/products`, { credentials: 'include' })
+        .then((r) => r.json())
+        .then((d) => setProducts(d.data || [])),
+      fetch(`/api/departments`, { credentials: 'include' })
+        .then((r) => r.json())
+        .then((d) => setDepartments(d.data || [])),
+      fetch(`/api/vendors`, { credentials: 'include' })
+        .then((r) => r.json())
+        .then((d) => setVendors(d.data || [])),
+    ]);
+  }, []);
 
   // Fetch budgets when department changes
   useEffect(() => {
     if (selectedDepartment) {
       fetch(`/api/departments/${selectedDepartment}/budgets`, { credentials: 'include' })
-        .then(r => r.json())
-        .then(d => setBudgets(d.data || []))
-        .catch(() => setBudgets([]))
+        .then((r) => r.json())
+        .then((d) => setBudgets(d.data || []))
+        .catch(() => setBudgets([]));
     }
-  }, [selectedDepartment])
+  }, [selectedDepartment]);
 
   // Calculate line amount
   const calculateLineAmount = (line: any) => {
-    const subtotal = line.quantity * line.unitPrice
-    const discountAmount = subtotal * (line.discount / 100)
-    const afterDiscount = subtotal - discountAmount
-    const vatAmount = afterDiscount * (line.vatRate / 100)
+    const subtotal = line.quantity * line.unitPrice;
+    const discountAmount = subtotal * (line.discount / 100);
+    const afterDiscount = subtotal - discountAmount;
+    const vatAmount = afterDiscount * (line.vatRate / 100);
     return {
       subtotal: Math.round(subtotal * 100) / 100,
       discountAmount: Math.round(discountAmount * 100) / 100,
       vatAmount: Math.round(vatAmount * 100) / 100,
       amount: Math.round((afterDiscount + vatAmount) * 100) / 100,
-    }
-  }
+    };
+  };
 
   // Calculate total
   const calculateTotal = () => {
-    const lines = form.watch('lines') || []
+    const lines = form.watch('lines') || [];
     return lines.reduce((sum, line) => {
-      const calc = calculateLineAmount(line)
-      return sum + calc.amount
-    }, 0)
-  }
+      const calc = calculateLineAmount(line);
+      return sum + calc.amount;
+    }, 0);
+  };
 
   // Add line
   const addLine = () => {
-    const lines = form.getValues('lines')
-    const lastLineNo = lines.length > 0 ? lines[lines.length - 1].lineNo || 0 : 0
+    const lines = form.getValues('lines');
+    const lastLineNo = lines.length > 0 ? lines[lines.length - 1].lineNo || 0 : 0;
     form.setValue('lines', [
       ...lines,
       {
@@ -202,85 +208,87 @@ export function PurchaseRequestForm({
         discount: 0,
         vatRate: 7,
       },
-    ])
-  }
+    ]);
+  };
 
   // Remove line
   const removeLine = (index: number) => {
-    const lines = form.getValues('lines')
+    const lines = form.getValues('lines');
     if (lines.length > 1) {
       form.setValue(
         'lines',
         lines.filter((_, i) => i !== index).map((line, i) => ({ ...line, lineNo: i + 1 }))
-      )
+      );
     }
-  }
+  };
 
   // Select product
   const selectProduct = (index: number, product: Product) => {
-    const lines = form.getValues('lines')
+    const lines = form.getValues('lines');
     lines[index] = {
       ...lines[index],
       productId: product.id,
       description: product.name,
       unit: product.unit,
       unitPrice: product.costPrice || 0,
-    }
-    form.setValue('lines', lines)
-  }
+    };
+    form.setValue('lines', lines);
+  };
 
   // Submit form
   const onSubmit = async (data: PurchaseRequestFormValues, submitType: 'draft' | 'submit') => {
-    setSubmitting(submitType)
+    setSubmitting(submitType);
     try {
-      const lines = data.lines.map(line => ({
+      const lines = data.lines.map((line) => ({
         ...line,
         ...calculateLineAmount(line),
-      }))
+      }));
 
       const payload = {
         ...data,
         lines,
         estimatedAmount: Math.round(calculateTotal() * 100), // Convert to Satang
-      }
+      };
 
-      const res = await fetch(`/api/purchase-requests`, { credentials: 'include', 
+      const res = await fetch(`/api/purchase-requests`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      })
+      });
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'สร้างใบขอซื้อไม่สำเร็จ')
+        throw new Error(result.error || 'สร้างใบขอซื้อไม่สำเร็จ');
       }
 
       toast({
         title: 'สำเร็จ',
-        description: submitType === 'submit'
-          ? 'ส่งใบขอซื้อเพื่อขออนุมัติเรียบร้อยแล้ว'
-          : 'บันทึกฉบับร่างเรียบร้อยแล้ว',
-      })
+        description:
+          submitType === 'submit'
+            ? 'ส่งใบขอซื้อเพื่อขออนุมัติเรียบร้อยแล้ว'
+            : 'บันทึกฉบับร่างเรียบร้อยแล้ว',
+      });
 
-      if (onSuccess) onSuccess()
+      if (onSuccess) onSuccess();
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'เกิดข้อผิดพลาด',
         description: error instanceof Error ? error.message : 'กรุณาลองอีกครั้ง',
-      })
+      });
     } finally {
-      setSubmitting(null)
+      setSubmitting(null);
     }
-  }
+  };
 
-  const selectedBudget = budgets.find(b => b.id === form.watch('budgetId'))
-  const totalAmount = calculateTotal()
+  const selectedBudget = budgets.find((b) => b.id === form.watch('budgetId'));
+  const totalAmount = calculateTotal();
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(data => onSubmit(data, 'draft'))} className="space-y-6">
+      <form onSubmit={form.handleSubmit((data) => onSubmit(data, 'draft'))} className="space-y-6">
         {/* Header */}
         <Card>
           <CardHeader>
@@ -288,7 +296,7 @@ export function PurchaseRequestForm({
             <CardDescription>กรอกข้อมูลใบขอซื้อเพื่อขออนุมัติงบประมาณ</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {/* Request Date */}
               <FormField
                 control={form.control}
@@ -318,9 +326,7 @@ export function PurchaseRequestForm({
                         <Calendar
                           mode="single"
                           selected={new Date(field.value)}
-                          onSelect={(date) =>
-                            field.onChange(date?.toISOString())
-                          }
+                          onSelect={(date) => field.onChange(date?.toISOString())}
                           initialFocus
                         />
                       </PopoverContent>
@@ -339,9 +345,9 @@ export function PurchaseRequestForm({
                     <FormLabel>แผนก</FormLabel>
                     <Select
                       onValueChange={(value) => {
-                        field.onChange(value)
-                        setSelectedDepartment(value)
-                        form.setValue('budgetId', '')
+                        field.onChange(value);
+                        setSelectedDepartment(value);
+                        form.setValue('budgetId', '');
                       }}
                       value={field.value}
                     >
@@ -378,19 +384,23 @@ export function PurchaseRequestForm({
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="URGENT">
-                          <Badge variant="destructive" className="mr-2">เร่งด่วน</Badge>
+                          <Badge variant="destructive" className="mr-2">
+                            เร่งด่วน
+                          </Badge>
                           URGENT
                         </SelectItem>
                         <SelectItem value="HIGH">
-                          <Badge className="bg-orange-100 text-orange-800 mr-2">สูง</Badge>
+                          <Badge className="mr-2 bg-orange-100 text-orange-800">สูง</Badge>
                           HIGH
                         </SelectItem>
                         <SelectItem value="NORMAL">
-                          <Badge className="bg-blue-100 text-blue-800 mr-2">ปกติ</Badge>
+                          <Badge className="mr-2 bg-blue-100 text-blue-800">ปกติ</Badge>
                           NORMAL
                         </SelectItem>
                         <SelectItem value="LOW">
-                          <Badge variant="secondary" className="mr-2">ต่ำ</Badge>
+                          <Badge variant="secondary" className="mr-2">
+                            ต่ำ
+                          </Badge>
                           LOW
                         </SelectItem>
                       </SelectContent>
@@ -401,7 +411,7 @@ export function PurchaseRequestForm({
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Required Date */}
               <FormField
                 control={form.control}
@@ -431,9 +441,7 @@ export function PurchaseRequestForm({
                         <Calendar
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={(date) =>
-                            field.onChange(date?.toISOString())
-                          }
+                          onSelect={(date) => field.onChange(date?.toISOString())}
                           initialFocus
                         />
                       </PopoverContent>
@@ -513,7 +521,7 @@ export function PurchaseRequestForm({
                 <CardDescription>เพิ่มรายการสินค้าที่ต้องการขอซื้อ</CardDescription>
               </div>
               <Button type="button" variant="outline" size="sm" onClick={addLine}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 เพิ่มรายการ
               </Button>
             </div>
@@ -537,12 +545,10 @@ export function PurchaseRequestForm({
                 </TableHeader>
                 <TableBody>
                   {form.watch('lines')?.map((line, index) => {
-                    const calc = calculateLineAmount(line)
+                    const calc = calculateLineAmount(line);
                     return (
                       <TableRow key={index}>
-                        <TableCell className="text-center font-medium">
-                          {index + 1}
-                        </TableCell>
+                        <TableCell className="text-center font-medium">{index + 1}</TableCell>
                         <TableCell>
                           <ProductSelector
                             products={products}
@@ -556,10 +562,7 @@ export function PurchaseRequestForm({
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
-                                  <Input
-                                    placeholder="รายการสินค้า"
-                                    {...field}
-                                  />
+                                  <Input placeholder="รายการสินค้า" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -669,7 +672,8 @@ export function PurchaseRequestForm({
                           />
                         </TableCell>
                         <TableCell className="text-right font-medium">
-                          ฿{calc.amount.toLocaleString('th-TH', {
+                          ฿
+                          {calc.amount.toLocaleString('th-TH', {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
                           })}
@@ -686,15 +690,15 @@ export function PurchaseRequestForm({
                           </Button>
                         </TableCell>
                       </TableRow>
-                    )
+                    );
                   })}
                 </TableBody>
               </Table>
             </div>
 
             {/* Total */}
-            <div className="flex justify-end mt-4">
-              <div className="text-right space-y-2">
+            <div className="mt-4 flex justify-end">
+              <div className="space-y-2 text-right">
                 <div className="text-sm text-gray-600">
                   วงเงินรวม: ฿
                   {totalAmount.toLocaleString('th-TH', {
@@ -703,9 +707,7 @@ export function PurchaseRequestForm({
                   })}
                 </div>
                 {selectedBudget && totalAmount > selectedBudget.remainingAmount / 100 && (
-                  <div className="text-sm text-red-600 font-medium">
-                    ⚠️ เกินงบประมาณที่กำหนด
-                  </div>
+                  <div className="text-sm font-medium text-red-600">⚠️ เกินงบประมาณที่กำหนด</div>
                 )}
               </div>
             </div>
@@ -742,11 +744,7 @@ export function PurchaseRequestForm({
                 <FormItem>
                   <FormLabel>บันทึกภายใน (ไม่แสดงในรายงาน)</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="บันทึกภายใน..."
-                      className="min-h-[80px]"
-                      {...field}
-                    />
+                    <Textarea placeholder="บันทึกภายใน..." className="min-h-[80px]" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -765,33 +763,33 @@ export function PurchaseRequestForm({
           <Button
             type="button"
             variant="outline"
-            onClick={form.handleSubmit(data => onSubmit(data, 'draft'))}
+            onClick={form.handleSubmit((data) => onSubmit(data, 'draft'))}
             disabled={submitting !== null}
           >
             {submitting === 'draft' ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="mr-2 h-4 w-4" />
             )}
             บันทึกฉบับร่าง
           </Button>
           <Button
             type="button"
-            onClick={form.handleSubmit(data => onSubmit(data, 'submit'))}
+            onClick={form.handleSubmit((data) => onSubmit(data, 'submit'))}
             disabled={submitting !== null}
             className="bg-blue-600 hover:bg-blue-700"
           >
             {submitting === 'submit' ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Send className="h-4 w-4 mr-2" />
+              <Send className="mr-2 h-4 w-4" />
             )}
             ส่งอนุมัติ
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }
 
 // Product Selector Component
@@ -799,17 +797,17 @@ function ProductSelector({
   products,
   onSelect,
 }: {
-  products: Product[]
-  onSelect: (product: Product) => void
+  products: Product[];
+  onSelect: (product: Product) => void;
 }) {
-  const [open, setOpen] = useState(false)
-  const [search, setSearch] = useState('')
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.code.toLowerCase().includes(search.toLowerCase())
-  )
+  );
 
   return (
     <div className="relative">
@@ -819,7 +817,7 @@ function ProductSelector({
         className="w-full justify-start"
         onClick={() => setOpen(true)}
       >
-        <Search className="h-4 w-4 mr-2" />
+        <Search className="mr-2 h-4 w-4" />
         เลือกสินค้า...
       </Button>
 
@@ -828,9 +826,7 @@ function ProductSelector({
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>เลือกสินค้า</DialogTitle>
-              <DialogDescription>
-                เลือกสินค้าจากรายการสินค้าในระบบ
-              </DialogDescription>
+              <DialogDescription>เลือกสินค้าจากรายการสินค้าในระบบ</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
@@ -842,18 +838,16 @@ function ProductSelector({
 
               <div className="max-h-[400px] overflow-y-auto">
                 {filteredProducts.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    ไม่พบสินค้า
-                  </div>
+                  <div className="py-8 text-center text-gray-500">ไม่พบสินค้า</div>
                 ) : (
                   <div className="space-y-2">
                     {filteredProducts.map((product) => (
                       <div
                         key={product.id}
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                        className="flex cursor-pointer items-center justify-between rounded-lg border p-3 hover:bg-gray-50"
                         onClick={() => {
-                          onSelect(product)
-                          setOpen(false)
+                          onSelect(product);
+                          setOpen(false);
                         }}
                       >
                         <div>
@@ -881,5 +875,5 @@ function ProductSelector({
         </Dialog>
       )}
     </div>
-  )
+  );
 }

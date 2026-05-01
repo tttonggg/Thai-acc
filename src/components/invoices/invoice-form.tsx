@@ -1,77 +1,66 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import {
-  Plus,
-  Trash2,
-  Save,
-  Loader2,
-  Info
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useState, useEffect } from 'react';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Plus, Trash2, Save, Loader2, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card'
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { useToast } from '@/hooks/use-toast'
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { useToast } from '@/hooks/use-toast';
 
 // Types
 interface Customer {
-  id: string
-  code: string
-  name: string
-  taxId?: string
-  branchCode?: string
+  id: string;
+  code: string;
+  name: string;
+  taxId?: string;
+  branchCode?: string;
 }
 
 interface Product {
-  id: string
-  code: string
-  name: string
-  nameEn?: string
-  unitPrice?: number
-  unit?: string
+  id: string;
+  code: string;
+  name: string;
+  nameEn?: string;
+  unitPrice?: number;
+  unit?: string;
 }
 
 interface InvoiceLine {
-  id: string
-  productId?: string
-  description: string
-  quantity: number
-  unit: string
-  unitPrice: number
-  discount: number
-  vatRate: number
-  vatAmount: number
-  amount: number
+  id: string;
+  productId?: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  discount: number;
+  vatRate: number;
+  vatAmount: number;
+  amount: number;
 }
 
 interface InvoiceFormProps {
-  open: boolean
-  onClose: () => void
-  onSuccess: () => void
-  defaultType?: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE'
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  defaultType?: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE';
 }
 
 const invoiceTypeLabels: Record<string, string> = {
@@ -80,17 +69,22 @@ const invoiceTypeLabels: Record<string, string> = {
   DELIVERY_NOTE: 'ใบส่งของ',
   CREDIT_NOTE: 'ใบลดหนี้',
   DEBIT_NOTE: 'ใบเพิ่มหนี้',
-}
+};
 
-const vatRates = [0, 7, 10]
+const vatRates = [0, 7, 10];
 
-export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOICE' }: InvoiceFormProps) {
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(false)
-  const [fetchingData, setFetchingData] = useState(false)
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [products, setProducts] = useState<Product[]>([])
-  const [invoiceNumber, setInvoiceNumber] = useState('')
+export function InvoiceForm({
+  open,
+  onClose,
+  onSuccess,
+  defaultType = 'TAX_INVOICE',
+}: InvoiceFormProps) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [fetchingData, setFetchingData] = useState(false);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [invoiceNumber, setInvoiceNumber] = useState('');
 
   const [formData, setFormData] = useState({
     customerId: '',
@@ -102,7 +96,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
     discountPercent: 0,
     withholdingRate: 0,
     notes: '',
-  })
+  });
 
   const [lines, setLines] = useState<InvoiceLine[]>([
     {
@@ -116,83 +110,89 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
       vatAmount: 0,
       amount: 0,
     },
-  ])
+  ]);
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Fetch customers and products on mount
   useEffect(() => {
     if (open) {
-      fetchInitialData()
+      fetchInitialData();
     }
-    
+
     return () => {
       // Cleanup handled by AbortController in fetchInitialData
-    }
-  }, [open])
+    };
+  }, [open]);
 
   const fetchInitialData = async () => {
-    setFetchingData(true)
-    const controller = new AbortController()
-    
+    setFetchingData(true);
+    const controller = new AbortController();
+
     try {
       const [customersRes, productsRes, invoiceNumRes] = await Promise.all([
         fetch('/api/customers', { credentials: 'include', signal: controller.signal }),
-        fetch('/api/products', { credentials: 'include', signal: controller.signal }).catch(() => ({ ok: false, json: async () => ({ data: [] }) })),
-        fetch('/api/invoices/next-number?type=' + formData.type, { credentials: 'include', signal: controller.signal }).catch(() => ({ ok: false, json: async () => ({ data: '' }) })),
-      ])
+        fetch('/api/products', { credentials: 'include', signal: controller.signal }).catch(() => ({
+          ok: false,
+          json: async () => ({ data: [] }),
+        })),
+        fetch('/api/invoices/next-number?type=' + formData.type, {
+          credentials: 'include',
+          signal: controller.signal,
+        }).catch(() => ({ ok: false, json: async () => ({ data: '' }) })),
+      ]);
 
       if (customersRes.ok) {
-        const customersData = await customersRes.json()
-        setCustomers(customersData.data || [])
+        const customersData = await customersRes.json();
+        setCustomers(customersData.data || []);
       }
 
       if (productsRes.ok) {
-        const productsData = await productsRes.json()
-        setProducts(productsData.data || [])
+        const productsData = await productsRes.json();
+        setProducts(productsData.data || []);
       }
 
       if (invoiceNumRes.ok) {
-        const invoiceNumData = await invoiceNumRes.json()
-        setInvoiceNumber(invoiceNumData.data || '')
+        const invoiceNumData = await invoiceNumRes.json();
+        setInvoiceNumber(invoiceNumData.data || '');
       }
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') return
-      console.error('Error fetching initial data:', error)
+      if (error instanceof Error && error.name === 'AbortError') return;
+      console.error('Error fetching initial data:', error);
     } finally {
-      setFetchingData(false)
+      setFetchingData(false);
     }
-    
-    return () => controller.abort()
-  }
+
+    return () => controller.abort();
+  };
 
   // Calculate totals
   const calculateLineTotals = (line: InvoiceLine): { amount: number; vatAmount: number } => {
-    const beforeDiscount = line.quantity * line.unitPrice
-    const discountAmount = beforeDiscount * (line.discount / 100)
-    const afterDiscount = beforeDiscount - discountAmount
-    const vatAmount = afterDiscount * (line.vatRate / 100)
-    const amount = afterDiscount
+    const beforeDiscount = line.quantity * line.unitPrice;
+    const discountAmount = beforeDiscount * (line.discount / 100);
+    const afterDiscount = beforeDiscount - discountAmount;
+    const vatAmount = afterDiscount * (line.vatRate / 100);
+    const amount = afterDiscount;
 
-    return { amount, vatAmount }
-  }
+    return { amount, vatAmount };
+  };
 
   const calculateTotals = () => {
-    let subtotal = 0
-    let totalVat = 0
+    let subtotal = 0;
+    let totalVat = 0;
 
-    lines.forEach(line => {
-      const { amount, vatAmount } = calculateLineTotals(line)
-      subtotal += amount
-      totalVat += vatAmount
-    })
+    lines.forEach((line) => {
+      const { amount, vatAmount } = calculateLineTotals(line);
+      subtotal += amount;
+      totalVat += vatAmount;
+    });
 
-    const discountAmount = subtotal * (formData.discountPercent / 100) + formData.discountAmount
-    const afterDiscount = subtotal - discountAmount
-    const vat = totalVat
-    const grandTotal = afterDiscount + vat
-    const withholdingAmount = grandTotal * (formData.withholdingRate / 100)
-    const netTotal = grandTotal - withholdingAmount
+    const discountAmount = subtotal * (formData.discountPercent / 100) + formData.discountAmount;
+    const afterDiscount = subtotal - discountAmount;
+    const vat = totalVat;
+    const grandTotal = afterDiscount + vat;
+    const withholdingAmount = grandTotal * (formData.withholdingRate / 100);
+    const netTotal = grandTotal - withholdingAmount;
 
     return {
       subtotal,
@@ -201,36 +201,38 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
       grandTotal,
       withholdingAmount,
       netTotal,
-    }
-  }
+    };
+  };
 
-  const totals = calculateTotals()
+  const totals = calculateTotals();
 
   // Update line
   const updateLine = (id: string, field: keyof InvoiceLine, value: any) => {
-    setLines(prev => prev.map(line => {
-      if (line.id === id) {
-        const updated = { ...line, [field]: value }
+    setLines((prev) =>
+      prev.map((line) => {
+        if (line.id === id) {
+          const updated = { ...line, [field]: value };
 
-        // Recalculate amounts
-        const { amount, vatAmount } = calculateLineTotals(updated)
-        updated.amount = amount
-        updated.vatAmount = vatAmount
+          // Recalculate amounts
+          const { amount, vatAmount } = calculateLineTotals(updated);
+          updated.amount = amount;
+          updated.vatAmount = vatAmount;
 
-        return updated
-      }
-      return line
-    }))
+          return updated;
+        }
+        return line;
+      })
+    );
 
     // Clear error for this line if exists
     if (errors[`line_${id}_${field}`]) {
-      setErrors(prev => {
-        const updated = { ...prev }
-        delete updated[`line_${id}_${field}`]
-        return updated
-      })
+      setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[`line_${id}_${field}`];
+        return updated;
+      });
     }
-  }
+  };
 
   // Add new line
   const addLine = () => {
@@ -244,9 +246,9 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
       vatRate: 7,
       vatAmount: 0,
       amount: 0,
-    }
-    setLines(prev => [...prev, newLine])
-  }
+    };
+    setLines((prev) => [...prev, newLine]);
+  };
 
   // Remove line
   const removeLine = (id: string) => {
@@ -255,50 +257,50 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
         title: 'ไม่สามารถลบรายการได้',
         description: 'ต้องมีอย่างน้อย 1 รายการ',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
-    setLines(prev => prev.filter(line => line.id !== id))
-  }
+    setLines((prev) => prev.filter((line) => line.id !== id));
+  };
 
   // Select product
   const selectProduct = (lineId: string, productId: string) => {
-    const product = products.find(p => p.id === productId)
+    const product = products.find((p) => p.id === productId);
     if (product) {
-      updateLine(lineId, 'productId', product.id)
-      updateLine(lineId, 'description', product.name)
-      updateLine(lineId, 'unit', product.unit || 'ชิ้น')
-      updateLine(lineId, 'unitPrice', product.unitPrice || 0)
+      updateLine(lineId, 'productId', product.id);
+      updateLine(lineId, 'description', product.name);
+      updateLine(lineId, 'unit', product.unit || 'ชิ้น');
+      updateLine(lineId, 'unitPrice', product.unitPrice || 0);
     }
-  }
+  };
 
   // Validate form
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (!formData.customerId) {
-      newErrors.customerId = 'กรุณาเลือกลูกค้า'
+      newErrors.customerId = 'กรุณาเลือกลูกค้า';
     }
 
     if (lines.length === 0) {
-      newErrors.lines = 'ต้องมีอย่างน้อย 1 รายการ'
+      newErrors.lines = 'ต้องมีอย่างน้อย 1 รายการ';
     }
 
     lines.forEach((line, index) => {
       if (!line.description.trim()) {
-        newErrors[`line_${line.id}_description`] = 'กรุณาระบุรายการสินค้า'
+        newErrors[`line_${line.id}_description`] = 'กรุณาระบุรายการสินค้า';
       }
       if (line.quantity <= 0) {
-        newErrors[`line_${line.id}_quantity`] = 'จำนวนต้องมากกว่า 0'
+        newErrors[`line_${line.id}_quantity`] = 'จำนวนต้องมากกว่า 0';
       }
       if (line.unitPrice < 0) {
-        newErrors[`line_${line.id}_unitPrice`] = 'ราคาต้องไม่ติดลบ'
+        newErrors[`line_${line.id}_unitPrice`] = 'ราคาต้องไม่ติดลบ';
       }
-    })
+    });
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // Format currency
   const formatCurrency = (amount: number): string => {
@@ -307,8 +309,8 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
       currency: 'THB',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
   // Submit form
   const handleSubmit = async () => {
@@ -317,15 +319,15 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
         title: 'กรุณาตรวจสอบข้อมูล',
         description: 'มีข้อมูลที่ต้องกรอกไม่ครบถ้วน',
         variant: 'destructive',
-      })
-      return
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
       const payload = {
         ...formData,
-        lines: lines.map(line => ({
+        lines: lines.map((line) => ({
           productId: line.productId || null,
           description: line.description,
           quantity: line.quantity,
@@ -336,51 +338,52 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
           vatAmount: line.vatAmount,
           amount: line.amount,
         })),
-      }
+      };
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-      }
+      };
 
       // DEV: Skip CSRF entirely in development
       if (process.env.NODE_ENV !== 'development') {
         // Fetch CSRF token first for production
-        let csrfToken = ''
+        let csrfToken = '';
         try {
-          const csrfRes = await fetch(`/api/csrf/token`, { credentials: 'include' })
+          const csrfRes = await fetch(`/api/csrf/token`, { credentials: 'include' });
           if (csrfRes.ok) {
-            const csrfData = await csrfRes.json()
-            csrfToken = csrfData.token || ''
+            const csrfData = await csrfRes.json();
+            csrfToken = csrfData.token || '';
           }
         } catch (error) {
-          console.warn('Failed to fetch CSRF token:', error)
+          console.warn('Failed to fetch CSRF token:', error);
         }
         if (csrfToken) {
-          headers['x-csrf-token'] = csrfToken
+          headers['x-csrf-token'] = csrfToken;
         }
       }
 
-      const response = await fetch(`/api/invoices`, { credentials: 'include', 
+      const response = await fetch(`/api/invoices`, {
+        credentials: 'include',
         method: 'POST',
         headers,
         body: JSON.stringify(payload),
-      })
+      });
 
-      let result
+      let result;
       try {
-        result = await response.json()
+        result = await response.json();
       } catch (jsonError) {
-        throw new Error(`ไม่สามารถบันทึกใบกำกับภาษีได้ (${response.status})`)
+        throw new Error(`ไม่สามารถบันทึกใบกำกับภาษีได้ (${response.status})`);
       }
 
       if (!response.ok) {
-        throw new Error(result?.error || 'ไม่สามารถบันทึกใบกำกับภาษีได้')
+        throw new Error(result?.error || 'ไม่สามารถบันทึกใบกำกับภาษีได้');
       }
 
       toast({
         title: 'บันทึกสำเร็จ',
         description: `บันทึก ${invoiceTypeLabels[formData.type]} เลขที่ ${result.data.invoiceNo} แล้ว`,
-      })
+      });
 
       // Reset form
       setFormData({
@@ -393,7 +396,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
         discountPercent: 0,
         withholdingRate: 0,
         notes: '',
-      })
+      });
       setLines([
         {
           id: '1',
@@ -406,39 +409,35 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
           vatAmount: 0,
           amount: 0,
         },
-      ])
-      setErrors({})
+      ]);
+      setErrors({});
 
-      onSuccess()
-      onClose()
+      onSuccess();
+      onClose();
     } catch (error: any) {
-      console.error('Error submitting invoice:', error)
+      console.error('Error submitting invoice:', error);
       toast({
         title: 'เกิดข้อผิดพลาด',
         description: error.message || 'ไม่สามารถบันทึกใบกำกับภาษีได้',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] md:max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-6xl">
         <VisuallyHidden>
           <DialogDescription>
             สร้างใหม่ invoice dialog สำหรับสร้างใบกำกับภาษีใหม่พร้อมรายการสินค้าและการคำนวณยอดรวม
           </DialogDescription>
         </VisuallyHidden>
         <DialogHeader>
-          <DialogTitle className="text-xl">
-            สร้าง{invoiceTypeLabels[formData.type]}ใหม่
-          </DialogTitle>
+          <DialogTitle className="text-xl">สร้าง{invoiceTypeLabels[formData.type]}ใหม่</DialogTitle>
           {invoiceNumber && (
-            <p className="text-sm text-muted-foreground mt-1">
-              เลขที่เอกสาร: {invoiceNumber}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">เลขที่เอกสาร: {invoiceNumber}</p>
           )}
         </DialogHeader>
 
@@ -450,7 +449,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
         ) : (
           <div className="space-y-6">
             {/* Customer & Type */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               <div className="md:col-span-2">
                 <Label htmlFor="customerId" className="required">
                   ลูกค้า *
@@ -458,13 +457,13 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                 <Select
                   value={formData.customerId}
                   onValueChange={(value) => {
-                    setFormData(prev => ({ ...prev, customerId: value }))
+                    setFormData((prev) => ({ ...prev, customerId: value }));
                     if (errors.customerId) {
-                      setErrors(prev => {
-                        const updated = { ...prev }
-                        delete updated.customerId
-                        return updated
-                      })
+                      setErrors((prev) => {
+                        const updated = { ...prev };
+                        delete updated.customerId;
+                        return updated;
+                      });
                     }
                   }}
                   aria-label="เลือกลูกค้า"
@@ -478,7 +477,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                     <SelectValue placeholder="เลือกลูกค้า" />
                   </SelectTrigger>
                   <SelectContent>
-                    {customers.map(customer => (
+                    {customers.map((customer) => (
                       <SelectItem key={customer.id} value={customer.id}>
                         {customer.code} - {customer.name}
                         {customer.taxId && ` (${customer.taxId})`}
@@ -487,7 +486,9 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                   </SelectContent>
                 </Select>
                 {errors.customerId && (
-                  <p id="customerId-error" className="text-sm text-destructive mt-1" role="alert">{errors.customerId}</p>
+                  <p id="customerId-error" className="mt-1 text-sm text-destructive" role="alert">
+                    {errors.customerId}
+                  </p>
                 )}
               </div>
 
@@ -497,7 +498,9 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                   id="invoiceDate"
                   type="date"
                   value={formData.invoiceDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, invoiceDate: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, invoiceDate: e.target.value }))
+                  }
                   max={new Date().toISOString().split('T')[0]}
                   aria-label="เลือกวันที่เอกสาร"
                 />
@@ -505,14 +508,14 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
             </div>
 
             {/* Reference & PO */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="reference">เลขที่อ้างอิง</Label>
                 <Input
                   id="reference"
                   placeholder="เลขที่อ้างอิง (ถ้ามี)"
                   value={formData.reference}
-                  onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, reference: e.target.value }))}
                   aria-label="เลขที่อ้างอิง"
                 />
               </div>
@@ -522,7 +525,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                   id="poNumber"
                   placeholder="เลขที่ Purchase Order (ถ้ามี)"
                   value={formData.poNumber}
-                  onChange={(e) => setFormData(prev => ({ ...prev, poNumber: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, poNumber: e.target.value }))}
                   aria-label="เลขที่ Purchase Order"
                 />
               </div>
@@ -536,7 +539,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
               <CardContent>
                 <div className="space-y-4">
                   {/* Header */}
-                  <div className="hidden md:grid md:grid-cols-12 gap-2 text-sm font-medium text-muted-foreground">
+                  <div className="hidden gap-2 text-sm font-medium text-muted-foreground md:grid md:grid-cols-12">
                     <div className="col-span-4">รายการ</div>
                     <div className="col-span-1 text-center">จำนวน</div>
                     <div className="col-span-1">หน่วย</div>
@@ -549,9 +552,12 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
 
                   {/* Lines */}
                   {lines.map((line, index) => (
-                    <div key={line.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-start">
+                    <div
+                      key={line.id}
+                      className="grid grid-cols-1 items-start gap-2 md:grid-cols-12"
+                    >
                       {/* Product/Description */}
-                      <div className="md:col-span-4 space-y-1">
+                      <div className="space-y-1 md:col-span-4">
                         {products.length > 0 && (
                           <Select
                             value={line.productId || ''}
@@ -562,7 +568,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                               <SelectValue placeholder="เลือกสินค้า" />
                             </SelectTrigger>
                             <SelectContent>
-                              {products.map(product => (
+                              {products.map((product) => (
                                 <SelectItem key={product.id} value={product.id}>
                                   {product.code} - {product.name}
                                 </SelectItem>
@@ -574,14 +580,26 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                           placeholder="รายการสินค้า/บริการ"
                           value={line.description}
                           onChange={(e) => updateLine(line.id, 'description', e.target.value)}
-                          className={errors[`line_${line.id}_description`] ? 'border-destructive' : ''}
+                          className={
+                            errors[`line_${line.id}_description`] ? 'border-destructive' : ''
+                          }
                           id={`description-${line.id}`}
                           aria-label="รายการสินค้าหรือบริการ"
                           aria-invalid={errors[`line_${line.id}_description`] ? 'true' : 'false'}
-                          aria-describedby={errors[`line_${line.id}_description`] ? `description-error-${line.id}` : undefined}
+                          aria-describedby={
+                            errors[`line_${line.id}_description`]
+                              ? `description-error-${line.id}`
+                              : undefined
+                          }
                         />
                         {errors[`line_${line.id}_description`] && (
-                          <p id={`description-error-${line.id}`} className="text-xs text-destructive" role="alert">{errors[`line_${line.id}_description`]}</p>
+                          <p
+                            id={`description-error-${line.id}`}
+                            className="text-xs text-destructive"
+                            role="alert"
+                          >
+                            {errors[`line_${line.id}_description`]}
+                          </p>
                         )}
                       </div>
 
@@ -592,15 +610,25 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                           min="0"
                           step="1"
                           value={line.quantity}
-                          onChange={(e) => updateLine(line.id, 'quantity', parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateLine(line.id, 'quantity', parseFloat(e.target.value) || 0)
+                          }
                           className={errors[`line_${line.id}_quantity`] ? 'border-destructive' : ''}
                           id={`quantity-${line.id}`}
                           aria-label="จำนวน"
                           aria-invalid={errors[`line_${line.id}_quantity`] ? 'true' : 'false'}
-                          aria-describedby={errors[`line_${line.id}_quantity`] ? `quantity-error-${line.id}` : undefined}
+                          aria-describedby={
+                            errors[`line_${line.id}_quantity`]
+                              ? `quantity-error-${line.id}`
+                              : undefined
+                          }
                         />
                         {errors[`line_${line.id}_quantity`] && (
-                          <p id={`quantity-error-${line.id}`} className="text-xs text-destructive md:hidden mt-1" role="alert">
+                          <p
+                            id={`quantity-error-${line.id}`}
+                            className="mt-1 text-xs text-destructive md:hidden"
+                            role="alert"
+                          >
                             {errors[`line_${line.id}_quantity`]}
                           </p>
                         )}
@@ -637,8 +665,12 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                           step="0.01"
                           placeholder="0.00"
                           value={line.unitPrice}
-                          onChange={(e) => updateLine(line.id, 'unitPrice', parseFloat(e.target.value) || 0)}
-                          className={errors[`line_${line.id}_unitPrice`] ? 'border-destructive' : ''}
+                          onChange={(e) =>
+                            updateLine(line.id, 'unitPrice', parseFloat(e.target.value) || 0)
+                          }
+                          className={
+                            errors[`line_${line.id}_unitPrice`] ? 'border-destructive' : ''
+                          }
                           id={`unitPrice-${line.id}`}
                           aria-label="ราคาต่อหน่วย"
                           aria-invalid={errors[`line_${line.id}_unitPrice`] ? 'true' : 'false'}
@@ -654,26 +686,32 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                           step="1"
                           placeholder="0"
                           value={line.discount}
-                          onChange={(e) => updateLine(line.id, 'discount', parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateLine(line.id, 'discount', parseFloat(e.target.value) || 0)
+                          }
                           className="pr-6"
                           id={`discount-${line.id}`}
                           aria-label="ส่วนลด (%)"
                         />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                          %
+                        </span>
                       </div>
 
                       {/* VAT */}
                       <div>
                         <Select
                           value={line.vatRate.toString()}
-                          onValueChange={(value) => updateLine(line.id, 'vatRate', parseFloat(value))}
+                          onValueChange={(value) =>
+                            updateLine(line.id, 'vatRate', parseFloat(value))
+                          }
                           aria-label="อัตรา VAT"
                         >
                           <SelectTrigger className="w-full" id={`vatRate-${line.id}`}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {vatRates.map(rate => (
+                            {vatRates.map((rate) => (
                               <SelectItem key={rate} value={rate.toString()}>
                                 {rate}%
                               </SelectItem>
@@ -713,7 +751,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                     className="w-full"
                     aria-label="เพิ่มรายการสินค้า"
                   >
-                    <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
+                    <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
                     เพิ่มรายการ
                   </Button>
                 </div>
@@ -729,7 +767,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                     <span>{formatCurrency(totals.subtotal)}</span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                       <Label htmlFor="discountPercent">ส่วนลด (%)</Label>
                       <Input
@@ -738,7 +776,12 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                         min="0"
                         max="100"
                         value={formData.discountPercent}
-                        onChange={(e) => setFormData(prev => ({ ...prev, discountPercent: parseFloat(e.target.value) || 0 }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            discountPercent: parseFloat(e.target.value) || 0,
+                          }))
+                        }
                         aria-label="ส่วนลดเปอร์เซ็นต์"
                       />
                     </div>
@@ -750,7 +793,12 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                         min="0"
                         step="0.01"
                         value={formData.discountAmount}
-                        onChange={(e) => setFormData(prev => ({ ...prev, discountAmount: parseFloat(e.target.value) || 0 }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            discountAmount: parseFloat(e.target.value) || 0,
+                          }))
+                        }
                         aria-label="ส่วนลดเป็นบาท"
                       />
                     </div>
@@ -773,7 +821,7 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                     <span>{formatCurrency(totals.totalVat)}</span>
                   </div>
 
-                  <div className="flex justify-between text-lg font-bold border-t pt-2">
+                  <div className="flex justify-between border-t pt-2 text-lg font-bold">
                     <span>ยอดรวมสุทธิ</span>
                     <span className="text-blue-600">{formatCurrency(totals.grandTotal)}</span>
                   </div>
@@ -795,25 +843,34 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
             </Card>
 
             {/* Withholding Tax & Notes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <div className="flex items-center gap-1.5">
                   <Label htmlFor="withholdingRate">หัก ณ ที่จ่าย (%)</Label>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button type="button" className="text-muted-foreground hover:text-foreground cursor-help" aria-label="ข้อมูลอัตราหัก ณ ที่จ่าย">
+                      <button
+                        type="button"
+                        className="cursor-help text-muted-foreground hover:text-foreground"
+                        aria-label="ข้อมูลอัตราหัก ณ ที่จ่าย"
+                      >
                         <Info className="h-3.5 w-3.5" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="right" className="max-w-xs">
                       <div className="space-y-1">
-                        <p className="font-semibold text-xs mb-2">อัตราหัก ณ ที่จ่าย ภ.ง.ด.53</p>
+                        <p className="mb-2 text-xs font-semibold">อัตราหัก ณ ที่จ่าย ภ.ง.ด.53</p>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
-                          <span>ค่าบริการ</span><span className="text-right font-medium">3%</span>
-                          <span>ค่าเช่า</span><span className="text-right font-medium">5%</span>
-                          <span>ค่าบริการวิชาชีพ</span><span className="text-right font-medium">3%</span>
-                          <span>ค่าจ้างทำของ</span><span className="text-right font-medium">1%</span>
-                          <span>ค่าโฆษณา</span><span className="text-right font-medium">2%</span>
+                          <span>ค่าบริการ</span>
+                          <span className="text-right font-medium">3%</span>
+                          <span>ค่าเช่า</span>
+                          <span className="text-right font-medium">5%</span>
+                          <span>ค่าบริการวิชาชีพ</span>
+                          <span className="text-right font-medium">3%</span>
+                          <span>ค่าจ้างทำของ</span>
+                          <span className="text-right font-medium">1%</span>
+                          <span>ค่าโฆษณา</span>
+                          <span className="text-right font-medium">2%</span>
                         </div>
                       </div>
                     </TooltipContent>
@@ -821,7 +878,9 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                 </div>
                 <Select
                   value={formData.withholdingRate.toString()}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, withholdingRate: parseFloat(value) }))}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, withholdingRate: parseFloat(value) }))
+                  }
                   aria-label="เลือกอัตราหัก ณ ที่จ่าย"
                 >
                   <SelectTrigger id="withholdingRate">
@@ -843,14 +902,14 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
                   id="notes"
                   placeholder="หมายเหตุ (ถ้ามี)"
                   value={formData.notes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
                   aria-label="หมายเหตุ"
                 />
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 border-t">
+            <div className="flex flex-col-reverse justify-end gap-2 border-t pt-4 sm:flex-row">
               <Button
                 type="button"
                 variant="outline"
@@ -869,12 +928,12 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
               >
                 {loading ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                     กำลังบันทึก...
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" aria-hidden="true" />
+                    <Save className="mr-2 h-4 w-4" aria-hidden="true" />
                     บันทึก
                   </>
                 )}
@@ -884,5 +943,5 @@ export function InvoiceForm({ open, onClose, onSuccess, defaultType = 'TAX_INVOI
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }
