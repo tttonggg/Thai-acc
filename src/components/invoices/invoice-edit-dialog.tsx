@@ -1,5 +1,9 @@
 'use client';
 
+// TODO: Consider splitting this large dialog (1134 lines) following the invoice-list pattern
+// See: src/components/invoices/invoice-list-virtual.tsx for virtualization reference
+// Consider extracting: line-item-editor, invoice-preview, invoice-audit-log sections
+
 import { useState, useEffect } from 'react';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import {
