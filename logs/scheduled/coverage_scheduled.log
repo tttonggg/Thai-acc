@@ -1,0 +1,11 @@
+
+[0;36m═══════════════════════════════════════════════════════════════[0m
+[0;36m  Generating Coverage Report[0m
+[0;36m═══════════════════════════════════════════════════════════════[0m
+
+[0;34m▶ Running unit tests with coverage...[0m
+./scripts/test-automation.sh: line 413: bun: command not found
+[0;31m❌ Coverage tests failed (exit code: 127)[0m
+
+[0;34mℹ️  Coverage report generated in 0s[0m
+[0;34mℹ️  Coverage report: /Users/tong/thai-acc/coverage/index.html[0m

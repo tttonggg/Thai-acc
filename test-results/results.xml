@@ -1,0 +1,118 @@
+<testsuites id="" name="" tests="14" failures="1" skipped="11" errors="0" time="40.64017499999999">
+<testsuite name="comprehensive/accounts.spec.ts" timestamp="2026-05-01T06:43:27.621Z" hostname="ci-headless" tests="14" failures="1" skipped="11" time="34.574" errors="0">
+<testcase name="Chart of Accounts - Comprehensive Tests › [NAVIGATE] To Chart of Accounts module" classname="comprehensive/accounts.spec.ts" time="9.937">
+<system-out>
+<![CDATA[✅ Login successful as ACCOUNTANT
+✅ Navigating directly to: /accounts
+Final URL: https://acc.k56mm.uk/accounts
+✅ Navigated to: ผังบัญชี
+✅ Navigated to Chart of Accounts module
+]]>
+</system-out>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [CREATE] Add new account button" classname="comprehensive/accounts.spec.ts" time="11.615">
+<system-out>
+<![CDATA[✅ Login successful as ACCOUNTANT
+✅ Navigating directly to: /accounts
+Final URL: https://acc.k56mm.uk/accounts
+✅ Navigated to: ผังบัญชี
+✅ Add Account button found
+📸 Screenshot saved: screenshots/comprehensive/accounts/add-account-button.png
+]]>
+</system-out>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [CREATE] Fill and submit new account form" classname="comprehensive/accounts.spec.ts" time="13.022">
+<failure message="accounts.spec.ts:85:7 [CREATE] Fill and submit new account form" type="FAILURE">
+<![CDATA[  [ci-headless] › comprehensive/accounts.spec.ts:85:7 › Chart of Accounts - Comprehensive Tests › [CREATE] Fill and submit new account form 
+
+    Error: Failed to fetch records from /api/accounts
+
+       at comprehensive/test-helpers.ts:285
+
+      283 |
+      284 |   if (!result.success) {
+    > 285 |     throw new Error(`Failed to fetch records from ${endpoint}`)
+          |           ^
+      286 |   }
+      287 |
+      288 |   const record = result.data.find((r: any) => r.code === code)
+        at verifyRecordExists (/Users/tong/Thai-acc/e2e/comprehensive/test-helpers.ts:285:11)
+        at /Users/tong/Thai-acc/e2e/comprehensive/accounts.spec.ts:119:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/comprehensive-accounts-Cha-c2f9d-and-submit-new-account-form-ci-headless/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/comprehensive-accounts-Cha-c2f9d-and-submit-new-account-form-ci-headless/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/comprehensive-accounts-Cha-c2f9d-and-submit-new-account-form-ci-headless/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[✅ Login successful as ACCOUNTANT
+✅ Navigating directly to: /accounts
+Final URL: https://acc.k56mm.uk/accounts
+✅ Navigated to: ผังบัญชี
+  ✅ Filled field: รหัส = TEST844814
+  ✅ Filled field: ชื่อบัญชี = บัญชีทดสอบ TEST844814
+  ⚠️ Input not found for label: ประเภท
+  ⚠️ Label not found: คำอธิบาย
+🔔 Toast notification: 
+✅ Created account: TEST844814
+
+[[ATTACHMENT|comprehensive-accounts-Cha-c2f9d-and-submit-new-account-form-ci-headless/test-failed-1.png]]
+
+[[ATTACHMENT|comprehensive-accounts-Cha-c2f9d-and-submit-new-account-form-ci-headless/video.webm]]
+
+[[ATTACHMENT|comprehensive-accounts-Cha-c2f9d-and-submit-new-account-form-ci-headless/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [VALIDATE] Account code uniqueness" classname="comprehensive/accounts.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [EDIT] Account button per row" classname="comprehensive/accounts.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [CREATE] Add child account button" classname="comprehensive/accounts.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [DELETE] Account button with validation" classname="comprehensive/accounts.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [VALIDATE] Cannot delete account with transactions" classname="comprehensive/accounts.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [FILTER] Account by type" classname="comprehensive/accounts.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [SEARCH] Account by name or code" classname="comprehensive/accounts.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [PAGINATION] Navigate through account pages" classname="comprehensive/accounts.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [UI] Expand and collapse account hierarchy" classname="comprehensive/accounts.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [EXPORT] Account list" classname="comprehensive/accounts.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Chart of Accounts - Comprehensive Tests › [SCREENSHOT] Accounts module overview" classname="comprehensive/accounts.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+</testsuites>

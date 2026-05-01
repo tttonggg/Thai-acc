@@ -1,0 +1,882 @@
+{
+  "config": {
+    "configFile": "/Users/tong/Thai-acc/playwright.config.ts",
+    "rootDir": "/Users/tong/Thai-acc/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/tong/Thai-acc/tests/global-setup.ts",
+    "globalTeardown": "/Users/tong/Thai-acc/tests/global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "project": "Thai Accounting ERP",
+      "version": "1.0.0",
+      "environment": "development",
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/tong/Thai-acc/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "project": "Thai Accounting ERP",
+          "version": "1.0.0",
+          "environment": "development",
+          "actualWorkers": 1
+        },
+        "id": "ci-headless",
+        "name": "ci-headless",
+        "testDir": "/Users/tong/Thai-acc/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/tong/Thai-acc/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "project": "Thai Accounting ERP",
+          "version": "1.0.0",
+          "environment": "development",
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/tong/Thai-acc/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/tong/Thai-acc/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "project": "Thai Accounting ERP",
+          "version": "1.0.0",
+          "environment": "development",
+          "actualWorkers": 1
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/tong/Thai-acc/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/tong/Thai-acc/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "project": "Thai Accounting ERP",
+          "version": "1.0.0",
+          "environment": "development",
+          "actualWorkers": 1
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/tong/Thai-acc/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/tong/Thai-acc/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "project": "Thai Accounting ERP",
+          "version": "1.0.0",
+          "environment": "development",
+          "actualWorkers": 1
+        },
+        "id": "Microsoft Edge",
+        "name": "Microsoft Edge",
+        "testDir": "/Users/tong/Thai-acc/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/tong/Thai-acc/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "project": "Thai Accounting ERP",
+          "version": "1.0.0",
+          "environment": "development",
+          "actualWorkers": 1
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/Users/tong/Thai-acc/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/tong/Thai-acc/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "project": "Thai Accounting ERP",
+          "version": "1.0.0",
+          "environment": "development",
+          "actualWorkers": 1
+        },
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/Users/tong/Thai-acc/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/tong/Thai-acc/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "project": "Thai Accounting ERP",
+          "version": "1.0.0",
+          "environment": "development",
+          "actualWorkers": 1
+        },
+        "id": "iPhone SE",
+        "name": "iPhone SE",
+        "testDir": "/Users/tong/Thai-acc/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/tong/Thai-acc/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "project": "Thai Accounting ERP",
+          "version": "1.0.0",
+          "environment": "development",
+          "actualWorkers": 1
+        },
+        "id": "Galaxy S8",
+        "name": "Galaxy S8",
+        "testDir": "/Users/tong/Thai-acc/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/tong/Thai-acc/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "project": "Thai Accounting ERP",
+          "version": "1.0.0",
+          "environment": "development",
+          "actualWorkers": 1
+        },
+        "id": "iPad",
+        "name": "iPad",
+        "testDir": "/Users/tong/Thai-acc/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/tong/Thai-acc/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "project": "Thai Accounting ERP",
+          "version": "1.0.0",
+          "environment": "development",
+          "actualWorkers": 1
+        },
+        "id": "iPad Pro",
+        "name": "iPad Pro",
+        "testDir": "/Users/tong/Thai-acc/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report",
+          "open": "never",
+          "host": "localhost",
+          "port": 9323
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "test-results/results.xml"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.2",
+    "workers": 4,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "comprehensive/accounts.spec.ts",
+      "file": "comprehensive/accounts.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Chart of Accounts - Comprehensive Tests",
+          "file": "comprehensive/accounts.spec.ts",
+          "line": 28,
+          "column": 6,
+          "specs": [
+            {
+              "title": "[NAVIGATE] To Chart of Accounts module",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9937,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Login successful as ACCOUNTANT\n"
+                        },
+                        {
+                          "text": "✅ Navigating directly to: /accounts\n"
+                        },
+                        {
+                          "text": "Final URL: https://acc.k56mm.uk/accounts\n"
+                        },
+                        {
+                          "text": "✅ Navigated to: ผังบัญชี\n"
+                        },
+                        {
+                          "text": "✅ Navigated to Chart of Accounts module\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:43:28.745Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-b4e53b770b1029cad00c",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 57,
+              "column": 7
+            },
+            {
+              "title": "[CREATE] Add new account button",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 11615,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Login successful as ACCOUNTANT\n"
+                        },
+                        {
+                          "text": "✅ Navigating directly to: /accounts\n"
+                        },
+                        {
+                          "text": "Final URL: https://acc.k56mm.uk/accounts\n"
+                        },
+                        {
+                          "text": "✅ Navigated to: ผังบัญชี\n"
+                        },
+                        {
+                          "text": "✅ Add Account button found\n"
+                        },
+                        {
+                          "text": "📸 Screenshot saved: screenshots/comprehensive/accounts/add-account-button.png\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:43:41.727Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-1a1999ba0783ae5b6426",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 69,
+              "column": 7
+            },
+            {
+              "title": "[CREATE] Fill and submit new account form",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 13022,
+                      "error": {
+                        "message": "Error: Failed to fetch records from /api/accounts",
+                        "stack": "Error: Failed to fetch records from /api/accounts\n    at verifyRecordExists (/Users/tong/Thai-acc/e2e/comprehensive/test-helpers.ts:285:11)\n    at /Users/tong/Thai-acc/e2e/comprehensive/accounts.spec.ts:119:5",
+                        "location": {
+                          "file": "/Users/tong/Thai-acc/e2e/comprehensive/test-helpers.ts",
+                          "column": 11,
+                          "line": 285
+                        },
+                        "snippet": "\u001b[90m   at \u001b[39mcomprehensive/test-helpers.ts:285\n\n  283 |\n  284 |   if (!result.success) {\n> 285 |     throw new Error(`Failed to fetch records from ${endpoint}`)\n      |           ^\n  286 |   }\n  287 |\n  288 |   const record = result.data.find((r: any) => r.code === code)"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/tong/Thai-acc/e2e/comprehensive/test-helpers.ts",
+                            "column": 11,
+                            "line": 285
+                          },
+                          "message": "Error: Failed to fetch records from /api/accounts\n\n   at comprehensive/test-helpers.ts:285\n\n  283 |\n  284 |   if (!result.success) {\n> 285 |     throw new Error(`Failed to fetch records from ${endpoint}`)\n      |           ^\n  286 |   }\n  287 |\n  288 |   const record = result.data.find((r: any) => r.code === code)\n    at verifyRecordExists (/Users/tong/Thai-acc/e2e/comprehensive/test-helpers.ts:285:11)\n    at /Users/tong/Thai-acc/e2e/comprehensive/accounts.spec.ts:119:5"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "✅ Login successful as ACCOUNTANT\n"
+                        },
+                        {
+                          "text": "✅ Navigating directly to: /accounts\n"
+                        },
+                        {
+                          "text": "Final URL: https://acc.k56mm.uk/accounts\n"
+                        },
+                        {
+                          "text": "✅ Navigated to: ผังบัญชี\n"
+                        },
+                        {
+                          "text": "  ✅ Filled field: รหัส = TEST844814\n"
+                        },
+                        {
+                          "text": "  ✅ Filled field: ชื่อบัญชี = บัญชีทดสอบ TEST844814\n"
+                        },
+                        {
+                          "text": "  ⚠️ Input not found for label: ประเภท\n"
+                        },
+                        {
+                          "text": "  ⚠️ Label not found: คำอธิบาย\n"
+                        },
+                        {
+                          "text": "🔔 Toast notification: \n"
+                        },
+                        {
+                          "text": "✅ Created account: TEST844814\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:43:53.351Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/tong/Thai-acc/test-results/comprehensive-accounts-Cha-c2f9d-and-submit-new-account-form-ci-headless/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/tong/Thai-acc/test-results/comprehensive-accounts-Cha-c2f9d-and-submit-new-account-form-ci-headless/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/tong/Thai-acc/test-results/comprehensive-accounts-Cha-c2f9d-and-submit-new-account-form-ci-headless/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/tong/Thai-acc/e2e/comprehensive/test-helpers.ts",
+                        "column": 11,
+                        "line": 285
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-10d5c9d04e8f590e04dc",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 85,
+              "column": 7
+            },
+            {
+              "title": "[VALIDATE] Account code uniqueness",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:44:07.828Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-02d38a54d3e15f78b04c",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 125,
+              "column": 7
+            },
+            {
+              "title": "[EDIT] Account button per row",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:44:07.828Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-8cd256e0055629e53eab",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 161,
+              "column": 7
+            },
+            {
+              "title": "[CREATE] Add child account button",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:44:07.828Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-3081c1f5e5ad0ac386e2",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 217,
+              "column": 7
+            },
+            {
+              "title": "[DELETE] Account button with validation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:44:07.828Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-95baf6d9dcbea74dfbe0",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 274,
+              "column": 7
+            },
+            {
+              "title": "[VALIDATE] Cannot delete account with transactions",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:44:07.829Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-83a0efd71eb8c4961ef0",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 323,
+              "column": 7
+            },
+            {
+              "title": "[FILTER] Account by type",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:44:07.829Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-cfd0e0f5c8f3308b5d5e",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 373,
+              "column": 7
+            },
+            {
+              "title": "[SEARCH] Account by name or code",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:44:07.829Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-8bbd1ffedf9afc3584dd",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 404,
+              "column": 7
+            },
+            {
+              "title": "[PAGINATION] Navigate through account pages",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:44:07.829Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-c10b437bf20547c7a3a6",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 444,
+              "column": 7
+            },
+            {
+              "title": "[UI] Expand and collapse account hierarchy",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:44:07.829Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-c55ab08d0cb53d5ee591",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 480,
+              "column": 7
+            },
+            {
+              "title": "[EXPORT] Account list",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:44:07.829Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-e70eb3794fa9e889f162",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 512,
+              "column": 7
+            },
+            {
+              "title": "[SCREENSHOT] Accounts module overview",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ci-headless",
+                  "projectName": "ci-headless",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-01T06:44:07.829Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e56a68e1cb32fd38cf2-ddd6bbcca397a2afc20d",
+              "file": "comprehensive/accounts.spec.ts",
+              "line": 538,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-05-01T06:43:27.335Z",
+    "duration": 40640.174999999996,
+    "expected": 2,
+    "skipped": 11,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

@@ -1,0 +1,228 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic:
+    - generic:
+      - complementary:
+        - generic:
+          - generic:
+            - generic:
+              - img
+            - generic:
+              - heading [level=1]: Keerati ERP
+              - paragraph: โปรแกรมบัญชีสไตล์คุณ
+          - button:
+            - img
+        - navigation:
+          - generic:
+            - button:
+              - img
+              - generic: หน้าหลัก (Main)
+              - img
+          - generic:
+            - button:
+              - img
+              - generic: บุคคล (PEOPLE)
+              - img
+        - generic:
+          - button:
+            - img
+            - generic: ปรับแต่งธีม
+          - button:
+            - generic:
+              - generic: น
+            - generic:
+              - paragraph: นักบัญชี ทดสอบ
+              - paragraph: นักบัญชี
+          - generic:
+            - paragraph: Keerati ERP v1.0 🛺
+            - paragraph: Made with 💕
+    - generic:
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - heading [level=1]: ผังบัญชี
+              - paragraph: จัดการผังบัญชีตามมาตรฐาน TFRS
+            - generic:
+              - button:
+                - img
+                - text: นำเข้า
+              - button:
+                - img
+                - text: ส่งออก
+              - button [expanded]:
+                - img
+                - text: เพิ่มบัญชี
+          - generic:
+            - generic:
+              - generic:
+                - img
+                - textbox:
+                  - /placeholder: ค้นหาบัญชี...
+          - generic:
+            - generic:
+              - generic: รายการบัญชี (75 บัญชี)
+            - generic:
+              - generic:
+                - table:
+                  - rowgroup:
+                    - row:
+                      - columnheader: รหัสบัญชี
+                      - columnheader: ชื่อบัญชี
+                      - columnheader: ประเภท
+                      - columnheader: สถานะ
+                      - columnheader: จัดการ
+                  - rowgroup:
+                    - row:
+                      - cell:
+                        - generic:
+                          - button:
+                            - img
+                          - img
+                          - generic: "1000"
+                      - cell: สินทรัพย์
+                      - cell:
+                        - generic: สินทรัพย์
+                      - cell:
+                        - generic: หมวด
+                      - cell:
+                        - generic:
+                          - button:
+                            - img
+                          - button:
+                            - img
+                          - button:
+                            - img
+                    - row:
+                      - cell:
+                        - generic:
+                          - generic: "1145"
+                      - cell: ภาษีมูลค่าเพิ่มซื้อ
+                      - cell:
+                        - generic: สินทรัพย์
+                      - cell:
+                        - generic: รายละเอียด
+                      - cell:
+                        - generic:
+                          - button:
+                            - img
+                          - button:
+                            - img
+                    - row:
+                      - cell:
+                        - generic:
+                          - button:
+                            - img
+                          - img
+                          - generic: "2000"
+                      - cell: หนี้สิน
+                      - cell:
+                        - generic: หนี้สิน
+                      - cell:
+                        - generic: หมวด
+                      - cell:
+                        - generic:
+                          - button:
+                            - img
+                          - button:
+                            - img
+                          - button:
+                            - img
+                    - row:
+                      - cell:
+                        - generic:
+                          - button:
+                            - img
+                          - img
+                          - generic: "3000"
+                      - cell: ส่วนของผู้ถือหุ้น
+                      - cell:
+                        - generic: ทุน
+                      - cell:
+                        - generic: หมวด
+                      - cell:
+                        - generic:
+                          - button:
+                            - img
+                          - button:
+                            - img
+                          - button:
+                            - img
+                    - row:
+                      - cell:
+                        - generic:
+                          - button:
+                            - img
+                          - img
+                          - generic: "4000"
+                      - cell: รายได้
+                      - cell:
+                        - generic: รายได้
+                      - cell:
+                        - generic: หมวด
+                      - cell:
+                        - generic:
+                          - button:
+                            - img
+                          - button:
+                            - img
+                          - button:
+                            - img
+                    - row:
+                      - cell:
+                        - generic:
+                          - button:
+                            - img
+                          - img
+                          - generic: "5000"
+                      - cell: ค่าใช้จ่าย
+                      - cell:
+                        - generic: ค่าใช้จ่าย
+                      - cell:
+                        - generic: หมวด
+                      - cell:
+                        - generic:
+                          - button:
+                            - img
+                          - button:
+                            - img
+                          - button:
+                            - img
+  - region "Notifications alt+T"
+  - generic:
+    - generic: v940febb
+    - text: 30/4/2569 09:42:23
+  - alert
+  - generic: 2K
+  - dialog "เพิ่มบัญชีใหม่" [ref=e2]:
+    - generic [ref=e3]:
+      - heading "เพิ่มบัญชีใหม่" [level=2] [ref=e4]
+      - paragraph [ref=e5]: กรอกข้อมูลบัญชีใหม่ตามแบบฟอร์มด้านล่าง
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]: รหัสบัญชี
+        - textbox "รหัสบัญชี" [ref=e9]:
+          - /placeholder: เช่น 1111
+          - text: TEST844814
+      - generic [ref=e10]:
+        - generic [ref=e11]: ชื่อบัญชี
+        - textbox "ชื่อบัญชี" [ref=e12]: บัญชีทดสอบ TEST844814
+      - generic [ref=e13]:
+        - generic [ref=e14]: ประเภท
+        - combobox [ref=e15]:
+          - generic: สินทรัพย์
+          - img
+      - generic [ref=e16]:
+        - generic [ref=e17]: ประเภทบัญชี
+        - combobox [ref=e18]:
+          - generic: บัญชีรายละเอียด (สามารถลงบัญชีได้)
+          - img
+    - generic [ref=e19]:
+      - button "ยกเลิก" [ref=e20]
+      - button "บันทึก" [active] [ref=e21]
+    - button "Close" [ref=e22]:
+      - img
+      - generic [ref=e23]: Close
+```

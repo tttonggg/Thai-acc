@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     // Handle auth errors
-    if (error?.statusCode === 401 || error?.message?.includes('Unauthorized')) {
+    if (error?.statusCode === 401 || error?.message?.includes('Unauthorized') || error?.message?.includes('ไม่ได้รับอนุญาต')) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
