@@ -1,132 +1,235 @@
 // ============================================
-// Revenue Auto-Service Stub
+// Revenue Auto-Service
 // บริการสร้างรายได้อัตโนมัติ
 //
-// STATUS: STUB - Not yet implemented
-//
-// CURRENT: Revenue GL entries are created manually in:
-//   src/app/api/invoices/[id]/issue/route.ts
-//
-// PURPOSE: This service should handle automatic revenue recognition and
-// GL entry creation for:
-//   - Invoice issuance
-//   - Revenue scheduling/recognition
-//   - Deferred revenue handling
-//   - Accrued revenue
-//
-// EXPECTED INTERFACE:
+// Implements revenue GL journal entry creation for issued invoices.
+// Replaces inline JE creation in src/app/api/invoices/[id]/issue/route.ts
 // ============================================
 
-/**
- * Create revenue GL entries from an issued invoice
- * 
- * CURRENT LOCATION: src/app/api/invoices/[id]/issue/route.ts (manual)
- * 
- * @param invoiceId - The issued invoice ID
- * @param options - Recognition options
- * @returns Object containing journal entry ID and details
- */
-export async function createRevenueGLEntry(
-  invoiceId: string,
-  options?: {
-    recognitionDate?: Date;     // Defaults to invoice date
-    deferredUntil?: Date;       // If provided, revenue is deferred
-    splitByLine?: boolean;      // Create separate entries per line item
-  }
-): Promise<{
+import { PrismaClient } from '@prisma/client';
+import { generateDocNumber } from './api-utils';
+
+export interface RevenueJEContext {
+  userId: string;
+  invoiceId: string;
+  invoiceNo: string;
+  invoiceDate: Date;
+  /** Total including VAT (Satang) */
+  totalAmount: number;
+  /** Subtotal before VAT (Satang) */
+  subtotal: number;
+  /** VAT amount (Satang) */
+  vatAmount: number;
+}
+
+export interface RevenueJELine {
+  accountCode: string;
+  accountId: string;
+  description: string;
+  debit: number;   // Satang
+  credit: number;  // Satang
+}
+
+export interface CreateRevenueJournalEntryResult {
   journalEntryId: string;
-  lines: Array<{
-    accountId: string;
-    debit: number;      // Satang
-    credit: number;     // Satang
-    description: string;
-  }>;
-}> {
-  // TODO: Implement revenue GL entry creation
-  // - Debit: Accounts Receivable (or Cash)
-  // - Credit: Revenue account(s) by line item
-  // - Tax: VAT Payable
-  throw new Error('Revenue auto-service not yet implemented. GL entries created manually in invoices/[id]/issue/route.ts');
+  entryNo: string;
+  lines: RevenueJELine[];
 }
 
 /**
- * Recognize deferred revenue on a specific date
- * 
- * @param deferredRevenueId - Reference to the deferred revenue record
- * @param amount - Amount to recognize (Satang)
- * @param recognitionDate - Date to recognize
+ * Create revenue GL journal entry for an issued invoice.
+ *
+ * Creates balanced double-entry:
+ *   DR: Accounts Receivable (1120)    = totalAmount (incl. VAT)
+ *   CR: Sales Revenue (4100)          = subtotal
+ *   CR: VAT Output Payable (2132)     = vatAmount (if > 0)
+ *
+ * @param db      - PrismaClient (passed in so caller controls tx)
+ * @param ctx     - Invoice context (already fetched by caller)
+ * @returns       - Created JE ID, entryNo, and line details
  */
-export async function recognizeDeferredRevenue(
-  deferredRevenueId: string,
-  amount: number,
-  recognitionDate: Date
-): Promise<{ journalEntryId: string }> {
-  // TODO: Implement deferred revenue recognition
-  // - Debit: Deferred Revenue liability
-  // - Credit: Revenue
-  throw new Error('Deferred revenue recognition not yet implemented');
-}
+export async function createRevenueJournalEntry(
+  db: PrismaClient,
+  ctx: RevenueJEContext
+): Promise<CreateRevenueJournalEntryResult> {
+  // Look up required accounts
+  const [arAccount, revenueAccount, vatOutputAccount] = await Promise.all([
+    db.chartOfAccount.findUnique({ where: { code: '1120' } }),
+    db.chartOfAccount.findUnique({ where: { code: '4100' } }),
+    db.chartOfAccount.findUnique({ where: { code: '2132' } }),
+  ]);
 
-/**
- * Reverse revenue entry (for credit notes/cancellations)
- * 
- * @param originalJournalEntryId - Journal entry to reverse
- * @param reason - Reason for reversal
- */
-export async function reverseRevenueEntry(
-  originalJournalEntryId: string,
-  reason: string
-): Promise<{ reversalJournalEntryId: string }> {
-  // TODO: Implement revenue reversal
-  // - Creates reversing entries
-  // - Links to original entry
-  throw new Error('Revenue reversal not yet implemented');
-}
-
-/**
- * Get revenue by period for reporting
- * 
- * @param startDate - Period start
- * @param endDate - Period end
- * @param options - Grouping options
- */
-export async function getRevenueByPeriod(
-  startDate: Date,
-  endDate: Date,
-  options?: {
-    groupBy?: 'account' | 'customer' | 'product' | 'month';
-    accountId?: string;  // Filter by specific account
+  if (!arAccount || !revenueAccount || !vatOutputAccount) {
+    throw new Error(
+      `ไม่พบบัญชี: AR (1120=${!!arAccount}), รายได้ (4100=${!!revenueAccount}), VAT ขาย (2132=${!!vatOutputAccount})`
+    );
   }
-): Promise<{
-  totalRevenue: number;  // Satang
-  breakdown: Array<{
-    key: string;
-    revenue: number;     // Satang
-    percentage: number;
-  }>;
-}> {
-  // TODO: Implement revenue reporting
-  throw new Error('Revenue reporting not yet implemented');
+
+  // Validate accounting equation
+  if (ctx.subtotal + ctx.vatAmount !== ctx.totalAmount) {
+    throw new Error(
+      `ยอดไม่ถูกต้อง: subtotal(${ctx.subtotal}) + vat(${ctx.vatAmount}) != total(${ctx.totalAmount})`
+    );
+  }
+
+  const entryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE');
+
+  // Build JE lines
+  const lines: RevenueJELine[] = [
+    {
+      accountCode: '1120',
+      accountId: arAccount.id,
+      description: `ลูกหนี้การค้า ${ctx.invoiceNo}`,
+      debit: ctx.totalAmount,
+      credit: 0,
+    },
+    {
+      accountCode: '4100',
+      accountId: revenueAccount.id,
+      description: `รายได้ขาย ${ctx.invoiceNo}`,
+      debit: 0,
+      credit: ctx.subtotal,
+    },
+  ];
+
+  // Only create VAT line if there's actually VAT
+  if (ctx.vatAmount > 0) {
+    lines.push({
+      accountCode: '2132',
+      accountId: vatOutputAccount.id,
+      description: `ภาษีมูลค่าเพิ่มขาย ${ctx.invoiceNo}`,
+      debit: 0,
+      credit: ctx.vatAmount,
+    });
+  }
+
+  // Create journal entry
+  const journalEntry = await db.journalEntry.create({
+    data: {
+      entryNo,
+      date: ctx.invoiceDate,
+      description: `รายได้ขาย ${ctx.invoiceNo}`,
+      reference: ctx.invoiceNo,
+      documentType: 'INVOICE_REVENUE',
+      documentId: ctx.invoiceId,
+      totalDebit: ctx.totalAmount,
+      totalCredit: ctx.totalAmount,
+      status: 'POSTED',
+      createdById: ctx.userId,
+      approvedById: ctx.userId,
+      approvedAt: new Date(),
+      lines: {
+        create: lines.map((line, idx) => ({
+          lineNo: idx + 1,
+          accountId: line.accountId,
+          description: line.description,
+          debit: line.debit,
+          credit: line.credit,
+          reference: ctx.invoiceNo,
+        })),
+      },
+    },
+  });
+
+  return {
+    journalEntryId: journalEntry.id,
+    entryNo: journalEntry.entryNo,
+    lines,
+  };
 }
 
 /**
- * Calculate accrued revenue (earned but not yet invoiced)
- * 
- * @param asOfDate - Date to calculate accrued revenue
+ * Create COGS journal entry for inventory items on invoice issuance.
+ *
+ *   DR: Cost of Goods Sold (5110)    = totalCOGS
+ *   CR: Inventory (1140)             = totalCOGS
+ *
+ * @param db       - PrismaClient (passed in so caller controls tx)
+ * @param ctx      - Invoice + line context
+ * @param lines    - Invoice lines with product info (already fetched by caller)
+ * @param userId   - User issuing the invoice
+ * @returns        - Created JE ID and entryNo (or null if no COGS)
  */
-export async function calculateAccruedRevenue(
-  asOfDate: Date
-): Promise<{
-  totalAccrued: number;  // Satang
-  items: Array<{
-    description: string;
-    amount: number;       // Satang
-    earnedDate: Date;
-    expectedInvoiceDate?: Date;
-  }>;
-}> {
-  // TODO: Implement accrued revenue calculation
-  // - Based on delivery/performance
-  // - Not yet invoiced
-  throw new Error('Accrued revenue calculation not yet implemented');
+export async function createCogsJournalEntry(
+  db: PrismaClient,
+  ctx: { invoiceId: string; invoiceNo: string; invoiceDate: Date; userId: string },
+  lines: Array<{ productId: string | null; quantity: number }>
+): Promise<{ journalEntryId: string; entryNo: string; totalCOGS: number } | null> {
+  const productIds = lines
+    .map((l) => l.productId)
+    .filter((id): id is string => id !== null);
+
+  if (productIds.length === 0) return null;
+
+  const products = await db.product.findMany({
+    where: { id: { in: productIds } },
+    select: { id: true, costPrice: true, isInventory: true },
+  });
+
+  const productMap = new Map(products.map((p) => [p.id, p]));
+
+  let totalCOGS = 0;
+  for (const line of lines) {
+    if (!line.productId) continue;
+    const product = productMap.get(line.productId);
+    if (product && product.isInventory) {
+      totalCOGS += product.costPrice * line.quantity;
+    }
+  }
+
+  if (totalCOGS <= 0) return null;
+
+  const [cogsAccount, inventoryAccount] = await Promise.all([
+    db.chartOfAccount.findUnique({ where: { code: '5110' } }),
+    db.chartOfAccount.findUnique({ where: { code: '1140' } }),
+  ]);
+
+  if (!cogsAccount || !inventoryAccount) {
+    throw new Error(`ไม่พบบัญชี: COGS (5110=${!!cogsAccount}), สินค้าคงเหลือ (1140=${!!inventoryAccount})`);
+  }
+
+  const entryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE');
+
+  const journalEntry = await db.journalEntry.create({
+    data: {
+      entryNo,
+      date: ctx.invoiceDate,
+      description: `ต้นทุนขาย ${ctx.invoiceNo}`,
+      reference: ctx.invoiceNo,
+      documentType: 'INVOICE',
+      documentId: ctx.invoiceId,
+      totalDebit: totalCOGS,
+      totalCredit: totalCOGS,
+      status: 'POSTED',
+      createdById: ctx.userId,
+      approvedById: ctx.userId,
+      approvedAt: new Date(),
+      lines: {
+        create: [
+          {
+            lineNo: 1,
+            accountId: cogsAccount.id,
+            description: 'ต้นทุนขาย',
+            debit: totalCOGS,
+            credit: 0,
+            reference: ctx.invoiceNo,
+          },
+          {
+            lineNo: 2,
+            accountId: inventoryAccount.id,
+            description: 'ลดสินค้าคงเหลือ',
+            debit: 0,
+            credit: totalCOGS,
+            reference: ctx.invoiceNo,
+          },
+        ],
+      },
+    },
+  });
+
+  return {
+    journalEntryId: journalEntry.id,
+    entryNo: journalEntry.entryNo,
+    totalCOGS,
+  };
 }

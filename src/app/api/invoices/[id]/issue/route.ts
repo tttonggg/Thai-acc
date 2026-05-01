@@ -9,6 +9,8 @@ import {
   unauthorizedError,
 } from '@/lib/api-utils';
 import { checkPeriodStatus } from '@/lib/period-service';
+import { createRevenueJournalEntry } from '@/lib/revenue-auto-service';
+import { createCogsJournalEntry } from '@/lib/revenue-auto-service';
 
 // POST /api/invoices/[id]/issue - Issue invoice
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -151,79 +153,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           }
         }
 
-        // 3. Create Revenue journal entry
-        const arAccount = await tx.chartOfAccount.findUnique({
-          where: { code: '1120' },
-        });
-
-        const revenueAccount = await tx.chartOfAccount.findUnique({
-          where: { code: '4100' },
-        });
-
-        const vatOutputAccount = await tx.chartOfAccount.findUnique({
-          where: { code: '2132' },
-        });
-
-        if (!arAccount || !revenueAccount || !vatOutputAccount) {
-          throw new Error(`ไม่พบบัญชี: AR (1120), รายได้ (4100), หรือ VAT ขาย (2132)`);
-        }
-
-        const totalAmount = existing.totalAmount;
-        const subtotal = existing.subtotal;
-        const vatAmount = existing.vatAmount;
-
-        // Validate amounts
-        if (subtotal + vatAmount !== totalAmount) {
-          throw new Error(
-            `ยอดไม่ถูกต้อง: subtotal(${subtotal}) + vat(${vatAmount}) != total(${totalAmount})`
-          );
-        }
-
-        const revenueEntryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE');
-
-        const revenueJournalEntry = await tx.journalEntry.create({
-          data: {
-            entryNo: revenueEntryNo,
-            date: existing.invoiceDate,
-            description: `รายได้ขาย ${existing.invoiceNo}`,
-            reference: existing.invoiceNo,
-            documentType: 'INVOICE_REVENUE',
-            documentId: existing.id,
-            totalDebit: totalAmount,
-            totalCredit: totalAmount,
-            status: 'POSTED',
-            createdById: user.id,
-            approvedById: user.id,
-            approvedAt: new Date(),
-            lines: {
-              create: [
-                {
-                  lineNo: 1,
-                  accountId: arAccount.id,
-                  description: 'ลูกหนี้การค้า',
-                  debit: totalAmount,
-                  credit: 0,
-                  reference: existing.invoiceNo,
-                },
-                {
-                  lineNo: 2,
-                  accountId: revenueAccount.id,
-                  description: 'รายได้ขาย',
-                  debit: 0,
-                  credit: subtotal,
-                  reference: existing.invoiceNo,
-                },
-                {
-                  lineNo: 3,
-                  accountId: vatOutputAccount.id,
-                  description: 'ภาษีมูลค่าเพิ่มขาย',
-                  debit: 0,
-                  credit: vatAmount,
-                  reference: existing.invoiceNo,
-                },
-              ],
-            },
-          },
+        // 3. Create Revenue journal entry (via service)
+        const revenueResult = await createRevenueJournalEntry(tx, {
+          userId: user.id,
+          invoiceId: existing.id,
+          invoiceNo: existing.invoiceNo,
+          invoiceDate: existing.invoiceDate,
+          totalAmount: existing.totalAmount,
+          subtotal: existing.subtotal,
+          vatAmount: existing.vatAmount,
         });
 
         // 4. Update invoice status to ISSUED and link REVENUE journal entry (not COGS).
@@ -232,7 +170,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           where: { id },
           data: {
             status: 'ISSUED',
-            journalEntryId: revenueJournalEntry.id,
+            journalEntryId: revenueResult.journalEntryId,
             issuedById: user.id,
           },
         });
