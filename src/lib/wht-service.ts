@@ -3,10 +3,11 @@ import prisma from '@/lib/db';
 /**
  * Auto-generates a WithholdingTax record when a Payment is made (we deduct tax from Vendor).
  * This creates a PND.3 or PND.53 record depending on the vendor type (Individual vs Corporate).
+ * @param tx - Optional Prisma transaction client for atomicity with caller transactions.
  */
-export async function generateWhtFromPayment(paymentId: string) {
+export async function generateWhtFromPayment(paymentId: string, tx: any = prisma) {
   // 1. Fetch the Payment and its related PurchaseInvoice through allocations
-  const payment = await prisma.payment.findUnique({
+  const payment = await tx.payment.findUnique({
     where: { id: paymentId },
     include: {
       allocations: {
@@ -35,7 +36,7 @@ export async function generateWhtFromPayment(paymentId: string) {
   // 2. Check if there was WHT deducted on this invoice
   if (purchaseInvoice.withholdingAmount > 0) {
     // Generate document number WHT202603-0001
-    const count = await prisma.withholdingTax.count();
+    const count = await tx.withholdingTax.count();
     const docNo = `WHT${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(count + 1).padStart(4, '0')}`;
 
     // Determine type: PND3 for Individual, PND53 for Company
@@ -53,11 +54,11 @@ export async function generateWhtFromPayment(paymentId: string) {
       (l) => l.product?.type === 'SERVICE' && l.product?.incomeType != null
     );
     if (serviceLine && serviceLine.product?.incomeType) {
-      incomeType = serviceLine.product.incomeType.replace(/\d+%/, '').trim() || incomeType;
+      incomeType = serviceLine.product?.incomeType.replace(/\d+%/, '').trim() || incomeType;
     }
 
     // Insert record
-    const whtRecord = await prisma.withholdingTax.create({
+    const whtRecord = await tx.withholdingTax.create({
       data: {
         type: whtType as any,
         documentNo: docNo,

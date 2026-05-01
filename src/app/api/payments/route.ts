@@ -194,75 +194,76 @@ export async function POST(request: Request) {
     // Generate payment number
     const paymentNo = await generateDocNumber('PAYMENT', 'PAY');
 
-    // Create payment with allocations
-    const payment = await db.payment.create({
-      data: {
-        paymentNo,
-        paymentDate: new Date(validatedData.paymentDate),
-        vendorId: validatedData.vendorId,
-        paymentMethod: validatedData.paymentMethod,
-        bankAccountId: validatedData.bankAccountId,
-        chequeNo: validatedData.chequeNo,
-        chequeDate: validatedData.chequeDate ? new Date(validatedData.chequeDate) : null,
-        amount: bahtToSatang(validatedData.amount),
-        whtAmount: bahtToSatang(totalWHT),
-        unallocated: bahtToSatang(validatedData.amount - totalAllocated),
-        notes: validatedData.notes,
-        status: validatedData.status,
-        createdById: user.id,
-        allocations: {
-          create: validatedData.allocations.map((allocation, index) => ({
-            invoiceId: allocation.invoiceId,
-            amount: bahtToSatang(allocation.amount),
-            whtRate: allocation.whtRate,
-            whtAmount: bahtToSatang(allocation.whtAmount),
-            notes: allocation.notes,
-          })),
-        },
-      },
-      include: {
-        vendor: true,
-        allocations: {
-          include: {
-            invoice: true,
+    // Atomic transaction: payment.create + cheque.create + GL posting + WHT generation
+    const payment = await db.$transaction(async (tx) => {
+      // Create payment with allocations
+      const payment = await tx.payment.create({
+        data: {
+          paymentNo,
+          paymentDate: new Date(validatedData.paymentDate),
+          vendorId: validatedData.vendorId,
+          paymentMethod: validatedData.paymentMethod,
+          bankAccountId: validatedData.bankAccountId,
+          chequeNo: validatedData.chequeNo,
+          chequeDate: validatedData.chequeDate ? new Date(validatedData.chequeDate) : null,
+          amount: bahtToSatang(validatedData.amount),
+          whtAmount: bahtToSatang(totalWHT),
+          unallocated: bahtToSatang(validatedData.amount - totalAllocated),
+          notes: validatedData.notes,
+          status: validatedData.status,
+          createdById: user.id,
+          allocations: {
+            create: validatedData.allocations.map((allocation) => ({
+              invoiceId: allocation.invoiceId,
+              amount: bahtToSatang(allocation.amount),
+              whtRate: allocation.whtRate,
+              whtAmount: bahtToSatang(allocation.whtAmount),
+              notes: allocation.notes,
+            })),
           },
         },
-      },
-    });
-
-    // Create cheque record if payment by cheque
-    if (validatedData.paymentMethod === 'CHEQUE' && validatedData.chequeNo) {
-      const bankAccount = validatedData.bankAccountId
-        ? await db.bankAccount.findUnique({ where: { id: validatedData.bankAccountId } })
-        : null;
-
-      await db.cheque.create({
-        data: {
-          chequeNo: validatedData.chequeNo,
-          type: 'PAY',
-          bankAccountId: validatedData.bankAccountId || '',
-          dueDate: validatedData.chequeDate
-            ? new Date(validatedData.chequeDate)
-            : new Date(validatedData.paymentDate),
-          amount: bahtToSatang(validatedData.amount),
-          payeeName: vendor.name,
-          status: 'ON_HAND',
-          documentRef: paymentNo,
-          paymentId: payment.id,
+        include: {
+          vendor: true,
+          allocations: {
+            include: {
+              invoice: true,
+            },
+          },
         },
       });
-    }
 
-    // If POSTED, create journal entry
-    if (validatedData.status === 'POSTED') {
-      await postPaymentToGL(payment);
-
-      // Auto-generate WHT records for vendor-withheld amounts (PND3/PND53)
-      // Mirrors the pattern used in receipts/[id]/post/route.ts lines 266-311
-      if (payment.whtAmount > 0) {
-        await generateWhtFromPayment(payment.id);
+      // Create cheque record if payment by cheque
+      if (validatedData.paymentMethod === 'CHEQUE' && validatedData.chequeNo) {
+        await tx.cheque.create({
+          data: {
+            chequeNo: validatedData.chequeNo,
+            type: 'PAY',
+            bankAccountId: validatedData.bankAccountId || '',
+            dueDate: validatedData.chequeDate
+              ? new Date(validatedData.chequeDate)
+              : new Date(validatedData.paymentDate),
+            amount: bahtToSatang(validatedData.amount),
+            payeeName: vendor.name,
+            status: 'ON_HAND',
+            documentRef: paymentNo,
+            paymentId: payment.id,
+          },
+        });
       }
-    }
+
+      // If POSTED, create journal entry
+      if (validatedData.status === 'POSTED') {
+        await postPaymentToGL(payment, tx);
+
+        // Auto-generate WHT records for vendor-withheld amounts (PND3/PND53)
+        // Mirrors the pattern used in receipts/[id]/post/route.ts lines 266-311
+        if (payment.whtAmount > 0) {
+          await generateWhtFromPayment(payment.id, tx);
+        }
+      }
+
+      return payment;
+    });
 
     // Convert Satang to Baht for response
     const paymentInBaht = {
