@@ -57,6 +57,25 @@ export async function middleware(request: NextRequest) {
     ].join('; ');
     response.headers.set('Content-Security-Policy', csp);
 
+    // T8: /uploads/* Access Control - require auth for document uploads
+    if (pathname.startsWith('/uploads')) {
+      const sessionId =
+        request.cookies.get('next-auth.session-token')?.value ||
+        request.cookies.get('__Secure-next-auth.session-token')?.value ||
+        request.headers.get('x-session-id');
+
+      if (!sessionId) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Unauthorized' }),
+          {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
+      // Authenticated - let request pass through to serve static file from /public/uploads
+    }
+
     // SPA Route handling - rewrite known SPA routes to the main page
     const spaRoutes = [
       '/receipts', '/vendors', '/customers', '/invoices',

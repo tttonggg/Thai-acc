@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
+import { DocumentUpload } from '@/components/common/document-upload'
 
 interface Vendor {
   id: string
@@ -200,10 +201,11 @@ export function PurchaseOrderViewDialog({
         </DialogHeader>
 
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="details">รายละเอียด</TabsTrigger>
             <TabsTrigger value="items">รายการสินค้า</TabsTrigger>
             <TabsTrigger value="history">ประวัติ</TabsTrigger>
+            <TabsTrigger value="documents">เอกสาร</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="space-y-6">
@@ -545,6 +547,10 @@ export function PurchaseOrderViewDialog({
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="documents" className="space-y-4">
+            <DocumentUpload entityType="PurchaseOrder" entityId={po.id} />
           </TabsContent>
         </Tabs>
 

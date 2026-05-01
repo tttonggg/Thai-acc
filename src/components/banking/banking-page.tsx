@@ -336,6 +336,8 @@ function ReconciliationTab() {
   const [statementDate, setStatementDate] = useState('')
   const [statementBalance, setStatementBalance] = useState('')
   const [unreconciledCheques, setUnreconciledCheques] = useState<Cheque[]>([])
+  const [unreconciledReceipts, setUnreconciledReceipts] = useState<any[]>([])
+  const [unreconciledPayments, setUnreconciledPayments] = useState<any[]>([])
   const [selectedCheques, setSelectedCheques] = useState<Set<string>>(new Set())
   const [calculatedBookBalance, setCalculatedBookBalance] = useState(0)
   const [difference, setDifference] = useState(0)
@@ -359,10 +361,19 @@ function ReconciliationTab() {
         const res = await window.fetch(`/api/bank-accounts/${selectedAccountId}/reconcile`, { credentials: 'include' }).then(r => r.json())
         if (res.success) {
           setUnreconciledCheques(res.data.unreconciledCheques)
-          // Calculate initial book balance
-          const bookBalance = res.data.unreconciledCheques.reduce((acc: number, cheque: Cheque) => {
-            return cheque.type === 'RECEIVE' ? acc + cheque.amount : acc - cheque.amount
-          }, 0)
+          setUnreconciledReceipts(res.data.unreconciledReceipts || [])
+          setUnreconciledPayments(res.data.unreconciledPayments || [])
+          // Calculate initial book balance from ALL unreconciled items
+          // Cheques RECEIVE: +, Cheques PAYMENT: -
+          // Receipts: always + (money into bank)
+          // Payments: always - (money out of bank)
+          const chequesTotal = (res.data.unreconciledCheques || []).reduce((acc: number, c: Cheque) => 
+            acc + (c.type === 'RECEIVE' ? c.amount : -c.amount), 0)
+          const receiptsTotal = (res.data.unreconciledReceipts || []).reduce((acc: number, r: any) => 
+            acc + r.amount, 0)
+          const paymentsTotal = (res.data.unreconciledPayments || []).reduce((acc: number, p: any) => 
+            acc - p.amount, 0)
+          const bookBalance = chequesTotal + receiptsTotal + paymentsTotal
           setCalculatedBookBalance(bookBalance)
         }
         setLoading(false)
@@ -415,6 +426,8 @@ function ReconciliationTab() {
       const refreshRes = await window.fetch(`/api/bank-accounts/${selectedAccountId}/reconcile`, { credentials: 'include' }).then(r => r.json())
       if (refreshRes.success) {
         setUnreconciledCheques(refreshRes.data.unreconciledCheques)
+        setUnreconciledReceipts(refreshRes.data.unreconciledReceipts || [])
+        setUnreconciledPayments(refreshRes.data.unreconciledPayments || [])
       }
     } else {
       toast({ title: 'ข้อผิดพลาด', description: res.error, variant: 'destructive' })
@@ -494,10 +507,10 @@ function ReconciliationTab() {
           {/* Unreconciled Items */}
           <Card>
             <CardContent className="p-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                รายการที่ยังไม่กระทบยอด ({unreconciledCheques.length})
-              </h3>
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  รายการที่ยังไม่กระทบยอด (เช็ค: {unreconciledCheques.length}, ใบเสร็จ: {unreconciledReceipts.length}, ใบจ่าย: {unreconciledPayments.length})
+                </h3>
               {loading ? (
                 <Skeleton className="h-64" />
               ) : unreconciledCheques.length === 0 ? (

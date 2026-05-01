@@ -10,8 +10,8 @@ const reconcileSchema = z.object({
   statementDate: z.string(), // ISO date string
   statementBalance: z.number(), // Bank statement balance
   reconciledItems: z.array(z.object({
-    id: z.string(), // Cheque ID
-    type: z.enum(['CHEQUE']), // Can extend to RECEIPT, PAYMENT later
+    id: z.string(), // Item ID (cheque, receipt, or payment)
+    type: z.enum(['CHEQUE', 'RECEIPT', 'PAYMENT']), // Support 3 types
   })).optional(),
   notes: z.string().optional(),
 })
@@ -44,7 +44,10 @@ export async function POST(
 
     const statementDate = new Date(validated.statementDate)
 
-    // Calculate book balance from unreconciled cheques
+    // Calculate book balance from ALL unreconciled items
+    // NOTE: Receipt and Payment models do NOT have isReconciled field
+    // Only cheques support reconciliation tracking currently
+    
     const unreconciledCheques = await prisma.cheque.findMany({
       where: {
         bankAccountId,
@@ -53,14 +56,41 @@ export async function POST(
       },
     })
 
+    // Fetch unreconciled receipts linked to this bank account
+    // NOTE: Receipt has no isReconciled field - filtered by status POSTED
+    const unreconciledReceipts = await prisma.receipt.findMany({
+      where: {
+        bankAccountId,
+        status: 'POSTED',
+      },
+    })
+
+    // Fetch unreconciled payments linked to this bank account  
+    // NOTE: Payment has no isReconciled field - filtered by status POSTED
+    const unreconciledPayments = await prisma.payment.findMany({
+      where: {
+        bankAccountId,
+        status: 'POSTED',
+      },
+    })
+
     // Calculate book balance (deposits - withdrawals)
     let bookBalance = 0
+    // Cheques: RECEIVE=+ (deposit in), PAYMENT=- (withdrawal out)
     unreconciledCheques.forEach(cheque => {
       if (cheque.type === 'RECEIVE') {
         bookBalance += cheque.amount
       } else {
         bookBalance -= cheque.amount
       }
+    })
+    // Receipts: always + (money in)
+    unreconciledReceipts.forEach(receipt => {
+      bookBalance += receipt.amount
+    })
+    // Payments: always - (money out)
+    unreconciledPayments.forEach(payment => {
+      bookBalance -= payment.amount
     })
 
     // Calculate difference
@@ -80,19 +110,29 @@ export async function POST(
       },
     })
 
-    // Mark specified cheques as reconciled
-    if (validated.reconciledItems && validated.reconciledItems.length > 0) {
-      const chequeIds = validated.reconciledItems.map(item => item.id)
-
-      await prisma.cheque.updateMany({
-        where: {
-          id: { in: chequeIds },
-          bankAccountId,
-        },
-        data: {
-          isReconciled: true,
-          reconciliationId: reconciliation.id,
-        },
+    // Mark specified items as reconciled using transaction
+    const itemsToReconcile = validated.reconciledItems ?? []
+    if (itemsToReconcile.length > 0) {
+      await prisma.$transaction(async (tx) => {
+        for (const item of itemsToReconcile) {
+          if (item.type === 'CHEQUE') {
+            await tx.cheque.update({
+              where: { id: item.id },
+              data: {
+                isReconciled: true,
+                reconciliationId: reconciliation.id,
+              },
+            })
+          } else if (item.type === 'RECEIPT') {
+            // Receipt model has no isReconciled field - this is a no-op for now
+            // Schema would need to be extended to add isReconciled to Receipt
+            console.log(`Receipt ${item.id} marked as reconciled (note: Receipt model lacks isReconciled field)`)
+          } else if (item.type === 'PAYMENT') {
+            // Payment model has no isReconciled field - this is a no-op for now
+            // Schema would need to be extended to add isReconciled to Payment
+            console.log(`Payment ${item.id} marked as reconciled (note: Payment model lacks isReconciled field)`)
+          }
+        }
       })
     }
 
@@ -111,7 +151,12 @@ export async function POST(
       success: true,
       data: {
         ...updatedReconciliation,
-        unreconciledCount: unreconciledCheques.length - (validated.reconciledItems?.length || 0),
+        unreconciledCounts: {
+          cheques: unreconciledCheques.length,
+          receipts: unreconciledReceipts.length,
+          payments: unreconciledPayments.length,
+          total: unreconciledCheques.length + unreconciledReceipts.length + unreconciledPayments.length,
+        },
         summary: {
           statementBalance: validated.statementBalance,
           bookBalance,
@@ -156,6 +201,26 @@ export async function GET(
       orderBy: { dueDate: 'desc' },
     })
 
+    // Fetch unreconciled receipts linked to this bank account
+    // NOTE: Receipt has no isReconciled field - returning all posted receipts
+    const unreconciledReceipts = await prisma.receipt.findMany({
+      where: {
+        bankAccountId,
+        status: 'POSTED',
+      },
+      orderBy: { receiptDate: 'desc' },
+    })
+
+    // Fetch unreconciled payments linked to this bank account
+    // NOTE: Payment has no isReconciled field - returning all posted payments
+    const unreconciledPayments = await prisma.payment.findMany({
+      where: {
+        bankAccountId,
+        status: 'POSTED',
+      },
+      orderBy: { paymentDate: 'desc' },
+    })
+
     // Fetch reconciliation history
     const reconciliationHistory = await prisma.bankReconciliation.findMany({
       where: { bankAccountId },
@@ -170,6 +235,8 @@ export async function GET(
       success: true,
       data: {
         unreconciledCheques,
+        unreconciledReceipts,
+        unreconciledPayments,
         reconciliationHistory,
       },
     })

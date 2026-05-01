@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { checkPeriodStatus } from "@/lib/period-service"
 import { requireAuth, apiResponse, apiError, unauthorizedError, forbiddenError } from "@/lib/api-utils"
 import { AuthError } from "@/lib/api-auth"
+import { generateWhtFromPayment } from "@/lib/wht-service"
 import { z } from "zod"
 
 // Validation schema
@@ -319,6 +320,12 @@ export async function POST(
         data: { status: "POSTED" }
       })
     })
+
+    // Auto-generate WHT records after successful GL posting (PND3/PND53)
+    // Mirrors the pattern used in receipts/[id]/post/route.ts lines 266-311
+    if (payment.whtAmount > 0) {
+      await generateWhtFromPayment(id)
+    }
 
     // Fetch updated payment to return
     const updatedPayment = await db.payment.findUnique({

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import {
   FileText,
   Download,
@@ -13,7 +14,8 @@ import {
   ChevronDown,
   ChevronUp,
   Filter,
-  X
+  X,
+  AlertCircle
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -620,66 +622,374 @@ export function Reports() {
         })}
       </div>
 
+      {/* Quick Preview - Balance Sheet */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">งบดุล - ตัวอย่าง</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <BalanceSheetPreview />
+        </CardContent>
+      </Card>
+
+      {/* Quick Preview - Income Statement */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">งบกำไรขาดทุน - ตัวอย่าง</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <IncomeStatementPreview />
+        </CardContent>
+      </Card>
+
       {/* Quick Preview - Trial Balance */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">งบทดลอง - ตัวอย่าง</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2 px-4">รหัสบัญชี</th>
-                  <th className="text-left py-2 px-4">ชื่อบัญชี</th>
-                  <th className="text-right py-2 px-4">เดบิต</th>
-                  <th className="text-right py-2 px-4">เครดิต</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="py-2 px-4 font-mono">1111</td>
-                  <td className="py-2 px-4">เงินสด - ธนาคารกรุงเทพ</td>
-                  <td className="py-2 px-4 text-right text-blue-600">฿500,000.00</td>
-                  <td className="py-2 px-4 text-right">-</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2 px-4 font-mono">1121</td>
-                  <td className="py-2 px-4">ลูกหนี้การค้า</td>
-                  <td className="py-2 px-4 text-right text-blue-600">฿250,000.00</td>
-                  <td className="py-2 px-4 text-right">-</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2 px-4 font-mono">211</td>
-                  <td className="py-2 px-4">เจ้าหนี้การค้า</td>
-                  <td className="py-2 px-4 text-right">-</td>
-                  <td className="py-2 px-4 text-right text-green-600">฿180,000.00</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2 px-4 font-mono">311</td>
-                  <td className="py-2 px-4">ทุนจดทะเบียน</td>
-                  <td className="py-2 px-4 text-right">-</td>
-                  <td className="py-2 px-4 text-right text-green-600">฿1,000,000.00</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2 px-4 font-mono">411</td>
-                  <td className="py-2 px-4">รายได้จากการขาย</td>
-                  <td className="py-2 px-4 text-right">-</td>
-                  <td className="py-2 px-4 text-right text-green-600">฿450,000.00</td>
-                </tr>
-                <tr className="bg-gray-50 font-semibold">
-                  <td className="py-2 px-4" colSpan={2}>รวม</td>
-                  <td className="py-2 px-4 text-right text-blue-600">฿750,000.00</td>
-                  <td className="py-2 px-4 text-right text-green-600">฿1,630,000.00</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <TrialBalancePreview />
         </CardContent>
       </Card>
 
       {/* Cash Flow Report Preview */}
       <CashFlowReport dateRange={dateRange} />
+    </div>
+  )
+}
+
+// Balance Sheet Response interface
+interface BalanceSheetResponse {
+  success: boolean
+  asOfDate: string
+  data: {
+    assets: Array<{ code: string; name: string; nameEn?: string | null; amount: number }>
+    liabilities: Array<{ code: string; name: string; nameEn?: string | null; amount: number }>
+    equity: Array<{ code: string; name: string; nameEn?: string | null; amount: number }>
+    totalAssets: number
+    totalLiabilities: number
+    totalEquity: number
+    isBalanced: boolean
+  }
+}
+
+// Balance Sheet Preview Component - fetches real data from API
+function BalanceSheetPreview() {
+  const { data, isLoading, error } = useQuery<BalanceSheetResponse>({
+    queryKey: ['balance-sheet-preview'],
+    queryFn: async () => {
+      const res = await fetch('/api/reports/balance-sheet', { credentials: 'include' })
+      if (!res.ok) throw new Error('Failed to fetch balance sheet')
+      return res.json()
+    },
+  })
+
+  const formatBaht = (amount: number) => {
+    if (amount === 0) return '-'
+    return `฿${amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+        <span className="ml-2 text-gray-600">กำลังโหลดข้อมูล...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-8 text-red-600">
+        <AlertCircle className="w-5 h-5 mr-2" />
+        <span>เกิดข้อผิดพลาดในการโหลดข้อมูล</span>
+      </div>
+    )
+  }
+
+  const { data: bsData } = data || {}
+  const assets = bsData?.assets || []
+  const liabilities = bsData?.liabilities || []
+  const equity = bsData?.equity || []
+
+  if (assets.length === 0 && liabilities.length === 0 && equity.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        ไม่พบข้อมูลงบดุล
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Assets Section */}
+      <div>
+        <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+          สินทรัพย์
+        </h4>
+        <div className="space-y-1">
+          {assets.map((account) => (
+            <div key={account.code} className="flex justify-between items-center py-1 px-3 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs text-gray-500">{account.code}</span>
+                <span>{account.name}</span>
+              </div>
+              <span className="text-blue-600 font-medium">{formatBaht(account.amount)}</span>
+            </div>
+          ))}
+          <div className="flex justify-between items-center py-1.5 px-3 text-sm font-semibold bg-blue-50 rounded">
+            <span>รวมสินทรัพย์</span>
+            <span className="text-blue-700">{formatBaht(bsData?.totalAssets || 0)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Liabilities Section */}
+      <div>
+        <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-red-500"></span>
+          หนี้สิน
+        </h4>
+        <div className="space-y-1">
+          {liabilities.map((account) => (
+            <div key={account.code} className="flex justify-between items-center py-1 px-3 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs text-gray-500">{account.code}</span>
+                <span>{account.name}</span>
+              </div>
+              <span className="text-red-600 font-medium">{formatBaht(account.amount)}</span>
+            </div>
+          ))}
+          <div className="flex justify-between items-center py-1.5 px-3 text-sm font-semibold bg-red-50 rounded">
+            <span>รวมหนี้สิน</span>
+            <span className="text-red-700">{formatBaht(bsData?.totalLiabilities || 0)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Equity Section */}
+      <div>
+        <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-green-500"></span>
+          ส่วนของผู้ถือหุ้น
+        </h4>
+        <div className="space-y-1">
+          {equity.map((account) => (
+            <div key={account.code} className="flex justify-between items-center py-1 px-3 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs text-gray-500">{account.code}</span>
+                <span>{account.name}</span>
+              </div>
+              <span className="text-green-600 font-medium">{formatBaht(account.amount)}</span>
+            </div>
+          ))}
+          <div className="flex justify-between items-center py-1.5 px-3 text-sm font-semibold bg-green-50 rounded">
+            <span>รวมส่วนของผู้ถือหุ้น</span>
+            <span className="text-green-700">{formatBaht(bsData?.totalEquity || 0)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Balance Validation */}
+      <div className={`flex justify-center items-center gap-2 py-2 px-4 rounded ${bsData?.isBalanced ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+        {bsData?.isBalanced ? (
+          <>✓ งบดุลสมดุล (สินทรัพย์ = หนี้สิน + ส่วนของผู้ถือหุ้น)</>
+        ) : (
+          <>✗ งบดุลไม่สมดุล</>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Trial Balance Preview Component - fetches real data from API
+function TrialBalancePreview() {
+  const { data, isLoading, error } = useQuery<TrialBalanceResponse>({
+    queryKey: ['trial-balance-preview'],
+    queryFn: async () => {
+      const res = await fetch('/api/reports/trial-balance', { credentials: 'include' })
+      if (!res.ok) throw new Error('Failed to fetch trial balance')
+      return res.json()
+    },
+  })
+
+  const formatBaht = (amount: number) => {
+    if (amount === 0) return '-'
+    return `฿${amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+        <span className="ml-2 text-gray-600">กำลังโหลดข้อมูล...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-8 text-red-600">
+        <AlertCircle className="w-5 h-5 mr-2" />
+        <span>เกิดข้อผิดพลาดในการโหลดข้อมูล</span>
+      </div>
+    )
+  }
+
+  const accounts = data?.accounts || []
+  const totals = data?.totals || { debit: 0, credit: 0 }
+
+  if (accounts.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        ไม่พบข้อมูลบัญชี
+      </div>
+    )
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b">
+            <th className="text-left py-2 px-4">รหัสบัญชี</th>
+            <th className="text-left py-2 px-4">ชื่อบัญชี</th>
+            <th className="text-right py-2 px-4">เดบิต</th>
+            <th className="text-right py-2 px-4">เครดิต</th>
+          </tr>
+        </thead>
+        <tbody>
+          {accounts.map((account) => (
+            <tr key={account.code} className="border-b">
+              <td className="py-2 px-4 font-mono">{account.code}</td>
+              <td className="py-2 px-4">{account.name}</td>
+              <td className="py-2 px-4 text-right text-blue-600">
+                {account.debit > 0 ? formatBaht(account.debit) : '-'}
+              </td>
+              <td className="py-2 px-4 text-right text-green-600">
+                {account.credit > 0 ? formatBaht(account.credit) : '-'}
+              </td>
+            </tr>
+          ))}
+          <tr className="bg-gray-50 font-semibold">
+            <td className="py-2 px-4" colSpan={2}>รวม</td>
+            <td className="py-2 px-4 text-right text-blue-600">{formatBaht(totals.debit)}</td>
+            <td className="py-2 px-4 text-right text-green-600">{formatBaht(totals.credit)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+interface TrialBalanceResponse {
+  success: boolean
+  asOfDate: string
+  accounts: Array<{
+    code: string
+    name: string
+    nameEn?: string | null
+    type: string
+    debit: number
+    credit: number
+    balance: number
+  }>
+  totals: {
+    debit: number
+    credit: number
+    isBalanced: boolean
+  }
+}
+
+// Income Statement Response interface
+interface IncomeStatementResponse {
+  success: boolean
+  asOfDate: string
+  data: {
+    revenue: number
+    costOfSales: number
+    grossProfit: number
+    operatingExpenses: number
+    otherIncome: number
+    otherExpenses: number
+    expenses: number
+    netIncome: number
+    isProfit: boolean
+  }
+}
+
+// Income Statement Preview Component - fetches real data from API
+function IncomeStatementPreview() {
+  const { data, isLoading, error } = useQuery<IncomeStatementResponse>({
+    queryKey: ['income-statement-preview'],
+    queryFn: async () => {
+      const res = await fetch('/api/reports/income-statement', { credentials: 'include' })
+      if (!res.ok) throw new Error('Failed to fetch income statement')
+      return res.json()
+    },
+  })
+
+  const formatBaht = (amount: number) => {
+    if (amount === 0) return '-'
+    return `฿${amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+        <span className="ml-2 text-gray-600">กำลังโหลดข้อมูล...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-8 text-red-600">
+        <AlertCircle className="w-5 h-5 mr-2" />
+        <span>เกิดข้อผิดพลาดในการโหลดข้อมูล</span>
+      </div>
+    )
+  }
+
+  const isData = data?.data
+  const netIncome = isData?.netIncome || 0
+  const isProfit = isData?.isProfit ?? netIncome >= 0
+
+  return (
+    <div className="space-y-4">
+      {/* Revenue */}
+      <div className="flex justify-between items-center py-2 px-3 text-sm">
+        <span className="text-gray-600">รายได้</span>
+        <span className="text-green-600 font-medium">{formatBaht(isData?.revenue || 0)}</span>
+      </div>
+
+      {/* COGS */}
+      <div className="flex justify-between items-center py-2 px-3 text-sm">
+        <span className="text-gray-600">ต้นทุนขาย</span>
+        <span className="text-red-600 font-medium">({formatBaht(isData?.costOfSales || 0)})</span>
+      </div>
+
+      {/* Gross Profit */}
+      <div className="flex justify-between items-center py-2 px-3 text-sm bg-blue-50 rounded">
+        <span className="font-semibold text-blue-700">กำไรขั้นต้น</span>
+        <span className="font-semibold text-blue-700">{formatBaht(isData?.grossProfit || 0)}</span>
+      </div>
+
+      {/* Expenses */}
+      <div className="flex justify-between items-center py-2 px-3 text-sm">
+        <span className="text-gray-600">ค่าใช้จ่าย</span>
+        <span className="text-red-600 font-medium">({formatBaht(isData?.expenses || 0)})</span>
+      </div>
+
+      {/* Net Income */}
+      <div className={`flex justify-between items-center py-3 px-4 rounded-lg font-semibold text-base ${
+        isProfit ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+      }`}>
+        <span>{isProfit ? 'กำไรสุทธิ' : 'ขาดทุนสุทธิ'}</span>
+        <span>{formatBaht(Math.abs(netIncome))}</span>
+      </div>
     </div>
   )
 }
