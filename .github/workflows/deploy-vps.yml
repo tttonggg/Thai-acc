@@ -83,7 +83,7 @@ jobs:
 
             # Generate Prisma client
             echo "🗄️  Generating Prisma client..."
-            npm run db:generate
+            npx prisma generate
 
             # Build application
             echo "🔨 Building..."
