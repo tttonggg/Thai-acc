@@ -586,7 +586,7 @@ export async function validateTaxForm(
     if (!line.payeeName) {
       errors.push(`รายการที่ ${line.lineNo}: ไม่มีชื่อผู้ถูกหักภาษี`);
     }
-    if (line.taxRate <= 0) {
+    if (line.taxRate <= 0 && line.incomeType !== 'NET') {
       errors.push(`รายการที่ ${line.lineNo}: อัตราภาษีต้องมากกว่า 0`);
     }
   }

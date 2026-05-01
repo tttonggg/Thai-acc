@@ -40,13 +40,16 @@ export async function recordStockMovement(params: {
 
     if (isIncoming) {
       if (costingMethod === 'WEIGHTED_AVERAGE') {
+        // Integer Satang math: quantity * unitCost gives total in Satang
         const newItemTotalCost = quantity * unitCost;
         const combinedQty = newQty + quantity;
         const combinedCost = newTotalCost + newItemTotalCost;
-        newUnitCost = combinedQty > 0 ? combinedCost / combinedQty : unitCost;
+        // WAC: round to nearest Satang (integer) to avoid float drift
+        newUnitCost = combinedQty > 0 ? Math.round(combinedCost / combinedQty) : unitCost;
         newTotalCost = combinedCost;
       } else {
-        newTotalCost += quantity * unitCost;
+        // FIFO/batch: accumulate total cost in Satang
+        newTotalCost = newTotalCost + quantity * unitCost;
       }
       newQty += quantity;
     } else if (isOutgoing) {
@@ -54,23 +57,25 @@ export async function recordStockMovement(params: {
         throw new Error(`สต็อกไม่เพียงพอ: มี ${newQty} หน่วย ต้องการ ${quantity} หน่วย`);
       }
       newQty -= quantity;
-      newTotalCost = newQty * newUnitCost;
+      // Integer Satang math for remaining balance
+      newTotalCost = Math.round(newQty * newUnitCost);
     } else {
       // ADJUST / COUNT
       newQty += quantity;
-      newTotalCost = newQty * newUnitCost;
+      newTotalCost = Math.round(newQty * newUnitCost);
     }
 
+    // Ensure all values are integers (Satang)
     const balance = await tx.stockBalance.upsert({
       where: { productId_warehouseId: { productId, warehouseId } },
       create: {
         productId,
         warehouseId,
         quantity: newQty,
-        unitCost: newUnitCost,
-        totalCost: newTotalCost,
+        unitCost: Math.round(newUnitCost),
+        totalCost: Math.round(newTotalCost),
       },
-      update: { quantity: newQty, unitCost: newUnitCost, totalCost: newTotalCost },
+      update: { quantity: newQty, unitCost: Math.round(newUnitCost), totalCost: Math.round(newTotalCost) },
     });
 
     // StockMovement schema fields: date, type, quantity, unitCost, totalCost

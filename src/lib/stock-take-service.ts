@@ -377,7 +377,7 @@ export async function postStockTake(params: {
         reference: stockTake.takeNo,
         documentType: 'STOCK_TAKE',
         documentId: stockTake.id,
-        totalDebit: totalLoss + totalGain, // For simplicity, debit loss + credit gain
+        totalDebit: totalLoss + totalGain, // Correct: only non-zero amount contributes
         totalCredit: totalLoss + totalGain,
         status: 'POSTED',
         approvedById: userId,

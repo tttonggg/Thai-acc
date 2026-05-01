@@ -22,9 +22,6 @@ export async function middleware(request: NextRequest) {
       request.headers.get('host')?.includes('127.0.0.1:3001') ||
       request.headers.get('host')?.includes('127.0.0.1:3002'));
 
-  // Bypass CSRF for testing (set BYPASS_CSRF=true in production for testing)
-  const bypassCsrf = process.env.BYPASS_CSRF === 'true';
-
   // Bypass for automated tests
   const isTest =
     request.headers.get('x-playwright-test') === 'true' ||
@@ -149,7 +146,7 @@ export async function middleware(request: NextRequest) {
       if (!isCsrfExemptPath(pathname)) {
         // DEV ONLY: Allow requests without CSRF token for easier testing
         // WARNING: Remove or disable this in production!
-        if (isLocalDev || bypassCsrf) {
+        if (isLocalDev) {
           // In local dev or when BYPASS_CSRF=true, allow requests without CSRF token but log a warning
           console.warn('[DEV] CSRF check bypassed for:', pathname);
         } else {
