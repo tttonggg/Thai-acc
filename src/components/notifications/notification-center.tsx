@@ -249,17 +249,34 @@ export function useNotifications(userId?: string) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const { subscribe, isConnected } = useWebSocket()
 
+  // Helper: fetch notifications from API
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch(`/api/notifications`, { credentials: 'include' })
+      if (response.ok) {
+        const data = await response.json()
+        queueMicrotask(() => setNotifications(data.notifications))
+      }
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error)
+    }
+  }
+
   useEffect(() => {
     if (!isConnected || !userId) return
 
     const unsubscribe = subscribe(`notifications:${userId}`, (data) => {
       const message = data as { type: string; notification: Notification }
       if (message.type === 'new_notification') {
-        setNotifications((prev) => [message.notification, ...prev])
+        queueMicrotask(() =>
+          setNotifications((prev) => [message.notification, ...prev])
+        )
       } else if (message.type === 'notification_read') {
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.id === message.notification.id ? { ...n, isRead: true } : n
+        queueMicrotask(() =>
+          setNotifications((prev) =>
+            prev.map((n) =>
+              n.id === message.notification.id ? { ...n, isRead: true } : n
+            )
           )
         )
       }
@@ -270,18 +287,6 @@ export function useNotifications(userId?: string) {
 
     return unsubscribe
   }, [subscribe, isConnected, userId])
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await fetch(`/api/notifications`, { credentials: 'include' })
-      if (response.ok) {
-        const data = await response.json()
-        setNotifications(data.notifications)
-      }
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error)
-    }
-  }
 
   const markAsRead = useCallback(async (id: string) => {
     try {

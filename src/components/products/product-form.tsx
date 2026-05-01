@@ -123,25 +123,27 @@ export function ProductForm({ product, onSubmit, isLoading = false }: ProductFor
 
   useEffect(() => {
     if (product) {
-      setFormData({
-        code: product.code || '',
-        name: product.name || '',
-        nameEn: product.nameEn || '',
-        description: product.description || '',
-        category: product.category || '',
-        unit: product.unit || 'ชิ้น',
-        type: product.type || 'PRODUCT',
-        salePrice: product.salePrice || 0,
-        costPrice: product.costPrice || 0,
-        vatRate: product.vatRate || 7,
-        vatType: product.vatType || 'EXCLUSIVE',
-        isInventory: product.isInventory || false,
-        quantity: product.quantity || 0,
-        minQuantity: product.minQuantity || 0,
-        incomeType: product.incomeType || '',
-        costingMethod: product.costingMethod || 'WEIGHTED_AVERAGE',
-        isActive: product.isActive !== false,
-        notes: product.notes || '',
+      queueMicrotask(() => {
+        setFormData({
+          code: product.code || '',
+          name: product.name || '',
+          nameEn: product.nameEn || '',
+          description: product.description || '',
+          category: product.category || '',
+          unit: product.unit || 'ชิ้น',
+          type: product.type || 'PRODUCT',
+          salePrice: product.salePrice || 0,
+          costPrice: product.costPrice || 0,
+          vatRate: product.vatRate || 7,
+          vatType: product.vatType || 'EXCLUSIVE',
+          isInventory: product.isInventory || false,
+          quantity: product.quantity || 0,
+          minQuantity: product.minQuantity || 0,
+          incomeType: product.incomeType || '',
+          costingMethod: product.costingMethod || 'WEIGHTED_AVERAGE',
+          isActive: product.isActive !== false,
+          notes: product.notes || '',
+        })
       })
     }
   }, [product])

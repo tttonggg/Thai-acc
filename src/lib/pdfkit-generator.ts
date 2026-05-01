@@ -859,12 +859,13 @@ export async function generatePayslipPDFWithPDFKit(data: any): Promise<Buffer> {
 }
 
 // Export all functions
-export default {
+const pdfExports = {
   generateThaiTestPDF,
   generateInvoicePDFWithPDFKit,
   generateReceiptPDFWithPDFKit,
   generatePayslipPDFWithPDFKit,
   formatCurrency,
   formatDateThai,
-  formatAddress
+  formatAddress,
 }
+export default pdfExports

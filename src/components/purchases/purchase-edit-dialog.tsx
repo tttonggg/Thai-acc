@@ -508,11 +508,10 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
             {/* Invoice Number (Read-only) */}
             <div>
               <Label htmlFor="invoiceNo">เลขที่เอกสาร</Label>
-              <Input className="!h-11 text-base"
+              <Input className="!h-11 text-base bg-muted"
                 id="invoiceNo"
                 value={purchase?.invoiceNo || ''}
                 disabled
-                className="bg-muted"
               />
             </div>
 
@@ -647,11 +646,11 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
                             </SelectContent>
                           </Select>
                         )}
-                        <Input className="!h-11 text-base"
+                        <Input
+                          className={"!h-11 text-base " + (errors[`line_${line.id}_description`] ? 'border-destructive' : '')}
                           placeholder="รายการสินค้า/บริการ"
                           value={line.description}
                           onChange={(e) => updateLine(line.id, 'description', e.target.value)}
-                          className={errors[`line_${line.id}_description`] ? 'border-destructive' : ''}
                           disabled={isEditingRestricted}
                         />
                         {errors[`line_${line.id}_description`] && (
@@ -661,13 +660,12 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
 
                       {/* Quantity */}
                       <div>
-                        <Input className="!h-11 text-base"
+                        <Input className={"!h-11 text-base " + (errors[`line_${line.id}_quantity`] ? 'border-destructive' : '')}
                           type="number"
                           min="0"
                           step="1"
                           value={line.quantity}
                           onChange={(e) => updateLine(line.id, 'quantity', parseFloat(e.target.value) || 0)}
-                          className={errors[`line_${line.id}_quantity`] ? 'border-destructive' : ''}
                           disabled={isEditingRestricted}
                         />
                         {errors[`line_${line.id}_quantity`] && (
@@ -702,21 +700,20 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
 
                       {/* Unit Price */}
                       <div>
-                        <Input className="!h-11 text-base"
+                        <Input className={"!h-11 text-base " + (errors[`line_${line.id}_unitPrice`] ? 'border-destructive' : '')}
                           type="number"
                           min="0"
                           step="0.01"
                           placeholder="0.00"
                           value={line.unitPrice}
                           onChange={(e) => updateLine(line.id, 'unitPrice', parseFloat(e.target.value) || 0)}
-                          className={errors[`line_${line.id}_unitPrice`] ? 'border-destructive' : ''}
                           disabled={isEditingRestricted}
                         />
                       </div>
 
                       {/* Discount */}
                       <div className="relative">
-                        <Input className="!h-11 text-base"
+                        <Input className="!h-11 text-base pr-6"
                           type="number"
                           min="0"
                           max="100"
@@ -724,7 +721,6 @@ export function PurchaseEditDialog({ purchaseId, open, onOpenChange, onSuccess }
                           placeholder="0"
                           value={line.discount}
                           onChange={(e) => updateLine(line.id, 'discount', parseFloat(e.target.value) || 0)}
-                          className="pr-6"
                           disabled={isEditingRestricted}
                         />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>

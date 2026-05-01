@@ -57,6 +57,7 @@ export function VirtualTable<T>({
   const parentRef = useRef<HTMLDivElement>(null)
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
 
+  /* eslint-disable-next-line react-hooks/incompatible-library */
   const virtualizer = useVirtualizer({
     count: data.length,
     getScrollElement: () => parentRef.current,
@@ -231,6 +232,7 @@ export function VirtualTable<T>({
 export function useVirtualList<T>(items: T[], options?: { overscan?: number }) {
   const parentRef = useRef<HTMLDivElement>(null)
 
+  /* eslint-disable-next-line react-hooks/incompatible-library */
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,

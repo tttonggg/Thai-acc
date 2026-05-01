@@ -500,11 +500,10 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
                           <SelectValue placeholder="เลือกสินค้า" />
                         </SelectTrigger>
                         <SelectContent>
-                          <Input className="!h-11 text-base"
+                          <Input className="!h-11 text-base mb-2"
                             placeholder="ค้นหา..."
                             value={searchProduct}
                             onChange={(e) => setSearchProduct(e.target.value)}
-                            className="mb-2"
                           />
                           {filteredProducts.map((product) => (
                             <SelectItem key={product.id} value={product.id}>

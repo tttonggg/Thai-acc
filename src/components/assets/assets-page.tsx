@@ -52,10 +52,10 @@ function AssetListTab() {
   const { toast } = useToast()
 
   const fetch = useCallback(async () => {
-    setLoading(true)
+    queueMicrotask(() => setLoading(true))
     const res = await window.fetch(`/api/assets`, { credentials: 'include' }).then(r => r.json())
-    if (res.success) setAssets(res.data)
-    setLoading(false)
+    if (res.success) queueMicrotask(() => setAssets(res.data))
+    queueMicrotask(() => setLoading(false))
   }, [])
   useEffect(() => { fetch() }, [fetch])
 

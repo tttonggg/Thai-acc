@@ -3,23 +3,31 @@
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider } from 'next-themes'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { PWAProvider } from '@/components/pwa/pwa-provider'
 import { OfflineSyncProvider } from '@/components/offline-sync/offline-sync-provider'
 import { Toaster } from 'sonner'
+import dynamic from 'next/dynamic'
+
+const WebSocketProviderDynamic = dynamic(
+  () => import('@/components/websocket/websocket-provider').then((m) => m.WebSocketProvider),
+  { ssr: false }
+)
 
 // WebSocket is optional - only load if enabled
 function OptionalWebSocketProvider({ children }: { children: React.ReactNode }) {
   // Check if WebSocket is explicitly enabled via env
   const wsEnabled = process.env.NEXT_PUBLIC_WS_ENABLED === 'true'
-  
+
   if (!wsEnabled) {
     return <>{children}</>
   }
-  
-  // Dynamic import to avoid loading WebSocket provider when not needed
-  const { WebSocketProvider } = require('@/components/websocket/websocket-provider')
-  return <WebSocketProvider>{children}</WebSocketProvider>
+
+  return (
+    <Suspense fallback={null}>
+      <WebSocketProviderDynamic>{children}</WebSocketProviderDynamic>
+    </Suspense>
+  )
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {

@@ -43,10 +43,10 @@ function BankAccountsTab() {
   const { toast } = useToast()
 
   const fetchAll = useCallback(async () => {
-    setLoading(true)
+    queueMicrotask(() => setLoading(true))
     const res = await window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())
-    if (res.success) setAccounts(res.data)
-    setLoading(false)
+    if (res.success) queueMicrotask(() => setAccounts(res.data))
+    queueMicrotask(() => setLoading(false))
   }, [])
   useEffect(() => { fetchAll() }, [fetchAll])
 
@@ -171,11 +171,11 @@ function ChequeRegisterTab() {
   const { toast } = useToast()
 
   const fetchAll = useCallback(async () => {
-    setLoading(true)
+    queueMicrotask(() => setLoading(true))
     const [chRes, accRes] = await Promise.all([window.fetch(`/api/cheques`, { credentials: 'include' }).then(r => r.json()), window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())])
-    if (chRes.success) setCheques(chRes.data)
-    if (accRes.success) setAccounts(accRes.data)
-    setLoading(false)
+    if (chRes.success) queueMicrotask(() => setCheques(chRes.data))
+    if (accRes.success) queueMicrotask(() => setAccounts(accRes.data))
+    queueMicrotask(() => setLoading(false))
   }, [])
   useEffect(() => { fetchAll() }, [fetchAll])
 
@@ -348,7 +348,7 @@ function ReconciliationTab() {
   useEffect(() => {
     const fetchAccounts = async () => {
       const res = await window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())
-      if (res.success) setAccounts(res.data)
+      if (res.success) queueMicrotask(() => setAccounts(res.data))
     }
     fetchAccounts()
   }, [])
@@ -357,12 +357,14 @@ function ReconciliationTab() {
   useEffect(() => {
     if (selectedAccountId) {
       const fetchItems = async () => {
-        setLoading(true)
+        queueMicrotask(() => setLoading(true))
         const res = await window.fetch(`/api/bank-accounts/${selectedAccountId}/reconcile`, { credentials: 'include' }).then(r => r.json())
         if (res.success) {
-          setUnreconciledCheques(res.data.unreconciledCheques)
-          setUnreconciledReceipts(res.data.unreconciledReceipts || [])
-          setUnreconciledPayments(res.data.unreconciledPayments || [])
+          queueMicrotask(() => {
+            setUnreconciledCheques(res.data.unreconciledCheques)
+            setUnreconciledReceipts(res.data.unreconciledReceipts || [])
+            setUnreconciledPayments(res.data.unreconciledPayments || [])
+          })
           // Calculate initial book balance from ALL unreconciled items
           // Cheques RECEIVE: +, Cheques PAYMENT: -
           // Receipts: always + (money into bank)
@@ -374,9 +376,13 @@ function ReconciliationTab() {
           const paymentsTotal = (res.data.unreconciledPayments || []).reduce((acc: number, p: any) => 
             acc - p.amount, 0)
           const bookBalance = chequesTotal + receiptsTotal + paymentsTotal
-          setCalculatedBookBalance(bookBalance)
+          queueMicrotask(() => {
+            setCalculatedBookBalance(bookBalance)
+            setLoading(false)
+          })
+        } else {
+          queueMicrotask(() => setLoading(false))
         }
-        setLoading(false)
       }
       fetchItems()
     }
@@ -389,10 +395,10 @@ function ReconciliationTab() {
       const bookBalance = selectedChequeObjects.reduce((acc, cheque) => {
         return cheque.type === 'RECEIVE' ? acc + cheque.amount : acc - cheque.amount
       }, 0)
-      setCalculatedBookBalance(bookBalance)
+      queueMicrotask(() => setCalculatedBookBalance(bookBalance))
 
       const stmtBalance = parseFloat(statementBalance) || 0
-      setDifference(stmtBalance - bookBalance)
+      queueMicrotask(() => setDifference(stmtBalance - bookBalance))
     }
   }, [selectedCheques, statementBalance, unreconciledCheques])
 

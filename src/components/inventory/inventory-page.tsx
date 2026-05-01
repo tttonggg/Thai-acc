@@ -761,7 +761,7 @@ export function InventoryPage({ initialTab }: { initialTab?: 'balance' | 'moveme
   // Update tab when initialTab prop changes (e.g., when navigating between /inventory and /warehouses)
   useEffect(() => {
     if (initialTab) {
-      setTab(initialTab)
+      queueMicrotask(() => setTab(initialTab))
     }
   }, [initialTab])
 

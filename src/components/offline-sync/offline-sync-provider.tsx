@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
   ReactNode,
 } from 'react'
 import { get, set, del, keys } from 'idb-keyval'
@@ -72,58 +73,40 @@ export function OfflineSyncProvider({
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
   const [conflicts, setConflicts] = useState<Conflict[]>([])
 
-  // Load pending changes from IndexedDB on mount
-  useEffect(() => {
-    loadPendingChanges()
-    loadConflicts()
-  }, [])
-
-  // Sync when coming back online
-  useEffect(() => {
-    if (isOnline && pendingChanges.length > 0) {
-      syncNow()
-    }
-  }, [isOnline])
-
-  // Periodic sync
-  useEffect(() => {
-    if (!isOnline) return
-
-    const interval = setInterval(() => {
-      if (pendingChanges.length > 0) {
-        syncNow()
-      }
-    }, syncInterval)
-
-    return () => clearInterval(interval)
-  }, [isOnline, pendingChanges, syncInterval])
-
+  // Helper: load pending changes from IndexedDB
   const loadPendingChanges = async () => {
     try {
       const changes = await get<PendingChange[]>(PENDING_CHANGES_KEY)
       if (changes) {
-        setPendingChanges(changes)
+        queueMicrotask(() => setPendingChanges(changes))
       }
     } catch (error) {
       console.error('Failed to load pending changes:', error)
     }
   }
 
+  // Helper: load conflicts from IndexedDB
   const loadConflicts = async () => {
     try {
       const stored = await get<Conflict[]>(CONFLICTS_KEY)
       if (stored) {
-        setConflicts(stored)
+        queueMicrotask(() => setConflicts(stored))
       }
     } catch (error) {
       console.error('Failed to load conflicts:', error)
     }
   }
 
+  // Load pending changes and conflicts from IndexedDB on mount
+  useEffect(() => {
+    loadPendingChanges()
+    loadConflicts()
+  }, [])
+
   const savePendingChanges = async (changes: PendingChange[]) => {
     try {
       await set(PENDING_CHANGES_KEY, changes)
-      setPendingChanges(changes)
+      queueMicrotask(() => setPendingChanges(changes))
     } catch (error) {
       console.error('Failed to save pending changes:', error)
     }
@@ -132,7 +115,7 @@ export function OfflineSyncProvider({
   const saveConflicts = async (newConflicts: Conflict[]) => {
     try {
       await set(CONFLICTS_KEY, newConflicts)
-      setConflicts(newConflicts)
+      queueMicrotask(() => setConflicts(newConflicts))
     } catch (error) {
       console.error('Failed to save conflicts:', error)
     }
@@ -154,7 +137,7 @@ export function OfflineSyncProvider({
 
       // Try to sync immediately if online
       if (isOnline) {
-        syncNow()
+        syncNowRef.current()
       }
     },
     [pendingChanges, isOnline]
@@ -168,7 +151,7 @@ export function OfflineSyncProvider({
   const syncNow = useCallback(async () => {
     if (isSyncing || !isOnline || pendingChanges.length === 0) return
 
-    setIsSyncing(true)
+    queueMicrotask(() => setIsSyncing(true))
     const newConflicts: Conflict[] = []
     const completed: string[] = []
 
@@ -197,13 +180,29 @@ export function OfflineSyncProvider({
           })
           completed.push(change.id)
         } else {
-          // Retry
-          change.retries++
-          change.error = `HTTP ${response.status}: ${response.statusText}`
+          // Retry — create new object instead of mutating
+          const updatedChange: PendingChange = {
+            ...change,
+            retries: change.retries + 1,
+            error: `HTTP ${response.status}: ${response.statusText}`,
+          }
+          const updated = pendingChanges.map((c) =>
+            c.id === change.id ? updatedChange : c
+          )
+          await savePendingChanges(updated)
+          completed.push(change.id)
         }
       } catch (error) {
-        change.retries++
-        change.error = error instanceof Error ? error.message : 'Unknown error'
+        const updatedChange: PendingChange = {
+          ...change,
+          retries: change.retries + 1,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        }
+        const updated = pendingChanges.map((c) =>
+          c.id === change.id ? updatedChange : c
+        )
+        await savePendingChanges(updated)
+        completed.push(change.id)
       }
     }
 
@@ -216,9 +215,30 @@ export function OfflineSyncProvider({
       await saveConflicts([...conflicts, ...newConflicts])
     }
 
-    setLastSyncTime(new Date())
-    setIsSyncing(false)
+    setLastSyncTime(() => new Date())
+    queueMicrotask(() => setIsSyncing(false))
   }, [isSyncing, isOnline, pendingChanges, conflicts, maxRetries])
+
+  // Keep syncNowRef in sync with latest syncNow
+  // Sync when coming online
+  useEffect(() => {
+    if (isOnline && pendingChanges.length > 0) {
+      queueMicrotask(() => syncNow())
+    }
+  }, [isOnline, syncNow])
+
+  // Periodic sync
+  useEffect(() => {
+    if (!isOnline) return
+
+    const interval = setInterval(() => {
+      if (pendingChanges.length > 0) {
+        syncNow()
+      }
+    }, syncInterval)
+
+    return () => clearInterval(interval)
+  }, [isOnline, pendingChanges, syncInterval, syncNow])
 
   const resolveConflict = useCallback(
     async (conflictId: string, resolution: 'local' | 'server' | 'merge', mergedData?: unknown) => {

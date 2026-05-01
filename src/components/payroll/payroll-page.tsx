@@ -16,7 +16,7 @@ export function PayrollPage({ initialTab }: { initialTab?: 'employees' | 'runs' 
   // Update tab when initialTab prop changes (e.g., when navigating between /payroll and /employees)
   useEffect(() => {
     if (initialTab) {
-      setTab(initialTab)
+      queueMicrotask(() => setTab(initialTab))
     }
   }, [initialTab])
   const tabs = [

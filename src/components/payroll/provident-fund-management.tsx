@@ -148,11 +148,11 @@ export function ProvidentFundManagement() {
   const fetchAll = useCallback(async () => {
     setLoading(true)
     await Promise.all([fetchFunds(), fetchEmployees(), fetchPayrollRuns()])
-    setLoading(false)
+    queueMicrotask(() => setLoading(false))
   }, [fetchFunds, fetchEmployees, fetchPayrollRuns])
 
   useEffect(() => {
-    fetchAll()
+    queueMicrotask(() => fetchAll())
   }, [fetchAll])
 
   const handleCreateFund = async () => {

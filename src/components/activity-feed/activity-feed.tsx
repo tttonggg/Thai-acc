@@ -298,6 +298,34 @@ export function useActivityFeed(userId?: string) {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([])
   const { subscribe, isConnected } = useWebSocket()
 
+  // Load initial data
+  const loadActivities = async () => {
+    try {
+      const response = await fetch(`/api/activities`, { credentials: 'include' })
+      if (response.ok) {
+        const data = await response.json()
+        queueMicrotask(() =>
+          setActivities(
+            data.activities.map((a: Activity) => ({
+              ...a,
+              timestamp: new Date(a.timestamp),
+            }))
+          )
+        )
+        queueMicrotask(() =>
+          setOnlineUsers(
+            data.onlineUsers.map((u: OnlineUser) => ({
+              ...u,
+              lastActive: new Date(u.lastActive),
+            }))
+          )
+        )
+      }
+    } catch (error) {
+      console.error('Failed to load activities:', error)
+    }
+  }
+
   useEffect(() => {
     if (!isConnected) return
 
@@ -305,7 +333,9 @@ export function useActivityFeed(userId?: string) {
     const unsubscribeActivity = subscribe('activity', (data) => {
       const message = data as { type: string; activity: Activity }
       if (message.type === 'new_activity') {
-        setActivities((prev) => [message.activity, ...prev].slice(0, 100))
+        queueMicrotask(() =>
+          setActivities((prev) => [message.activity, ...prev].slice(0, 100))
+        )
       }
     })
 
@@ -313,11 +343,13 @@ export function useActivityFeed(userId?: string) {
     const unsubscribePresence = subscribe('presence', (data) => {
       const message = data as { type: string; users: OnlineUser[] }
       if (message.type === 'presence_update') {
-        setOnlineUsers(
-          message.users.map((u) => ({
-            ...u,
-            lastActive: new Date(u.lastActive),
-          }))
+        queueMicrotask(() =>
+          setOnlineUsers(
+            message.users.map((u) => ({
+              ...u,
+              lastActive: new Date(u.lastActive),
+            }))
+          )
         )
       }
     })
@@ -330,29 +362,6 @@ export function useActivityFeed(userId?: string) {
       unsubscribePresence()
     }
   }, [subscribe, isConnected])
-
-  const loadActivities = async () => {
-    try {
-      const response = await fetch(`/api/activities`, { credentials: 'include' })
-      if (response.ok) {
-        const data = await response.json()
-        setActivities(
-          data.activities.map((a: Activity) => ({
-            ...a,
-            timestamp: new Date(a.timestamp),
-          }))
-        )
-        setOnlineUsers(
-          data.onlineUsers.map((u: OnlineUser) => ({
-            ...u,
-            lastActive: new Date(u.lastActive),
-          }))
-        )
-      }
-    } catch (error) {
-      console.error('Failed to load activities:', error)
-    }
-  }
 
   const recordActivity = useCallback(
     async (activity: Omit<Activity, 'id' | 'timestamp' | 'user'>) => {

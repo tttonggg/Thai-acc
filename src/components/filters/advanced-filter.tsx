@@ -110,12 +110,13 @@ export function AdvancedFilter({
 
   const handleAddFilter = () => {
     let value = newFilter.value
+    let value2 = newFilter.value2
     if (newFilter.operator === 'between' && dateRange.from && dateRange.to) {
       value = dateRange.from.toISOString()
-      newFilter.value2 = dateRange.to.toISOString()
+      value2 = dateRange.to.toISOString()
     }
 
-    const updatedFilters = [...activeFilters, { ...newFilter, value }]
+    const updatedFilters = [...activeFilters, { ...newFilter, value, value2 }]
     onFilterChange(updatedFilters)
     setNewFilter({ field: fields[0]?.key || '', operator: 'contains', value: '' })
     setDateRange({})

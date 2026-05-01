@@ -38,7 +38,7 @@ export function PWAProvider({ children }: PWAProviderProps) {
   useEffect(() => {
     // Check if app is installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true)
+      queueMicrotask(() => setIsInstalled(true))
     }
 
     // Listen for beforeinstallprompt
@@ -51,26 +51,27 @@ export function PWAProvider({ children }: PWAProviderProps) {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
     // Listen for app installed
-    window.addEventListener('appinstalled', () => {
-      setIsInstalled(true)
-      setCanInstall(false)
-      setDeferredPrompt(null)
-    })
+    const handleAppInstalled = () => {
+      queueMicrotask(() => setIsInstalled(true))
+      queueMicrotask(() => setCanInstall(false))
+      queueMicrotask(() => setDeferredPrompt(null))
+    }
+    window.addEventListener('appinstalled', handleAppInstalled)
 
     // Online/offline detection
-    const handleOnline = () => setIsOffline(false)
-    const handleOffline = () => setIsOffline(true)
+    const handleOnline = () => queueMicrotask(() => setIsOffline(false))
+    const handleOffline = () => queueMicrotask(() => setIsOffline(true))
 
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
-    setIsOffline(!navigator.onLine)
+    queueMicrotask(() => setIsOffline(!navigator.onLine))
 
     // Register service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/service-worker.js')
         .then((reg) => {
-          setRegistration(reg)
+          queueMicrotask(() => setRegistration(reg))
 
           // Check for updates
           reg.addEventListener('updatefound', () => {
@@ -78,8 +79,8 @@ export function PWAProvider({ children }: PWAProviderProps) {
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  setUpdateAvailable(true)
-                  setWaitingWorker(newWorker)
+                  queueMicrotask(() => setUpdateAvailable(true))
+                  queueMicrotask(() => setWaitingWorker(newWorker))
                 }
               })
             }
@@ -92,13 +93,14 @@ export function PWAProvider({ children }: PWAProviderProps) {
       // Listen for messages from service worker
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data.type === 'UPDATE_AVAILABLE') {
-          setUpdateAvailable(true)
+          queueMicrotask(() => setUpdateAvailable(true))
         }
       })
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('appinstalled', handleAppInstalled)
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }

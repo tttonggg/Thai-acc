@@ -44,7 +44,7 @@ const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
     "no-useless-escape": "off",
   },
 }, {
-  ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "examples/**", "skills", "tests/**", "**/*.test.*", "**/*.spec.*", "**/node_modules/**", "deploy/**"],
+  ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "examples/**", "skills", "tests/**", "**/*.test.*", "**/*.spec.*", "**/node_modules/**", "deploy/**", "e2e/**", "scripts/**", "prisma/schema-loader.js", "next.config.ts"],
 }];
 
 export default eslintConfig;

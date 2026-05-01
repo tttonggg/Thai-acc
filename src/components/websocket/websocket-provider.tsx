@@ -66,6 +66,7 @@ export function WebSocketProvider({
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null)
   const subscriptionsRef = useRef<Map<string, Set<(data: unknown) => void>>>(new Map())
   const socketRef = useRef<WebSocket | null>(null)
+  const connectRef = useRef<() => void>(() => {})
 
   const connect = useCallback(() => {
     if (socketRef.current?.readyState === WebSocket.OPEN) return
@@ -106,7 +107,7 @@ export function WebSocketProvider({
         socketRef.current = null
 
         if (autoReconnect) {
-          reconnectTimerRef.current = setTimeout(connect, reconnectInterval)
+          reconnectTimerRef.current = setTimeout(() => connectRef.current(), reconnectInterval)
         }
       }
 
@@ -117,6 +118,11 @@ export function WebSocketProvider({
       console.error('Failed to connect WebSocket:', error)
     }
   }, [url, autoReconnect, reconnectInterval])
+
+  // Keep connectRef in sync with connect
+  useEffect(() => {
+    connectRef.current = connect
+  }, [connect])
 
   const disconnect = useCallback(() => {
     if (reconnectTimerRef.current) {

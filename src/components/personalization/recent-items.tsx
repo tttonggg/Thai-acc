@@ -139,24 +139,27 @@ export function RecentItemsSidebar({
   const [items, setItems] = useState<RecentItem[]>([])
   const [isExpanded, setIsExpanded] = useState(true)
 
-  useEffect(() => {
-    loadRecentItems()
-  }, [userId])
-
+  // Helper: load recent items from API
   const loadRecentItems = async () => {
     try {
       const response = await fetch(`/api/user/recent-items`, { credentials: 'include' })
       if (response.ok) {
         const data = await response.json()
-        setItems(data.items.map((item: RecentItem) => ({
-          ...item,
-          accessedAt: new Date(item.accessedAt),
-        })))
+        queueMicrotask(() =>
+          setItems(data.items.map((item: RecentItem) => ({
+            ...item,
+            accessedAt: new Date(item.accessedAt),
+          })))
+        )
       }
     } catch (error) {
       console.error('Failed to load recent items:', error)
     }
   }
+
+  useEffect(() => {
+    loadRecentItems()
+  }, [userId])
 
   const handleItemClick = (item: RecentItem) => {
     onNavigate(item.module, item.recordId)
@@ -209,26 +212,29 @@ export function RecentItemsSidebar({
 export function useRecentItems(userId?: string) {
   const [recentItems, setRecentItems] = useState<RecentItem[]>([])
 
-  useEffect(() => {
-    if (userId) {
-      loadRecentItems()
-    }
-  }, [userId])
-
+  // Helper: load recent items from API
   const loadRecentItems = async () => {
     try {
       const response = await fetch(`/api/user/recent-items`, { credentials: 'include' })
       if (response.ok) {
         const data = await response.json()
-        setRecentItems(data.items.map((item: RecentItem) => ({
-          ...item,
-          accessedAt: new Date(item.accessedAt),
-        })))
+        queueMicrotask(() =>
+          setRecentItems(data.items.map((item: RecentItem) => ({
+            ...item,
+            accessedAt: new Date(item.accessedAt),
+          })))
+        )
       }
     } catch (error) {
       console.error('Failed to load recent items:', error)
     }
   }
+
+  useEffect(() => {
+    if (userId) {
+      loadRecentItems()
+    }
+  }, [userId])
 
   const recordAccess = useCallback(
     async (

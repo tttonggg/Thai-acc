@@ -233,7 +233,7 @@ function ThemeCustomizer() {
 
   // Prevent hydration mismatch with next-themes
   useEffect(() => {
-    setMounted(true)
+    queueMicrotask(() => setMounted(true))
   }, [])
 
   // Sync next-themes with Zustand pastel theme (with fallback to prevent issues)

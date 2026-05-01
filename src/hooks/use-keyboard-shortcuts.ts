@@ -16,7 +16,10 @@ export interface KeyboardShortcut {
 
 export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
   const shortcutsRef = useRef(shortcuts)
-  shortcutsRef.current = shortcuts
+
+  useEffect(() => {
+    shortcutsRef.current = shortcuts
+  }, [shortcuts])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -280,11 +283,12 @@ export function useERPKeyboardShortcuts(options: {
   // Apply all shortcuts
   useKeyboardShortcuts(shortcuts)
 
-  // Vim navigation
-  const vimNav = enableVim ? useVimNavigation(itemCount, {
+  // Vim navigation - always call hook to maintain consistent order
+  const vimNavResult = useVimNavigation(itemCount, {
     onSelect: onItemSelect,
     onActivate: onItemActivate,
-  }) : null
+  })
+  const vimNav = enableVim ? vimNavResult : null
 
   // Help modal
   const { isOpen: isHelpOpen, setIsOpen: setIsHelpOpen } = useHelpModal()

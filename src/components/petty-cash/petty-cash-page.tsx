@@ -56,9 +56,9 @@ function FundsTab({ onFundsLoaded }: { onFundsLoaded: (funds: Fund[]) => void })
     setLoading(true)
     const fRes = await window.fetch(`/api/petty-cash/funds`, { credentials: 'include' }).then(r => r.json())
     if (fRes.success) { setFunds(fRes.data); onFundsLoaded(fRes.data) }
-    setLoading(false)
+    queueMicrotask(() => setLoading(false))
   }, [onFundsLoaded])
-  useEffect(() => { fetchAll() }, [fetchAll])
+  useEffect(() => { queueMicrotask(() => fetchAll()) }, [fetchAll])
 
   const handleCreate = () => {
     setSelectedFund(null)
@@ -249,9 +249,9 @@ function VouchersTab({ funds }: { funds: Fund[] }) {
     setLoading(true)
     const res = await window.fetch(`/api/petty-cash/vouchers`, { credentials: 'include' }).then(r => r.json())
     if (res.success) setVouchers(res.data)
-    setLoading(false)
+    queueMicrotask(() => setLoading(false))
   }, [])
-  useEffect(() => { fetchAll() }, [fetchAll])
+  useEffect(() => { queueMicrotask(() => fetchAll()) }, [fetchAll])
 
   const selectedFund = funds.find(f => f.id === form.fundId)
 

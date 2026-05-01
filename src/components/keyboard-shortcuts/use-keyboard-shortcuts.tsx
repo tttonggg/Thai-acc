@@ -16,9 +16,9 @@ export interface KeyboardShortcut {
 
 export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
   const shortcutsRef = useRef(shortcuts)
-  shortcutsRef.current = shortcuts
 
   useEffect(() => {
+    shortcutsRef.current = shortcuts
     const handleKeyDown = (event: KeyboardEvent) => {
       // Don't trigger shortcuts when user is typing in an input
       const target = event.target as HTMLElement
