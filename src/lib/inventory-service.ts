@@ -38,6 +38,7 @@ export async function recordStockMovement(params: {
     const isIncoming = ['RECEIVE', 'TRANSFER_IN'].includes(type);
     const isOutgoing = ['ISSUE', 'TRANSFER_OUT'].includes(type);
 
+    // ─── WAC (Weighted Average Cost) ──────────────────────────────────────────
     if (isIncoming) {
       if (costingMethod === 'WEIGHTED_AVERAGE') {
         // Integer Satang math: quantity * unitCost gives total in Satang
@@ -47,9 +48,6 @@ export async function recordStockMovement(params: {
         // WAC: round to nearest Satang (integer) to avoid float drift
         newUnitCost = combinedQty > 0 ? Math.round(combinedCost / combinedQty) : unitCost;
         newTotalCost = combinedCost;
-      } else {
-        // FIFO/batch: accumulate total cost in Satang
-        newTotalCost = newTotalCost + quantity * unitCost;
       }
       newQty += quantity;
     } else if (isOutgoing) {
@@ -57,12 +55,71 @@ export async function recordStockMovement(params: {
         throw new Error(`สต็อกไม่เพียงพอ: มี ${newQty} หน่วย ต้องการ ${quantity} หน่วย`);
       }
       newQty -= quantity;
-      // Integer Satang math for remaining balance
+      // WAC: Integer Satang math for remaining balance
       newTotalCost = Math.round(newQty * newUnitCost);
     } else {
       // ADJUST / COUNT
       newQty += quantity;
       newTotalCost = Math.round(newQty * newUnitCost);
+    }
+
+    // ─── FIFO BATCH TRACKING ─────────────────────────────────────────────────
+    // For FIFO products, record the incoming batch and consume oldest batches on issue
+    if (isIncoming && costingMethod === 'FIFO') {
+      // Record incoming batch with cost and remaining quantity
+      // All monetary values stored in Satang (integer)
+      const unitCostSatang = Math.round(unitCost);
+      const totalCostSatang = quantity * unitCostSatang;
+      await tx.stockBatch.create({
+        data: {
+          productId,
+          warehouseId,
+          batchDate: new Date(),
+          quantity,                    // remaining quantity in this batch
+          unitCost: unitCostSatang,    // Satang
+          totalCost: totalCostSatang,  // Satang
+          referenceId: params.referenceId,
+          referenceNo: params.referenceNo,
+          notes: params.notes,
+        },
+      });
+    } else if (isOutgoing && costingMethod === 'FIFO') {
+      // FIFO: consume from oldest batches first (FEFO logic)
+      let remainingToIssue = quantity;
+      const batches = await tx.stockBatch.findMany({
+        where: { productId, warehouseId, quantity: { gt: 0 } },
+        orderBy: { batchDate: 'asc' },
+      });
+
+      if (batches.length === 0) {
+        throw new Error(`ไม่พบ batch สินค้าสำหรับ FIFO: ${productId}`);
+      }
+
+      for (const batch of batches) {
+        if (remainingToIssue <= 0) break;
+
+        const qtyFromBatch = Math.min(batch.quantity, remainingToIssue);
+        // Update batch remaining quantity
+        await tx.stockBatch.update({
+          where: { id: batch.id },
+          data: { quantity: batch.quantity - qtyFromBatch },
+        });
+
+        remainingToIssue -= qtyFromBatch;
+      }
+
+      if (remainingToIssue > 0) {
+        throw new Error(`FIFO batch ไม่เพียงพอ: ยังต้องการอีก ${remainingToIssue} หน่วย`);
+      }
+
+      // Recalculate balance totalCost from remaining batches after consumption
+      const remainingBatches = await tx.stockBatch.findMany({
+        where: { productId, warehouseId },
+        select: { totalCost: true },
+      });
+      newTotalCost = remainingBatches.reduce((sum, b) => sum + b.totalCost, 0);
+      // Recalculate unit cost for display (avg of remaining batches in Satang)
+      newUnitCost = newQty > 0 ? Math.round(newTotalCost / newQty) : unitCost;
     }
 
     // Ensure all values are integers (Satang)

@@ -13,14 +13,7 @@ export async function middleware(request: NextRequest) {
 
   // DEV ONLY: Bypass rate limiting for local development
   // WARNING: Remove or disable this in production!
-  const isLocalDev =
-    process.env.NODE_ENV === 'development' &&
-    (request.headers.get('host')?.includes('localhost:3000') ||
-      request.headers.get('host')?.includes('localhost:3001') ||
-      request.headers.get('host')?.includes('localhost:3002') ||
-      request.headers.get('host')?.includes('127.0.0.1:3000') ||
-      request.headers.get('host')?.includes('127.0.0.1:3001') ||
-      request.headers.get('host')?.includes('127.0.0.1:3002'));
+  const isLocalDev = process.env.NODE_ENV === 'development';
 
   // Bypass for automated tests
   const isTest =
@@ -128,7 +121,6 @@ export async function middleware(request: NextRequest) {
         '/api/auth/signout',
         '/api/auth/session',
         '/api/csrf/token',
-        '/api/invoices', // Allow invoice creation during testing
       ];
 
       const isPublic = publicRoutes.some((route) => pathname.startsWith(route));
@@ -147,7 +139,7 @@ export async function middleware(request: NextRequest) {
         // DEV ONLY: Allow requests without CSRF token for easier testing
         // WARNING: Remove or disable this in production!
         if (isLocalDev) {
-          // In local dev or when BYPASS_CSRF=true, allow requests without CSRF token but log a warning
+          // In local dev, allow requests without CSRF token but log a warning
           console.warn('[DEV] CSRF check bypassed for:', pathname);
         } else {
           const csrfToken = getCsrfTokenFromHeaders(request.headers);

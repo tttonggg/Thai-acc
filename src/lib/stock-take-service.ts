@@ -355,7 +355,7 @@ export async function postStockTake(params: {
       throw new Error('ไม่พบบัญชีสินค้าคงคลัง (1210)');
     }
 
-    // Calculate totals
+    // Calculate totals - loss and gain tracked separately
     const totalLoss = varianceLines
       .filter((line) => line.varianceQuantity < 0)
       .reduce((sum, line) => sum + Math.abs(line.varianceQuantity) * line.unitCost, 0);
@@ -364,77 +364,94 @@ export async function postStockTake(params: {
       .filter((line) => line.varianceQuantity > 0)
       .reduce((sum, line) => sum + line.varianceQuantity * line.unitCost, 0);
 
-    // Generate journal entry number
-    const journalCount = await tx.journalEntry.count();
-    const entryNo = `JE-${String(journalCount + 1).padStart(6, '0')}`;
+    // Import generateDocNumber for transaction-safe number generation
+    const { generateDocNumber } = require('@/lib/api-utils');
 
-    // Create journal entry
-    const journalEntry = await tx.journalEntry.create({
-      data: {
-        entryNo,
-        date: new Date(),
-        description: `ผลต่างการตรวจนับสต็อก - ${stockTake.warehouse.name} (${stockTake.takeNo})`,
-        reference: stockTake.takeNo,
-        documentType: 'STOCK_TAKE',
-        documentId: stockTake.id,
-        totalDebit: totalLoss + totalGain, // Correct: only non-zero amount contributes
-        totalCredit: totalLoss + totalGain,
-        status: 'POSTED',
-        approvedById: userId,
-        approvedAt: new Date(),
-        createdById: userId,
-      },
-    });
+    // Create SEPARATE journal entries for loss and gain (B-08 fix)
+    const journalEntries = [];
 
-    // Create journal lines
-    const journalLinesData = [];
-
-    // Loss: Debit Expense, Credit Inventory
+    // JE 1: Loss - Debit Expense, Credit Inventory
     if (totalLoss > 0) {
-      journalLinesData.push({
-        entryId: journalEntry.id,
-        lineNo: 1,
-        accountId: expenseAccountId,
-        description: `ผลต่างสต็อก (ขาด) - ${stockTake.takeNo}`,
-        debit: totalLoss,
-        credit: 0,
+      const lossEntryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE');
+      const lossEntry = await tx.journalEntry.create({
+        data: {
+          entryNo: lossEntryNo,
+          date: new Date(),
+          description: `ผลต่างสต็อก (ขาด) - ${stockTake.warehouse.name} (${stockTake.takeNo})`,
+          reference: stockTake.takeNo,
+          documentType: 'STOCK_TAKE',
+          documentId: stockTake.id,
+          totalDebit: totalLoss,
+          totalCredit: totalLoss,
+          status: 'POSTED',
+          approvedById: userId,
+          approvedAt: new Date(),
+          createdById: userId,
+          lines: {
+            create: [
+              {
+                lineNo: 1,
+                accountId: expenseAccountId,
+                description: `ผลต่างสต็อก (ขาด) - ${stockTake.takeNo}`,
+                debit: totalLoss,
+                credit: 0,
+              },
+              {
+                lineNo: 2,
+                accountId: inventoryAccountId,
+                description: `ปรับปรุงสินค้าคงคลัง - ${stockTake.takeNo}`,
+                debit: 0,
+                credit: totalLoss,
+              },
+            ],
+          },
+        },
       });
-
-      journalLinesData.push({
-        entryId: journalEntry.id,
-        lineNo: 2,
-        accountId: inventoryAccountId,
-        description: `ปรับปรุงสินค้าคงคลัง - ${stockTake.takeNo}`,
-        debit: 0,
-        credit: totalLoss,
-      });
+      journalEntries.push(lossEntry);
     }
 
-    // Gain: Debit Inventory, Credit Expense (income)
+    // JE 2: Gain - Debit Inventory, Credit Expense (income)
     if (totalGain > 0) {
-      const startLineNo = journalLinesData.length + 1;
-      journalLinesData.push({
-        entryId: journalEntry.id,
-        lineNo: startLineNo,
-        accountId: inventoryAccountId,
-        description: `ปรับปรุงสินค้าคงคลัง - ${stockTake.takeNo}`,
-        debit: totalGain,
-        credit: 0,
+      const gainEntryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE');
+      const gainEntry = await tx.journalEntry.create({
+        data: {
+          entryNo: gainEntryNo,
+          date: new Date(),
+          description: `ผลต่างสต็อก (เกิน) - ${stockTake.warehouse.name} (${stockTake.takeNo})`,
+          reference: stockTake.takeNo,
+          documentType: 'STOCK_TAKE',
+          documentId: stockTake.id,
+          totalDebit: totalGain,
+          totalCredit: totalGain,
+          status: 'POSTED',
+          approvedById: userId,
+          approvedAt: new Date(),
+          createdById: userId,
+          lines: {
+            create: [
+              {
+                lineNo: 1,
+                accountId: inventoryAccountId,
+                description: `ปรับปรุงสินค้าคงคลัง - ${stockTake.takeNo}`,
+                debit: totalGain,
+                credit: 0,
+              },
+              {
+                lineNo: 2,
+                accountId: expenseAccountId,
+                description: `ผลต่างสต็อก (เกิน) - ${stockTake.takeNo}`,
+                debit: 0,
+                credit: totalGain,
+              },
+            ],
+          },
+        },
       });
-
-      journalLinesData.push({
-        entryId: journalEntry.id,
-        lineNo: startLineNo + 1,
-        accountId: expenseAccountId,
-        description: `ผลต่างสต็อก (เกิน) - ${stockTake.takeNo}`,
-        debit: 0,
-        credit: totalGain,
-      });
+      journalEntries.push(gainEntry);
     }
 
-    await tx.journalLine.createMany({
-      data: journalLinesData,
-    });
+    // Store primary JE reference for backward compatibility
+    const primaryJournalEntry = journalEntries[0] || null;
 
     // Update stock balances for variances
     for (const line of stockTake.lines) {
@@ -487,7 +504,7 @@ export async function postStockTake(params: {
       });
     }
 
-    // Update stock take as posted
+    // Update stock take as posted - store all journal entry IDs
     const updatedTake = await tx.stockTake.update({
       where: { id: takeId },
       data: {
@@ -496,7 +513,7 @@ export async function postStockTake(params: {
           posted: true,
           postedAt: new Date().toISOString(),
           postedById: userId,
-          journalEntryId: journalEntry.id,
+          journalEntryIds: journalEntries.map(je => je.id),
         },
       },
       include: {
@@ -510,8 +527,7 @@ export async function postStockTake(params: {
 
     return {
       stockTake: updatedTake,
-      journalEntry,
-      journalLines: journalLinesData,
+      journalEntries,
       summary: {
         totalVariance: totalLoss + totalGain,
         totalLoss,
