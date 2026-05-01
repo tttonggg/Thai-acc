@@ -1,10 +1,14 @@
 # ADR-005: UI Component Strategy
 
 ## Status
+
 Accepted
 
 ## Context
-We needed a UI component strategy for the Thai Accounting ERP system. Requirements:
+
+We needed a UI component strategy for the Thai Accounting ERP system.
+Requirements:
+
 - Consistent design across the application
 - Accessible components
 - Customizable styling
@@ -13,11 +17,13 @@ We needed a UI component strategy for the Thai Accounting ERP system. Requiremen
 - Thai language support (RTL considerations)
 
 ## Decision
+
 We chose **shadcn/ui** with **Tailwind CSS** as our component strategy.
 
 ## Consequences
 
 ### Positive
+
 - **Copy-paste components**: Full ownership of component code
 - **Tailwind CSS**: Utility-first CSS, easy customization
 - **Radix UI primitives**: Built on accessible, unstyled primitives
@@ -28,6 +34,7 @@ We chose **shadcn/ui** with **Tailwind CSS** as our component strategy.
 - **Consistent design**: Pre-designed components that work together
 
 ### Negative
+
 - **Manual updates**: Need to manually update components
 - **Bundle size**: Can grow if not careful
 - **Learning curve**: Need to learn Tailwind CSS
@@ -36,6 +43,7 @@ We chose **shadcn/ui** with **Tailwind CSS** as our component strategy.
 ## Component Architecture
 
 ### shadcn/ui Components
+
 ```bash
 # Core components
 npx shadcn add button
@@ -55,6 +63,7 @@ npx shadcn add radio-group
 ```
 
 ### Custom Components
+
 ```typescript
 // components/custom/DataTable.tsx
 'use client';
@@ -72,6 +81,7 @@ import {
 ```
 
 ### Component Hierarchy
+
 ```
 shadcn/ui (Base)
     ↓
@@ -85,6 +95,7 @@ Page Components (Page-specific)
 ## Styling Strategy
 
 ### Tailwind Configuration
+
 ```typescript
 // tailwind.config.ts
 import type { Config } from 'tailwindcss';
@@ -121,6 +132,7 @@ const config: Config = {
 ```
 
 ### CSS Variables (theming)
+
 ```css
 /* globals.css */
 @layer base {
@@ -147,6 +159,7 @@ const config: Config = {
 ## Form Handling Strategy
 
 ### React Hook Form + Zod
+
 ```typescript
 'use client';
 
@@ -187,26 +200,32 @@ export function InvoiceForm() {
 ## Alternatives Considered
 
 ### 1. Material-UI (MUI)
+
 - Pros: Comprehensive, mature
 - Cons: Heavy bundle size, customization complexity
 
 ### 2. Chakra UI
+
 - Pros: Developer experience, accessibility
 - Cons: Runtime CSS-in-JS, v2 migration complexity
 
 ### 3. Ant Design
+
 - Pros: Comprehensive, enterprise-focused
 - Cons: Heavy, Chinese-focused design
 
 ### 4. Bootstrap
+
 - Pros: Familiar
 - Cons: Outdated, jQuery dependency
 
 ### 5. Custom components from scratch
+
 - Pros: Full control, minimal bundle
 - Cons: Time-consuming, accessibility challenges
 
 ## Decision Drivers
+
 1. Customization flexibility
 2. TypeScript support
 3. Accessibility
@@ -215,12 +234,15 @@ export function InvoiceForm() {
 6. Ownership of code
 
 ## References
+
 - [shadcn/ui Documentation](https://ui.shadcn.com/)
 - [Radix UI](https://www.radix-ui.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
 
 ## Date
+
 March 16, 2026
 
 ## Author
+
 Development Team

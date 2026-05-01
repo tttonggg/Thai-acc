@@ -1,6 +1,7 @@
 # GraphQL API Documentation
 
-Thai Accounting ERP provides a GraphQL API for flexible data querying and mutations.
+Thai Accounting ERP provides a GraphQL API for flexible data querying and
+mutations.
 
 ## Endpoint
 
@@ -24,6 +25,7 @@ curl -X POST http://localhost:3000/api/graphql \
 ### User Queries
 
 #### Get current user
+
 ```graphql
 query {
   me {
@@ -37,6 +39,7 @@ query {
 ```
 
 #### Get all users (Admin only)
+
 ```graphql
 query {
   users {
@@ -52,6 +55,7 @@ query {
 ### Invoice Queries
 
 #### List invoices with pagination
+
 ```graphql
 query GetInvoices($page: Int, $limit: Int, $status: InvoiceStatus) {
   invoices(page: $page, limit: $limit, status: $status) {
@@ -77,6 +81,7 @@ query GetInvoices($page: Int, $limit: Int, $status: InvoiceStatus) {
 ```
 
 #### Get single invoice
+
 ```graphql
 query GetInvoice($id: ID!) {
   invoice(id: $id) {
@@ -111,6 +116,7 @@ query GetInvoice($id: ID!) {
 ### Customer Queries
 
 #### List customers
+
 ```graphql
 query {
   customers(page: 1, limit: 20) {
@@ -134,6 +140,7 @@ query {
 ### Chart of Accounts Queries
 
 #### Get accounts
+
 ```graphql
 query {
   accounts(type: ASSET, isActive: true) {
@@ -155,9 +162,14 @@ query {
 ### Journal Entry Queries
 
 #### List journal entries
+
 ```graphql
 query {
-  journalEntries(status: POSTED, startDate: "2024-03-01", endDate: "2024-03-31") {
+  journalEntries(
+    status: POSTED
+    startDate: "2024-03-01"
+    endDate: "2024-03-31"
+  ) {
     edges {
       node {
         id
@@ -184,6 +196,7 @@ query {
 ### Product Queries
 
 #### List products
+
 ```graphql
 query {
   products(type: PRODUCT, isActive: true) {
@@ -202,6 +215,7 @@ query {
 ### Invoice Mutations
 
 #### Create invoice
+
 ```graphql
 mutation CreateInvoice($input: CreateInvoiceInput!) {
   createInvoice(input: $input) {
@@ -214,6 +228,7 @@ mutation CreateInvoice($input: CreateInvoiceInput!) {
 ```
 
 Variables:
+
 ```json
 {
   "input": {
@@ -233,6 +248,7 @@ Variables:
 ```
 
 #### Issue invoice
+
 ```graphql
 mutation IssueInvoice($id: ID!) {
   issueInvoice(id: $id) {
@@ -243,6 +259,7 @@ mutation IssueInvoice($id: ID!) {
 ```
 
 #### Void invoice
+
 ```graphql
 mutation VoidInvoice($id: ID!, $reason: String) {
   voidInvoice(id: $id, reason: $reason) {
@@ -255,6 +272,7 @@ mutation VoidInvoice($id: ID!, $reason: String) {
 ### Customer Mutations
 
 #### Create customer
+
 ```graphql
 mutation CreateCustomer($input: CreateCustomerInput!) {
   createCustomer(input: $input) {
@@ -266,6 +284,7 @@ mutation CreateCustomer($input: CreateCustomerInput!) {
 ```
 
 #### Update customer
+
 ```graphql
 mutation UpdateCustomer($id: ID!, $input: CreateCustomerInput!) {
   updateCustomer(id: $id, input: $input) {
@@ -279,6 +298,7 @@ mutation UpdateCustomer($id: ID!, $input: CreateCustomerInput!) {
 ### Journal Entry Mutations
 
 #### Create journal entry
+
 ```graphql
 mutation CreateJournalEntry($input: CreateJournalEntryInput!) {
   createJournalEntry(input: $input) {
@@ -291,6 +311,7 @@ mutation CreateJournalEntry($input: CreateJournalEntryInput!) {
 ```
 
 Variables:
+
 ```json
 {
   "input": {
@@ -305,6 +326,7 @@ Variables:
 ```
 
 #### Post journal entry
+
 ```graphql
 mutation PostJournalEntry($id: ID!) {
   postJournalEntry(id: $id) {
@@ -317,6 +339,7 @@ mutation PostJournalEntry($id: ID!) {
 ### Product Mutations
 
 #### Create product
+
 ```graphql
 mutation CreateProduct($input: CreateProductInput!) {
   createProduct(input: $input) {
@@ -331,6 +354,7 @@ mutation CreateProduct($input: CreateProductInput!) {
 ### Webhook Mutations
 
 #### Create webhook
+
 ```graphql
 mutation CreateWebhook($input: CreateWebhookInput!) {
   createWebhook(input: $input) {
@@ -343,6 +367,7 @@ mutation CreateWebhook($input: CreateWebhookInput!) {
 ```
 
 Variables:
+
 ```json
 {
   "input": {
@@ -354,6 +379,7 @@ Variables:
 ```
 
 #### Test webhook
+
 ```graphql
 mutation TestWebhook($id: ID!) {
   testWebhook(id: $id) {
@@ -368,6 +394,7 @@ mutation TestWebhook($id: ID!) {
 ## Analytics Queries
 
 ### API Metrics
+
 ```graphql
 query {
   apiMetrics {
@@ -395,6 +422,7 @@ query {
 ## Fragments
 
 ### Invoice Fragment
+
 ```graphql
 fragment InvoiceFields on Invoice {
   id
@@ -413,6 +441,7 @@ fragment InvoiceFields on Invoice {
 ```
 
 ### Customer Fragment
+
 ```graphql
 fragment CustomerFields on Customer {
   id

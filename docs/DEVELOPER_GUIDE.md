@@ -75,7 +75,8 @@
 
 ### Key Architectural Principles
 
-1. **Layered Architecture**: Clear separation between presentation, business logic, and data layers
+1. **Layered Architecture**: Clear separation between presentation, business
+   logic, and data layers
 2. **Domain-Driven Design**: Services organized by business domain
 3. **API-First**: RESTful API design for all operations
 4. **Type Safety**: Full TypeScript coverage
@@ -144,19 +145,19 @@ thai-accounting-erp/
 
 ## Technology Stack
 
-| Category | Technology | Version | Purpose |
-|----------|------------|---------|---------|
-| Framework | Next.js | 16.1.1 | React framework |
-| Language | TypeScript | 5.x | Type safety |
-| Styling | Tailwind CSS | 4.x | Utility-first CSS |
-| UI Components | shadcn/ui | latest | Component library |
-| Database | Prisma + SQLite | 6.11.1 | ORM and database |
-| Auth | NextAuth.js | 4.24.11 | Authentication |
-| Forms | React Hook Form + Zod | 7.x / 4.x | Form handling |
-| State | Zustand | 5.x | State management |
-| Data Fetching | TanStack Query | 5.x | Server state |
-| Testing | Vitest + Playwright | latest | Testing |
-| Icons | Lucide React | 0.525.0 | Icon library |
+| Category      | Technology            | Version   | Purpose           |
+| ------------- | --------------------- | --------- | ----------------- |
+| Framework     | Next.js               | 16.1.1    | React framework   |
+| Language      | TypeScript            | 5.x       | Type safety       |
+| Styling       | Tailwind CSS          | 4.x       | Utility-first CSS |
+| UI Components | shadcn/ui             | latest    | Component library |
+| Database      | Prisma + SQLite       | 6.11.1    | ORM and database  |
+| Auth          | NextAuth.js           | 4.24.11   | Authentication    |
+| Forms         | React Hook Form + Zod | 7.x / 4.x | Form handling     |
+| State         | Zustand               | 5.x       | State management  |
+| Data Fetching | TanStack Query        | 5.x       | Server state      |
+| Testing       | Vitest + Playwright   | latest    | Testing           |
+| Icons         | Lucide React          | 0.525.0   | Icon library      |
 
 ---
 
@@ -228,16 +229,16 @@ API_KEY_SECRET=your-api-key
 
 ### Naming Conventions
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Components | PascalCase | `InvoiceList.tsx` |
-| Files (utils) | camelCase | `formatCurrency.ts` |
-| Files (services) | kebab-case | `inventory-service.ts` |
-| Constants | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT` |
-| Functions | camelCase | `calculateTotal` |
-| Types/Interfaces | PascalCase | `InvoiceData` |
-| Enums | PascalCase | `InvoiceStatus` |
-| Database Models | PascalCase | `Invoice` |
+| Type             | Convention       | Example                |
+| ---------------- | ---------------- | ---------------------- |
+| Components       | PascalCase       | `InvoiceList.tsx`      |
+| Files (utils)    | camelCase        | `formatCurrency.ts`    |
+| Files (services) | kebab-case       | `inventory-service.ts` |
+| Constants        | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT`      |
+| Functions        | camelCase        | `calculateTotal`       |
+| Types/Interfaces | PascalCase       | `InvoiceData`          |
+| Enums            | PascalCase       | `InvoiceStatus`        |
+| Database Models  | PascalCase       | `Invoice`              |
 
 ### File Organization
 
@@ -287,12 +288,12 @@ const schema = z.object({
 export function ComponentName({ prop1, prop2 }: Props) {
   // Hooks
   const [state, setState] = useState();
-  
+
   // Handlers
   const handleClick = () => {
     // ...
   };
-  
+
   // Render
   return (
     <div>
@@ -323,22 +324,22 @@ export async function GET(req: Request) {
     if (!session) {
       return apiResponse.unauthorized();
     }
-    
+
     // 2. Authorization
     if (!canAccess(session.user.role, 'resource', 'read')) {
       return apiResponse.forbidden();
     }
-    
+
     // 3. Parse query params
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
-    
+
     // 4. Fetch data
     const data = await prisma.resource.findMany({
       take: 20,
       skip: (page - 1) * 20,
     });
-    
+
     // 5. Return response
     return apiResponse.success(data);
   } catch (error) {
@@ -354,16 +355,16 @@ export async function POST(req: Request) {
     if (!session) {
       return apiResponse.unauthorized();
     }
-    
+
     // 2. Validate request body
     const body = await req.json();
     const validated = schema.parse(body);
-    
+
     // 3. Create record
     const created = await prisma.resource.create({
       data: validated,
     });
-    
+
     // 4. Return response
     return apiResponse.created(created);
   } catch (error) {
@@ -392,7 +393,7 @@ model User {
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
+
   invoices      Invoice[]
   journalEntries JournalEntry[]
 }
@@ -407,7 +408,7 @@ model Account {
   parentId      String?
   isDetail      Boolean     @default(true)
   isActive      Boolean     @default(true)
-  
+
   parent        Account?    @relation("AccountHierarchy", fields: [parentId], references: [id])
   children      Account[]   @relation("AccountHierarchy")
   journalLines  JournalLine[]
@@ -424,7 +425,7 @@ model Invoice {
   subtotal      Decimal       @db.Decimal(15, 2)
   vatAmount     Decimal       @db.Decimal(15, 2)
   total         Decimal       @db.Decimal(15, 2)
-  
+
   customer      Customer      @relation(fields: [customerId], references: [id])
   lines         InvoiceLine[]
   createdBy     User          @relation(fields: [createdById], references: [id])
@@ -438,7 +439,7 @@ model JournalEntry {
   date          DateTime
   description   String
   status        JournalStatus @default(DRAFT)
-  
+
   lines         JournalLine[]
   createdBy     User          @relation(fields: [createdById], references: [id])
   createdById   String
@@ -451,7 +452,7 @@ model JournalLine {
   description     String?
   debit           Decimal      @db.Decimal(15, 2) @default(0)
   credit          Decimal      @db.Decimal(15, 2) @default(0)
-  
+
   journalEntry    JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
   account         Account      @relation(fields: [accountId], references: [id])
 }
@@ -476,14 +477,14 @@ bun run db:reset
 
 ### REST API Conventions
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | /api/resource | List resources |
-| GET | /api/resource/:id | Get single resource |
-| POST | /api/resource | Create resource |
-| PUT | /api/resource/:id | Update resource |
-| DELETE | /api/resource/:id | Delete resource |
-| POST | /api/resource/:id/action | Custom action |
+| Method | Path                     | Description         |
+| ------ | ------------------------ | ------------------- |
+| GET    | /api/resource            | List resources      |
+| GET    | /api/resource/:id        | Get single resource |
+| POST   | /api/resource            | Create resource     |
+| PUT    | /api/resource/:id        | Update resource     |
+| DELETE | /api/resource/:id        | Delete resource     |
+| POST   | /api/resource/:id/action | Custom action       |
 
 ### Response Format
 
@@ -527,39 +528,44 @@ bun run db:reset
 ```typescript
 // lib/api-utils.ts
 export const apiResponse = {
-  success: (data: any, status = 200) => 
+  success: (data: any, status = 200) =>
     Response.json({ success: true, data }, { status }),
-  
+
   created: (data: any) =>
     Response.json({ success: true, data }, { status: 201 }),
-  
-  noContent: () =>
-    new Response(null, { status: 204 }),
-  
+
+  noContent: () => new Response(null, { status: 204 }),
+
   badRequest: (message: string) =>
     Response.json({ success: false, error: message }, { status: 400 }),
-  
+
   unauthorized: () =>
     Response.json({ success: false, error: 'Unauthorized' }, { status: 401 }),
-  
+
   forbidden: () =>
     Response.json({ success: false, error: 'Forbidden' }, { status: 403 }),
-  
+
   notFound: () =>
     Response.json({ success: false, error: 'Not found' }, { status: 404 }),
-  
+
   validationError: (errors: z.ZodError) =>
-    Response.json({ 
-      success: false, 
-      error: 'Validation error',
-      details: errors.errors 
-    }, { status: 422 }),
-  
+    Response.json(
+      {
+        success: false,
+        error: 'Validation error',
+        details: errors.errors,
+      },
+      { status: 422 }
+    ),
+
   error: (error: any) =>
-    Response.json({ 
-      success: false, 
-      error: error.message || 'Internal server error' 
-    }, { status: 500 }),
+    Response.json(
+      {
+        success: false,
+        error: error.message || 'Internal server error',
+      },
+      { status: 500 }
+    ),
 };
 ```
 
@@ -622,9 +628,9 @@ describe('formatCurrency', () => {
   it('formats THB correctly', () => {
     expect(formatCurrency(1000)).toBe('฿1,000.00');
   });
-  
+
   it('handles decimal values', () => {
-    expect(formatCurrency(1000.50)).toBe('฿1,000.50');
+    expect(formatCurrency(1000.5)).toBe('฿1,000.50');
   });
 });
 ```
@@ -641,7 +647,7 @@ describe('Button', () => {
     render(<Button>Click me</Button>);
     expect(screen.getByText('Click me')).toBeInTheDocument();
   });
-  
+
   it('handles click events', () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick}>Click</Button>);
@@ -662,12 +668,12 @@ test('create invoice', async ({ page }) => {
   await page.fill('[name="email"]', 'admin@thaiaccounting.com');
   await page.fill('[name="password"]', 'admin123');
   await page.click('button[type="submit"]');
-  
+
   await page.goto('/invoices');
   await page.click('text=Create New Invoice');
   await page.fill('[name="customer"]', 'Customer A');
   await page.click('text=Save');
-  
+
   await expect(page.locator('text=Invoice created')).toBeVisible();
 });
 ```
@@ -736,7 +742,7 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - DATABASE_URL=file:/data/dev.db
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}

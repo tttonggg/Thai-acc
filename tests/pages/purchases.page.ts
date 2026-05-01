@@ -14,7 +14,9 @@ export class PurchasesPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("ใบซื้อ"), h1:has-text("Purchases")');
-    this.newPurchaseButton = page.locator('button:has-text("สร้างใบซื้อ"), button:has-text("New Purchase")');
+    this.newPurchaseButton = page.locator(
+      'button:has-text("สร้างใบซื้อ"), button:has-text("New Purchase")'
+    );
     this.purchasesTable = page.locator('table, [role="table"]').first();
   }
 
@@ -23,13 +25,19 @@ export class PurchasesPage {
     await this.pageTitle.waitFor({ state: 'visible', timeout: 10000 });
   }
 
-  async createPurchase(data: { vendorName: string; items: Array<{ productName: string; quantity: number; price: number }> }) {
+  async createPurchase(data: {
+    vendorName: string;
+    items: Array<{ productName: string; quantity: number; price: number }>;
+  }) {
     await this.newPurchaseButton.click();
     await this.page.locator('select[name="vendorId"]').selectOption({ label: data.vendorName });
 
     for (const item of data.items) {
       await this.page.locator('button:has-text("เพิ่มรายการ")').click();
-      await this.page.locator('select[name="productId"]').last().selectOption({ label: item.productName });
+      await this.page
+        .locator('select[name="productId"]')
+        .last()
+        .selectOption({ label: item.productName });
       await this.page.locator('input[name="quantity"]').last().fill(item.quantity.toString());
       await this.page.locator('input[name="price"]').last().fill(item.price.toString());
     }

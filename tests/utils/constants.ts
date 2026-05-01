@@ -10,23 +10,23 @@ export const TEST_USERS = {
   ADMIN: {
     email: 'admin@thaiaccounting.com',
     password: 'admin123',
-    role: 'ADMIN'
+    role: 'ADMIN',
   },
   ACCOUNTANT: {
     email: 'accountant@thaiaccounting.com',
     password: 'acc123',
-    role: 'ACCOUNTANT'
+    role: 'ACCOUNTANT',
   },
   USER: {
     email: 'user@thaiaccounting.com',
     password: 'user123',
-    role: 'USER'
+    role: 'USER',
   },
   VIEWER: {
     email: 'viewer@thaiaccounting.com',
     password: 'viewer123',
-    role: 'VIEWER'
-  }
+    role: 'VIEWER',
+  },
 } as const;
 
 /**
@@ -70,21 +70,21 @@ export const URLs = {
 
   // Settings
   SETTINGS: '/settings',
-  USERS: '/users'
+  USERS: '/users',
 } as const;
 
 /**
  * Test timeouts in milliseconds
  */
 export const TIMEOUTS = {
-  SHORT: 1000,      // 1 second - quick operations
-  MEDIUM: 5000,     // 5 seconds - normal operations
-  LONG: 10000,      // 10 seconds - slow operations
-  XLONG: 30000,     // 30 seconds - very slow operations
+  SHORT: 1000, // 1 second - quick operations
+  MEDIUM: 5000, // 5 seconds - normal operations
+  LONG: 10000, // 10 seconds - slow operations
+  XLONG: 30000, // 30 seconds - very slow operations
   DB_OPERATION: 5000, // Database operations
-  NAVIGATION: 5000,   // Page navigation
-  TOAST: 3000,        // Toast notifications
-  NETWORK: 10000      // Network requests
+  NAVIGATION: 5000, // Page navigation
+  TOAST: 3000, // Toast notifications
+  NETWORK: 10000, // Network requests
 } as const;
 
 /**
@@ -134,7 +134,7 @@ export const SELECTORS = {
 
   // Empty states
   EMPTY_STATE: '[data-empty-state]',
-  NO_DATA: '[data-no-data]'
+  NO_DATA: '[data-no-data]',
 } as const;
 
 /**
@@ -147,7 +147,7 @@ export const TEST_DATA = {
     LIABILITY: 'LIABILITY',
     EQUITY: 'EQUITY',
     REVENUE: 'REVENUE',
-    EXPENSE: 'EXPENSE'
+    EXPENSE: 'EXPENSE',
   },
 
   // Document statuses
@@ -157,7 +157,7 @@ export const TEST_DATA = {
     POSTED: 'POSTED',
     PAID: 'PAID',
     CANCELLED: 'CANCELLED',
-    REVERSED: 'REVERSED'
+    REVERSED: 'REVERSED',
   },
 
   // VAT rates
@@ -171,8 +171,8 @@ export const TEST_DATA = {
       rent: 5,
       professional: 3,
       contract: 1,
-      advertising: 2
-    }
+      advertising: 2,
+    },
   },
 
   // SSC rates
@@ -184,8 +184,8 @@ export const TEST_DATA = {
     SMALL: 1000,
     MEDIUM: 10000,
     LARGE: 100000,
-    XLARGE: 1000000
-  }
+    XLARGE: 1000000,
+  },
 } as const;
 
 /**
@@ -210,7 +210,7 @@ export const ERROR_MESSAGES = {
 
   // Database
   RECORD_NOT_FOUND: 'ไม่พบข้อมูลที่ค้นหา',
-  DUPLICATE_RECORD: 'ข้อมูลซ้ำ'
+  DUPLICATE_RECORD: 'ข้อมูลซ้ำ',
 } as const;
 
 /**
@@ -222,7 +222,7 @@ export const SUCCESS_MESSAGES = {
   DELETED: 'ลบสำเร็จ',
   POSTED: 'ลงบัญชีแล้ว',
   APPROVED: 'อนุมัติแล้ว',
-  REJECTED: 'ปฏิเสธแล้ว'
+  REJECTED: 'ปฏิเสธแล้ว',
 } as const;
 
 /**
@@ -237,7 +237,7 @@ export const SAMPLE_DATA = {
     address: '123 Test Street',
     province: 'Bangkok',
     postcode: '10100',
-    creditLimit: 50000
+    creditLimit: 50000,
   },
 
   vendor: {
@@ -248,7 +248,7 @@ export const SAMPLE_DATA = {
     address: '456 Vendor Road',
     province: 'Bangkok',
     postcode: '10200',
-    paymentTerms: 30
+    paymentTerms: 30,
   },
 
   product: {
@@ -257,17 +257,19 @@ export const SAMPLE_DATA = {
     unit: 'pcs',
     price: 1000,
     cost: 500,
-    vatType: 'EXCLUSIVE'
+    vatType: 'EXCLUSIVE',
   },
 
   invoice: {
     customerId: null, // To be filled
     invoiceDate: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    items: [{
-      productId: null, // To be filled
-      quantity: 10,
-      price: 1000
-    }]
-  }
+    items: [
+      {
+        productId: null, // To be filled
+        quantity: 10,
+        price: 1000,
+      },
+    ],
+  },
 } as const;

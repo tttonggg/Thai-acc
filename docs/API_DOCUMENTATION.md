@@ -2,7 +2,10 @@
 
 ## Overview
 
-Welcome to the Thai Accounting ERP API documentation. This comprehensive guide provides everything you need to integrate with our REST API, including interactive examples, code snippets in multiple languages, and detailed troubleshooting information.
+Welcome to the Thai Accounting ERP API documentation. This comprehensive guide
+provides everything you need to integrate with our REST API, including
+interactive examples, code snippets in multiple languages, and detailed
+troubleshooting information.
 
 **Base URL:** `http://localhost:3000/api` (Development)  
 **Current Version:** 1.0.0  
@@ -17,6 +20,7 @@ Welcome to the Thai Accounting ERP API documentation. This comprehensive guide p
 Visit the interactive API documentation at: `/api/docs`
 
 Features:
+
 - 🔥 Live "Try It Now" functionality
 - 📋 Copy-paste code examples
 - 🔐 Built-in authentication tester
@@ -27,16 +31,19 @@ Features:
 
 ## Authentication
 
-All API endpoints (except authentication endpoints) require authentication via NextAuth session cookie.
+All API endpoints (except authentication endpoints) require authentication via
+NextAuth session cookie.
 
 ### Authentication Methods
 
 #### 1. Session Cookie (Browser)
+
 ```
 Cookie: next-auth.session-token={token}
 ```
 
 #### 2. API Token (Server-to-Server)
+
 ```
 Authorization: Bearer {api_token}
 X-API-Key: {your_api_key}
@@ -56,6 +63,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -72,6 +80,7 @@ Content-Type: application/json
 ### Code Examples - Authentication
 
 #### cURL
+
 ```bash
 # Login
 curl -X POST http://localhost:3000/api/auth/callback/credentials \
@@ -89,6 +98,7 @@ curl http://localhost:3000/api/invoices \
 ```
 
 #### JavaScript (Fetch)
+
 ```javascript
 // Login
 const loginResponse = await fetch('/api/auth/callback/credentials', {
@@ -97,9 +107,9 @@ const loginResponse = await fetch('/api/auth/callback/credentials', {
   body: JSON.stringify({
     email: 'admin@thaiaccounting.com',
     password: 'admin123',
-    redirect: false
+    redirect: false,
   }),
-  credentials: 'include'
+  credentials: 'include',
 });
 
 const { sessionToken } = await loginResponse.json();
@@ -107,25 +117,26 @@ const { sessionToken } = await loginResponse.json();
 // Use in subsequent requests
 const invoices = await fetch('/api/invoices', {
   headers: {
-    'Cookie': `next-auth.session-token=${sessionToken}`
-  }
+    Cookie: `next-auth.session-token=${sessionToken}`,
+  },
 });
 ```
 
 #### JavaScript (Axios)
+
 ```javascript
 import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost:3000/api',
-  withCredentials: true
+  withCredentials: true,
 });
 
 // Login
 const login = await api.post('/auth/callback/credentials', {
   email: 'admin@thaiaccounting.com',
   password: 'admin123',
-  redirect: false
+  redirect: false,
 });
 
 // Get invoices
@@ -133,6 +144,7 @@ const invoices = await api.get('/invoices');
 ```
 
 #### Python (Requests)
+
 ```python
 import requests
 
@@ -154,6 +166,7 @@ print(invoices.json())
 ```
 
 #### PHP
+
 ```php
 <?php
 $ch = curl_init();
@@ -184,6 +197,7 @@ curl_close($ch);
 ```
 
 #### Go
+
 ```go
 package main
 
@@ -213,7 +227,7 @@ func main() {
         Password: "admin123",
         Redirect: false,
     }
-    
+
     jsonData, _ := json.Marshal(loginData)
     resp, _ := client.Post(
         "http://localhost:3000/api/auth/callback/credentials",
@@ -225,7 +239,7 @@ func main() {
     // Get invoices
     resp, _ = client.Get("http://localhost:3000/api/invoices")
     defer resp.Body.Close()
-    
+
     fmt.Println("Status:", resp.Status)
 }
 ```
@@ -235,6 +249,7 @@ func main() {
 ## Response Format
 
 ### Success Response
+
 ```json
 {
   "success": true,
@@ -247,15 +262,14 @@ func main() {
 ```
 
 ### Error Response
+
 ```json
 {
   "success": false,
   "error": {
     "code": "VALIDATION_ERROR",
     "message": "ข้อมูลไม่ถูกต้อง",
-    "details": [
-      { "field": "email", "message": "รูปแบบอีเมลไม่ถูกต้อง" }
-    ]
+    "details": [{ "field": "email", "message": "รูปแบบอีเมลไม่ถูกต้อง" }]
   },
   "meta": {
     "timestamp": "2026-03-16T10:00:00Z",
@@ -265,6 +279,7 @@ func main() {
 ```
 
 ### Paginated Response
+
 ```json
 {
   "success": true,
@@ -286,45 +301,46 @@ func main() {
 
 ### HTTP Status Codes
 
-| Code | Meaning | Description | Troubleshooting |
-|------|---------|-------------|-----------------|
-| 200 | OK | Request successful | - |
-| 201 | Created | Resource created successfully | - |
-| 204 | No Content | Request successful, no content returned | - |
-| 400 | Bad Request | Invalid input data or business logic violation | Check request body format, required fields, and data types |
-| 401 | Unauthorized | Not authenticated or invalid session | Re-authenticate, check session token expiry |
-| 403 | Forbidden | Authenticated but insufficient permissions | Verify user role has required permissions |
-| 404 | Not Found | Resource does not exist | Check resource ID, verify resource exists |
-| 409 | Conflict | Resource state conflict (e.g., already posted) | Check resource status before operation |
-| 422 | Validation Error | Request validation failed | Check validation errors in response body |
-| 429 | Too Many Requests | Rate limit exceeded | Wait before retrying, check rate limit headers |
-| 500 | Server Error | Internal server error | Contact support, retry with exponential backoff |
-| 503 | Service Unavailable | Server temporarily unavailable | Retry after delay, check system status |
+| Code | Meaning             | Description                                    | Troubleshooting                                            |
+| ---- | ------------------- | ---------------------------------------------- | ---------------------------------------------------------- |
+| 200  | OK                  | Request successful                             | -                                                          |
+| 201  | Created             | Resource created successfully                  | -                                                          |
+| 204  | No Content          | Request successful, no content returned        | -                                                          |
+| 400  | Bad Request         | Invalid input data or business logic violation | Check request body format, required fields, and data types |
+| 401  | Unauthorized        | Not authenticated or invalid session           | Re-authenticate, check session token expiry                |
+| 403  | Forbidden           | Authenticated but insufficient permissions     | Verify user role has required permissions                  |
+| 404  | Not Found           | Resource does not exist                        | Check resource ID, verify resource exists                  |
+| 409  | Conflict            | Resource state conflict (e.g., already posted) | Check resource status before operation                     |
+| 422  | Validation Error    | Request validation failed                      | Check validation errors in response body                   |
+| 429  | Too Many Requests   | Rate limit exceeded                            | Wait before retrying, check rate limit headers             |
+| 500  | Server Error        | Internal server error                          | Contact support, retry with exponential backoff            |
+| 503  | Service Unavailable | Server temporarily unavailable                 | Retry after delay, check system status                     |
 
 ### Application Error Codes
 
-| Code | Description | Solution |
-|------|-------------|----------|
-| `AUTH_INVALID_CREDENTIALS` | อีเมลหรือรหัสผ่านไม่ถูกต้อง | ตรวจสอบอีเมลและรหัสผ่าน หรือรีเซ็ตรหัสผ่าน |
-| `AUTH_SESSION_EXPIRED` | เซสชันหมดอายุ | เข้าสู่ระบบใหม่ |
-| `AUTH_INSUFFICIENT_PERMISSIONS` | สิทธิ์ไม่เพียงพอ | ติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์ |
-| `VALIDATION_REQUIRED_FIELD` | ฟิลด์ที่จำเป็นขาดหายไป | ตรวจสอบฟิลด์ที่จำเป็นทั้งหมด |
-| `VALIDATION_INVALID_FORMAT` | รูปแบบข้อมูลไม่ถูกต้อง | ตรวจสอบรูปแบบข้อมูล (เช่น อีเมล, วันที่) |
-| `VALIDATION_INVALID_RANGE` | ค่าอยู่นอกช่วงที่กำหนด | ตรวจสอบช่วงค่าที่ยอมรับ |
-| `RESOURCE_NOT_FOUND` | ไม่พบข้อมูล | ตรวจสอบรหัสข้อมูล |
-| `RESOURCE_ALREADY_EXISTS` | ข้อมูลมีอยู่แล้ว | ใช้รหัสใหม่หรืออัปเดตข้อมูลเดิม |
-| `RESOURCE_LOCKED` | ข้อมูลถูกล็อก | รอการปลดล็อกหรือติดต่อผู้ดูแลระบบ |
-| `BUSINESS_RULE_VIOLATION` | ฝ่าฝืนกฎธุรกิจ | ตรวจสอบเงื่อนไขทางธุรกิจ |
-| `INSUFFICIENT_BALANCE` | ยอดคงเหลือไม่เพียงพอ | ตรวจสอบยอดคงเหลือในบัญชี |
-| `DOCUMENT_ALREADY_POSTED` | เอกสารโพสต์แล้ว | ไม่สามารถแก้ไขเอกสารที่โพสต์แล้ว |
-| `DOCUMENT_CANCELLED` | เอกสารถูกยกเลิก | ไม่สามารถดำเนินการกับเอกสารที่ยกเลิก |
-| `INVENTORY_INSUFFICIENT` | สต็อกสินค้าไม่เพียงพอ | ตรวจสอบจำนวนสินค้าคงเหลือ |
-| `RATE_LIMIT_EXCEEDED` | เกินจำกัดการเรียก API | รอก่อนเรียก API ใหม่ |
-| `MAINTENANCE_MODE` | ระบบอยู่ในโหมดบำรุงรักษา | รอจนกว่าระบบจะกลับมาทำงาน |
+| Code                            | Description                 | Solution                                   |
+| ------------------------------- | --------------------------- | ------------------------------------------ |
+| `AUTH_INVALID_CREDENTIALS`      | อีเมลหรือรหัสผ่านไม่ถูกต้อง | ตรวจสอบอีเมลและรหัสผ่าน หรือรีเซ็ตรหัสผ่าน |
+| `AUTH_SESSION_EXPIRED`          | เซสชันหมดอายุ               | เข้าสู่ระบบใหม่                            |
+| `AUTH_INSUFFICIENT_PERMISSIONS` | สิทธิ์ไม่เพียงพอ            | ติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์             |
+| `VALIDATION_REQUIRED_FIELD`     | ฟิลด์ที่จำเป็นขาดหายไป      | ตรวจสอบฟิลด์ที่จำเป็นทั้งหมด               |
+| `VALIDATION_INVALID_FORMAT`     | รูปแบบข้อมูลไม่ถูกต้อง      | ตรวจสอบรูปแบบข้อมูล (เช่น อีเมล, วันที่)   |
+| `VALIDATION_INVALID_RANGE`      | ค่าอยู่นอกช่วงที่กำหนด      | ตรวจสอบช่วงค่าที่ยอมรับ                    |
+| `RESOURCE_NOT_FOUND`            | ไม่พบข้อมูล                 | ตรวจสอบรหัสข้อมูล                          |
+| `RESOURCE_ALREADY_EXISTS`       | ข้อมูลมีอยู่แล้ว            | ใช้รหัสใหม่หรืออัปเดตข้อมูลเดิม            |
+| `RESOURCE_LOCKED`               | ข้อมูลถูกล็อก               | รอการปลดล็อกหรือติดต่อผู้ดูแลระบบ          |
+| `BUSINESS_RULE_VIOLATION`       | ฝ่าฝืนกฎธุรกิจ              | ตรวจสอบเงื่อนไขทางธุรกิจ                   |
+| `INSUFFICIENT_BALANCE`          | ยอดคงเหลือไม่เพียงพอ        | ตรวจสอบยอดคงเหลือในบัญชี                   |
+| `DOCUMENT_ALREADY_POSTED`       | เอกสารโพสต์แล้ว             | ไม่สามารถแก้ไขเอกสารที่โพสต์แล้ว           |
+| `DOCUMENT_CANCELLED`            | เอกสารถูกยกเลิก             | ไม่สามารถดำเนินการกับเอกสารที่ยกเลิก       |
+| `INVENTORY_INSUFFICIENT`        | สต็อกสินค้าไม่เพียงพอ       | ตรวจสอบจำนวนสินค้าคงเหลือ                  |
+| `RATE_LIMIT_EXCEEDED`           | เกินจำกัดการเรียก API       | รอก่อนเรียก API ใหม่                       |
+| `MAINTENANCE_MODE`              | ระบบอยู่ในโหมดบำรุงรักษา    | รอจนกว่าระบบจะกลับมาทำงาน                  |
 
 ### Common Troubleshooting Scenarios
 
 #### 1. Authentication Issues
+
 ```bash
 # Problem: 401 Unauthorized
 # Solution: Check session and re-authenticate
@@ -341,6 +357,7 @@ curl -X POST http://localhost:3000/api/auth/callback/credentials \
 ```
 
 #### 2. Validation Errors
+
 ```bash
 # Problem: 422 Validation Error
 # Solution: Check validation errors and fix request
@@ -357,6 +374,7 @@ curl -X POST http://localhost:3000/api/invoices \
 ```
 
 #### 3. Rate Limiting
+
 ```bash
 # Problem: 429 Too Many Requests
 # Solution: Check rate limit headers and wait
@@ -372,12 +390,13 @@ curl -X POST http://localhost:3000/api/invoices \
 ### Error Handling Examples
 
 #### JavaScript (Axios with Interceptors)
+
 ```javascript
 import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost:3000/api',
-  withCredentials: true
+  withCredentials: true,
 });
 
 // Request interceptor
@@ -403,7 +422,7 @@ api.interceptors.response.use(
         await api.post('/auth/callback/credentials', {
           email: 'admin@thaiaccounting.com',
           password: 'admin123',
-          redirect: false
+          redirect: false,
         });
         return api(originalRequest);
       } catch (refreshError) {
@@ -434,6 +453,7 @@ export default api;
 ```
 
 #### Python (Error Handling)
+
 ```python
 import requests
 from requests.adapters import HTTPAdapter
@@ -443,7 +463,7 @@ class ThaiAccountingAPI:
     def __init__(self, base_url='http://localhost:3000'):
         self.base_url = base_url
         self.session = requests.Session()
-        
+
         # Configure retry strategy
         retry_strategy = Retry(
             total=3,
@@ -498,6 +518,7 @@ class ConflictError(Exception):
 ```
 
 #### Go (Error Handling)
+
 ```go
 package main
 
@@ -575,16 +596,17 @@ func (c *Client) handleError(resp *http.Response) error {
 
 ### Request Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | number | 1 | Page number (1-indexed) |
-| `limit` | number | 20 | Items per page (max: 100) |
-| `sort` | string | - | Sort field |
-| `order` | string | asc | Sort order (asc, desc) |
+| Parameter | Type   | Default | Description               |
+| --------- | ------ | ------- | ------------------------- |
+| `page`    | number | 1       | Page number (1-indexed)   |
+| `limit`   | number | 20      | Items per page (max: 100) |
+| `sort`    | string | -       | Sort field                |
+| `order`   | string | asc     | Sort order (asc, desc)    |
 
 ### Pagination Examples
 
 #### Basic Pagination
+
 ```javascript
 // Get page 2 with 50 items per page
 const response = await fetch('/api/invoices?page=2&limit=50');
@@ -602,25 +624,27 @@ console.log(data.pagination);
 ```
 
 #### Cursor-Based Pagination (For Large Datasets)
+
 ```javascript
 // Using cursor for better performance with large datasets
 let cursor = null;
 const allItems = [];
 
 do {
-  const url = cursor 
+  const url = cursor
     ? `/api/invoices?cursor=${cursor}&limit=100`
     : '/api/invoices?limit=100';
-  
+
   const response = await fetch(url);
   const data = await response.json();
-  
+
   allItems.push(...data.data);
   cursor = data.pagination.nextCursor;
 } while (cursor);
 ```
 
 #### Python Pagination Helper
+
 ```python
 class PaginatedIterator:
     def __init__(self, client, endpoint, params=None, per_page=100):
@@ -667,13 +691,13 @@ for items in PaginatedIterator(client, '/api/invoices', {'status': 'DRAFT'}):
 
 ### Limits by Endpoint Category
 
-| Category | Limit | Window | Description |
-|----------|-------|--------|-------------|
-| Authentication | 5 requests | 15 minutes | Login, password reset |
-| General API | 60 requests | 1 minute | Standard API calls |
-| Reports | 10 requests | 1 minute | Report generation |
-| Export | 5 requests | 5 minutes | Data export operations |
-| Webhooks | 100 requests | 1 minute | Webhook deliveries |
+| Category       | Limit        | Window     | Description            |
+| -------------- | ------------ | ---------- | ---------------------- |
+| Authentication | 5 requests   | 15 minutes | Login, password reset  |
+| General API    | 60 requests  | 1 minute   | Standard API calls     |
+| Reports        | 10 requests  | 1 minute   | Report generation      |
+| Export         | 5 requests   | 5 minutes  | Data export operations |
+| Webhooks       | 100 requests | 1 minute   | Webhook deliveries     |
 
 ### Rate Limit Headers
 
@@ -687,26 +711,27 @@ X-RateLimit-Retry-After: 45
 ### Handling Rate Limits
 
 #### Client-Side Implementation
+
 ```javascript
 class RateLimitHandler {
   async makeRequest(url, options) {
     try {
       const response = await fetch(url, options);
-      
+
       if (response.status === 429) {
         const retryAfter = response.headers.get('X-RateLimit-Retry-After');
         await this.wait(parseInt(retryAfter) * 1000);
         return this.makeRequest(url, options); // Retry
       }
-      
+
       return response;
     } catch (error) {
       throw error;
     }
   }
-  
+
   wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 ```
@@ -715,27 +740,27 @@ class RateLimitHandler {
 
 ## Role-Based Access Control
 
-| Role | Permissions | Endpoints |
-|------|-------------|-----------|
-| **ADMIN** | Full access | All endpoints including user management |
+| Role           | Permissions            | Endpoints                                  |
+| -------------- | ---------------------- | ------------------------------------------ |
+| **ADMIN**      | Full access            | All endpoints including user management    |
 | **ACCOUNTANT** | Full accounting access | All accounting modules, no user management |
-| **USER** | Create/view only | Limited write access, no settings |
-| **VIEWER** | Read-only | GET requests only |
+| **USER**       | Create/view only       | Limited write access, no settings          |
+| **VIEWER**     | Read-only              | GET requests only                          |
 
 ### Permission Matrix
 
-| Endpoint | ADMIN | ACCOUNTANT | USER | VIEWER |
-|----------|-------|------------|------|--------|
-| GET /api/accounts | ✅ | ✅ | ✅ | ✅ |
-| POST /api/accounts | ✅ | ✅ | ❌ | ❌ |
-| DELETE /api/accounts | ✅ | ❌ | ❌ | ❌ |
-| GET /api/invoices | ✅ | ✅ | ✅ | ✅ |
-| POST /api/invoices | ✅ | ✅ | ✅ | ❌ |
-| POST /api/invoices/:id/void | ✅ | ✅ | ❌ | ❌ |
-| GET /api/settings | ✅ | ✅ | ✅ | ✅ |
-| PUT /api/settings | ✅ | ❌ | ❌ | ❌ |
-| GET /api/users | ✅ | ❌ | ❌ | ❌ |
-| POST /api/users | ✅ | ❌ | ❌ | ❌ |
+| Endpoint                    | ADMIN | ACCOUNTANT | USER | VIEWER |
+| --------------------------- | ----- | ---------- | ---- | ------ |
+| GET /api/accounts           | ✅    | ✅         | ✅   | ✅     |
+| POST /api/accounts          | ✅    | ✅         | ❌   | ❌     |
+| DELETE /api/accounts        | ✅    | ❌         | ❌   | ❌     |
+| GET /api/invoices           | ✅    | ✅         | ✅   | ✅     |
+| POST /api/invoices          | ✅    | ✅         | ✅   | ❌     |
+| POST /api/invoices/:id/void | ✅    | ✅         | ❌   | ❌     |
+| GET /api/settings           | ✅    | ✅         | ✅   | ✅     |
+| PUT /api/settings           | ✅    | ❌         | ❌   | ❌     |
+| GET /api/users              | ✅    | ❌         | ❌   | ❌     |
+| POST /api/users             | ✅    | ❌         | ❌   | ❌     |
 
 ---
 
@@ -744,14 +769,17 @@ class RateLimitHandler {
 ### Accounts API
 
 #### List Accounts
+
 ```http
 GET /api/accounts?page=1&limit=20&type=ASSET&search=ค่า
 ```
 
 **Query Parameters:**
+
 - `page` (number): Page number (default: 1)
 - `limit` (number): Items per page (default: 20, max: 100)
-- `type` (string): Filter by account type (ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE)
+- `type` (string): Filter by account type (ASSET, LIABILITY, EQUITY, REVENUE,
+  EXPENSE)
 - `search` (string): Search by name or code
 - `parentId` (string): Filter by parent account
 
@@ -765,6 +793,7 @@ curl "http://localhost:3000/api/accounts?page=1&limit=20&type=ASSET" \
   -H "Content-Type: application/json" \
   -b cookies.txt
 ```
+
 </details>
 
 <details>
@@ -773,10 +802,11 @@ curl "http://localhost:3000/api/accounts?page=1&limit=20&type=ASSET" \
 ```javascript
 const response = await fetch('/api/accounts?page=1&limit=20&type=ASSET', {
   headers: { 'Content-Type': 'application/json' },
-  credentials: 'include'
+  credentials: 'include',
 });
 const accounts = await response.json();
 ```
+
 </details>
 
 <details>
@@ -792,9 +822,11 @@ response = requests.get(
 )
 accounts = response.json()
 ```
+
 </details>
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -821,11 +853,13 @@ accounts = response.json()
 ```
 
 #### Create Account
+
 ```http
 POST /api/accounts
 ```
 
 **Request Body:**
+
 ```json
 {
   "code": "1102",
@@ -838,6 +872,7 @@ POST /api/accounts
 ```
 
 **Validation Rules:**
+
 - `code`: Required, unique, 4-10 characters
 - `name`: Required, 1-200 characters
 - `type`: Required, enum: ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE
@@ -847,11 +882,13 @@ POST /api/accounts
 ### Invoices API
 
 #### List Invoices
+
 ```http
 GET /api/invoices?page=1&limit=20&status=DRAFT&customerId=xxx&startDate=2024-01-01&endDate=2024-12-31
 ```
 
 **Query Parameters:**
+
 - `page` (number): Page number
 - `limit` (number): Items per page
 - `status` (string): DRAFT, ISSUED, PARTIAL, PAID, CANCELLED
@@ -862,11 +899,13 @@ GET /api/invoices?page=1&limit=20&status=DRAFT&customerId=xxx&startDate=2024-01-
 - `maxAmount` (number): Maximum amount
 
 #### Create Invoice
+
 ```http
 POST /api/invoices
 ```
 
 **Request Body:**
+
 ```json
 {
   "customerId": "cust_001",
@@ -910,6 +949,7 @@ curl -X POST http://localhost:3000/api/invoices \
     ]
   }'
 ```
+
 </details>
 
 <details>
@@ -939,6 +979,7 @@ response = requests.post(
 )
 print(response.json())
 ```
+
 </details>
 
 <details>
@@ -972,9 +1013,11 @@ curl_close($ch);
 echo $response;
 ?>
 ```
+
 </details>
 
 #### Issue Invoice
+
 ```http
 POST /api/invoices/:id/issue
 ```
@@ -986,16 +1029,19 @@ Creates journal entries and marks invoice as ISSUED.
 ### Receipts API
 
 #### List Receipts
+
 ```http
 GET /api/receipts?page=1&limit=20&status=DRAFT&customerId=xxx
 ```
 
 #### Create Receipt
+
 ```http
 POST /api/receipts
 ```
 
 **Request Body:**
+
 ```json
 {
   "customerId": "cust_001",
@@ -1017,6 +1063,7 @@ POST /api/receipts
 ```
 
 **Payment Methods:**
+
 - `CASH` - เงินสด
 - `BANK_TRANSFER` - โอนเงิน
 - `CHEQUE` - เช็ค
@@ -1027,16 +1074,19 @@ POST /api/receipts
 ### Journal Entries API
 
 #### List Journal Entries
+
 ```http
 GET /api/journal?page=1&limit=20&status=POSTED&startDate=2024-01-01&endDate=2024-12-31
 ```
 
 #### Create Journal Entry
+
 ```http
 POST /api/journal
 ```
 
 **Request Body:**
+
 ```json
 {
   "date": "2024-03-15",
@@ -1066,31 +1116,37 @@ POST /api/journal
 ### Reports API
 
 #### General Ledger Report
+
 ```http
 GET /api/reports/general-ledger?startDate=2024-01-01&endDate=2024-03-31&accountId=xxx
 ```
 
 #### Balance Sheet
+
 ```http
 GET /api/reports/balance-sheet?asOf=2024-03-31
 ```
 
 #### Income Statement
+
 ```http
 GET /api/reports/income-statement?startDate=2024-01-01&endDate=2024-03-31
 ```
 
 #### Trial Balance
+
 ```http
 GET /api/reports/trial-balance?asOf=2024-03-31
 ```
 
 #### VAT Report
+
 ```http
 GET /api/reports/vat?month=3&year=2024&type=OUTPUT
 ```
 
 **Report Types:**
+
 - `OUTPUT` - ภาษีขาย (Output VAT)
 - `INPUT` - ภาษีซื้อ (Input VAT)
 
@@ -1099,16 +1155,19 @@ GET /api/reports/vat?month=3&year=2024&type=OUTPUT
 ### Customers API
 
 #### List Customers
+
 ```http
 GET /api/customers?page=1&limit=20&search=บริษัท&isActive=true
 ```
 
 #### Create Customer
+
 ```http
 POST /api/customers
 ```
 
 **Request Body:**
+
 ```json
 {
   "code": "CUST-001",
@@ -1133,11 +1192,13 @@ POST /api/customers
 ### Settings API
 
 #### Get Settings
+
 ```http
 GET /api/settings
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -1158,6 +1219,7 @@ GET /api/settings
 ```
 
 #### Update Settings
+
 ```http
 PUT /api/settings
 ```
@@ -1167,27 +1229,30 @@ PUT /api/settings
 ## Status Codes Reference
 
 ### Invoice Status
-| Status | Thai | Description |
-|--------|------|-------------|
-| DRAFT | ฉบับร่าง | Initial state, editable |
-| ISSUED | ออกแล้ว | Invoice issued to customer |
-| PARTIAL | ชำระบางส่วน | Partially paid |
-| PAID | ชำระแล้ว | Fully paid |
-| CANCELLED | ยกเลิก | Cancelled/voided |
+
+| Status    | Thai        | Description                |
+| --------- | ----------- | -------------------------- |
+| DRAFT     | ฉบับร่าง    | Initial state, editable    |
+| ISSUED    | ออกแล้ว     | Invoice issued to customer |
+| PARTIAL   | ชำระบางส่วน | Partially paid             |
+| PAID      | ชำระแล้ว    | Fully paid                 |
+| CANCELLED | ยกเลิก      | Cancelled/voided           |
 
 ### Receipt/Payment Status
-| Status | Thai | Description |
-|--------|------|-------------|
-| DRAFT | ฉบับร่าง | Initial state |
-| POSTED | โพสต์แล้ว | Posted to GL |
-| CANCELLED | ยกเลิก | Cancelled |
+
+| Status    | Thai      | Description   |
+| --------- | --------- | ------------- |
+| DRAFT     | ฉบับร่าง  | Initial state |
+| POSTED    | โพสต์แล้ว | Posted to GL  |
+| CANCELLED | ยกเลิก    | Cancelled     |
 
 ### Journal Entry Status
-| Status | Thai | Description |
-|--------|------|-------------|
-| DRAFT | ฉบับร่าง | Initial state |
-| POSTED | โพสต์แล้ว | Posted to GL |
-| REVERSED | ยกเลิก | Reversed |
+
+| Status   | Thai      | Description   |
+| -------- | --------- | ------------- |
+| DRAFT    | ฉบับร่าง  | Initial state |
+| POSTED   | โพสต์แล้ว | Posted to GL  |
+| REVERSED | ยกเลิก    | Reversed      |
 
 ---
 
@@ -1199,19 +1264,20 @@ Configure webhooks in Settings → Integrations → Webhooks
 
 ### Events
 
-| Event | Description |
-|-------|-------------|
-| `invoice.created` | Invoice created |
-| `invoice.issued` | Invoice issued |
-| `invoice.paid` | Invoice paid |
-| `invoice.cancelled` | Invoice cancelled |
-| `receipt.created` | Receipt created |
-| `receipt.posted` | Receipt posted |
-| `payment.created` | Payment created |
-| `payment.posted` | Payment posted |
-| `journal.posted` | Journal entry posted |
+| Event               | Description          |
+| ------------------- | -------------------- |
+| `invoice.created`   | Invoice created      |
+| `invoice.issued`    | Invoice issued       |
+| `invoice.paid`      | Invoice paid         |
+| `invoice.cancelled` | Invoice cancelled    |
+| `receipt.created`   | Receipt created      |
+| `receipt.posted`    | Receipt posted       |
+| `payment.created`   | Payment created      |
+| `payment.posted`    | Payment posted       |
+| `journal.posted`    | Journal entry posted |
 
 ### Webhook Payload
+
 ```json
 {
   "event": "invoice.created",
@@ -1227,6 +1293,7 @@ Configure webhooks in Settings → Integrations → Webhooks
 ```
 
 ### Signature Verification
+
 ```javascript
 const crypto = require('crypto');
 
@@ -1235,17 +1302,15 @@ function verifyWebhook(payload, signature, secret) {
     .createHmac('sha256', secret)
     .update(payload)
     .digest('hex');
-  
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expected)
-  );
+
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
 }
 ```
 
 ### Webhook Examples
 
 #### Handling Webhooks in Express.js
+
 ```javascript
 const express = require('express');
 const crypto = require('crypto');
@@ -1263,10 +1328,7 @@ app.post('/webhooks/thai-accounting', (req, res) => {
     .update(req.body)
     .digest('hex');
 
-  if (!crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expected)
-  )) {
+  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
     return res.status(401).send('Invalid signature');
   }
 
@@ -1307,6 +1369,7 @@ function handleReceiptPosted(data) {
 ```
 
 #### Python Webhook Handler (Flask)
+
 ```python
 from flask import Flask, request, jsonify
 import hmac
@@ -1319,30 +1382,30 @@ WEBHOOK_SECRET = os.environ.get('WEBHOOK_SECRET')
 @app.route('/webhooks/thai-accounting', methods=['POST'])
 def handle_webhook():
     signature = request.headers.get('X-Webhook-Signature')
-    
+
     # Verify signature
     expected = hmac.new(
         WEBHOOK_SECRET.encode(),
         request.data,
         hashlib.sha256
     ).hexdigest()
-    
+
     if not hmac.compare_digest(signature, expected):
         return jsonify({'error': 'Invalid signature'}), 401
-    
+
     event = request.json
-    
+
     # Handle events
     handlers = {
         'invoice.created': handle_invoice_created,
         'invoice.paid': handle_invoice_paid,
         'receipt.posted': handle_receipt_posted,
     }
-    
+
     handler = handlers.get(event['event'])
     if handler:
         handler(event['data'])
-    
+
     return jsonify({'status': 'ok'}), 200
 
 def handle_invoice_created(data):
@@ -1362,6 +1425,7 @@ if __name__ == '__main__':
 ```
 
 #### Go Webhook Handler
+
 ```go
 package main
 
@@ -1434,11 +1498,13 @@ func handleReceiptPosted(data json.RawMessage) {
 ## Postman Collection
 
 ### Import URL
+
 ```
 https://api.thaiaccounting.com/postman-collection.json
 ```
 
 ### Collection Structure
+
 ```
 Thai Accounting ERP API
 ├── 🔐 Authentication
@@ -1469,6 +1535,7 @@ Thai Accounting ERP API
 ```
 
 ### Environment Variables
+
 ```json
 {
   "baseUrl": "http://localhost:3000",
@@ -1482,6 +1549,7 @@ Thai Accounting ERP API
 ## API Changelog
 
 ### Version 1.0.0 (2026-03-16)
+
 - 🎉 Initial stable release
 - ✅ All core accounting modules
 - ✅ Authentication & authorization
@@ -1490,23 +1558,27 @@ Thai Accounting ERP API
 - ✅ Webhooks support
 
 ### Version 0.9.0 (2026-03-01)
+
 - ➕ Added inventory management endpoints
 - ➕ Added payroll endpoints
 - ➕ Added banking endpoints
 - 🔧 Improved error messages
 
 ### Version 0.8.0 (2026-02-15)
+
 - ➕ Added fixed assets endpoints
 - ➕ Added petty cash endpoints
 - ➕ Added WHT endpoints
 - 🔧 Performance improvements
 
 ### Version 0.7.0 (2026-02-01)
+
 - ➕ Added credit/debit notes
 - ➕ Added multi-currency support
 - 🔧 Bug fixes
 
 ### Version 0.6.0 (2026-01-15)
+
 - ➕ Initial beta release
 - ➕ Core accounting features
 
@@ -1517,6 +1589,7 @@ Thai Accounting ERP API
 ### Official SDKs
 
 #### JavaScript/TypeScript
+
 ```bash
 npm install @thaiaccounting/api-client
 ```
@@ -1526,13 +1599,14 @@ import { ThaiAccountingClient } from '@thaiaccounting/api-client';
 
 const client = new ThaiAccountingClient({
   baseUrl: 'http://localhost:3000',
-  credentials: { email: 'admin@thaiaccounting.com', password: 'admin123' }
+  credentials: { email: 'admin@thaiaccounting.com', password: 'admin123' },
 });
 
 const invoices = await client.invoices.list({ page: 1, limit: 20 });
 ```
 
 #### Python
+
 ```bash
 pip install thaiaccounting-api
 ```

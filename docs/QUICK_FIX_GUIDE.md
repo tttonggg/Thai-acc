@@ -4,7 +4,8 @@
 
 ## 🔴 Critical Issue Found: Authentication Failure
 
-All "Fetch failed" and "Unexpected data format" errors are caused by **authentication issues**, not data format issues.
+All "Fetch failed" and "Unexpected data format" errors are caused by
+**authentication issues**, not data format issues.
 
 ---
 
@@ -34,13 +35,15 @@ This will refresh your session cookie and fix all API authentication issues.
 ## 🐛 What's Happening
 
 The APIs are returning:
+
 ```json
-{"success": false, "error": "ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ"}
+{ "success": false, "error": "ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ" }
 ```
 
 Translation: "Not authorized - Please login"
 
 This means:
+
 - ✅ Your session expired or wasn't sent properly
 - ✅ All API calls are being rejected
 - ✅ Frontend shows "Fetch failed" because `res.ok` is false
@@ -49,7 +52,8 @@ This means:
 
 ## 🔧 What I Fixed Already
 
-1. ✅ **Routing between inventory/warehouses** - Added `key` props to force remount
+1. ✅ **Routing between inventory/warehouses** - Added `key` props to force
+   remount
 2. ✅ **Routing between payroll/employees** - Added `key` props to force remount
 3. ✅ **Data transformation** - All APIs now flatten vendor/customer data
 4. ✅ **Error handling** - Added try-catch to prevent API crashes
@@ -71,6 +75,7 @@ All data is intact. The issue is just authentication.
 ## 🎯 After Re-logging
 
 You should see:
+
 - ✅ **Purchase Invoices** (ใบซื้อ) - Shows 2 records
 - ✅ **Debit Notes** (ใบเพิ่มหนี้) - Shows 12 records
 - ✅ **Credit Notes** (ใบลดหนี้) - Shows all records
@@ -83,6 +88,7 @@ You should see:
 ## 💡 Why Session Issues Happen
 
 NextAuth.js sessions can fail due to:
+
 1. **Session expiration** - Sessions expire after a period
 2. **Cookie issues** - Browser blocks cookies
 3. **Database connection** - Session database access fails
@@ -92,11 +98,13 @@ NextAuth.js sessions can fail due to:
 
 ## 🚀 Status
 
-**Root Cause Identified**: Authentication session issue (not a data format issue)
+**Root Cause Identified**: Authentication session issue (not a data format
+issue)
 
 **Solution**: Re-login to refresh session
 
 **All Code Fixes Applied** ✅
+
 - Routing fixed
 - Data transformation fixed
 - Error handling improved
@@ -106,6 +114,7 @@ NextAuth.js sessions can fail due to:
 ## 📝 Note
 
 After re-logging, if you still see issues, please let me know:
+
 1. What page you're on
 2. What error you see
 3. A screenshot if possible

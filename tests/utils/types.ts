@@ -252,13 +252,7 @@ export type DocumentType =
 
 export type AccountType = 'ASSET' | 'LIABILITY' | 'EQUITY' | 'REVENUE' | 'EXPENSE';
 
-export type DocumentStatus =
-  | 'DRAFT'
-  | 'ISSUED'
-  | 'POSTED'
-  | 'PAID'
-  | 'CANCELLED'
-  | 'REVERSED';
+export type DocumentStatus = 'DRAFT' | 'ISSUED' | 'POSTED' | 'PAID' | 'CANCELLED' | 'REVERSED';
 
 // ============================================================================
 // Form Field Types
@@ -458,7 +452,7 @@ export const TEST_MODULES: TestModule[] = [
   { name: 'Petty Cash', path: '/petty-cash', permissions: ['ADMIN', 'ACCOUNTANT', 'USER'] },
   { name: 'Reports', path: '/reports', permissions: ['ADMIN', 'ACCOUNTANT', 'VIEWER'] },
   { name: 'Settings', path: '/settings', permissions: ['ADMIN'] },
-  { name: 'Users', path: '/users', permissions: ['ADMIN'] }
+  { name: 'Users', path: '/users', permissions: ['ADMIN'] },
 ];
 
 // ============================================================================
@@ -514,8 +508,4 @@ export interface DebugInfo {
 // Export All Types
 // ============================================================================
 
-export type {
-  Page,
-  Locator,
-  PrismaClient
-};
+export type { Page, Locator, PrismaClient };

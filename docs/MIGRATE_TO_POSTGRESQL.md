@@ -1,7 +1,9 @@
 # PostgreSQL Migration Guide
+
 ## Thai Accounting ERP System
 
-This guide provides step-by-step instructions for migrating the Thai Accounting ERP System from SQLite to PostgreSQL.
+This guide provides step-by-step instructions for migrating the Thai Accounting
+ERP System from SQLite to PostgreSQL.
 
 ## Table of Contents
 
@@ -185,39 +187,39 @@ bun run db:push
 # Create import script
 psql -U thai_acc_user -d thai_acc_db <<'EOF'
 -- Import customers
-COPY customers(id, code, name, name_en, tax_id, branch_code, address, 
-    sub_district, district, province, postal_code, phone, fax, email, 
-    website, contact_name, contact_phone, credit_limit, credit_days, 
-    is_active, deleted_at, deleted_by, notes, external_ref_id, metadata, 
+COPY customers(id, code, name, name_en, tax_id, branch_code, address,
+    sub_district, district, province, postal_code, phone, fax, email,
+    website, contact_name, contact_phone, credit_limit, credit_days,
+    is_active, deleted_at, deleted_by, notes, external_ref_id, metadata,
     created_at, updated_at)
 FROM '/path/to/migration/export/customers.csv'
 WITH (FORMAT csv, HEADER true);
 
 -- Import chart of accounts
-COPY chart_of_accounts(id, code, name, name_en, type, level, parent_id, 
+COPY chart_of_accounts(id, code, name, name_en, type, level, parent_id,
     is_detail, is_system, is_active, notes, created_at, updated_at)
 FROM '/path/to/migration/export/chart_of_accounts.csv'
 WITH (FORMAT csv, HEADER true);
 
 -- Import products
-COPY products(id, code, name, name_en, description, category, unit, type, 
-    sale_price, cost_price, vat_rate, vat_type, is_inventory, quantity, 
-    min_quantity, income_type, costing_method, is_active, deleted_at, 
+COPY products(id, code, name, name_en, description, category, unit, type,
+    sale_price, cost_price, vat_rate, vat_type, is_inventory, quantity,
+    min_quantity, income_type, costing_method, is_active, deleted_at,
     deleted_by, notes, metadata, created_at, updated_at)
 FROM '/path/to/migration/export/products.csv'
 WITH (FORMAT csv, HEADER true);
 
 -- Import journal entries
-COPY journal_entries(id, entry_no, date, description, reference, 
-    document_type, document_id, total_debit, total_credit, status, 
-    is_adjustment, is_reversing, reversing_id, created_by_id, approved_by_id, 
-    approved_at, idempotency_key, notes, is_active, deleted_at, deleted_by, 
+COPY journal_entries(id, entry_no, date, description, reference,
+    document_type, document_id, total_debit, total_credit, status,
+    is_adjustment, is_reversing, reversing_id, created_by_id, approved_by_id,
+    approved_at, idempotency_key, notes, is_active, deleted_at, deleted_by,
     created_at, updated_at)
 FROM '/path/to/migration/export/journal_entries.csv'
 WITH (FORMAT csv, HEADER true);
 
 -- Import journal lines
-COPY journal_lines(id, entry_id, line_no, account_id, description, 
+COPY journal_lines(id, entry_id, line_no, account_id, description,
     debit, credit, reference, created_at, updated_at)
 FROM '/path/to/migration/export/journal_lines.csv'
 WITH (FORMAT csv, HEADER true);
@@ -332,15 +334,15 @@ psql -U thai_acc_user -d thai_acc_db
 
 ```sql
 -- Refresh materialized views (run daily)
-SELECT cron.schedule('refresh-materialized-views', '0 2 * * *', 
+SELECT cron.schedule('refresh-materialized-views', '0 2 * * *',
     'SELECT refresh_all_materialized_views()');
 
 -- Maintain partitions (run monthly)
-SELECT cron.schedule('maintain-partitions', '0 3 1 * *', 
+SELECT cron.schedule('maintain-partitions', '0 3 1 * *',
     'SELECT maintain_partitions()');
 
 -- Analyze tables (run weekly)
-SELECT cron.schedule('analyze-tables', '0 4 * * 0', 
+SELECT cron.schedule('analyze-tables', '0 4 * * 0',
     'SELECT analyze_all_tables()');
 ```
 
@@ -392,7 +394,7 @@ bun run dev
 CREATE TEXT SEARCH CONFIGURATION thai (COPY = simple);
 
 -- Example usage
-SELECT * FROM products 
+SELECT * FROM products
 WHERE to_tsvector('thai', name) @@ to_tsquery('thai', 'คอมพิวเตอร์');
 ```
 
@@ -400,7 +402,7 @@ WHERE to_tsvector('thai', name) @@ to_tsquery('thai', 'คอมพิวเต�
 
 ```sql
 -- Query JSONB metadata
-SELECT * FROM customers 
+SELECT * FROM customers
 WHERE metadata @> '{"region": "bangkok"}'::jsonb;
 
 -- Index for JSONB queries
@@ -455,7 +457,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO thai_acc_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO thai_acc_user;
 
 -- Set default privileges
-ALTER DEFAULT PRIVILEGES IN SCHEMA public 
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
     GRANT ALL ON TABLES TO thai_acc_user;
 ```
 
@@ -466,8 +468,8 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 EXPLAIN ANALYZE SELECT * FROM invoices WHERE customer_id = 'xxx';
 
 -- Check table statistics
-SELECT schemaname, tablename, n_tup_ins, n_tup_upd, n_live_tup 
-FROM pg_stat_user_tables 
+SELECT schemaname, tablename, n_tup_ins, n_tup_upd, n_live_tup
+FROM pg_stat_user_tables
 ORDER BY n_live_tup DESC;
 
 -- Update statistics
@@ -515,6 +517,7 @@ WHERE NOT blocked_locks.granted;
 ## Support
 
 For issues or questions:
+
 1. Check PostgreSQL logs: `/var/log/postgresql/`
 2. Review application logs: `logs/`
 3. Consult PostgreSQL documentation: https://www.postgresql.org/docs/

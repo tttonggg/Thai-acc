@@ -3,6 +3,7 @@
 ## Download the Project
 
 The project ZIP file is available at:
+
 ```
 /home/z/my-project/download/thai-accounting-erp-project.zip
 ```
@@ -10,6 +11,7 @@ The project ZIP file is available at:
 ## Setup on Your Local PC
 
 ### 1. Prerequisites
+
 - Node.js 18+ or Bun runtime
 - SQLite (included with the project)
 
@@ -51,6 +53,7 @@ bun run dev
 ### 3. Environment Variables
 
 Create a `.env` file with:
+
 ```
 DATABASE_URL=file:./dev.db
 NEXTAUTH_URL=http://localhost:3000
@@ -59,12 +62,12 @@ NEXTAUTH_SECRET=your-secret-key-change-this
 
 ### 4. Test Accounts
 
-| Email | Password | Role |
-|-------|----------|------|
-| admin@thaiaccounting.com | admin123 | Admin |
-| accountant@thaiaccounting.com | acc123 | Accountant |
-| user@thaiaccounting.com | user123 | User |
-| viewer@thaiaccounting.com | viewer123 | Viewer |
+| Email                         | Password  | Role       |
+| ----------------------------- | --------- | ---------- |
+| admin@thaiaccounting.com      | admin123  | Admin      |
+| accountant@thaiaccounting.com | acc123    | Accountant |
+| user@thaiaccounting.com       | user123   | User       |
+| viewer@thaiaccounting.com     | viewer123 | Viewer     |
 
 ## Features
 

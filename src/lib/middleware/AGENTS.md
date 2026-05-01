@@ -5,17 +5,19 @@
 
 ## Purpose
 
-Custom Express/Next.js middleware implementations for analytics tracking and API versioning.
+Custom Express/Next.js middleware implementations for analytics tracking and API
+versioning.
 
 ## Parent Reference
+
 <!-- Parent: ../AGENTS.md -->
 
 ## Key Files
 
-| File | Description |
-|------|-------------|
+| File                      | Description                   |
+| ------------------------- | ----------------------------- |
 | `analytics-middleware.ts` | Analytics tracking middleware |
-| `version-middleware.ts` | API version middleware |
+| `version-middleware.ts`   | API version middleware        |
 
 ## For AI Agents
 

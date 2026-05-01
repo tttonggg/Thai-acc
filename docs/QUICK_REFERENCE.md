@@ -3,13 +3,15 @@
 ## Mobile Patterns (Copy-Paste Ready)
 
 ### Responsive Grid
+
 ```tsx
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
   {/* Content */}
 </div>
 ```
 
 ### Responsive Dialog
+
 ```tsx
 <DialogContent className="max-w-[95vw] md:max-w-2xl">
   {/* Content */}
@@ -17,6 +19,7 @@
 ```
 
 ### Table Scroll Wrapper
+
 ```tsx
 <div className="w-full overflow-x-auto">
   <Table>...</Table>
@@ -24,11 +27,14 @@
 ```
 
 ### Mobile Navigation
+
 ```tsx
-<div className="md:hidden fixed top-4 left-4 z-50">
+<div className="fixed left-4 top-4 z-50 md:hidden">
   <Sheet open={open} onOpenChange={setOpen}>
     <SheetTrigger>
-      <button><Menu size={24} /></button>
+      <button>
+        <Menu size={24} />
+      </button>
     </SheetTrigger>
     <SheetContent side="left" className="w-80">
       <Sidebar onCloseMobile={() => setOpen(false)} />
@@ -38,8 +44,9 @@
 ```
 
 ### Touch-Friendly Button
+
 ```tsx
-<button className="p-3 min-h-[44px] min-w-[44px]">
+<button className="min-h-[44px] min-w-[44px] p-3">
   <Icon size={20} />
 </button>
 ```
@@ -47,20 +54,24 @@
 ## Theme Customization
 
 ### Switch Theme
+
 ```typescript
-import { useThemeStore } from '@/stores/theme-store'
-const { setTheme } = useThemeStore()
-setTheme('lavender')
+import { useThemeStore } from '@/stores/theme-store';
+const { setTheme } = useThemeStore();
+setTheme('lavender');
 ```
 
 ### Toggle Dark Mode
+
 ```typescript
-const { toggleDarkMode } = useThemeStore()
-toggleDarkMode()
+const { toggleDarkMode } = useThemeStore();
+toggleDarkMode();
 ```
 
 ### Available Themes
-`default` | `mint` | `lavender` | `peach` | `sky` | `lemon` | `coral` | `professional`
+
+`default` | `mint` | `lavender` | `peach` | `sky` | `lemon` | `coral` |
+`professional`
 
 ## Testing Commands
 
@@ -77,12 +88,12 @@ bun run test:quick
 
 ## Breakpoints
 
-| Name | Width | Devices |
-|------|-------|---------|
-| `sm` | 640px | Large phones |
-| `md` | 768px | Tablets |
-| `lg` | 1024px | Laptops |
-| `xl` | 1280px | Desktops |
+| Name | Width  | Devices      |
+| ---- | ------ | ------------ |
+| `sm` | 640px  | Large phones |
+| `md` | 768px  | Tablets      |
+| `lg` | 1024px | Laptops      |
+| `xl` | 1280px | Desktops     |
 
 ## Touch Target Size
 
@@ -90,12 +101,12 @@ bun run test:quick
 
 ## Common Issues
 
-| Issue | Fix |
-|-------|-----|
-| Table overflows mobile | Add `overflow-x-auto` wrapper |
-| Dialog too small on mobile | Use `max-w-[95vw]` |
-| Button hard to tap | Increase padding to `p-3` |
-| Horizontal scroll on body | Check for fixed widths >100vw |
+| Issue                      | Fix                           |
+| -------------------------- | ----------------------------- |
+| Table overflows mobile     | Add `overflow-x-auto` wrapper |
+| Dialog too small on mobile | Use `max-w-[95vw]`            |
+| Button hard to tap         | Increase padding to `p-3`     |
+| Horizontal scroll on body  | Check for fixed widths >100vw |
 
 ## Documentation Files
 
@@ -115,6 +126,7 @@ bun run test:quick
 ## Quick Checklist
 
 For new components:
+
 - [ ] Mobile layout (single column)
 - [ ] Desktop layout (multi-column)
 - [ ] Touch targets ≥44×44px
@@ -124,4 +136,5 @@ For new components:
 
 ---
 
-**Full Documentation**: See MOBILE_FEATURES.md, DEVELOPER_MOBILE_GUIDE.md, THEME_CUSTOMIZATION.md, TESTING_CHECKLIST.md
+**Full Documentation**: See MOBILE_FEATURES.md, DEVELOPER_MOBILE_GUIDE.md,
+THEME_CUSTOMIZATION.md, TESTING_CHECKLIST.md

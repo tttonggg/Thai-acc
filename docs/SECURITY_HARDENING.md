@@ -17,7 +17,10 @@
 
 ## Security Overview
 
-This guide provides comprehensive security hardening recommendations for the Thai Accounting ERP system. Implementation of these measures is critical for protecting financial data and ensuring compliance with Thai data protection regulations.
+This guide provides comprehensive security hardening recommendations for the
+Thai Accounting ERP system. Implementation of these measures is critical for
+protecting financial data and ensuring compliance with Thai data protection
+regulations.
 
 ### Security Principles
 
@@ -147,30 +150,30 @@ aws ec2 authorize-security-group-ingress \
 ```nginx
 server {
     listen 443 ssl http2;
-    
+
     # Certificate paths
     ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
-    
+
     # Modern SSL configuration
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
-    
+
     # Strong cipher suites
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
-    
+
     # Session configuration
     ssl_session_cache shared:SSL:50m;
     ssl_session_timeout 1d;
     ssl_session_tickets off;
-    
+
     # OCSP Stapling
     ssl_stapling on;
     ssl_stapling_verify on;
     ssl_trusted_certificate /etc/letsencrypt/live/your-domain.com/chain.pem;
     resolver 8.8.8.8 8.8.4.4 valid=300s;
     resolver_timeout 5s;
-    
+
     # Security headers
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
@@ -178,7 +181,7 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
-    
+
     # Content Security Policy
     add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" always;
 }
@@ -285,14 +288,14 @@ export const authOptions: NextAuthOptions = {
       name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         // Validation logic with rate limiting
         const result = await validateCredentials(credentials);
         return result;
-      }
-    })
+      },
+    }),
   ],
   session: {
     strategy: 'jwt',
@@ -360,7 +363,7 @@ export function rateLimit(options?: RateLimitOptions) {
           tokenCount[0] += 1;
           tokenCache.set(token, tokenCount);
         }
-        
+
         if (tokenCount[0] > limit) {
           reject(new Error('Rate limit exceeded'));
         } else {
@@ -392,24 +395,31 @@ export async function POST(req: Request) {
 // lib/password-policy.ts
 import { z } from 'zod';
 
-const passwordSchema = z.string()
+const passwordSchema = z
+  .string()
   .min(8, 'Password must be at least 8 characters')
   .max(128, 'Password must not exceed 128 characters')
   .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
   .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
   .regex(/[0-9]/, 'Password must contain at least one number')
-  .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character');
+  .regex(
+    /[^A-Za-z0-9]/,
+    'Password must contain at least one special character'
+  );
 
-export function validatePassword(password: string): { valid: boolean; errors: string[] } {
+export function validatePassword(password: string): {
+  valid: boolean;
+  errors: string[];
+} {
   const result = passwordSchema.safeParse(password);
-  
+
   if (result.success) {
     return { valid: true, errors: [] };
   }
-  
+
   return {
     valid: false,
-    errors: result.error.errors.map(e => e.message),
+    errors: result.error.errors.map((e) => e.message),
   };
 }
 ```
@@ -478,12 +488,16 @@ import { z } from 'zod';
 export const invoiceSchema = z.object({
   customerId: z.string().uuid(),
   invoiceDate: z.string().datetime(),
-  lines: z.array(z.object({
-    productId: z.string().uuid().optional(),
-    description: z.string().min(1).max(500),
-    quantity: z.number().positive(),
-    unitPrice: z.number().positive(),
-  })).min(1),
+  lines: z
+    .array(
+      z.object({
+        productId: z.string().uuid().optional(),
+        description: z.string().min(1).max(500),
+        quantity: z.number().positive(),
+        unitPrice: z.number().positive(),
+      })
+    )
+    .min(1),
 });
 
 export function validateInvoice(data: unknown) {
@@ -497,7 +511,7 @@ export function validateInvoice(data: unknown) {
 // Always use Prisma ORM
 // Good
 const invoices = await prisma.invoice.findMany({
-  where: { status: 'ISSUED' }
+  where: { status: 'ISSUED' },
 });
 
 // Never do this
@@ -526,17 +540,17 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
-  
+
   // CSRF token validation for state-changing requests
   if (['POST', 'PUT', 'DELETE'].includes(request.method)) {
     const csrfToken = request.headers.get('X-CSRF-Token');
     const cookieToken = request.cookies.get('csrf-token')?.value;
-    
+
     if (csrfToken !== cookieToken) {
       return new NextResponse('Invalid CSRF token', { status: 403 });
     }
   }
-  
+
   return response;
 }
 ```
@@ -558,7 +572,7 @@ const securityLogger = winston.createLogger({
     winston.format.json()
   ),
   transports: [
-    new winston.transports.File({ 
+    new winston.transports.File({
       filename: '/var/log/thai-acc/security.log',
       maxsize: 5242880, // 5MB
       maxFiles: 5,
@@ -566,7 +580,10 @@ const securityLogger = winston.createLogger({
   ],
 });
 
-export function logSecurityEvent(event: string, details: Record<string, unknown>) {
+export function logSecurityEvent(
+  event: string,
+  details: Record<string, unknown>
+) {
   securityLogger.info({
     event,
     ...details,

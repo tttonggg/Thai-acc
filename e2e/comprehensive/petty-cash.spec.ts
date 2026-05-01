@@ -44,7 +44,7 @@ test.describe('Petty Cash Module - Comprehensive Tests', () => {
 
     const pendingVoucher = await page.locator('tr').filter({ hasText: 'รออนุมัติ' }).first();
 
-    if (await pendingVoucher.count() > 0) {
+    if ((await pendingVoucher.count()) > 0) {
       await pendingVoucher.locator('button:has-text("อนุมัติ")').click();
       await page.waitForSelector('[data-sonner-toast]', { timeout: 5000 });
 
@@ -57,7 +57,7 @@ test.describe('Petty Cash Module - Comprehensive Tests', () => {
 
     const approvedVoucher = await page.locator('tr').filter({ hasText: 'อนุมัติแล้ว' }).first();
 
-    if (await approvedVoucher.count() > 0) {
+    if ((await approvedVoucher.count()) > 0) {
       await approvedVoucher.locator('button:has-text("เติมเงิน")').click();
 
       await page.click('button:has-text("ยืนยัน")');

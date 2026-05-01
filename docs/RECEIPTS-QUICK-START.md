@@ -19,10 +19,10 @@ npx prisma migrate dev --name add_receipt_allocations
 Create `/Users/tong/Thai-acc/src/app/receipts/page.tsx`:
 
 ```tsx
-import { ReceiptList } from '@/components/receipts'
+import { ReceiptList } from '@/components/receipts';
 
 export default function ReceiptsPage() {
-  return <ReceiptList />
+  return <ReceiptList />;
 }
 ```
 
@@ -187,6 +187,7 @@ bun run dev
 ## Validation Rules
 
 ### Payment Method Validation
+
 - **CASH**: No additional fields required
 - **TRANSFER**: Bank account required
 - **CHEQUE**: Bank account + cheque number required
@@ -194,12 +195,14 @@ bun run dev
 - **OTHER**: No additional fields
 
 ### Allocation Validation
+
 - Total allocations ≤ Received amount
 - Allocation amount ≤ Invoice balance
 - WHT rate: 0-100%
 - WHT amount = Allocation amount × WHT rate / 100
 
 ### Status Rules
+
 - **DRAFT**: Can be edited, deleted, posted
 - **POSTED**: Cannot be edited or deleted
 - **CANCELLED**: Cannot be edited or deleted
@@ -208,32 +211,40 @@ bun run dev
 
 When posting a receipt, the following GL accounts are used:
 
-| Account Type | Account Code | Account Name | Notes |
-|--------------|--------------|--------------|-------|
-| Debit | 1110 | เงินสด | For CASH payments |
-| Debit | Bank GL | บัญชีธนาคาร | For TRANSFER/CHEQUE payments |
-| Credit | 1120 | ลูกหนี้การค้า | For each invoice allocation |
-| Credit | 2130 | ภาษีหัก ณ ที่จ่าย | If any WHT deducted |
+| Account Type | Account Code | Account Name      | Notes                        |
+| ------------ | ------------ | ----------------- | ---------------------------- |
+| Debit        | 1110         | เงินสด            | For CASH payments            |
+| Debit        | Bank GL      | บัญชีธนาคาร       | For TRANSFER/CHEQUE payments |
+| Credit       | 1120         | ลูกหนี้การค้า     | For each invoice allocation  |
+| Credit       | 2130         | ภาษีหัก ณ ที่จ่าย | If any WHT deducted          |
 
 ## Troubleshooting
 
 ### Issue: Cannot see unpaid invoices
-- **Solution**: Make sure customer has unpaid invoices with ISSUED or PARTIAL status
+
+- **Solution**: Make sure customer has unpaid invoices with ISSUED or PARTIAL
+  status
 
 ### Issue: Cannot allocate more than balance
+
 - **Solution**: This is by design. Allocation cannot exceed invoice balance
 
 ### Issue: Total allocation exceeds received amount
+
 - **Solution**: Reduce allocations or increase received amount
 
 ### Issue: Cannot post receipt
+
 - **Solution**: Ensure at least one allocation is present
 
 ### Issue: Bank account dropdown empty
+
 - **Solution**: Create bank accounts first via Bank Account module
 
 ### Issue: Receipt number already exists
-- **Solution**: Auto-generation should prevent this. Check database for duplicates
+
+- **Solution**: Auto-generation should prevent this. Check database for
+  duplicates
 
 ## Testing Checklist
 
@@ -254,20 +265,21 @@ When posting a receipt, the following GL accounts are used:
 
 ## API Endpoints Reference
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/receipts` | List all receipts |
-| POST | `/api/receipts` | Create new receipt |
-| GET | `/api/receipts/[id]` | Get single receipt |
-| PUT | `/api/receipts/[id]` | Update receipt (draft only) |
-| DELETE | `/api/receipts/[id]` | Delete receipt (draft only) |
-| POST | `/api/receipts/[id]/post` | Post receipt to GL |
-| GET | `/api/receipts/[id]/export/pdf` | Export receipt as HTML |
-| GET | `/api/receipts/unpaid-invoices?customerId=xxx` | Get unpaid invoices |
+| Method | Endpoint                                       | Description                 |
+| ------ | ---------------------------------------------- | --------------------------- |
+| GET    | `/api/receipts`                                | List all receipts           |
+| POST   | `/api/receipts`                                | Create new receipt          |
+| GET    | `/api/receipts/[id]`                           | Get single receipt          |
+| PUT    | `/api/receipts/[id]`                           | Update receipt (draft only) |
+| DELETE | `/api/receipts/[id]`                           | Delete receipt (draft only) |
+| POST   | `/api/receipts/[id]/post`                      | Post receipt to GL          |
+| GET    | `/api/receipts/[id]/export/pdf`                | Export receipt as HTML      |
+| GET    | `/api/receipts/unpaid-invoices?customerId=xxx` | Get unpaid invoices         |
 
 ## Support
 
 For issues or questions:
+
 1. Check the main documentation: `RECEIPTS-MODULE-COMPLETE.md`
 2. Review the code in `/Users/tong/Thai-acc/src/components/receipts/`
 3. Check API routes in `/Users/tong/Thai-acc/src/app/api/receipts/`

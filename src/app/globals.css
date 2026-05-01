@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -47,7 +47,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  
+
   /* Pastel Custom Colors */
   --color-pastel-pink: #ffd1dc;
   --color-pastel-blue: #b5eadd;
@@ -66,59 +66,59 @@
    ============================================ */
 :root {
   --radius: 0.75rem;
-  
+
   /* Background - Soft cream white */
   --background: #fefdfb;
   /* FIXED: Darker foreground for proper contrast on light bg */
   --foreground: #1a1a2e;
-  
+
   /* Card - Pure white with soft shadow */
   --card: #ffffff;
   /* FIXED: Dark text for readability on white cards */
   --card-foreground: #1a1a2e;
-  
+
   /* Popover - White */
   --popover: #ffffff;
   /* FIXED: Dark text for readability */
   --popover-foreground: #1a1a2e;
-  
+
   /* Primary - Soft pastel pink */
   --primary: #ffb6c1;
   /* FIXED: Dark text for contrast on light pink */
   --primary-foreground: #3d1f24;
-  
+
   /* Secondary - Pastel mint */
   --secondary: #e0f2e0;
   /* FIXED: Dark green text for contrast */
   --secondary-foreground: #1a3d1a;
-  
+
   /* Muted - Soft lavender gray */
   --muted: #f5f3f7;
   /* FIXED: Darker muted text for better visibility */
   --muted-foreground: #4a4a5a;
-  
+
   /* Accent - Pastel sky blue */
   --accent: #e0f6ff;
   /* FIXED: Dark blue text for contrast */
   --accent-foreground: #1a3a4a;
-  
+
   /* Destructive - Soft coral */
   --destructive: #ffb6b6;
   /* FIXED: Dark red text for contrast */
   --destructive-foreground: #4a1a1a;
-  
+
   /* Border - Light pastel gray */
   --border: #f0e6e6;
   --input: #f8f4f4;
   --ring: #ffd1dc;
-  
+
   /* Charts - Pastel palette */
   --chart-1: #ffb6c1;
   --chart-2: #b5eadd;
   --chart-3: #e6e6fa;
   --chart-4: #ffdab9;
   --chart-5: #c1e1c1;
-  
+
   /* Sidebar - Soft pink white */
   --sidebar: #fff8f8;
   /* FIXED: Very dark text for sidebar readability */
@@ -138,53 +138,53 @@
    Professional, easy-to-read, non-accountant friendly
    ============================================ */
 .dark,
-[data-theme="keerati-dark"] {
-  --background: #0F1117;
-  --foreground: #F1F5F9;
+[data-theme='keerati-dark'] {
+  --background: #0f1117;
+  --foreground: #f1f5f9;
 
-  --card: #1A1D26;
-  --card-foreground: #F1F5F9;
+  --card: #1a1d26;
+  --card-foreground: #f1f5f9;
 
-  --popover: #1A1D26;
-  --popover-foreground: #F1F5F9;
+  --popover: #1a1d26;
+  --popover-foreground: #f1f5f9;
 
   /* Primary - Indigo */
-  --primary: #6366F1;
+  --primary: #6366f1;
   --primary-foreground: #ffffff;
 
   --secondary: #242836;
-  --secondary-foreground: #F1F5F9;
+  --secondary-foreground: #f1f5f9;
 
   --muted: #242836;
-  --muted-foreground: #94A3B8;
+  --muted-foreground: #94a3b8;
 
   /* Accent - Teal (money, success) */
-  --accent: #14B8A6;
+  --accent: #14b8a6;
   --accent-foreground: #ffffff;
 
-  --destructive: #F87171;
+  --destructive: #f87171;
   --destructive-foreground: #ffffff;
 
-  --border: #2D3348;
+  --border: #2d3348;
   --input: #242836;
-  --ring: #6366F1;
+  --ring: #6366f1;
 
   /* Charts - Pastel palette */
-  --chart-1: #6366F1;
-  --chart-2: #14B8A6;
-  --chart-3: #F87171;
-  --chart-4: #FBBF24;
-  --chart-5: #34D399;
+  --chart-1: #6366f1;
+  --chart-2: #14b8a6;
+  --chart-3: #f87171;
+  --chart-4: #fbbf24;
+  --chart-5: #34d399;
 
   /* Sidebar - Deep dark */
-  --sidebar: #13151C;
-  --sidebar-foreground: #F1F5F9;
-  --sidebar-primary: #6366F1;
+  --sidebar: #13151c;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #6366f1;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1E2128;
-  --sidebar-accent-foreground: #14B8A6;
-  --sidebar-border: #2D3348;
-  --sidebar-ring: #6366F1;
+  --sidebar-accent: #1e2128;
+  --sidebar-accent-foreground: #14b8a6;
+  --sidebar-border: #2d3348;
+  --sidebar-ring: #6366f1;
 }
 
 /* ============================================
@@ -195,44 +195,44 @@
   --background: #1a1a2e;
   /* FIXED: Light text for dark background */
   --foreground: #f8f8fc;
-  
+
   --card: #252538;
   /* FIXED: Light text for dark cards */
   --card-foreground: #f8f8fc;
-  
+
   --popover: #252538;
   --popover-foreground: #f8f8fc;
-  
+
   --primary: #ffb6c1;
   /* FIXED: Dark text for contrast on primary (pink stays light) */
   --primary-foreground: #2d1a1d;
-  
+
   --secondary: #3a4a3a;
   /* FIXED: Light text for dark secondary */
   --secondary-foreground: #e8f5e8;
-  
+
   --muted: #2d2d3d;
   /* FIXED: Light muted text for dark bg */
   --muted-foreground: #b0b0c0;
-  
+
   --accent: #3a5a6a;
   /* FIXED: Light text for dark accent */
   --accent-foreground: #e8f8ff;
-  
+
   --destructive: #e8a0a0;
   /* FIXED: Dark text for light destructive */
   --destructive-foreground: #2d1a1a;
-  
+
   --border: #3a3a4a;
   --input: #3a3a4a;
   --ring: #ffb6c1;
-  
+
   --chart-1: #ffb6c1;
   --chart-2: #b5eadd;
   --chart-3: #e6e6fa;
   --chart-4: #ffdab9;
   --chart-5: #c1e1c1;
-  
+
   --sidebar: #1e1e32;
   /* FIXED: Light text for dark sidebar */
   --sidebar-foreground: #f8f8fc;
@@ -251,7 +251,7 @@
    ============================================ */
 
 /* Mint Theme - Light */
-[data-theme="mint"] {
+[data-theme='mint'] {
   --primary: #7dd3c0;
   --primary-foreground: #0d332a;
   --secondary: #e0f7f0;
@@ -279,7 +279,7 @@
 }
 
 /* Mint Theme - Dark Mode */
-.dark[data-theme="mint"] {
+.dark[data-theme='mint'] {
   --primary: #7dd3c0;
   --primary-foreground: #0d332a;
   --secondary: #2a4a42;
@@ -306,7 +306,7 @@
 }
 
 /* Lavender Theme - Light */
-[data-theme="lavender"] {
+[data-theme='lavender'] {
   --primary: #c5b0f0;
   --primary-foreground: #2d1a4a;
   --secondary: #f5f0ff;
@@ -334,7 +334,7 @@
 }
 
 /* Lavender Theme - Dark Mode */
-.dark[data-theme="lavender"] {
+.dark[data-theme='lavender'] {
   --primary: #c5b0f0;
   --primary-foreground: #2d1a4a;
   --secondary: #4a3a6a;
@@ -361,7 +361,7 @@
 }
 
 /* Peach Theme - Light */
-[data-theme="peach"] {
+[data-theme='peach'] {
   --primary: #f5c8a8;
   --primary-foreground: #4a2a15;
   --secondary: #fff5eb;
@@ -389,7 +389,7 @@
 }
 
 /* Peach Theme - Dark Mode */
-.dark[data-theme="peach"] {
+.dark[data-theme='peach'] {
   --primary: #f5c8a8;
   --primary-foreground: #4a2a15;
   --secondary: #5a4a3a;
@@ -416,7 +416,7 @@
 }
 
 /* Sky Theme - Light */
-[data-theme="sky"] {
+[data-theme='sky'] {
   --primary: #7bc8e8;
   --primary-foreground: #0d2a3a;
   --secondary: #e8f4f8;
@@ -444,7 +444,7 @@
 }
 
 /* Sky Theme - Dark Mode */
-.dark[data-theme="sky"] {
+.dark[data-theme='sky'] {
   --primary: #7bc8e8;
   --primary-foreground: #0d2a3a;
   --secondary: #2a4a5a;
@@ -471,7 +471,7 @@
 }
 
 /* Lemon Theme - Light */
-[data-theme="lemon"] {
+[data-theme='lemon'] {
   --primary: #e8dc70;
   --primary-foreground: #3a3500;
   --secondary: #fffef0;
@@ -499,7 +499,7 @@
 }
 
 /* Lemon Theme - Dark Mode */
-.dark[data-theme="lemon"] {
+.dark[data-theme='lemon'] {
   --primary: #e8dc70;
   --primary-foreground: #3a3500;
   --secondary: #5a5520;
@@ -526,7 +526,7 @@
 }
 
 /* Coral Theme - Light */
-[data-theme="coral"] {
+[data-theme='coral'] {
   --primary: #ff9e8d;
   --primary-foreground: #4a1a12;
   --secondary: #fff0ee;
@@ -554,7 +554,7 @@
 }
 
 /* Coral Theme - Dark Mode */
-.dark[data-theme="coral"] {
+.dark[data-theme='coral'] {
   --primary: #ff9e8d;
   --primary-foreground: #4a1a12;
   --secondary: #5a4038;
@@ -583,7 +583,7 @@
 /* ============================================
    🏢 PROFESSIONAL THEME - LIGHT MODE
    ============================================ */
-[data-theme="professional"] {
+[data-theme='professional'] {
   --primary: #f59e0b;
   --primary-foreground: #1c0a00;
   --secondary: #f1f5f9;
@@ -621,7 +621,7 @@
 /* ============================================
    🏢 PROFESSIONAL THEME - DARK MODE
    ============================================ */
-.dark[data-theme="professional"] {
+.dark[data-theme='professional'] {
   --primary: #f59e0b;
   --primary-foreground: #1c0a00;
   --secondary: #1e293b;
@@ -659,29 +659,29 @@
     @apply bg-background text-foreground;
     font-family: var(--font-quicksand), 'Quicksand', sans-serif;
   }
-  
+
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
   }
-  
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
-  
+
   ::-webkit-scrollbar-track {
     background: var(--muted);
     border-radius: 4px;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     background: var(--primary);
     border-radius: 4px;
     opacity: 0.5;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
     background: var(--primary);
     opacity: 0.8;
@@ -698,38 +698,40 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   .bg-gradient-pastel {
     background: linear-gradient(135deg, #fff8f8 0%, #fffef0 50%, #f8fffb 100%);
   }
-  
+
   .bg-pastel-card {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 182, 193, 0.2);
   }
-  
+
   .hover-lift {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
   }
-  
+
   .hover-lift:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(255, 182, 193, 0.15);
   }
-  
+
   .shadow-pastel {
     box-shadow: 0 4px 16px rgba(255, 182, 193, 0.1);
   }
-  
+
   .shadow-pastel-lg {
     box-shadow: 0 8px 32px rgba(255, 182, 193, 0.15);
   }
-  
+
   .border-pastel {
     border-color: rgba(255, 182, 193, 0.3);
   }
-  
+
   .glass-pastel {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(12px);

@@ -1,6 +1,7 @@
 # Video Tutorial Script: 08 - Settings and Configuration
 
 ## Video Information
+
 - **Title:** Settings and Configuration (การตั้งค่าและการกำหนดค่า)
 - **Duration:** 12-15 minutes
 - **Target Audience:** Administrators, system admins
@@ -10,10 +11,11 @@
 
 **[Scene: Settings dashboard]**
 
-**Narrator:**
-"สวัสดีครับ/ค่ะ ในตอนนี้เราจะมาเรียนรู้การตั้งค่าระบบทั้งหมด ซึ่งจำเป็นสำหรับผู้ดูแลระบบ"
+**Narrator:** "สวัสดีครับ/ค่ะ ในตอนนี้เราจะมาเรียนรู้การตั้งค่าระบบทั้งหมด
+ซึ่งจำเป็นสำหรับผู้ดูแลระบบ"
 
 **On-screen text:**
+
 - Company Settings
 - User Management
 - Document Numbering
@@ -23,10 +25,10 @@
 
 **[Scene: Company settings page]**
 
-**Narrator:**
-"เริ่มจากข้อมูลบริษัท ซึ่งจะปรากฏในเอกสารทั้งหมด"
+**Narrator:** "เริ่มจากข้อมูลบริษัท ซึ่งจะปรากฏในเอกสารทั้งหมด"
 
 **Company Details:**
+
 ```
 ชื่อบริษัท (ไทย): บริษัท ตัวอย่าง จำกัด
 ชื่อบริษัท (อังกฤษ): Example Company Ltd.
@@ -45,10 +47,10 @@
 
 **[Scene: Upload logo]**
 
-**Narrator:**
-"อัปโหลดโลโก้บริษัทสำหรับแสดงในเอกสาร"
+**Narrator:** "อัปโหลดโลโก้บริษัทสำหรับแสดงในเอกสาร"
 
 **Logo Requirements:**
+
 - ขนาดแนะนำ: 200x80 pixels
 - รูปแบบ: PNG หรือ JPG
 - พื้นหลังโปร่งใสแนะนำ
@@ -57,10 +59,10 @@
 
 **[Scene: Accounting settings]**
 
-**Narrator:**
-"กำหนดค่าทางบัญชีที่สำคัญ"
+**Narrator:** "กำหนดค่าทางบัญชีที่สำคัญ"
 
 **Settings:**
+
 ```
 อัตราภาษีมูลค่าเพิ่ม: 7%
 วันเริ่มปีงบประมาณ: 01/01
@@ -71,6 +73,7 @@
 ```
 
 **Fiscal Year:**
+
 ```
 ปีงบประมาณ: มกราคม - ธันวาคม
 หรือ
@@ -81,10 +84,10 @@
 
 **[Scene: Document numbering settings]**
 
-**Narrator:**
-"กำหนดรูปแบบเลขที่เอกสารอัตโนมัติ"
+**Narrator:** "กำหนดรูปแบบเลขที่เอกสารอัตโนมัติ"
 
 **Number Formats:**
+
 ```
 ใบกำกับภาษีขาย: INV-{YYYY}{MM}-{0000}
 ใบเสร็จรับเงิน: REC-{YYYY}{MM}-{0000}
@@ -94,11 +97,13 @@
 ```
 
 **Variables:**
+
 - {YYYY} = ปี ค.ศ. (2026)
 - {MM} = เดือน (03)
 - {0000} = ลำดับเลข (0001)
 
 **Example Result:**
+
 ```
 INV-202603-0001
 REC-202603-0156
@@ -109,10 +114,10 @@ JV-202603-0089
 
 **[Scene: User management page]**
 
-**Narrator:**
-"จัดการผู้ใช้งานและสิทธิ์การเข้าถึง"
+**Narrator:** "จัดการผู้ใช้งานและสิทธิ์การเข้าถึง"
 
 **Create New User:**
+
 ```
 ชื่อ: นักบัญชี หนึ่ง
 อีเมล: accountant@example.com
@@ -130,6 +135,7 @@ JV-202603-0089
 **[Scene: Show role permissions]**
 
 **Role Descriptions:**
+
 ```
 ADMIN: ควบคุมทั้งหมด
 - จัดการผู้ใช้
@@ -156,10 +162,10 @@ VIEWER: ผู้ดูอย่างเดียว
 
 **[Scene: Email settings]**
 
-**Narrator:**
-"ตั้งค่าอีเมลสำหรับส่งเอกสาร"
+**Narrator:** "ตั้งค่าอีเมลสำหรับส่งเอกสาร"
 
 **SMTP Configuration:**
+
 ```
 SMTP Server: smtp.gmail.com
 Port: 587
@@ -173,6 +179,7 @@ From Email: noreply@example.com
 ```
 
 **Test Email:**
+
 ```
 [ส่งอีเมลทดสอบ]
 ```
@@ -181,10 +188,10 @@ From Email: noreply@example.com
 
 **[Scene: Backup settings]**
 
-**Narrator:**
-"ตั้งค่าการสำรองข้อมูลอัตโนมัติ"
+**Narrator:** "ตั้งค่าการสำรองข้อมูลอัตโนมัติ"
 
 **Automatic Backup:**
+
 ```
 ความถี่: ทุกวัน
 เวลา: 02:00 น.
@@ -200,5 +207,5 @@ From Email: noreply@example.com
 
 **[Scene: Settings summary]**
 
-**Narrator:**
-"คุณได้เรียนรู้การตั้งค่าระบบทั้งหมดแล้ว ต่อไปเราจะเรียนรู้การสำรองและกู้คืนข้อมูล"
+**Narrator:** "คุณได้เรียนรู้การตั้งค่าระบบทั้งหมดแล้ว
+ต่อไปเราจะเรียนรู้การสำรองและกู้คืนข้อมูล"

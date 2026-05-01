@@ -4,16 +4,20 @@
 # Stock Takes
 
 ## Purpose
-Physical inventory counting and variance analysis. Creates adjustment journal entries for discrepancies.
+
+Physical inventory counting and variance analysis. Creates adjustment journal
+entries for discrepancies.
 
 ## Key Files
-| File | Description |
-|------|-------------|
+
+| File                  | Description                                |
+| --------------------- | ------------------------------------------ |
 | `stock-take-page.tsx` | Stock take management with counting sheets |
 
 ## For AI Agents
 
 ### Stock Take Process
+
 1. Create stock take with date and warehouse
 2. Generate counting sheets
 3. Staff count physical inventory
@@ -23,22 +27,24 @@ Physical inventory counting and variance analysis. Creates adjustment journal en
 7. Adjustment journal entry created
 
 ### Stock Adjustment Pattern
+
 ```typescript
 // Calculate variance and create adjustment
-const variance = countedQty - systemQty
-const adjustmentValue = variance * unitCost  // In Satang
+const variance = countedQty - systemQty;
+const adjustmentValue = variance * unitCost; // In Satang
 
 if (variance !== 0) {
   await createAdjustmentJournalEntry({
     warehouseId,
     varianceAccountId,
     debit: variance > 0 ? adjustmentValue : 0,
-    credit: variance < 0 ? Math.abs(adjustmentValue) : 0
-  })
+    credit: variance < 0 ? Math.abs(adjustmentValue) : 0,
+  });
 }
 ```
 
 ### Critical Invariants
+
 - System quantities locked after stock take starts
 - Variance threshold for investigation (e.g., >5% or >10,000 Baht)
 - All adjustments require manager approval
@@ -47,12 +53,14 @@ if (variance !== 0) {
 ## Dependencies
 
 ### Internal
+
 - @/lib/currency - Satang/Baht conversion
 - @/lib/stock-take-service - Stock take logic
 - @/components/inventory - Warehouse and product lookup
 - @/components/journal - Adjustment journal entries
 
 ### External
+
 - react-hook-form v7 - Form handling
 - @tanstack/react-query v5 - Data fetching
 - lucide-react - Icons

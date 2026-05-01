@@ -2,13 +2,15 @@
 
 ## Overview
 
-Keerati ERP is fully responsive and optimized for mobile devices. You can access all features from your smartphone or tablet with a touch-friendly interface.
+Keerati ERP is fully responsive and optimized for mobile devices. You can access
+all features from your smartphone or tablet with a touch-friendly interface.
 
 ## Mobile Navigation
 
 ### Hamburger Menu (Mobile Only)
 
-On mobile devices (screens smaller than 768px), the sidebar transforms into a slide-out drawer:
+On mobile devices (screens smaller than 768px), the sidebar transforms into a
+slide-out drawer:
 
 1. Tap the **hamburger icon** (☰) in the top-left corner
 2. The navigation menu slides in from the left
@@ -16,6 +18,7 @@ On mobile devices (screens smaller than 768px), the sidebar transforms into a sl
 4. The menu automatically closes after selection
 
 **Visual Guide:**
+
 ```
 ┌─────────────────────────┐
 │ ☰  Keerati ERP          │  ← Hamburger button
@@ -41,7 +44,8 @@ On mobile devices (screens smaller than 768px), the sidebar transforms into a sl
 
 ### Desktop Sidebar
 
-On larger screens (768px and above), you see a full sidebar that can be collapsed:
+On larger screens (768px and above), you see a full sidebar that can be
+collapsed:
 
 - Click the **collapse button** (←) in the sidebar header to minimize
 - Collapsed sidebar shows icons only with tooltips
@@ -49,9 +53,11 @@ On larger screens (768px and above), you see a full sidebar that can be collapse
 
 ## Responsive Tables
 
-Tables on mobile have horizontal scrolling when content is wider than the screen:
+Tables on mobile have horizontal scrolling when content is wider than the
+screen:
 
 **Desktop (full width):**
+
 ```
 ┌──────────┬──────────┬────────┬──────────┐
 │ Invoice  │ Customer  │ Amount │ Status   │
@@ -61,6 +67,7 @@ Tables on mobile have horizontal scrolling when content is wider than the screen
 ```
 
 **Mobile (scrollable):**
+
 ```
 ┌──────────┐
 │ Invoice  │ ◄─ Swipe left →
@@ -70,6 +77,7 @@ Tables on mobile have horizontal scrolling when content is wider than the screen
 ```
 
 **How to use:**
+
 - Swipe left/right on the table to view all columns
 - All critical columns (like invoice number, amount) remain visible
 - Scroll indicator shows when more content exists
@@ -82,6 +90,7 @@ Dialog windows adapt to mobile screens:
 - **Mobile**: Full-width dialogs with small margins (`max-w-[95vw]`)
 
 **Example:**
+
 ```
 Desktop:              Mobile:
 ┌──────────────┐     ┌───────────────────┐
@@ -97,6 +106,7 @@ Desktop:              Mobile:
 Forms and layouts use responsive grids that stack on mobile:
 
 **Desktop (2-4 columns):**
+
 ```
 ┌─────────┬─────────┐
 │ Field 1 │ Field 2 │
@@ -106,6 +116,7 @@ Forms and layouts use responsive grids that stack on mobile:
 ```
 
 **Mobile (1 column):**
+
 ```
 ┌─────────┐
 │ Field 1 │
@@ -139,21 +150,23 @@ Access the theme customizer:
 6. Adjust border radius and accent intensity
 
 **Mobile Theme Dialog:**
+
 - Optimized for touch with larger buttons
 - Color palette in a 4×2 grid for easy selection
 - Sliders and switches with adequate touch targets
 
 ## Supported Breakpoints
 
-| Breakpoint | Width | Devices |
-|------------|-------|---------|
-| `sm` | 640px | Large phones (landscape) |
-| `md` | 768px | Tablets (portrait) |
-| `lg` | 1024px | Tablets (landscape), small laptops |
-| `xl` | 1280px | Desktops |
-| `2xl` | 1536px | Large screens |
+| Breakpoint | Width  | Devices                            |
+| ---------- | ------ | ---------------------------------- |
+| `sm`       | 640px  | Large phones (landscape)           |
+| `md`       | 768px  | Tablets (portrait)                 |
+| `lg`       | 1024px | Tablets (landscape), small laptops |
+| `xl`       | 1280px | Desktops                           |
+| `2xl`      | 1536px | Large screens                      |
 
 **Mobile-specific changes:**
+
 - Below 768px (`md`): Hamburger menu, single-column layouts, full-width dialogs
 - 768px and above: Full sidebar, multi-column layouts, fixed-width dialogs
 
@@ -176,16 +189,19 @@ Access the theme customizer:
 ## Troubleshooting
 
 ### Menu won't open
+
 - Ensure JavaScript is enabled
 - Try refreshing the page
 - Check your internet connection
 
 ### Tables hard to read
+
 - Switch to landscape orientation
 - Use the theme customizer to increase contrast
 - Try dark mode for better visibility
 
 ### Dialog too small
+
 - Theme customizer → Border Radius → select "ใหญ่พิเศษ" (XL)
 - Use landscape orientation
 
@@ -200,4 +216,5 @@ Access the theme customizer:
 
 **Need Help?**
 
-Contact support at support@keerati-erp.com or visit our documentation at docs.keerati-erp.com
+Contact support at support@keerati-erp.com or visit our documentation at
+docs.keerati-erp.com

@@ -1,11 +1,13 @@
 # PR/PO System Design
+
 ## ระบบใบขอซื้อและใบสั่งซื้อ (Purchase Request & Purchase Order System)
 
 ---
 
 ## 📋 ภาพรวมระบบ (System Overview)
 
-ระบบ PR/PO เป็น workflow สำหรับการจัดการการซื้อสินค้าและบริการ โดยมีขั้นตอนดังนี้:
+ระบบ PR/PO เป็น workflow สำหรับการจัดการการซื้อสินค้าและบริการ
+โดยมีขั้นตอนดังนี้:
 
 ```
 Purchase Request (PR) → Approval → Purchase Order (PO) → Goods Receipt → Purchase Invoice
@@ -427,6 +429,7 @@ src/components/
 ### Key UI Features
 
 **Purchase Request List:**
+
 - ตารางแสดงรายการ PR พร้อมสถานะและจำนวนเงิน
 - ฟิลเตอร์ตามสถานะ (DRAFT, PENDING, APPROVED, REJECTED)
 - ปุ่มดำเนินการ: สร้าง, แก้ไข, อนุมัติ, ปฏิเสธ, แปลงเป็น PO
@@ -434,6 +437,7 @@ src/components/
 - Dashboard cards: รออนุมัติ, อนุมัติแล้ว, ปฏิเสธ
 
 **Purchase Order List:**
+
 - ตารางแสดงรายการ PO พร้อมสถานะ
 - ฟิลเตอร์ตามสถานะและผู้ขาย
 - ปุ่มดำเนินการ: สร้าง, แก้ไข, ส่งผู้ขาย, ยืนยัน, ยกเลิก, รับสินค้า
@@ -483,11 +487,11 @@ src/components/
 
 ### Approval Matrix
 
-| ยอดเงิน | ผู้อนุมัติ | ระดับการอนุมัติ |
-|-----------|--------------|-------------------|
-| < 50,000 บาท | Department Manager | 1 ระดับ |
-| 50,000 - 200,000 บาท | Department Manager + Finance Manager | 2 ระดับ |
-| > 200,000 บาท | Department Manager + Finance Manager + Director | 3 ระดับ |
+| ยอดเงิน              | ผู้อนุมัติ                                      | ระดับการอนุมัติ |
+| -------------------- | ----------------------------------------------- | --------------- |
+| < 50,000 บาท         | Department Manager                              | 1 ระดับ         |
+| 50,000 - 200,000 บาท | Department Manager + Finance Manager            | 2 ระดับ         |
+| > 200,000 บาท        | Department Manager + Finance Manager + Director | 3 ระดับ         |
 
 ---
 
@@ -520,7 +524,7 @@ purchaseOrder: PurchaseOrder?
 ```typescript
 // ตรวจสอบงบประมาณก่อนอนุมัติ PR/PO:
 if (pr.estimatedAmount > budget.remainingAmount) {
-  throw new Error("เกินวงเงินงบประมาณ");
+  throw new Error('เกินวงเงินงบประมาณ');
 }
 ```
 
@@ -566,6 +570,7 @@ XXX = Running number per month
 ## 🚀 Implementation Priority
 
 ### Phase 1: Core PR/PO (Must Have)
+
 1. Database schema & migrations
 2. PR APIs (CRUD + Submit/Approve/Reject)
 3. PO APIs (CRUD + Send/Confirm/Receive)
@@ -573,12 +578,14 @@ XXX = Running number per month
 5. PO List & Form Components
 
 ### Phase 2: Workflow & Approval (Should Have)
+
 1. Approval workflow logic
 2. Email notifications
 3. Approval history tracking
 4. Budget checking
 
 ### Phase 3: Advanced Features (Nice to Have)
+
 1. Department management
 2. Budget management
 3. Advanced reporting

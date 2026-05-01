@@ -11,26 +11,26 @@ export const TEST_USERS = {
     email: 'admin@thaiaccounting.com',
     password: 'admin123',
     role: 'ADMIN',
-    name: 'ผู้ดูแลระบบ'
+    name: 'ผู้ดูแลระบบ',
   },
   ACCOUNTANT: {
     email: 'accountant@thaiaccounting.com',
     password: 'acc123',
     role: 'ACCOUNTANT',
-    name: 'นักบัญชี ทดสอบ'
+    name: 'นักบัญชี ทดสอบ',
   },
   USER: {
     email: 'user@thaiaccounting.com',
     password: 'user123',
     role: 'USER',
-    name: 'ผู้ใช้ทั่วไป'
+    name: 'ผู้ใช้ทั่วไป',
   },
   VIEWER: {
     email: 'viewer@thaiaccounting.com',
     password: 'viewer123',
     role: 'VIEWER',
-    name: 'ผู้ชมเท่านั้น'
-  }
+    name: 'ผู้ชมเท่านั้น',
+  },
 } as const;
 
 /**
@@ -50,21 +50,21 @@ export const test = base.extend<{
     page.setDefaultTimeout(30000);
 
     // Handle console errors
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.type() === 'error') {
         console.error('Browser Console Error:', msg.text());
       }
     });
 
     // Handle page errors
-    page.on('pageerror', exception => {
+    page.on('pageerror', (exception) => {
       console.error('Page Error:', exception);
     });
 
     await use(page);
   },
 
-  db: async ({ }, use) => {
+  db: async ({}, use) => {
     const prisma = new PrismaClient({
       log: ['error', 'warn'],
     });
@@ -107,43 +107,43 @@ export const test = base.extend<{
             `DELETE FROM JournalLine WHERE journalEntryId IN (${testData.journalEntries.join(',')})`
           );
           await prisma.journalEntry.deleteMany({
-            where: { id: { in: testData.journalEntries } }
+            where: { id: { in: testData.journalEntries } },
           });
         }
 
         if (testData.payments?.length) {
           await prisma.payment.deleteMany({
-            where: { id: { in: testData.payments } }
+            where: { id: { in: testData.payments } },
           });
         }
 
         if (testData.receipts?.length) {
           await prisma.receipt.deleteMany({
-            where: { id: { in: testData.receipts } }
+            where: { id: { in: testData.receipts } },
           });
         }
 
         if (testData.invoices?.length) {
           await prisma.invoice.deleteMany({
-            where: { id: { in: testData.invoices } }
+            where: { id: { in: testData.invoices } },
           });
         }
 
         if (testData.products?.length) {
           await prisma.product.deleteMany({
-            where: { id: { in: testData.products } }
+            where: { id: { in: testData.products } },
           });
         }
 
         if (testData.vendors?.length) {
           await prisma.vendor.deleteMany({
-            where: { id: { in: testData.vendors } }
+            where: { id: { in: testData.vendors } },
           });
         }
 
         if (testData.customers?.length) {
           await prisma.customer.deleteMany({
-            where: { id: { in: testData.customers } }
+            where: { id: { in: testData.customers } },
           });
         }
       } catch (error) {
@@ -183,7 +183,7 @@ export const test = base.extend<{
     };
 
     await use(waitFor);
-  }
+  },
 });
 
 /**
@@ -209,7 +209,7 @@ export class TestDataGenerator {
       email: `test${timestamp}@company.com`,
       creditLimit: 100000,
       creditDays: 30,
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -229,7 +229,7 @@ export class TestDataGenerator {
       phone: '02-222-2222',
       email: `vendor${timestamp}@company.com`,
       creditDays: 30,
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -247,7 +247,7 @@ export class TestDataGenerator {
       cost: 800,
       vatType: 'VAT_7',
       incomeType: 'SERVICE',
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -265,10 +265,10 @@ export class TestDataGenerator {
           productId: '',
           quantity: 1,
           price: 1000,
-          vatAmount: 70
-        }
+          vatAmount: 70,
+        },
       ],
-      ...overrides
+      ...overrides,
     };
   }
 }
@@ -284,7 +284,7 @@ export class DatabaseVerifier {
    */
   async verifyCustomerExists(code: string): Promise<boolean> {
     const customer = await this.db.customer.findUnique({
-      where: { code }
+      where: { code },
     });
     return !!customer;
   }
@@ -294,7 +294,7 @@ export class DatabaseVerifier {
    */
   async verifyVendorExists(code: string): Promise<boolean> {
     const vendor = await this.db.vendor.findUnique({
-      where: { code }
+      where: { code },
     });
     return !!vendor;
   }
@@ -309,7 +309,7 @@ export class DatabaseVerifier {
   }> {
     const journalEntry = await this.db.journalEntry.findUnique({
       where: { id: journalEntryId },
-      include: { lines: true }
+      include: { lines: true },
     });
 
     if (!journalEntry) {
@@ -325,8 +325,8 @@ export class DatabaseVerifier {
       details: {
         totalDebit,
         totalCredit,
-        lineCount: journalEntry.lines.length
-      }
+        lineCount: journalEntry.lines.length,
+      },
     };
   }
 
@@ -340,12 +340,10 @@ export class DatabaseVerifier {
   }> {
     const lines = await this.db.journalLine.findMany({
       where: { accountCode },
-      include: { journalEntry: true }
+      include: { journalEntry: true },
     });
 
-    const filteredLines = lines.filter(
-      line => line.journalEntry.status === 'POSTED'
-    );
+    const filteredLines = lines.filter((line) => line.journalEntry.status === 'POSTED');
 
     const totalDebit = filteredLines.reduce((sum, line) => sum + Number(line.debit || 0), 0);
     const totalCredit = filteredLines.reduce((sum, line) => sum + Number(line.credit || 0), 0);
@@ -353,7 +351,7 @@ export class DatabaseVerifier {
     return {
       debit: totalDebit,
       credit: totalCredit,
-      balance: totalDebit - totalCredit
+      balance: totalDebit - totalCredit,
     };
   }
 }
@@ -372,14 +370,14 @@ export class ScreenshotHelper {
 
     await page.screenshot({
       path: filepath,
-      fullPage: true
+      fullPage: true,
     });
 
     console.log(`📸 Screenshot saved: ${filepath}`);
     testInfo.attachments.push({
       name: 'screenshot',
       path: filepath,
-      contentType: 'image/png'
+      contentType: 'image/png',
     });
   }
 
@@ -394,7 +392,7 @@ export class ScreenshotHelper {
 
     await page.screenshot({
       path: filepath,
-      fullPage: true
+      fullPage: true,
     });
 
     console.log(`📸 Screenshot saved: ${filepath}`);
@@ -415,8 +413,8 @@ export class ApiTestHelper {
   ) {
     const context = await request.newContext({
       extraHTTPHeaders: {
-        'x-playwright-test': 'true'
-      }
+        'x-playwright-test': 'true',
+      },
     });
 
     // Get CSRF token
@@ -428,8 +426,8 @@ export class ApiTestHelper {
       data: {
         email: credentials.email,
         password: credentials.password,
-        csrfToken
-      }
+        csrfToken,
+      },
     });
 
     if (!loginResponse.ok()) {
@@ -449,11 +447,7 @@ export class ApiTestHelper {
     data?: any,
     baseURL: string = 'http://localhost:3000'
   ) {
-    const context = await this.loginAndGetContext(
-      request,
-      baseURL,
-      TEST_USERS.ADMIN
-    );
+    const context = await this.loginAndGetContext(request, baseURL, TEST_USERS.ADMIN);
 
     let response;
     switch (method) {

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * Prisma Schema Loader
- * 
+ *
  * This script dynamically selects the appropriate schema file based on DATABASE_URL.
  * Supports both PostgreSQL (production with external DB) and SQLite (standalone deployment).
- * 
+ *
  * Usage: node prisma/schema-loader.js
  */
 
@@ -28,8 +28,8 @@ function copySchema() {
   const schemaType = getSchemaType();
   // Map schema type to filename
   const schemaFileMap = {
-    'postgres': 'schema-postgres.prisma',
-    'sqlite': 'schema-sqlite.prisma'
+    postgres: 'schema-postgres.prisma',
+    sqlite: 'schema-sqlite.prisma',
   };
   const sourceFile = path.join(schemaDir, schemaFileMap[schemaType]);
   const targetFile = path.join(schemaDir, 'schema.prisma');
@@ -46,7 +46,7 @@ function copySchema() {
   console.log(`✅ Using ${schemaType.toUpperCase()} schema`);
   console.log(`   Source: ${sourceFile}`);
   console.log(`   Target: ${targetFile}`);
-  
+
   return schemaType;
 }
 

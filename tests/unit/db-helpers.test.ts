@@ -163,13 +163,9 @@ describe('findByIdOrThrow', () => {
   it('should throw NotFoundError when not found', async () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
 
-    await expect(findByIdOrThrow(mockPrisma.user, '999')).rejects.toThrow(
-      NotFoundError
-    );
+    await expect(findByIdOrThrow(mockPrisma.user, '999')).rejects.toThrow(NotFoundError);
 
-    await expect(findByIdOrThrow(mockPrisma.user, '999')).rejects.toThrow(
-      'User not found: 999'
-    );
+    await expect(findByIdOrThrow(mockPrisma.user, '999')).rejects.toThrow('User not found: 999');
   });
 
   it('should include relations when specified', async () => {
@@ -342,9 +338,7 @@ describe('isUnique', () => {
 describe('Transaction Helpers', () => {
   it('should handle successful transactions', async () => {
     const mockCallback = vi.fn().mockResolvedValue('success');
-    mockPrisma.$transaction.mockImplementation((callback) =>
-      callback(mockPrisma)
-    );
+    mockPrisma.$transaction.mockImplementation((callback) => callback(mockPrisma));
 
     const { transactionWithRetry } = require('../../src/lib/db-helpers');
 
@@ -356,14 +350,9 @@ describe('Transaction Helpers', () => {
 
   it('should retry on deadlock', async () => {
     const mockError = { code: 'P2034' };
-    const mockCallback = vi
-      .fn()
-      .mockRejectedValueOnce(mockError)
-      .mockResolvedValue('success');
+    const mockCallback = vi.fn().mockRejectedValueOnce(mockError).mockResolvedValue('success');
 
-    mockPrisma.$transaction.mockImplementation((callback) =>
-      callback(mockPrisma)
-    );
+    mockPrisma.$transaction.mockImplementation((callback) => callback(mockPrisma));
 
     const { transactionWithRetry } = require('../../src/lib/db-helpers');
 
@@ -381,13 +370,7 @@ describe('Delete Helpers', () => {
     const mockResult = { count: 5 };
     mockPrisma.user.deleteMany.mockResolvedValue(mockResult);
 
-    const result = await deleteManyByIds(mockPrisma.user, [
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-    ]);
+    const result = await deleteManyByIds(mockPrisma.user, ['1', '2', '3', '4', '5']);
 
     expect(result).toEqual(mockResult);
     expect(mockPrisma.user.deleteMany).toHaveBeenCalledWith({

@@ -45,12 +45,7 @@ describe('AppError', () => {
   });
 
   it('should create AppError with custom values', () => {
-    const error = new AppError(
-      'Custom error',
-      418,
-      false,
-      { customField: 'value' }
-    );
+    const error = new AppError('Custom error', 418, false, { customField: 'value' });
 
     expect(error.statusCode).toBe(418);
     expect(error.isOperational).toBe(false);
@@ -390,9 +385,7 @@ describe('Error Utilities', () => {
 
     it('should return generic message for non-operational errors', () => {
       const error = new Error('Internal error details');
-      expect(getErrorMessage(error)).toBe(
-        'An unexpected error occurred. Please try again.'
-      );
+      expect(getErrorMessage(error)).toBe('An unexpected error occurred. Please try again.');
     });
   });
 

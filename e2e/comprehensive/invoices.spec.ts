@@ -1,7 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../../tests/pages/login.page';
 import { InvoicesPage } from '../../tests/pages/invoices.page';
-import { verifyRecordCount, verifyRecordExists, verifyJournalEntry, getAllRecords } from '../../tests/utils/db-verification';
+import {
+  verifyRecordCount,
+  verifyRecordExists,
+  verifyJournalEntry,
+  getAllRecords,
+} from '../../tests/utils/db-verification';
 import { TEST_USERS, URLs } from '../../tests/utils/constants';
 
 /**
@@ -253,9 +258,12 @@ test.describe('Invoice Module - Comprehensive Tests', () => {
 
   test('should not allow editing posted invoice', async ({ page }) => {
     // Find an ISSUED or POSTED invoice
-    const postedInvoice = await page.locator('tr').filter({ hasText: /(ISSUED|POSTED)/ }).first();
+    const postedInvoice = await page
+      .locator('tr')
+      .filter({ hasText: /(ISSUED|POSTED)/ })
+      .first();
 
-    if (await postedInvoice.count() > 0) {
+    if ((await postedInvoice.count()) > 0) {
       // Edit button should be disabled or not present
       const editButton = postedInvoice.locator('button:has-text("แก้ไข")');
       const isEnabled = await editButton.isEnabled();

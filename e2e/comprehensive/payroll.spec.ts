@@ -56,7 +56,7 @@ test.describe('Payroll Module - Comprehensive Tests', () => {
 
     const draftPayroll = await page.locator('tr').filter({ hasText: 'DRAFT' }).first();
 
-    if (await draftPayroll.count() > 0) {
+    if ((await draftPayroll.count()) > 0) {
       await draftPayroll.locator('button[title="จัดการ"]').click();
 
       // Approve payroll

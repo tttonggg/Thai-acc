@@ -28,7 +28,7 @@ export default defineConfig({
 
   // Expect timeout
   expect: {
-    timeout: 10 * 1000
+    timeout: 10 * 1000,
   },
 
   // Run tests in parallel (faster execution)
@@ -45,15 +45,18 @@ export default defineConfig({
 
   // Reporter configuration
   reporter: [
-    ['html', {
-      outputFolder: 'playwright-report',
-      open: 'never',
-      host: 'localhost',
-      port: 9323
-    }],
+    [
+      'html',
+      {
+        outputFolder: 'playwright-report',
+        open: 'never',
+        host: 'localhost',
+        port: 9323,
+      },
+    ],
     ['json', { outputFile: 'test-results/results.json' }],
     ['junit', { outputFile: 'test-results/results.xml' }],
-    ['list']
+    ['list'],
   ],
 
   // Global setup and teardown
@@ -93,7 +96,7 @@ export default defineConfig({
 
     // Extra HTTP headers (bypass rate limiting)
     extraHTTPHeaders: {
-      'x-playwright-test': 'true'
+      'x-playwright-test': 'true',
     },
 
     // Ignore HTTPS errors
@@ -125,8 +128,8 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
         contextOptions: {
-          permissions: ['clipboard-read', 'clipboard-write']
-        }
+          permissions: ['clipboard-read', 'clipboard-write'],
+        },
       },
     },
 
@@ -207,6 +210,6 @@ export default defineConfig({
   metadata: {
     project: 'Thai Accounting ERP',
     version: '1.0.0',
-    environment: process.env.NODE_ENV || 'development'
-  }
+    environment: process.env.NODE_ENV || 'development',
+  },
 });

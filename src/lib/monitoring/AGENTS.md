@@ -5,15 +5,17 @@
 
 ## Purpose
 
-Application monitoring utilities including centralized logging and performance tracking.
+Application monitoring utilities including centralized logging and performance
+tracking.
 
 ## Parent Reference
+
 <!-- Parent: ../AGENTS.md -->
 
 ## Key Files
 
-| File | Description |
-|------|-------------|
+| File        | Description                |
+| ----------- | -------------------------- |
 | `logger.ts` | Centralized logging system |
 
 ## For AI Agents

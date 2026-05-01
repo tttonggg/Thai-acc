@@ -2,13 +2,16 @@
 
 ## Overview
 
-The Custom Report Builder allows users to create personalized financial reports with flexible configurations, filters, and output formats.
+The Custom Report Builder allows users to create personalized financial reports
+with flexible configurations, filters, and output formats.
 
 ## Location
 
-- **Component**: `/Users/tong/Thai-acc/src/components/reports/custom-report-builder.tsx`
+- **Component**:
+  `/Users/tong/Thai-acc/src/components/reports/custom-report-builder.tsx`
 - **API Endpoint**: `/Users/tong/Thai-acc/src/app/api/reports/custom/route.ts`
-- **Templates API**: `/Users/tong/Thai-acc/src/app/api/reports/templates/route.ts`
+- **Templates API**:
+  `/Users/tong/Thai-acc/src/app/api/reports/templates/route.ts`
 
 ## Features
 
@@ -27,7 +30,8 @@ Users can choose from 6 report types:
 
 - **Date Range**: From/To dates for filtering transactions
 - **Comparison with Previous Period**: Checkbox to compare with prior period
-- **Include Zero Balances**: Option to include/exclude accounts with zero balances
+- **Include Zero Balances**: Option to include/exclude accounts with zero
+  balances
 - **Account Level Filter**: Detail vs Summary view
 
 ### 3. Column Selection
@@ -45,7 +49,8 @@ Users can select which columns to display:
 
 ### 4. Filter Section
 
-- **Account Type Filter**: Filter by Asset, Liability, Equity, Revenue, or Expense
+- **Account Type Filter**: Filter by Asset, Liability, Equity, Revenue, or
+  Expense
 - **Account Range**: From/to account codes (e.g., 1000 to 1999)
 - **Specific Accounts**: Filter by specific account selections
 
@@ -71,6 +76,7 @@ Users can save their configurations as templates for reuse:
 Generates a custom report based on configuration.
 
 **Request Body:**
+
 ```json
 {
   "reportType": "TRIAL_BALANCE",
@@ -92,6 +98,7 @@ Generates a custom report based on configuration.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -113,6 +120,7 @@ Generates a custom report based on configuration.
 Saves a report template.
 
 **Request Body:**
+
 ```json
 {
   "name": "Monthly Trial Balance",
@@ -135,10 +143,10 @@ Retrieves all saved templates.
 ## Usage Example
 
 ```tsx
-import { CustomReportBuilder } from '@/components/reports/custom-report-builder'
+import { CustomReportBuilder } from '@/components/reports/custom-report-builder';
 
 export default function ReportsPage() {
-  return <CustomReportBuilder />
+  return <CustomReportBuilder />;
 }
 ```
 
@@ -162,31 +170,37 @@ model ScheduledReport {
 ## Report Generation Logic
 
 ### Trial Balance
+
 - Sums all journal entries up to the specified date
 - Calculates debit/credit balances by account
 - Validates debits = credits
 
 ### Balance Sheet
+
 - Groups accounts by Assets, Liabilities, Equity
 - Calculates retained earnings from revenue - expenses
 - Validates Assets = Liabilities + Equity
 
 ### Income Statement
+
 - Shows revenue and expense accounts
 - Calculates net income
 - Supports date range filtering
 
 ### AR Aging
+
 - Groups customer invoices by aging buckets (0, 30, 60, 90, 90+ days)
 - Calculates outstanding balances
 - Filters by active customers
 
 ### AP Aging
+
 - Groups vendor invoices by aging buckets (0, 30, 60, 90, 90+ days)
 - Calculates outstanding balances
 - Filters by active vendors
 
 ### Stock Report
+
 - Shows inventory quantities and values
 - Uses weighted average costing (WAC)
 - Groups by warehouse and product
@@ -202,6 +216,7 @@ model ScheduledReport {
 ## Thai Language Support
 
 All labels, buttons, and messages are in Thai language:
+
 - Report names: งบทดลอง, งบดุล, etc.
 - UI labels: สร้างรายงาน, บันทึกเทมเพลต, etc.
 - Error messages: Thai error descriptions
@@ -209,6 +224,7 @@ All labels, buttons, and messages are in Thai language:
 ## Future Enhancements
 
 Potential improvements:
+
 - Add chart visualizations
 - Support for custom calculations
 - Scheduled report generation

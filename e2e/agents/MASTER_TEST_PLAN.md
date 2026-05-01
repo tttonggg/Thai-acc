@@ -1,4 +1,5 @@
 # 🤖 MASTER TEST PLAN - Agent Swarm UI Testing
+
 ## Thai Accounting ERP - Complete Left Pane Menu Testing
 
 **Server URL**: http://localhost:3000  
@@ -128,24 +129,24 @@ SUB TASK 8: UI-DB Alignment Verification [AGENT_VALIDATOR]
 
 ## 🎯 SIDEBAR MENU ITEMS (16 Total)
 
-| # | ID | Label (TH) | Label (EN) | Role Access |
-|---|-----|------------|------------|-------------|
-| 1 | dashboard | ภาพรวม | Dashboard | All |
-| 2 | accounts | ผังบัญชี | Chart of Accounts | All |
-| 3 | journal | บันทึกบัญชี | Journal Entries | All |
-| 4 | invoices | ใบกำกับภาษี | Invoices | All |
-| 5 | vat | ภาษีมูลค่าเพิ่ม | VAT | All |
-| 6 | wht | ภาษีหัก ณ ที่จ่าย | Withholding Tax | All |
-| 7 | customers | ลูกหนี้ | Customers/AR | All |
-| 8 | vendors | เจ้าหนี้ | Vendors/AP | All |
-| 9 | inventory | สต็อกสินค้า | Inventory | All |
-| 10 | banking | ธนาคาร | Banking | All |
-| 11 | assets | ทรัพย์สิน | Fixed Assets | All |
-| 12 | payroll | เงินเดือน | Payroll | All |
-| 13 | petty-cash | เงินสดย่อย | Petty Cash | All |
-| 14 | reports | รายงาน | Reports | All |
-| 15 | settings | ตั้งค่า | Settings | ADMIN only |
-| 16 | users | จัดการผู้ใช้ | User Management | ADMIN only |
+| #   | ID         | Label (TH)        | Label (EN)        | Role Access |
+| --- | ---------- | ----------------- | ----------------- | ----------- |
+| 1   | dashboard  | ภาพรวม            | Dashboard         | All         |
+| 2   | accounts   | ผังบัญชี          | Chart of Accounts | All         |
+| 3   | journal    | บันทึกบัญชี       | Journal Entries   | All         |
+| 4   | invoices   | ใบกำกับภาษี       | Invoices          | All         |
+| 5   | vat        | ภาษีมูลค่าเพิ่ม   | VAT               | All         |
+| 6   | wht        | ภาษีหัก ณ ที่จ่าย | Withholding Tax   | All         |
+| 7   | customers  | ลูกหนี้           | Customers/AR      | All         |
+| 8   | vendors    | เจ้าหนี้          | Vendors/AP        | All         |
+| 9   | inventory  | สต็อกสินค้า       | Inventory         | All         |
+| 10  | banking    | ธนาคาร            | Banking           | All         |
+| 11  | assets     | ทรัพย์สิน         | Fixed Assets      | All         |
+| 12  | payroll    | เงินเดือน         | Payroll           | All         |
+| 13  | petty-cash | เงินสดย่อย        | Petty Cash        | All         |
+| 14  | reports    | รายงาน            | Reports           | All         |
+| 15  | settings   | ตั้งค่า           | Settings          | ADMIN only  |
+| 16  | users      | จัดการผู้ใช้      | User Management   | ADMIN only  |
 
 ---
 
@@ -157,14 +158,14 @@ const CONFIG = {
   workers: 4,
   retries: 1,
   timeout: 60000,
-  headers: { 'x-playwright-test': 'true' }  // Bypass rate limiting
-}
+  headers: { 'x-playwright-test': 'true' }, // Bypass rate limiting
+};
 
 const TEST_ACCOUNT = {
   email: 'admin@thaiaccounting.com',
   password: 'admin123',
-  role: 'ADMIN'
-}
+  role: 'ADMIN',
+};
 ```
 
 ---

@@ -14,7 +14,9 @@ export class ReceiptsPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("ใบเสร็จรับเงิน"), h1:has-text("Receipts")');
-    this.newReceiptButton = page.locator('button:has-text("สร้างใบเสร็จ"), button:has-text("New Receipt")');
+    this.newReceiptButton = page.locator(
+      'button:has-text("สร้างใบเสร็จ"), button:has-text("New Receipt")'
+    );
     this.receiptsTable = page.locator('table, [role="table"]').first();
   }
 
@@ -36,7 +38,9 @@ export class ReceiptsPage {
     await this.page.fill('input[name="amount"]', data.amount.toString());
 
     if (data.invoiceNumber) {
-      await this.page.locator('select[name="invoiceId"]').selectOption({ label: data.invoiceNumber });
+      await this.page
+        .locator('select[name="invoiceId"]')
+        .selectOption({ label: data.invoiceNumber });
     }
 
     if (data.paymentMethod) {

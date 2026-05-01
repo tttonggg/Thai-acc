@@ -16,13 +16,13 @@ Complete DevOps implementation for Thai Accounting ERP System (Phase H).
 
 ### GitHub Actions Workflows
 
-| Workflow | Purpose | Trigger |
-|----------|---------|---------|
-| `ci-cd.yml` | Full CI/CD pipeline | Push to main/develop, PRs |
-| `e2e-tests.yml` | End-to-end tests | Push to main/develop, PRs |
-| `security-scan.yml` | Security scanning | Push, PRs, Daily schedule |
-| `nightly.yml` | Nightly comprehensive tests | Daily at 2 AM UTC |
-| `release.yml` | Release automation | Tag push |
+| Workflow            | Purpose                     | Trigger                   |
+| ------------------- | --------------------------- | ------------------------- |
+| `ci-cd.yml`         | Full CI/CD pipeline         | Push to main/develop, PRs |
+| `e2e-tests.yml`     | End-to-end tests            | Push to main/develop, PRs |
+| `security-scan.yml` | Security scanning           | Push, PRs, Daily schedule |
+| `nightly.yml`       | Nightly comprehensive tests | Daily at 2 AM UTC         |
+| `release.yml`       | Release automation          | Tag push                  |
 
 ### Pipeline Stages
 
@@ -106,14 +106,14 @@ terraform destroy -var-file=variables.tfvars
 
 ### Components
 
-| Resource | Purpose |
-|----------|---------|
-| `vpc.tf` | VPC, subnets, NAT gateways |
-| `eks.tf` | Kubernetes cluster |
-| `rds.tf` | PostgreSQL database |
-| `alb.tf` | Application load balancer |
-| `route53.tf` | DNS and SSL certificates |
-| `iam.tf` | IAM roles and policies |
+| Resource     | Purpose                    |
+| ------------ | -------------------------- |
+| `vpc.tf`     | VPC, subnets, NAT gateways |
+| `eks.tf`     | Kubernetes cluster         |
+| `rds.tf`     | PostgreSQL database        |
+| `alb.tf`     | Application load balancer  |
+| `route53.tf` | DNS and SSL certificates   |
+| `iam.tf`     | IAM roles and policies     |
 
 ### Kubernetes (Raw Manifests)
 
@@ -174,15 +174,15 @@ docker-compose --profile seed run --rm seed
 
 ### Stack Components
 
-| Component | Purpose | Port |
-|-----------|---------|------|
-| Prometheus | Metrics collection | 9090 |
-| Grafana | Visualization | 3001 |
-| Alertmanager | Alert routing | 9093 |
-| Loki | Log aggregation | 3100 |
-| Promtail | Log shipping | - |
-| Jaeger | Distributed tracing | 16686 |
-| Datadog | APM and monitoring | - |
+| Component    | Purpose             | Port  |
+| ------------ | ------------------- | ----- |
+| Prometheus   | Metrics collection  | 9090  |
+| Grafana      | Visualization       | 3001  |
+| Alertmanager | Alert routing       | 9093  |
+| Loki         | Log aggregation     | 3100  |
+| Promtail     | Log shipping        | -     |
+| Jaeger       | Distributed tracing | 16686 |
+| Datadog      | APM and monitoring  | -     |
 
 ### Access URLs
 
@@ -278,37 +278,41 @@ snyk test --severity-threshold=high
 ### Manual Deployment Steps
 
 1. **Pre-deployment Checks**
+
    ```bash
    # Run tests
    npm run ci:all
-   
+
    # Security scan
    npm run security:scan
-   
+
    # Build image
    docker build -t thai-erp:$TAG .
    ```
 
 2. **Database Backup**
+
    ```bash
    # Create backup
    kubectl create job backup-$(date +%s) --from=cronjob/database-backup -n production
    ```
 
 3. **Deploy**
+
    ```bash
    # Update image tag
    kubectl set image deployment/thai-erp thai-erp=thai-erp:$TAG -n production
-   
+
    # Wait for rollout
    kubectl rollout status deployment/thai-erp -n production
    ```
 
 4. **Verify**
+
    ```bash
    # Health check
    curl https://thai-erp.example.com/api/health
-   
+
    # Smoke tests
    ./scripts/test-quick.sh
    ```
@@ -366,6 +370,7 @@ MINIO_SECRET_KEY=...
 ### Common Issues
 
 1. **Build Fails**
+
    ```bash
    # Clear cache
    npm run clean
@@ -374,31 +379,34 @@ MINIO_SECRET_KEY=...
    ```
 
 2. **Database Connection Issues**
+
    ```bash
    # Check migrations
    npx prisma migrate status
-   
+
    # Reset (dev only!)
    npx prisma migrate reset
    ```
 
 3. **Kubernetes Pod Issues**
+
    ```bash
    # Check logs
    kubectl logs -f deployment/thai-erp -n production
-   
+
    # Check events
    kubectl get events -n production --sort-by=.metadata.creationTimestamp
-   
+
    # Describe pod
    kubectl describe pod <pod-name> -n production
    ```
 
 4. **Helm Release Issues**
+
    ```bash
    # Get release history
    helm history thai-erp -n thai-erp
-   
+
    # Rollback
    helm rollback thai-erp <revision> -n thai-erp
    ```
@@ -423,6 +431,7 @@ MINIO_SECRET_KEY=...
 ## Support
 
 For DevOps support:
+
 - Slack: #platform-team
 - Email: devops@thai-erp.example.com
 - On-call: PagerDuty rotation

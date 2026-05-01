@@ -1,47 +1,62 @@
 # Invoice Commenting Integration Test Report
 
-**Date**: March 18, 2026
-**Tester**: Playwright Automation Testing Specialist
-**Application**: Thai Accounting ERP System
-**URL**: http://localhost:3000/
+**Date**: March 18, 2026 **Tester**: Playwright Automation Testing Specialist
+**Application**: Thai Accounting ERP System **URL**: http://localhost:3000/
 **Test File**: `/Users/tong/Thai-acc/e2e/invoice-commenting-integration.spec.ts`
 
 ---
 
 ## Executive Summary
 
-**CRITICAL ISSUE FOUND**: The application has a severe runtime error that prevents all functionality from working. The PrismaClient is being bundled for the browser environment, which causes a fatal error on page load.
+**CRITICAL ISSUE FOUND**: The application has a severe runtime error that
+prevents all functionality from working. The PrismaClient is being bundled for
+the browser environment, which causes a fatal error on page load.
 
-**Overall Test Status**: FAILED - Cannot proceed with feature testing due to critical application error
+**Overall Test Status**: FAILED - Cannot proceed with feature testing due to
+critical application error
 
 ---
 
 ## Critical Error Found
 
 ### Error Description
+
 ```
 PrismaClient is unable to run in this browser environment, or has been bundled for the browser (running in ``).
 ```
 
 ### Screenshot
+
 ![Critical Error](test-results/01-login-complete-Phase-1--0e17e-and-verify-dashboard-access-ci-headless/test-failed-1.png)
 
-The error appears as a red error dialog with the title "เกิดข้อผิดพลาด" (Error Occurred) and prevents the login form from rendering.
+The error appears as a red error dialog with the title "เกิดข้อผิดพลาด" (Error
+Occurred) and prevents the login form from rendering.
 
 ### Impact
+
 - **Severity**: CRITICAL
-- **Affected Areas**: Entire application - users cannot log in or use any features
-- **User Experience**: Complete application failure - white screen with error dialog
+- **Affected Areas**: Entire application - users cannot log in or use any
+  features
+- **User Experience**: Complete application failure - white screen with error
+  dialog
 
 ### Root Cause Analysis
-The PrismaClient is being imported somewhere in the client-side code bundle. PrismaClient is a server-side-only library and cannot run in the browser. Possible causes:
 
-1. **Accidental import in client component**: A 'use client' component may be importing from `@/lib/db` or `@/lib/db-helpers`
-2. **Tree-shaking issue**: The bundler may be including server-only code in the client bundle
-3. **Dynamic import failure**: A dynamic import may be resolving to server code in the client context
+The PrismaClient is being imported somewhere in the client-side code bundle.
+PrismaClient is a server-side-only library and cannot run in the browser.
+Possible causes:
+
+1. **Accidental import in client component**: A 'use client' component may be
+   importing from `@/lib/db` or `@/lib/db-helpers`
+2. **Tree-shaking issue**: The bundler may be including server-only code in the
+   client bundle
+3. **Dynamic import failure**: A dynamic import may be resolving to server code
+   in the client context
 
 ### Files Potentially Causing the Issue
+
 Based on code analysis, these files import PrismaClient:
+
 - `/src/lib/db.ts` - Main database client (server-only)
 - `/src/lib/db-helpers.ts` - Database helper functions (server-only)
 - `/src/lib/db-optimizer.ts` - Query optimizer (server-only)
@@ -54,19 +69,22 @@ Based on code analysis, these files import PrismaClient:
 ## Test Results Summary
 
 ### Tests Attempted
-| Test Suite | Tests | Passed | Failed | Status |
-|------------|-------|--------|--------|--------|
-| Authentication Testing | 4 | 0 | 4 | FAILED |
-| Invoice List - Comment Badges | 3 | 0 | 3 | FAILED |
-| Invoice Edit Dialog - Tabs | 3 | 0 | 3 | FAILED |
-| Comment Operations | 4 | 0 | 4 | FAILED |
-| UI/UX Verification | 5 | 0 | 5 | FAILED |
-| Error Handling | 2 | 0 | 2 | FAILED |
-| Console Error Monitoring | 1 | 0 | 1 | FAILED |
-| **TOTAL** | **22** | **0** | **22** | **FAILED** |
+
+| Test Suite                    | Tests  | Passed | Failed | Status     |
+| ----------------------------- | ------ | ------ | ------ | ---------- |
+| Authentication Testing        | 4      | 0      | 4      | FAILED     |
+| Invoice List - Comment Badges | 3      | 0      | 3      | FAILED     |
+| Invoice Edit Dialog - Tabs    | 3      | 0      | 3      | FAILED     |
+| Comment Operations            | 4      | 0      | 4      | FAILED     |
+| UI/UX Verification            | 5      | 0      | 5      | FAILED     |
+| Error Handling                | 2      | 0      | 2      | FAILED     |
+| Console Error Monitoring      | 1      | 0      | 1      | FAILED     |
+| **TOTAL**                     | **22** | **0**  | **22** | **FAILED** |
 
 ### Error Pattern
+
 All 22 tests failed with the same root cause:
+
 ```
 Error: expect(locator).toBeVisible() failed
 Locator: locator('input[type="email"]')
@@ -75,19 +93,25 @@ Timeout: 20000ms
 Error: element(s) not found
 ```
 
-The login form input field could not be found because the PrismaClient error prevents the page from rendering properly.
+The login form input field could not be found because the PrismaClient error
+prevents the page from rendering properly.
 
 ---
 
 ## Screenshots Captured
 
 ### 1. Login Page Error
-**File**: `test-results/01-login-complete-Phase-1--0e17e-and-verify-dashboard-access-ci-headless/test-failed-1.png`
 
-**Description**: Shows the critical PrismaClient error dialog. The page displays:
+**File**:
+`test-results/01-login-complete-Phase-1--0e17e-and-verify-dashboard-access-ci-headless/test-failed-1.png`
+
+**Description**: Shows the critical PrismaClient error dialog. The page
+displays:
+
 - Error title: "เกิดข้อผิดพลาด" (Error Occurred)
 - Error message about PrismaClient not being able to run in browser
-- Subtitle: "ระบบพบข้อผิดพลาดในการแสดงผล กรุณาลองใหม่อีกครั้ง" (System encountered a display error. Please try again.)
+- Subtitle: "ระบบพบข้อผิดพลาดในการแสดงผล กรุณาลองใหม่อีกครั้ง" (System
+  encountered a display error. Please try again.)
 - A pink "โหลดหน้าใหม่" (Reload Page) button
 - Next.js dev tools indicator showing "1 Issue"
 
@@ -98,28 +122,33 @@ The login form input field could not be found because the PrismaClient error pre
 Due to the critical error, the following features could not be verified:
 
 ### 1. Authentication
+
 - [ ] Login with valid credentials
 - [ ] Error handling for invalid credentials
 - [ ] Session persistence across reloads
 - [ ] Auth consistency (no intermittent failures)
 
 ### 2. Invoice List with Comment Badges
+
 - [ ] Comment column in invoice table
 - [ ] Comment badges showing count
 - [ ] Empty state for invoices without comments
 
 ### 3. Invoice Edit Dialog
+
 - [ ] Tab layout (Details + Comments)
 - [ ] Tab switching functionality
 - [ ] Comment count badge on tab
 
 ### 4. Comment Operations
+
 - [ ] Add a test comment
 - [ ] Reply to a comment
 - [ ] Resolve/unresolve a comment
 - [ ] Comment count updates
 
 ### 5. UI/UX Verification
+
 - [ ] Login page styling
 - [ ] Invoice list layout
 - [ ] Edit dialog layout
@@ -131,15 +160,18 @@ Due to the critical error, the following features could not be verified:
 ## Code Review Findings
 
 ### Invoice Commenting Implementation Status
+
 Based on code analysis (files exist but could not be tested):
 
 #### 1. Database Schema (COMPLETE)
+
 - `InvoiceComment` model with threading, mentions, attachments, resolved status
 - `InvoiceLineItemAudit` model for change tracking
 - `RelatedDocument` model for document relationships
 - `CommentNotification` model for user notifications
 
 #### 2. API Endpoints (CREATED)
+
 - `/api/invoices/[id]/comments` - List and create comments
 - `/api/invoices/[id]/comments/[commentId]` - Update/delete/resolve comments
 - `/api/invoices/[id]/lines/[lineId]` - Edit line items with audit
@@ -147,6 +179,7 @@ Based on code analysis (files exist but could not be tested):
 - `/api/invoices/[id]/related` - Related documents
 
 #### 3. Frontend Components (CREATED)
+
 - `CommentSection` - Main comment section component
 - `CommentInput` - Input with @mentions and attachments
 - `CommentThread` - Nested comment display
@@ -155,6 +188,7 @@ Based on code analysis (files exist but could not be tested):
 - `RelatedDocuments` - Document relationship management
 
 #### 4. Integration Points (PARTIAL)
+
 - ✅ `InvoiceEditDialog` has tabs for Details and Comments
 - ✅ `InvoiceList` has comment column with badges
 - ❌ Could not verify actual functionality due to application error
@@ -181,7 +215,7 @@ Based on code analysis (files exist but could not be tested):
    - Example:
    ```typescript
    if (typeof window !== 'undefined') {
-     throw new Error('PrismaClient cannot be used in browser')
+     throw new Error('PrismaClient cannot be used in browser');
    }
    ```
 
@@ -189,7 +223,8 @@ Based on code analysis (files exist but could not be tested):
 
 Once the critical error is fixed:
 
-1. **Re-run the complete test suite** at `/Users/tong/Thai-acc/e2e/invoice-commenting-integration.spec.ts`
+1. **Re-run the complete test suite** at
+   `/Users/tong/Thai-acc/e2e/invoice-commenting-integration.spec.ts`
 2. **Verify all 22 tests pass** before deploying
 3. **Add the test file to CI/CD pipeline** for regression testing
 4. **Test on multiple browsers** (Chrome, Firefox, Safari)
@@ -205,19 +240,23 @@ Once the critical error is fixed:
 
 ## Test Script Details
 
-**Test File Location**: `/Users/tong/Thai-acc/e2e/invoice-commenting-integration.spec.ts`
+**Test File Location**:
+`/Users/tong/Thai-acc/e2e/invoice-commenting-integration.spec.ts`
 
 **Test Credentials Used**:
+
 - Email: `admin@thaiaccounting.com`
 - Password: `admin123`
 
 **Test Configuration**:
+
 - Browser: Chromium (headless)
 - Viewport: 1920x1080
 - Timeout: 60 seconds per test
 - Navigation timeout: 60 seconds
 
 **Expected Screenshots** (would be generated after fix):
+
 1. `01-login-success.png` - Dashboard after successful login
 2. `02-login-error.png` - Error message for invalid credentials
 3. `03-invoice-list.png` - Invoice list page
@@ -243,22 +282,31 @@ Once the critical error is fixed:
 
 ## Conclusion
 
-The Thai Accounting ERP System **cannot be tested** in its current state due to a critical runtime error where PrismaClient is being bundled for the browser environment. This is a fundamental application architecture issue that must be resolved before any feature testing can proceed.
+The Thai Accounting ERP System **cannot be tested** in its current state due to
+a critical runtime error where PrismaClient is being bundled for the browser
+environment. This is a fundamental application architecture issue that must be
+resolved before any feature testing can proceed.
 
-The invoice commenting feature appears to be fully implemented based on code review (database schema, API endpoints, React components, and UI integration), but its functionality cannot be verified until the PrismaClient bundle issue is fixed.
+The invoice commenting feature appears to be fully implemented based on code
+review (database schema, API endpoints, React components, and UI integration),
+but its functionality cannot be verified until the PrismaClient bundle issue is
+fixed.
 
-**Priority**: Fix the PrismaClient browser bundle issue immediately before proceeding with any further testing or deployment.
+**Priority**: Fix the PrismaClient browser bundle issue immediately before
+proceeding with any further testing or deployment.
 
 ---
 
 ## Appendix: File Locations
 
 ### Test Files
+
 - Test Script: `/Users/tong/Thai-acc/e2e/invoice-commenting-integration.spec.ts`
 - Test Results: `/Users/tong/Thai-acc/test-results/`
 - Screenshots: `/Users/tong/Thai-acc/test-results/screenshots/`
 
 ### Application Files (Invoice Commenting)
+
 - Comment Section: `/src/components/invoices/comment-section.tsx`
 - Comment Input: `/src/components/ui/comment-input.tsx`
 - Comment Thread: `/src/components/ui/comment-thread.tsx`
@@ -266,9 +314,11 @@ The invoice commenting feature appears to be fully implemented based on code rev
 - Invoice List: `/src/components/invoices/invoice-list.tsx`
 
 ### Database Schema
+
 - Prisma Schema: `/prisma/schema.prisma`
 
 ### API Routes
+
 - Comments API: `/src/app/api/invoices/[id]/comments/route.ts`
 - Individual Comment: `/src/app/api/invoices/[id]/comments/[commentId]/route.ts`
 - Line Items: `/src/app/api/invoices/[id]/lines/[lineId]/route.ts`
@@ -277,4 +327,4 @@ The invoice commenting feature appears to be fully implemented based on code rev
 
 ---
 
-*Report generated by Playwright Automation Testing on March 18, 2026*
+_Report generated by Playwright Automation Testing on March 18, 2026_

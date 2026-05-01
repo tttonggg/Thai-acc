@@ -1,6 +1,7 @@
 # Webhook Events Documentation
 
-Thai Accounting ERP System supports real-time webhook notifications for various business events.
+Thai Accounting ERP System supports real-time webhook notifications for various
+business events.
 
 ## Webhook Endpoint
 
@@ -28,10 +29,7 @@ function verifyWebhookSignature(
     .createHmac('sha256', secret)
     .update(payload)
     .digest('hex');
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expected)
-  );
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
 }
 ```
 
@@ -54,6 +52,7 @@ All webhook requests follow this structure:
 ### Invoice Events
 
 #### INVOICE_CREATED
+
 Triggered when a new invoice is created.
 
 ```json
@@ -73,6 +72,7 @@ Triggered when a new invoice is created.
 ```
 
 #### INVOICE_UPDATED
+
 Triggered when an invoice is modified.
 
 ```json
@@ -90,6 +90,7 @@ Triggered when an invoice is modified.
 ```
 
 #### INVOICE_ISSUED
+
 Triggered when an invoice status changes from DRAFT to ISSUED.
 
 ```json
@@ -106,6 +107,7 @@ Triggered when an invoice status changes from DRAFT to ISSUED.
 ```
 
 #### INVOICE_PAID
+
 Triggered when an invoice is fully paid.
 
 ```json
@@ -123,6 +125,7 @@ Triggered when an invoice is fully paid.
 ```
 
 #### INVOICE_VOIDED
+
 Triggered when an invoice is voided/cancelled.
 
 ```json
@@ -142,6 +145,7 @@ Triggered when an invoice is voided/cancelled.
 ### Receipt Events
 
 #### RECEIPT_CREATED
+
 Triggered when a new receipt is created.
 
 ```json
@@ -162,6 +166,7 @@ Triggered when a new receipt is created.
 ```
 
 #### RECEIPT_POSTED
+
 Triggered when a receipt is posted to the general ledger.
 
 ```json
@@ -180,6 +185,7 @@ Triggered when a receipt is posted to the general ledger.
 ### Payment Events
 
 #### PAYMENT_CREATED
+
 Triggered when a new payment is created.
 
 ```json
@@ -200,6 +206,7 @@ Triggered when a new payment is created.
 ```
 
 #### PAYMENT_POSTED
+
 Triggered when a payment is posted to the general ledger.
 
 ```json
@@ -218,6 +225,7 @@ Triggered when a payment is posted to the general ledger.
 ### Journal Events
 
 #### JOURNAL_ENTRY_POSTED
+
 Triggered when a journal entry is posted.
 
 ```json
@@ -239,6 +247,7 @@ Triggered when a journal entry is posted.
 ### Customer Events
 
 #### CUSTOMER_CREATED
+
 Triggered when a new customer is created.
 
 ```json
@@ -256,6 +265,7 @@ Triggered when a new customer is created.
 ```
 
 #### CUSTOMER_UPDATED
+
 Triggered when a customer is modified.
 
 ```json
@@ -275,6 +285,7 @@ Triggered when a customer is modified.
 ### Product Events
 
 #### PRODUCT_CREATED
+
 Triggered when a new product is created.
 
 ```json
@@ -293,6 +304,7 @@ Triggered when a new product is created.
 ```
 
 #### PRODUCT_UPDATED
+
 Triggered when a product is modified.
 
 ```json
@@ -312,6 +324,7 @@ Triggered when a product is modified.
 ### Inventory Events
 
 #### STOCK_MOVEMENT
+
 Triggered when stock is received, issued, or adjusted.
 
 ```json
@@ -335,7 +348,8 @@ Types: `RECEIVE`, `ISSUE`, `TRANSFER_IN`, `TRANSFER_OUT`, `ADJUST`
 
 ## Retry Policy
 
-If your endpoint returns a non-2xx status code or times out, we will retry the delivery:
+If your endpoint returns a non-2xx status code or times out, we will retry the
+delivery:
 
 - Maximum retries: 3
 - Retry intervals: 1s, 2s, 4s (exponential backoff)
@@ -350,15 +364,18 @@ Your webhook endpoint should:
 
 ## Best Practices
 
-1. **Verify signatures** - Always verify the webhook signature to ensure authenticity
+1. **Verify signatures** - Always verify the webhook signature to ensure
+   authenticity
 2. **Process asynchronously** - Queue webhook payloads for background processing
-3. **Handle retries** - Implement idempotent processing to handle duplicate deliveries
+3. **Handle retries** - Implement idempotent processing to handle duplicate
+   deliveries
 4. **Monitor failures** - Set up alerts for webhook delivery failures
 5. **Use HTTPS** - Always use HTTPS endpoints for security
 
 ## Testing
 
-You can test your webhook endpoint using the "Test" button in the webhook management UI or by sending a test event:
+You can test your webhook endpoint using the "Test" button in the webhook
+management UI or by sending a test event:
 
 ```bash
 curl -X POST https://your-api.com/webhook/test \

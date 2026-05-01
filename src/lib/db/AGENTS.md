@@ -5,17 +5,19 @@
 
 ## Purpose
 
-Database connection management, connection pooling, and query monitoring utilities.
+Database connection management, connection pooling, and query monitoring
+utilities.
 
 ## Parent Reference
+
 <!-- Parent: ../AGENTS.md -->
 
 ## Key Files
 
-| File | Description |
-|------|-------------|
+| File                 | Description                         |
+| -------------------- | ----------------------------------- |
 | `connection-pool.ts` | Database connection pool management |
-| `query-monitor.ts` | Query performance monitoring |
+| `query-monitor.ts`   | Query performance monitoring        |
 
 ## For AI Agents
 

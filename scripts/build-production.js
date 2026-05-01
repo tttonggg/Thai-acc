@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * Production Build Script for Standalone Deployment
- * 
+ *
  * This script prepares the production build with SQLite support.
  * It ensures the correct schema is used and generates the Prisma client.
- * 
+ *
  * Usage: node scripts/build-production.js
  */
 
@@ -57,11 +57,8 @@ function buildProduction() {
   console.log('\n📦 Copying Prisma files to standalone...');
   const standalonePrismaDir = path.join(standaloneDir, 'prisma');
   ensureDirectory(standalonePrismaDir);
-  
-  copyFile(
-    path.join(prismaDir, 'schema.prisma'),
-    path.join(standalonePrismaDir, 'schema.prisma')
-  );
+
+  copyFile(path.join(prismaDir, 'schema.prisma'), path.join(standalonePrismaDir, 'schema.prisma'));
   copyFile(
     path.join(prismaDir, 'schema-sqlite.prisma'),
     path.join(standalonePrismaDir, 'schema-sqlite.prisma')
@@ -71,7 +68,7 @@ function buildProduction() {
   console.log('\n📦 Copying Prisma client...');
   const sourcePrismaClient = path.join(rootDir, 'node_modules', '.prisma');
   const targetPrismaClient = path.join(standaloneDir, 'node_modules', '.prisma');
-  
+
   if (fs.existsSync(sourcePrismaClient)) {
     ensureDirectory(path.dirname(targetPrismaClient));
     execSync(`cp -r "${sourcePrismaClient}" "${targetPrismaClient}"`, { stdio: 'inherit' });

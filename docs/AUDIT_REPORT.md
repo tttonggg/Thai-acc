@@ -1,14 +1,14 @@
 # 📊 Thai Accounting ERP - Comprehensive Audit Report
 
-**Date:** March 19, 2026
-**Audit Type:** Data Integrity & Real-World Compliance Check
-**Status:** ✅ Critical Issues Fixed
+**Date:** March 19, 2026 **Audit Type:** Data Integrity & Real-World Compliance
+Check **Status:** ✅ Critical Issues Fixed
 
 ---
 
 ## 🎯 Executive Summary
 
 This audit analyzed the Thai Accounting ERP system for:
+
 1. **Real-world accounting document relationships**
 2. **Data consistency issues**
 3. **Schema vs data mismatches**
@@ -16,9 +16,11 @@ This audit analyzed the Thai Accounting ERP system for:
 
 ### Critical Finding: Receipt Documents Missing
 
-**Issue:** 21 invoices had payments recorded but **0 Receipt documents** existed.
+**Issue:** 21 invoices had payments recorded but **0 Receipt documents**
+existed.
 
 **Impact:**
+
 - ❌ No legal proof of payment (ใบเสร็จรับเงิน)
 - ❌ Tax audit risk (Thai Revenue Dept compliance)
 - ❌ Incomplete accounting records
@@ -47,6 +49,7 @@ This audit analyzed the Thai Accounting ERP system for:
 ```
 
 **Key Relationships:**
+
 - Invoice → ReceiptAllocation → Receipt
 - Receipt.amount = Sum(ReceiptAllocation.amount)
 - Invoice.paidAmount = Sum(related ReceiptAllocations)
@@ -69,10 +72,12 @@ This audit analyzed the Thai Accounting ERP system for:
 ```
 
 **Key Relationships:**
+
 - PurchaseInvoice → PaymentAllocation → Payment
 - Payment.amount = Sum(PaymentAllocation.amount)
 - PurchaseInvoice.paidAmount = Sum(related PaymentAllocations)
-- PurchaseInvoice.remaining = PurchaseInvoice.totalAmount - PurchaseInvoice.paidAmount
+- PurchaseInvoice.remaining = PurchaseInvoice.totalAmount -
+  PurchaseInvoice.paidAmount
 
 ### VAT & Withholding Tax
 
@@ -93,37 +98,37 @@ Withholding Tax (ภาษีหัก ณ ที่จ่าย)
 
 ### ✅ Healthy Modules (Data Exists)
 
-| Module | Records | Status | Notes |
-|--------|---------|--------|-------|
-| Chart of Accounts | 74 | ✅ OK | Standard Thai accounts seeded |
-| Journal Entries | 100 | ✅ OK | Double-entry records |
-| Customers | 24 | ✅ OK | Master data exists |
-| Vendors | 10 | ✅ OK | Master data exists |
-| Invoices (AR) | 61 | ✅ OK | Sales invoices |
-| **Receipts (AR)** | **21** | **✅ FIXED** | **Generated from paid invoices** |
-| Credit Notes | 7 | ✅ OK | Sales adjustments |
-| Debit Notes | 13 | ✅ OK | Sales adjustments |
-| Purchase Invoices (AP) | 2 | ✅ OK | Vendor invoices |
-| VAT Records | 54 | ✅ OK | Tax tracking |
-| Products | 4 | ✅ OK | Inventory items |
-| Warehouses | 1 | ✅ OK | Single warehouse |
-| Company Settings | 1 | ✅ OK | Company configured |
-| Users | 4 | ✅ OK | Admin/test accounts |
+| Module                 | Records | Status       | Notes                            |
+| ---------------------- | ------- | ------------ | -------------------------------- |
+| Chart of Accounts      | 74      | ✅ OK        | Standard Thai accounts seeded    |
+| Journal Entries        | 100     | ✅ OK        | Double-entry records             |
+| Customers              | 24      | ✅ OK        | Master data exists               |
+| Vendors                | 10      | ✅ OK        | Master data exists               |
+| Invoices (AR)          | 61      | ✅ OK        | Sales invoices                   |
+| **Receipts (AR)**      | **21**  | **✅ FIXED** | **Generated from paid invoices** |
+| Credit Notes           | 7       | ✅ OK        | Sales adjustments                |
+| Debit Notes            | 13      | ✅ OK        | Sales adjustments                |
+| Purchase Invoices (AP) | 2       | ✅ OK        | Vendor invoices                  |
+| VAT Records            | 54      | ✅ OK        | Tax tracking                     |
+| Products               | 4       | ✅ OK        | Inventory items                  |
+| Warehouses             | 1       | ✅ OK        | Single warehouse                 |
+| Company Settings       | 1       | ✅ OK        | Company configured               |
+| Users                  | 4       | ✅ OK        | Admin/test accounts              |
 
 ### ❌ Modules Needing Data (Empty)
 
-| Module | Status | Action Required |
-|--------|--------|-----------------|
-| **Payments (AP)** | ❌ 0 records | **CRITICAL** - Create for purchase invoices |
-| **Quotations** | ❌ 0 records | Schema exists, need sample data |
-| **Withholding Tax** | ❌ 0 records | Need PND3/PND53 certificates |
-| **Stock** | ❌ 0 records | Need inventory transactions |
-| **Bank Accounts** | ❌ 0 records | Need bank setup |
-| **Cheques** | ❌ 0 records | Need cheque management |
-| **Fixed Assets** | ❌ 0 records | Need asset registry |
-| **Petty Cash Funds** | ❌ 0 records | Need fund setup |
-| **Employees** | ⚠️ 1 record | Need more employees |
-| **Payroll Runs** | ❌ 0 records | Need employees first |
+| Module               | Status       | Action Required                             |
+| -------------------- | ------------ | ------------------------------------------- |
+| **Payments (AP)**    | ❌ 0 records | **CRITICAL** - Create for purchase invoices |
+| **Quotations**       | ❌ 0 records | Schema exists, need sample data             |
+| **Withholding Tax**  | ❌ 0 records | Need PND3/PND53 certificates                |
+| **Stock**            | ❌ 0 records | Need inventory transactions                 |
+| **Bank Accounts**    | ❌ 0 records | Need bank setup                             |
+| **Cheques**          | ❌ 0 records | Need cheque management                      |
+| **Fixed Assets**     | ❌ 0 records | Need asset registry                         |
+| **Petty Cash Funds** | ❌ 0 records | Need fund setup                             |
+| **Employees**        | ⚠️ 1 record  | Need more employees                         |
+| **Payroll Runs**     | ❌ 0 records | Need employees first                        |
 
 ---
 
@@ -134,6 +139,7 @@ Withholding Tax (ภาษีหัก ณ ที่จ่าย)
 **Script:** `scripts/migrate-receipts.ts`
 
 **What was done:**
+
 - Analyzed 21 invoices with `paidAmount > 0`
 - Created 21 Receipt documents
 - Created 21 ReceiptAllocation records
@@ -141,6 +147,7 @@ Withholding Tax (ภาษีหัก ณ ที่จ่าย)
 - Linked receipts to invoices via allocations
 
 **Example Receipt Created:**
+
 ```
 Receipt No: RC202602-0020
 Date: Feb 2026
@@ -151,6 +158,7 @@ Status: POSTED
 ```
 
 **Files Created:**
+
 - `/Users/tong/Thai-acc/scripts/migrate-receipts.ts` - Migration script
 - 21 Receipt records in database
 - 21 ReceiptAllocation records in database
@@ -160,12 +168,14 @@ Status: POSTED
 **Script:** `scripts/audit-modules.ts`
 
 **What was done:**
+
 - Audited all 25 modules
 - Checked record counts
 - Identified data gaps
 - Prioritized fixes needed
 
 **Files Created:**
+
 - `/Users/tong/Thai-acc/scripts/audit-modules.ts` - Audit script
 
 ---
@@ -193,22 +203,22 @@ Status: POSTED
 ## 📊 Data Integrity Issues Found
 
 ### Issue 1: Paid Amount Without Receipts ✅ FIXED
-**Problem:** Invoices had `paidAmount` but no Receipt documents
-**Root Cause:** System allowed direct invoice payment without creating receipt
-**Solution:** Generated 21 Receipt documents with allocations
-**Status:** ✅ RESOLVED
+
+**Problem:** Invoices had `paidAmount` but no Receipt documents **Root Cause:**
+System allowed direct invoice payment without creating receipt **Solution:**
+Generated 21 Receipt documents with allocations **Status:** ✅ RESOLVED
 
 ### Issue 2: AP Payments Missing ❌ ACTION NEEDED
-**Problem:** 2 PurchaseInvoices but 0 Payment documents
-**Impact:** Can't track vendor payments
-**Action:** Create Payment documents for purchase invoices
+
+**Problem:** 2 PurchaseInvoices but 0 Payment documents **Impact:** Can't track
+vendor payments **Action:** Create Payment documents for purchase invoices
 **Priority:** HIGH
 
 ### Issue 3: WHT Records Missing ❌ ACTION NEEDED
-**Problem:** VAT exists but no Withholding Tax records
-**Impact:** Can't generate PND3/PND53 forms
-**Action:** Create WHT records when payments have withholding
-**Priority:** MEDIUM
+
+**Problem:** VAT exists but no Withholding Tax records **Impact:** Can't
+generate PND3/PND53 forms **Action:** Create WHT records when payments have
+withholding **Priority:** MEDIUM
 
 ---
 
@@ -217,7 +227,8 @@ Status: POSTED
 ### Immediate (Critical)
 
 1. **Create AP Payments** - Generate Payment documents for 2 purchase invoices
-2. **Review Receipt Dates** - Verify generated receipt dates match actual payment dates
+2. **Review Receipt Dates** - Verify generated receipt dates match actual
+   payment dates
 3. **Test Receipt Printing** - Ensure receipts can be printed for customers
 
 ### Short Term (High Priority)
@@ -238,7 +249,8 @@ Status: POSTED
 
 ## 📝 Scripts Created
 
-1. **`scripts/migrate-receipts.ts`** - Generates Receipt documents from paid invoices
+1. **`scripts/migrate-receipts.ts`** - Generates Receipt documents from paid
+   invoices
 2. **`scripts/audit-modules.ts`** - Comprehensive module audit tool
 
 ### Usage:
@@ -258,17 +270,20 @@ npx ts-node scripts/audit-modules.ts
 To verify the fixes:
 
 1. **Check Receipts in UI:**
+
    ```
    Navigate to: ใบเสร็จรับเงิน (Receipts)
    Expected: 21 records displayed
    ```
 
 2. **Verify Allocations:**
+
    ```sql
    SELECT COUNT(*) FROM ReceiptAllocation; -- Should be 21
    ```
 
 3. **Test Receipt-Invoice Link:**
+
    ```sql
    SELECT
      r.receiptNo,
@@ -328,7 +343,5 @@ To verify the fixes:
 
 ---
 
-**Report Generated:** 2026-03-19
-**System Version:** 1.0
-**Audited By:** Claude Code AI Assistant
-**Status:** ✅ Critical Issues Resolved
+**Report Generated:** 2026-03-19 **System Version:** 1.0 **Audited By:** Claude
+Code AI Assistant **Status:** ✅ Critical Issues Resolved

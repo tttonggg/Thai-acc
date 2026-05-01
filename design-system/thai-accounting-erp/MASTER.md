@@ -1,13 +1,12 @@
 # Design System Master File
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
-> If that file exists, its rules **override** this Master file.
-> If not, strictly follow the rules below.
+> **LOGIC:** When building a specific page, first check
+> `design-system/pages/[page-name].md`. If that file exists, its rules
+> **override** this Master file. If not, strictly follow the rules below.
 
 ---
 
-**Project:** Thai Accounting ERP
-**Generated:** 2026-03-20 07:10:28
+**Project:** Thai Accounting ERP **Generated:** 2026-03-20 07:10:28
 **Category:** Fintech/Crypto
 
 ---
@@ -16,13 +15,13 @@
 
 ### Color Palette
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#F59E0B` | `--color-primary` |
-| Secondary | `#FBBF24` | `--color-secondary` |
-| CTA/Accent | `#8B5CF6` | `--color-cta` |
+| Role       | Hex       | CSS Variable         |
+| ---------- | --------- | -------------------- |
+| Primary    | `#F59E0B` | `--color-primary`    |
+| Secondary  | `#FBBF24` | `--color-secondary`  |
+| CTA/Accent | `#8B5CF6` | `--color-cta`        |
 | Background | `#0F172A` | `--color-background` |
-| Text | `#F8FAFC` | `--color-text` |
+| Text       | `#F8FAFC` | `--color-text`       |
 
 **Color Notes:** Gold trust + purple tech
 
@@ -31,32 +30,34 @@
 - **Heading Font:** IBM Plex Sans
 - **Body Font:** IBM Plex Sans
 - **Mood:** financial, trustworthy, professional, corporate, banking, serious
-- **Google Fonts:** [IBM Plex Sans + IBM Plex Sans](https://fonts.google.com/share?selection.family=IBM+Plex+Sans:wght@300;400;500;600;700)
+- **Google Fonts:**
+  [IBM Plex Sans + IBM Plex Sans](https://fonts.google.com/share?selection.family=IBM+Plex+Sans:wght@300;400;500;600;700)
 
 **CSS Import:**
+
 ```css
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 ```
 
 ### Spacing Variables
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
+| Token         | Value             | Usage                     |
+| ------------- | ----------------- | ------------------------- |
+| `--space-xs`  | `4px` / `0.25rem` | Tight gaps                |
+| `--space-sm`  | `8px` / `0.5rem`  | Icon gaps, inline spacing |
+| `--space-md`  | `16px` / `1rem`   | Standard padding          |
+| `--space-lg`  | `24px` / `1.5rem` | Section padding           |
+| `--space-xl`  | `32px` / `2rem`   | Large gaps                |
+| `--space-2xl` | `48px` / `3rem`   | Section margins           |
+| `--space-3xl` | `64px` / `4rem`   | Hero padding              |
 
 ### Shadow Depths
 
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
+| Level         | Value                          | Usage                       |
+| ------------- | ------------------------------ | --------------------------- |
+| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)`   | Subtle lift                 |
+| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)`    | Cards, buttons              |
+| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)`  | Modals, dropdowns           |
 | `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
 
 ---
@@ -68,7 +69,7 @@
 ```css
 /* Primary Button */
 .btn-primary {
-  background: #8B5CF6;
+  background: #8b5cf6;
   color: white;
   padding: 12px 24px;
   border-radius: 8px;
@@ -85,8 +86,8 @@
 /* Secondary Button */
 .btn-secondary {
   background: transparent;
-  color: #F59E0B;
-  border: 2px solid #F59E0B;
+  color: #f59e0b;
+  border: 2px solid #f59e0b;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -99,7 +100,7 @@
 
 ```css
 .card {
-  background: #0F172A;
+  background: #0f172a;
   border-radius: 12px;
   padding: 24px;
   box-shadow: var(--shadow-md);
@@ -118,16 +119,16 @@
 ```css
 .input {
   padding: 12px 16px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 200ms ease;
 }
 
 .input:focus {
-  border-color: #F59E0B;
+  border-color: #f59e0b;
   outline: none;
-  box-shadow: 0 0 0 3px #F59E0B20;
+  box-shadow: 0 0 0 3px #f59e0b20;
 }
 ```
 
@@ -155,19 +156,24 @@
 
 **Style:** Dark Mode (OLED)
 
-**Keywords:** Dark theme, low light, high contrast, deep black, midnight blue, eye-friendly, OLED, night mode, power efficient
+**Keywords:** Dark theme, low light, high contrast, deep black, midnight blue,
+eye-friendly, OLED, night mode, power efficient
 
-**Best For:** Night-mode apps, coding platforms, entertainment, eye-strain prevention, OLED devices, low-light
+**Best For:** Night-mode apps, coding platforms, entertainment, eye-strain
+prevention, OLED devices, low-light
 
-**Key Effects:** Minimal glow (text-shadow: 0 0 10px), dark-to-light transitions, low white emission, high readability, visible focus
+**Key Effects:** Minimal glow (text-shadow: 0 0 10px), dark-to-light
+transitions, low white emission, high readability, visible focus
 
 ### Page Pattern
 
 **Pattern Name:** Enterprise Gateway
 
-- **Conversion Strategy:**  logo carousel,  tab switching for industries, Path selection (I am a...). Mega menu navigation. Trust signals prominent.
+- **Conversion Strategy:** logo carousel, tab switching for industries, Path
+  selection (I am a...). Mega menu navigation. Trust signals prominent.
 - **CTA Placement:** Contact Sales (Primary) + Login (Secondary)
-- **Section Order:** 1. Hero (Video/Mission), 2. Solutions by Industry, 3. Solutions by Role, 4. Client Logos, 5. Contact Sales
+- **Section Order:** 1. Hero (Video/Mission), 2. Solutions by Industry, 3.
+  Solutions by Role, 4. Client Logos, 5. Contact Sales
 
 ---
 
@@ -179,7 +185,8 @@
 ### Additional Forbidden Patterns
 
 - ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
+- ❌ **Missing cursor:pointer** — All clickable elements must have
+  cursor:pointer
 - ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
 - ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
 - ❌ **Instant state changes** — Always use transitions (150-300ms)

@@ -1,20 +1,23 @@
 # 🧪 Manual Web UI Testing Plan - Currency Fixes Verification
 
-**Date:** 2026-04-15
-**Purpose:** Verify all currency unit fixes work correctly in real user workflows
-**Criticality:** 🔴 **VERY IMPORTANT** - Production deployment depends on this
+**Date:** 2026-04-15 **Purpose:** Verify all currency unit fixes work correctly
+in real user workflows **Criticality:** 🔴 **VERY IMPORTANT** - Production
+deployment depends on this
 
 ---
 
 ## 🎯 Objective
 
-Test that **all 54 currency bug fixes** work correctly in real business scenarios by:
+Test that **all 54 currency bug fixes** work correctly in real business
+scenarios by:
+
 1. Resetting database to clean state
 2. Manually entering data through web UI forms
 3. Verifying amounts display correctly at each step
 4. Testing end-to-end workflows (Create → View → Report)
 
 **Why Manual Testing?**
+
 - Database has mixed dummy data (old bugs + new fixes)
 - Need to verify **real user workflows** work correctly
 - Automation can't catch UX issues (e.g., "฿1,000,000 looks wrong")
@@ -25,9 +28,11 @@ Test that **all 54 currency bug fixes** work correctly in real business scenario
 ## 📋 Test Scenarios
 
 ### Scenario 1: Invoice Workflow (ภาษีขาย)
+
 **Purpose:** Verify invoice creation and VAT calculation
 
 **Steps:**
+
 1. **Create Customer**
    - Name: "บริษัท ทดสอบ จำกัด"
    - Tax ID: "1234567890123"
@@ -74,9 +79,11 @@ Test that **all 54 currency bug fixes** work correctly in real business scenario
 ---
 
 ### Scenario 2: Receipt Workflow (รับเงิน)
+
 **Purpose:** Verify receipt allocation and WHT calculation
 
 **Steps:**
+
 1. **Create Receipt for Invoice** (฿1,320.98 from Scenario 1)
    - Customer: "บริษัท ทดสอบ จำกัด"
    - Amount Received: ฿1,500.00
@@ -100,9 +107,11 @@ Test that **all 54 currency bug fixes** work correctly in real business scenario
 ---
 
 ### Scenario 3: Payment Workflow (จ่ายเหนื่อย)
+
 **Purpose:** Verify payment and WHT category guidance
 
 **Steps:**
+
 1. **Create Vendor**
    - Name: "บริษัท ผู้ขาย จำกัด"
    - Tax ID: "9876543210987"
@@ -129,9 +138,11 @@ Test that **all 54 currency bug fixes** work correctly in real business scenario
 ---
 
 ### Scenario 4: Purchase Order Workflow (ใบสั่งซื้อ)
+
 **Purpose:** Verify PO calculations (Float → Int migration)
 
 **Steps:**
+
 1. **Create Purchase Request**
    - Item: "กระดาษ A4"
    - Quantity: 100
@@ -153,9 +164,11 @@ Test that **all 54 currency bug fixes** work correctly in real business scenario
 ---
 
 ### Scenario 5: Quotation Workflow (ใบเสนอราคา)
+
 **Purpose:** Verify quotation calculations
 
 **Steps:**
+
 1. **Create Quotation**
    - Customer: "บริษัท ลูกค้า จำกัด"
    - Items:
@@ -175,9 +188,11 @@ Test that **all 54 currency bug fixes** work correctly in real business scenario
 ---
 
 ### Scenario 6: Report Verification
+
 **Purpose:** Verify reports show correct amounts (not 100x bug)
 
 **Steps:**
+
 1. **VAT Report** (รายงานภาษีมูลค่าเพิ่ม)
    - Run report for current month
    - ✅ Should show: ฿10,700.00 (NOT ฿1,070,000.00)
@@ -197,9 +212,11 @@ Test that **all 54 currency bug fixes** work correctly in real business scenario
 ---
 
 ### Scenario 7: Dashboard Verification
+
 **Purpose:** Verify dashboard aging breakdowns
 
 **Steps:**
+
 1. **Login as Admin**
    - Go to Dashboard
    - ✅ AR Total shows: ฿10,700.00 (NOT 0.00 or 100x)
@@ -247,23 +264,23 @@ Test that **all 54 currency bug fixes** work correctly in real business scenario
 
 ### Test Price Points (Cover All Ranges)
 
-| Test | Amount | VAT (7%) | WHT (3%) | Net + VAT |
-|------|--------|---------|----------|-----------|
-| Small | ฿100.50 | ฿7.04 | ฿3.02 | ฿107.54 |
-| Medium | ฿1,234.56 | ฿86.42 | ฿37.04 | ฿1,320.98 |
-| Large | ฿10,000.00 | ฿700.00 | ฿300.00 | ฿10,700.00 |
+| Test       | Amount      | VAT (7%)   | WHT (3%)   | Net + VAT     |
+| ---------- | ----------- | ---------- | ---------- | ------------- |
+| Small      | ฿100.50     | ฿7.04      | ฿3.02      | ฿107.54       |
+| Medium     | ฿1,234.56   | ฿86.42     | ฿37.04     | ฿1,320.98     |
+| Large      | ฿10,000.00  | ฿700.00    | ฿300.00    | ฿10,700.00    |
 | Very Large | ฿999,999.99 | ฿69,999.99 | ฿30,000.00 | ฿1,069,999.98 |
 
 ### WHT Categories to Test
 
-| Category | Rate | Test Amount | Expected WHT |
-|----------|------|-------------|--------------|
-| ค่าบริการ (Service) | 3% | ฿10,000 | ฿300 |
-| ค่าเช่า (Rent) | 5% | ฿10,000 | ฿500 |
-| ค่าบริการวิชาชีพ (Professional) | 3% | ฿50,000 | ฿1,500 |
-| ค่าจ้างทำของ (Contract) | 1% | ฿100,000 | ฿1,000 |
-| ค่าโฆษณา (Advertising) | 2% | ฿20,000 | ฿400 |
-| ไม่หักภาษี (No WHT) | 0% | ฿5,000 | ฿0 |
+| Category                        | Rate | Test Amount | Expected WHT |
+| ------------------------------- | ---- | ----------- | ------------ |
+| ค่าบริการ (Service)             | 3%   | ฿10,000     | ฿300         |
+| ค่าเช่า (Rent)                  | 5%   | ฿10,000     | ฿500         |
+| ค่าบริการวิชาชีพ (Professional) | 3%   | ฿50,000     | ฿1,500       |
+| ค่าจ้างทำของ (Contract)         | 1%   | ฿100,000    | ฿1,000       |
+| ค่าโฆษณา (Advertising)          | 2%   | ฿20,000     | ฿400         |
+| ไม่หักภาษี (No WHT)             | 0%   | ฿5,000      | ฿0           |
 
 ---
 
@@ -293,6 +310,7 @@ npm run dev
 ### Step 3: Verification Checklist
 
 After each scenario, verify:
+
 - [ ] Input form accepts decimals correctly
 - [ ] Database stores Int (Satang)
 - [ ] Display shows Baht with 2 decimals
@@ -307,19 +325,21 @@ After each scenario, verify:
 
 ### Scenario X: [Name]
 
-**Test Date:** 2026-04-15
-**Tester:** [Name]
+**Test Date:** 2026-04-15 **Tester:** [Name]
 
 **Steps Executed:**
+
 1. [ ] Step 1 - Result: ✅/❌
 2. [ ] Step 2 - Result: ✅/❌
 3. [ ] Step 3 - Result: ✅/❌
 
 **Issues Found:**
+
 - [ ] None
 - [ ] Issue 1: [Description]
 
 **Screenshots:**
+
 - [ ] Input form
 - [ ] Database storage
 - [ ] Display
@@ -332,6 +352,7 @@ After each scenario, verify:
 ## 🎯 Success Criteria
 
 **Overall Test Passes If:**
+
 - ✅ All 7 scenarios complete without critical bugs
 - ✅ No 100x display errors found
 - ✅ No 0.00 display errors found
@@ -340,6 +361,7 @@ After each scenario, verify:
 - ✅ All reports show correct amounts
 
 **Can Deploy to Production If:**
+
 - ✅ 90%+ test cases pass
 - ✅ No critical bugs
 - ✅ Minor issues documented

@@ -8,7 +8,8 @@
 
 ## 📋 Phase 3 Overview
 
-Phase 3 focuses on advanced features that complete the Thai Accounting ERP system:
+Phase 3 focuses on advanced features that complete the Thai Accounting ERP
+system:
 
 1. **Stock Take (Physical Inventory)** - Physical count and variance management
 2. **Enhanced Data Management** - Backup/restore UI, data export/import
@@ -25,6 +26,7 @@ Phase 3 focuses on advanced features that complete the Thai Accounting ERP syste
 ### 1. Stock Take (Physical Inventory)
 
 #### Features to Implement:
+
 - Stock take list creation
 - Physical count entry
 - Variance calculation (Expected vs Actual)
@@ -33,6 +35,7 @@ Phase 3 focuses on advanced features that complete the Thai Accounting ERP syste
 - Stock take history and reports
 
 #### Database Models Needed:
+
 ```prisma
 model StockTake {
   id              String   @id @default(cuid())
@@ -68,7 +71,7 @@ model StockTakeLine {
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
+
   @@index([stockTakeId])
 }
 
@@ -83,6 +86,7 @@ enum StockTakeStatus {
 ```
 
 #### API Endpoints:
+
 - `POST /api/stock-takes` - Create stock take
 - `GET /api/stock-takes` - List stock takes
 - `GET /api/stock-takes/[id]` - Get stock take details
@@ -92,6 +96,7 @@ enum StockTakeStatus {
 - `DELETE /api/stock-takes/[id]` - Cancel stock take
 
 #### UI Components:
+
 - `src/components/inventory/stock-take-page.tsx` - Main stock take page
 - `src/components/inventory/stock-take-create-dialog.tsx` - Create dialog
 - `src/components/inventory/stock-take-line-editor.tsx` - Line item editor
@@ -103,12 +108,14 @@ enum StockTakeStatus {
 ### 2. Enhanced Data Management
 
 #### Features to Implement:
+
 - **Backup/Restore UI**: Visual interface for database backups
 - **Data Export**: Export customers, vendors, products, chart of accounts
 - **Data Import**: Import from CSV/Excel with validation
 - **System Health Dashboard**: Database size, record counts, performance metrics
 
 #### API Endpoints:
+
 - `POST /api/admin/backup` - Create database backup
 - `GET /api/admin/backups` - List backups
 - `POST /api/admin/restore` - Restore from backup
@@ -117,6 +124,7 @@ enum StockTakeStatus {
 - `GET /api/admin/health` - System health status
 
 #### UI Components:
+
 - `src/components/admin/backup-restore-page.tsx`
 - `src/components/admin/data-export-page.tsx`
 - `src/components/admin/data-import-page.tsx`
@@ -127,6 +135,7 @@ enum StockTakeStatus {
 ### 3. Advanced Reporting
 
 #### Features to Implement:
+
 - **Custom Report Builder**: Drag-and-drop report designer
 - **Scheduled Reports**: Auto-generate reports on schedule
 - **Email Reports**: Send reports via email
@@ -134,6 +143,7 @@ enum StockTakeStatus {
 - **Report Templates**: Save and reuse report configurations
 
 #### Report Types:
+
 - Custom Trial Balance (date range, account filter)
 - Custom Balance Sheet (comparative, multi-period)
 - Custom P&L (comparative, departmental)
@@ -143,6 +153,7 @@ enum StockTakeStatus {
 - Purchase Analysis (by vendor, by category)
 
 #### API Endpoints:
+
 - `POST /api/reports/custom` - Generate custom report
 - `GET /api/reports/scheduled` - List scheduled reports
 - `POST /api/reports/schedule` - Create scheduled report
@@ -151,6 +162,7 @@ enum StockTakeStatus {
 - `POST /api/reports/templates` - Save report template
 
 #### UI Components:
+
 - `src/components/reports/custom-report-builder.tsx`
 - `src/components/reports/scheduled-reports-page.tsx`
 - `src/components/reports/report-email-dialog.tsx`
@@ -161,6 +173,7 @@ enum StockTakeStatus {
 ### 4. System Monitoring & Dashboard
 
 #### Features to Implement:
+
 - **Performance Metrics**: API response times, query performance
 - **Activity Log**: User actions, system events
 - **Error Tracking**: Failed operations, exceptions
@@ -168,6 +181,7 @@ enum StockTakeStatus {
 - **Backup Status**: Last backup, backup size, backup schedule
 
 #### UI Components:
+
 - `src/components/admin/system-dashboard.tsx`
 - `src/components/admin/activity-log.tsx`
 - `src/components/admin/performance-metrics.tsx`
@@ -177,17 +191,20 @@ enum StockTakeStatus {
 ## 🚀 Implementation Order
 
 ### Week 1: Stock Take System
+
 - Day 1-2: Database models, API endpoints, GL posting
 - Day 3: UI components and workflows
 - Day 4: Testing and validation
 
 ### Week 2: Data Management & Monitoring
+
 - Day 1: Backup/restore UI
 - Day 2: Data export/import
 - Day 3: System health dashboard
 - Day 4: Activity logging
 
 ### Week 3: Advanced Reporting
+
 - Day 1-2: Custom report builder
 - Day 3: Scheduled reports
 - Day 4: Email reports and templates
@@ -197,6 +214,7 @@ enum StockTakeStatus {
 ## ✅ Acceptance Criteria
 
 Each feature must:
+
 1. ✅ Pass all E2E smoke tests
 2. ✅ Work across all user roles (ADMIN, ACCOUNTANT, USER, VIEWER)
 3. ✅ Post correct journal entries to GL

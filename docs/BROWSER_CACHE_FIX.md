@@ -2,24 +2,29 @@
 
 ## ⚠️ Issue: Changes Not Visible
 
-If you're still seeing small form fields even after we fixed them, your browser has cached the old JavaScript.
+If you're still seeing small form fields even after we fixed them, your browser
+has cached the old JavaScript.
 
 ---
 
 ## 🔧 Solution: Hard Refresh Your Browser
 
 ### Chrome/Edge (Windows/Linux):
+
 1. Press **Ctrl + Shift + R** OR
 2. Press **Ctrl + F5**
 
 ### Chrome/Edge (Mac):
+
 1. Press **Cmd + Shift + R**
 
 ### Firefox (Windows/Linux/Mac):
+
 1. Press **Ctrl + Shift + R** (Windows/Linux) OR
 2. Press **Cmd + Shift + R** (Mac)
 
 ### Safari (Mac):
+
 1. Press **Cmd + Option + E** to empty cache
 2. Then press **Cmd + R** to refresh
 
@@ -28,12 +33,14 @@ If you're still seeing small form fields even after we fixed them, your browser 
 ## 🧹 Alternative: Clear Site Data
 
 ### Chrome/Edge:
+
 1. Press **F12** to open DevTools
 2. Go to **Application** tab
 3. Click **Clear site data** (or **Clear storage** → **Clear site data**)
 4. Refresh the page with **F5**
 
 ### Firefox:
+
 1. Press **F12** to open DevTools
 2. Right-click the refresh button
 3. Select **"Empty Cache and Hard Reload"**
@@ -43,11 +50,13 @@ If you're still seeing small form fields even after we fixed them, your browser 
 ## ✅ What You Should See After Hard Refresh
 
 ### Form Fields Should Be:
+
 - **Height**: 44px (taller than before)
 - **Font size**: 16px (more readable)
 - **Easier to click** on all devices
 
 ### Before (OLD - 36px height):
+
 ```
 ┌─────────────────────┐
 │ Vendor Dropdown     │ ← Too small!
@@ -55,6 +64,7 @@ If you're still seeing small form fields even after we fixed them, your browser 
 ```
 
 ### After (NEW - 44px height):
+
 ```
 ┌─────────────────────┐
 │                     │
@@ -83,6 +93,7 @@ If you see these values, the fix is working! ✅
 ## 🚨 If Still Not Working
 
 ### Step 1: Check Dev Server is Running
+
 ```bash
 # Check if dev server is running
 ps aux | grep "next dev"
@@ -92,12 +103,14 @@ bun run dev
 ```
 
 ### Step 2: Check for TypeScript Errors
+
 ```bash
 # Look for red errors in terminal
 bun run dev
 ```
 
 ### Step 3: Force Rebuild
+
 ```bash
 # Stop dev server (Ctrl+C)
 # Delete .next cache
@@ -108,6 +121,7 @@ bun run dev
 ```
 
 ### Step 4: Try Incognito/Private Mode
+
 - Open **Incognito window** (Chrome) or **Private window** (Firefox/Safari)
 - Go to `http://localhost:3000/purchases`
 - If fields are correct in incognito, it's definitely a cache issue
@@ -121,6 +135,7 @@ bun run dev
 **File**: `/src/components/purchases/purchase-form.tsx`
 
 **Before**:
+
 ```typescript
 <Input
   placeholder="เลือกผู้ขาย"
@@ -128,6 +143,7 @@ bun run dev
 ```
 
 **After**:
+
 ```typescript
 <Input
   placeholder="เลือกผู้ขาย"
@@ -140,6 +156,7 @@ The `!h-11` uses `!important` to override the base component's `h-9` class.
 ### Why `!important`?
 
 The shadcn/ui `Input` component has:
+
 ```typescript
 className={cn(
   "flex h-9 w-full ...",  // ← h-9 is hardcoded here
@@ -154,9 +171,9 @@ Using `!h-11` (with `!important`) forces our style to take precedence.
 
 ## ✨ Status
 
-**Fix Applied**: ✅ All purchase form fields now use `!h-11 text-base`
-**Files Modified**: 2 files (~55 fields updated)
-**Requires**: Browser hard refresh to see changes
+**Fix Applied**: ✅ All purchase form fields now use `!h-11 text-base` **Files
+Modified**: 2 files (~55 fields updated) **Requires**: Browser hard refresh to
+see changes
 
 ---
 

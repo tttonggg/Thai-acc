@@ -1,17 +1,19 @@
 # Thai Accounting ERP - UI Rework Implementation Plan
 
-**Generated**: 2026-03-13
-**Backup Commit**: `7fa11bf`
-**Database Backup**: `backups/dev.db.backup-20260313-113716`
-**Archive Backup**: `backups/thai-acc-backup-20260313-113717.tar.gz`
+**Generated**: 2026-03-13 **Backup Commit**: `7fa11bf` **Database Backup**:
+`backups/dev.db.backup-20260313-113716` **Archive Backup**:
+`backups/thai-acc-backup-20260313-113717.tar.gz`
 
 ---
 
 ## Executive Summary
 
-The Thai Accounting ERP system has **excellent backend coverage** (85% of APIs connected) but **critical UI gaps** in basic CRUD operations, especially **Edit/Delete functionality** across most modules.
+The Thai Accounting ERP system has **excellent backend coverage** (85% of APIs
+connected) but **critical UI gaps** in basic CRUD operations, especially
+**Edit/Delete functionality** across most modules.
 
 **Current Status**:
+
 - ✅ Backend APIs: 85% complete and functional
 - ⚠️ UI Components: 60% complete with many broken buttons
 - ❌ Critical Issue: Most Edit/Delete buttons don't work
@@ -24,39 +26,39 @@ The Thai Accounting ERP system has **excellent backend coverage** (85% of APIs c
 
 **Components with Non-Functional Edit/Delete Buttons**:
 
-| Component | Edit Button | Delete Button | Missing Features |
-|-----------|-------------|---------------|------------------|
-| Chart of Accounts | ❌ No handler | ⚠️ May not work | Add child account |
-| Customer List | ⚠️ No dialog | ⚠️ No dialog | Complete edit workflow |
-| Vendor List | ❌ No handler | ❌ Missing | Complete edit workflow |
-| Assets | ❌ Missing | ❌ Missing | Status management |
-| Banking | ❌ Missing | ❌ Missing | Reconciliation UI |
-| Payroll | ⚠️ No dialog | ❌ Missing | Status management |
-| Petty Cash | ❌ Missing | ❌ Missing | Edit funds/vouchers |
-| Settings | ⚠️ No save | ❌ Missing | Configuration save |
-| Inventory | ⚠️ Limited | ❌ Missing | Stock adjustments |
+| Component         | Edit Button   | Delete Button   | Missing Features       |
+| ----------------- | ------------- | --------------- | ---------------------- |
+| Chart of Accounts | ❌ No handler | ⚠️ May not work | Add child account      |
+| Customer List     | ⚠️ No dialog  | ⚠️ No dialog    | Complete edit workflow |
+| Vendor List       | ❌ No handler | ❌ Missing      | Complete edit workflow |
+| Assets            | ❌ Missing    | ❌ Missing      | Status management      |
+| Banking           | ❌ Missing    | ❌ Missing      | Reconciliation UI      |
+| Payroll           | ⚠️ No dialog  | ❌ Missing      | Status management      |
+| Petty Cash        | ❌ Missing    | ❌ Missing      | Edit funds/vouchers    |
+| Settings          | ⚠️ No save    | ❌ Missing      | Configuration save     |
+| Inventory         | ⚠️ Limited    | ❌ Missing      | Stock adjustments      |
 
 ### 2. Missing UI Components (Priority: HIGH)
 
-| API Feature | UI Status | Impact |
-|-------------|-----------|--------|
-| Purchase Invoices | ❌ No UI | Can't manage vendor purchases |
-| Products | ❌ No catalog UI | Can't manage product catalog |
-| Credit Notes | ❌ No UI | Can't issue customer credits |
-| Debit Notes | ❌ No UI | Can't issue vendor debits |
-| Receipts | ❌ No UI | Can't record customer payments |
-| Payments | ❌ No UI | Can't record vendor payments |
-| Stock Take | ❌ No UI | Can't do physical inventory |
-| Stock Transfer | ⚠️ API only | No transfer interface |
-| Backup/Restore | ❌ No UI | Can't backup/restore data |
+| API Feature       | UI Status        | Impact                         |
+| ----------------- | ---------------- | ------------------------------ |
+| Purchase Invoices | ❌ No UI         | Can't manage vendor purchases  |
+| Products          | ❌ No catalog UI | Can't manage product catalog   |
+| Credit Notes      | ❌ No UI         | Can't issue customer credits   |
+| Debit Notes       | ❌ No UI         | Can't issue vendor debits      |
+| Receipts          | ❌ No UI         | Can't record customer payments |
+| Payments          | ❌ No UI         | Can't record vendor payments   |
+| Stock Take        | ❌ No UI         | Can't do physical inventory    |
+| Stock Transfer    | ⚠️ API only      | No transfer interface          |
+| Backup/Restore    | ❌ No UI         | Can't backup/restore data      |
 
 ### 3. Database Models Status
 
-| Status | Count | Models |
-|--------|-------|--------|
-| ✅ Fully Implemented | 23 | Customer, Vendor, Invoice, Journal, Asset, etc. |
-| ⚠️ Partially Implemented | 12 | Product, PurchaseInvoice, Payment, Receipt, etc. |
-| ❌ Not Implemented | 8 | CreditNote, DebitNote, StockTake, etc. |
+| Status                   | Count | Models                                           |
+| ------------------------ | ----- | ------------------------------------------------ |
+| ✅ Fully Implemented     | 23    | Customer, Vendor, Invoice, Journal, Asset, etc.  |
+| ⚠️ Partially Implemented | 12    | Product, PurchaseInvoice, Payment, Receipt, etc. |
+| ❌ Not Implemented       | 8     | CreditNote, DebitNote, StockTake, etc.           |
 
 ---
 
@@ -115,8 +117,7 @@ The Thai Accounting ERP system has **excellent backend coverage** (85% of APIs c
    - Add warehouse edit/delete
    - Complete stock transfer workflow
 
-**Estimated Effort**: 3-4 days
-**Files to Create**: 8-10 dialog components
+**Estimated Effort**: 3-4 days **Files to Create**: 8-10 dialog components
 **Files to Modify**: 9 existing components
 
 ---
@@ -157,9 +158,8 @@ The Thai Accounting ERP system has **excellent backend coverage** (85% of APIs c
    - `src/components/debit-notes/debit-note-list.tsx`
    - `src/components/debit-notes/debit-note-form.tsx`
 
-**Estimated Effort**: 4-5 days
-**Files to Create**: 10-12 new components
-**APIs to Connect**: 5 existing APIs
+**Estimated Effort**: 4-5 days **Files to Create**: 10-12 new components **APIs
+to Connect**: 5 existing APIs
 
 ---
 
@@ -331,16 +331,19 @@ export function AccountList() {
 ## Implementation Order
 
 ### Week 1: Critical Fixes (Phase 1)
+
 - Day 1-2: Chart of Accounts, Customers, Vendors
 - Day 3-4: Assets, Banking, Payroll
 - Day 5: Petty Cash, Settings, Inventory
 
 ### Week 2: Core Missing UI (Phase 2)
+
 - Day 1-2: Purchase Invoices, Products
 - Day 3-4: Receipts, Payments
 - Day 5: Credit/Debit Notes
 
 ### Week 3: Advanced Features (Phase 3)
+
 - Day 1-2: Stock Take, Transfer
 - Day 3: Backup/Restore
 - Day 4-5: Testing and refinement
@@ -350,16 +353,19 @@ export function AccountList() {
 ## Testing Strategy
 
 ### Unit Tests
+
 - Test all dialog components
 - Test API integration
 - Test form validation
 
 ### E2E Tests
+
 - Test all CRUD operations
 - Test workflows (invoice → receipt → payment)
 - Test error handling
 
 ### Manual Testing
+
 - Test with real data
 - Test edge cases
 - User acceptance testing
@@ -368,30 +374,29 @@ export function AccountList() {
 
 ## Success Criteria
 
-✅ All Edit/Delete buttons functional
-✅ All CRUD operations connected to APIs
-✅ All essential workflows complete
-✅ Error handling implemented
-✅ Loading states shown
-✅ Toast notifications for actions
-✅ Form validation working
-✅ E2E tests passing
+✅ All Edit/Delete buttons functional ✅ All CRUD operations connected to APIs
+✅ All essential workflows complete ✅ Error handling implemented ✅ Loading
+states shown ✅ Toast notifications for actions ✅ Form validation working ✅
+E2E tests passing
 
 ---
 
 ## Risk Management
 
 ### Backup Plan
+
 - Git backup already created (commit 7fa11bf)
 - Database backup available
 - Can rollback at any time
 
 ### Testing Safety
+
 - Use development database
 - Test each component before merging
 - Keep broken components until replacements ready
 
 ### Deployment Safety
+
 - Test in staging first
 - Gradual rollout
 - Monitor for issues
@@ -407,4 +412,5 @@ export function AccountList() {
 
 ---
 
-**Ready to proceed?** Please confirm and I'll begin implementation starting with Phase 1: Critical Edit/Delete Fixes.
+**Ready to proceed?** Please confirm and I'll begin implementation starting with
+Phase 1: Critical Edit/Delete Fixes.

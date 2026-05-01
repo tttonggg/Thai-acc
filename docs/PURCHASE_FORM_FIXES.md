@@ -4,58 +4,66 @@
 
 ### Issue 1: Wrong Dialog Title - "Create New Tax Invoice" Instead of "Create New Purchase Invoice"
 
-**Problem**:
-When clicking "สร้างใบซื้อใหม่" (Create New Purchase Invoice), the dialog showed:
+**Problem**: When clicking "สร้างใบซื้อใหม่" (Create New Purchase Invoice), the
+dialog showed:
+
 ```
 สร้างใบกำกับภาษีใหม่
 ```
+
 (Create NEW TAX INVOICE) - **WRONG!**
 
 This was confusing because it's the PURCHASE module, not the Sales module.
 
-**Root Cause**:
-The `purchaseTypeLabels` in both `purchase-form.tsx` and `purchase-edit-dialog.tsx` used the same labels as sales invoices:
+**Root Cause**: The `purchaseTypeLabels` in both `purchase-form.tsx` and
+`purchase-edit-dialog.tsx` used the same labels as sales invoices:
+
 ```typescript
 const purchaseTypeLabels: Record<string, string> = {
-  TAX_INVOICE: 'ใบกำกับภาษี',  // ❌ Same as sales - confusing!
+  TAX_INVOICE: 'ใบกำกับภาษี', // ❌ Same as sales - confusing!
   RECEIPT: 'ใบเสร็จรับเงิน',
   DELIVERY_NOTE: 'ใบส่งของ',
-}
+};
 ```
 
-**Solution**:
-Updated labels to be purchase-specific with "ซื้อ" (Purchase) suffix:
+**Solution**: Updated labels to be purchase-specific with "ซื้อ" (Purchase)
+suffix:
+
 ```typescript
 const purchaseTypeLabels: Record<string, string> = {
-  TAX_INVOICE: 'ใบซื้อ/ใบกำกับภาษีซื้อ',  // ✅ Purchase Tax Invoice
-  RECEIPT: 'ใบเสร็จรับเงินซื้อ',           // ✅ Purchase Receipt
-  DELIVERY_NOTE: 'ใบส่งของซื้อ',              // ✅ Purchase Delivery Note
-}
+  TAX_INVOICE: 'ใบซื้อ/ใบกำกับภาษีซื้อ', // ✅ Purchase Tax Invoice
+  RECEIPT: 'ใบเสร็จรับเงินซื้อ', // ✅ Purchase Receipt
+  DELIVERY_NOTE: 'ใบส่งของซื้อ', // ✅ Purchase Delivery Note
+};
 ```
 
 **Now the dialog shows**:
+
 ```
 สร้างใบซื้อ/ใบกำกับภาษีซื้อใหม่
 ```
+
 (CREATE NEW PURCHASE INVOICE / PURCHASE TAX INVOICE) - **CORRECT!**
 
 ---
 
 ### Issue 2: Dropdowns and Text Fields Too Small to Read
 
-**Problem**:
-Form fields (dropdowns, inputs) were rendered with default sizing, making them difficult to read and interact with.
+**Problem**: Form fields (dropdowns, inputs) were rendered with default sizing,
+making them difficult to read and interact with.
 
-**Solution**:
-Added explicit sizing classes to ALL form fields:
+**Solution**: Added explicit sizing classes to ALL form fields:
+
 - **Height**: `h-11` (44px - comfortable touch target)
 - **Font Size**: `text-base` (16px - readable)
 
 **Files Modified**:
+
 1. `/src/components/purchases/purchase-form.tsx`
 2. `/src/components/purchases/purchase-edit-dialog.tsx`
 
 **Fields Updated**:
+
 - Vendor dropdown (SelectTrigger)
 - Date inputs (invoiceDate, dueDate)
 - Text inputs (vendorInvoiceNo, reference, poNumber)
@@ -74,6 +82,7 @@ Added explicit sizing classes to ALL form fields:
 - Notes inputs (notes, internalNotes)
 
 **Example Before**:
+
 ```typescript
 <Input
   id="vendorInvoiceNo"
@@ -84,6 +93,7 @@ Added explicit sizing classes to ALL form fields:
 ```
 
 **Example After**:
+
 ```typescript
 <Input
   id="vendorInvoiceNo"
@@ -113,12 +123,17 @@ Added explicit sizing classes to ALL form fields:
 ## 🎯 What You Should See Now
 
 ### ✅ Correct Dialog Title
-When you click "สร้างใบซื้อใหม่" (Create New Purchase Invoice), the dialog now shows:
+
+When you click "สร้างใบซื้อใหม่" (Create New Purchase Invoice), the dialog now
+shows:
+
 - **Title**: "สร้างใบซื้อ/ใบกำกับภาษีซื้อใหม่"
 - **Clear distinction**: No longer confused with sales invoices
 
 ### ✅ Readable Form Fields
+
 All form fields now have:
+
 - **Comfortable height**: 44px (easy to click on mobile)
 - **Readable font size**: 16px (standard web size)
 - **Better UX**: Easier to interact with on all devices
@@ -140,17 +155,23 @@ All form fields now have:
 ## 💡 Why These Changes Matter
 
 ### 1. Clear User Communication
-Using "ใบซื้อ" (Purchase) instead of just "ใบกำกับภาษี" (Tax Invoice) makes it crystal clear which module the user is in. This prevents confusion between:
+
+Using "ใบซื้อ" (Purchase) instead of just "ใบกำกับภาษี" (Tax Invoice) makes it
+crystal clear which module the user is in. This prevents confusion between:
+
 - **Sales Invoices** (ใบกำกับภาษีขาย) - Issued to customers
 - **Purchase Invoices** (ใบซื้อ/ใบกำกับภาษีซื้อ) - Received from vendors
 
 ### 2. Better Accessibility & Usability
+
 The `h-11` (44px) height meets WCAG AAA guidelines for touch targets:
+
 - **Minimum touch target**: 44x44 CSS pixels
 - **Prevents misclicks**: Easier to tap on mobile devices
 - **Better visibility**: Larger fields are easier to see
 
 The `text-base` (16px) font size ensures:
+
 - **Readability**: Comfortable reading size for most users
 - **No zoom required**: Meets minimum accessibility standards
 - **Professional appearance**: Consistent with modern web standards
@@ -162,6 +183,7 @@ The `text-base` (16px) font size ensures:
 **✅ ALL ISSUES RESOLVED**
 
 **User Impact**:
+
 - ✅ Purchase invoice dialog now shows correct title
 - ✅ No more confusion with sales invoices
 - ✅ All form fields are readable and easy to use
@@ -172,7 +194,9 @@ The `text-base` (16px) font size ensures:
 
 ## 📝 Note
 
-The dev server has hot-reloaded all changes. Try creating a new purchase invoice now - you should see:
+The dev server has hot-reloaded all changes. Try creating a new purchase invoice
+now - you should see:
+
 1. Correct dialog title: "สร้างใบซื้อ/ใบกำกับภาษีซื้อใหม่"
 2. All fields with proper sizing (44px height, 16px font)
 3. Better readability and usability across the board! 🎉

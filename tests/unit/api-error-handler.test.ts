@@ -7,11 +7,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { z } from 'zod';
-import {
-  handleApiError,
-  withErrorHandler,
-  tryAsync,
-} from '../../src/lib/api-error-handler';
+import { handleApiError, withErrorHandler, tryAsync } from '../../src/lib/api-error-handler';
 import {
   AppError,
   AuthError,
@@ -77,12 +73,7 @@ describe('handleApiError', () => {
     });
 
     it('should include context in error response', async () => {
-      const error = new AppError(
-        'Test error',
-        400,
-        true,
-        { customField: 'customValue' }
-      );
+      const error = new AppError('Test error', 400, true, { customField: 'customValue' });
       const response = await handleApiError(error, mockRequest);
       const data = await response.json();
 
@@ -230,9 +221,7 @@ describe('handleApiError', () => {
 
       expect(response.status).toBe(500);
       expect(data.error.code).toBe('Error');
-      expect(data.error.messageTh).toBe(
-        'เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่'
-      );
+      expect(data.error.messageTh).toBe('เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่');
     });
 
     it('should not expose internal error messages', async () => {
@@ -252,10 +241,7 @@ describe('handleApiError', () => {
 
       await handleApiError(error, mockRequest);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '[API Error]',
-        expect.any(Object)
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('[API Error]', expect.any(Object));
       expect(consoleSpy).toHaveBeenCalledWith(
         '[Operational Error]',
         expect.objectContaining({
@@ -293,9 +279,9 @@ describe('handleApiError', () => {
 
 describe('withErrorHandler', () => {
   it('should wrap successful handlers', async () => {
-    const mockHandler = vi.fn().mockResolvedValue(
-      NextResponse.json({ success: true, data: 'test' })
-    );
+    const mockHandler = vi
+      .fn()
+      .mockResolvedValue(NextResponse.json({ success: true, data: 'test' }));
 
     const wrappedHandler = withErrorHandler(mockHandler);
     const request = new Request('http://localhost:3000/api/test');
@@ -308,9 +294,7 @@ describe('withErrorHandler', () => {
   });
 
   it('should catch and handle errors in handlers', async () => {
-    const mockHandler = vi.fn().mockRejectedValue(
-      new NotFoundError('User', '123')
-    );
+    const mockHandler = vi.fn().mockRejectedValue(new NotFoundError('User', '123'));
 
     const wrappedHandler = withErrorHandler(mockHandler);
     const request = new Request('http://localhost:3000/api/test');
@@ -324,9 +308,7 @@ describe('withErrorHandler', () => {
   });
 
   it('should pass request to handler', async () => {
-    const mockHandler = vi.fn().mockResolvedValue(
-      NextResponse.json({ success: true })
-    );
+    const mockHandler = vi.fn().mockResolvedValue(NextResponse.json({ success: true }));
 
     const wrappedHandler = withErrorHandler(mockHandler);
     const request = new Request('http://localhost:3000/api/test', {
@@ -386,10 +368,7 @@ describe('tryAsync', () => {
     const [data, error] = await tryAsync(mockApiCall());
 
     if (error) {
-      const response = await handleApiError(
-        error,
-        new Request('http://localhost:3000/api/test')
-      );
+      const response = await handleApiError(error, new Request('http://localhost:3000/api/test'));
       expect(response.status).toBeGreaterThanOrEqual(400);
     } else {
       expect(data).toBeDefined();

@@ -3,11 +3,12 @@
 ## ✅ Setup Completed
 
 ### GitHub Actions CI/CD Pipeline
-**Workflow**: `.github/workflows/deploy.yml`
-**Status**: 🟢 Active and Deploying
+
+**Workflow**: `.github/workflows/deploy.yml` **Status**: 🟢 Active and Deploying
 **Current Run**: #24344019593 (Started: 2026-04-13 12:44:20 UTC)
 
 ### What's Configured
+
 1. **Automatic Deployment** on push to `master` branch
 2. **Manual Trigger** via GitHub Actions UI
 3. **3-Stage Pipeline**:
@@ -16,7 +17,9 @@
    - **Deploy**: Rsync to VPS + PM2 restart + health check
 
 ### GitHub Secrets ✅
+
 All 7 required secrets configured:
+
 - `VPS_HOST`, `VPS_USER`, `VPS_SSH_PRIVATE_KEY`
 - `VPS_APP_PATH`, `DATABASE_URL`
 - `NEXTAUTH_URL`, `NEXTAUTH_SECRET`
@@ -24,6 +27,7 @@ All 7 required secrets configured:
 ## 🔧 Fixes Applied (8 Commits)
 
 ### Critical Data Fixes
+
 1. **Receipt/Payment Forms** - Fixed Satang/Baht conversions
    - Amount input: `Math.round(parseFloat(e.target.value) * 100)`
    - Display: `(amount / 100).toLocaleString()`
@@ -32,6 +36,7 @@ All 7 required secrets configured:
    - Changed from `(data.purchases || data)` to `response.data`
 
 ### CI/CD Infrastructure Fixes
+
 3. **Husky Error** - Use `bun install --ignore-scripts`
 4. **TypeScript** - Exclude `backups/` from tsconfig.json
 5. **Root Files** - Exclude test files, fix include paths
@@ -42,6 +47,7 @@ All 7 required secrets configured:
 ## 📊 Deployment Status
 
 **Current Progress**:
+
 - ✅ Checkout code
 - ✅ Setup Bun
 - ✅ Install dependencies
@@ -51,8 +57,7 @@ All 7 required secrets configured:
 - ⏳ Build application (pending)
 - ⏳ Deploy to VPS (pending)
 
-**Estimated Time**: 3-5 minutes total
-**Deployment URL**: https://acc.k56mm.uk
+**Estimated Time**: 3-5 minutes total **Deployment URL**: https://acc.k56mm.uk
 **Health Check**: https://acc.k56mm.uk/api/health
 
 ## 📝 Documentation Files Created
@@ -66,6 +71,7 @@ All 7 required secrets configured:
 ## 🚀 How to Deploy
 
 ### Automatic (Recommended)
+
 ```bash
 git add .
 git commit -m "Your message"
@@ -74,6 +80,7 @@ git push origin master
 ```
 
 ### Manual via GitHub UI
+
 1. Go to: https://github.com/tttonggg/Thai-acc/actions
 2. Click "CI/CD Pipeline" workflow
 3. Click "Run workflow" → "Run workflow"
@@ -81,11 +88,13 @@ git push origin master
 ## 🔍 Monitoring
 
 ### View Deployment
+
 - **GitHub Actions**: https://github.com/tttonggg/Thai-acc/actions
 - **Live App**: https://acc.k56mm.uk
 - **VPS Logs**: `ssh root@135.181.107.76 "pm2 logs keerati-erp --lines 100"`
 
 ### Troubleshooting
+
 ```bash
 # SSH into VPS
 ssh root@135.181.107.76
@@ -106,6 +115,7 @@ pm2 restart keerati-erp
 ## ✅ Success Criteria
 
 Deployment is successful when:
+
 - ✅ All jobs complete (type-check/lint may fail but continue)
 - ✅ Build job succeeds
 - ✅ Deploy job completes
@@ -114,7 +124,6 @@ Deployment is successful when:
 - ✅ Login works with test accounts
 
 ---
-**Status**: 🟡 Deployment in progress
-**Started**: 2026-04-13 12:44:20 UTC
-**Updated**: 2026-04-13 12:48 UTC
-**Monitoring**: Run #24344019593
+
+**Status**: 🟡 Deployment in progress **Started**: 2026-04-13 12:44:20 UTC
+**Updated**: 2026-04-13 12:48 UTC **Monitoring**: Run #24344019593

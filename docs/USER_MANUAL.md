@@ -43,12 +43,10 @@
 2. Enter your email address and password
 3. Click "เข้าสู่ระบบ" (Login)
 
-**Default Test Accounts:**
-| Email | Password | Role |
-|-------|----------|------|
-| admin@thaiaccounting.com | admin123 | Administrator |
-| accountant@thaiaccounting.com | acc123 | Accountant |
-| user@thaiaccounting.com | user123 | User |
+**Default Test Accounts:** | Email | Password | Role |
+|-------|----------|------| | admin@thaiaccounting.com | admin123 |
+Administrator | | accountant@thaiaccounting.com | acc123 | Accountant | |
+user@thaiaccounting.com | user123 | User |
 
 ### 1.3 Initial Setup
 
@@ -112,12 +110,12 @@ The left sidebar provides access to all modules:
 
 ### 2.2 User Roles and Permissions
 
-| Role | Description |
-|------|-------------|
-| **ADMIN** | Full access to all features including user management |
-| **ACCOUNTANT** | Full accounting access, can post transactions |
-| **USER** | Can create documents but cannot post or access settings |
-| **VIEWER** | Read-only access to reports and documents |
+| Role           | Description                                             |
+| -------------- | ------------------------------------------------------- |
+| **ADMIN**      | Full access to all features including user management   |
+| **ACCOUNTANT** | Full accounting access, can post transactions           |
+| **USER**       | Can create documents but cannot post or access settings |
+| **VIEWER**     | Read-only access to reports and documents               |
 
 ---
 
@@ -126,6 +124,7 @@ The left sidebar provides access to all modules:
 ### 3.1 Overview Widgets
 
 The dashboard displays:
+
 - **Today's Summary**: Sales, receipts, payments
 - **Outstanding Invoices**: Amounts receivable and payable
 - **Bank Balances**: Current balances for all bank accounts
@@ -141,6 +140,7 @@ The dashboard displays:
 ### 3.3 Alerts and Notifications
 
 The system shows alerts for:
+
 - Overdue invoices
 - Low stock items
 - Cheques pending clearance
@@ -154,22 +154,22 @@ The system shows alerts for:
 
 The system uses the Thai standard chart of accounts with 4 levels:
 
-| Level | Type | Example |
-|-------|------|---------|
-| 1 | Category | 1 = Assets (สินทรัพย์) |
-| 2 | Group | 11 = Current Assets (สินทรัพย์หมุนเวียน) |
-| 3 | Subgroup | 110 = Receivables (ลูกหนี้) |
-| 4 | Account | 1101 = Trade Receivables (ลูกหนี้การค้า) |
+| Level | Type     | Example                                  |
+| ----- | -------- | ---------------------------------------- |
+| 1     | Category | 1 = Assets (สินทรัพย์)                   |
+| 2     | Group    | 11 = Current Assets (สินทรัพย์หมุนเวียน) |
+| 3     | Subgroup | 110 = Receivables (ลูกหนี้)              |
+| 4     | Account  | 1101 = Trade Receivables (ลูกหนี้การค้า) |
 
 ### 4.2 Account Types
 
-| Code | Type | Thai | Description |
-|------|------|------|-------------|
-| 1xxx | ASSET | สินทรัพย์ | What the company owns |
-| 2xxx | LIABILITY | หนี้สิน | What the company owes |
-| 3xxx | EQUITY | ทุน | Owner's equity |
-| 4xxx | REVENUE | รายได้ | Income from sales/services |
-| 5xxx | EXPENSE | ค่าใช้จ่าย | Operating expenses |
+| Code | Type      | Thai       | Description                |
+| ---- | --------- | ---------- | -------------------------- |
+| 1xxx | ASSET     | สินทรัพย์  | What the company owns      |
+| 2xxx | LIABILITY | หนี้สิน    | What the company owes      |
+| 3xxx | EQUITY    | ทุน        | Owner's equity             |
+| 4xxx | REVENUE   | รายได้     | Income from sales/services |
+| 5xxx | EXPENSE   | ค่าใช้จ่าย | Operating expenses         |
 
 ### 4.3 Creating a New Account
 
@@ -186,6 +186,7 @@ The system uses the Thai standard chart of accounts with 4 levels:
 ### 4.4 Account Balances
 
 View account balances by:
+
 - Clicking on an account to see transaction history
 - Using filters to view by date range
 - Exporting to Excel for further analysis
@@ -211,6 +212,7 @@ View account balances by:
 ### 5.2 Customer Statements
 
 Generate customer statements:
+
 1. Select customer
 2. Click **ใบแจ้งยอด** (Statement)
 3. Select date range
@@ -219,6 +221,7 @@ Generate customer statements:
 ### 5.3 Aging Report
 
 View customer aging:
+
 1. Go to **รายงาน** (Reports) → **อายุลูกหนี้** (AR Aging)
 2. View balances by age: Current, 30, 60, 90, 90+ days
 
@@ -239,6 +242,7 @@ View customer aging:
 ### 6.2 Vendor Payments
 
 Process payments to vendors:
+
 1. Select vendor
 2. View outstanding invoices
 3. Select invoices to pay
@@ -264,6 +268,7 @@ Process payments to vendors:
 ### 7.2 Inventory Tracking
 
 For inventory items:
+
 1. Check **ติดตามสต็อก** (Track Inventory)
 2. Set **จำนวนต่ำสุด** (Minimum Quantity) for reorder alerts
 3. Select **วิธีคิดต้นทุน** (Costing Method):
@@ -273,6 +278,7 @@ For inventory items:
 ### 7.3 Stock Adjustments
 
 Adjust stock quantities:
+
 1. Go to **คลังสินค้า** (Inventory)
 2. Click **ปรับปรุงสต็อก** (Adjust Stock)
 3. Select product and enter new quantity
@@ -339,6 +345,7 @@ DRAFT (ฉบับร่าง) → ISSUED (ออกแล้ว) → PARTIAL 
 ### 9.2 Input VAT Tracking
 
 The system automatically tracks input VAT for tax filing:
+
 - Monthly VAT report shows all input VAT
 - Links to purchase invoices for verification
 
@@ -363,6 +370,7 @@ The system automatically tracks input VAT for tax filing:
 ### 10.2 Withholding Tax on Receipts
 
 If withholding tax applies:
+
 1. Check **หักภาษี ณ ที่จ่าย** (Withholding Tax)
 2. Select **ประเภท** (Type): PND3 or PND53
 3. Enter **อัตราภาษี** (Rate): 1%, 3%, 5%, etc.
@@ -384,6 +392,7 @@ If withholding tax applies:
 ### 11.2 Partial Payments
 
 For partial payments:
+
 1. Enter payment amount less than invoice total
 2. System updates invoice status to PARTIAL
 3. Remaining balance shown on customer/vendor statement
@@ -395,6 +404,7 @@ For partial payments:
 ### 12.1 When to Use Credit Notes
 
 Create credit notes for:
+
 - Sales returns
 - Price adjustments
 - Billing corrections
@@ -416,6 +426,7 @@ Create credit notes for:
 ### 12.3 Allocating Credit Notes
 
 Apply credit notes to invoices:
+
 1. Open the credit note
 2. Click **จัดสรร** (Allocate)
 3. Select invoice to apply
@@ -428,6 +439,7 @@ Apply credit notes to invoices:
 ### 13.1 When to Use Debit Notes
 
 Create debit notes for:
+
 - Additional charges
 - Price increases
 - Billing corrections (increase)
@@ -443,6 +455,7 @@ Process is similar to credit notes, but increases the amount owed.
 ### 14.1 Understanding Journal Entries
 
 Journal entries record financial transactions using double-entry bookkeeping:
+
 - **เดบิต** (Debit) - Left side
 - **เครดิต** (Credit) - Right side
 
@@ -463,17 +476,11 @@ Total debits must equal total credits.
 
 ### 14.3 Common Journal Entries
 
-**Adjusting Entry:**
-| Account | Debit | Credit |
-|---------|-------|--------|
-| ค่าใช้จ่ายสำนักงาน | 10,000 | |
-| เงินสดในมือ | | 10,000 |
+**Adjusting Entry:** | Account | Debit | Credit | |---------|-------|--------| |
+ค่าใช้จ่ายสำนักงาน | 10,000 | | | เงินสดในมือ | | 10,000 |
 
-**Accrual Entry:**
-| Account | Debit | Credit |
-|---------|-------|--------|
-| ค่าใช้จ่ายเงินเดือน | 50,000 | |
-| ค่าใช้จ่ายเงินเดือนค้างจ่าย | | 50,000 |
+**Accrual Entry:** | Account | Debit | Credit | |---------|-------|--------| |
+ค่าใช้จ่ายเงินเดือน | 50,000 | | | ค่าใช้จ่ายเงินเดือนค้างจ่าย | | 50,000 |
 
 ---
 
@@ -482,6 +489,7 @@ Total debits must equal total credits.
 ### 15.1 Bank Accounts
 
 Add bank accounts:
+
 1. Go to **บัญชีธนาคาร** (Bank Accounts)
 2. Click **สร้างบัญชีใหม่**
 3. Enter:
@@ -494,6 +502,7 @@ Add bank accounts:
 ### 15.2 Bank Reconciliation
 
 Reconcile bank statements:
+
 1. Go to **บัญชีธนาคาร** → **กระทบยอด** (Reconcile)
 2. Select bank account and statement date
 3. Check off cleared transactions
@@ -503,6 +512,7 @@ Reconcile bank statements:
 ### 15.3 Cheque Management
 
 Register cheques:
+
 1. Go to **เช็ค** (Cheques)
 2. Select **เช็คจ่าย** (Cheques Issued) or **เช็ครับ** (Cheques Received)
 3. Enter cheque details:
@@ -516,6 +526,7 @@ Register cheques:
 ### 15.4 Petty Cash
 
 Manage petty cash:
+
 1. Go to **กระเป๋าเงินสดย่อย** (Petty Cash)
 2. Set up petty cash float amount
 3. Record expenses:
@@ -532,6 +543,7 @@ Manage petty cash:
 ### 16.1 Stock Movements
 
 Track inventory movements:
+
 - **รับสินค้า** (Goods Receipt): Receive from vendors
 - **จ่ายสินค้า** (Goods Issue): Issue to production/customers
 - **โอนย้าย** (Transfer): Move between locations
@@ -547,6 +559,7 @@ Track inventory movements:
 ### 16.3 Stock Valuation
 
 View stock valuation:
+
 1. Go to **รายงาน** → **มูลค่าสินค้าคงเหลือ**
 2. Select costing method view
 3. Export to Excel
@@ -554,6 +567,7 @@ View stock valuation:
 ### 16.4 Inventory Reports
 
 Available reports:
+
 - **รายงานสต็อกสินค้า** (Stock Balance Report)
 - **รายงานการเคลื่อนไหวสินค้า** (Stock Movement Report)
 - **รายงานสินค้าใกล้หมด** (Low Stock Report)
@@ -577,6 +591,7 @@ Available reports:
 ### 17.2 Depreciation Methods
 
 Supported methods:
+
 - **Straight Line** (เส้นตรง)
 - **Declining Balance** (ถ declining)
 
@@ -619,6 +634,7 @@ Supported methods:
 ### 18.3 Replenishment
 
 When balance is low:
+
 1. Click **เบิกเติมเงิน**
 2. System calculates amount needed
 3. Create payment voucher
@@ -661,6 +677,7 @@ When balance is low:
 ### 19.3 Payroll Components
 
 **Income:**
+
 - เงินเดือนพื้นฐาน (Basic Salary)
 - ค่าล่วงเวลา (Overtime)
 - ค่าเดินทาง (Transportation)
@@ -668,6 +685,7 @@ When balance is low:
 - โบนัส (Bonus)
 
 **Deductions:**
+
 - ประกันสังคม (Social Security)
 - ภาษีหัก ณ ที่จ่าย (Withholding Tax)
 - เงินกู้ (Loan)
@@ -687,6 +705,7 @@ When balance is low:
 ### 20.1 WHT on Payments
 
 When paying vendors:
+
 1. Check **หักภาษี ณ ที่จ่าย**
 2. Select type:
    - **ภ.ง.ด.3** (PND3): For individuals
@@ -701,6 +720,7 @@ When paying vendors:
 ### 20.2 WHT Certificates
 
 Generate WHT certificates:
+
 1. Go to **ภาษีหัก ณ ที่จ่าย**
 2. Select month/year
 3. Click **ออกใบหัก ณ ที่จ่าย**
@@ -719,6 +739,7 @@ Generate WHT certificates:
 ### 21.1 General Ledger
 
 View all transactions by account:
+
 1. Go to **รายงาน** → **สมุดบัญชีแยกประเภท**
 2. Select account
 3. Select date range
@@ -727,6 +748,7 @@ View all transactions by account:
 ### 21.2 Balance Sheet
 
 Shows financial position:
+
 - สินทรัพย์ (Assets)
 - หนี้สิน (Liabilities)
 - ทุน (Equity)
@@ -734,6 +756,7 @@ Shows financial position:
 ### 21.3 Income Statement
 
 Shows financial performance:
+
 - รายได้ (Revenue)
 - ต้นทุนขาย (Cost of Goods Sold)
 - ค่าใช้จ่าย (Expenses)
@@ -742,6 +765,7 @@ Shows financial performance:
 ### 21.4 Trial Balance
 
 Lists all account balances:
+
 - Opening balance
 - Debit movement
 - Credit movement
@@ -750,11 +774,13 @@ Lists all account balances:
 ### 21.5 VAT Reports
 
 **ภาษีขาย (Output VAT):**
+
 - Monthly summary
 - By invoice
 - For filing Por.Por.30
 
 **ภาษีซื้อ (Input VAT):**
+
 - Monthly summary
 - By purchase invoice
 - For filing Por.Por.30
@@ -762,6 +788,7 @@ Lists all account balances:
 ### 21.6 Exporting Reports
 
 All reports can be exported to:
+
 - Excel (.xlsx)
 - PDF
 - CSV
@@ -773,6 +800,7 @@ All reports can be exported to:
 ### 22.1 Company Information
 
 Configure:
+
 - Company name (Thai/English)
 - Tax ID
 - Address
@@ -790,6 +818,7 @@ Configure:
 ### 22.3 Document Numbering
 
 Configure number formats:
+
 - Invoice: INV-{YYYY}{MM}-{0000}
 - Receipt: REC-{YYYY}{MM}-{0000}
 - Journal: JV-{YYYY}{MM}-{0000}
@@ -797,6 +826,7 @@ Configure number formats:
 ### 22.4 User Management
 
 Add/manage users:
+
 1. Go to **ตั้งค่า** → **ผู้ใช้งาน**
 2. Click **สร้างผู้ใช้ใหม่**
 3. Enter:
@@ -809,6 +839,7 @@ Add/manage users:
 ### 22.5 Permissions
 
 Assign module permissions by role:
+
 - View
 - Create
 - Edit
@@ -832,6 +863,7 @@ Assign module permissions by role:
 ### 23.2 Scheduled Backups
 
 Set up automatic backups:
+
 1. Configure backup schedule
 2. Set retention period
 3. Choose storage location
@@ -849,6 +881,7 @@ Set up automatic backups:
 ### 23.4 Data Export
 
 Export specific data:
+
 - Customers
 - Vendors
 - Products
@@ -861,8 +894,8 @@ Export specific data:
 
 ### 24.1 Login Issues
 
-**Problem**: Cannot log in
-**Solutions**:
+**Problem**: Cannot log in **Solutions**:
+
 1. Check email/password
 2. Clear browser cache
 3. Try incognito mode
@@ -870,8 +903,8 @@ Export specific data:
 
 ### 24.2 Document Posting Errors
 
-**Problem**: Cannot post document
-**Solutions**:
+**Problem**: Cannot post document **Solutions**:
+
 1. Check document is in DRAFT status
 2. Verify all required fields
 3. Check account balances (for payments)
@@ -879,8 +912,8 @@ Export specific data:
 
 ### 24.3 Report Discrepancies
 
-**Problem**: Report totals don't match
-**Solutions**:
+**Problem**: Report totals don't match **Solutions**:
+
 1. Check for unposted documents
 2. Verify date range
 3. Check account mappings
@@ -888,8 +921,8 @@ Export specific data:
 
 ### 24.4 Database Connection
 
-**Problem**: Cannot connect to database
-**Solutions**:
+**Problem**: Cannot connect to database **Solutions**:
+
 1. Check DATABASE_URL in .env
 2. Verify database file exists
 3. Check file permissions
@@ -897,8 +930,8 @@ Export specific data:
 
 ### 24.5 Performance Issues
 
-**Problem**: System running slowly
-**Solutions**:
+**Problem**: System running slowly **Solutions**:
+
 1. Clear browser cache
 2. Reduce date range in reports
 3. Archive old data
@@ -907,6 +940,7 @@ Export specific data:
 ### 24.6 Contact Support
 
 For additional help:
+
 - 📧 Email: support@thaiaccounting.com
 - 📞 Phone: 02-xxx-xxxx
 - 💬 Live Chat: Available during business hours
@@ -917,37 +951,37 @@ For additional help:
 
 ### A. Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
+| Shortcut | Action              |
+| -------- | ------------------- |
 | Ctrl + N | Create new document |
-| Ctrl + S | Save |
-| Ctrl + P | Print |
-| Ctrl + F | Search |
-| Escape | Close modal |
-| F1 | Help |
+| Ctrl + S | Save                |
+| Ctrl + P | Print               |
+| Ctrl + F | Search              |
+| Escape   | Close modal         |
+| F1       | Help                |
 
 ### B. Glossary
 
-| Thai | English | Description |
-|------|---------|-------------|
-| ผังบัญชี | Chart of Accounts | List of all accounts |
-| ลูกหนี้ | Accounts Receivable | Money owed by customers |
-| เจ้าหนี้ | Accounts Payable | Money owed to vendors |
-| ใบกำกับภาษี | Tax Invoice | VAT invoice |
-| ใบเสร็จ | Receipt | Payment received |
-| ใบสำคัญ | Voucher | Payment voucher |
-| สมุดรายวัน | Journal | Transaction log |
-| งบดุล | Balance Sheet | Financial position |
-| งบกำไรขาดทุน | Income Statement | Financial performance |
+| Thai         | English             | Description             |
+| ------------ | ------------------- | ----------------------- |
+| ผังบัญชี     | Chart of Accounts   | List of all accounts    |
+| ลูกหนี้      | Accounts Receivable | Money owed by customers |
+| เจ้าหนี้     | Accounts Payable    | Money owed to vendors   |
+| ใบกำกับภาษี  | Tax Invoice         | VAT invoice             |
+| ใบเสร็จ      | Receipt             | Payment received        |
+| ใบสำคัญ      | Voucher             | Payment voucher         |
+| สมุดรายวัน   | Journal             | Transaction log         |
+| งบดุล        | Balance Sheet       | Financial position      |
+| งบกำไรขาดทุน | Income Statement    | Financial performance   |
 
 ### C. VAT Quick Reference
 
-| Transaction Type | VAT Treatment |
-|-----------------|---------------|
-| Domestic sales | 7% output VAT |
-| Domestic purchases | 7% input VAT |
-| Exports | 0% VAT (with documentation) |
-| Imports | 7% VAT (at customs) |
+| Transaction Type   | VAT Treatment               |
+| ------------------ | --------------------------- |
+| Domestic sales     | 7% output VAT               |
+| Domestic purchases | 7% input VAT                |
+| Exports            | 0% VAT (with documentation) |
+| Imports            | 7% VAT (at customs)         |
 
 ---
 

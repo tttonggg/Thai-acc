@@ -3,6 +3,7 @@
 ## Build Configuration Status
 
 **Next.js Config**: `/Users/tong/Thai-acc/next.config.ts`
+
 - ✅ Standalone output enabled: `output: "standalone"`
 - ✅ TypeScript errors ignored for builds
 - ✅ React Strict Mode disabled
@@ -16,9 +17,12 @@
 ## 1. CRITICAL ISSUE: Manual Dependency Installation Required
 
 ### Problem
-The standalone build does NOT automatically install dependencies in `.next/standalone/node_modules`. This must be done manually after each build.
+
+The standalone build does NOT automatically install dependencies in
+`.next/standalone/node_modules`. This must be done manually after each build.
 
 ### Solution Implemented
+
 Updated `package.json` with automated build script:
 
 ```json
@@ -27,11 +31,13 @@ Updated `package.json` with automated build script:
 ```
 
 ### New Build Command
+
 ```bash
 npm run build
 ```
 
 This now automatically:
+
 1. Builds Next.js application
 2. Copies static files
 3. Installs production dependencies (351 packages)
@@ -43,10 +49,13 @@ This now automatically:
 
 ### Issue: DATABASE_URL Must Use Absolute Path
 
-The standalone build MUST use an absolute path for the database. Relative paths cause Prisma to connect to the wrong database.
+The standalone build MUST use an absolute path for the database. Relative paths
+cause Prisma to connect to the wrong database.
 
 ### Current Configuration
+
 `.next/standalone/.env`:
+
 ```env
 DATABASE_URL=file:/Users/tong/Thai-acc/.next/standalone/dev.db
 NEXTAUTH_URL=http://localhost:3000
@@ -54,6 +63,7 @@ NEXTAUTH_SECRET=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY=
 ```
 
 ### Root `.env` (for development)
+
 ```env
 DATABASE_URL=file:./prisma/dev.db
 NEXTAUTH_URL=http://localhost:3000
@@ -125,7 +135,8 @@ bun server.js
 - [ ] Verify `.next/standalone/.env` has absolute DATABASE_URL
 - [ ] Copy database: `cp prisma/dev.db .next/standalone/dev.db`
 - [ ] Test database connection: Check that users exist (4 users)
-- [ ] Verify all 6 modules accessible (WHT, Inventory, Assets, Banking, Petty Cash, Payroll)
+- [ ] Verify all 6 modules accessible (WHT, Inventory, Assets, Banking, Petty
+      Cash, Payroll)
 
 ### Deployment (Server)
 
@@ -158,6 +169,7 @@ bun server.js
 **Cause**: Dependencies not installed in standalone directory
 
 **Solution**:
+
 ```bash
 cd .next/standalone
 npm install --production --legacy-peer-deps
@@ -168,6 +180,7 @@ npm install --production --legacy-peer-deps
 **Cause**: DATABASE_URL using relative path, connecting to wrong database
 
 **Solution**: Update `.next/standalone/.env`:
+
 ```bash
 DATABASE_URL=file:/absolute/path/to/.next/standalone/dev.db
 ```
@@ -177,13 +190,16 @@ DATABASE_URL=file:/absolute/path/to/.next/standalone/dev.db
 **Cause**: Database empty or wrong database
 
 **Solution**:
+
 1. Verify database exists: `ls -lh .next/standalone/dev.db` (should be ~732KB)
-2. Check database has data: `sqlite3 .next/standalone/dev.db "SELECT COUNT(*) FROM User;"`
+2. Check database has data:
+   `sqlite3 .next/standalone/dev.db "SELECT COUNT(*) FROM User;"`
 3. If needed, reseed: `cp prisma/dev.db .next/standalone/dev.db`
 
 ### Issue: Port already in use
 
 **Solution**:
+
 ```bash
 # Find process using port 3000
 lsof -i :3000
@@ -282,12 +298,14 @@ docker run -p 3000:3000 -v $(pwd)/db:/app/db thai-accounting
 ### Bun vs Node.js
 
 **Bun** (Recommended for production):
+
 - Faster startup time
 - Lower memory usage
 - Better performance for I/O operations
 - Native TypeScript support
 
 **Node.js** (Fallback):
+
 - More stable ecosystem
 - Better debugging tools
 - Wider package compatibility
@@ -295,12 +313,14 @@ docker run -p 3000:3000 -v $(pwd)/db:/app/db thai-accounting
 ### Database Considerations
 
 **Current**: SQLite (development)
+
 - Single-file database
 - No separate database server needed
 - Suitable for low to medium traffic
 - Easy backup (copy file)
 
 **Production Recommendation**: PostgreSQL
+
 - Better concurrency
 - More robust for high traffic
 - Better backup/restore options
@@ -334,14 +354,14 @@ docker run -p 3000:3000 -v $(pwd)/db:/app/db thai-accounting
 
 ### Current Status: ✅ Build Configured Correctly
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Next.js Config | ✅ | Standalone output enabled |
-| Build Script | ✅ | Automated with dependency installation |
-| Environment | ⚠️ | DATABASE_URL must be absolute path |
-| Database | ✅ | Copied to standalone directory |
-| Dependencies | ✅ | 351 packages installed |
-| Server Start | ✅ | Works with Bun and Node.js |
+| Component      | Status | Notes                                  |
+| -------------- | ------ | -------------------------------------- |
+| Next.js Config | ✅     | Standalone output enabled              |
+| Build Script   | ✅     | Automated with dependency installation |
+| Environment    | ⚠️     | DATABASE_URL must be absolute path     |
+| Database       | ✅     | Copied to standalone directory         |
+| Dependencies   | ✅     | 351 packages installed                 |
+| Server Start   | ✅     | Works with Bun and Node.js             |
 
 ### Recommendations
 
@@ -355,7 +375,5 @@ docker run -p 3000:3000 -v $(pwd)/db:/app/db thai-accounting
 
 ---
 
-**Last Updated**: 2026-03-12
-**Next.js Version**: 16.1.1
-**Node.js Version**: 20+
-**Prisma Version**: 6.11.1
+**Last Updated**: 2026-03-12 **Next.js Version**: 16.1.1 **Node.js Version**:
+20+ **Prisma Version**: 6.11.1

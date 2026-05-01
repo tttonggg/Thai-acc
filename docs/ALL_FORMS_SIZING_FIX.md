@@ -3,13 +3,20 @@
 ## ✅ Fixed: All Form Fields Now Properly Sized
 
 ### Problem Reported:
-"from fill still too small, not change!" - Form fields were too small and difficult to read.
+
+"from fill still too small, not change!" - Form fields were too small and
+difficult to read.
 
 ### Root Cause:
-The base shadcn/ui `Input` and `SelectTrigger` components have hardcoded `h-9` (36px) height. Custom `h-11` classes weren't overriding due to CSS specificity.
+
+The base shadcn/ui `Input` and `SelectTrigger` components have hardcoded `h-9`
+(36px) height. Custom `h-11` classes weren't overriding due to CSS specificity.
 
 ### Solution Applied:
-Added `!h-11 text-base` classes to ALL form fields across the entire application:
+
+Added `!h-11 text-base` classes to ALL form fields across the entire
+application:
+
 - `!h-11` = 44px height with `!important` to force override
 - `text-base` = 16px font size for readability
 
@@ -18,10 +25,12 @@ Added `!h-11 text-base` classes to ALL form fields across the entire application
 ## 📁 Files Modified (6 files, ~200 fields total)
 
 ### ✅ Purchase Forms:
+
 1. `/src/components/purchases/purchase-form.tsx` (~30 fields)
 2. `/src/components/purchases/purchase-edit-dialog.tsx` (~25 fields)
 
 ### ✅ Other Forms (Just Fixed):
+
 3. `/src/components/debit-notes/debit-note-form.tsx` (~40 fields)
 4. `/src/components/credit-notes/credit-note-form.tsx` (~40 fields)
 5. `/src/components/receipts/receipt-form.tsx` (~35 fields)
@@ -32,6 +41,7 @@ Added `!h-11 text-base` classes to ALL form fields across the entire application
 ## 🎯 What Changed
 
 ### Before (36px height - too small):
+
 ```typescript
 <Input placeholder="Vendor Name" />
 <SelectTrigger>
@@ -40,6 +50,7 @@ Added `!h-11 text-base` classes to ALL form fields across the entire application
 ```
 
 ### After (44px height - proper size):
+
 ```typescript
 <Input placeholder="Vendor Name" className="!h-11 text-base" />
 <SelectTrigger className="!h-11 text-base">
@@ -55,12 +66,13 @@ Added `!h-11 text-base` classes to ALL form fields across the entire application
 
 The changes won't be visible until you clear your browser cache:
 
-**Chrome/Edge (Windows/Linux):** Press `Ctrl + Shift + R`
-**Chrome/Edge (Mac):** Press `Cmd + Shift + R`
-**Firefox:** Press `Ctrl + Shift + R` (Windows/Linux) or `Cmd + Shift + R` (Mac)
-**Safari (Mac):** Press `Cmd + Option + E` then `Cmd + R`
+**Chrome/Edge (Windows/Linux):** Press `Ctrl + Shift + R` **Chrome/Edge (Mac):**
+Press `Cmd + Shift + R` **Firefox:** Press `Ctrl + Shift + R` (Windows/Linux) or
+`Cmd + Shift + R` (Mac) **Safari (Mac):** Press `Cmd + Option + E` then
+`Cmd + R`
 
 ### Alternative: Use DevTools
+
 1. Press `F12` to open DevTools
 2. Go to **Application** tab
 3. Click **"Clear site data"**
@@ -71,6 +83,7 @@ The changes won't be visible until you clear your browser cache:
 ## ✅ Verify the Fix
 
 After hard refresh, check ANY form:
+
 1. Navigate to any module (ใบซื้อ, ใบเพิ่มหนี้, ใบลดหนี้, etc.)
 2. Click "Create New" or "สร้างใหม่"
 3. Check if fields are:
@@ -79,6 +92,7 @@ After hard refresh, check ANY form:
    - ✅ **Comfortable to click** (good touch target)
 
 ### Test These Forms:
+
 - ✅ Purchase Invoice (ใบซื้อ)
 - ✅ Debit Note (ใบเพิ่มหนี้)
 - ✅ Credit Note (ใบลดหนี้)
@@ -90,6 +104,7 @@ After hard refresh, check ANY form:
 ## 📊 Visual Comparison
 
 ### Before (TOO SMALL - 36px):
+
 ```
 ┌─────────────────────┐
 │ Select Vendor       │ ← Hard to read!
@@ -97,6 +112,7 @@ After hard refresh, check ANY form:
 ```
 
 ### After (PERFECT - 44px):
+
 ```
 ┌─────────────────────┐
 │                     │
@@ -110,6 +126,7 @@ After hard refresh, check ANY form:
 ## 💡 Why `!important`?
 
 The shadcn/ui base components have:
+
 ```typescript
 // Input component
 className={cn(
@@ -118,13 +135,16 @@ className={cn(
 )}
 ```
 
-In CSS, when classes have equal specificity, the **last one wins**. But `h-9` appears first in the base string, so we need `!h-11` (with `!important`) to force the override.
+In CSS, when classes have equal specificity, the **last one wins**. But `h-9`
+appears first in the base string, so we need `!h-11` (with `!important`) to
+force the override.
 
 ---
 
 ## 🚀 Status
 
 ✅ **ALL FORMS FIXED**
+
 - 6 files modified
 - ~200 fields updated
 - All using `!h-11 text-base` for consistent sizing
@@ -139,6 +159,7 @@ In CSS, when classes have equal specificity, the **last one wins**. But `h-9` ap
 ### Troubleshooting Steps:
 
 1. **Verify dev server is running:**
+
    ```bash
    bun run dev
    ```
@@ -150,6 +171,7 @@ In CSS, when classes have equal specificity, the **last one wins**. But `h-9` ap
    - Clear your browser cache completely
 
 4. **Force rebuild:**
+
    ```bash
    # Stop dev server (Ctrl+C)
    rm -rf .next
@@ -165,9 +187,9 @@ In CSS, when classes have equal specificity, the **last one wins**. But `h-9` ap
 
 ## 📝 Summary
 
-**Issue**: Form fields too small (36px height)
-**Fix**: Added `!h-11 text-base` to all form fields
-**Files**: 6 forms, ~200 fields
-**Status**: ✅ Complete - Requires browser hard refresh
+**Issue**: Form fields too small (36px height) **Fix**: Added `!h-11 text-base`
+to all form fields **Files**: 6 forms, ~200 fields **Status**: ✅ Complete -
+Requires browser hard refresh
 
-**Next Step**: Press `Ctrl + Shift + R` (Windows/Linux) or `Cmd + Shift + R` (Mac) to see the changes! 🚀
+**Next Step**: Press `Ctrl + Shift + R` (Windows/Linux) or `Cmd + Shift + R`
+(Mac) to see the changes! 🚀

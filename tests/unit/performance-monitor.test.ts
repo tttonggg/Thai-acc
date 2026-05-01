@@ -24,12 +24,7 @@ describe('PerformanceMonitor', () => {
       expect(typeof startTime).toBe('number');
 
       // Simulate some work
-      const duration = performanceMonitor.endRequest(
-        startTime,
-        '/api/test',
-        'GET',
-        200
-      );
+      const duration = performanceMonitor.endRequest(startTime, '/api/test', 'GET', 200);
 
       expect(typeof duration).toBe('number');
       expect(duration).toBeGreaterThanOrEqual(0);
@@ -61,12 +56,7 @@ describe('PerformanceMonitor', () => {
       const durations = [100, 200, 300, 400, 500];
 
       durations.forEach((duration) => {
-        performanceMonitor.endRequest(
-          Date.now() - duration,
-          '/api/stats',
-          'GET',
-          200
-        );
+        performanceMonitor.endRequest(Date.now() - duration, '/api/stats', 'GET', 200);
       });
 
       const stats = performanceMonitor.getRequestStats('/api/stats');
@@ -138,12 +128,7 @@ describe('PerformanceMonitor', () => {
   describe('Slow Request Detection', () => {
     it('should identify slow requests (>3s)', () => {
       const startTime = performanceMonitor.startRequest();
-      performanceMonitor.endRequest(
-        startTime - 3500,
-        '/api/slow',
-        'GET',
-        200
-      );
+      performanceMonitor.endRequest(startTime - 3500, '/api/slow', 'GET', 200);
 
       const slowRequests = performanceMonitor.getSlowRequests();
 
@@ -242,12 +227,7 @@ describe('PerformanceMonitor', () => {
 
   describe('Metrics Management', () => {
     it('should clear all metrics', () => {
-      performanceMonitor.endRequest(
-        performanceMonitor.startRequest(),
-        '/api/test',
-        'GET',
-        200
-      );
+      performanceMonitor.endRequest(performanceMonitor.startRequest(), '/api/test', 'GET', 200);
 
       performanceMonitor.clear();
 
@@ -256,12 +236,7 @@ describe('PerformanceMonitor', () => {
     });
 
     it('should get copy of metrics', () => {
-      performanceMonitor.endRequest(
-        performanceMonitor.startRequest(),
-        '/api/test',
-        'GET',
-        200
-      );
+      performanceMonitor.endRequest(performanceMonitor.startRequest(), '/api/test', 'GET', 200);
 
       const metrics = performanceMonitor.getMetrics();
 
@@ -326,9 +301,7 @@ describe('withPerformanceTracking', () => {
     });
 
     try {
-      await wrappedHandler(
-        new Request('http://localhost:3000/api/error')
-      );
+      await wrappedHandler(new Request('http://localhost:3000/api/error'));
     } catch (error) {
       // Expected to throw
     }
@@ -347,9 +320,7 @@ describe('withPerformanceTracking', () => {
       path: '/api/custom',
     });
 
-    await wrappedHandler(
-      new Request('http://localhost:3000/api/different')
-    );
+    await wrappedHandler(new Request('http://localhost:3000/api/different'));
 
     const stats = performanceMonitor.getRequestStats('/api/custom');
 
@@ -359,9 +330,7 @@ describe('withPerformanceTracking', () => {
 
 describe('trackQuery', () => {
   it('should track query execution time', async () => {
-    const mockQuery = new Promise((resolve) =>
-      setTimeout(() => resolve('result'), 100)
-    );
+    const mockQuery = new Promise((resolve) => setTimeout(() => resolve('result'), 100));
 
     const result = await trackQuery('User', 'findMany', mockQuery);
 
@@ -377,9 +346,7 @@ describe('trackQuery', () => {
   it('should track failed queries', async () => {
     const mockQuery = Promise.reject(new Error('Query failed'));
 
-    await expect(
-      trackQuery('User', 'findMany', mockQuery)
-    ).rejects.toThrow('Query failed');
+    await expect(trackQuery('User', 'findMany', mockQuery)).rejects.toThrow('Query failed');
 
     const queries = performanceMonitor.getQueryMetrics();
     expect(queries).toHaveLength(1);
@@ -446,12 +413,7 @@ describe('generatePerformanceReport', () => {
 
 describe('checkPerformanceHealth', () => {
   it('should return healthy for good performance', () => {
-    performanceMonitor.endRequest(
-      performanceMonitor.startRequest() - 100,
-      '/api/fast',
-      'GET',
-      200
-    );
+    performanceMonitor.endRequest(performanceMonitor.startRequest() - 100, '/api/fast', 'GET', 200);
 
     const health = checkPerformanceHealth();
 
@@ -540,12 +502,7 @@ describe('Percentile Calculations', () => {
 describe('Success Rate Calculation', () => {
   it('should calculate 100% success rate', () => {
     for (let i = 0; i < 10; i++) {
-      performanceMonitor.endRequest(
-        performanceMonitor.startRequest(),
-        '/api/success',
-        'GET',
-        200
-      );
+      performanceMonitor.endRequest(performanceMonitor.startRequest(), '/api/success', 'GET', 200);
     }
 
     const stats = performanceMonitor.getRequestStats('/api/success');
@@ -570,12 +527,7 @@ describe('Success Rate Calculation', () => {
 
   it('should calculate 0% success rate', () => {
     for (let i = 0; i < 5; i++) {
-      performanceMonitor.endRequest(
-        performanceMonitor.startRequest(),
-        '/api/fail',
-        'GET',
-        500
-      );
+      performanceMonitor.endRequest(performanceMonitor.startRequest(), '/api/fail', 'GET', 500);
     }
 
     const stats = performanceMonitor.getRequestStats('/api/fail');

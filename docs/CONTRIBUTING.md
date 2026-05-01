@@ -1,6 +1,7 @@
 # Contributing to Thai Accounting ERP
 
-Thank you for your interest in contributing to Thai Accounting ERP! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Thai Accounting ERP! This
+document provides guidelines and instructions for contributing to the project.
 
 ## Table of Contents
 
@@ -21,8 +22,10 @@ Thank you for your interest in contributing to Thai Accounting ERP! This documen
 
 This project and everyone participating in it is governed by our commitment to:
 
-- **Be respectful** - Treat everyone with respect. Healthy debate is encouraged, but harassment is not tolerated.
-- **Be constructive** - Provide constructive feedback and be open to receiving it.
+- **Be respectful** - Treat everyone with respect. Healthy debate is encouraged,
+  but harassment is not tolerated.
+- **Be constructive** - Provide constructive feedback and be open to receiving
+  it.
 - **Be collaborative** - Work together towards the best solutions for users.
 - **Be professional** - Maintain professionalism in all interactions.
 
@@ -38,12 +41,14 @@ This project and everyone participating in it is governed by our commitment to:
 ### Setting Up Development Environment
 
 1. **Fork the repository**
+
    ```bash
    git clone https://github.com/your-username/thai-accounting-erp.git
    cd thai-accounting-erp
    ```
 
 2. **Install dependencies**
+
    ```bash
    bun install
    # or
@@ -51,12 +56,14 @@ This project and everyone participating in it is governed by our commitment to:
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your settings
    ```
 
 4. **Set up database**
+
    ```bash
    bun run db:generate
    bun run db:push
@@ -100,12 +107,12 @@ git push origin feature/your-feature-name
 
 ### Branch Naming Conventions
 
-| Type | Pattern | Example |
-|------|---------|---------|
+| Type    | Pattern               | Example                     |
+| ------- | --------------------- | --------------------------- |
 | Feature | `feature/description` | `feature/invoice-templates` |
-| Bugfix | `bugfix/description` | `bugfix/vat-calculation` |
-| Hotfix | `hotfix/description` | `hotfix/login-error` |
-| Docs | `docs/description` | `docs/api-examples` |
+| Bugfix  | `bugfix/description`  | `bugfix/vat-calculation`    |
+| Hotfix  | `hotfix/description`  | `hotfix/login-error`        |
+| Docs    | `docs/description`    | `docs/api-examples`         |
 
 ## Code Style Guidelines
 
@@ -159,13 +166,13 @@ export function InvoiceCard({ invoice, onSelect }: InvoiceCardProps) {
 
 ### File Naming
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Components | PascalCase | `InvoiceList.tsx` |
-| Utilities | camelCase | `formatCurrency.ts` |
-| Hooks | camelCase with 'use' prefix | `useInvoiceData.ts` |
-| Styles | kebab-case.module.css | `invoice-card.module.css` |
-| Tests | ComponentName.test.ts | `InvoiceList.test.tsx` |
+| Type       | Convention                  | Example                   |
+| ---------- | --------------------------- | ------------------------- |
+| Components | PascalCase                  | `InvoiceList.tsx`         |
+| Utilities  | camelCase                   | `formatCurrency.ts`       |
+| Hooks      | camelCase with 'use' prefix | `useInvoiceData.ts`       |
+| Styles     | kebab-case.module.css       | `invoice-card.module.css` |
+| Tests      | ComponentName.test.ts       | `InvoiceList.test.tsx`    |
 
 ### API Routes
 
@@ -192,10 +199,10 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const validated = schema.parse(body);
-    
+
     // Business logic here
     const result = await createInvoice(validated);
-    
+
     return Response.json({ success: true, data: result });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -204,7 +211,7 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    
+
     console.error('Invoice creation error:', error);
     return Response.json(
       { success: false, error: 'Internal server error' },
@@ -231,7 +238,8 @@ export async function POST(req: Request) {
 
 ## Commit Message Format
 
-We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+We follow the [Conventional Commits](https://www.conventionalcommits.org/)
+specification:
 
 ### Format
 
@@ -245,16 +253,16 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 
 ### Types
 
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only changes |
-| `style` | Code style changes (formatting, semicolons, etc) |
-| `refactor` | Code refactoring |
-| `perf` | Performance improvements |
-| `test` | Adding or updating tests |
-| `chore` | Build process or auxiliary tool changes |
+| Type       | Description                                      |
+| ---------- | ------------------------------------------------ |
+| `feat`     | New feature                                      |
+| `fix`      | Bug fix                                          |
+| `docs`     | Documentation only changes                       |
+| `style`    | Code style changes (formatting, semicolons, etc) |
+| `refactor` | Code refactoring                                 |
+| `perf`     | Performance improvements                         |
+| `test`     | Adding or updating tests                         |
+| `chore`    | Build process or auxiliary tool changes          |
 
 ### Examples
 
@@ -275,6 +283,7 @@ chore(deps): update Next.js to version 16
 ### Scope Guidelines
 
 Common scopes:
+
 - `invoices` - Sales invoice module
 - `receipts` - Receipt management
 - `journal` - Journal entries
@@ -290,6 +299,7 @@ Common scopes:
 ### Before Submitting
 
 1. **Update your branch**
+
    ```bash
    git checkout develop
    git pull origin develop
@@ -298,6 +308,7 @@ Common scopes:
    ```
 
 2. **Run tests**
+
    ```bash
    bun run test
    bun run test:e2e
@@ -315,28 +326,34 @@ Common scopes:
    - Example: `[FEAT] Add multi-currency support`
 
 2. **Description Template**:
+
    ```markdown
    ## Description
+
    Brief description of changes
 
    ## Type of Change
+
    - [ ] Bug fix
    - [ ] New feature
    - [ ] Breaking change
    - [ ] Documentation update
 
    ## Testing
+
    - [ ] Unit tests added/updated
    - [ ] E2E tests added/updated
    - [ ] Manual testing performed
 
    ## Checklist
+
    - [ ] Code follows style guidelines
    - [ ] Self-review completed
    - [ ] Documentation updated
    - [ ] No console errors
 
    ## Screenshots (if applicable)
+
    [Add screenshots for UI changes]
    ```
 
@@ -380,12 +397,12 @@ describe('calculateVAT', () => {
 
 ### Test Coverage Requirements
 
-| Module | Minimum Coverage |
-|--------|------------------|
-| Critical (tax, calculations) | 90% |
-| Business logic | 80% |
-| UI components | 70% |
-| API routes | 80% |
+| Module                       | Minimum Coverage |
+| ---------------------------- | ---------------- |
+| Critical (tax, calculations) | 90%              |
+| Business logic               | 80%              |
+| UI components                | 70%              |
+| API routes                   | 80%              |
 
 ### E2E Tests
 
@@ -394,14 +411,14 @@ describe('calculateVAT', () => {
 test('user can create and issue invoice', async ({ page }) => {
   await page.goto('/invoices');
   await page.click('button:has-text("New Invoice")');
-  
+
   await page.fill('[name="customerId"]', 'CUST-001');
   await page.fill('[name="lines[0].description"]', 'Service Fee');
   await page.fill('[name="lines[0].amount"]', '1000');
-  
+
   await page.click('button:has-text("Save")');
   await page.click('button:has-text("Issue")');
-  
+
   await expect(page.locator('.status')).toHaveText('ISSUED');
 });
 ```
@@ -449,12 +466,14 @@ function calculateVAT(
 ### Documentation Updates
 
 Update documentation when:
+
 - Adding new features
 - Changing API contracts
 - Modifying database schema
 - Updating configuration options
 
 Documentation locations:
+
 - `/docs/*.md` - User and technical docs
 - `API_DOCUMENTATION.md` - API reference
 - `README.md` - Project overview
@@ -467,50 +486,42 @@ Documentation locations:
 Use this template:
 
 ```markdown
-**Description**
-Clear description of the bug
+**Description** Clear description of the bug
 
 **Steps to Reproduce**
+
 1. Go to '...'
 2. Click on '...'
 3. Scroll down to '...'
 4. See error
 
-**Expected Behavior**
-What should happen
+**Expected Behavior** What should happen
 
-**Actual Behavior**
-What actually happens
+**Actual Behavior** What actually happens
 
-**Screenshots**
-If applicable
+**Screenshots** If applicable
 
 **Environment**
+
 - OS: [e.g., Windows 10]
 - Browser: [e.g., Chrome 120]
 - Version: [e.g., 1.0.0]
 
-**Additional Context**
-Any other information
+**Additional Context** Any other information
 ```
 
 ### Feature Requests
 
 ```markdown
-**Feature Description**
-Clear description of the feature
+**Feature Description** Clear description of the feature
 
-**Problem Statement**
-What problem does this solve?
+**Problem Statement** What problem does this solve?
 
-**Proposed Solution**
-How should it work?
+**Proposed Solution** How should it work?
 
-**Alternatives Considered**
-Other approaches
+**Alternatives Considered** Other approaches
 
-**Additional Context**
-Mockups, examples, etc.
+**Additional Context** Mockups, examples, etc.
 ```
 
 ### Security Issues
@@ -520,6 +531,7 @@ Mockups, examples, etc.
 Email: security@thaiaccounting.com
 
 Include:
+
 - Description of vulnerability
 - Steps to reproduce
 - Potential impact
@@ -536,6 +548,7 @@ Include:
 ### Recognition
 
 Contributors will be:
+
 - Listed in CONTRIBUTORS.md
 - Mentioned in release notes
 - Awarded contributor badges
@@ -543,6 +556,7 @@ Contributors will be:
 ### Becoming a Maintainer
 
 Regular contributors may be invited to become maintainers. Criteria:
+
 - Consistent quality contributions
 - Understanding of codebase
 - Community participation
@@ -552,10 +566,11 @@ Regular contributors may be invited to become maintainers. Criteria:
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the same license as the project (MIT License).
+By contributing, you agree that your contributions will be licensed under the
+same license as the project (MIT License).
 
 ---
 
 Thank you for contributing to Thai Accounting ERP! 🎉
 
-*Last Updated: March 16, 2026*
+_Last Updated: March 16, 2026_

@@ -1,13 +1,19 @@
 # AGENTS.md - Infrastructure Operations
 
-This file provides essential guidance for AI coding agents working on **Thai Accounting ERP Infrastructure** - DevOps, Docker, Kubernetes, and cloud deployment configurations.
+This file provides essential guidance for AI coding agents working on **Thai
+Accounting ERP Infrastructure** - DevOps, Docker, Kubernetes, and cloud
+deployment configurations.
 
 ## Parent Reference
+
 - **Parent**: [../AGENTS.md](../AGENTS.md) - Main project documentation
 
 ## Infrastructure Overview
 
-The infrastructure directory contains complete DevOps and deployment configurations for the Thai Accounting ERP system using modern cloud-native technologies. The setup supports multi-environment deployments with blue-green deployment strategies, automated scaling, and comprehensive monitoring.
+The infrastructure directory contains complete DevOps and deployment
+configurations for the Thai Accounting ERP system using modern cloud-native
+technologies. The setup supports multi-environment deployments with blue-green
+deployment strategies, automated scaling, and comprehensive monitoring.
 
 ## Directory Structure
 
@@ -65,18 +71,18 @@ infrastructure/
 
 ## Technology Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Containerization** | Docker | Application containerization |
-| **Orchestration** | Kubernetes | Container orchestration |
-| **Package Management** | Helm | Kubernetes package management |
-| **Infrastructure as Code** | Terraform | AWS infrastructure provisioning |
-| **Reverse Proxy** | NGINX | Load balancing and SSL termination |
-| **CDN** | AWS CloudFront | Content delivery network |
-| **Database** | AWS RDS | Managed PostgreSQL database |
-| **Monitoring** | Prometheus + Grafana | Application metrics |
-| **Container Registry** | GitHub Container Registry | Image storage |
-| **Load Balancer** | AWS ALB | Application load balancing |
+| Component                  | Technology                | Purpose                            |
+| -------------------------- | ------------------------- | ---------------------------------- |
+| **Containerization**       | Docker                    | Application containerization       |
+| **Orchestration**          | Kubernetes                | Container orchestration            |
+| **Package Management**     | Helm                      | Kubernetes package management      |
+| **Infrastructure as Code** | Terraform                 | AWS infrastructure provisioning    |
+| **Reverse Proxy**          | NGINX                     | Load balancing and SSL termination |
+| **CDN**                    | AWS CloudFront            | Content delivery network           |
+| **Database**               | AWS RDS                   | Managed PostgreSQL database        |
+| **Monitoring**             | Prometheus + Grafana      | Application metrics                |
+| **Container Registry**     | GitHub Container Registry | Image storage                      |
+| **Load Balancer**          | AWS ALB                   | Application load balancing         |
 
 ## Deployment Strategies
 
@@ -124,7 +130,7 @@ Kubernetes handles rolling updates automatically:
 strategy:
   type: RollingUpdate
   rollingUpdate:
-    maxSurge: 1        # Max pods added
+    maxSurge: 1 # Max pods added
     maxUnavailable: 0 # Max pods unavailable
 ```
 
@@ -154,7 +160,8 @@ bun run build
 docker build -t thai-erp:latest .
 ```
 
-**CRITICAL**: In standalone mode, update `.next/standalone/.env` with absolute paths:
+**CRITICAL**: In standalone mode, update `.next/standalone/.env` with absolute
+paths:
 
 ```env
 DATABASE_URL=file:/absolute/path/to/.next/standalone/prisma/dev.db
@@ -376,9 +383,9 @@ Application exposes metrics at `/api/metrics`:
 
 ```yaml
 # Prometheus annotations
-prometheus.io/scrape: "true"
-prometheus.io/port: "3000"
-prometheus.io/path: "/api/metrics"
+prometheus.io/scrape: 'true'
+prometheus.io/port: '3000'
+prometheus.io/path: '/api/metrics'
 ```
 
 ### Health Endpoints
@@ -431,13 +438,13 @@ spec:
     matchLabels:
       app: thai-erp
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: thai-erp
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: thai-erp
 ```
 
 ### AWS Security
@@ -519,12 +526,14 @@ kubectl scale deployment thai-erp --replicas=0 -n thai-erp
 ### Common Issues
 
 1. **Database Connection**
+
    ```bash
    # Check database connectivity
    kubectl exec -it deployment/thai-erp -n thai-erp -- nslookup rds-endpoint
    ```
 
 2. **Pod Failures**
+
    ```bash
    # Check pod events
    kubectl describe pod pod-name -n thai-erp
@@ -580,4 +589,5 @@ kubectl top pods -n thai-erp --sort-by=cpu
 
 **Last Updated**: 2026-04-16
 
-For questions or issues, refer to the main [../AGENTS.md](../AGENTS.md) for general project guidance.
+For questions or issues, refer to the main [../AGENTS.md](../AGENTS.md) for
+general project guidance.

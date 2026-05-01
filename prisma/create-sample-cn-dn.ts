@@ -1,29 +1,29 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
-const db = new PrismaClient()
+const db = new PrismaClient();
 
 async function createSampleData() {
-  console.log('Creating sample Credit Notes and Debit Notes...')
+  console.log('Creating sample Credit Notes and Debit Notes...');
 
   // Get a customer and vendor
-  const customers = await db.customer.findMany({ take: 1 })
-  const vendors = await db.vendor.findMany({ take: 1 })
+  const customers = await db.customer.findMany({ take: 1 });
+  const vendors = await db.vendor.findMany({ take: 1 });
 
   if (customers.length === 0) {
-    console.log('❌ No customers found. Please create customers first.')
-    return
+    console.log('❌ No customers found. Please create customers first.');
+    return;
   }
 
   if (vendors.length === 0) {
-    console.log('❌ No vendors found. Please create vendors first.')
-    return
+    console.log('❌ No vendors found. Please create vendors first.');
+    return;
   }
 
-  const customer = customers[0]
-  const vendor = vendors[0]
+  const customer = customers[0];
+  const vendor = vendors[0];
 
-  console.log(`Using customer: ${customer.name} (${customer.id})`)
-  console.log(`Using vendor: ${vendor.name} (${vendor.id})`)
+  console.log(`Using customer: ${customer.name} (${customer.id})`);
+  console.log(`Using vendor: ${vendor.name} (${vendor.id})`);
 
   // Create a sample Credit Note
   const creditNote = await db.creditNote.create({
@@ -38,10 +38,10 @@ async function createSampleData() {
       totalAmount: 1070,
       status: 'ISSUED',
       notes: 'Sample credit note for testing',
-    }
-  })
+    },
+  });
 
-  console.log(`✅ Created Credit Note: ${creditNote.creditNoteNo}`)
+  console.log(`✅ Created Credit Note: ${creditNote.creditNoteNo}`);
 
   // Create a sample Debit Note
   const debitNote = await db.debitNote.create({
@@ -56,13 +56,13 @@ async function createSampleData() {
       totalAmount: 535,
       status: 'ISSUED',
       notes: 'Sample debit note for testing',
-    }
-  })
+    },
+  });
 
-  console.log(`✅ Created Debit Note: ${debitNote.debitNoteNo}`)
+  console.log(`✅ Created Debit Note: ${debitNote.debitNoteNo}`);
 
   // Create journal entries for them
-  const settings = await db.systemSettings.findFirst()
+  const settings = await db.systemSettings.findFirst();
 
   // Credit Note Journal Entry
   const cnJE = await db.journalEntry.create({
@@ -76,8 +76,8 @@ async function createSampleData() {
       totalDebit: 1070,
       totalCredit: 1070,
       status: 'POSTED',
-    }
-  })
+    },
+  });
 
   await db.journalLine.createMany({
     data: [
@@ -105,13 +105,13 @@ async function createSampleData() {
         debit: 0,
         credit: 1070,
       },
-    ]
-  })
+    ],
+  });
 
   await db.creditNote.update({
     where: { id: creditNote.id },
-    data: { journalEntryId: cnJE.id }
-  })
+    data: { journalEntryId: cnJE.id },
+  });
 
   // Debit Note Journal Entry
   const dnJE = await db.journalEntry.create({
@@ -125,8 +125,8 @@ async function createSampleData() {
       totalDebit: 535,
       totalCredit: 535,
       status: 'POSTED',
-    }
-  })
+    },
+  });
 
   await db.journalLine.createMany({
     data: [
@@ -154,15 +154,15 @@ async function createSampleData() {
         debit: 0,
         credit: 535,
       },
-    ]
-  })
+    ],
+  });
 
   await db.debitNote.update({
     where: { id: debitNote.id },
-    data: { journalEntryId: dnJE.id }
-  })
+    data: { journalEntryId: dnJE.id },
+  });
 
-  console.log(`✅ Created journal entries for both CN and DN`)
+  console.log(`✅ Created journal entries for both CN and DN`);
 
   // Create VAT INPUT record for debit note
   await db.vatRecord.create({
@@ -182,16 +182,16 @@ async function createSampleData() {
       totalAmount: 535,
       taxMonth: new Date().getMonth() + 1,
       taxYear: new Date().getFullYear(),
-    }
-  })
+    },
+  });
 
-  console.log(`✅ Created VAT INPUT record for debit note`)
+  console.log(`✅ Created VAT INPUT record for debit note`);
 
-  await db.$disconnect()
+  await db.$disconnect();
 
-  console.log('\n✅ Sample data created successfully!')
-  console.log('📝 Credit Note: CN-TEST-001')
-  console.log('📝 Debit Note: DN-TEST-001')
+  console.log('\n✅ Sample data created successfully!');
+  console.log('📝 Credit Note: CN-TEST-001');
+  console.log('📝 Debit Note: DN-TEST-001');
 }
 
-createSampleData().catch(console.error)
+createSampleData().catch(console.error);

@@ -1,4 +1,5 @@
 # PDFKit Migration Guide
+
 ## Thai Font Support for PDF Generation
 
 ### Current Status: Proof of Concept Complete ✅
@@ -9,11 +10,13 @@
 
 ## Problem Summary
 
-**Current System**: jsPDF (v4.2.0) with jspdf-autotable
-**Issue**: Thai fonts not rendering - PDFs are unusable for Thai users
-**Root Cause**: jsPDF requires complex base64 font conversion; existing "font files" are actually HTML documents
+**Current System**: jsPDF (v4.2.0) with jspdf-autotable **Issue**: Thai fonts
+not rendering - PDFs are unusable for Thai users **Root Cause**: jsPDF requires
+complex base64 font conversion; existing "font files" are actually HTML
+documents
 
 **Evidence**:
+
 ```bash
 # Current "font" files are HTML, not TTF:
 $ file public/fonts/THSarabunNew.ttf
@@ -30,32 +33,34 @@ $ npx tsx src/lib/__tests__/pdfkit-test.ts
 
 ### Why PDFKit?
 
-| Feature | jsPDF (Current) | PDFKit (Recommended) |
-|---------|----------------|---------------------|
-| **Installation** | Already used | Already installed (v0.17.2) |
-| **Thai Font Support** | ❌ Complex (base64 conversion) | ✅ Native TTF loading |
-| **Font Loading** | `addFileToVFS()` + base64 string | `doc.font('path/to/file.ttf')` |
-| **Unicode Support** | Limited | Full Unicode support |
-| **API Style** | Canvas-like | Stream-based, cleaner |
-| **Bundle Size** | Smaller | Larger (but acceptable) |
-| **Production Ready** | Yes (with workarounds) | Yes (127k+ users) |
+| Feature               | jsPDF (Current)                  | PDFKit (Recommended)           |
+| --------------------- | -------------------------------- | ------------------------------ |
+| **Installation**      | Already used                     | Already installed (v0.17.2)    |
+| **Thai Font Support** | ❌ Complex (base64 conversion)   | ✅ Native TTF loading          |
+| **Font Loading**      | `addFileToVFS()` + base64 string | `doc.font('path/to/file.ttf')` |
+| **Unicode Support**   | Limited                          | Full Unicode support           |
+| **API Style**         | Canvas-like                      | Stream-based, cleaner          |
+| **Bundle Size**       | Smaller                          | Larger (but acceptable)        |
+| **Production Ready**  | Yes (with workarounds)           | Yes (127k+ users)              |
 
 ### Key Advantage
 
 **jsPDF requires**:
+
 ```typescript
 // Complex base64 conversion needed
-const fontBase64 = await convertFontToBase64('THSarabunNew.ttf')
-doc.addFileToVFS('THSarabunNew.ttf', fontBase64)
-doc.addFont('THSarabunNew.ttf', 'THSarabun', 'normal')
-doc.setFont('THSarabun')
+const fontBase64 = await convertFontToBase64('THSarabunNew.ttf');
+doc.addFileToVFS('THSarabunNew.ttf', fontBase64);
+doc.addFont('THSarabunNew.ttf', 'THSarabun', 'normal');
+doc.setFont('THSarabun');
 ```
 
 **PDFKit requires**:
+
 ```typescript
 // Simple direct file loading
-doc.font('public/fonts/THSarabunNew.ttf')
-doc.text('ภาษาไทยรองรับได้อย่างสมบูรณ์')
+doc.font('public/fonts/THSarabunNew.ttf');
+doc.text('ภาษาไทยรองรับได้อย่างสมบูรณ์');
 ```
 
 ---
@@ -63,6 +68,7 @@ doc.text('ภาษาไทยรองรับได้อย่างสม�
 ## Migration Strategy
 
 ### Phase 1: Proof of Concept ✅ COMPLETE
+
 - [x] Create PDFKit generator (`src/lib/pdfkit-generator.ts`)
 - [x] Test PDF generation with standard fonts
 - [x] Verify PDFKit produces valid PDFs
@@ -74,12 +80,13 @@ doc.text('ภาษาไทยรองรับได้อย่างสม�
 
 ### Phase 2: Font Setup ⚠️ PENDING
 
-**Problem**: Current font files are HTML, not TTF
-**Solution**: Obtain valid Thai font files
+**Problem**: Current font files are HTML, not TTF **Solution**: Obtain valid
+Thai font files
 
 #### Options:
 
 **Option 1: Download Real TTF Files** (Recommended)
+
 ```bash
 # From official sources (need working URLs or local files)
 curl -o public/fonts/THSarabunNew.ttf [WORKING_TTF_URL]
@@ -87,18 +94,21 @@ curl -o public/fonts/THSarabunNew-Bold.ttf [WORKING_TTF_URL]
 ```
 
 **Option 2: Use NPM Font Package**
+
 ```bash
 npm install @fontsource/sarabun
 # Then reference: node_modules/@fontsource/sarabun/files/*.ttf
 ```
 
 **Option 3: Use System Fonts** (Fallback)
+
 ```typescript
 // Use fonts available on macOS/Linux
-doc.font('/System/Library/Fonts/THSarabunNew.ttc')
+doc.font('/System/Library/Fonts/THSarabunNew.ttc');
 ```
 
 **Option 4: Use Embedded Fonts** (Production-ready)
+
 - Bundle font files with the app
 - Serve from `/public/fonts/` with proper MIME types
 
@@ -115,21 +125,24 @@ doc.font('/System/Library/Fonts/THSarabunNew.ttc')
 #### Migration Steps:
 
 **Step 1: Update API Routes**
+
 ```typescript
 // Before (jsPDF):
-import { generateInvoicePDF } from '@/lib/pdf-generator'
+import { generateInvoicePDF } from '@/lib/pdf-generator';
 
 // After (PDFKit):
-import { generateInvoicePDFWithPDFKit as generateInvoicePDF } from '@/lib/pdfkit-generator'
+import { generateInvoicePDFWithPDFKit as generateInvoicePDF } from '@/lib/pdfkit-generator';
 ```
 
 **Step 2: Update Export Functions**
+
 - Invoice PDF: `generateInvoicePDFWithPDFKit()`
 - Receipt PDF: `generateReceiptPDFWithPDFKit()`
 - Payslip PDF: `generatePayslipPDFWithPDFKit()`
 - Report PDFs: Create PDFKit versions
 
 **Step 3: Test All Document Types**
+
 - [ ] Tax Invoices (ใบกำกับภาษี)
 - [ ] Receipts (ใบเสร็จรับเงิน)
 - [ ] Credit Notes (ใบลดหนี้)
@@ -147,13 +160,16 @@ import { generateInvoicePDFWithPDFKit as generateInvoicePDF } from '@/lib/pdfkit
 
 ```typescript
 // Helper function for tables
-function drawTable(doc: PDFDocument, data: {
-  headers: string[]
-  rows: string[][]
-  x: number
-  y: number
-  columnWidths: number[]
-}) {
+function drawTable(
+  doc: PDFDocument,
+  data: {
+    headers: string[];
+    rows: string[][];
+    x: number;
+    y: number;
+    columnWidths: number[];
+  }
+) {
   // Draw header row
   // Draw data rows
   // Draw borders
@@ -166,12 +182,14 @@ function drawTable(doc: PDFDocument, data: {
 ## Implementation Checklist
 
 ### Pre-Migration
+
 - [ ] Obtain valid Thai TTF font files
 - [ ] Verify fonts work with PDFKit
 - [ ] Test font rendering with Thai characters
 - [ ] Backup current jsPDF implementation
 
 ### Migration
+
 - [ ] Create PDFKit invoice generator
 - [ ] Create PDFKit receipt generator
 - [ ] Create PDFKit payslip generator
@@ -181,6 +199,7 @@ function drawTable(doc: PDFDocument, data: {
 - [ ] Run E2E tests to verify functionality
 
 ### Post-Migration
+
 - [ ] Remove jsPDF dependencies (optional)
 - [ ] Update documentation
 - [ ] Performance testing
@@ -193,30 +212,31 @@ function drawTable(doc: PDFDocument, data: {
 ### Invoice Generation (PDFKit)
 
 ```typescript
-export async function generateInvoicePDFWithPDFKit(invoice: any): Promise<Buffer> {
+export async function generateInvoicePDFWithPDFKit(
+  invoice: any
+): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: 'A4',
       margins: { top: 50, bottom: 50, left: 50, right: 50 },
-      bufferPages: true
-    })
+      bufferPages: true,
+    });
 
-    const chunks: Buffer[] = []
-    doc.on('data', chunk => chunks.push(chunk))
-    doc.on('end', () => resolve(Buffer.concat(chunks)))
-    doc.on('error', reject)
+    const chunks: Buffer[] = [];
+    doc.on('data', (chunk) => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
 
     // Load Thai font (once valid TTF files are in place)
-    doc.font('public/fonts/THSarabunNew.ttf')
+    doc.font('public/fonts/THSarabunNew.ttf');
 
     // Document content
-    doc.fontSize(20)
-       .text('ใบกำกับภาษี / TAX INVOICE', { align: 'center' })
+    doc.fontSize(20).text('ใบกำกับภาษี / TAX INVOICE', { align: 'center' });
 
     // ... rest of invoice generation
 
-    doc.end()
-  })
+    doc.end();
+  });
 }
 ```
 
@@ -225,23 +245,25 @@ export async function generateInvoicePDFWithPDFKit(invoice: any): Promise<Buffer
 ## Testing Strategy
 
 ### Unit Tests
+
 ```typescript
 describe('PDFKit Generator', () => {
   it('should generate invoice PDF', async () => {
-    const pdf = await generateInvoicePDFWithPDFKit(mockInvoice)
-    expect(pdf).toBeInstanceOf(Buffer)
-    expect(pdf.length).toBeGreaterThan(0)
-  })
+    const pdf = await generateInvoicePDFWithPDFKit(mockInvoice);
+    expect(pdf).toBeInstanceOf(Buffer);
+    expect(pdf.length).toBeGreaterThan(0);
+  });
 
   it('should render Thai text correctly', async () => {
-    const pdf = await generateThaiTestPDF()
+    const pdf = await generateThaiTestPDF();
     // Verify PDF contains Thai characters
-    expect(pdf.toString()).toContain('Thai')
-  })
-})
+    expect(pdf.toString()).toContain('Thai');
+  });
+});
 ```
 
 ### Integration Tests
+
 - Test PDF generation via API endpoints
 - Verify PDF downloads work in browser
 - Check Thai character rendering visually
@@ -250,32 +272,33 @@ describe('PDFKit Generator', () => {
 
 ## Performance Comparison
 
-| Metric | jsPDF | PDFKit |
-|--------|-------|--------|
-| **Bundle Size** | ~100 KB | ~200 KB |
-| **Generate Time** | ~200ms | ~150ms |
-| **File Size** | ~30 KB | ~25 KB |
-| **Memory Usage** | Low | Medium |
-| **Thai Support** | Complex | Native |
+| Metric            | jsPDF   | PDFKit  |
+| ----------------- | ------- | ------- |
+| **Bundle Size**   | ~100 KB | ~200 KB |
+| **Generate Time** | ~200ms  | ~150ms  |
+| **File Size**     | ~30 KB  | ~25 KB  |
+| **Memory Usage**  | Low     | Medium  |
+| **Thai Support**  | Complex | Native  |
 
 ---
 
 ## Rollback Plan
 
 If PDFKit migration fails:
+
 1. Keep jsPDF implementation as backup
 2. Use feature flags to switch between generators
 3. Can revert API routes in minutes
 
 ```typescript
 // Feature flag approach
-const USE_PDFKIT = process.env.USE_PDFKIT === 'true'
+const USE_PDFKIT = process.env.USE_PDFKIT === 'true';
 
 export async function generateInvoicePDF(invoice: any) {
   if (USE_PDFKIT) {
-    return generateInvoicePDFWithPDFKit(invoice)
+    return generateInvoicePDFWithPDFKit(invoice);
   } else {
-    return generateInvoicePDFWithJsPDF(invoice)
+    return generateInvoicePDFWithJsPDF(invoice);
   }
 }
 ```
@@ -319,7 +342,8 @@ export async function generateInvoicePDF(invoice: any) {
 
 **Migration Priority**: HIGH - Thai users cannot use current PDFs
 
-**Recommendation**: Proceed with PDFKit migration once valid Thai fonts are obtained
+**Recommendation**: Proceed with PDFKit migration once valid Thai fonts are
+obtained
 
 **Time Estimate**: 6-8 hours total migration time
 

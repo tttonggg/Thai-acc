@@ -1,11 +1,11 @@
 # Settings Component - Verification Checklist
 
-**Date:** 2025-03-13
-**Status:** ✅ READY FOR TESTING
+**Date:** 2025-03-13 **Status:** ✅ READY FOR TESTING
 
 ## Pre-Deployment Checklist
 
 ### Database Changes
+
 - [x] `SystemSettings` model added to schema
 - [x] `Company` model updated with `systemSettings` relation
 - [x] `prisma generate` run successfully
@@ -15,6 +15,7 @@
 - [x] Seed run successfully (verified output)
 
 ### API Implementation
+
 - [x] `/api/settings` route created
 - [x] GET endpoint returns all settings
 - [x] PUT endpoint updates tax rates
@@ -24,6 +25,7 @@
 - [x] Proper HTTP status codes
 
 ### Component Implementation
+
 - [x] Settings component rewritten
 - [x] Company info tab functional
 - [x] Documents tab functional
@@ -35,6 +37,7 @@
 - [x] Form validation added
 
 ### Features Implemented
+
 - [x] Company profile editing
 - [x] Company profile saving
 - [x] Logo upload (existing, maintained)
@@ -49,6 +52,7 @@
 - [x] Backup/restore (existing, maintained)
 
 ### User Interface
+
 - [x] 4 tabs: Company, Documents, Taxes, Backup
 - [x] Responsive layout (grid cols-1 md:grid-cols-2)
 - [x] Thai language labels
@@ -61,6 +65,7 @@
 - [x] Reset button for defaults
 
 ### Code Quality
+
 - [x] TypeScript interfaces defined
 - [x] Proper error handling
 - [x] No console errors in IDE
@@ -74,6 +79,7 @@
 ### Manual Testing Required
 
 #### 1. Company Information Tab
+
 - [ ] Load page - verify company info displays
 - [ ] Edit company name - save - verify persists
 - [ ] Edit address - save - verify persists
@@ -83,6 +89,7 @@
 - [ ] Test validation (empty fields)
 
 #### 2. Documents Tab
+
 - [ ] Load page - verify 9 document types display
 - [ ] Change invoice prefix - save - verify persists
 - [ ] Toggle monthly reset - save - verify persists
@@ -93,6 +100,7 @@
 - [ ] Test all 9 document types
 
 #### 3. Taxes Tab
+
 - [ ] Load page - verify default rates display (7%, 3%, 5%, etc.)
 - [ ] Change VAT rate - save - verify persists
 - [ ] Change WHT service rate - save - verify persists
@@ -103,6 +111,7 @@
 - [ ] Verify standard rate hints display
 
 #### 4. Backup Tab
+
 - [ ] Click export - verify file downloads
 - [ ] Verify file format is JSON
 - [ ] Import exported file - verify success
@@ -111,6 +120,7 @@
 ### Integration Testing
 
 #### After Saving Settings
+
 - [ ] Create new invoice - verify document number uses format
 - [ ] Create new invoice - verify tax rate uses default
 - [ ] Generate invoice PDF - verify company info displays
@@ -119,12 +129,14 @@
 - [ ] Create payment - verify WHT rate applies
 
 #### Error Scenarios
+
 - [ ] Simulate network error - verify error toast
 - [ ] Enter invalid data - verify validation error
 - [ ] Concurrent edits - verify no data loss
 - [ ] Rapid save clicks - verify only one saves
 
 ### Browser Testing
+
 - [ ] Chrome - verify all features work
 - [ ] Firefox - verify all features work
 - [ ] Safari - verify all features work
@@ -135,12 +147,14 @@
 ## Performance Testing
 
 ### Load Times
+
 - [ ] Initial page load < 2 seconds
 - [ ] Settings fetch < 500ms
 - [ ] Save operation < 1 second
 - [ ] Document number preview updates instantly
 
 ### Database
+
 - [ ] Query performance acceptable
 - [ ] No N+1 queries
 - [ ] Proper indexing on settings
@@ -161,6 +175,7 @@ None at this time.
 ## Future Enhancements
 
 Potential improvements for later:
+
 1. Add fiscal year configuration
 2. Add document number history/audit log
 3. Add settings search/filter
@@ -192,6 +207,7 @@ Potential improvements for later:
 ---
 
 **Notes:**
+
 - All changes are backward compatible
 - No breaking changes to existing APIs
 - Existing company/backup functionality maintained

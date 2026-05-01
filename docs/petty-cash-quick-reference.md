@@ -1,6 +1,7 @@
 # Petty Cash API Quick Reference
 
 ## Base URL
+
 ```
 /api/petty-cash
 ```
@@ -10,11 +11,13 @@
 ### Vouchers
 
 #### List Vouchers
+
 ```http
 GET /api/petty-cash/vouchers?fundId={id}&isReimbursed={boolean}
 ```
 
 #### Create Voucher
+
 ```http
 POST /api/petty-cash/vouchers
 Content-Type: application/json
@@ -30,26 +33,31 @@ Content-Type: application/json
 ```
 
 #### Get Voucher
+
 ```http
 GET /api/petty-cash/vouchers/{id}
 ```
 
 #### Delete Voucher (unapproved only)
+
 ```http
 DELETE /api/petty-cash/vouchers/{id}
 ```
 
 #### Approve Voucher (creates journal entry)
+
 ```http
 POST /api/petty-cash/vouchers/{id}/approve
 ```
 
 **Creates Journal Entry**:
+
 - Dr: Expense account
 - Cr: Petty cash fund
 - Status: POSTED
 
 #### Reimburse Fund
+
 ```http
 POST /api/petty-cash/vouchers/{id}/reimburse
 Content-Type: application/json
@@ -60,6 +68,7 @@ Content-Type: application/json
 ```
 
 **Creates Journal Entry**:
+
 - Dr: Petty cash fund
 - Cr: Cash/bank account
 - Updates fund balance
@@ -67,11 +76,13 @@ Content-Type: application/json
 ### Funds
 
 #### List Funds
+
 ```http
 GET /api/petty-cash/funds
 ```
 
 #### Create Fund
+
 ```http
 POST /api/petty-cash/funds
 Content-Type: application/json
@@ -88,6 +99,7 @@ Content-Type: application/json
 ## Response Format
 
 ### Success
+
 ```json
 {
   "success": true,
@@ -97,6 +109,7 @@ Content-Type: application/json
 ```
 
 ### Error
+
 ```json
 {
   "success": false,
@@ -107,6 +120,7 @@ Content-Type: application/json
 ## Journal Entry Structure
 
 ### Approval Entry
+
 ```
 Description: เบิกเงินสดย่อย {voucherNo} - {description}
 Document Type: PETTY_CASH_VOUCHER
@@ -126,6 +140,7 @@ Line 2:
 ```
 
 ### Reimbursement Entry
+
 ```
 Description: เติมเงินสดย่อย {fundName} ใบเบิก {voucherNo}
 Document Type: PETTY_CASH_REIMBURSEMENT
@@ -146,13 +161,13 @@ Line 2:
 
 ## Common Errors
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| เงินสดย่อยไม่เพียงพอ | Insufficient fund balance | Reimburse fund first |
-| ได้รับการอนุมัติแล้ว | Already approved | Check existing journal entry |
-| ได้รับการเติมเงินแล้ว | Already reimbursed | Cannot reimburse twice |
-| ไม่สามารถลบใบเบิกที่ได้รับการอนุมัติแล้ว | Cannot delete approved | Use reversing entry |
-| ไม่พบบัญชีเงินสด/ธนาคาร | Invalid cash/bank account | Provide valid account ID |
+| Error                                    | Cause                     | Solution                     |
+| ---------------------------------------- | ------------------------- | ---------------------------- |
+| เงินสดย่อยไม่เพียงพอ                     | Insufficient fund balance | Reimburse fund first         |
+| ได้รับการอนุมัติแล้ว                     | Already approved          | Check existing journal entry |
+| ได้รับการเติมเงินแล้ว                    | Already reimbursed        | Cannot reimburse twice       |
+| ไม่สามารถลบใบเบิกที่ได้รับการอนุมัติแล้ว | Cannot delete approved    | Use reversing entry          |
+| ไม่พบบัญชีเงินสด/ธนาคาร                  | Invalid cash/bank account | Provide valid account ID     |
 
 ## Status Flow
 
@@ -167,6 +182,7 @@ REIMBURSED (isReimbursed = true)
 ## Database Fields
 
 ### PettyCashVoucher
+
 - `id`: Primary key
 - `voucherNo`: Unique voucher number
 - `fundId`: FK to PettyCashFund
@@ -176,6 +192,7 @@ REIMBURSED (isReimbursed = true)
 - `isReimbursed`: Boolean
 
 ### PettyCashFund
+
 - `id`: Primary key
 - `glAccountId`: FK to ChartOfAccount (asset)
 - `currentBalance`: Current fund balance
@@ -200,49 +217,49 @@ const voucher = await fetch('/api/petty-cash/vouchers', {
     payee: 'สมชาย ใจดี',
     description: 'ซื้อเอกสาร',
     amount: 500,
-    glExpenseAccountId: 'exp_456'
-  })
-}).then(r => r.json())
+    glExpenseAccountId: 'exp_456',
+  }),
+}).then((r) => r.json());
 
 // 2. Approve (creates journal entry)
 await fetch(`/api/petty-cash/vouchers/${voucher.data.id}/approve`, {
-  method: 'POST'
-})
+  method: 'POST',
+});
 
 // 3. Reimburse (optional)
 await fetch(`/api/petty-cash/vouchers/${voucher.data.id}/reimburse`, {
   method: 'POST',
   body: JSON.stringify({
-    cashBankAccountId: 'cash_789'
-  })
-})
+    cashBankAccountId: 'cash_789',
+  }),
+});
 ```
 
 ## TypeScript Types
 
 ```typescript
 interface PettyCashVoucher {
-  id: string
-  voucherNo: string
-  fundId: string
-  date: Date
-  amount: number
-  payee: string
-  description: string
-  glExpenseAccountId: string
-  journalEntryId?: string
-  isReimbursed: boolean
-  createdAt: Date
+  id: string;
+  voucherNo: string;
+  fundId: string;
+  date: Date;
+  amount: number;
+  payee: string;
+  description: string;
+  glExpenseAccountId: string;
+  journalEntryId?: string;
+  isReimbursed: boolean;
+  createdAt: Date;
 }
 
 interface PettyCashFund {
-  id: string
-  code: string
-  name: string
-  custodianId: string
-  glAccountId: string
-  maxAmount: number
-  currentBalance: number
-  isActive: boolean
+  id: string;
+  code: string;
+  name: string;
+  custodianId: string;
+  glAccountId: string;
+  maxAmount: number;
+  currentBalance: number;
+  isActive: boolean;
 }
 ```

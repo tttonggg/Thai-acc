@@ -63,7 +63,7 @@ export class LoginPage {
       ADMIN: { email: 'admin@thaiaccounting.com', password: 'admin123' },
       ACCOUNTANT: { email: 'accountant@thaiaccounting.com', password: 'acc123' },
       USER: { email: 'user@thaiaccounting.com', password: 'user123' },
-      VIEWER: { email: 'viewer@thaiaccounting.com', password: 'viewer123' }
+      VIEWER: { email: 'viewer@thaiaccounting.com', password: 'viewer123' },
     };
 
     const user = credentials[role];
@@ -80,7 +80,7 @@ export class LoginPage {
 
     await Promise.race([
       dashboard.waitFor({ state: 'visible', timeout: 10000 }),
-      sidebar.waitFor({ state: 'visible', timeout: 10000 })
+      sidebar.waitFor({ state: 'visible', timeout: 10000 }),
     ]);
   }
 
@@ -95,7 +95,7 @@ export class LoginPage {
    * Get current error message text
    */
   async getErrorMessage(): Promise<string> {
-    return await this.errorMessage.textContent() || '';
+    return (await this.errorMessage.textContent()) || '';
   }
 
   /**

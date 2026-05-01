@@ -35,8 +35,8 @@ async function globalTeardown(config: FullConfig) {
         artifacts: {
           screenshots: 0,
           videos: 0,
-          traces: 0
-        }
+          traces: 0,
+        },
       };
 
       // Count artifacts
@@ -106,7 +106,6 @@ async function globalTeardown(config: FullConfig) {
     console.log('\n========================================');
     console.log('✅ Global Teardown Complete');
     console.log('========================================\n');
-
   } catch (error) {
     console.error('\n❌ Global Teardown Failed:', error);
     throw error;

@@ -2,8 +2,8 @@
 
 ## สถานะการพัฒนา / Development Status
 
-**วันที่ / Date**: 18 มีนาคม 2569 (2026-03-18)
-**สถานะ / Status**: 🔄 ในการดำเนินงาน / In Progress
+**วันที่ / Date**: 18 มีนาคม 2569 (2026-03-18) **สถานะ / Status**: 🔄
+ในการดำเนินงาน / In Progress
 
 ---
 
@@ -19,13 +19,17 @@
    - ✅ Self-referencing relation for nested replies
 
 2. **InvoiceLineItemAudit**
-   - ✅ Structured fields for quantity (beforeQuantity, afterQuantity, quantityDiff)
-   - ✅ Structured fields for unit price (beforeUnitPrice, afterUnitPrice, unitPriceDiff)
-   - ✅ Structured fields for discount (beforeDiscount, afterDiscount, discountDiff)
+   - ✅ Structured fields for quantity (beforeQuantity, afterQuantity,
+     quantityDiff)
+   - ✅ Structured fields for unit price (beforeUnitPrice, afterUnitPrice,
+     unitPriceDiff)
+   - ✅ Structured fields for discount (beforeDiscount, afterDiscount,
+     discountDiff)
    - ✅ Change tracking (changeType, changeReason, changedById, changedByName)
 
 3. **RelatedDocument**
-   - ✅ Document relationships (sourceModule, sourceId, relatedModule, relatedId)
+   - ✅ Document relationships (sourceModule, sourceId, relatedModule,
+     relatedId)
    - ✅ Relation types (LINKS, CANCELS, REPLACES, REFUNDS, ADJUSTS)
    - ✅ Unique constraint (prevent duplicate relationships)
    - ✅ Notes field for documentation
@@ -36,6 +40,7 @@
    - ✅ Read status tracking (isRead, readAt)
 
 ### Test Results:
+
 ```
 ✅ Passed: 7/7 tests (100%)
 ✅ InvoiceComment: Threading, mentions, attachments, resolved
@@ -85,6 +90,7 @@
    - ✅ Support multiple document types (invoice, receipt, credit note, etc.)
 
 ### Files Created:
+
 ```
 src/app/api/invoices/[id]/comments/route.ts (272 lines)
 src/app/api/invoices/[id]/comments/[commentId]/route.ts (346 lines)
@@ -157,6 +163,7 @@ src/app/api/invoices/[id]/related/route.ts (445 lines)
    - ✅ Thai document numbers and dates
 
 ### All Components Feature:
+
 - ✅ TypeScript types
 - ✅ shadcn/ui components
 - ✅ Thai language support
@@ -171,6 +178,7 @@ src/app/api/invoices/[id]/related/route.ts (445 lines)
 ## ⏳ Step 4: Integration (PENDING)
 
 ### Remaining Tasks:
+
 1. Integrate components into invoice detail page
 2. Integrate into invoice form
 3. Add navigation menu items
@@ -178,6 +186,7 @@ src/app/api/invoices/[id]/related/route.ts (445 lines)
 5. Verify data flow: UI → API → Database → UI
 
 ### Integration Points:
+
 - `/src/app/(dashboard)/invoices/[id]/page.tsx` - Invoice detail page
 - `/src/components/invoices/invoice-form.tsx` - Invoice editing form
 - `/src/components/invoices/invoice-list.tsx` - Invoice list
@@ -187,6 +196,7 @@ src/app/api/invoices/[id]/related/route.ts (445 lines)
 ## ⏳ Step 5: Final Testing (PENDING)
 
 ### Test Plan:
+
 1. ✅ Database Schema - COMPLETED (100% pass)
 2. ⏳ Backend API - IN PROGRESS
    - Need to test with proper authentication
@@ -210,12 +220,15 @@ src/app/api/invoices/[id]/related/route.ts (445 lines)
 ## 📊 Statistics
 
 ### Code Created:
-- **Database Models**: 4 (InvoiceComment, InvoiceLineItemAudit, RelatedDocument, CommentNotification)
+
+- **Database Models**: 4 (InvoiceComment, InvoiceLineItemAudit, RelatedDocument,
+  CommentNotification)
 - **API Endpoints**: 5 routes, ~2,376 lines total
 - **React Components**: 6 components, ~3,497 lines total
 - **Test Files**: 3 test scripts created
 
 ### File Sizes:
+
 ```
 Database Schema:     +100 lines (Prisma)
 API Routes:          2,376 lines TypeScript
@@ -226,6 +239,7 @@ Total:              ~7,173 lines of code
 ```
 
 ### Time Invested:
+
 - Step 1 (Database): ~30 minutes
 - Step 2 (Backend): ~2 hours (4 parallel agents)
 - Step 3 (Frontend): ~2 hours (6 parallel agents)
@@ -236,6 +250,7 @@ Total:              ~7,173 lines of code
 ## 🎯 Next Steps
 
 ### Immediate Actions:
+
 1. ✅ **Database**: VERIFIED - All models working correctly
 2. ⏳ **API**: Need to fix authentication in test script
 3. ⏳ **Components**: Build verification in progress
@@ -243,6 +258,7 @@ Total:              ~7,173 lines of code
 5. ⏳ **E2E Testing**: Need comprehensive end-to-end tests
 
 ### Recommended Order:
+
 1. ✅ Fix Step 2 authentication test
 2. ✅ Complete Step 3 component build verification
 3. ⏳ Step 4: Integrate into invoice detail page
@@ -255,7 +271,9 @@ Total:              ~7,173 lines of code
 ## 🐛 Known Issues
 
 ### Minor Issues:
-1. **Authentication in API Tests**: Need to properly handle session cookies in test script
+
+1. **Authentication in API Tests**: Need to properly handle session cookies in
+   test script
    - **Impact**: Low (API works, just test script needs fix)
    - **Solution**: Use proper session management or test through UI
 
@@ -268,13 +286,18 @@ Total:              ~7,173 lines of code
 ## 📝 Notes
 
 ### Design Decisions:
-1. **Threading Depth**: Limited to 2 levels for UX (parent → reply → reply to reply)
-2. **Thai Tax Compliance**: Only DRAFT invoices can be edited (immutable posted invoices)
+
+1. **Threading Depth**: Limited to 2 levels for UX (parent → reply → reply to
+   reply)
+2. **Thai Tax Compliance**: Only DRAFT invoices can be edited (immutable posted
+   invoices)
 3. **Cascade Delete**: Replies automatically deleted when parent comment deleted
 4. **Permission Model**: VIEWER cannot add internal comments or edit/delete
-5. **Audit Trail**: Comprehensive tracking with before/after values and differences
+5. **Audit Trail**: Comprehensive tracking with before/after values and
+   differences
 
 ### Agent Swarm Used:
+
 - **Research Agent**: Analyzed existing codebase and best practices
 - **Design Agent**: Created system architecture and specifications
 - **Planning Agent**: Created 6-8 day implementation plan
@@ -297,11 +320,12 @@ Total:              ~7,173 lines of code
 
 ---
 
-**สถานะถัดไป / Next Status**: รอ build verification แล้วดำเนินการต่อ Step 4 (Integration)
+**สถานะถัดไป / Next Status**: รอ build verification แล้วดำเนินการต่อ Step 4
+(Integration)
 
 **หมายเหตุ / Note**: ระบบพร้อมใช้งาน แต่ยังไม่ได้ integrate เข้ากับ UI หลัก
 
 ---
 
-*Generated: 2026-03-18 10:26:00 UTC*
-*Agent Swarm Collaboration: 10 specialized agents*
+_Generated: 2026-03-18 10:26:00 UTC_ _Agent Swarm Collaboration: 10 specialized
+agents_

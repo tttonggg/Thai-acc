@@ -3,14 +3,19 @@
 ## Issues Fixed
 
 ### 1. Poor Text Contrast (CRITICAL)
-**Before:** Light gray text (`#5a5a5a`, `#6a6a6a`) on light background - very hard to read
-**After:** Dark text (`#1a1a2e`) on light background - excellent readability
+
+**Before:** Light gray text (`#5a5a5a`, `#6a6a6a`) on light background - very
+hard to read **After:** Dark text (`#1a1a2e`) on light background - excellent
+readability
 
 ### 2. Theme Only Changed Background
-**Before:** Switching themes only changed background colors, text stayed the same
-**After:** Both background AND foreground colors change together for proper contrast
+
+**Before:** Switching themes only changed background colors, text stayed the
+same **After:** Both background AND foreground colors change together for proper
+contrast
 
 ### 3. Sidebar Text Visibility
+
 **Before:** `--sidebar-foreground: #6a6a6a` - barely visible on light sidebar
 **After:** `--sidebar-foreground: #1a1a2e` - crisp, readable text
 
@@ -19,20 +24,24 @@
 ## Technical Changes
 
 ### Contrast Ratio Improvements
-| Element | Before | After | Ratio |
-|---------|--------|-------|-------|
-| Body text | `#5a5a5a` | `#1a1a2e` | ~12:1 ✅ |
-| Sidebar text | `#6a6a6a` | `#1a1a2e` | ~12:1 ✅ |
-| Muted text | `#8b8b9a` | `#4a4a5a` | ~7:1 ✅ |
-| Dark mode text | `#f0e6f0` | `#f8f8fc` | High ✅ |
+
+| Element        | Before    | After     | Ratio    |
+| -------------- | --------- | --------- | -------- |
+| Body text      | `#5a5a5a` | `#1a1a2e` | ~12:1 ✅ |
+| Sidebar text   | `#6a6a6a` | `#1a1a2e` | ~12:1 ✅ |
+| Muted text     | `#8b8b9a` | `#4a4a5a` | ~7:1 ✅  |
+| Dark mode text | `#f0e6f0` | `#f8f8fc` | High ✅  |
 
 ### Files Modified
+
 1. **`src/app/globals.css`** - Complete CSS variable overhaul
 2. **`src/stores/theme-store.ts`** - Enhanced theme application
 3. **`src/components/layout/tuktuk-sidebar.tsx`** - Fixed color variable usage
 
 ### Theme Variants Now Support Both Modes
+
 Each pastel theme (Mint, Lavender, Peach, Sky, Lemon, Coral) now has:
+
 - ✅ Light mode with dark text
 - ✅ Dark mode with light text
 - ✅ Proper contrast ratios
@@ -50,8 +59,8 @@ Each pastel theme (Mint, Lavender, Peach, Sky, Lemon, Coral) now has:
 ---
 
 ## WCAG Compliance
-✅ All text now meets **WCAG AA 4.5:1 minimum contrast ratio**
-✅ Sidebar text is clearly readable
-✅ Theme switching properly updates ALL colors
+
+✅ All text now meets **WCAG AA 4.5:1 minimum contrast ratio** ✅ Sidebar text
+is clearly readable ✅ Theme switching properly updates ALL colors
 
 **Made with 💕 by Tuktuk ERP Team**

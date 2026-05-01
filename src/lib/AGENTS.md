@@ -4,7 +4,9 @@
 
 ## Purpose
 
-This directory contains the **business logic layer** and **utility functions** for the Thai Accounting ERP system. It serves as the central service layer where all application logic, data transformations, and business rules are implemented.
+This directory contains the **business logic layer** and **utility functions**
+for the Thai Accounting ERP system. It serves as the central service layer where
+all application logic, data transformations, and business rules are implemented.
 
 ## Key Files
 
@@ -13,16 +15,21 @@ This directory contains the **business logic layer** and **utility functions** f
 - **`db.ts`** - Prisma client singleton and database connection management
 - **`auth.ts`** - NextAuth configuration and authentication system
 - **`auth-full.ts`** - Complete authentication configuration (server-side)
-- **`api-utils.ts`** - API response helpers and authentication utilities (`requireAuth`, `auth()`, `requireRole`, `canEdit()`, `isAdmin()`)
+- **`api-utils.ts`** - API response helpers and authentication utilities
+  (`requireAuth`, `auth()`, `requireRole`, `canEdit()`, `isAdmin()`)
 - **`validations.ts`** - Zod validation schemas for all API inputs
 
 ### Critical Business Services
 
-- **`thai-accounting.ts`** - Thai-specific accounting functions (date formatting, tax calculations, SSC, TFRS compliance)
-- **`currency.ts`** - Baht/Satang conversion utilities (CRITICAL for monetary display and storage)
-- **`inventory-service.ts`** - Stock management and WAC (Weighted Average Cost) costing
+- **`thai-accounting.ts`** - Thai-specific accounting functions (date
+  formatting, tax calculations, SSC, TFRS compliance)
+- **`currency.ts`** - Baht/Satang conversion utilities (CRITICAL for monetary
+  display and storage)
+- **`inventory-service.ts`** - Stock management and WAC (Weighted Average Cost)
+  costing
 - **`asset-service.ts`** - Fixed asset depreciation calculations and management
-- **`payroll-service.ts`** - Thai SSC calculations, PND1 forms, and payroll processing
+- **`payroll-service.ts`** - Thai SSC calculations, PND1 forms, and payroll
+  processing
 - **`wht-service.ts`** - Withholding tax automation and calculations
 - **`petty-cash-service.ts`** - Petty cash vouchers and management
 - **`cheque-service.ts`** - Cheque tracking and management
@@ -42,7 +49,8 @@ This directory contains the **business logic layer** and **utility functions** f
 
 ### PDF & Document Generation
 
-- **`pdf-generator.ts`** - PDF generation using jsPDF for invoices, receipts, reports
+- **`pdf-generator.ts`** - PDF generation using jsPDF for invoices, receipts,
+  reports
 - **`pdfkit-generator.ts`** - PDFKit implementation for complex documents
 - **`excel-export.ts`** - Excel export functionality for reports and data
 - **`tax-form-service.ts`** - Thai tax form generation (PND1, PND3, etc.)
@@ -92,35 +100,42 @@ This directory contains the **business logic layer** and **utility functions** f
 ## Subdirectories
 
 ### `constants/`
+
 - **Purpose**: Application-wide constants and configurations
 - **`error-messages.ts`** - Standardized error messages
 
 ### `db/`
+
 - **Purpose**: Database utilities and connection management
 - **`connection-pool.ts`** - Database connection pool management
 - **`query-monitor.ts`** - Query performance monitoring
 
 ### `graphql/`
+
 - **Purpose**: GraphQL schema and resolvers
 - **`schema.ts`** - GraphQL type definitions
 - **`resolvers.ts`** - GraphQL resolvers
 - **`dataloaders.ts`** - Data loaders for GraphQL optimization
 
 ### `middleware/`
+
 - **Purpose**: Custom middleware implementations
 - **`analytics-middleware.ts`** - Analytics tracking middleware
 - **`version-middleware.ts`** - API version middleware
 
 ### `monitoring/`
+
 - **Purpose**: Application monitoring utilities
 - **`logger.ts`** - Centralized logging system
 
 ### `services/`
+
 - **Purpose**: Additional business logic services
 - **`analytics-service.ts`** - Business analytics service
 - **`webhook-service.ts`** - Webhook management service
 
 ### `templates/`
+
 - **Purpose**: Document templates for PDF generation
 - **`invoice-template.html`** - Invoice HTML template
 - **`receipt-template.html`** - Receipt HTML template
@@ -135,22 +150,23 @@ This directory contains the **business logic layer** and **utility functions** f
    - Keep API routes thin - only handle request/response
 
 2. **Satang/Baht Conversion Pattern**
+
    ```typescript
    // User input → Database (POST routes)
-   import { bahtToSatang } from './currency'
+   import { bahtToSatang } from './currency';
    const invoice = await prisma.invoice.create({
      data: {
        totalAmount: bahtToSatang(userEnteredAmount), // 1234.56 → 123456
-     }
-   })
+     },
+   });
 
    // Database → Display (GET routes)
-   import { satangToBaht } from './currency'
-   const invoice = await prisma.invoice.findUnique({ where: { id } })
+   import { satangToBaht } from './currency';
+   const invoice = await prisma.invoice.findUnique({ where: { id } });
    return {
      ...invoice,
      totalAmount: satangToBaht(invoice.totalAmount), // 123456 → 1234.56
-   }
+   };
    ```
 
 3. **Thai Accounting Functions**
@@ -171,6 +187,7 @@ This directory contains the **business logic layer** and **utility functions** f
 ### Common Patterns
 
 1. **Service Layer Architecture**
+
    ```typescript
    // Service file: invoice-service.ts
    export async function createInvoice(data: InvoiceCreateInput) {
@@ -179,9 +196,9 @@ This directory contains the **business logic layer** and **utility functions** f
 
    // API route: src/app/api/invoices/route.ts
    export async function POST(request: Request) {
-     const data = await request.json()
-     const result = await invoiceService.createInvoice(data)
-     return apiResponse(result)
+     const data = await request.json();
+     const result = await invoiceService.createInvoice(data);
+     return apiResponse(result);
    }
    ```
 
@@ -202,7 +219,8 @@ This directory contains the **business logic layer** and **utility functions** f
 - **Thai accounting follows TFRS standards**
 - **Use Prisma parameterized queries only - no raw SQL**
 - **Always add soft delete conditions: `where: { deletedAt: null }`**
-- **Document numbering via `generateDocNumber()` - never implement ad-hoc numbering**
+- **Document numbering via `generateDocNumber()` - never implement ad-hoc
+  numbering**
 
 ## Dependencies
 
@@ -216,6 +234,7 @@ This directory contains the **business logic layer** and **utility functions** f
 ## Testing
 
 Test files are located in `__tests__/` subdirectory:
+
 - Unit tests for individual services
 - Integration tests for API endpoints
 - Mock data and fixtures for Thai accounting scenarios

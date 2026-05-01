@@ -68,8 +68,8 @@ function parseTestResults(resultsPath: string): ReportData {
     artifacts: {
       screenshots: 0,
       videos: 0,
-      traces: 0
-    }
+      traces: 0,
+    },
   };
 
   // Process test files
@@ -77,7 +77,7 @@ function parseTestResults(resultsPath: string): ReportData {
     const suite: TestSuite = {
       title: path.basename(file.location.file),
       tests: [],
-      duration: 0
+      duration: 0,
     };
 
     for (const test of file.tests || []) {
@@ -85,7 +85,7 @@ function parseTestResults(resultsPath: string): ReportData {
         status: test.results?.[0]?.status || 'skipped',
         duration: test.results?.[0]?.duration || 0,
         errors: test.results?.[0]?.errors || [],
-        attachments: []
+        attachments: [],
       };
 
       suite.tests.push(testResult);
@@ -115,7 +115,11 @@ function parseTestResults(resultsPath: string): ReportData {
 /**
  * Scan for artifacts
  */
-function scanArtifacts(testResultsDir: string): { screenshots: number; videos: number; traces: number } {
+function scanArtifacts(testResultsDir: string): {
+  screenshots: number;
+  videos: number;
+  traces: number;
+} {
   const artifacts = { screenshots: 0, videos: 0, traces: 0 };
 
   const scanDir = (dir: string) => {
@@ -349,22 +353,30 @@ function generateHTMLReport(data: ReportData, outputPath: string): void {
 
     <div class="suites">
       <h2>📋 Test Suites</h2>
-      ${data.suites.map(suite => `
+      ${data.suites
+        .map(
+          (suite) => `
         <div class="suite">
           <div class="suite-header">
             <div class="suite-title">${suite.title}</div>
             <div class="suite-duration">⏱️ ${Math.round(suite.duration / 1000)}s</div>
           </div>
           <ul class="test-list">
-            ${suite.tests.map(test => `
+            ${suite.tests
+              .map(
+                (test) => `
               <li class="test-item ${test.status}">
                 <span class="test-name">${test.status === 'failed' ? '❌' : test.status === 'skipped' ? '⏭️' : '✅'} Test</span>
                 <span class="test-duration">${Math.round(test.duration)}ms</span>
               </li>
-            `).join('')}
+            `
+              )
+              .join('')}
           </ul>
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
 
     <div class="footer">

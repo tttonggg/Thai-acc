@@ -37,13 +37,21 @@ export class DashboardPage {
     this.totalRevenueCard = page.locator('[data-testid="total-revenue"], .revenue-card').first();
     this.totalExpensesCard = page.locator('[data-testid="total-expenses"], .expenses-card').first();
     this.netProfitCard = page.locator('[data-testid="net-profit"], .profit-card').first();
-    this.totalCustomersCard = page.locator('[data-testid="total-customers"], .customers-card').first();
+    this.totalCustomersCard = page
+      .locator('[data-testid="total-customers"], .customers-card')
+      .first();
     this.totalVendorsCard = page.locator('[data-testid="total-vendors"], .vendors-card').first();
 
     // Quick actions
-    this.newInvoiceButton = page.locator('button:has-text("สร้างใบแจ้งหนี้"), button:has-text("New Invoice")');
-    this.newReceiptButton = page.locator('button:has-text("รับเงินเข้า"), button:has-text("New Receipt")');
-    this.newPaymentButton = page.locator('button:has-text("จ่ายเงินออก"), button:has-text("New Payment")');
+    this.newInvoiceButton = page.locator(
+      'button:has-text("สร้างใบแจ้งหนี้"), button:has-text("New Invoice")'
+    );
+    this.newReceiptButton = page.locator(
+      'button:has-text("รับเงินเข้า"), button:has-text("New Receipt")'
+    );
+    this.newPaymentButton = page.locator(
+      'button:has-text("จ่ายเงินออก"), button:has-text("New Payment")'
+    );
   }
 
   /**
@@ -51,22 +59,22 @@ export class DashboardPage {
    */
   async navigateTo(module: string) {
     const moduleLabels = {
-      'dashboard': 'ภาพรวม',
-      'accounts': 'ผังบัญชี',
-      'journal': 'บันทึกบัญชี',
-      'invoices': 'ใบกำกับภาษี',
-      'vat': 'ภาษีมูลค่าเพิ่ม',
-      'wht': 'ภาษีหัก ณ ที่จ่าย',
-      'customers': 'ลูกหนี้',
-      'vendors': 'เจ้าหนี้',
-      'inventory': 'สต็อกสินค้า',
-      'banking': 'ธนาคาร',
-      'assets': 'ทรัพย์สิน',
-      'payroll': 'เงินเดือน',
+      dashboard: 'ภาพรวม',
+      accounts: 'ผังบัญชี',
+      journal: 'บันทึกบัญชี',
+      invoices: 'ใบกำกับภาษี',
+      vat: 'ภาษีมูลค่าเพิ่ม',
+      wht: 'ภาษีหัก ณ ที่จ่าย',
+      customers: 'ลูกหนี้',
+      vendors: 'เจ้าหนี้',
+      inventory: 'สต็อกสินค้า',
+      banking: 'ธนาคาร',
+      assets: 'ทรัพย์สิน',
+      payroll: 'เงินเดือน',
       'petty-cash': 'เงินสดย่อย',
-      'reports': 'รายงาน',
-      'settings': 'ตั้งค่า',
-      'users': 'จัดการผู้ใช้'
+      reports: 'รายงาน',
+      settings: 'ตั้งค่า',
+      users: 'จัดการผู้ใช้',
     };
 
     const label = moduleLabels[module] || module;
@@ -93,7 +101,7 @@ export class DashboardPage {
       totalExpenses: await this.getText(this.totalExpensesCard),
       netProfit: await this.getText(this.netProfitCard),
       totalCustomers: await this.getText(this.totalCustomersCard),
-      totalVendors: await this.getText(this.totalVendorsCard)
+      totalVendors: await this.getText(this.totalVendorsCard),
     };
 
     return cards;
@@ -115,7 +123,7 @@ export class DashboardPage {
     const buttons = {
       invoice: this.newInvoiceButton,
       receipt: this.newReceiptButton,
-      payment: this.newPaymentButton
+      payment: this.newPaymentButton,
     };
 
     await buttons[action].click();
@@ -128,8 +136,8 @@ export class DashboardPage {
     const userMenu = this.page.locator('[data-testid="user-menu"], .user-menu').first();
 
     if (await userMenu.isVisible({ timeout: 3000 }).catch(() => false)) {
-      const name = await userMenu.locator('.user-name').textContent() || '';
-      const email = await userMenu.locator('.user-email').textContent() || '';
+      const name = (await userMenu.locator('.user-name').textContent()) || '';
+      const email = (await userMenu.locator('.user-email').textContent()) || '';
       return { name, role: '', email };
     }
 
@@ -143,7 +151,9 @@ export class DashboardPage {
     const userMenu = this.page.locator('[data-testid="user-menu"], .user-menu').first();
     await userMenu.click();
 
-    const logoutButton = this.page.locator('button:has-text("ออกจากระบบ"), button:has-text("Logout")');
+    const logoutButton = this.page.locator(
+      'button:has-text("ออกจากระบบ"), button:has-text("Logout")'
+    );
     await logoutButton.click();
 
     // Verify back on login page
@@ -162,7 +172,7 @@ export class DashboardPage {
    */
   private async getText(locator: Locator): Promise<string> {
     if (await locator.isVisible({ timeout: 2000 }).catch(() => false)) {
-      return await locator.textContent() || '';
+      return (await locator.textContent()) || '';
     }
     return '';
   }

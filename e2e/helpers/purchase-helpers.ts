@@ -82,7 +82,7 @@ export async function loginAsAdmin(page: Page): Promise<void> {
   await page.fill('input[type="email"]', TEST_USERS.ADMIN.email);
   await page.fill('input[type="password"]', TEST_USERS.ADMIN.password);
   await page.click('button[type="submit"]');
-  
+
   // Wait for dashboard to load
   await page.waitForSelector('text=ภาพรวมธุรกิจ, nav, aside', { timeout: 10000 });
 }
@@ -96,7 +96,7 @@ export async function loginAsAccountant(page: Page): Promise<void> {
   await page.fill('input[type="email"]', TEST_USERS.ACCOUNTANT.email);
   await page.fill('input[type="password"]', TEST_USERS.ACCOUNTANT.password);
   await page.click('button[type="submit"]');
-  
+
   await page.waitForSelector('text=ภาพรวมธุรกิจ, nav, aside', { timeout: 10000 });
 }
 
@@ -257,10 +257,7 @@ export async function createPurchaseRequestViaAPI(
  * Submit PR for approval via API
  * ส่งใบขอซื้อเพื่อขออนุมัติผ่าน API
  */
-export async function submitPRViaAPI(
-  request: APIRequestContext,
-  prId: string
-): Promise<void> {
+export async function submitPRViaAPI(request: APIRequestContext, prId: string): Promise<void> {
   const response = await request.post(`/api/purchase-requests/${prId}/submit`, {
     data: {},
   });
@@ -356,10 +353,7 @@ export async function createPurchaseOrderViaAPI(
  * Submit PO to vendor via API
  * ส่งใบสั่งซื้อให้ผู้ขายผ่าน API
  */
-export async function submitPOViaAPI(
-  request: APIRequestContext,
-  poId: string
-): Promise<void> {
+export async function submitPOViaAPI(request: APIRequestContext, poId: string): Promise<void> {
   const response = await request.post(`/api/purchase-orders/${poId}/submit`, {
     data: {},
   });
@@ -373,10 +367,7 @@ export async function submitPOViaAPI(
  * Confirm PO via API
  * ยืนยันใบสั่งซื้อผ่าน API
  */
-export async function confirmPOViaAPI(
-  request: APIRequestContext,
-  poId: string
-): Promise<void> {
+export async function confirmPOViaAPI(request: APIRequestContext, poId: string): Promise<void> {
   const response = await request.post(`/api/purchase-orders/${poId}/confirm`, {
     data: {},
   });
@@ -450,11 +441,13 @@ export async function cancelPOViaAPI(
  */
 export async function navigateToPR(page: Page): Promise<void> {
   // Click on purchases menu
-  await page.click('text=งานซื้อ, button:has-text("งานซื้อ"), [data-menu="purchases"]', { timeout: 5000 });
-  
+  await page.click('text=งานซื้อ, button:has-text("งานซื้อ"), [data-menu="purchases"]', {
+    timeout: 5000,
+  });
+
   // Click on PR submenu
   await page.click('text=ใบขอซื้อ (PR), a:has-text("ใบขอซื้อ")', { timeout: 5000 });
-  
+
   // Wait for PR list to load
   await page.waitForSelector('text=ใบขอซื้อ (Purchase Request), table', { timeout: 10000 });
 }
@@ -465,11 +458,13 @@ export async function navigateToPR(page: Page): Promise<void> {
  */
 export async function navigateToPO(page: Page): Promise<void> {
   // Click on purchases menu
-  await page.click('text=งานซื้อ, button:has-text("งานซื้อ"), [data-menu="purchases"]', { timeout: 5000 });
-  
+  await page.click('text=งานซื้อ, button:has-text("งานซื้อ"), [data-menu="purchases"]', {
+    timeout: 5000,
+  });
+
   // Click on PO submenu
   await page.click('text=ใบสั่งซื้อ (PO), a:has-text("ใบสั่งซื้อ")', { timeout: 5000 });
-  
+
   // Wait for PO list to load
   await page.waitForSelector('text=ใบสั่งซื้อ (Purchase Order), table', { timeout: 10000 });
 }
@@ -480,9 +475,9 @@ export async function navigateToPO(page: Page): Promise<void> {
  */
 export async function takeScreenshot(page: Page, name: string): Promise<void> {
   const timestamp = new Date().getTime();
-  await page.screenshot({ 
+  await page.screenshot({
     path: `test-results/${name}-${timestamp}.png`,
-    fullPage: true 
+    fullPage: true,
   });
 }
 
@@ -557,10 +552,8 @@ export async function waitForToast(
   message?: string,
   timeout: number = 5000
 ): Promise<void> {
-  const selector = message 
-    ? `[data-sonner-toast]:has-text("${message}")` 
-    : '[data-sonner-toast]';
-  
+  const selector = message ? `[data-sonner-toast]:has-text("${message}")` : '[data-sonner-toast]';
+
   await page.waitForSelector(selector, { timeout });
 }
 
@@ -570,5 +563,5 @@ export async function waitForToast(
  */
 export async function getToastMessage(page: Page): Promise<string> {
   const toast = page.locator('[data-sonner-toast]').first();
-  return await toast.textContent() || '';
+  return (await toast.textContent()) || '';
 }

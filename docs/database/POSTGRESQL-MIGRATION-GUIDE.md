@@ -1,9 +1,11 @@
 # Thai Accounting ERP - PostgreSQL Migration Guide
+
 # โปรแกรมบัญชีมาตรฐานไทย - คู่มือการย้ายไป PostgreSQL
 
 ## Overview
 
-This guide provides step-by-step instructions for migrating the Thai Accounting ERP system from SQLite to PostgreSQL.
+This guide provides step-by-step instructions for migrating the Thai Accounting
+ERP system from SQLite to PostgreSQL.
 
 ## Benefits of PostgreSQL
 
@@ -25,6 +27,7 @@ This guide provides step-by-step instructions for migrating the Thai Accounting 
 ### Step 1: Install PostgreSQL
 
 #### Ubuntu/Debian
+
 ```bash
 sudo apt update
 sudo apt install postgresql-14 postgresql-contrib
@@ -33,12 +36,14 @@ sudo systemctl start postgresql
 ```
 
 #### macOS
+
 ```bash
 brew install postgresql@14
 brew services start postgresql@14
 ```
 
 #### Windows
+
 Download installer from https://www.postgresql.org/download/windows/
 
 ### Step 2: Create Database and User
@@ -133,40 +138,44 @@ psql -U thaiacc -d thai_accounting -f prisma/postgresql/partitioning.sql
 Update `src/lib/db.ts`:
 
 ```typescript
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
+  prisma: PrismaClient | undefined;
+};
 
-const prismaInstance = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' 
-    ? ['query', 'error', 'warn'] 
-    : ['error'],
-  // Connection pooling for PostgreSQL
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
+const prismaInstance =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log:
+      process.env.NODE_ENV === 'development'
+        ? ['query', 'error', 'warn']
+        : ['error'],
+    // Connection pooling for PostgreSQL
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
     },
-  },
-})
+  });
 
 // Connection health check (PostgreSQL only)
 if (process.env.DATABASE_URL?.includes('postgresql')) {
   setInterval(async () => {
     try {
-      await prismaInstance.$queryRaw`SELECT 1`
+      await prismaInstance.$queryRaw`SELECT 1`;
     } catch (error) {
-      console.error('Database connection lost:', error)
+      console.error('Database connection lost:', error);
     }
-  }, 30000) // Check every 30 seconds
+  }, 30000); // Check every 30 seconds
 }
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prismaInstance
+if (process.env.NODE_ENV !== 'production')
+  globalForPrisma.prisma = prismaInstance;
 
-export const prisma = prismaInstance
-export const db = prismaInstance
-export default prismaInstance
+export const prisma = prismaInstance;
+export const db = prismaInstance;
+export default prismaInstance;
 ```
 
 ### Step 9: Configure Connection Pooling
@@ -192,6 +201,7 @@ default_pool_size = 25
 ```
 
 Update connection string:
+
 ```env
 DATABASE_URL=postgresql://thaiacc:password@localhost:6432/thai_accounting
 ```
@@ -231,6 +241,7 @@ If issues occur:
 ## Troubleshooting
 
 ### Connection Issues
+
 ```bash
 # Test connection
 psql -U thaiacc -d thai_accounting -c "SELECT 1;"
@@ -240,6 +251,7 @@ sudo tail -f /var/log/postgresql/postgresql-14-main.log
 ```
 
 ### Performance Issues
+
 ```sql
 -- Check slow queries
 SELECT query, calls, mean_time, total_time
@@ -253,7 +265,9 @@ ANALYZE "JournalEntry";
 ```
 
 ### Data Type Issues
+
 SQLite to PostgreSQL type mappings:
+
 - `BOOLEAN`: Same
 - `INTEGER`: Same
 - `BIGINT`: Same
@@ -269,10 +283,10 @@ SQLite to PostgreSQL type mappings:
 CREATE TEXT SEARCH CONFIGURATION thai (COPY = english);
 
 -- Create GIN indexes for search
-CREATE INDEX idx_customer_search ON "Customer" 
+CREATE INDEX idx_customer_search ON "Customer"
 USING GIN (to_tsvector('thai', name || ' ' || COALESCE(address, '')));
 
-CREATE INDEX idx_product_search ON "Product" 
+CREATE INDEX idx_product_search ON "Product"
 USING GIN (to_tsvector('thai', name || ' ' || COALESCE(description, '')));
 ```
 
@@ -287,7 +301,7 @@ SELECT pg_reload_conf();
 CREATE EXTENSION pg_stat_statements;
 
 -- Query to monitor top queries
-SELECT 
+SELECT
     substring(query, 1, 100) as query_snippet,
     calls,
     round(total_exec_time::numeric, 2) as total_time,

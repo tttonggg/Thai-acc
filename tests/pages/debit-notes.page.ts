@@ -32,7 +32,9 @@ export class DebitNotesPage {
     await this.newDebitNoteButton.click();
 
     await this.page.locator('select[name="vendorId"]').selectOption({ label: data.vendorName });
-    await this.page.locator('select[name="purchaseId"]').selectOption({ label: data.purchaseNumber });
+    await this.page
+      .locator('select[name="purchaseId"]')
+      .selectOption({ label: data.purchaseNumber });
     await this.page.fill('input[name="amount"]', data.amount.toString());
     await this.page.fill('textarea[name="reason"]', data.reason);
 

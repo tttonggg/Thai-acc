@@ -7,24 +7,30 @@ Your CI/CD pipeline is now **fully configured and operational**.
 ### What's Been Done
 
 #### 1. GitHub Actions Workflow ✅
+
 - **File**: `.github/workflows/deploy.yml`
 - **Trigger**: Automatic on push to `master` branch
 - **Stages**: Test → Build → Deploy → Health Check
 - **Status**: 🟢 Active
 
 #### 2. VPS Deployment Script ✅
+
 - **File**: `scripts/vps-deploy.sh`
 - **Features**: Backup, restart, health checks
 - **Process Manager**: PM2
 
 #### 3. GitHub Secrets ✅
+
 All 7 secrets configured:
+
 - VPS connection details
 - Database configuration
 - Authentication settings
 
 #### 4. Bug Fixes ✅
+
 Fixed 8 critical issues:
+
 - Satang/Baht conversions
 - API response handling
 - TypeScript compilation
@@ -32,6 +38,7 @@ Fixed 8 critical issues:
 - Corrupted configuration files
 
 #### 5. Documentation ✅
+
 - `CI-CD-SETUP.md` - Setup guide
 - `CI-CD-DEPLOYMENT-LOG.md` - Deployment status
 - `CI-CD-SUMMARY.md` - Executive summary
@@ -41,7 +48,9 @@ Fixed 8 critical issues:
 
 ## 📊 Current Status
 
-**Latest Deployment**: https://github.com/tttonggg/Thai-acc/actions/runs/24344019593
+**Latest Deployment**:
+https://github.com/tttonggg/Thai-acc/actions/runs/24344019593
+
 - Status: 🔄 In Progress
 - Started: 2026-04-13 12:44:20 UTC
 - Current Step: Running lint
@@ -51,6 +60,7 @@ Fixed 8 critical issues:
 ## 🎯 How It Works
 
 ### Automatic Deployment (Recommended)
+
 ```bash
 git add .
 git commit -m "Your message"
@@ -59,6 +69,7 @@ git push origin master
 ```
 
 ### Manual Deployment
+
 1. Go to: https://github.com/tttonggg/Thai-acc/actions
 2. Click "CI/CD Pipeline"
 3. Click "Run workflow" → "Run workflow"
@@ -66,11 +77,13 @@ git push origin master
 ## 🔍 Monitoring
 
 ### View Deployment
+
 - **GitHub Actions**: https://github.com/tttonggg/Thai-cc/actions
 - **Live Application**: https://acc.k56mm.uk
 - **Health Check**: https://acc.k56mm.uk/api/health
 
 ### VPS Commands
+
 ```bash
 # SSH into VPS
 ssh root@135.181.107.76
@@ -88,6 +101,7 @@ pm2 restart keerati-erp
 ## 📈 Success Criteria
 
 Deployment is successful when:
+
 - ✅ Build job completes
 - ✅ Deploy job completes
 - ✅ Health check passes
@@ -97,18 +111,21 @@ Deployment is successful when:
 ## 🛠️ Troubleshooting
 
 ### Deployment Fails
+
 1. Check GitHub Actions logs
 2. Verify VPS SSH access
 3. Check disk space: `df -h`
 4. Review PM2 logs: `pm2 logs keerati-erp`
 
 ### Application Issues
+
 1. Check `.env` file on VPS
 2. Verify DATABASE_URL (absolute path)
 3. Check PM2 process status
 4. Review application logs
 
 ### Rollback
+
 ```bash
 ssh root@135.181.107.76
 ls -la /root/thai-acc/backups/deployments/
@@ -119,6 +136,7 @@ pm2 restart keerati-erp
 ## 📝 Commits Summary
 
 Recent commits related to CI/CD:
+
 - `05f680d` - 📚 ADD: CI/CD documentation
 - `80313c1` - 🔧 FIX: Make type-check non-blocking
 - `52bd707` - 🔧 FIX: Correct TypeScript syntax
@@ -131,7 +149,9 @@ Recent commits related to CI/CD:
 
 ## 🎉 You're All Set!
 
-Your CI/CD pipeline is now operational. Every push to `master` will automatically:
+Your CI/CD pipeline is now operational. Every push to `master` will
+automatically:
+
 1. ✅ Run tests
 2. ✅ Build the application
 3. ✅ Deploy to your VPS
@@ -140,6 +160,6 @@ Your CI/CD pipeline is now operational. Every push to `master` will automaticall
 **Production URL**: https://acc.k56mm.uk
 
 ---
-**Setup Date**: 2026-04-13
-**Status**: 🟢 Operational
-**Documentation**: Complete
+
+**Setup Date**: 2026-04-13 **Status**: 🟢 Operational **Documentation**:
+Complete

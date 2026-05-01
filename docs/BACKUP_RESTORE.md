@@ -23,12 +23,12 @@
 
 ### What to Backup
 
-| Component | Type | Frequency | Retention |
-|-----------|------|-----------|-----------|
-| Database | SQLite/PostgreSQL | Daily | 30 days |
-| Uploads | Files | Daily | 30 days |
-| Configuration | Environment files | Weekly | 90 days |
-| Logs | System logs | Weekly | 90 days |
+| Component     | Type              | Frequency | Retention |
+| ------------- | ----------------- | --------- | --------- |
+| Database      | SQLite/PostgreSQL | Daily     | 30 days   |
+| Uploads       | Files             | Daily     | 30 days   |
+| Configuration | Environment files | Weekly    | 90 days   |
+| Logs          | System logs       | Weekly    | 90 days   |
 
 ### Backup Types
 
@@ -323,12 +323,12 @@ tar -xzf backup/uploads.tar.gz -C /home/thaiacc/erp uploads/2024/
 
 ### Recovery Time Objectives (RTO)
 
-| Scenario | RTO | RPO |
-|----------|-----|-----|
-| Database corruption | 1 hour | 24 hours |
-| Server failure | 4 hours | 24 hours |
-| Data center failure | 8 hours | 24 hours |
-| Catastrophic event | 24 hours | 48 hours |
+| Scenario            | RTO      | RPO      |
+| ------------------- | -------- | -------- |
+| Database corruption | 1 hour   | 24 hours |
+| Server failure      | 4 hours  | 24 hours |
+| Data center failure | 8 hours  | 24 hours |
+| Catastrophic event  | 24 hours | 48 hours |
 
 ### Recovery Procedures
 
@@ -552,31 +552,31 @@ find /backup/monthly -name "*.tar.gz" -mtime +365 -delete
 ```json
 // lifecycle.json for S3
 {
-    "Rules": [
+  "Rules": [
+    {
+      "ID": "DailyBackupRetention",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "daily/"
+      },
+      "Expiration": {
+        "Days": 30
+      }
+    },
+    {
+      "ID": "MonthlyBackupTransition",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "monthly/"
+      },
+      "Transitions": [
         {
-            "ID": "DailyBackupRetention",
-            "Status": "Enabled",
-            "Filter": {
-                "Prefix": "daily/"
-            },
-            "Expiration": {
-                "Days": 30
-            }
-        },
-        {
-            "ID": "MonthlyBackupTransition",
-            "Status": "Enabled",
-            "Filter": {
-                "Prefix": "monthly/"
-            },
-            "Transitions": [
-                {
-                    "Days": 90,
-                    "StorageClass": "GLACIER"
-                }
-            ]
+          "Days": 90,
+          "StorageClass": "GLACIER"
         }
-    ]
+      ]
+    }
+  ]
 }
 ```
 

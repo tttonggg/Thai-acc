@@ -1,6 +1,7 @@
 # Troubleshooting Guide for Developers
 
-This guide helps developers troubleshoot common issues when developing the Thai Accounting ERP system.
+This guide helps developers troubleshoot common issues when developing the Thai
+Accounting ERP system.
 
 ## Table of Contents
 
@@ -20,11 +21,13 @@ This guide helps developers troubleshoot common issues when developing the Thai 
 ### Issue: `bun install` fails
 
 **Symptoms:**
+
 ```
 error: Failed to install packages
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Clear bun cache
 bun pm cache rm
@@ -42,11 +45,13 @@ npm install
 ### Issue: Port 3000 already in use
 
 **Symptoms:**
+
 ```
 Error: Port 3000 is already in use
 ```
 
 **Solutions:**
+
 ```bash
 # Find and kill process
 lsof -ti:3000 | xargs kill -9
@@ -58,11 +63,13 @@ bun run dev -- --port 3001
 ### Issue: Environment variables not loading
 
 **Symptoms:**
+
 ```
 Error: DATABASE_URL is not defined
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Check .env file exists
 ls -la .env
@@ -83,11 +90,13 @@ cp .env.example .env
 ### Issue: Prisma generate fails
 
 **Symptoms:**
+
 ```
 Error: @prisma/client did not initialize yet
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Install Prisma CLI
 bun add -D prisma
@@ -103,11 +112,13 @@ bun run db:generate
 ### Issue: Migration fails
 
 **Symptoms:**
+
 ```
 Error: P3002 - Migration already applied
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Check migration status
 bunx prisma migrate status
@@ -122,11 +133,13 @@ bunx prisma migrate resolve --rolled-back "migration_name"
 ### Issue: Database is locked
 
 **Symptoms:**
+
 ```
 Error: database is locked (SQLite)
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Stop all processes using the database
 # 2. Wait a few seconds
@@ -141,11 +154,13 @@ rm prisma/dev.db-shm
 ### Issue: Foreign key constraint fails
 
 **Symptoms:**
+
 ```
 Error: Foreign key constraint failed
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Check related records exist
 # 2. Check cascade delete settings
@@ -160,11 +175,13 @@ Error: Foreign key constraint failed
 ### Issue: TypeScript compilation errors
 
 **Symptoms:**
+
 ```
 error TS2322: Type 'X' is not assignable to type 'Y'
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Run type check
 bun run type-check
@@ -182,11 +199,13 @@ bun run db:generate
 ### Issue: Module not found
 
 **Symptoms:**
+
 ```
 Error: Cannot find module '@/components/ui/button'
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Check tsconfig.json paths
 # 2. Check file exists
@@ -201,11 +220,13 @@ rm -rf .next
 ### Issue: ESLint errors
 
 **Symptoms:**
+
 ```
 error: 'variable' is assigned but never used
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Check lint errors
 bun run lint
@@ -223,11 +244,13 @@ bun run lint:fix
 ### Issue: API route 404
 
 **Symptoms:**
+
 ```
 404: Cannot GET /api/invoices
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Check file exists
 ls src/app/api/invoices/route.ts
@@ -243,11 +266,13 @@ ls src/app/api/invoices/route.ts
 ### Issue: Session not working
 
 **Symptoms:**
+
 ```
 Session is null after login
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Check NEXTAUTH_SECRET is set
 # Must be at least 32 characters
@@ -264,11 +289,13 @@ Session is null after login
 ### Issue: Prisma Client in production
 
 **Symptoms:**
+
 ```
 Error: PrismaClient is not configured
 ```
 
 **Solutions:**
+
 ```typescript
 // lib/db.ts
 import { PrismaClient } from '@prisma/client';
@@ -287,11 +314,13 @@ if (process.env.NODE_ENV !== 'production') {
 ### Issue: Hydration mismatch
 
 **Symptoms:**
+
 ```
 Warning: Text content does not match server-rendered HTML
 ```
 
 **Solutions:**
+
 ```tsx
 // 1. Check for browser-only APIs
 'use client';
@@ -299,10 +328,9 @@ Warning: Text content does not match server-rendered HTML
 // 2. Use dynamic import for client components
 import dynamic from 'next/dynamic';
 
-const ClientComponent = dynamic(
-  () => import('./ClientComponent'),
-  { ssr: false }
-);
+const ClientComponent = dynamic(() => import('./ClientComponent'), {
+  ssr: false,
+});
 
 // 3. Use useEffect for browser-only code
 const [mounted, setMounted] = useState(false);
@@ -316,11 +344,13 @@ useEffect(() => setMounted(true), []);
 ### Issue: Tests fail with database error
 
 **Symptoms:**
+
 ```
 Error: Cannot connect to database
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Check test database URL
 # Usually different from dev database
@@ -335,11 +365,13 @@ bun run db:migrate
 ### Issue: Playwright tests timeout
 
 **Symptoms:**
+
 ```
 Error: Test timeout of 30000ms exceeded
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Increase timeout
 # playwright.config.ts
@@ -357,11 +389,13 @@ bun run test:e2e -- --headed
 ### Issue: Vitest module resolution
 
 **Symptoms:**
+
 ```
 Error: Cannot find module '@/lib/utils'
 ```
 
 **Solutions:**
+
 ```typescript
 // vitest.config.ts
 import { defineConfig } from 'vitest/config';
@@ -383,11 +417,13 @@ export default defineConfig({
 ### Issue: NextAuth callbacks not working
 
 **Symptoms:**
+
 ```
 Session does not contain custom properties
 ```
 
 **Solutions:**
+
 ```typescript
 // 1. Check JWT callback
 callbacks: {
@@ -419,11 +455,13 @@ declare module 'next-auth' {
 ### Issue: bcrypt module error
 
 **Symptoms:**
+
 ```
 Error: Cannot find module 'bcrypt'
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Install bcrypt
 bun add bcrypt
@@ -441,11 +479,13 @@ bun add -D @types/bcryptjs
 ### Issue: Slow page load
 
 **Symptoms:**
+
 ```
 Page takes > 3 seconds to load
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Check bundle size
 bun run build
@@ -464,11 +504,13 @@ const HeavyComponent = dynamic(() => import('./Heavy'));
 ### Issue: Memory leak
 
 **Symptoms:**
+
 ```
 JavaScript heap out of memory
 ```
 
 **Solutions:**
+
 ```bash
 # 1. Increase Node memory
 export NODE_OPTIONS="--max-old-space-size=4096"
@@ -485,6 +527,7 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 ### Issue: Merge conflicts
 
 **Solutions:**
+
 ```bash
 # 1. Fetch latest
  git fetch origin
@@ -503,6 +546,7 @@ git rebase --continue
 ### Issue: Large files in git history
 
 **Solutions:**
+
 ```bash
 # 1. Use git-lfs for large files
 # 2. Or remove from history

@@ -49,6 +49,7 @@ Comprehensive test automation system for the Thai Accounting ERP project with:
 ### 3. View Test Reports
 
 Test reports are automatically generated and saved to:
+
 - **HTML Report**: `test-results/playwright-report/index.html`
 - **JSON Results**: `test-results/results.json`
 - **Test History**: `test-history/`
@@ -59,6 +60,7 @@ Test reports are automatically generated and saved to:
 ## 📋 Test Tiers
 
 ### Smoke Tests (2-3 minutes)
+
 - Critical path only
 - Authentication
 - Navigation
@@ -66,12 +68,14 @@ Test reports are automatically generated and saved to:
 - **Run**: Every commit, hourly
 
 ### Quick Tests (5 minutes)
+
 - Smoke tests + critical features
 - All 16 modules (basic checks)
 - Database integrity
 - **Run**: On PRs, daily
 
 ### Full Tests (15-20 minutes)
+
 - Complete E2E suite
 - All modules (comprehensive)
 - Unit tests
@@ -112,6 +116,7 @@ Add these to your `.env` file or export in your shell.
 ```
 
 This offers:
+
 1. **Hourly smoke tests** - Every hour at :00
 2. **Daily quick tests** - 2 AM daily
 3. **Weekly full tests** - Sunday 3 AM
@@ -157,6 +162,7 @@ This offers:
 ### Notification Content
 
 Notifications include:
+
 - ✅/❌ Test status
 - Branch and commit info
 - Duration
@@ -182,6 +188,7 @@ ls -la test-history/
 ### CI/CD Reports
 
 Reports are automatically:
+
 - Uploaded as workflow artifacts
 - Published to GitHub Pages (main branch)
 - Commented on PRs
@@ -268,11 +275,13 @@ logs/                     # Execution logs
 ### GitHub Actions Workflows
 
 **`.github/workflows/test-automation.yml`**:
+
 - Triggered on push/PR
 - Scheduled runs (daily/weekly)
 - Manual trigger with options
 
 **`.github/workflows/test-report.yml`**:
+
 - Generates comprehensive reports
 - Coverage trends analysis
 - Flaky test detection
@@ -280,6 +289,7 @@ logs/                     # Execution logs
 ### Workflow Dispatch Options
 
 Manual trigger from GitHub Actions UI:
+
 1. Go to Actions → Test Automation
 2. Click "Run workflow"
 3. Select options:
@@ -430,6 +440,7 @@ bun run type-check
 ## 🆘 Support
 
 For issues or questions:
+
 1. Check logs: `logs/scheduled/`
 2. Review troubleshooting section
 3. Open GitHub issue
@@ -437,5 +448,4 @@ For issues or questions:
 
 ---
 
-**Last Updated**: 2026-03-17
-**Version**: 1.0.0
+**Last Updated**: 2026-03-17 **Version**: 1.0.0

@@ -1,10 +1,12 @@
 # E2E Test Utilities
 
-Comprehensive utility library for End-to-End testing of the Thai Accounting ERP system.
+Comprehensive utility library for End-to-End testing of the Thai Accounting ERP
+system.
 
 ## Overview
 
 This directory provides utilities for:
+
 - **Database verification** - Direct database assertions
 - **Test data factory** - Create test records programmatically
 - **Test helpers** - UI interaction utilities
@@ -12,7 +14,8 @@ This directory provides utilities for:
 
 ## Installation
 
-The utilities are already included in the project. No additional installation needed.
+The utilities are already included in the project. No additional installation
+needed.
 
 ```bash
 # Install Playwright (if not already installed)
@@ -30,7 +33,7 @@ import {
   verifyRecordCount,
   createTestCustomer,
   TEST_USERS,
-  URLs
+  URLs,
 } from '@/tests/utils';
 
 // Or import from specific files
@@ -52,7 +55,7 @@ test('create customer via API', async ({ page }) => {
   // Create test customer
   const customer = await createTestCustomer({
     name: 'Test Customer',
-    email: 'test@example.com'
+    email: 'test@example.com',
   });
 
   // Verify in database
@@ -75,23 +78,23 @@ import {
   SELECTORS,
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
-  TEST_DATA
+  TEST_DATA,
 } from '@/tests/utils';
 
 // Usage
-await loginAs(page, 'ADMIN');  // Uses TEST_USERS.ADMIN
+await loginAs(page, 'ADMIN'); // Uses TEST_USERS.ADMIN
 await navigateTo(page, URLs.CUSTOMERS);
 await page.waitForTimeout(TIMEOUTS.MEDIUM);
 ```
 
 #### TEST_USERS
 
-| Role | Email | Password | Permissions |
-|------|-------|----------|-------------|
-| ADMIN | admin@thaiaccounting.com | admin123 | Full access |
-| ACCOUNTANT | accountant@thaiaccounting.com | acc123 | Accounting operations |
-| USER | user@thaiaccounting.com | user123 | Basic operations |
-| VIEWER | viewer@thaiaccounting.com | viewer123 | Read-only |
+| Role       | Email                         | Password  | Permissions           |
+| ---------- | ----------------------------- | --------- | --------------------- |
+| ADMIN      | admin@thaiaccounting.com      | admin123  | Full access           |
+| ACCOUNTANT | accountant@thaiaccounting.com | acc123    | Accounting operations |
+| USER       | user@thaiaccounting.com       | user123   | Basic operations      |
+| VIEWER     | viewer@thaiaccounting.com     | viewer123 | Read-only             |
 
 #### URLs
 
@@ -123,14 +126,18 @@ await logout(page);
 // Setup test environment (clear cookies, set headers)
 await setupTest(page, {
   bypassRateLimit: true,
-  viewport: { width: 1920, height: 1080 }
+  viewport: { width: 1920, height: 1080 },
 });
 ```
 
 #### Navigation
 
 ```typescript
-import { navigateTo, clickSidebarNavItem, waitForNavigation } from '@/tests/utils';
+import {
+  navigateTo,
+  clickSidebarNavItem,
+  waitForNavigation,
+} from '@/tests/utils';
 
 // Navigate to specific page
 await navigateTo(page, URLs.CUSTOMERS);
@@ -150,7 +157,7 @@ import {
   fillForm,
   submitForm,
   selectOption,
-  clickButton
+  clickButton,
 } from '@/tests/utils';
 
 // Fill single field by label
@@ -158,9 +165,9 @@ await fillField(page, 'ชื่อลูกค้า', 'Test Customer');
 
 // Fill multiple fields
 await fillForm(page, {
-  'ชื่อลูกค้า': 'Test Customer',
-  'อีเมล': 'test@example.com',
-  'เบอร์โทรศัพท์': '0812345678'
+  ชื่อลูกค้า: 'Test Customer',
+  อีเมล: 'test@example.com',
+  เบอร์โทรศัพท์: '0812345678',
 });
 
 // Select dropdown option
@@ -176,7 +183,11 @@ await clickButton(page, 'บันทึก');
 #### Toast Notifications
 
 ```typescript
-import { waitForToast, getToastMessage, waitForToastToDisappear } from '@/tests/utils';
+import {
+  waitForToast,
+  getToastMessage,
+  waitForToastToDisappear,
+} from '@/tests/utils';
 
 // Wait for toast
 await waitForToast(page);
@@ -195,7 +206,7 @@ await waitForToastToDisappear(page);
 import {
   verifyTableRowCount,
   getTableRowData,
-  findTableRowByText
+  findTableRowByText,
 } from '@/tests/utils';
 
 // Verify row count
@@ -233,7 +244,7 @@ import {
   verifyHidden,
   verifyText,
   verifyContainsText,
-  verifyUrl
+  verifyUrl,
 } from '@/tests/utils';
 
 // Verify element visible
@@ -270,18 +281,18 @@ await pause(page, 'Check the state');
 import { waitForApiResponse, retry, bypassRateLimiting } from '@/tests/utils';
 
 // Wait for API response
-const response = await waitForApiResponse(
-  page,
-  '/api/customers',
-  async () => {
-    await clickButton(page, 'บันทึก');
-  }
-);
+const response = await waitForApiResponse(page, '/api/customers', async () => {
+  await clickButton(page, 'บันทึก');
+});
 
 // Retry flaky operation
-const result = await retry(async () => {
-  return await getRecordCount('customer');
-}, 3, 1000);
+const result = await retry(
+  async () => {
+    return await getRecordCount('customer');
+  },
+  3,
+  1000
+);
 
 // Bypass rate limiting
 bypassRateLimiting(page);
@@ -305,7 +316,7 @@ import {
   verifyStockMovement,
   getStockBalance,
   getAccountBalance,
-  verifyDocumentStatus
+  verifyDocumentStatus,
 } from '@/tests/utils';
 ```
 
@@ -324,7 +335,7 @@ expect(exists).toBe(true);
 const valuesMatch = await verifyRecordValues('customer', customerId, {
   name: 'Test Customer',
   email: 'test@example.com',
-  status: 'ACTIVE'
+  status: 'ACTIVE',
 });
 expect(valuesMatch).toBe(true);
 
@@ -342,7 +353,7 @@ console.log('Total customers:', count);
 
 // Get all records
 const customers = await getAllRecords('customer');
-customers.forEach(c => console.log(c.name));
+customers.forEach((c) => console.log(c.name));
 
 // Get specific record
 const customer = await getRecordById('customer', customerId);
@@ -387,7 +398,11 @@ expect(arBalance).toBeGreaterThan(0);
 
 ```typescript
 // Verify document status
-const statusCorrect = await verifyDocumentStatus('invoice', invoiceId, 'POSTED');
+const statusCorrect = await verifyDocumentStatus(
+  'invoice',
+  invoiceId,
+  'POSTED'
+);
 expect(statusCorrect).toBe(true);
 ```
 
@@ -407,7 +422,7 @@ import {
   createTestScenario,
   createTestCustomers,
   createTestProducts,
-  deleteTestData
+  deleteTestData,
 } from '@/tests/utils';
 ```
 
@@ -418,13 +433,13 @@ import {
 const customer = await createTestCustomer({
   name: 'Custom Customer',
   email: 'custom@example.com',
-  creditLimit: 100000
+  creditLimit: 100000,
 });
 
 // Create vendor
 const vendor = await createTestVendor({
   name: 'Custom Vendor',
-  paymentTerms: 45
+  paymentTerms: 45,
 });
 
 // Create product
@@ -432,13 +447,13 @@ const product = await createTestProduct({
   name: 'Custom Product',
   code: 'PROD-001',
   price: 5000,
-  vatType: 'INCLUSIVE'
+  vatType: 'INCLUSIVE',
 });
 
 // Create warehouse
 const warehouse = await createTestWarehouse({
   name: 'Main Warehouse',
-  code: 'WH-MAIN'
+  code: 'WH-MAIN',
 });
 ```
 
@@ -455,30 +470,30 @@ const invoice = await createTestInvoice({
       quantity: 10,
       price: 1000,
       vatAmount: 700,
-      total: 10700
+      total: 10700,
     },
     {
       productId: product2.id,
       quantity: 5,
       price: 2000,
       vatAmount: 700,
-      total: 10700
-    }
-  ]
+      total: 10700,
+    },
+  ],
 });
 
 // Create receipt
 const receipt = await createTestReceipt({
   customerId: customer.id,
   amount: 5000,
-  paymentMethod: 'BANK_TRANSFER'
+  paymentMethod: 'BANK_TRANSFER',
 });
 
 // Create payment
 const payment = await createTestPayment({
   vendorId: vendor.id,
   amount: 10000,
-  paymentMethod: 'CHEQUE'
+  paymentMethod: 'CHEQUE',
 });
 ```
 
@@ -693,7 +708,9 @@ await page.waitForSelector('.element', { timeout: TIMEOUTS.LONG });
 
 ## Examples
 
-See `/tests/examples/test-utilities-example.spec.ts` for comprehensive examples of:
+See `/tests/examples/test-utilities-example.spec.ts` for comprehensive examples
+of:
+
 - Basic test operations
 - Database verification
 - UI interactions

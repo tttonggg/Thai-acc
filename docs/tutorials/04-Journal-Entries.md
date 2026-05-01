@@ -1,6 +1,7 @@
 # Video Tutorial Script: 04 - Journal Entries
 
 ## Video Information
+
 - **Title:** Journal Entries (สมุดรายวัน)
 - **Duration:** 15-18 minutes
 - **Target Audience:** Accountants and accounting staff
@@ -10,15 +11,18 @@
 
 **[Scene: Journal entry list]**
 
-**Narrator:**
-"สวัสดีครับ/ค่ะ ในตอนนี้เราจะมาเรียนรู้การบันทึกรายการบัญชีด้วยสมุดรายวัน ซึ่งเป็นหัวใจสำคัญของระบบบัญชี Double Entry"
+**Narrator:** "สวัสดีครับ/ค่ะ
+ในตอนนี้เราจะมาเรียนรู้การบันทึกรายการบัญชีด้วยสมุดรายวัน
+ซึ่งเป็นหัวใจสำคัญของระบบบัญชี Double Entry"
 
 **On-screen text:**
+
 - Double-Entry Bookkeeping
 - เดบิต = Credit
 - บัญชีแยกประเภท (GL)
 
 **Learning Objectives:**
+
 1. เข้าใจหลักการบัญชี Double Entry
 2. สร้างรายการบัญชี
 3. บันทึกรายการประจำวัน
@@ -29,10 +33,11 @@
 
 **[Scene: Accounting equation diagram]**
 
-**Narrator:**
-"ระบบบัญชี Double Entry มีหลักการสำคัญคือ ทุกรายการต้องมีเดบิตและเครดิตเท่ากัน"
+**Narrator:** "ระบบบัญชี Double Entry มีหลักการสำคัญคือ
+ทุกรายการต้องมีเดบิตและเครดิตเท่ากัน"
 
 **Accounting Equation:**
+
 ```
 สินทรัพย์ = หนี้สิน + ทุน
 Assets = Liabilities + Equity
@@ -41,26 +46,26 @@ Assets = Liabilities + Equity
 **Debit/Credit Rules:**
 
 | ประเภทบัญชี | เดบิต (Debit) | เครดิต (Credit) |
-|-------------|---------------|-----------------|
-| สินทรัพย์ | เพิ่ม | ลด |
-| หนี้สิน | ลด | เพิ่ม |
-| ทุน | ลด | เพิ่ม |
-| รายได้ | ลด | เพิ่ม |
-| ค่าใช้จ่าย | เพิ่ม | ลด |
+| ----------- | ------------- | --------------- |
+| สินทรัพย์   | เพิ่ม         | ลด              |
+| หนี้สิน     | ลด            | เพิ่ม           |
+| ทุน         | ลด            | เพิ่ม           |
+| รายได้      | ลด            | เพิ่ม           |
+| ค่าใช้จ่าย  | เพิ่ม         | ลด              |
 
 **[Scene: Show T-accounts]**
 
-**Narrator:**
-"จำไว้ว่า สินทรัพย์และค่าใช้จ่าย เดบิตเพิ่ม ส่วนหนี้สิน ทุน และรายได้ เครดิตเพิ่ม"
+**Narrator:** "จำไว้ว่า สินทรัพย์และค่าใช้จ่าย เดบิตเพิ่ม ส่วนหนี้สิน ทุน
+และรายได้ เครดิตเพิ่ม"
 
 ## Section 2: Chart of Accounts Review (2 minutes)
 
 **[Scene: Chart of accounts]**
 
-**Narrator:**
-"ก่อนบันทึกบัญชี เราต้องเข้าใจผังบัญชีของเรา"
+**Narrator:** "ก่อนบันทึกบัญชี เราต้องเข้าใจผังบัญชีของเรา"
 
 **Account Structure:**
+
 ```
 1xxx - สินทรัพย์ (Assets)
   11xx - สินทรัพย์หมุนเวียน
@@ -86,12 +91,12 @@ Assets = Liabilities + Equity
 
 **[Scene: Journal entry list, click Create New]**
 
-**Narrator:**
-"ไปที่เมนู สมุดรายวัน และคลิก สร้างรายการใหม่"
+**Narrator:** "ไปที่เมนู สมุดรายวัน และคลิก สร้างรายการใหม่"
 
 **[Scene: Journal entry form]**
 
 **Journal Entry Header:**
+
 ```
 วันที่: 31/03/2026
 คำอธิบาย: บันทึกค่าเช่าสำนักงาน เดือน มี.ค.
@@ -103,6 +108,7 @@ Assets = Liabilities + Equity
 **Adding Journal Lines:**
 
 **Example 1: Rent Expense**
+
 ```
 รายการที่ 1:
   บัญชี: ค่าเช่า (5220)
@@ -120,6 +126,7 @@ Assets = Liabilities + Equity
 **[Scene: Add both lines]**
 
 **Balance Check:**
+
 ```
 รวมเดบิต: 25,000
 รวมเครดิต: 25,000
@@ -128,8 +135,8 @@ Assets = Liabilities + Equity
 
 **[Scene: Verify balance]**
 
-**Narrator:**
-"ตรวจสอบให้แน่ใจว่ายอดเดบิตเท่ากับยอดเครดิต ระบบจะแสดงสถานะบัญชีดุลเมือยอดเท่ากัน"
+**Narrator:** "ตรวจสอบให้แน่ใจว่ายอดเดบิตเท่ากับยอดเครดิต
+ระบบจะแสดงสถานะบัญชีดุลเมือยอดเท่ากัน"
 
 **[Scene: Click Save]**
 
@@ -138,6 +145,7 @@ Assets = Liabilities + Equity
 **[Scene: Multiple examples]**
 
 **Example 1: Accrued Expenses**
+
 ```
 วันที่: 31/03/2026
 คำอธิบาย: ค่าใช้จ่ายค้างจ่าย - เงินเดือน
@@ -147,6 +155,7 @@ Assets = Liabilities + Equity
 ```
 
 **Example 2: Depreciation**
+
 ```
 วันที่: 31/03/2026
 คำอธิบาย: ค่าเสื่อมราคาเครื่องใช้สำนักงาน
@@ -156,6 +165,7 @@ Assets = Liabilities + Equity
 ```
 
 **Example 3: Prepaid Expenses**
+
 ```
 วันที่: 01/03/2026
 คำอธิบาย: จ่ายค่าประกันภัยล่วงหน้า 1 ปี
@@ -165,6 +175,7 @@ Assets = Liabilities + Equity
 ```
 
 **Example 4: Adjusting Prepaid**
+
 ```
 วันที่: 31/03/2026
 คำอธิบาย: บันทึกค่าประกันภัยเดือน มี.ค.
@@ -174,6 +185,7 @@ Assets = Liabilities + Equity
 ```
 
 **Example 5: Owner's Drawings**
+
 ```
 วันที่: 15/03/2026
 คำอธิบาย: เบิกเงินส่วนตัวเจ้าของ
@@ -186,12 +198,12 @@ Assets = Liabilities + Equity
 
 **[Scene: Journal entry detail]**
 
-**Narrator:**
-"หลังจากบันทึกรายการแล้ว เราต้องโพสต์เพื่อบันทึกลงบัญชีแยกประเภท"
+**Narrator:** "หลังจากบันทึกรายการแล้ว เราต้องโพสต์เพื่อบันทึกลงบัญชีแยกประเภท"
 
 **[Scene: Click Post]**
 
 **Confirmation:**
+
 ```
 ยืนยันการโพสต์รายการบัญชี?
 
@@ -204,19 +216,19 @@ Assets = Liabilities + Equity
 
 **[Scene: Confirm, show posted status]**
 
-**Narrator:**
-"เมื่อโพสต์แล้วจะได้เลขที่รายการบัญชี และไม่สามารถแก้ไขได้"
+**Narrator:** "เมื่อโพสต์แล้วจะได้เลขที่รายการบัญชี และไม่สามารถแก้ไขได้"
 
 ## Section 6: Reversing Entries (2 minutes)
 
 **[Scene: Posted journal entry]**
 
-**Narrator:**
-"หากบันทึกผิดพลาด เราต้องยกเลิกด้วยการบันทึกสมผล (Reversing Entry)"
+**Narrator:** "หากบันทึกผิดพลาด เราต้องยกเลิกด้วยการบันทึกสมผล (Reversing
+Entry)"
 
 **[Scene: Click Reverse]**
 
 **Reversing Entry Created:**
+
 ```
 เลขที่: JV-202603-0156-R
 วันที่: 31/03/2026
@@ -228,17 +240,17 @@ Assets = Liabilities + Equity
 
 **[Scene: Show original and reversing entries]**
 
-**Narrator:**
-"การยกเลิกจะสร้างรายการใหม่ที่สลับเดบิตเครดิตกัน ทำให้ผลกระทบเป็นศูนย์"
+**Narrator:** "การยกเลิกจะสร้างรายการใหม่ที่สลับเดบิตเครดิตกัน
+ทำให้ผลกระทบเป็นศูนย์"
 
 ## Section 7: Recurring Entries (1 minute)
 
 **[Scene: Recurring entries setup]**
 
-**Narrator:**
-"สำหรับรายการที่เกิดขึ้นประจำ สามารถตั้งค่ารายการประจำได้"
+**Narrator:** "สำหรับรายการที่เกิดขึ้นประจำ สามารถตั้งค่ารายการประจำได้"
 
 **Example Recurring Entries:**
+
 - ค่าเช่า เดือนละครั้ง
 - ค่าเสื่อมราคา เดือนละครั้ง
 - เงินเดือน เดือนละครั้ง
@@ -249,10 +261,10 @@ Assets = Liabilities + Equity
 
 **[Scene: GL Report]**
 
-**Narrator:**
-"ดูรายการทั้งหมดในบัญชีแยกประเภท"
+**Narrator:** "ดูรายการทั้งหมดในบัญชีแยกประเภท"
 
 **GL View:**
+
 ```
 บัญชี: ค่าเช่า (5220)
 งวด: มีนาคม 2026
@@ -269,23 +281,24 @@ Assets = Liabilities + Equity
 
 **[Scene: Summary]**
 
-**Narrator:**
-"คุณได้เรียนรู้การใช้สมุดรายวันแล้ว ซึ่งเป็นพื้นฐานสำคัญของการบัญชี"
+**Narrator:** "คุณได้เรียนรู้การใช้สมุดรายวันแล้ว
+ซึ่งเป็นพื้นฐานสำคัญของการบัญชี"
 
-**Next Episode:**
-"ตอนหน้าเราจะเรียนรู้การอ่านและวิเคราะห์รายงานทางการเงิน"
+**Next Episode:** "ตอนหน้าเราจะเรียนรู้การอ่านและวิเคราะห์รายงานทางการเงิน"
 
 ---
 
 ## Production Notes
 
 ### Key Concepts
+
 - Double-entry visualization
 - T-accounts
 - Trial balance concept
 - Account classifications
 
 ### Animations Needed
+
 - Debit/Credit arrows
 - Account balance changes
 - Journal flow to GL

@@ -3,6 +3,7 @@
 ## Issues Fixed ✅
 
 ### Problem
+
 - Thai text overlapping
 - Font sizes too large
 - Line spacing inadequate for Thai text
@@ -27,17 +28,19 @@
    - Proper alignment for Thai text
 
 4. **Test PDF Changes**
+
    ```typescript
    // Before: Overlapping text
-   doc.fontSize(24).text('...')
-   doc.moveDown() // Not enough spacing
+   doc.fontSize(24).text('...');
+   doc.moveDown(); // Not enough spacing
 
    // After: Proper spacing
-   doc.fontSize(20).text('...')
-   doc.moveDown(2) // Explicit spacing
+   doc.fontSize(20).text('...');
+   doc.moveDown(2); // Explicit spacing
    ```
 
 5. **Invoice PDF Changes**
+
    ```typescript
    // Column widths adjusted: [30, 200, 50, 50, 60, 50, 70]
    // → [25, 160, 40, 40, 55, 45, 60]
@@ -55,6 +58,7 @@
 ## Verification
 
 Both PDFs should now display:
+
 - ✅ Thai text without overlapping
 - ✅ Proper line spacing
 - ✅ Readable table layouts
@@ -63,6 +67,7 @@ Both PDFs should now display:
 ## If Issues Persist
 
 Further adjustments can be made to:
+
 - `yPos += X` values (increase for more spacing)
 - `fontSize(X)` values (decrease for smaller text)
 - Column width arrays (adjust table widths)

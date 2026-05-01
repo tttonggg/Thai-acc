@@ -7,11 +7,15 @@
 ## ✅ Issues Fixed
 
 ### 1. Routing Issue: inventory ↔ warehouses Not Switching
-**Problem**: When switching between `/inventory` and `/warehouses`, page content didn't change.
 
-**Root Cause**: Both routes rendered the same `<InventoryPage />` component. React was reusing the component instance instead of remounting it.
+**Problem**: When switching between `/inventory` and `/warehouses`, page content
+didn't change.
+
+**Root Cause**: Both routes rendered the same `<InventoryPage />` component.
+React was reusing the component instance instead of remounting it.
 
 **Solution**: Added unique `key` props to force React to remount:
+
 ```typescript
 // Before
 case 'inventory':
@@ -31,9 +35,11 @@ case 'warehouses':
 ---
 
 ### 2. Routing Issue: payroll ↔ employees Not Switching
+
 **Problem**: Similar issue with payroll and employees routes.
 
 **Solution**: Added unique `key` props:
+
 ```typescript
 // Before
 case 'payroll':
@@ -53,15 +59,22 @@ case 'employees':
 ---
 
 ### 3. Debit Notes List: Wrong Data Access
-**Problem**: Frontend was accessing `dn.vendor?.name` but API returns `vendorName` (flattened).
+
+**Problem**: Frontend was accessing `dn.vendor?.name` but API returns
+`vendorName` (flattened).
 
 **Solution**: Updated filter to use flattened field:
+
 ```typescript
 // Before
-const matchesSearch = dn.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+const matchesSearch = dn.vendor?.name
+  ?.toLowerCase()
+  .includes(searchTerm.toLowerCase());
 
 // After
-const matchesSearch = dn.vendorName?.toLowerCase().includes(searchTerm.toLowerCase())
+const matchesSearch = dn.vendorName
+  ?.toLowerCase()
+  .includes(searchTerm.toLowerCase());
 ```
 
 **Result**: ✅ Debit notes search and filtering now works!
@@ -69,9 +82,12 @@ const matchesSearch = dn.vendorName?.toLowerCase().includes(searchTerm.toLowerCa
 ---
 
 ### 4. Credit Notes List: Wrong Data Access (2 places)
-**Problem**: Frontend was accessing `cn.customer?.name` but API returns `customerName` (flattened).
+
+**Problem**: Frontend was accessing `cn.customer?.name` but API returns
+`customerName` (flattened).
 
 **Solution**: Updated both filter and table display:
+
 ```typescript
 // Filter (line 114)
 // Before: cn.customer?.name?.toLowerCase()
@@ -87,9 +103,12 @@ const matchesSearch = dn.vendorName?.toLowerCase().includes(searchTerm.toLowerCa
 ---
 
 ### 5. API Error Handling: Debit Notes Transformation
-**Problem**: If a debit note has null dates or missing vendor, transformation could fail.
+
+**Problem**: If a debit note has null dates or missing vendor, transformation
+could fail.
 
 **Solution**: Added try-catch with null safety:
+
 ```typescript
 const transformedDebitNotes = debitNotes.map((dn: any) => {
   try {
@@ -98,12 +117,14 @@ const transformedDebitNotes = debitNotes.map((dn: any) => {
       vendorName: dn.vendor?.name || '',
       debitNoteDate: dn.debitNoteDate ? dn.debitNoteDate.toISOString() : '',
       // ... other fields with null checks
-    }
+    };
   } catch (err) {
-    console.error('Error transforming debit note:', dn.id, err)
-    return { /* safe default values */ }
+    console.error('Error transforming debit note:', dn.id, err);
+    return {
+      /* safe default values */
+    };
   }
-})
+});
 ```
 
 **Result**: ✅ Debit notes API won't crash on bad data!
@@ -111,6 +132,7 @@ const transformedDebitNotes = debitNotes.map((dn: any) => {
 ---
 
 ### 6. API Error Handling: Credit Notes Transformation
+
 **Problem**: Similar issue with credit notes transformation.
 
 **Solution**: Added same try-catch pattern with null safety.
@@ -122,13 +144,19 @@ const transformedDebitNotes = debitNotes.map((dn: any) => {
 ## 📋 Files Modified
 
 ### Routing Fixes:
-1. `/src/app/page.tsx` - Added `key` props to inventory, warehouses, payroll, employees
+
+1. `/src/app/page.tsx` - Added `key` props to inventory, warehouses, payroll,
+   employees
 
 ### Data Access Fixes:
-2. `/src/components/debit-notes/debit-note-list.tsx` - Updated filter to use `vendorName`
-3. `/src/components/credit-notes/credit-note-list.tsx` - Updated filter and table to use `customerName`
+
+2. `/src/components/debit-notes/debit-note-list.tsx` - Updated filter to use
+   `vendorName`
+3. `/src/components/credit-notes/credit-note-list.tsx` - Updated filter and
+   table to use `customerName`
 
 ### API Error Handling:
+
 4. `/src/app/api/debit-notes/route.ts` - Added try-catch in transformation
 5. `/src/app/api/credit-notes/route.ts` - Added try-catch in transformation
 
@@ -152,11 +180,14 @@ const transformedDebitNotes = debitNotes.map((dn: any) => {
 ## 🎯 Why This Happened
 
 ### The React Key Prop Issue:
+
 When React renders components:
+
 - **Same component type + no key change** → Reuses existing component instance
 - **Different key prop** → Unmounts old, mounts new component
 
 **Example**:
+
 ```typescript
 // React sees: InventoryPage, then InventoryPage again
 // → Reuses the same component instance (no remount)
@@ -170,6 +201,7 @@ When React renders components:
 ```
 
 ### The Data Structure Issue:
+
 - **Backend**: Prisma returns nested objects (`{ vendor: { name: "..." } }`)
 - **Frontend**: Components expect flat fields (`{ vendorName: "..." }`)
 - **Solution**: Transform API responses to flatten nested objects
@@ -181,6 +213,7 @@ When React renders components:
 ✅ **ALL ISSUES RESOLVED**
 
 **User Impact**:
+
 - ✅ Inventory/Warehouses switching works perfectly
 - ✅ Payroll/Employees switching works perfectly
 - ✅ Debit notes load and display correctly
@@ -193,4 +226,5 @@ When React renders components:
 
 ## 📝 Note
 
-The dev server has hot-reloaded all changes. Try switching between pages now - everything should work smoothly! 🚀
+The dev server has hot-reloaded all changes. Try switching between pages now -
+everything should work smoothly! 🚀

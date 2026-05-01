@@ -1,6 +1,7 @@
 # Reusable Dialog Components
 
-This directory contains reusable dialog components for the Thai Accounting ERP system.
+This directory contains reusable dialog components for the Thai Accounting ERP
+system.
 
 ## Components
 
@@ -11,25 +12,25 @@ A generic delete confirmation dialog with danger styling and loading states.
 **Usage:**
 
 ```tsx
-import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog'
-import { useState } from 'react'
+import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import { useState } from 'react';
 
 function MyComponent() {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    setIsDeleting(true)
+    setIsDeleting(true);
     try {
-      await fetch(`/api/items/${id}`, { method: 'DELETE' })
+      await fetch(`/api/items/${id}`, { method: 'DELETE' });
       // Handle success
-      setIsDeleteDialogOpen(false)
+      setIsDeleteDialogOpen(false);
     } catch (error) {
       // Handle error
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   return (
     <DeleteConfirmDialog
@@ -42,7 +43,7 @@ function MyComponent() {
       onConfirm={handleDelete}
       loading={isDeleting}
     />
-  )
+  );
 }
 ```
 
@@ -51,7 +52,8 @@ function MyComponent() {
 - `open`: boolean - Controls dialog visibility
 - `onOpenChange`: (open: boolean) => void - Callback when dialog state changes
 - `title`: string (default: 'ยืนยันการลบ') - Dialog title
-- `message`: string (default: 'คุณต้องการลบรายการนี้ใช่หรือไม่?...') - Dialog message
+- `message`: string (default: 'คุณต้องการลบรายการนี้ใช่หรือไม่?...') - Dialog
+  message
 - `confirmLabel`: string (default: 'ลบ') - Confirm button label
 - `cancelLabel`: string (default: 'ยกเลิก') - Cancel button label
 - `onConfirm`: () => void | Promise<void> - Callback when confirmed
@@ -61,36 +63,37 @@ function MyComponent() {
 
 ### 2. FormDialog
 
-A generic form dialog wrapper that handles form submission, loading states, and auto-close on success.
+A generic form dialog wrapper that handles form submission, loading states, and
+auto-close on success.
 
 **Usage:**
 
 ```tsx
-import { FormDialog } from '@/components/ui/form-dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useState } from 'react'
+import { FormDialog } from '@/components/ui/form-dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useState } from 'react';
 
 function MyComponent() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({ name: '' })
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({ name: '' });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
     try {
       await fetch('/api/items', {
         method: 'POST',
         body: JSON.stringify(formData),
-      })
-      setIsOpen(false) // Auto-close on success
+      });
+      setIsOpen(false); // Auto-close on success
     } catch (error) {
       // Handle error - dialog stays open
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <FormDialog
@@ -115,7 +118,7 @@ function MyComponent() {
         </div>
       </div>
     </FormDialog>
-  )
+  );
 }
 ```
 
@@ -132,36 +135,39 @@ function MyComponent() {
 - `cancelLabel`: string (default: 'ยกเลิก') - Cancel button label
 - `showFooter`: boolean (default: true) - Show/hide footer buttons
 - `disableSubmit`: boolean (default: false) - Disable submit button
-- `maxWidth`: 'sm' | 'md' | 'lg' | 'xl' | '2xl' (default: 'lg') - Dialog max width
+- `maxWidth`: 'sm' | 'md' | 'lg' | 'xl' | '2xl' (default: 'lg') - Dialog max
+  width
 
 ---
 
 ### 3. useDeleteConfirm Hook
 
-A custom hook for managing delete confirmation workflow with automatic toast notifications.
+A custom hook for managing delete confirmation workflow with automatic toast
+notifications.
 
 **Usage:**
 
 ```tsx
-import { useDeleteConfirm } from '@/hooks/use-delete-confirm'
-import { Button } from '@/components/ui/button'
-import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog'
+import { useDeleteConfirm } from '@/hooks/use-delete-confirm';
+import { Button } from '@/components/ui/button';
+import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 
 function MyComponent({ itemId }: { itemId: string }) {
-  const { confirmDelete, isOpen, title, message, isDeleting, cancel } = useDeleteConfirm()
+  const { confirmDelete, isOpen, title, message, isDeleting, cancel } =
+    useDeleteConfirm();
 
   const deleteItem = async () => {
     const response = await fetch(`/api/items/${itemId}`, {
       method: 'DELETE',
-    })
+    });
 
     if (!response.ok) {
-      throw new Error('Failed to delete item')
+      throw new Error('Failed to delete item');
     }
 
     // Refresh data or navigate away
-    window.location.reload()
-  }
+    window.location.reload();
+  };
 
   return (
     <>
@@ -172,11 +178,11 @@ function MyComponent({ itemId }: { itemId: string }) {
             title: 'ลบรายการสินค้า',
             message: 'คุณต้องการลบสินค้ารายการนี้ใช่หรือไม่?',
             onSuccess: () => {
-              console.log('Item deleted successfully')
+              console.log('Item deleted successfully');
               // Optional: Additional success handling
             },
             onError: (error) => {
-              console.error('Delete failed:', error)
+              console.error('Delete failed:', error);
               // Optional: Additional error handling
             },
           })
@@ -194,13 +200,14 @@ function MyComponent({ itemId }: { itemId: string }) {
         loading={isDeleting}
       />
     </>
-  )
+  );
 }
 ```
 
 **Hook Returns:**
 
-- `confirmDelete`: (deleteFn: () => Promise<void>, options?: DeleteConfirmOptions) => void - Function to trigger delete confirmation
+- `confirmDelete`: (deleteFn: () => Promise<void>, options?:
+  DeleteConfirmOptions) => void - Function to trigger delete confirmation
 - `isOpen`: boolean - Dialog open state
 - `title`: string - Dialog title
 - `message`: string - Dialog message
@@ -211,10 +218,10 @@ function MyComponent({ itemId }: { itemId: string }) {
 
 ```typescript
 interface DeleteConfirmOptions {
-  title?: string // Custom title (default: 'ยืนยันการลบ')
-  message?: string // Custom message
-  onSuccess?: () => void // Callback on successful delete
-  onError?: (error: Error) => void // Callback on error
+  title?: string; // Custom title (default: 'ยืนยันการลบ')
+  message?: string; // Custom message
+  onSuccess?: () => void; // Callback on successful delete
+  onError?: (error: Error) => void; // Callback on error
 }
 ```
 
@@ -234,12 +241,16 @@ interface DeleteConfirmOptions {
 
 ## Best Practices
 
-1. **Always use confirm dialogs for destructive actions** - Never delete without confirmation
-2. **Provide clear, specific messages** - Tell users exactly what will be deleted
+1. **Always use confirm dialogs for destructive actions** - Never delete without
+   confirmation
+2. **Provide clear, specific messages** - Tell users exactly what will be
+   deleted
 3. **Handle errors gracefully** - Show user-friendly error messages
 4. **Disable buttons during operations** - Prevent duplicate submissions
-5. **Auto-close on success** - Close dialogs automatically after successful operations
-6. **Use the useDeleteConfirm hook** - It provides better UX with automatic toast notifications
+5. **Auto-close on success** - Close dialogs automatically after successful
+   operations
+6. **Use the useDeleteConfirm hook** - It provides better UX with automatic
+   toast notifications
 
 ---
 
@@ -247,9 +258,11 @@ interface DeleteConfirmOptions {
 
 See these files for real-world usage examples:
 
-- `/Users/tong/Thai-acc/src/components/ar/customer-list.tsx` - Customer management
+- `/Users/tong/Thai-acc/src/components/ar/customer-list.tsx` - Customer
+  management
 - `/Users/tong/Thai-acc/src/components/ap/vendor-list.tsx` - Vendor management
-- `/Users/tong/Thai-acc/src/components/invoices/invoice-list.tsx` - Invoice management
+- `/Users/tong/Thai-acc/src/components/invoices/invoice-list.tsx` - Invoice
+  management
 
 ---
 

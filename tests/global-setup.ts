@@ -27,7 +27,7 @@ async function globalSetup(config: FullConfig) {
       'test-results/videos',
       'test-results/traces',
       'test-results/evidence',
-      'test-results/artifacts'
+      'test-results/artifacts',
     ];
 
     console.log('📁 Creating test artifacts directories...');
@@ -60,7 +60,7 @@ async function globalSetup(config: FullConfig) {
       try {
         execSync('npm run seed', {
           stdio: 'inherit',
-          cwd: process.cwd()
+          cwd: process.cwd(),
         });
         console.log('  ✅ Database seeded successfully');
       } catch (error) {
@@ -77,12 +77,12 @@ async function globalSetup(config: FullConfig) {
       'admin@thaiaccounting.com',
       'accountant@thaiaccounting.com',
       'user@thaiaccounting.com',
-      'viewer@thaiaccounting.com'
+      'viewer@thaiaccounting.com',
     ];
 
     for (const email of testUsers) {
       const user = await prisma.user.findUnique({
-        where: { email }
+        where: { email },
       });
 
       if (user) {
@@ -100,9 +100,9 @@ async function globalSetup(config: FullConfig) {
       where: {
         status: 'DRAFT',
         createdAt: {
-          lt: new Date(Date.now() - 24 * 60 * 60 * 1000) // Older than 24 hours
-        }
-      }
+          lt: new Date(Date.now() - 24 * 60 * 60 * 1000), // Older than 24 hours
+        },
+      },
     });
     console.log(`  🗑️  Deleted ${deletedJournalEntries.count} old draft journal entries`);
 
@@ -111,16 +111,15 @@ async function globalSetup(config: FullConfig) {
       where: {
         status: 'DRAFT',
         createdAt: {
-          lt: new Date(Date.now() - 24 * 60 * 60 * 1000)
-        }
-      }
+          lt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        },
+      },
     });
     console.log(`  🗑️  Deleted ${deletedInvoices.count} old draft invoices`);
 
     console.log('\n========================================');
     console.log('✅ Global Setup Complete');
     console.log('========================================\n');
-
   } catch (error) {
     console.error('\n❌ Global Setup Failed:', error);
     throw error;

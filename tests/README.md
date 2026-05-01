@@ -2,7 +2,9 @@
 
 ## Overview
 
-This directory contains comprehensive test orchestration for the Thai Accounting ERP system. The test suite covers all 16 modules with automated database verification, screenshot capture, and detailed reporting.
+This directory contains comprehensive test orchestration for the Thai Accounting
+ERP system. The test suite covers all 16 modules with automated database
+verification, screenshot capture, and detailed reporting.
 
 ## Test Structure
 
@@ -33,11 +35,13 @@ tests/
 ### Database Setup
 
 1. **Generate Prisma Client**:
+
    ```bash
    bun run db:generate
    ```
 
 2. **Push Schema to Database**:
+
    ```bash
    bun run db:push
    ```
@@ -67,8 +71,8 @@ Run only critical and high-priority tests for fast feedback:
 ./scripts/test-quick.sh
 ```
 
-**Duration**: ~2-3 minutes
-**Coverage**: Authentication, navigation, core accounting features
+**Duration**: ~2-3 minutes **Coverage**: Authentication, navigation, core
+accounting features
 
 ### Full Test Suite
 
@@ -78,10 +82,11 @@ Run all comprehensive tests with database verification:
 ./scripts/test-full.sh
 ```
 
-**Duration**: ~15-20 minutes
-**Coverage**: All 16 modules, database integrity, GL posting
+**Duration**: ~15-20 minutes **Coverage**: All 16 modules, database integrity,
+GL posting
 
 **Options**:
+
 - `--no-db-verify` - Skip database verification
 - `--parallel` - Run tests in parallel (default)
 - `--sequential` - Run tests sequentially
@@ -95,6 +100,7 @@ Run tests for a specific module:
 ```
 
 **Examples**:
+
 ```bash
 ./scripts/test-module.sh inventory
 ./scripts/test-module.sh @smoke
@@ -132,11 +138,13 @@ npx playwright test --headed
 ### GitHub Actions
 
 Tests automatically run on:
+
 - Push to `main` or `develop` branches
 - Pull requests to `main` or `develop` branches
 - Manual workflow dispatch
 
 The CI pipeline:
+
 1. Checks out code
 2. Sets up Node.js and Bun
 3. Installs dependencies
@@ -294,6 +302,7 @@ Tests are tagged for easy filtering:
 - `@database` - Database verification tests
 
 **Usage**:
+
 ```bash
 npx playwright test --grep "@smoke"
 npx playwright test --grep "@critical and not @pdf"
@@ -304,6 +313,7 @@ npx playwright test --grep "@critical and not @pdf"
 ### Automatic Verification
 
 The test suite automatically verifies database integrity:
+
 - Record counts before/after each test
 - Journal entry balance validation
 - Orphaned record detection
@@ -318,6 +328,7 @@ Run manual database verification:
 ```
 
 **Checks**:
+
 - Record counts for all tables
 - Journal entry debit/credit balance
 - Orphaned records (customers, invoices, receipts, payments)
@@ -326,6 +337,7 @@ Run manual database verification:
 ### Database State Snapshots
 
 The `database-reporter.ts` captures database state:
+
 ```json
 {
   "timestamp": "2025-03-13T10:00:00.000Z",
@@ -352,6 +364,7 @@ open playwright-report/index.html
 ```
 
 **Features**:
+
 - Test results overview
 - Per-test details
 - Screenshots of failures
@@ -367,10 +380,12 @@ npx ts-node tests/master-test-runner.ts
 ```
 
 **Output**:
+
 - `test-results/html/master-report-*.html` - Visual report
 - `test-results/json/master-report-*.json` - Raw data
 
 **Sections**:
+
 - Executive summary
 - Pass/fail statistics
 - Per-module results
@@ -387,6 +402,7 @@ ls test-results/database/
 ```
 
 **Files**:
+
 - `database-summary.json` - Summary of all tests
 - `<suite>-<test>.json` - Per-test details
 
@@ -395,21 +411,21 @@ ls test-results/database/
 ### Test File Structure
 
 ```typescript
-import { test, expect } from '@playwright/test'
+import { test, expect } from '@playwright/test';
 
 test.describe('Module Name', () => {
   test.beforeEach(async ({ page }) => {
     // Setup before each test
-    await page.goto('http://localhost:3000')
-    await login(page)
-  })
+    await page.goto('http://localhost:3000');
+    await login(page);
+  });
 
   test('should do something', async ({ page }) => {
     // Test implementation
-    await page.click('button')
-    await expect(page).toHaveURL(/expected-url/)
-  })
-})
+    await page.click('button');
+    await expect(page).toHaveURL(/expected-url/);
+  });
+});
 ```
 
 ### Test Tags
@@ -419,11 +435,11 @@ Add tags to tests for filtering:
 ```typescript
 test('should create customer', async ({ page }) => {
   // Test implementation
-})
+});
 
 test('@smoke @critical should login', async ({ page }) => {
   // Test implementation
-})
+});
 ```
 
 ### Database Verification
@@ -435,62 +451,69 @@ Use the database reporter:
 export default defineConfig({
   reporter: [
     ['html'],
-    ['tests/reporters/database-reporter.ts', {
-      outputDir: 'test-results/database'
-    }]
-  ]
-})
+    [
+      'tests/reporters/database-reporter.ts',
+      {
+        outputDir: 'test-results/database',
+      },
+    ],
+  ],
+});
 ```
 
 ### Best Practices
 
 1. **Use Page Object Model**:
+
    ```typescript
    class CustomerPage {
      constructor(private page: Page) {}
 
      async goto() {
-       await this.page.goto('/customers')
+       await this.page.goto('/customers');
      }
 
      async createCustomer(data: CustomerData) {
-       await this.page.fill('[name="name"]', data.name)
-       await this.page.click('button[type="submit"]')
+       await this.page.fill('[name="name"]', data.name);
+       await this.page.click('button[type="submit"]');
      }
    }
    ```
 
 2. **Use Test Data Fixtures**:
+
    ```typescript
    const testCustomer = {
      name: 'Test Customer',
      taxId: '1234567890123',
-     email: 'test@example.com'
-   }
+     email: 'test@example.com',
+   };
 
    test('should create customer', async ({ page }) => {
-     await createCustomer(page, testCustomer)
+     await createCustomer(page, testCustomer);
      // Assertions...
-   })
+   });
    ```
 
 3. **Wait for Network Idle**:
+
    ```typescript
-   await page.waitForLoadState('networkidle')
+   await page.waitForLoadState('networkidle');
    ```
 
 4. **Use Playwright Assertions**:
+
    ```typescript
-   await expect(page.locator('.success-message')).toBeVisible()
-   await expect(page).toHaveTitle(/Customer/)
+   await expect(page.locator('.success-message')).toBeVisible();
+   await expect(page).toHaveTitle(/Customer/);
    ```
 
 5. **Clean Up Test Data**:
    ```typescript
    test.afterEach(async ({ page }) => {
      // Clean up created records
-     await deleteTestCustomer(page)
-   })
+     await deleteTestCustomer(page);
+   });
    ```
 
 ## Troubleshooting
@@ -502,6 +525,7 @@ export default defineConfig({
 **Error**: `connect ECONNREFUSED localhost:3000`
 
 **Solution**: Start the dev server:
+
 ```bash
 bun run dev
 ```
@@ -513,6 +537,7 @@ The test scripts will auto-start the server if needed.
 **Error**: `Table does not exist`
 
 **Solution**:
+
 ```bash
 bun run db:push
 bun run seed
@@ -523,15 +548,17 @@ bun run seed
 **Error**: `Test timeout of 60000ms exceeded`
 
 **Solution**: Increase timeout for specific tests:
+
 ```typescript
-test.setTimeout(120000)
+test.setTimeout(120000);
 ```
 
 Or in `playwright.config.ts`:
+
 ```typescript
 export default defineConfig({
-  timeout: 120000
-})
+  timeout: 120000,
+});
 ```
 
 #### 4. Browser Not Installed
@@ -539,6 +566,7 @@ export default defineConfig({
 **Error**: `Executable doesn't exist`
 
 **Solution**: Install Playwright browsers:
+
 ```bash
 npx playwright install
 ```
@@ -547,13 +575,15 @@ npx playwright install
 
 **Error**: `Too many requests`
 
-**Solution**: Tests use `x-playwright-test: true` header to bypass rate limiting. Ensure this is set in `src/middleware.ts`.
+**Solution**: Tests use `x-playwright-test: true` header to bypass rate
+limiting. Ensure this is set in `src/middleware.ts`.
 
 #### 6. Screenshot Capture Failures
 
 **Error**: Screenshots not saving
 
 **Solution**: Ensure screenshot directory exists:
+
 ```bash
 mkdir -p test-results/screenshots
 ```
@@ -562,13 +592,15 @@ mkdir -p test-results/screenshots
 
 **Error**: Journal entries not balanced
 
-**Solution**: This indicates a test failure. Check the test implementation for proper GL posting.
+**Solution**: This indicates a test failure. Check the test implementation for
+proper GL posting.
 
 ## Test Data Management
 
 ### Seed Data
 
 Default seed data includes:
+
 - 181 Thai chart of accounts
 - 4 test users (admin, accountant, user, viewer)
 - Default company settings
@@ -576,6 +608,7 @@ Default seed data includes:
 ### Test Data Isolation
 
 Tests should:
+
 1. Create their own test data
 2. Clean up after execution
 3. Use unique identifiers (timestamps, UUIDs)
@@ -600,13 +633,14 @@ Tests run in parallel by default (3 workers). Adjust in `playwright.config.ts`:
 
 ```typescript
 export default defineConfig({
-  workers: 4
-})
+  workers: 4,
+});
 ```
 
 ### Test Isolation
 
 Each test should:
+
 - Use fresh browser context
 - Clean up after itself
 - Not depend on other tests
@@ -636,6 +670,7 @@ Add to README.md:
 ## Support
 
 For issues or questions:
+
 1. Check this documentation
 2. Review Playwright docs: https://playwright.dev
 3. Check test output logs
@@ -644,14 +679,15 @@ For issues or questions:
 
 ## Summary
 
-| Test Type | Duration | Coverage | When to Run |
-|-----------|----------|----------|-------------|
-| Quick Smoke | 2-3 min | Critical paths | Before commits |
-| Full Suite | 15-20 min | All modules | Before PRs |
-| Module Test | 5-10 min | Single module | During development |
-| Database Verify | 1-2 min | Data integrity | After tests |
+| Test Type       | Duration  | Coverage       | When to Run        |
+| --------------- | --------- | -------------- | ------------------ |
+| Quick Smoke     | 2-3 min   | Critical paths | Before commits     |
+| Full Suite      | 15-20 min | All modules    | Before PRs         |
+| Module Test     | 5-10 min  | Single module  | During development |
+| Database Verify | 1-2 min   | Data integrity | After tests        |
 
 **Recommended Workflow**:
+
 1. Run quick tests before committing
 2. Run module tests while developing
 3. Run full tests before creating PR

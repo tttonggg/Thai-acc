@@ -48,7 +48,9 @@ test.describe('Invoice Save & Display Bug Fixes', () => {
     await page.click('text=ใบกำกับภาษี');
 
     // Click "New Invoice" button
-    await page.click('button:has-text("สร้างใบกำกับ"), button:has-text("New Invoice"), button:has-text("+")');
+    await page.click(
+      'button:has-text("สร้างใบกำกับ"), button:has-text("New Invoice"), button:has-text("+")'
+    );
 
     // Wait for form to appear
     await page.waitForSelector('.dialog, [role="dialog"]', { timeout: 5000 });
@@ -80,9 +82,11 @@ test.describe('Invoice Save & Display Bug Fixes', () => {
       await page.waitForTimeout(2000);
 
       // Check for error messages
-      const errorToast = page.locator('.toast, [role="alert"]').filter({ hasText: /error|csrf|failed/i });
+      const errorToast = page
+        .locator('.toast, [role="alert"]')
+        .filter({ hasText: /error|csrf|failed/i });
 
-      if (await errorToast.count() > 0) {
+      if ((await errorToast.count()) > 0) {
         const errorText = await errorToast.textContent();
         console.error('❌ CSRF or save error:', errorText);
         expect(errorText).not.toContain('CSRF');
@@ -99,7 +103,9 @@ test.describe('Invoice Save & Display Bug Fixes', () => {
     await page.click('text=ใบกำกับภาษี');
 
     // Click "New Invoice"
-    await page.click('button:has-text("สร้างใบกำกับ"), button:has-text("New Invoice"), button:has-text("+")');
+    await page.click(
+      'button:has-text("สร้างใบกำกับ"), button:has-text("New Invoice"), button:has-text("+")'
+    );
 
     // Wait for form
     await page.waitForSelector('.dialog, [role="dialog"]', { timeout: 5000 });

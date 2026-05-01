@@ -85,6 +85,7 @@ prisma/
 1. Edit `prisma/schema.prisma` (source of truth)
 
 2. Regenerate variant schemas:
+
    ```bash
    npm run db:prepare-schemas
    ```
@@ -96,12 +97,12 @@ prisma/
 
 ### Key Differences Between Schemas
 
-| Feature | PostgreSQL | SQLite |
-|---------|------------|--------|
-| Array fields | `String[]` | `Json?` |
-| Extensions | `pgcrypto`, `pg_trgm` | Not supported |
-| Full-text search | Native | Limited |
-| Concurrent connections | High | Single writer |
+| Feature                | PostgreSQL            | SQLite        |
+| ---------------------- | --------------------- | ------------- |
+| Array fields           | `String[]`            | `Json?`       |
+| Extensions             | `pgcrypto`, `pg_trgm` | Not supported |
+| Full-text search       | Native                | Limited       |
+| Concurrent connections | High                  | Single writer |
 
 ## Environment Variables
 
@@ -131,14 +132,14 @@ DATABASE_URL=file:./prisma/dev.db
 
 ## Commands Reference
 
-| Command | Description |
-|---------|-------------|
+| Command                      | Description                          |
+| ---------------------------- | ------------------------------------ |
 | `npm run db:prepare-schemas` | Generate schema variants from source |
-| `npm run db:select-schema` | Select schema based on DATABASE_URL |
-| `npm run db:generate` | Generate Prisma client |
-| `npm run db:push` | Push schema to database |
-| `npm run db:migrate` | Create and run migration |
-| `npm run db:reset` | Reset database (⚠️ destructive) |
+| `npm run db:select-schema`   | Select schema based on DATABASE_URL  |
+| `npm run db:generate`        | Generate Prisma client               |
+| `npm run db:push`            | Push schema to database              |
+| `npm run db:migrate`         | Create and run migration             |
+| `npm run db:reset`           | Reset database (⚠️ destructive)      |
 
 ## Troubleshooting
 
@@ -147,6 +148,7 @@ DATABASE_URL=file:./prisma/dev.db
 This means your schema.prisma is set to PostgreSQL but DATABASE_URL is SQLite.
 
 **Fix:**
+
 ```bash
 # Regenerate with correct schema
 npm run db:select-schema
@@ -185,6 +187,7 @@ npm run db:push
 ### SQLite to PostgreSQL
 
 1. Export data from SQLite:
+
    ```bash
    sqlite3 prisma/dev.db .dump > backup.sql
    ```
@@ -192,6 +195,7 @@ npm run db:push
 2. Set up PostgreSQL and update DATABASE_URL
 
 3. Run migrations:
+
    ```bash
    npm run db:generate
    npm run db:migrate
@@ -202,12 +206,14 @@ npm run db:push
 ## Performance Considerations
 
 ### SQLite
+
 - ✅ Single-user or low-concurrency scenarios
 - ✅ Standalone deployments
 - ✅ Easy backups (just copy the file)
 - ❌ Limited concurrent writes
 
 ### PostgreSQL
+
 - ✅ High concurrency
 - ✅ Large datasets
 - ✅ Advanced features (full-text search, JSON operations)
@@ -217,11 +223,13 @@ npm run db:push
 ## Security
 
 ### SQLite
+
 - File-level permissions
 - Store outside web root
 - Backup regularly
 
 ### PostgreSQL
+
 - Use strong passwords
 - Enable SSL connections
 - Configure firewall rules

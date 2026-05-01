@@ -3,8 +3,9 @@
 ## 📋 สิ่งที่ต้องเตรียมบน VPS
 
 ### 1. System Requirements
+
 - **OS**: Ubuntu 20.04+ / Debian 11+ / CentOS 8+
-- **RAM**:  minimum 2GB (แนะนำ 4GB)
+- **RAM**: minimum 2GB (แนะนำ 4GB)
 - **Disk**: minimum 5GB free space
 - **CPU**: 2 cores+
 
@@ -66,6 +67,7 @@ BYPASS_RATE_LIMIT=false
 ```
 
 **สร้าง NEXTAUTH_SECRET:**
+
 ```bash
 openssl rand -base64 32
 ```
@@ -168,17 +170,20 @@ sudo systemctl status nginx
 ## 🔧 การจัดการ
 
 ### รีสตาร์ทแอพ
+
 ```bash
 sudo pm2 restart tuktuk-erp
 ```
 
 ### ดู Logs
+
 ```bash
 sudo pm2 logs tuktuk-erp
 sudo pm2 logs tuktuk-erp --lines 100
 ```
 
 ### อัปเดตแอพ
+
 ```bash
 # Backup database
 cp /var/www/tuktuk-erp/dev.db /var/www/tuktuk-erp/dev.db.backup.$(date +%Y%m%d)
@@ -219,17 +224,20 @@ sudo ufw enable
 ## 🆘 Troubleshooting
 
 ### Error: Port already in use
+
 ```bash
 sudo lsof -ti:3000 | xargs sudo kill -9
 ```
 
 ### Error: Permission denied
+
 ```bash
 sudo chown -R www-data:www-data /var/www/tuktuk-erp
 sudo chmod -R 755 /var/www/tuktuk-erp
 ```
 
 ### Error: Database locked
+
 ```bash
 # Check if another process using DB
 sudo lsof /var/www/tuktuk-erp/dev.db

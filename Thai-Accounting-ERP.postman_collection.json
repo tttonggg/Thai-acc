@@ -41,12 +41,16 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\", \"redirect\": false}"
             },
-            "url": {"raw": "{{baseUrl}}/api/auth/callback/credentials", "host": ["{{baseUrl}}"], "path": ["api", "auth", "callback", "credentials"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/callback/credentials",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "callback", "credentials"]
+            }
           }
         },
         {
@@ -54,7 +58,11 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/api/auth/session", "host": ["{{baseUrl}}"], "path": ["api", "auth", "session"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/session",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "session"]
+            }
           }
         },
         {
@@ -62,7 +70,11 @@
           "request": {
             "method": "POST",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/api/auth/signout", "host": ["{{baseUrl}}"], "path": ["api", "auth", "signout"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "signout"]
+            }
           }
         }
       ]
@@ -80,9 +92,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "accounts"],
               "query": [
-                {"key": "page", "value": "{{page}}"},
-                {"key": "limit", "value": "{{limit}}"},
-                {"key": "type", "value": "{{accountType}}"}
+                { "key": "page", "value": "{{page}}" },
+                { "key": "limit", "value": "{{limit}}" },
+                { "key": "type", "value": "{{accountType}}" }
               ]
             }
           }
@@ -91,12 +103,16 @@
           "name": "Create Account",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\"code\": \"{{accountCode}}\", \"name\": \"{{accountName}}\", \"type\": \"{{accountType}}\"}"
             },
-            "url": {"raw": "{{baseUrl}}/api/accounts", "host": ["{{baseUrl}}"], "path": ["api", "accounts"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts"]
+            }
           }
         }
       ]
@@ -114,9 +130,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "invoices"],
               "query": [
-                {"key": "page", "value": "{{page}}"},
-                {"key": "limit", "value": "{{limit}}"},
-                {"key": "status", "value": "{{invoiceStatus}}"}
+                { "key": "page", "value": "{{page}}" },
+                { "key": "limit", "value": "{{limit}}" },
+                { "key": "status", "value": "{{invoiceStatus}}" }
               ]
             }
           }
@@ -125,12 +141,16 @@
           "name": "Create Invoice",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\"customerId\": \"{{customerId}}\", \"invoiceDate\": \"{{invoiceDate}}\", \"lines\": [{\"description\": \"Service\", \"quantity\": 1, \"unitPrice\": 1000, \"vatRate\": 7}]}"
             },
-            "url": {"raw": "{{baseUrl}}/api/invoices", "host": ["{{baseUrl}}"], "path": ["api", "invoices"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices"]
+            }
           }
         },
         {
@@ -138,7 +158,11 @@
           "request": {
             "method": "POST",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/issue", "host": ["{{baseUrl}}"], "path": ["api", "invoices", "{{invoiceId}}", "issue"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/issue",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invoices", "{{invoiceId}}", "issue"]
+            }
           }
         }
       ]
@@ -151,19 +175,27 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/api/receipts", "host": ["{{baseUrl}}"], "path": ["api", "receipts"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/receipts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "receipts"]
+            }
           }
         },
         {
           "name": "Create Receipt",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\"customerId\": \"{{customerId}}\", \"receiptDate\": \"{{receiptDate}}\", \"amount\": {{receiptAmount}}, \"paymentMethod\": \"BANK_TRANSFER\"}"
             },
-            "url": {"raw": "{{baseUrl}}/api/receipts", "host": ["{{baseUrl}}"], "path": ["api", "receipts"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/receipts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "receipts"]
+            }
           }
         }
       ]
@@ -176,19 +208,27 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/api/journal", "host": ["{{baseUrl}}"], "path": ["api", "journal"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/journal",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "journal"]
+            }
           }
         },
         {
           "name": "Create Journal Entry",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\"date\": \"{{journalDate}}\", \"description\": \"Journal Entry\", \"lines\": [{\"accountId\": \"{{debitAccountId}}\", \"debit\": 1000, \"credit\": 0}, {\"accountId\": \"{{creditAccountId}}\", \"debit\": 0, \"credit\": 1000}]}"
             },
-            "url": {"raw": "{{baseUrl}}/api/journal", "host": ["{{baseUrl}}"], "path": ["api", "journal"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/journal",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "journal"]
+            }
           }
         }
       ]
@@ -201,19 +241,27 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            }
           }
         },
         {
           "name": "Create Customer",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\"code\": \"{{customerCode}}\", \"name\": \"{{customerName}}\", \"taxId\": \"{{customerTaxId}}\"}"
             },
-            "url": {"raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            }
           }
         }
       ]
@@ -231,8 +279,8 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "reports", "general-ledger"],
               "query": [
-                {"key": "startDate", "value": "{{startDate}}"},
-                {"key": "endDate", "value": "{{endDate}}"}
+                { "key": "startDate", "value": "{{startDate}}" },
+                { "key": "endDate", "value": "{{endDate}}" }
               ]
             }
           }
@@ -246,7 +294,7 @@
               "raw": "{{baseUrl}}/api/reports/balance-sheet?asOf={{asOfDate}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "reports", "balance-sheet"],
-              "query": [{"key": "asOf", "value": "{{asOfDate}}"}]
+              "query": [{ "key": "asOf", "value": "{{asOfDate}}" }]
             }
           }
         },
@@ -260,8 +308,8 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "reports", "income-statement"],
               "query": [
-                {"key": "startDate", "value": "{{startDate}}"},
-                {"key": "endDate", "value": "{{endDate}}"}
+                { "key": "startDate", "value": "{{startDate}}" },
+                { "key": "endDate", "value": "{{endDate}}" }
               ]
             }
           }
@@ -275,7 +323,7 @@
               "raw": "{{baseUrl}}/api/reports/trial-balance?asOf={{asOfDate}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "reports", "trial-balance"],
-              "query": [{"key": "asOf", "value": "{{asOfDate}}"}]
+              "query": [{ "key": "asOf", "value": "{{asOfDate}}" }]
             }
           }
         },
@@ -289,9 +337,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "reports", "vat"],
               "query": [
-                {"key": "month", "value": "{{month}}"},
-                {"key": "year", "value": "{{year}}"},
-                {"key": "type", "value": "{{vatType}}"}
+                { "key": "month", "value": "{{month}}" },
+                { "key": "year", "value": "{{year}}" },
+                { "key": "type", "value": "{{vatType}}" }
               ]
             }
           }
@@ -306,32 +354,40 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/api/settings", "host": ["{{baseUrl}}"], "path": ["api", "settings"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "settings"]
+            }
           }
         },
         {
           "name": "Update Settings",
           "request": {
             "method": "PUT",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\"companyName\": \"{{companyName}}\", \"taxId\": \"{{companyTaxId}}\", \"vatRate\": {{vatRate}}}"
             },
-            "url": {"raw": "{{baseUrl}}/api/settings", "host": ["{{baseUrl}}"], "path": ["api", "settings"]}
+            "url": {
+              "raw": "{{baseUrl}}/api/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "settings"]
+            }
           }
         }
       ]
     }
   ],
   "variable": [
-    {"key": "baseUrl", "value": "http://localhost:3000", "type": "string"},
-    {"key": "email", "value": "admin@thaiaccounting.com", "type": "string"},
-    {"key": "password", "value": "admin123", "type": "string"},
-    {"key": "page", "value": "1", "type": "string"},
-    {"key": "limit", "value": "20", "type": "string"},
-    {"key": "startDate", "value": "2024-01-01", "type": "string"},
-    {"key": "endDate", "value": "2024-12-31", "type": "string"},
-    {"key": "asOfDate", "value": "2024-12-31", "type": "string"}
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "email", "value": "admin@thaiaccounting.com", "type": "string" },
+    { "key": "password", "value": "admin123", "type": "string" },
+    { "key": "page", "value": "1", "type": "string" },
+    { "key": "limit", "value": "20", "type": "string" },
+    { "key": "startDate", "value": "2024-01-01", "type": "string" },
+    { "key": "endDate", "value": "2024-12-31", "type": "string" },
+    { "key": "asOfDate", "value": "2024-12-31", "type": "string" }
   ]
 }

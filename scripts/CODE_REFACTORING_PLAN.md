@@ -2,14 +2,14 @@
 
 **Focus**: Headless testing, code quality, and database performance
 
-**Created**: 2026-03-17
-**Status**: Ready for Implementation
+**Created**: 2026-03-17 **Status**: Ready for Implementation
 
 ---
 
 ## 📋 Executive Summary
 
 This refactoring plan focuses on:
+
 1. ✅ **Headless browser testing** - Faster, CI-friendly execution
 2. ✅ **Code quality improvements** - Type safety, error handling, consistency
 3. ✅ **Database query optimization** - Reduce N+1 queries, add indexes
@@ -23,12 +23,14 @@ This refactoring plan focuses on:
 ### ✅ Completed
 
 **Playwright Config Updates**:
+
 - ✅ Headless mode enabled by default
 - ✅ CI-optimized project configuration
 - ✅ Reduced worker overhead
 - ✅ Faster test execution
 
 **Usage**:
+
 ```bash
 # Run tests in headless mode (default)
 bun run test:e2e
@@ -47,6 +49,7 @@ bun run test:e2e --project=ci-headless
 ### 2.1 Type Safety Enhancements
 
 #### Issues Identified
+
 - Inconsistent error handling patterns
 - Missing type annotations in API routes
 - Unsafe type assertions
@@ -55,12 +58,14 @@ bun run test:e2e --project=ci-headless
 #### Action Items
 
 **Priority 1: Error Handling Standardization**
+
 - [ ] Create `AppError` base class for application errors
 - [ ] Standardize error response format across all API routes
 - [ ] Add error codes for common scenarios
 - [ ] Implement error logging middleware
 
 **Files to Refactor**:
+
 ```
 src/lib/api-auth.ts          - AuthError handling
 src/lib/api-utils.ts         - Response helpers
@@ -69,6 +74,7 @@ src/middleware.ts            - Error middleware
 ```
 
 **Implementation**:
+
 ```typescript
 // src/lib/errors.ts
 export class AppError extends Error {
@@ -96,6 +102,7 @@ export class ValidationError extends AppError {
 ```
 
 **Priority 2: Type Annotations**
+
 - [ ] Add return types to all functions
 - [ ] Remove `any` types
 - [ ] Add strict null checks
@@ -108,6 +115,7 @@ export class ValidationError extends AppError {
 #### Duplicated Patterns Identified
 
 **1. API Error Handling** (Found in 20+ files)
+
 ```typescript
 // Current (duplicated in every route)
 catch (error: any) {
@@ -122,6 +130,7 @@ catch (error: any) {
 ```
 
 **Refactored Solution**:
+
 ```typescript
 // src/lib/api-error-handler.ts
 export function handleApiError(error: unknown): NextResponse {
@@ -158,16 +167,18 @@ catch (error) {
 ```
 
 **2. Database Query Patterns** (Found in 15+ files)
+
 ```typescript
 // Current (duplicated)
 const items = await prisma.invoice.findMany({
   where: { companyId },
-  include: { customer: true, lineItems: true }
+  include: { customer: true, lineItems: true },
 });
-const total = await prisma.invoice.count({ where: { companyId }});
+const total = await prisma.invoice.count({ where: { companyId } });
 ```
 
 **Refactored Solution**:
+
 ```typescript
 // src/lib/db-helpers.ts
 export async function paginatedQuery<T>(
@@ -207,11 +218,13 @@ export async function paginatedQuery<T>(
 #### Complex Functions to Refactor
 
 **1. Dashboard API** (`src/app/api/dashboard/route.ts`)
+
 - **Current**: 200+ lines, multiple responsibilities
 - **Issues**: Hard to test, mixes data fetching with transformation
 - **Refactor**: Split into service functions
 
 **Before**:
+
 ```typescript
 // 200+ line function doing everything
 export async function GET(request: NextRequest) {
@@ -222,17 +235,17 @@ export async function GET(request: NextRequest) {
 ```
 
 **After**:
+
 ```typescript
 // src/lib/dashboard-service.ts
 export async function getDashboardData(params: DashboardParams) {
-  const [metrics, arAging, apAging, monthlyData, vatData] =
-    await Promise.all([
-      getMetrics(),
-      getARAging(),
-      getAPAging(),
-      getMonthlyData(params.year),
-      getMonthlyVatData(params.year),
-    ]);
+  const [metrics, arAging, apAging, monthlyData, vatData] = await Promise.all([
+    getMetrics(),
+    getARAging(),
+    getAPAging(),
+    getMonthlyData(params.year),
+    getMonthlyVatData(params.year),
+  ]);
 
   return transformDashboardData({
     metrics,
@@ -245,11 +258,13 @@ export async function getDashboardData(params: DashboardParams) {
 ```
 
 **2. Invoice Posting** (`src/app/api/invoices/route.ts`)
+
 - **Current**: GL posting logic mixed with invoice creation
 - **Issues**: Transaction handling, validation mixed with business logic
 - **Refactor**: Extract to `invoice-service.ts`
 
 **3. VAT Calculations** (multiple files)
+
 - **Current**: Scattered across components and API routes
 - **Issues**: Inconsistent calculations, rounding errors
 - **Refactor**: Centralize in `vat-service.ts`
@@ -263,17 +278,21 @@ export async function getDashboardData(params: DashboardParams) {
 #### Identified Issues
 
 **1. Journal Entry with Lines** (Current)
+
 ```typescript
 // N+1 problem: Fetches journal entry, then each line separately
 const entry = await prisma.journalEntry.findUnique({ where: { id } });
 const lines = await prisma.journalLine.findMany({ where: { entryId: id } });
 // Also fetches related data for each line
 for (const line of lines) {
-  line.account = await prisma.chartOfAccount.findUnique({ where: { id: line.accountId }});
+  line.account = await prisma.chartOfAccount.findUnique({
+    where: { id: line.accountId },
+  });
 }
 ```
 
 **Optimized Solution**:
+
 ```typescript
 // Single query with includes
 const entry = await prisma.journalEntry.findUnique({
@@ -282,23 +301,29 @@ const entry = await prisma.journalEntry.findUnique({
     lines: {
       include: {
         account: {
-          select: { id: true, code: true, name: true, type: true }
-        }
-      }
-    }
-  }
+          select: { id: true, code: true, name: true, type: true },
+        },
+      },
+    },
+  },
 });
 ```
 
 **2. Invoice with Customer and Line Items**
+
 ```typescript
 // Current: Multiple queries
 const invoice = await prisma.invoice.findUnique({ where: { id } });
-const customer = await prisma.customer.findUnique({ where: { id: invoice.customerId }});
-const items = await prisma.invoiceLineItem.findMany({ where: { invoiceId: id }});
+const customer = await prisma.customer.findUnique({
+  where: { id: invoice.customerId },
+});
+const items = await prisma.invoiceLineItem.findMany({
+  where: { invoiceId: id },
+});
 ```
 
 **Optimized**:
+
 ```typescript
 const invoice = await prisma.invoice.findUnique({
   where: { id },
@@ -309,7 +334,7 @@ const invoice = await prisma.invoice.findUnique({
         code: true,
         name: true,
         taxId: true,
-      }
+      },
     },
     lineItems: {
       include: {
@@ -318,11 +343,11 @@ const invoice = await prisma.invoice.findUnique({
             id: true,
             code: true,
             name: true,
-          }
-        }
-      }
-    }
-  }
+          },
+        },
+      },
+    },
+  },
 });
 ```
 
@@ -405,14 +430,14 @@ export class QueryOptimizer {
   ) {
     const ids = items.map((item: any) => item.id);
     const loaded = await loader(ids);
-    const map = new Map(loaded.map(item => [item.id, item]));
+    const map = new Map(loaded.map((item) => [item.id, item]));
     return items.map((item: any) => map.get(item.id));
   }
 
   // Select only needed fields
   static selectFields(fields: string[]) {
     return Prisma.validator<any>()({
-      select: fields.reduce((acc, field) => ({ ...acc, [field]: true }), {})
+      select: fields.reduce((acc, field) => ({ ...acc, [field]: true }), {}),
     });
   }
 }
@@ -426,16 +451,17 @@ export class QueryOptimizer {
 
 #### Current API Performance (from logs)
 
-| Endpoint | Current Time | Target | Status |
-|----------|--------------|--------|--------|
-| GET /api/dashboard | ~800ms | < 200ms | 🔴 Needs Work |
-| GET /api/invoices | ~500ms | < 200ms | 🟡 Close |
-| POST /api/invoices | ~1200ms | < 500ms | 🔴 Needs Work |
-| GET /api/reports/* | ~2000ms | < 500ms | 🔴 Needs Work |
+| Endpoint            | Current Time | Target  | Status        |
+| ------------------- | ------------ | ------- | ------------- |
+| GET /api/dashboard  | ~800ms       | < 200ms | 🔴 Needs Work |
+| GET /api/invoices   | ~500ms       | < 200ms | 🟡 Close      |
+| POST /api/invoices  | ~1200ms      | < 500ms | 🔴 Needs Work |
+| GET /api/reports/\* | ~2000ms      | < 500ms | 🔴 Needs Work |
 
 #### Optimization Strategies
 
 **1. Dashboard API - Parallel Queries**
+
 ```typescript
 // Before: Sequential queries (800ms)
 const metrics = await getMetrics();
@@ -451,6 +477,7 @@ const [metrics, arAging, apAging] = await Promise.all([
 ```
 
 **2. Invoice API - Selective Fields**
+
 ```typescript
 // Before: Fetch all columns
 const invoices = await prisma.invoice.findMany();
@@ -470,6 +497,7 @@ const invoices = await prisma.invoice.findMany({
 ```
 
 **3. Reports API - Caching**
+
 ```typescript
 // Add Redis caching for expensive reports
 const cachedReport = await redis.get(`report:${type}:${year}:${month}`);
@@ -478,12 +506,17 @@ if (cachedReport) {
 }
 
 const report = await generateReport(type, year, month);
-await redis.setex(`report:${type}:${year}:${month}`, 3600, JSON.stringify(report));
+await redis.setex(
+  `report:${type}:${year}:${month}`,
+  3600,
+  JSON.stringify(report)
+);
 ```
 
 ### 4.2 API Response Compression
 
 **Add to `next.config.ts`**:
+
 ```typescript
 module.exports = {
   compress: true, // Enable gzip compression
@@ -500,10 +533,11 @@ module.exports = {
 
 ### 5.1 Test Pyramid Adjustment
 
-**Current**: Heavy E2E focus (55 E2E tests, 772 unit tests)
-**Target**: More unit/integration, fewer E2E
+**Current**: Heavy E2E focus (55 E2E tests, 772 unit tests) **Target**: More
+unit/integration, fewer E2E
 
 **Shift**:
+
 ```
 Before:        After:
 E2E:     40%   →   E2E:     20%
@@ -514,12 +548,14 @@ Unit:      40%  →   Unit:      40%
 ### 5.2 Headless Test Execution
 
 **Benefits**:
+
 - ⚡ 3-5x faster execution
 - 💰 Lower CI/CD costs
 - 🔄 More reliable (no GUI issues)
 - 📊 Better resource utilization
 
 **Implementation**:
+
 ```bash
 # All tests run headless by default
 bun run test:e2e                    # Headless
@@ -544,9 +580,7 @@ test.describe('Invoices API', () => {
       data: {
         customerId: 'test-customer-id',
         date: '2026-03-17',
-        lineItems: [
-          { productId: 'prod-1', quantity: 2, unitPrice: 1000 }
-        ],
+        lineItems: [{ productId: 'prod-1', quantity: 2, unitPrice: 1000 }],
       },
     });
 
@@ -580,10 +614,13 @@ test.describe('Invoices API', () => {
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient({
-  log: process.env.LOG_QUERIES === 'true' ? [
-    { level: 'query', emit: 'event' },
-    { level: 'error', emit: 'stdout' },
-  ] : ['error'],
+  log:
+    process.env.LOG_QUERIES === 'true'
+      ? [
+          { level: 'query', emit: 'event' },
+          { level: 'error', emit: 'stdout' },
+        ]
+      : ['error'],
 });
 
 // Log slow queries
@@ -639,6 +676,7 @@ export class PerformanceMonitor {
 ```
 
 **Usage in API routes**:
+
 ```typescript
 export async function GET(request: NextRequest) {
   const start = Date.now();
@@ -664,24 +702,28 @@ export async function GET(request: NextRequest) {
 ## 📈 Phase 7: Implementation Timeline
 
 ### Week 1: Foundation
+
 - [ ] Enable headless testing by default
 - [ ] Create error handling utilities
 - [ ] Set up performance monitoring
 - [ ] Add database indexes
 
 ### Week 2: Code Quality
+
 - [ ] Refactor API error handling (20 files)
 - [ ] Create helper functions for common patterns
 - [ ] Add type annotations to critical functions
 - [ ] Remove code duplication
 
 ### Week 3: Database Optimization
+
 - [ ] Fix N+1 query issues
 - [ ] Optimize slow queries
 - [ ] Add query logging
 - [ ] Benchmark improvements
 
 ### Week 4: Testing & Validation
+
 - [ ] Run full test suite with headless mode
 - [ ] Validate performance improvements
 - [ ] Update documentation
@@ -693,23 +735,23 @@ export async function GET(request: NextRequest) {
 
 ### Performance Targets
 
-| Metric | Current | Target | Deadline |
-|--------|---------|--------|----------|
-| **Avg API Response** | ~800ms | < 200ms | Week 3 |
-| **Database Queries** | ~50ms | < 20ms | Week 3 |
-| **Test Execution** | ~20min | < 10min | Week 1 |
-| **Code Duplication** | ~15% | < 5% | Week 2 |
-| **Type Coverage** | ~70% | > 95% | Week 2 |
+| Metric               | Current | Target  | Deadline |
+| -------------------- | ------- | ------- | -------- |
+| **Avg API Response** | ~800ms  | < 200ms | Week 3   |
+| **Database Queries** | ~50ms   | < 20ms  | Week 3   |
+| **Test Execution**   | ~20min  | < 10min | Week 1   |
+| **Code Duplication** | ~15%    | < 5%    | Week 2   |
+| **Type Coverage**    | ~70%    | > 95%   | Week 2   |
 
 ### Quality Targets
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| **Any types** | ~150 | < 20 |
-| **Unhandled errors** | ~25 | 0 |
-| **N+1 queries** | ~12 | 0 |
-| **Slow queries (>1s)** | ~8 | < 2 |
-| **Test reliability** | 85% | > 98% |
+| Metric                 | Current | Target |
+| ---------------------- | ------- | ------ |
+| **Any types**          | ~150    | < 20   |
+| **Unhandled errors**   | ~25     | 0      |
+| **N+1 queries**        | ~12     | 0      |
+| **Slow queries (>1s)** | ~8      | < 2    |
+| **Test reliability**   | 85%     | > 98%  |
 
 ---
 
@@ -742,18 +784,21 @@ bun add -D eslint-plugin-import
 ## ✅ Checklist
 
 ### Before Starting
+
 - [ ] Backup database
 - [ ] Create feature branch
 - [ ] Run baseline tests
 - [ ] Document current performance
 
 ### During Refactoring
+
 - [ ] Test after each change
 - [ ] Update tests for refactored code
 - [ ] Document breaking changes
 - [ ] Monitor query performance
 
 ### After Completion
+
 - [ ] Full test suite passes
 - [ ] Performance benchmarks met
 - [ ] Code review completed
@@ -762,6 +807,5 @@ bun add -D eslint-plugin-import
 
 ---
 
-**Last Updated**: 2026-03-17
-**Owner**: Development Team
-**Status**: Ready to Start
+**Last Updated**: 2026-03-17 **Owner**: Development Team **Status**: Ready to
+Start

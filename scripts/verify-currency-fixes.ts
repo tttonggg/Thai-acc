@@ -22,7 +22,7 @@ function satangToBaht(satang: number): number {
 function formatBaht(satang: number): string {
   return `฿${satangToBaht(satang).toLocaleString('th-TH', {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   })}`;
 }
 
@@ -37,7 +37,7 @@ async function verifyCurrencyFixes() {
 
   // Get a sample invoice
   const invoice = await prisma.invoice.findFirst({
-    where: { deletedAt: null }
+    where: { deletedAt: null },
   });
 
   if (!invoice) {
@@ -50,7 +50,7 @@ async function verifyCurrencyFixes() {
       { field: 'subtotal', value: invoice.subtotal },
       { field: 'vatAmount', value: invoice.vatAmount },
       { field: 'totalAmount', value: invoice.totalAmount },
-      { field: 'netAmount', value: invoice.netAmount }
+      { field: 'netAmount', value: invoice.netAmount },
     ];
 
     checks.forEach(({ field, value }) => {
@@ -79,7 +79,7 @@ async function verifyCurrencyFixes() {
       { field: 'unitPrice', value: poLine.unitPrice },
       { field: 'discount', value: poLine.discount },
       { field: 'vatAmount', value: poLine.vatAmount },
-      { field: 'amount', value: poLine.amount }
+      { field: 'amount', value: poLine.amount },
     ];
 
     poChecks.forEach(({ field, value }) => {
@@ -104,7 +104,7 @@ async function verifyCurrencyFixes() {
       { field: 'unitPrice', value: prLine.unitPrice },
       { field: 'discount', value: prLine.discount },
       { field: 'vatAmount', value: prLine.vatAmount },
-      { field: 'amount', value: prLine.amount }
+      { field: 'amount', value: prLine.amount },
     ];
 
     prChecks.forEach(({ field, value }) => {
@@ -121,9 +121,9 @@ async function verifyCurrencyFixes() {
   console.log('\n🔧 Test 4: Currency Helper Functions');
 
   const testCases = [
-    { baht: 100.50, expectedSatang: 10050 },
+    { baht: 100.5, expectedSatang: 10050 },
     { baht: 1000, expectedSatang: 100000 },
-    { baht: 0.99, expectedSatang: 99 }
+    { baht: 0.99, expectedSatang: 99 },
   ];
 
   testCases.forEach(({ baht, expectedSatang }) => {
@@ -148,7 +148,7 @@ async function verifyCurrencyFixes() {
 
   const invoices = await prisma.invoice.findMany({
     where: { deletedAt: null },
-    take: 5
+    take: 5,
   });
 
   console.log(`  ✅ Checking ${invoices.length} invoices for factor-of-100 errors...`);
@@ -156,7 +156,9 @@ async function verifyCurrencyFixes() {
   invoices.forEach((inv) => {
     // If totalAmount is reasonable (e.g., between 100 and 10000000 Satang = ฿1-฿100,000)
     if (inv.totalAmount < 100 || inv.totalAmount > 10000000) {
-      errors.push(`❌ Invoice ${inv.invoiceNumber} has suspicious totalAmount: ${inv.totalAmount} Satang`);
+      errors.push(
+        `❌ Invoice ${inv.invoiceNumber} has suspicious totalAmount: ${inv.totalAmount} Satang`
+      );
     } else {
       console.log(`  ✅ Invoice ${inv.invoiceNumber}: ${formatBaht(inv.totalAmount)} (reasonable)`);
     }
@@ -177,7 +179,7 @@ async function verifyCurrencyFixes() {
   } else {
     console.log(`❌ SOME TESTS FAILED (${errors.length} errors)`);
     console.log('');
-    errors.forEach(err => console.log(err));
+    errors.forEach((err) => console.log(err));
   }
 
   console.log('\n' + '='.repeat(60));

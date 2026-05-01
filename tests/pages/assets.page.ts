@@ -14,7 +14,9 @@ export class AssetsPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("ทรัพย์สินถาวร"), h1:has-text("Fixed Assets")');
-    this.newAssetButton = page.locator('button:has-text("สร้างทรัพย์สิน"), button:has-text("New Asset")');
+    this.newAssetButton = page.locator(
+      'button:has-text("สร้างทรัพย์สิน"), button:has-text("New Asset")'
+    );
     this.assetsTable = page.locator('table, [role="table"]').first();
   }
 
@@ -41,7 +43,9 @@ export class AssetsPage {
     await this.page.fill('input[name="acquisitionDate"]', data.acquisitionDate);
     await this.page.fill('input[name="cost"]', data.cost.toString());
     await this.page.fill('input[name="usefulLife"]', data.usefulLife.toString());
-    await this.page.locator('select[name="depreciationMethod"]').selectOption(data.depreciationMethod);
+    await this.page
+      .locator('select[name="depreciationMethod"]')
+      .selectOption(data.depreciationMethod);
 
     await this.page.locator('button:has-text("บันทึก")').click();
     await this.page.waitForSelector('text=บันทึกสำเร็จ', { timeout: 5000 });

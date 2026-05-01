@@ -8,12 +8,13 @@
 HTML templates for PDF generation of invoices, receipts, and other documents.
 
 ## Parent Reference
+
 <!-- Parent: ../AGENTS.md -->
 
 ## Key Files
 
-| File | Description |
-|------|-------------|
+| File                    | Description               |
+| ----------------------- | ------------------------- |
 | `invoice-template.html` | Invoice PDF HTML template |
 | `receipt-template.html` | Receipt PDF HTML template |
 

@@ -13,7 +13,7 @@ let prisma: PrismaClient | null = null;
 function getPrisma(): PrismaClient {
   if (!prisma) {
     prisma = new PrismaClient({
-      log: process.env.DEBUG === 'true' ? ['query', 'error', 'warn'] : ['error']
+      log: process.env.DEBUG === 'true' ? ['query', 'error', 'warn'] : ['error'],
     });
   }
   return prisma;
@@ -36,13 +36,10 @@ export async function disconnectDatabase(): Promise<void> {
  * @param expected - Expected count
  * @returns true if count matches, false otherwise
  */
-export async function verifyRecordCount(
-  model: string,
-  expected: number
-): Promise<boolean> {
+export async function verifyRecordCount(model: string, expected: number): Promise<boolean> {
   try {
     const prisma = getPrisma();
-    const modelKey = model.charAt(0).toLowerCase() + model.slice(1) as keyof PrismaClient;
+    const modelKey = (model.charAt(0).toLowerCase() + model.slice(1)) as keyof PrismaClient;
     const modelClient = (prisma as any)[modelKey];
 
     if (typeof modelClient?.count !== 'function') {
@@ -64,13 +61,10 @@ export async function verifyRecordCount(
  * @param id - Record ID
  * @returns true if record exists, false otherwise
  */
-export async function verifyRecordExists(
-  model: string,
-  id: string
-): Promise<boolean> {
+export async function verifyRecordExists(model: string, id: string): Promise<boolean> {
   try {
     const prisma = getPrisma();
-    const modelKey = model.charAt(0).toLowerCase() + model.slice(1) as keyof PrismaClient;
+    const modelKey = (model.charAt(0).toLowerCase() + model.slice(1)) as keyof PrismaClient;
     const modelClient = (prisma as any)[modelKey];
 
     if (typeof modelClient?.findUnique !== 'function') {
@@ -78,7 +72,7 @@ export async function verifyRecordExists(
     }
 
     const record = await modelClient.findUnique({
-      where: { id }
+      where: { id },
     });
 
     return record !== null;
@@ -103,7 +97,7 @@ export async function verifyRecordValues(
 ): Promise<boolean> {
   try {
     const prisma = getPrisma();
-    const modelKey = model.charAt(0).toLowerCase() + model.slice(1) as keyof PrismaClient;
+    const modelKey = (model.charAt(0).toLowerCase() + model.slice(1)) as keyof PrismaClient;
     const modelClient = (prisma as any)[modelKey];
 
     if (typeof modelClient?.findUnique !== 'function') {
@@ -111,7 +105,7 @@ export async function verifyRecordValues(
     }
 
     const record = await modelClient.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!record) {
@@ -131,7 +125,9 @@ export async function verifyRecordValues(
       // Handle nested objects (JSON fields)
       else if (typeof expectedValue === 'object') {
         if (JSON.stringify(actualValue) !== JSON.stringify(expectedValue)) {
-          console.log(`Field ${field}: expected ${JSON.stringify(expectedValue)}, got ${JSON.stringify(actualValue)}`);
+          console.log(
+            `Field ${field}: expected ${JSON.stringify(expectedValue)}, got ${JSON.stringify(actualValue)}`
+          );
           return false;
         }
       }
@@ -158,10 +154,7 @@ export async function verifyRecordValues(
  * @param id - Record ID
  * @returns true if record does not exist, false otherwise
  */
-export async function verifyRecordDeleted(
-  model: string,
-  id: string
-): Promise<boolean> {
+export async function verifyRecordDeleted(model: string, id: string): Promise<boolean> {
   const exists = await verifyRecordExists(model, id);
   return !exists;
 }
@@ -175,7 +168,7 @@ export async function verifyRecordDeleted(
 export async function getRecordCount(model: string): Promise<number> {
   try {
     const prisma = getPrisma();
-    const modelKey = model.charAt(0).toLowerCase() + model.slice(1) as keyof PrismaClient;
+    const modelKey = (model.charAt(0).toLowerCase() + model.slice(1)) as keyof PrismaClient;
     const modelClient = (prisma as any)[modelKey];
 
     if (typeof modelClient?.count !== 'function') {
@@ -198,7 +191,7 @@ export async function getRecordCount(model: string): Promise<number> {
 export async function getAllRecords(model: string): Promise<any[]> {
   try {
     const prisma = getPrisma();
-    const modelKey = model.charAt(0).toLowerCase() + model.slice(1) as keyof PrismaClient;
+    const modelKey = (model.charAt(0).toLowerCase() + model.slice(1)) as keyof PrismaClient;
     const modelClient = (prisma as any)[modelKey];
 
     if (typeof modelClient?.findMany !== 'function') {
@@ -222,7 +215,7 @@ export async function getAllRecords(model: string): Promise<any[]> {
 export async function getRecordById(model: string, id: string): Promise<any> {
   try {
     const prisma = getPrisma();
-    const modelKey = model.charAt(0).toLowerCase() + model.slice(1) as keyof PrismaClient;
+    const modelKey = (model.charAt(0).toLowerCase() + model.slice(1)) as keyof PrismaClient;
     const modelClient = (prisma as any)[modelKey];
 
     if (typeof modelClient?.findUnique !== 'function') {
@@ -230,7 +223,7 @@ export async function getRecordById(model: string, id: string): Promise<any> {
     }
 
     return await modelClient.findUnique({
-      where: { id }
+      where: { id },
     });
   } catch (error) {
     console.error(`Error getting record by ID for ${model}:`, error);
@@ -258,7 +251,7 @@ export async function verifyJournalEntry(
       receipt: 'receiptId',
       payment: 'paymentId',
       purchaseInvoice: 'purchaseInvoiceId',
-      pettyCashVoucher: 'pettyCashVoucherId'
+      pettyCashVoucher: 'pettyCashVoucherId',
     };
 
     const field = documentFieldMap[documentType];
@@ -268,8 +261,8 @@ export async function verifyJournalEntry(
 
     const journalEntry = await prisma.journalEntry.findFirst({
       where: {
-        [field]: documentId
-      }
+        [field]: documentId,
+      },
     });
 
     return journalEntry !== null;
@@ -285,16 +278,14 @@ export async function verifyJournalEntry(
  * @param journalEntryId - Journal entry ID
  * @returns true if entry balances, false otherwise
  */
-export async function verifyJournalEntryBalances(
-  journalEntryId: string
-): Promise<boolean> {
+export async function verifyJournalEntryBalances(journalEntryId: string): Promise<boolean> {
   try {
     const prisma = getPrisma();
 
     const lines = await prisma.journalLine.findMany({
       where: {
-        journalEntryId
-      }
+        journalEntryId,
+      },
     });
 
     const totalDebit = lines.reduce((sum, line) => sum + Number(line.debit || 0), 0);
@@ -326,7 +317,7 @@ export async function verifyStockMovement(
     const prisma = getPrisma();
 
     const where: any = {
-      productId
+      productId,
     };
 
     if (warehouseId) {
@@ -334,7 +325,7 @@ export async function verifyStockMovement(
     }
 
     const movements = await prisma.stockMovement.findMany({
-      where
+      where,
     });
 
     const totalQuantity = movements.reduce((sum, m) => sum + m.quantity, 0);
@@ -352,15 +343,12 @@ export async function verifyStockMovement(
  * @param warehouseId - Optional warehouse ID
  * @returns Current stock balance
  */
-export async function getStockBalance(
-  productId: string,
-  warehouseId?: string
-): Promise<number> {
+export async function getStockBalance(productId: string, warehouseId?: string): Promise<number> {
   try {
     const prisma = getPrisma();
 
     const where: any = {
-      productId
+      productId,
     };
 
     if (warehouseId) {
@@ -368,7 +356,7 @@ export async function getStockBalance(
     }
 
     const balance = await prisma.stockBalance.findFirst({
-      where
+      where,
     });
 
     return balance?.quantity || 0;
@@ -426,8 +414,8 @@ export async function seedTestData(): Promise<void> {
       province: 'Bangkok',
       postalCode: '10100',
       creditLimit: 50000,
-      accountId: '1201' // Accounts Receivable
-    }
+      accountId: '1201', // Accounts Receivable
+    },
   });
 
   // Create test vendor
@@ -442,8 +430,8 @@ export async function seedTestData(): Promise<void> {
       province: 'Bangkok',
       postalCode: '10200',
       paymentTerms: 30,
-      accountId: '2101' // Accounts Payable
-    }
+      accountId: '2101', // Accounts Payable
+    },
   });
 
   // Create test product
@@ -457,8 +445,8 @@ export async function seedTestData(): Promise<void> {
       vatType: 'EXCLUSIVE',
       accountId: '4101', // Sales Revenue
       expenseAccountId: '5101', // Cost of Goods Sold
-      assetAccountId: '1203' // Inventory
-    }
+      assetAccountId: '1203', // Inventory
+    },
   });
 
   // Create test warehouse
@@ -468,8 +456,8 @@ export async function seedTestData(): Promise<void> {
       code: 'E2E-WH',
       location: '789 Warehouse Lane',
       province: 'Bangkok',
-      postalCode: '10300'
-    }
+      postalCode: '10300',
+    },
   });
 
   console.log('Test data seeded successfully');
@@ -495,19 +483,19 @@ export async function getTestDataIds(): Promise<{
   const prisma = getPrisma();
 
   const customer = await prisma.customer.findFirst({
-    where: { name: { contains: 'E2E' } }
+    where: { name: { contains: 'E2E' } },
   });
 
   const vendor = await prisma.vendor.findFirst({
-    where: { name: { contains: 'E2E' } }
+    where: { name: { contains: 'E2E' } },
   });
 
   const product = await prisma.product.findFirst({
-    where: { code: 'E2E-001' }
+    where: { code: 'E2E-001' },
   });
 
   const warehouse = await prisma.warehouse.findFirst({
-    where: { code: 'E2E-WH' }
+    where: { code: 'E2E-WH' },
   });
 
   if (!customer || !vendor || !product || !warehouse) {
@@ -522,7 +510,7 @@ export async function getTestDataIds(): Promise<{
     cashAccountId: '1111', // Cash on Hand
     bankAccountId: '1112', // Cash in Bank
     arAccountId: '1201', // Accounts Receivable
-    apAccountId: '2101' // Accounts Payable
+    apAccountId: '2101', // Accounts Payable
   };
 }
 
@@ -555,8 +543,8 @@ export async function getAccountBalance(accountId: string): Promise<number> {
     const account = await prisma.chartOfAccount.findUnique({
       where: { code: accountId },
       include: {
-        journalLines: true
-      }
+        journalLines: true,
+      },
     });
 
     if (!account) {

@@ -1,12 +1,12 @@
 # Comprehensive Improvement Plan for Thai Accounting ERP
 
-**Date:** 2026-03-18
-**Status:** Ready for Implementation
-**Priority:** HIGH
+**Date:** 2026-03-18 **Status:** Ready for Implementation **Priority:** HIGH
 
 ## Executive Summary
 
-This plan addresses critical issues identified through comprehensive codebase analysis:
+This plan addresses critical issues identified through comprehensive codebase
+analysis:
+
 1. CN/DN documents appearing in Invoice section
 2. Missing E2E test coverage that failed to catch redirect issues
 3. Document linking and synchronization verification
@@ -17,9 +17,12 @@ This plan addresses critical issues identified through comprehensive codebase an
 ## Issue 1: CN/DN Document Grouping Problem 🔴 **CRITICAL**
 
 ### Problem Statement
-Credit Notes (CN) and Debit Notes (DN) are incorrectly displayed in the Invoice list alongside regular invoices, causing confusion for users.
+
+Credit Notes (CN) and Debit Notes (DN) are incorrectly displayed in the Invoice
+list alongside regular invoices, causing confusion for users.
 
 ### Root Cause
+
 - **File:** `src/components/invoices/invoice-list.tsx` (Lines 135-143)
 - The filtering logic doesn't exclude CN/DN document types
 - API returns all document types but UI doesn't filter them
@@ -27,40 +30,49 @@ Credit Notes (CN) and Debit Notes (DN) are incorrectly displayed in the Invoice 
 ### Solution
 
 #### Step 1: Update Invoice List Component Filtering
+
 **File:** `src/components/invoices/invoice-list.tsx`
 
 **Current Code (Lines 135-143):**
+
 ```typescript
-const filteredInvoices = (invoices || []).filter(invoice => {
-  if (!invoice || typeof invoice !== 'object') return false
-  const matchesSearch = invoice.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        invoice.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase())
-  const matchesStatus = filterStatus === 'all' || invoice.status === filterStatus
-  return matchesSearch && matchesStatus
-})
+const filteredInvoices = (invoices || []).filter((invoice) => {
+  if (!invoice || typeof invoice !== 'object') return false;
+  const matchesSearch =
+    invoice.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase());
+  const matchesStatus =
+    filterStatus === 'all' || invoice.status === filterStatus;
+  return matchesSearch && matchesStatus;
+});
 ```
 
 **Fixed Code:**
+
 ```typescript
-const filteredInvoices = (invoices || []).filter(invoice => {
-  if (!invoice || typeof invoice !== 'object') return false
+const filteredInvoices = (invoices || []).filter((invoice) => {
+  if (!invoice || typeof invoice !== 'object') return false;
 
   // Only show invoice-related documents, not CN/DN
-  const allowedTypes = ['TAX_INVOICE', 'RECEIPT', 'DELIVERY_NOTE']
-  const matchesType = allowedTypes.includes(invoice.type)
-  if (!matchesType) return false
+  const allowedTypes = ['TAX_INVOICE', 'RECEIPT', 'DELIVERY_NOTE'];
+  const matchesType = allowedTypes.includes(invoice.type);
+  if (!matchesType) return false;
 
-  const matchesSearch = invoice.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        invoice.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase())
-  const matchesStatus = filterStatus === 'all' || invoice.status === filterStatus
-  return matchesSearch && matchesStatus
-})
+  const matchesSearch =
+    invoice.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase());
+  const matchesStatus =
+    filterStatus === 'all' || invoice.status === filterStatus;
+  return matchesSearch && matchesStatus;
+});
 ```
 
 #### Step 2: Add Document Type Filter UI (Optional Enhancement)
+
 **File:** `src/components/invoices/invoice-list.tsx`
 
 Add after status filter (around line 200):
+
 ```typescript
 <Select value={documentType} onValueChange={setDocumentType}>
   <SelectTrigger className="w-full md:w-[180px]">
@@ -76,35 +88,41 @@ Add after status filter (around line 200):
 ```
 
 Add state variable:
+
 ```typescript
-const [documentType, setDocumentType] = useState<string>('all')
+const [documentType, setDocumentType] = useState<string>('all');
 ```
 
 #### Step 3: Update API Call to Include Type Parameter
+
 **File:** `src/components/invoices/invoice-list.tsx`
 
 Update the fetch call (around line 250):
+
 ```typescript
 const params = new URLSearchParams({
   page: page.toString(),
   limit: limit.toString(),
-})
+});
 
-if (filterStatus !== 'all') params.append('status', filterStatus)
-if (documentType !== 'all') params.append('type', documentType)
-if (searchTerm) params.append('search', searchTerm)
+if (filterStatus !== 'all') params.append('status', filterStatus);
+if (documentType !== 'all') params.append('type', documentType);
+if (searchTerm) params.append('search', searchTerm);
 
-const res = await fetch(`/api/invoices?${params}`)
+const res = await fetch(`/api/invoices?${params}`);
 ```
 
 ### Expected Outcome
+
 - ✅ Invoice section shows only: Tax Invoices, Receipts, Delivery Notes
 - ✅ Credit Notes section shows only: Credit Notes
 - ✅ Debit Notes section shows only: Debit Notes
 - ✅ Each document type has its proper dedicated section
 
 ### Testing Required
-- [ ] Navigate to Invoices section - verify only invoices/receipts/delivery notes shown
+
+- [ ] Navigate to Invoices section - verify only invoices/receipts/delivery
+      notes shown
 - [ ] Navigate to Credit Notes section - verify only credit notes shown
 - [ ] Navigate to Debit Notes section - verify only debit notes shown
 - [ ] Test document type filter if implemented
@@ -115,9 +133,12 @@ const res = await fetch(`/api/invoices?${params}`)
 ## Issue 2: Missing E2E Test Coverage 🔴 **CRITICAL**
 
 ### Problem Statement
-Many pages redirect to dashboard but E2E tests didn't catch these critical issues, indicating insufficient test coverage.
+
+Many pages redirect to dashboard but E2E tests didn't catch these critical
+issues, indicating insufficient test coverage.
 
 ### Root Cause
+
 - **Current State:** Only backend unit tests exist
 - **Missing:** Playwright/Cypress E2E tests for frontend
 - **Missing:** Integration tests for full user workflows
@@ -126,6 +147,7 @@ Many pages redirect to dashboard but E2E tests didn't catch these critical issue
 ### Current Test Infrastructure Analysis
 
 **Existing Tests:**
+
 - ✅ Backend unit tests (`/Users/tong/Thai-acc/tests/`)
 - ✅ Database verification scripts
 - ❌ No frontend E2E tests
@@ -133,6 +155,7 @@ Many pages redirect to dashboard but E2E tests didn't catch these critical issue
 - ❌ No page rendering verification
 
 **Why Issues Were Missed:**
+
 1. No tests verify actual page content renders
 2. No tests check for proper navigation
 3. No tests verify URL after page transitions
@@ -143,14 +166,15 @@ Many pages redirect to dashboard but E2E tests didn't catch these critical issue
 #### Phase 1: Set Up Playwright E2E Testing
 
 **Step 1: Install Playwright Dependencies**
+
 ```bash
 cd /Users/tong/Thai-acc
 bun add -D @playwright/test
 bunx playwright install
 ```
 
-**Step 2: Create Playwright Configuration**
-**File:** `playwright.config.ts` (create if not exists)
+**Step 2: Create Playwright Configuration** **File:** `playwright.config.ts`
+(create if not exists)
 
 ```typescript
 import { defineConfig, devices } from '@playwright/test';
@@ -184,6 +208,7 @@ export default defineConfig({
 #### Phase 2: Create Critical E2E Tests
 
 **Test Structure:**
+
 ```
 e2e/
 ├── auth/
@@ -201,8 +226,8 @@ e2e/
     └── test-data.ts
 ```
 
-**Test 1: Navigation Verification**
-**File:** `e2e/navigation/main-navigation.spec.ts`
+**Test 1: Navigation Verification** **File:**
+`e2e/navigation/main-navigation.spec.ts`
 
 ```typescript
 import { test, expect } from '@playwright/test';
@@ -236,7 +261,12 @@ test.describe('Main Navigation', () => {
   });
 
   test('should not redirect to dashboard for valid pages', async ({ page }) => {
-    const sections = ['/invoices', '/credit-notes', '/debit-notes', '/receipts'];
+    const sections = [
+      '/invoices',
+      '/credit-notes',
+      '/debit-notes',
+      '/receipts',
+    ];
 
     for (const section of sections) {
       await page.goto(section);
@@ -247,8 +277,7 @@ test.describe('Main Navigation', () => {
 });
 ```
 
-**Test 2: Document Type Filtering**
-**File:** `e2e/documents/invoices.spec.ts`
+**Test 2: Document Type Filtering** **File:** `e2e/documents/invoices.spec.ts`
 
 ```typescript
 import { test, expect } from '@playwright/test';
@@ -262,7 +291,9 @@ test.describe('Invoice Document Filtering', () => {
     await page.goto('/invoices');
   });
 
-  test('should only show invoices/receipts/delivery notes, not CN/DN', async ({ page }) => {
+  test('should only show invoices/receipts/delivery notes, not CN/DN', async ({
+    page,
+  }) => {
     // Wait for data to load
     await page.waitForSelector('[data-testid="invoice-row"]');
 
@@ -280,8 +311,7 @@ test.describe('Invoice Document Filtering', () => {
 });
 ```
 
-**Test 3: Authentication Redirects**
-**File:** `e2e/auth/login.spec.ts`
+**Test 3: Authentication Redirects** **File:** `e2e/auth/login.spec.ts`
 
 ```typescript
 import { test, expect } from '@playwright/test';
@@ -319,6 +349,7 @@ test.describe('Authentication', () => {
 ```
 
 ### Expected Outcome
+
 - ✅ All navigation tested and verified
 - ✅ Page redirects caught by tests
 - ✅ Document filtering verified
@@ -330,9 +361,12 @@ test.describe('Authentication', () => {
 ## Issue 3: Document Linking and Stock Sync ✅ **VERIFIED WORKING**
 
 ### Summary
-After thorough investigation, **document linking and stock synchronization are working correctly**:
+
+After thorough investigation, **document linking and stock synchronization are
+working correctly**:
 
 #### ✅ Working Features:
+
 1. **Invoice → Receipt → Stock**
    - Invoices issue stock and create COGS entries
    - Receipts link to invoices and update paid amounts
@@ -349,13 +383,16 @@ After thorough investigation, **document linking and stock synchronization are w
    - Proper GL entries for all transactions
 
 #### ⚠️ Missing Feature:
+
 - **Purchase Order Module:** No dedicated PO management system
   - PO numbers are just text fields in purchase invoices
   - No PO approval workflow
   - No PO-to-invoice matching
 
 ### Recommendation
-Document linking is solid. Only add PO module if business requirements dictate it.
+
+Document linking is solid. Only add PO module if business requirements dictate
+it.
 
 ---
 
@@ -364,6 +401,7 @@ Document linking is solid. Only add PO module if business requirements dictate i
 ### Improvements Made:
 
 #### Invoice Template (`src/lib/templates/invoice-template.html`)
+
 - ✅ Modern gradient design with professional styling
 - ✅ Company logo support added
 - ✅ Enhanced info sections with better organization
@@ -376,6 +414,7 @@ Document linking is solid. Only add PO module if business requirements dictate i
 - ✅ Print-optimized styles
 
 #### Receipt Template (`src/lib/templates/receipt-template.html`)
+
 - ✅ Created new professional receipt template
 - ✅ Green color theme for differentiation from invoices
 - ✅ Large payment amount display
@@ -385,6 +424,7 @@ Document linking is solid. Only add PO module if business requirements dictate i
 - ✅ Professional footer with print timestamp
 
 ### Features:
+
 - Real-time customization panel
 - Font size adjustment
 - Line height control
@@ -396,6 +436,7 @@ Document linking is solid. Only add PO module if business requirements dictate i
 ## Implementation Sequence (IMPORTANT: Follow This Order!)
 
 ### Phase 1: Critical Fixes (Day 1)
+
 **⚠️ DO NOT PARALLELIZE - These must be sequential**
 
 1. **Fix CN/DN Filtering** (2 hours)
@@ -414,6 +455,7 @@ Document linking is solid. Only add PO module if business requirements dictate i
    - Document any remaining issues
 
 ### Phase 2: Enhanced Testing (Day 2)
+
 **Can parallelize test creation**
 
 4. **Create Document Tests** (4 hours)
@@ -427,6 +469,7 @@ Document linking is solid. Only add PO module if business requirements dictate i
    - Redirect tests
 
 ### Phase 3: Documentation (Day 2-3)
+
 **Can parallelize**
 
 6. **Update CLAUDE.md** (1 hour)
@@ -444,17 +487,20 @@ Document linking is solid. Only add PO module if business requirements dictate i
 ## Success Criteria
 
 ### Must Have (Blocking):
+
 - [ ] CN/DN documents no longer appear in Invoice section
 - [ ] E2E tests catch navigation redirect issues
 - [ ] All document sections show correct document types
 - [ ] Tests pass consistently
 
 ### Should Have:
+
 - [ ] Document type filter added to invoice list
 - [ ] Comprehensive test coverage for all workflows
 - [ ] Test documentation complete
 
 ### Nice to Have:
+
 - [ ] Enhanced UI with document type badges
 - [ ] Performance optimization for large document lists
 - [ ] Additional test scenarios for edge cases
@@ -466,11 +512,13 @@ Document linking is solid. Only add PO module if business requirements dictate i
 If any fix causes issues:
 
 1. **CN/DN Filter Fix:**
+
    ```bash
    git checkout HEAD -- src/components/invoices/invoice-list.tsx
    ```
 
 2. **E2E Tests:**
+
    ```bash
    # Remove Playwright if needed
    bun remove @playwright/test
@@ -487,12 +535,14 @@ If any fix causes issues:
 ## Monitoring & Validation
 
 ### After Implementation:
+
 1. Monitor error logs for navigation issues
 2. Check document counts in each section
 3. Run E2E tests daily for first week
 4. Gather user feedback on document organization
 
 ### Metrics to Track:
+
 - Number of redirect errors (should be 0)
 - Test pass rate (should be 100%)
 - User complaints about document organization (should decrease)
@@ -521,4 +571,5 @@ If any fix causes issues:
 
 **End of Improvement Plan**
 
-*This plan is ready for immediate implementation. All fixes are sequenced correctly to avoid dependencies and ensure system stability.*
+_This plan is ready for immediate implementation. All fixes are sequenced
+correctly to avoid dependencies and ensure system stability._

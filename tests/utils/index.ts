@@ -40,7 +40,7 @@ export {
   getTestDataIds,
   verifyDocumentStatus,
   getAccountBalance,
-  disconnectDatabase
+  disconnectDatabase,
 } from './db-verification';
 
 export {
@@ -55,7 +55,7 @@ export {
   createTestScenario,
   createTestCustomers,
   createTestProducts,
-  deleteTestData
+  deleteTestData,
 } from './test-data-factory';
 
 export {
@@ -95,7 +95,7 @@ export {
   retry,
   pause,
   bypassRateLimiting,
-  setupTest
+  setupTest,
 } from './test-helpers';
 
 /**
@@ -114,7 +114,7 @@ export async function createTestContext(page: any, role: string = 'ADMIN') {
     cleanup: async () => {
       await logout(page);
       await deleteTestData();
-    }
+    },
   };
 }
 
@@ -139,7 +139,7 @@ export async function createTestWithDb(page: any, role: string = 'ADMIN') {
       await logout(page);
       await clearTestData();
       await disconnectDatabase();
-    }
+    },
   };
 }
 
@@ -147,7 +147,7 @@ export async function createTestWithDb(page: any, role: string = 'ADMIN') {
  * Sleep utility for waiting
  */
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -157,7 +157,7 @@ export function formatThaiDate(date: Date): string {
   return date.toLocaleDateString('th-TH', {
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric'
+    year: 'numeric',
   });
 }
 
@@ -167,7 +167,7 @@ export function formatThaiDate(date: Date): string {
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('th-TH', {
     style: 'currency',
-    currency: 'THB'
+    currency: 'THB',
   }).format(amount);
 }
 
@@ -185,7 +185,9 @@ export function generateTestEmail(prefix: string = 'test'): string {
  */
 export function generateTestPhone(): string {
   const prefix = '08';
-  const middle = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+  const middle = Math.floor(Math.random() * 100000000)
+    .toString()
+    .padStart(8, '0');
   return prefix + middle;
 }
 
@@ -193,5 +195,7 @@ export function generateTestPhone(): string {
  * Generate random test tax ID (13 digits)
  */
 export function generateTestTaxId(): string {
-  return Math.floor(Math.random() * 10000000000000).toString().padStart(13, '0');
+  return Math.floor(Math.random() * 10000000000000)
+    .toString()
+    .padStart(13, '0');
 }

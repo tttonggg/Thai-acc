@@ -20,9 +20,13 @@ export class VendorsPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("เจ้าหนี้"), h1:has-text("Vendors")');
-    this.newVendorButton = page.locator('button:has-text("สร้างเจ้าหนี้"), button:has-text("New Vendor")');
+    this.newVendorButton = page.locator(
+      'button:has-text("สร้างเจ้าหนี้"), button:has-text("New Vendor")'
+    );
     this.vendorsTable = page.locator('table, [role="table"]').first();
-    this.searchInput = page.locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]').first();
+    this.searchInput = page
+      .locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]')
+      .first();
   }
 
   /**
@@ -97,17 +101,22 @@ export class VendorsPage {
     await this.page.locator('button:has-text("บันทึก"), button:has-text("Save")').click();
 
     // Wait for success
-    await this.page.waitForSelector('text=บันทึกสำเร็จ, text=Saved successfully', { timeout: 5000 });
+    await this.page.waitForSelector('text=บันทึกสำเร็จ, text=Saved successfully', {
+      timeout: 5000,
+    });
   }
 
   /**
    * Edit vendor
    */
-  async editVendor(vendorName: string, updates: Partial<{
-    name: string;
-    phone: string;
-    email: string;
-  }>) {
+  async editVendor(
+    vendorName: string,
+    updates: Partial<{
+      name: string;
+      phone: string;
+      email: string;
+    }>
+  ) {
     const vendorRow = this.vendorsTable.locator(`tr:has-text("${vendorName}")`);
     await vendorRow.locator('button:has-text("แก้ไข"), button:has-text("Edit")').click();
 

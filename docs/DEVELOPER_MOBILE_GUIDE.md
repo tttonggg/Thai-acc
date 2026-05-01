@@ -2,12 +2,14 @@
 
 ## Overview
 
-This guide explains the mobile-responsive patterns used in Keerati ERP and how to apply them when building new components.
+This guide explains the mobile-responsive patterns used in Keerati ERP and how
+to apply them when building new components.
 
 ## Core Principles
 
 1. **Mobile-First Approach**: Design for mobile, then enhance for desktop
-2. **Touch-Friendly**: All interactive elements meet 44×44px minimum touch target
+2. **Touch-Friendly**: All interactive elements meet 44×44px minimum touch
+   target
 3. **Responsive Grids**: Use Tailwind's responsive utilities (`md:`, `lg:`)
 4. **Progressive Enhancement**: Start simple, add complexity for larger screens
 
@@ -25,6 +27,7 @@ breakpoints: {
 ```
 
 **Key Breakpoint for Mobile:**
+
 - Below `768px` (md): Mobile layout
 - `768px` and above: Desktop layout
 
@@ -36,7 +39,7 @@ breakpoints: {
 
 ```tsx
 // Form fields - 1 column mobile, 2 columns tablet, 3 columns desktop
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
   <FormField label="Field 1" />
   <FormField label="Field 2" />
   <FormField label="Field 3" />
@@ -44,6 +47,7 @@ breakpoints: {
 ```
 
 **When to use:**
+
 - Forms with multiple fields
 - Dashboard cards
 - Settings panels
@@ -60,6 +64,7 @@ breakpoints: {
 ```
 
 **Available sizes:**
+
 ```tsx
 max-w-[95vw] md:max-w-sm      // Small (384px)
 max-w-[95vw] md:max-w-md      // Medium (448px)
@@ -83,9 +88,7 @@ max-w-[95vw] md:max-w-3xl     // 3XL (768px)
         {/* ... more columns */}
       </TableRow>
     </TableHeader>
-    <TableBody>
-      {/* Table rows */}
-    </TableBody>
+    <TableBody>{/* Table rows */}</TableBody>
   </Table>
 </div>
 ```
@@ -120,14 +123,14 @@ max-w-[95vw] md:max-w-3xl     // 3XL (768px)
 // In page.tsx
 <div className="flex h-screen">
   {/* Mobile Hamburger */}
-  <div className="md:hidden fixed top-4 left-4 z-50">
+  <div className="fixed left-4 top-4 z-50 md:hidden">
     <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
       <SheetTrigger asChild>
-        <button className="p-2 bg-background border rounded-lg">
+        <button className="rounded-lg border bg-background p-2">
           <Menu size={24} />
         </button>
       </SheetTrigger>
-      <SheetContent side="left" className="p-0 w-80">
+      <SheetContent side="left" className="w-80 p-0">
         <Sidebar onCloseMobile={() => setMobileMenuOpen(false)} />
       </SheetContent>
     </Sheet>
@@ -139,9 +142,7 @@ max-w-[95vw] md:max-w-3xl     // 3XL (768px)
   </div>
 
   {/* Main Content - Add top padding on mobile for hamburger space */}
-  <main className="flex-1 overflow-auto p-6 md:pt-6 pt-16">
-    {content}
-  </main>
+  <main className="flex-1 overflow-auto p-6 pt-16 md:pt-6">{content}</main>
 </div>
 ```
 
@@ -199,7 +200,7 @@ max-w-[95vw] md:max-w-3xl     // 3XL (768px)
 <img
   src="/logo.png"
   alt="Logo"
-  className="w-full max-w-[200px] md:max-w-[300px] h-auto"
+  className="h-auto w-full max-w-[200px] md:max-w-[300px]"
 />
 ```
 
@@ -246,7 +247,7 @@ max-w-[95vw] md:max-w-3xl     // 3XL (768px)
 ### Sheet Component (Mobile Drawer)
 
 ```tsx
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 <Sheet open={open} onOpenChange={setOpen}>
   <SheetTrigger asChild>
@@ -255,15 +256,17 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
   <SheetContent side="left" className="w-80">
     {/* Sidebar content */}
   </SheetContent>
-</Sheet>
+</Sheet>;
 ```
 
 ### Responsive Button Groups
 
 ```tsx
-<div className="flex flex-col md:flex-row gap-2">
+<div className="flex flex-col gap-2 md:flex-row">
   <Button className="w-full md:w-auto">Primary</Button>
-  <Button variant="outline" className="w-full md:w-auto">Secondary</Button>
+  <Button variant="outline" className="w-full md:w-auto">
+    Secondary
+  </Button>
 </div>
 ```
 
@@ -289,6 +292,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 3. Select device presets or enter custom dimensions
 
 **Key test sizes:**
+
 - iPhone SE: 375×667px
 - iPhone 12 Pro: 390×844px
 - iPad: 768×1024px
@@ -334,8 +338,8 @@ npx playwright test --project="iPhone SE"
 // Lazy loading component
 const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
   loading: () => <Loader />,
-  ssr: false // Skip SSR for client-only
-})
+  ssr: false, // Skip SSR for client-only
+});
 ```
 
 ## Common Mistakes to Avoid
@@ -407,4 +411,5 @@ const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
 
 ---
 
-**Remember**: Test on real devices whenever possible. Emulators don't always catch touch-related issues.
+**Remember**: Test on real devices whenever possible. Emulators don't always
+catch touch-related issues.

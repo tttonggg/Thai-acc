@@ -1,10 +1,13 @@
 # Comprehensive E2E Test Suites
 
-This directory contains comprehensive end-to-end tests for the Thai Accounting ERP System. Each test file tests every button, form field, validation, and database interaction for its respective module.
+This directory contains comprehensive end-to-end tests for the Thai Accounting
+ERP System. Each test file tests every button, form field, validation, and
+database interaction for its respective module.
 
 ## Test Structure
 
 All tests follow a consistent pattern:
+
 1. **Navigation Tests** - Verify module can be accessed
 2. **Create Tests** - Test all create operations and buttons
 3. **Validation Tests** - Test form validation rules
@@ -19,16 +22,21 @@ All tests follow a consistent pattern:
 ## Created Test Files
 
 ### ✅ Completed
+
 - `test-helpers.ts` - Reusable utility functions for all tests
 - `accounts.spec.ts` - Chart of Accounts comprehensive tests
 - `customers.spec.ts` - Customers/AR comprehensive tests
 - `vendors.spec.ts` - Vendors/AP comprehensive tests
 
 ### 📋 To Be Created
-The following test files need to be created following the same pattern as the completed files:
+
+The following test files need to be created following the same pattern as the
+completed files:
 
 #### 4. Products Test (`products.spec.ts`)
+
 **Key Tests:**
+
 - Add Product button and form
 - Product code uniqueness validation
 - Price and cost validation
@@ -40,7 +48,9 @@ The following test files need to be created following the same pattern as the co
 - Product appears in invoice line items
 
 #### 5. Invoices Test (`invoices.spec.ts`)
+
 **Key Tests:**
+
 - New Invoice button and form
 - Draft invoice creation
 - Add line items
@@ -57,7 +67,9 @@ The following test files need to be created following the same pattern as the co
 - Search and filter invoices
 
 #### 6. Purchase Invoices Test (`purchases.spec.ts`)
+
 **Key Tests:**
+
 - New Purchase button and form
 - Draft purchase creation
 - Add line items
@@ -73,7 +85,9 @@ The following test files need to be created following the same pattern as the co
 - Search and filter purchases
 
 #### 7. Receipts Test (`receipts.spec.ts`)
+
 **Key Tests:**
+
 - New Receipt button and form
 - Select customer
 - View unpaid invoices
@@ -89,7 +103,9 @@ The following test files need to be created following the same pattern as the co
 - Receipt export
 
 #### 8. Payments Test (`payments.spec.ts`)
+
 **Key Tests:**
+
 - New Payment button and form
 - Select vendor
 - View unpaid purchase invoices
@@ -105,7 +121,9 @@ The following test files need to be created following the same pattern as the co
 - Payment search and filter
 
 #### 9. Assets Test (`assets.spec.ts`)
+
 **Key Tests:**
+
 - Add Asset button and form
 - Fill asset details (code, name, purchase date, cost)
 - Set salvage value and useful life
@@ -118,7 +136,9 @@ The following test files need to be created following the same pattern as the co
 - TAS 16 compliance labels
 
 #### 10. Banking Test (`banking.spec.ts`)
+
 **Key Tests:**
+
 - Bank Accounts Tab
   - Add Bank Account button and form
   - Edit bank account
@@ -138,7 +158,9 @@ The following test files need to be created following the same pattern as the co
   - Verify reconciliation saved
 
 #### 11. Payroll Test (`payroll.spec.ts`)
+
 **Key Tests:**
+
 - Employees Tab
   - Add Employee button and form
   - Fill employee details (Thai fields)
@@ -158,7 +180,9 @@ The following test files need to be created following the same pattern as the co
   - Verify status updated
 
 #### 12. Petty Cash Test (`petty-cash.spec.ts`)
+
 **Key Tests:**
+
 - Funds Tab
   - Add Fund button and form
   - Fill fund details (code, name, custodian, amount)
@@ -179,7 +203,9 @@ The following test files need to be created following the same pattern as the co
   - Verify fund balance restored
 
 #### 13. Inventory Test (`inventory.spec.ts`)
+
 **Key Tests:**
+
 - Stock Balances Tab
   - View stock levels
   - WAC cost display
@@ -190,7 +216,8 @@ The following test files need to be created following the same pattern as the co
   - Verify stock balance updated
 - Stock Movements Tab
   - View movement history
-  - Movement type filters (RECEIVE, ISSUE, TRANSFER_OUT, TRANSFER_IN, ADJUST, COUNT)
+  - Movement type filters (RECEIVE, ISSUE, TRANSFER_OUT, TRANSFER_IN, ADJUST,
+    COUNT)
   - Edit movement notes
   - Reverse movement
   - Verify correcting entry created
@@ -209,7 +236,9 @@ The following test files need to be created following the same pattern as the co
   - Verify stock updated at both warehouses
 
 #### 14. Credit Notes Test (`credit-notes.spec.ts`)
+
 **Key Tests:**
+
 - New Credit Note button and form
 - Select customer
 - Select invoice to credit
@@ -224,7 +253,9 @@ The following test files need to be created following the same pattern as the co
 - Credit note PDF export
 
 #### 15. Debit Notes Test (`debit-notes.spec.ts`)
+
 **Key Tests:**
+
 - New Debit Note button and form
 - Select vendor
 - Select purchase invoice to debit
@@ -243,21 +274,26 @@ The following test files need to be created following the same pattern as the co
 The `test-helpers.ts` file provides reusable functions:
 
 ### Authentication
+
 - `loginAs(page, role)` - Login as specific user role
 - `loginWithRetry(page, role, maxRetries)` - Login with retry logic
 - `getAuthenticatedContext(role)` - Get API context for DB verification
 
 ### Navigation
+
 - `clickSidebarButton(page, thaiText, englishText)` - Click sidebar navigation
 - `navigateToModule(page, moduleThai, moduleEnglish)` - Navigate to module
 
 ### Database Verification
-- `verifyRecordExists(context, endpoint, code, expectedFields)` - Verify record in DB
+
+- `verifyRecordExists(context, endpoint, code, expectedFields)` - Verify record
+  in DB
 - `verifyRecordDeleted(context, endpoint, code)` - Verify record deleted
 - `getRecordByCode(context, endpoint, code)` - Get record from DB
 - `countRecords(context, endpoint)` - Count records
 
 ### UI Interaction
+
 - `fillFormByLabels(page, fields)` - Fill form fields by label
 - `clickButton(page, text)` - Click button by text
 - `takeScreenshot(page, path)` - Take screenshot with directory creation
@@ -265,12 +301,14 @@ The `test-helpers.ts` file provides reusable functions:
 - `verifyTableHasData(page)` - Verify table has rows
 
 ### Test Data
+
 - `generateTestCode(prefix)` - Generate unique code with timestamp
 - `generateTestCustomer()` - Generate test customer data
 - `generateTestVendor()` - Generate test vendor data
 - `generateTestProduct()` - Generate test product data
 
 ### Cleanup
+
 - `deleteTestRecord(context, endpoint, code)` - Delete test record
 - `cleanupTestRecords(context, endpoint, prefix)` - Cleanup all test records
 
@@ -292,20 +330,24 @@ bun run test:e2e e2e/comprehensive/accounts.spec.ts -g "CREATE"
 
 ## Test Organization
 
-Each test file uses `test.describe.configure({ mode: 'serial' })` to ensure tests run in order and can share state (test data codes).
+Each test file uses `test.describe.configure({ mode: 'serial' })` to ensure
+tests run in order and can share state (test data codes).
 
 Tests use the following lifecycle:
+
 - `beforeAll` - Setup API context for database verification
 - `afterAll` - Cleanup test data
 - `beforeEach` - Login and navigate to module
 
 ## Screenshot Directory
 
-Screenshots are saved to `screenshots/comprehensive/{module}/` for visual verification and debugging.
+Screenshots are saved to `screenshots/comprehensive/{module}/` for visual
+verification and debugging.
 
 ## Database Verification
 
 All critical operations verify database state using the API context:
+
 - Create operations verify record exists
 - Edit operations verify fields updated
 - Delete operations verify record removed
@@ -313,7 +355,8 @@ All critical operations verify database state using the API context:
 
 ## Best Practices
 
-1. **Use descriptive test names** with prefixes: `[NAVIGATE]`, `[CREATE]`, `[EDIT]`, `[DELETE]`, etc.
+1. **Use descriptive test names** with prefixes: `[NAVIGATE]`, `[CREATE]`,
+   `[EDIT]`, `[DELETE]`, etc.
 2. **Verify database state** after all mutations
 3. **Clean up test data** in `afterAll` hooks
 4. **Use test helpers** to avoid code duplication
@@ -327,6 +370,7 @@ All critical operations verify database state using the API context:
 ## Coverage Goals
 
 Each test file should achieve:
+
 - ✅ Every button clicked
 - ✅ Every form field filled
 - ✅ Every validation rule tested
@@ -338,23 +382,23 @@ Each test file should achieve:
 
 ## Status Dashboard
 
-| Module | Status | Last Updated | Tests Count |
-|--------|--------|--------------|-------------|
-| Accounts | ✅ Complete | 2025-03-13 | 12 |
-| Customers | ✅ Complete | 2025-03-13 | 13 |
-| Vendors | ✅ Complete | 2025-03-13 | 13 |
-| Products | 📋 Pending | - | ~12 |
-| Invoices | 📋 Pending | - | ~15 |
-| Purchases | 📋 Pending | - | ~12 |
-| Receipts | 📋 Pending | - | ~12 |
-| Payments | 📋 Pending | - | ~13 |
-| Assets | 📋 Pending | - | ~10 |
-| Banking | 📋 Pending | - | ~15 |
-| Payroll | 📋 Pending | - | ~12 |
-| Petty Cash | 📋 Pending | - | ~14 |
-| Inventory | 📋 Pending | - | ~14 |
-| Credit Notes | 📋 Pending | - | ~10 |
-| Debit Notes | 📋 Pending | - | ~10 |
+| Module       | Status      | Last Updated | Tests Count |
+| ------------ | ----------- | ------------ | ----------- |
+| Accounts     | ✅ Complete | 2025-03-13   | 12          |
+| Customers    | ✅ Complete | 2025-03-13   | 13          |
+| Vendors      | ✅ Complete | 2025-03-13   | 13          |
+| Products     | 📋 Pending  | -            | ~12         |
+| Invoices     | 📋 Pending  | -            | ~15         |
+| Purchases    | 📋 Pending  | -            | ~12         |
+| Receipts     | 📋 Pending  | -            | ~12         |
+| Payments     | 📋 Pending  | -            | ~13         |
+| Assets       | 📋 Pending  | -            | ~10         |
+| Banking      | 📋 Pending  | -            | ~15         |
+| Payroll      | 📋 Pending  | -            | ~12         |
+| Petty Cash   | 📋 Pending  | -            | ~14         |
+| Inventory    | 📋 Pending  | -            | ~14         |
+| Credit Notes | 📋 Pending  | -            | ~10         |
+| Debit Notes  | 📋 Pending  | -            | ~10         |
 
 **Total Planned Tests:** ~177 tests across 15 modules
 

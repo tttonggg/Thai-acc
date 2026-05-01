@@ -17,7 +17,7 @@ import type {
   Payment,
   PaymentItem,
   Warehouse,
-  PettyCashFund
+  PettyCashFund,
 } from '@prisma/client';
 
 // Prisma client singleton
@@ -26,7 +26,7 @@ let prisma: PrismaClient | null = null;
 function getPrisma(): PrismaClient {
   if (!prisma) {
     prisma = new PrismaClient({
-      log: process.env.DEBUG === 'true' ? ['query', 'error', 'warn'] : ['error']
+      log: process.env.DEBUG === 'true' ? ['query', 'error', 'warn'] : ['error'],
     });
   }
   return prisma;
@@ -49,7 +49,7 @@ async function getNextDocumentNumber(type: string): Promise<string> {
   const year = new Date().getFullYear();
 
   const docNumber = await prisma.documentNumber.findUnique({
-    where: { type_year: { type, year } }
+    where: { type_year: { type, year } },
   });
 
   if (!docNumber) {
@@ -58,8 +58,8 @@ async function getNextDocumentNumber(type: string): Promise<string> {
         type,
         year,
         lastNumber: 1,
-        prefix: `${type.substring(0, 3).toUpperCase()}-${year}`
-      }
+        prefix: `${type.substring(0, 3).toUpperCase()}-${year}`,
+      },
     });
     return `${type.substring(0, 3).toUpperCase()}-${year}-0001`;
   }
@@ -67,7 +67,7 @@ async function getNextDocumentNumber(type: string): Promise<string> {
   const nextNumber = docNumber.lastNumber + 1;
   await prisma.documentNumber.update({
     where: { id: docNumber.id },
-    data: { lastNumber: nextNumber }
+    data: { lastNumber: nextNumber },
   });
 
   return `${docNumber.prefix}-${String(nextNumber).padStart(4, '0')}`;
@@ -79,9 +79,7 @@ async function getNextDocumentNumber(type: string): Promise<string> {
  * @param overrides - Optional field overrides
  * @returns Created customer record
  */
-export async function createTestCustomer(
-  overrides: Partial<Customer> = {}
-): Promise<Customer> {
+export async function createTestCustomer(overrides: Partial<Customer> = {}): Promise<Customer> {
   const prisma = getPrisma();
 
   const id = generateTestId('cust');
@@ -101,7 +99,7 @@ export async function createTestCustomer(
     creditLimit: 50000,
     paymentTerms: 30,
     accountId: '1201', // Accounts Receivable
-    ...overrides
+    ...overrides,
   };
 
   return await prisma.customer.create({ data });
@@ -113,9 +111,7 @@ export async function createTestCustomer(
  * @param overrides - Optional field overrides
  * @returns Created vendor record
  */
-export async function createTestVendor(
-  overrides: Partial<Vendor> = {}
-): Promise<Vendor> {
+export async function createTestVendor(overrides: Partial<Vendor> = {}): Promise<Vendor> {
   const prisma = getPrisma();
 
   const id = generateTestId('vend');
@@ -134,7 +130,7 @@ export async function createTestVendor(
     country: 'Thailand',
     paymentTerms: 30,
     accountId: '2101', // Accounts Payable
-    ...overrides
+    ...overrides,
   };
 
   return await prisma.vendor.create({ data });
@@ -146,9 +142,7 @@ export async function createTestVendor(
  * @param overrides - Optional field overrides
  * @returns Created product record
  */
-export async function createTestProduct(
-  overrides: Partial<Product> = {}
-): Promise<Product> {
+export async function createTestProduct(overrides: Partial<Product> = {}): Promise<Product> {
   const prisma = getPrisma();
 
   const id = generateTestId('prod');
@@ -168,7 +162,7 @@ export async function createTestProduct(
     incomeType: null,
     whtRate: null,
     active: true,
-    ...overrides
+    ...overrides,
   };
 
   return await prisma.product.create({ data });
@@ -180,9 +174,7 @@ export async function createTestProduct(
  * @param overrides - Optional field overrides
  * @returns Created warehouse record
  */
-export async function createTestWarehouse(
-  overrides: Partial<Warehouse> = {}
-): Promise<Warehouse> {
+export async function createTestWarehouse(overrides: Partial<Warehouse> = {}): Promise<Warehouse> {
   const prisma = getPrisma();
 
   const id = generateTestId('wh');
@@ -196,7 +188,7 @@ export async function createTestWarehouse(
     province: 'Bangkok',
     postalCode: '10300',
     active: true,
-    ...overrides
+    ...overrides,
   };
 
   return await prisma.warehouse.create({ data });
@@ -230,7 +222,7 @@ export async function createTestInvoice(
       price: 1000,
       discount: 0,
       vatAmount: 700,
-      total: 10000
+      total: 10000,
     });
   }
 
@@ -250,7 +242,7 @@ export async function createTestInvoice(
     status: 'POSTED',
     notes: 'Test invoice',
     journalEntryId: null,
-    ...overrides
+    ...overrides,
   };
 
   delete (invoiceData as any).items;
@@ -268,11 +260,11 @@ export async function createTestInvoice(
           vatRate: 0.07,
           vatAmount: item.vatAmount || 0,
           total: item.total || 0,
-          description: item.description || `Item ${index + 1}`
-        }))
-      }
+          description: item.description || `Item ${index + 1}`,
+        })),
+      },
     },
-    include: { items: true }
+    include: { items: true },
   });
 
   return invoice as Invoice & { items: InvoiceItem[] };
@@ -315,7 +307,7 @@ export async function createTestReceipt(
     reference: '',
     notes: 'Test receipt',
     journalEntryId: null,
-    ...overrides
+    ...overrides,
   };
 
   delete (receiptData as any).items;
@@ -324,15 +316,18 @@ export async function createTestReceipt(
     data: {
       ...receiptData,
       items: {
-        create: items.length > 0 ? items.map((item, index) => ({
-          id: generateTestId(`rcpt-item-${index}`),
-          invoiceId: item.invoiceId || null,
-          amount: item.amount || 0,
-          discountAmount: item.discountAmount || 0
-        })) : undefined
-      }
+        create:
+          items.length > 0
+            ? items.map((item, index) => ({
+                id: generateTestId(`rcpt-item-${index}`),
+                invoiceId: item.invoiceId || null,
+                amount: item.amount || 0,
+                discountAmount: item.discountAmount || 0,
+              }))
+            : undefined,
+      },
     },
-    include: { items: true }
+    include: { items: true },
   });
 
   return receipt as Receipt & { items: ReceiptItem[] };
@@ -377,7 +372,7 @@ export async function createTestPayment(
     journalEntryId: null,
     whtAmount: 0,
     whtBase: 0,
-    ...overrides
+    ...overrides,
   };
 
   delete (paymentData as any).items;
@@ -386,15 +381,18 @@ export async function createTestPayment(
     data: {
       ...paymentData,
       items: {
-        create: items.length > 0 ? items.map((item, index) => ({
-          id: generateTestId(`pay-item-${index}`),
-          purchaseInvoiceId: item.purchaseInvoiceId || null,
-          amount: item.amount || 0,
-          discountAmount: item.discountAmount || 0
-        })) : undefined
-      }
+        create:
+          items.length > 0
+            ? items.map((item, index) => ({
+                id: generateTestId(`pay-item-${index}`),
+                purchaseInvoiceId: item.purchaseInvoiceId || null,
+                amount: item.amount || 0,
+                discountAmount: item.discountAmount || 0,
+              }))
+            : undefined,
+      },
     },
-    include: { items: true }
+    include: { items: true },
   });
 
   return payment as Payment & { items: PaymentItem[] };
@@ -424,7 +422,7 @@ export async function createTestPettyCashFund(
     replenishLevel: 2000,
     bankAccountId: '1111', // Cash on Hand
     active: true,
-    ...overrides
+    ...overrides,
   };
 
   return await prisma.pettyCashFund.create({ data });
@@ -454,35 +452,39 @@ export async function createTestScenario(): Promise<{
   const products = await Promise.all([
     createTestProduct({ name: 'Product A', code: 'PROD-A', price: 1000 }),
     createTestProduct({ name: 'Product B', code: 'PROD-B', price: 2000 }),
-    createTestProduct({ name: 'Service C', code: 'SVC-C', price: 5000, unit: 'hour' })
+    createTestProduct({ name: 'Service C', code: 'SVC-C', price: 5000, unit: 'hour' }),
   ]);
 
   // Create documents
   const invoice = await createTestInvoice({
     customerId: customer.id,
-    items: products.slice(0, 2).map(p => ({
+    items: products.slice(0, 2).map((p) => ({
       productId: p.id,
       quantity: 10,
       price: p.price,
       vatAmount: p.price * 10 * 0.07,
-      total: p.price * 10 * 1.07
-    }))
+      total: p.price * 10 * 1.07,
+    })),
   });
 
   const receipt = await createTestReceipt({
     customerId: customer.id,
-    items: [{
-      invoiceId: invoice.id,
-      amount: invoice.total * 0.5,
-      discountAmount: 0
-    }]
+    items: [
+      {
+        invoiceId: invoice.id,
+        amount: invoice.total * 0.5,
+        discountAmount: 0,
+      },
+    ],
   });
 
   const payment = await createTestPayment({
     vendorId: vendor.id,
-    items: [{
-      amount: 5000
-    }]
+    items: [
+      {
+        amount: 5000,
+      },
+    ],
   });
 
   return {
@@ -492,7 +494,7 @@ export async function createTestScenario(): Promise<{
     warehouse,
     invoice,
     receipt,
-    payment
+    payment,
   };
 }
 
@@ -507,7 +509,7 @@ export async function createTestCustomers(count: number): Promise<Customer[]> {
   for (let i = 0; i < count; i++) {
     const customer = await createTestCustomer({
       name: `Bulk Customer ${i + 1}`,
-      email: `bulk-customer-${i + 1}@example.com`
+      email: `bulk-customer-${i + 1}@example.com`,
     });
     customers.push(customer);
   }
@@ -526,7 +528,7 @@ export async function createTestProducts(count: number): Promise<Product[]> {
     const product = await createTestProduct({
       name: `Bulk Product ${i + 1}`,
       code: `BULK-${i + 1}`,
-      price: 1000 + (i * 100)
+      price: 1000 + i * 100,
     });
     products.push(product);
   }
@@ -547,10 +549,10 @@ export async function deleteTestData(): Promise<void> {
         OR: [
           { invoice: { id: { contains: '-' } } },
           { receipt: { id: { contains: '-' } } },
-          { payment: { id: { contains: '-' } } }
-        ]
-      }
-    }
+          { payment: { id: { contains: '-' } } },
+        ],
+      },
+    },
   });
 
   await prisma.journalEntry.deleteMany({
@@ -558,58 +560,58 @@ export async function deleteTestData(): Promise<void> {
       OR: [
         { invoice: { id: { contains: '-' } } },
         { receipt: { id: { contains: '-' } } },
-        { payment: { id: { contains: '-' } } }
-      ]
-    }
+        { payment: { id: { contains: '-' } } },
+      ],
+    },
   });
 
   await prisma.invoiceItem.deleteMany({
     where: {
-      invoice: { id: { contains: '-' } }
-    }
+      invoice: { id: { contains: '-' } },
+    },
   });
 
   await prisma.invoice.deleteMany({
-    where: { id: { contains: '-' } }
+    where: { id: { contains: '-' } },
   });
 
   await prisma.receiptItem.deleteMany({
     where: {
-      receipt: { id: { contains: '-' } }
-    }
+      receipt: { id: { contains: '-' } },
+    },
   });
 
   await prisma.receipt.deleteMany({
-    where: { id: { contains: '-' } }
+    where: { id: { contains: '-' } },
   });
 
   await prisma.paymentItem.deleteMany({
     where: {
-      payment: { id: { contains: '-' } }
-    }
+      payment: { id: { contains: '-' } },
+    },
   });
 
   await prisma.payment.deleteMany({
-    where: { id: { contains: '-' } }
+    where: { id: { contains: '-' } },
   });
 
   await prisma.product.deleteMany({
-    where: { id: { contains: '-' } }
+    where: { id: { contains: '-' } },
   });
 
   await prisma.warehouse.deleteMany({
-    where: { id: { contains: '-' } }
+    where: { id: { contains: '-' } },
   });
 
   await prisma.vendor.deleteMany({
-    where: { id: { contains: '-' } }
+    where: { id: { contains: '-' } },
   });
 
   await prisma.customer.deleteMany({
-    where: { id: { contains: '-' } }
+    where: { id: { contains: '-' } },
   });
 
   await prisma.pettyCashFund.deleteMany({
-    where: { id: { contains: '-' } }
+    where: { id: { contains: '-' } },
   });
 }

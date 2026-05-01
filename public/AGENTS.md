@@ -9,10 +9,10 @@ Static assets served by the Next.js application.
 
 ## Subdirectories
 
-| Directory | Purpose |
-|-----------|---------|
-| `fonts/` | Custom font files |
-| `icons/` | SVG and icon assets |
+| Directory | Purpose             |
+| --------- | ------------------- |
+| `fonts/`  | Custom font files   |
+| `icons/`  | SVG and icon assets |
 
 ## For AI Agents
 

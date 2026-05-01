@@ -32,11 +32,7 @@ export class PettyCashPage {
     await this.pageTitle.waitFor({ state: 'visible', timeout: 10000 });
   }
 
-  async createFund(data: {
-    name: string;
-    custodian: string;
-    initialAmount: number;
-  }) {
+  async createFund(data: { name: string; custodian: string; initialAmount: number }) {
     await this.fundsTab.click();
     await this.newFundButton.click();
 

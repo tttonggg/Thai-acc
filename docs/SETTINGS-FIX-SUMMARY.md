@@ -1,11 +1,12 @@
 # Settings Component Fix - Complete Implementation
 
-**Date**: 2025-03-13
-**Status**: ✅ **COMPLETE** - All save functionality working
+**Date**: 2025-03-13 **Status**: ✅ **COMPLETE** - All save functionality
+working
 
 ## Overview
 
 Fixed the Settings component to add complete, working save functionality for:
+
 1. **Company Profile** - Already working, maintained
 2. **Document Number Configuration** - NEW: Fully implemented
 3. **Tax Rate Configuration** - NEW: Fully implemented with validation
@@ -17,6 +18,7 @@ Fixed the Settings component to add complete, working save functionality for:
 ### 1. Database Schema (`prisma/schema.prisma`)
 
 **Added SystemSettings Model:**
+
 ```prisma
 model SystemSettings {
   id              String   @id @default(cuid())
@@ -35,15 +37,19 @@ model SystemSettings {
 ```
 
 **Updated Company Model:**
+
 - Added `systemSettings` relation to SystemSettings
 
 ### 2. API Endpoint (`src/app/api/settings/route.ts`)
 
 **New API routes:**
-- `GET /api/settings` - Fetch all settings (company, tax rates, document numbers)
+
+- `GET /api/settings` - Fetch all settings (company, tax rates, document
+  numbers)
 - `PUT /api/settings` - Update settings (tax rates and/or document numbers)
 
 **Features:**
+
 - Zod validation for all inputs
 - Support for updating tax rates (VAT, WHT PND53)
 - Support for updating document number formats
@@ -51,10 +57,11 @@ model SystemSettings {
 - Single-source-of-truth for settings
 
 **Example Usage:**
+
 ```typescript
 // Get all settings
-const response = await fetch('/api/settings')
-const { data } = await response.json()
+const response = await fetch('/api/settings');
+const { data } = await response.json();
 // data.company, data.taxRates, data.documentNumbers
 
 // Update tax rates
@@ -66,9 +73,9 @@ await fetch('/api/settings', {
       vatRate: 7,
       whtPnd53Service: 3,
       // ...
-    }
-  })
-})
+    },
+  }),
+});
 
 // Update document numbers
 await fetch('/api/settings', {
@@ -81,12 +88,12 @@ await fetch('/api/settings', {
         prefix: 'INV',
         format: '{prefix}-{yyyy}-{mm}-{0000}',
         resetMonthly: true,
-        resetYearly: false
-      }
+        resetYearly: false,
+      },
       // ...
-    ]
-  })
-})
+    ],
+  }),
+});
 ```
 
 ### 3. Settings Component (`src/components/settings/settings.tsx`)
@@ -94,12 +101,14 @@ await fetch('/api/settings', {
 **Complete rewrite with:**
 
 **New Tab Structure:**
+
 - ข้อมูลบริษัท (Company) - Company profile + logo upload
 - เอกสาร (Documents) - Document number configuration
 - ภาษี (Taxes) - Tax rate configuration
 - สำรองข้อมูล (Backup) - Export/import
 
 **Document Number Configuration:**
+
 - Table showing all 9 document types
 - Editable prefix field for each type
 - Editable format string with placeholders
@@ -109,6 +118,7 @@ await fetch('/api/settings', {
 - Individual save button
 
 **Tax Rate Configuration:**
+
 - VAT rate input (0-100%) with validation
 - WHT PND53 rates:
   - ค่าบริการ (Service) - 3%
@@ -121,6 +131,7 @@ await fetch('/api/settings', {
 - Individual save button
 
 **State Management:**
+
 - Load all settings on mount via `/api/settings`
 - Separate state for company info, tax rates, and document numbers
 - Optimistic updates with error handling
@@ -128,6 +139,7 @@ await fetch('/api/settings', {
 - Loading states during save operations
 
 **Document Types Supported:**
+
 1. `invoice` - ใบกำกับภาษี (INV)
 2. `receipt` - ใบเสร็จรับเงิน (RCP)
 3. `payment` - ใบจ่ายเงิน (PAY)
@@ -141,11 +153,13 @@ await fetch('/api/settings', {
 ### 4. Database Seed (`prisma/seed.ts`)
 
 **Added initialization:**
+
 - Default document number formats for all 9 types
 - Default system settings with Thai tax rates
 - Upsert logic to avoid duplicates
 
 **Seeded Defaults:**
+
 - VAT Rate: 7%
 - WHT PND53 Service: 3%
 - WHT PND53 Rent: 5%
@@ -158,6 +172,7 @@ await fetch('/api/settings', {
 ### Manual Testing
 
 1. **Start the dev server:**
+
    ```bash
    npm run dev
    ```
@@ -243,12 +258,15 @@ curl -X PUT http://localhost:3000/api/settings \
 
 1. `/Users/tong/Thai-acc/prisma/schema.prisma` - Added SystemSettings model
 2. `/Users/tong/Thai-acc/src/app/api/settings/route.ts` - NEW: Settings API
-3. `/Users/tong/Thai-acc/src/components/settings/settings.tsx` - Complete rewrite
-4. `/Users/tong/Thai-acc/prisma/seed.ts` - Added document number & settings initialization
+3. `/Users/tong/Thai-acc/src/components/settings/settings.tsx` - Complete
+   rewrite
+4. `/Users/tong/Thai-acc/prisma/seed.ts` - Added document number & settings
+   initialization
 
 ## Database Migration
 
 **Ran commands:**
+
 ```bash
 npx prisma generate
 npx prisma db push
@@ -256,18 +274,22 @@ npx prisma db seed
 ```
 
 **New tables:**
+
 - `SystemSettings` - Stores tax rates
-- `DocumentNumber` - Stores document number formats (already existed, now seeded)
+- `DocumentNumber` - Stores document number formats (already existed, now
+  seeded)
 
 ## Features Implemented
 
 ### ✅ Company Profile
+
 - [x] Edit company information
 - [x] Save to database
 - [x] Logo upload with preview
 - [x] Validation
 
 ### ✅ Document Number Configuration
+
 - [x] Display all document types
 - [x] Editable prefix
 - [x] Editable format string
@@ -278,6 +300,7 @@ npx prisma db seed
 - [x] Display next number
 
 ### ✅ Tax Rate Configuration
+
 - [x] VAT rate input (0-100%)
 - [x] WHT PND53 rates (5 types)
 - [x] Validation (0-100%)
@@ -286,6 +309,7 @@ npx prisma db seed
 - [x] Error handling
 
 ### ✅ Backup/Restore
+
 - [x] Export all data
 - [x] Import from backup
 - [x] Validation
@@ -293,11 +317,13 @@ npx prisma db seed
 ## Validation Rules
 
 ### Tax Rates
+
 - VAT Rate: 0-100%
 - WHT Rates: 0-100%
 - Step: 0.01 (supports decimal places)
 
 ### Document Numbers
+
 - Prefix: Any non-empty string
 - Format: Must include valid placeholders:
   - `{prefix}` - Document prefix
@@ -312,6 +338,7 @@ npx prisma db seed
 ## Error Handling
 
 All save operations include:
+
 - Loading states during save
 - Success toast notifications
 - Error toast with Thai messages
@@ -322,6 +349,7 @@ All save operations include:
 ## Future Enhancements
 
 Possible improvements for later:
+
 1. Add fiscal year configuration
 2. Add number preview with actual dates
 3. Add document number history/audit log
@@ -333,10 +361,13 @@ Possible improvements for later:
 ## Conclusion
 
 The Settings component now has complete, working save functionality for:
+
 - ✅ Company profile
 - ✅ Document number configuration
 - ✅ Tax rate configuration
 - ✅ Logo upload
 - ✅ Backup/restore
 
-All settings are persisted to the database via the new `/api/settings` endpoint and stored in the `SystemSettings` model. The UI is user-friendly with proper validation, loading states, and error handling in Thai language.
+All settings are persisted to the database via the new `/api/settings` endpoint
+and stored in the `SystemSettings` model. The UI is user-friendly with proper
+validation, loading states, and error handling in Thai language.

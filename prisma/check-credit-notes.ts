@@ -12,7 +12,7 @@ async function main() {
     const creditNotes = await prisma.creditNote.findMany({
       take: 10,
       include: { customer: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     console.log('\nใบลดหนี้ล่าสุด:');

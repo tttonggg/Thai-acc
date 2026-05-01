@@ -6,20 +6,24 @@
 
 ## What Was Implemented
 
-Automatic GL journal entry generation for petty cash vouchers in the Thai Accounting ERP System.
+Automatic GL journal entry generation for petty cash vouchers in the Thai
+Accounting ERP System.
 
 ## Files Created
 
 ### 1. Core Service
+
 **File**: `/Users/tong/Thai-acc/src/lib/petty-cash-service.ts`
 
 **Purpose**: Service layer for petty cash operations
 
 **Key Functions**:
+
 - `createVoucherJournalEntry()` - Creates journal entry when voucher is approved
 - `generateJournalEntryNumber()` - Generates sequential journal entry numbers
 
 **Journal Entry Structure**:
+
 ```
 Debit:  Expense account (from voucher.glExpenseAccountId)
 Credit: Petty cash fund (from fund.glAccountId)
@@ -28,8 +32,11 @@ Document Type: PETTY_CASH_VOUCHER
 ```
 
 **Code Snippet**:
+
 ```typescript
-export async function createVoucherJournalEntry(params: CreateVoucherJournalEntryParams) {
+export async function createVoucherJournalEntry(
+  params: CreateVoucherJournalEntryParams
+) {
   const journalEntry = await db.journalEntry.create({
     data: {
       entryNo: await generateJournalEntryNumber(voucherDate),
@@ -62,19 +69,22 @@ export async function createVoucherJournalEntry(params: CreateVoucherJournalEntr
         ],
       },
     },
-  })
-  return journalEntry
+  });
+  return journalEntry;
 }
 ```
 
 ### 2. Approve Voucher API
-**File**: `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/approve/route.ts`
+
+**File**:
+`/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/approve/route.ts`
 
 **Endpoint**: `POST /api/petty-cash/vouchers/[id]/approve`
 
 **Purpose**: Approve voucher and create journal entry
 
 **Process**:
+
 1. Validates voucher exists
 2. Checks if already approved (has `journalEntryId`)
 3. Calls `createVoucherJournalEntry()` service
@@ -82,10 +92,12 @@ export async function createVoucherJournalEntry(params: CreateVoucherJournalEntr
 5. Returns updated voucher and journal entry
 
 **Validation**:
+
 - Cannot approve already approved voucher
 - Double-entry bookkeeping verified (debit = credit)
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -98,13 +110,16 @@ export async function createVoucherJournalEntry(params: CreateVoucherJournalEntr
 ```
 
 ### 3. Reimburse Fund API
-**File**: `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/reimburse/route.ts`
+
+**File**:
+`/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/reimburse/route.ts`
 
 **Endpoint**: `POST /api/petty-cash/vouchers/[id]/reimburse`
 
 **Purpose**: Reimburse petty cash fund from cash/bank
 
 **Request Body**:
+
 ```json
 {
   "cashBankAccountId": "string"
@@ -112,6 +127,7 @@ export async function createVoucherJournalEntry(params: CreateVoucherJournalEntr
 ```
 
 **Process**:
+
 1. Validates voucher exists
 2. Checks if already reimbursed
 3. Creates reimbursement journal entry:
@@ -121,6 +137,7 @@ export async function createVoucherJournalEntry(params: CreateVoucherJournalEntr
 5. Updates fund's `currentBalance`
 
 **Journal Entry**:
+
 ```typescript
 {
   documentType: 'PETTY_CASH_REIMBURSEMENT',
@@ -142,20 +159,26 @@ export async function createVoucherJournalEntry(params: CreateVoucherJournalEntr
 ```
 
 ### 4. Voucher CRUD API
+
 **File**: `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/route.ts`
 
 **Endpoints**:
+
 - `GET /api/petty-cash/vouchers/[id]` - Get single voucher
 - `DELETE /api/petty-cash/vouchers/[id]` - Delete voucher
 
 **Delete Protection**:
+
 ```typescript
 // Check if already has journal entry
 if (voucher.journalEntryId) {
-  return NextResponse.json({
-    success: false,
-    error: 'ไม่สามารถลบใบเบิกที่ได้รับการอนุมัติแล้ว กรุณาใช้รายการย้อนกลับ'
-  }, { status: 400 })
+  return NextResponse.json(
+    {
+      success: false,
+      error: 'ไม่สามารถลบใบเบิกที่ได้รับการอนุมัติแล้ว กรุณาใช้รายการย้อนกลับ',
+    },
+    { status: 400 }
+  );
 }
 
 // Restore fund balance when deleting
@@ -163,9 +186,9 @@ const [deletedVoucher] = await prisma.$transaction([
   prisma.pettyCashVoucher.delete({ where: { id } }),
   prisma.pettyCashFund.update({
     where: { id: voucher.fundId },
-    data: { currentBalance: { increment: voucher.amount } }
-  })
-])
+    data: { currentBalance: { increment: voucher.amount } },
+  }),
+]);
 ```
 
 ## Database Schema (No Changes Required)
@@ -202,24 +225,27 @@ model JournalEntry {
 ### Double-Entry Bookkeeping Verification
 
 **Test 1: Debits Equal Credits**
+
 ```typescript
-const totalDebit = journalEntry.lines.reduce((sum, l) => sum + l.debit, 0)
-const totalCredit = journalEntry.lines.reduce((sum, l) => sum + l.credit, 0)
-assert(totalDebit === totalCredit) // ✓ Pass
+const totalDebit = journalEntry.lines.reduce((sum, l) => sum + l.debit, 0);
+const totalCredit = journalEntry.lines.reduce((sum, l) => sum + l.credit, 0);
+assert(totalDebit === totalCredit); // ✓ Pass
 ```
 
 **Test 2: Correct Account Types**
+
 ```typescript
 // Debit line: Expense account (type EXPENSE)
-const debitLine = journalEntry.lines.find(l => l.debit > 0)
-assert(debitLine.account.type === 'EXPENSE') // ✓ Pass
+const debitLine = journalEntry.lines.find((l) => l.debit > 0);
+assert(debitLine.account.type === 'EXPENSE'); // ✓ Pass
 
 // Credit line: Asset account (type ASSET)
-const creditLine = journalEntry.lines.find(l => l.credit > 0)
-assert(creditLine.account.type === 'ASSET') // ✓ Pass
+const creditLine = journalEntry.lines.find((l) => l.credit > 0);
+assert(creditLine.account.type === 'ASSET'); // ✓ Pass
 ```
 
 **Test 3: Sequential Journal Entry Numbers**
+
 ```typescript
 const entry1 = await createVoucherJournalEntry(...)
 const entry2 = await createVoucherJournalEntry(...)
@@ -232,6 +258,7 @@ assert(seq2 === seq1 + 1) // ✓ Pass
 ## API Usage Examples
 
 ### 1. Create Voucher
+
 ```bash
 POST /api/petty-cash/vouchers
 {
@@ -245,17 +272,20 @@ POST /api/petty-cash/vouchers
 ```
 
 ### 2. Approve Voucher (Creates Journal Entry)
+
 ```bash
 POST /api/petty-cash/vouchers/{voucherId}/approve
 ```
 
 **Result**: Journal entry created with:
+
 - Debit: Expense account (500.00)
 - Credit: Petty cash fund (500.00)
 - Status: POSTED
 - Voucher linked via `journalEntryId`
 
 ### 3. Reimburse Fund
+
 ```bash
 POST /api/petty-cash/vouchers/{voucherId}/reimburse
 {
@@ -266,17 +296,19 @@ POST /api/petty-cash/vouchers/{voucherId}/reimburse
 **Result**: Fund balance increased by 500.00
 
 ### 4. Verify Journal Entry
+
 ```bash
 GET /api/journal/{journalEntryId}
 ```
 
 **Response**:
+
 ```json
 {
   "entryNo": "JV-202603-0001",
   "description": "เบิกเงินสดย่อย PCV-2026-0001 - ซื้อเอกสารสำนักงาน",
-  "totalDebit": 500.00,
-  "totalCredit": 500.00,
+  "totalDebit": 500.0,
+  "totalCredit": 500.0,
   "status": "POSTED",
   "documentType": "PETTY_CASH_VOUCHER",
   "lines": [
@@ -284,15 +316,15 @@ GET /api/journal/{journalEntryId}
       "lineNo": 1,
       "accountId": "expense_567",
       "description": "ซื้อเอกสารสำนักงาน (ค่าใช้จ่าย)",
-      "debit": 500.00,
-      "credit": 0.00
+      "debit": 500.0,
+      "credit": 0.0
     },
     {
       "lineNo": 2,
       "accountId": "petty_cash_fund_123",
       "description": "เงินสดย่อย (สมชาย ใจดี)",
-      "debit": 0.00,
-      "credit": 500.00
+      "debit": 0.0,
+      "credit": 500.0
     }
   ]
 }
@@ -301,6 +333,7 @@ GET /api/journal/{journalEntryId}
 ## Accounting Logic
 
 ### Approval Entry
+
 ```
 เบิกเงินสดย่อย PCV-2026-0001 - ซื้อเอกสารสำนักงาน
 
@@ -312,6 +345,7 @@ Dr. ค่าใช้จ่ายออฟฟิศ (Office Supplies Expense)  
 ```
 
 ### Reimbursement Entry
+
 ```
 เติมเงินสดย่อย Petty Cash Fund A ใบเบิก PCV-2026-0001
 
@@ -324,31 +358,29 @@ Dr. เงินสดย่อย (Petty Cash Fund)                500.00
 
 ## Validation Results
 
-✅ Double-entry bookkeeping verified (debit = credit)
-✅ Journal entry numbers sequential
-✅ Account types correct (expense vs asset)
-✅ Document references stored
-✅ Voucher linked to journal entry
-✅ Status auto-set to POSTED
-✅ Thai descriptions for compliance
-✅ Cannot approve twice
-✅ Cannot reimburse twice
-✅ Cannot delete approved voucher
-✅ Fund balance restored on delete
+✅ Double-entry bookkeeping verified (debit = credit) ✅ Journal entry numbers
+sequential ✅ Account types correct (expense vs asset) ✅ Document references
+stored ✅ Voucher linked to journal entry ✅ Status auto-set to POSTED ✅ Thai
+descriptions for compliance ✅ Cannot approve twice ✅ Cannot reimburse twice ✅
+Cannot delete approved voucher ✅ Fund balance restored on delete
 
 ## Files Summary
 
 **Created**:
+
 1. `/Users/tong/Thai-acc/src/lib/petty-cash-service.ts` - Core service
 2. `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/route.ts` - CRUD
-3. `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/approve/route.ts` - Approve
-4. `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/reimburse/route.ts` - Reimburse
+3. `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/approve/route.ts` -
+   Approve
+4. `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/reimburse/route.ts` -
+   Reimburse
 5. `/Users/tong/Thai-acc/src/lib/__tests__/petty-cash-service.test.ts` - Tests
 6. `/Users/tong/Thai-acc/examples/petty-cash-api-usage.ts` - Usage examples
 7. `/Users/tong/Thai-acc/PETTY-CASH-IMPLEMENTATION.md` - Documentation
 8. `/Users/tong/Thai-acc/docs/petty-cash-flowchart.md` - Flow diagrams
 
 **No Changes Required**:
+
 - Schema (already had `journalEntryId` and `isReimbursed`)
 - Existing voucher creation endpoint
 - Existing fund management
@@ -364,6 +396,7 @@ Dr. เงินสดย่อย (Petty Cash Fund)                500.00
 ## Conclusion
 
 The petty cash GL journal entry system is now fully implemented with:
+
 - ✅ Automatic journal entry creation on approval
 - ✅ Double-entry bookkeeping (debit = credit)
 - ✅ Proper account linking

@@ -8,14 +8,15 @@
 Additional business logic services beyond the core services in `src/lib/`.
 
 ## Parent Reference
+
 <!-- Parent: ../AGENTS.md -->
 
 ## Key Files
 
-| File | Description |
-|------|-------------|
+| File                   | Description                |
+| ---------------------- | -------------------------- |
 | `analytics-service.ts` | Business analytics service |
-| `webhook-service.ts` | Webhook management service |
+| `webhook-service.ts`   | Webhook management service |
 
 ## For AI Agents
 

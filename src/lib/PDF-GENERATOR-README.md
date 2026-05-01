@@ -4,9 +4,11 @@
 
 ## Overview
 
-บริการนี้ให้การสร้างเอกสาร PDF สำหรับเอกสารบัญชีต่างๆ ในระบบ ERP บัญชีไทย โดยใช้ jsPDF และ jspdf-autotable
+บริการนี้ให้การสร้างเอกสาร PDF สำหรับเอกสารบัญชีต่างๆ ในระบบ ERP บัญชีไทย โดยใช้
+jsPDF และ jspdf-autotable
 
-This service provides PDF generation for various accounting documents in the Thai Accounting ERP system using jsPDF and jspdf-autotable.
+This service provides PDF generation for various accounting documents in the
+Thai Accounting ERP system using jsPDF and jspdf-autotable.
 
 ## Features
 
@@ -49,31 +51,37 @@ This service provides PDF generation for various accounting documents in the Tha
 ## API Endpoints
 
 ### Invoice PDF Export
+
 ```
 GET /api/invoices/[id]/export/pdf
 ```
 
 ### Receipt PDF Export
+
 ```
 GET /api/receipts/[id]/export/pdf
 ```
 
 ### Journal Entry PDF Export
+
 ```
 GET /api/journal-entries/[id]/export/pdf
 ```
 
 ### Trial Balance PDF Export
+
 ```
 GET /api/reports/trial-balance/export/pdf?startDate=2024-01-01&endDate=2024-12-31
 ```
 
 ### Income Statement PDF Export
+
 ```
 GET /api/reports/income-statement/export/pdf?startDate=2024-01-01&endDate=2024-12-31
 ```
 
 ### Balance Sheet PDF Export
+
 ```
 GET /api/reports/balance-sheet/export/pdf?endDate=2024-12-31
 ```
@@ -83,61 +91,57 @@ GET /api/reports/balance-sheet/export/pdf?endDate=2024-12-31
 ### Client-side Usage (React Component)
 
 ```tsx
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
 export function InvoiceExportButton({ invoiceId }: { invoiceId: string }) {
-  const router = useRouter()
+  const router = useRouter();
 
   const handleExport = async () => {
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}/export/pdf`)
-      if (!response.ok) throw new Error('Failed to generate PDF')
+      const response = await fetch(`/api/invoices/${invoiceId}/export/pdf`);
+      if (!response.ok) throw new Error('Failed to generate PDF');
 
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `invoice-${invoiceId}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${invoiceId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (error) {
-      console.error('Error exporting PDF:', error)
+      console.error('Error exporting PDF:', error);
     }
-  }
+  };
 
-  return (
-    <button onClick={handleExport}>
-      Export PDF
-    </button>
-  )
+  return <button onClick={handleExport}>Export PDF</button>;
 }
 ```
 
 ### Server-side Usage
 
 ```typescript
-import { generateInvoicePDF } from '@/lib/pdf-generator'
+import { generateInvoicePDF } from '@/lib/pdf-generator';
 
 export async function generateInvoiceDocument(invoiceId: string) {
   const invoice = await prisma.invoice.findUnique({
     where: { id: invoiceId },
     include: {
       customer: true,
-      lines: { include: { product: true } }
-    }
-  })
+      lines: { include: { product: true } },
+    },
+  });
 
   if (!invoice) {
-    throw new Error('Invoice not found')
+    throw new Error('Invoice not found');
   }
 
-  const pdfBytes = await generateInvoicePDF(invoice)
+  const pdfBytes = await generateInvoicePDF(invoice);
 
   // Save to file system or storage
   // Or return as response
-  return pdfBytes
+  return pdfBytes;
 }
 ```
 
@@ -145,11 +149,14 @@ export async function generateInvoiceDocument(invoiceId: string) {
 
 ### Current Status (MVP)
 
-The current implementation uses **English labels with Thai data where possible**. This is a pragmatic approach for the MVP phase.
+The current implementation uses **English labels with Thai data where
+possible**. This is a pragmatic approach for the MVP phase.
 
 **Limitations:**
+
 - jsPDF's default fonts don't support Thai characters
-- Thai text in customer names, addresses, and product descriptions may not render correctly
+- Thai text in customer names, addresses, and product descriptions may not
+  render correctly
 - Only ASCII characters (English) are fully supported
 
 ### Production Implementation (Thai Font Support)
@@ -168,23 +175,23 @@ To enable full Thai font support, you need to:
 2. **Add Font to jsPDF**
 
 ```typescript
-import jsPDF from 'jspdf'
+import jsPDF from 'jspdf';
 
 // Load font files (these would be actual base64 strings)
-const sarabunRegularBase64 = '...' // Load from file or CDN
-const sarabunBoldBase64 = '...'
+const sarabunRegularBase64 = '...'; // Load from file or CDN
+const sarabunBoldBase64 = '...';
 
 export function addThaiFont(doc: jsPDF) {
   // Add font files to virtual file system
-  doc.addFileToVFS('Sarabun-Regular.ttf', sarabunRegularBase64)
-  doc.addFileToVFS('Sarabun-Bold.ttf', sarabunBoldBase64)
+  doc.addFileToVFS('Sarabun-Regular.ttf', sarabunRegularBase64);
+  doc.addFileToVFS('Sarabun-Bold.ttf', sarabunBoldBase64);
 
   // Register fonts
-  doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal')
-  doc.addFont('Sarabun-Bold.ttf', 'Sarabun', 'bold')
+  doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
+  doc.addFont('Sarabun-Bold.ttf', 'Sarabun', 'bold');
 
   // Set as active font
-  doc.setFont('Sarabun', 'normal')
+  doc.setFont('Sarabun', 'normal');
 }
 ```
 
@@ -192,23 +199,23 @@ export function addThaiFont(doc: jsPDF) {
 
 ```typescript
 export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
-  const doc = new jsPDF()
+  const doc = new jsPDF();
 
   // Add Thai font
-  addThaiFont(doc)
+  addThaiFont(doc);
 
   // Now Thai text will render correctly
-  doc.text('ใบกำกับภาษี', 15, 20)
-  doc.text(invoice.customer.name, 15, 30)
+  doc.text('ใบกำกับภาษี', 15, 20);
+  doc.text(invoice.customer.name, 15, 30);
 
-  return doc.output('arraybuffer') as Uint8Array
+  return doc.output('arraybuffer') as Uint8Array;
 }
 ```
 
 #### Option 2: Use HTML to PDF Converter (Alternative)
 
 ```typescript
-import { htmlToPdf } from 'some-html-to-pdf-library'
+import { htmlToPdf } from 'some-html-to-pdf-library';
 
 export async function generateInvoicePDF(invoice: any) {
   const html = `
@@ -224,9 +231,9 @@ export async function generateInvoicePDF(invoice: any) {
         <p>${invoice.customer.name}</p>
       </body>
     </html>
-  `
+  `;
 
-  return htmlToPdf(html)
+  return htmlToPdf(html);
 }
 ```
 
@@ -248,13 +255,13 @@ export async function generateInvoicePDF(invoice: any) {
 ### Currency Format
 
 ```typescript
-formatCurrency(1234.56) // "฿1,234.56"
+formatCurrency(1234.56); // "฿1,234.56"
 ```
 
 ### Date Format (Buddhist Era)
 
 ```typescript
-formatDateThai(new Date('2024-12-31')) // "31/12/2567"
+formatDateThai(new Date('2024-12-31')); // "31/12/2567"
 ```
 
 ### Address Format
@@ -265,8 +272,8 @@ formatAddress({
   subDistrict: 'คลองตันเหนือ',
   district: 'วัฒนา',
   province: 'กรุงเทพมหานคร',
-  postalCode: '10110'
-})
+  postalCode: '10110',
+});
 // "123 ถนนสุขุมวิท คลองตันเหนือ วัฒนา กรุงเทพมหานคร 10110"
 ```
 
@@ -278,8 +285,8 @@ formatAddress({
 const doc = new jsPDF({
   orientation: 'portrait', // or 'landscape'
   unit: 'mm',
-  format: 'a4'
-})
+  format: 'a4',
+});
 ```
 
 ### Table Styling
@@ -293,12 +300,12 @@ doc.autoTable({
   headStyles: {
     fillColor: [66, 66, 66],
     textColor: 255,
-    fontSize: 10
+    fontSize: 10,
   },
   bodyStyles: {
-    fontSize: 9
-  }
-})
+    fontSize: 9,
+  },
+});
 ```
 
 ## Error Handling
@@ -307,24 +314,25 @@ All API routes include error handling:
 
 ```typescript
 try {
-  const pdfBytes = await generateInvoicePDF(invoice)
+  const pdfBytes = await generateInvoicePDF(invoice);
   return new NextResponse(pdfBytes, {
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename="invoice.pdf"'
-    }
-  })
+      'Content-Disposition': 'attachment; filename="invoice.pdf"',
+    },
+  });
 } catch (error) {
   return NextResponse.json(
     { error: 'Failed to generate PDF' },
     { status: 500 }
-  )
+  );
 }
 ```
 
 ## Performance Considerations
 
-1. **Company Info Caching**: Company information is cached to reduce database queries
+1. **Company Info Caching**: Company information is cached to reduce database
+   queries
 2. **Async Operations**: PDF generation is non-blocking
 3. **Memory Management**: Large reports may require pagination
 4. **Streaming**: For very large documents, consider streaming the response
@@ -332,7 +340,7 @@ try {
 ## Testing
 
 ```typescript
-import { generateInvoicePDF } from '@/lib/pdf-generator'
+import { generateInvoicePDF } from '@/lib/pdf-generator';
 
 describe('PDF Generator', () => {
   it('should generate invoice PDF', async () => {
@@ -343,14 +351,14 @@ describe('PDF Generator', () => {
       lines: [],
       subtotal: 1000,
       vatAmount: 70,
-      netAmount: 1070
-    }
+      netAmount: 1070,
+    };
 
-    const pdf = await generateInvoicePDF(mockInvoice)
-    expect(pdf).toBeInstanceOf(Uint8Array)
-    expect(pdf.length).toBeGreaterThan(0)
-  })
-})
+    const pdf = await generateInvoicePDF(mockInvoice);
+    expect(pdf).toBeInstanceOf(Uint8Array);
+    expect(pdf.length).toBeGreaterThan(0);
+  });
+});
 ```
 
 ## Troubleshooting
@@ -359,13 +367,15 @@ describe('PDF Generator', () => {
 
 **Problem**: Thai text appears as boxes or question marks
 
-**Solution**: Implement Thai font support (see "Thai Font Support" section above)
+**Solution**: Implement Thai font support (see "Thai Font Support" section
+above)
 
 ### PDF Generation Timeout
 
 **Problem**: Large reports timeout during generation
 
 **Solution**:
+
 - Add pagination
 - Use streaming responses
 - Increase server timeout
@@ -375,6 +385,7 @@ describe('PDF Generator', () => {
 **Problem**: Out of memory errors with large datasets
 
 **Solution**:
+
 - Limit data size
 - Implement batch processing
 - Use server-side pagination
@@ -408,6 +419,8 @@ This PDF generator service is part of the Thai Accounting ERP System.
 ## Support
 
 For issues or questions:
+
 - Check the troubleshooting section
 - Review jsPDF documentation: https://github.com/parallax/jsPDF
-- Review jspdf-autotable documentation: https://github.com/simonbengtsson/jsPDF-AutoTable
+- Review jspdf-autotable documentation:
+  https://github.com/simonbengtsson/jsPDF-AutoTable

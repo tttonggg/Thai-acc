@@ -47,7 +47,7 @@ test.describe('Payment Form - Unpaid Invoices Loading', () => {
 
     // CRITICAL: Verify unpaid invoices are displayed
     const invoiceCards = page.locator('div[class*="border"][class*="rounded"]').filter({
-      hasText: /PO202603-0001|PO202603-0002/
+      hasText: /PO202603-0001|PO202603-0002/,
     });
     await expect(invoiceCards.first()).toBeVisible({ timeout: 5000 });
 
@@ -109,7 +109,9 @@ test.describe('Payment Form - Unpaid Invoices Loading', () => {
     await expect(saveButton).toBeEnabled();
   });
 
-  test('[CRITICAL] Should show empty state when vendor has no unpaid invoices', async ({ page }) => {
+  test('[CRITICAL] Should show empty state when vendor has no unpaid invoices', async ({
+    page,
+  }) => {
     // Navigate to Payments page
     await page.click('aside nav button:has-text("ใบจ่ายเงิน")');
     await page.waitForURL('http://localhost:3000/payments');

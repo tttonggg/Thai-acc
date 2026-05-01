@@ -2,11 +2,14 @@
 
 ## Overview
 
-This document explains how VAT (ภาษีมูลค่าเพิ่ม) is properly tracked and linked throughout the Thai Accounting ERP system according to real-world accounting standards.
+This document explains how VAT (ภาษีมูลค่าเพิ่ม) is properly tracked and linked
+throughout the Thai Accounting ERP system according to real-world accounting
+standards.
 
 ## 📚 Accounting Principles (Thai Revenue Department Standards)
 
 ### VAT OUTPUT (ภาษีขาย) - Tax You Charge Customers
+
 - **Source**: Sales tax invoices you issue
 - **When**: When invoice is issued/posted (not when drafted)
 - **Documents**:
@@ -16,6 +19,7 @@ This document explains how VAT (ภาษีมูลค่าเพิ่ม) i
   - ✅ Credit Notes (ใบลดหนี้) - Decrease VAT
 
 ### VAT INPUT (ภาษีซื้อ) - Tax You Pay to Suppliers
+
 - **Source**: Supplier tax invoices you receive
 - **When**: When purchase invoice is received/posted
 - **Documents**:
@@ -24,6 +28,7 @@ This document explains how VAT (ภาษีมูลค่าเพิ่ม) i
   - ✅ Supplier Credit Notes - Decrease VAT INPUT
 
 ### ❌ NOT Tax Documents (Don't Create VAT Records):
+
 - Purchase Orders (PO) - Internal purchasing requests only
 - Purchase Requests - Internal documents only
 - Quotations - Not tax documents until issued
@@ -162,6 +167,7 @@ VatRecord {
 ## 🧪 Testing VAT Linking
 
 ### Test VAT OUTPUT (Already Working)
+
 ```bash
 # 1. Create sales invoice
 POST /api/invoices
@@ -184,6 +190,7 @@ GET /api/reports/vat?startDate=2025-01-01&endDate=2026-12-31
 ```
 
 ### Test VAT INPUT (New Feature)
+
 ```bash
 # 1. Create purchase invoice
 POST /api/purchases
@@ -207,7 +214,8 @@ GET /api/reports/vat?startDate=2025-01-01&endDate=2026-12-31
 
 ## 📋 Monthly VAT Filing (PP.30 Form)
 
-The VatRecord table is structured to match the Thai Revenue Department's PP.30 VAT filing form:
+The VatRecord table is structured to match the Thai Revenue Department's PP.30
+VAT filing form:
 
 ```typescript
 // For monthly VAT report
@@ -215,12 +223,12 @@ const monthlyVat = await prisma.vatRecord.groupBy({
   by: ['taxMonth', 'taxYear', 'type'],
   where: {
     taxMonth: currentMonth,
-    taxYear: currentYear
+    taxYear: currentYear,
   },
   _sum: {
-    vatAmount: true
-  }
-})
+    vatAmount: true,
+  },
+});
 
 // Results match PP.30 sections:
 // - Section 1: VAT OUTPUT (ภาษีขาย)
@@ -239,7 +247,8 @@ const monthlyVat = await prisma.vatRecord.groupBy({
 
 ## 📝 Important Notes
 
-1. **DRAFT ≠ Posted** - VAT records only created when documents are posted/issued
+1. **DRAFT ≠ Posted** - VAT records only created when documents are
+   posted/issued
 2. **Purchase Orders ≠ Tax Documents** - POs don't create VAT records
 3. **ReferenceId Linking** - All VatRecords link back to source documents
 4. **Credit/Debit Notes** - Should adjust existing VAT (future implementation)

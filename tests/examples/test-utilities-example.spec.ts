@@ -63,7 +63,7 @@ import {
   createTestWithDb,
   sleep,
   formatThaiDate,
-  formatCurrency
+  formatCurrency,
 } from '../utils';
 
 test.describe('Example Test Suite', () => {
@@ -114,14 +114,14 @@ test.describe('Example Test Suite', () => {
 
     // Fill customer form
     await fillForm(page, {
-      'ชื่อลูกค้า': 'Test Customer UI',
-      'เลขประจำตัวผู้เสียภาษี': '1234567890123',
-      'อีเมล': 'test@example.com',
-      'เบอร์โทรศัพท์': '0812345678',
-      'ที่อยู่': '123 Test Street',
-      'จังหวัด': 'Bangkok',
-      'รหัสไปรษณีย์': '10100',
-      'วงเงินเครดิต': '50000'
+      ชื่อลูกค้า: 'Test Customer UI',
+      เลขประจำตัวผู้เสียภาษี: '1234567890123',
+      อีเมล: 'test@example.com',
+      เบอร์โทรศัพท์: '0812345678',
+      ที่อยู่: '123 Test Street',
+      จังหวัด: 'Bangkok',
+      รหัสไปรษณีย์: '10100',
+      วงเงินเครดิต: '50000',
     });
 
     // Submit form
@@ -160,13 +160,9 @@ test.describe('Example Test Suite', () => {
     await clickButton(page, 'เพิ่มรายการ');
 
     // Wait for API response
-    const response = await waitForApiResponse(
-      page,
-      '/api/invoices',
-      async () => {
-        await submitForm(page);
-      }
-    );
+    const response = await waitForApiResponse(page, '/api/invoices', async () => {
+      await submitForm(page);
+    });
 
     expect(response.success).toBe(true);
 
@@ -226,7 +222,7 @@ test.describe('Example Test Suite', () => {
     // Create test customer via factory
     const customer = await createTestCustomer({
       name: 'DB Verification Test',
-      email: 'db-test@example.com'
+      email: 'db-test@example.com',
     });
 
     // Verify customer exists
@@ -236,7 +232,7 @@ test.describe('Example Test Suite', () => {
     // Verify customer values
     const valuesMatch = await verifyRecordValues('customer', customer.id, {
       name: 'DB Verification Test',
-      email: 'db-test@example.com'
+      email: 'db-test@example.com',
     });
     expect(valuesMatch).toBe(true);
 
@@ -316,11 +312,15 @@ test.describe('Example Test Suite', () => {
     await loginAs(page, 'ADMIN');
 
     // Use retry utility for potentially flaky operations
-    const customerCount = await retry(async () => {
-      await navigateTo(page, URLs.CUSTOMERS);
-      await page.waitForLoadState('networkidle');
-      return await getRecordCount('customer');
-    }, 3, 1000);
+    const customerCount = await retry(
+      async () => {
+        await navigateTo(page, URLs.CUSTOMERS);
+        await page.waitForLoadState('networkidle');
+        return await getRecordCount('customer');
+      },
+      3,
+      1000
+    );
 
     expect(customerCount).toBeGreaterThan(0);
   });
@@ -345,7 +345,10 @@ test.describe('Example Test Suite', () => {
     await waitForToastToDisappear(page);
 
     // Verify toast is gone
-    const toastVisible = await page.locator('[data-sonner-toast]').isVisible().catch(() => false);
+    const toastVisible = await page
+      .locator('[data-sonner-toast]')
+      .isVisible()
+      .catch(() => false);
     expect(toastVisible).toBe(false);
   });
 
@@ -378,7 +381,7 @@ test.describe('Example Test Suite', () => {
   test('Example: Working with dates and currency', async ({ page }) => {
     const today = new Date();
     const thaiDate = formatThaiDate(today);
-    const amount = 15000.50;
+    const amount = 15000.5;
     const formattedCurrency = formatCurrency(amount);
 
     console.log('Thai date:', thaiDate); // e.g., 13/03/2569
@@ -456,7 +459,7 @@ test.describe('Example Test Suite', () => {
     console.log('Cookies:', cookies);
 
     // Verify session exists
-    expect(cookies.some(c => c.name.includes('session'))).toBe(true);
+    expect(cookies.some((c) => c.name.includes('session'))).toBe(true);
   });
 
   test('Example: API response testing', async ({ page }) => {
@@ -466,14 +469,10 @@ test.describe('Example Test Suite', () => {
     await navigateTo(page, URLs.CUSTOMERS);
     await clickButton(page, 'สร้างลูกค้าใหม่');
 
-    const response = await waitForApiResponse(
-      page,
-      '/api/customers',
-      async () => {
-        await fillField(page, 'ชื่อลูกค้า', 'API Test Customer');
-        await submitForm(page);
-      }
-    );
+    const response = await waitForApiResponse(page, '/api/customers', async () => {
+      await fillField(page, 'ชื่อลูกค้า', 'API Test Customer');
+      await submitForm(page);
+    });
 
     // Verify response structure
     expect(response).toHaveProperty('success');

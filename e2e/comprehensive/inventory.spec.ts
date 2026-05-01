@@ -60,7 +60,7 @@ test.describe('Inventory Module - Comprehensive Tests', () => {
 
     const inTransitTransfer = await page.locator('tr').filter({ hasText: 'IN_TRANSIT' }).first();
 
-    if (await inTransitTransfer.count() > 0) {
+    if ((await inTransitTransfer.count()) > 0) {
       await inTransitTransfer.locator('button:has-text("ดำเนินการ")').click();
 
       // Complete transfer

@@ -1,10 +1,13 @@
 # AGENTS.md - E2E Testing Suite
 
-This file provides essential guidance for AI coding agents working on the **E2E Testing Suite** for the Thai Accounting ERP System. The suite contains 67 Playwright test files with 21,421 lines of comprehensive test coverage.
+This file provides essential guidance for AI coding agents working on the **E2E
+Testing Suite** for the Thai Accounting ERP System. The suite contains 67
+Playwright test files with 21,421 lines of comprehensive test coverage.
 
 ## Parent Reference
 
-See [../AGENTS.md](../AGENTS.md) for general project overview and core system documentation.
+See [../AGENTS.md](../AGENTS.md) for general project overview and core system
+documentation.
 
 ## Test Suite Overview
 
@@ -13,13 +16,16 @@ See [../AGENTS.md](../AGENTS.md) for general project overview and core system do
 The E2E tests are organized into 6 main categories:
 
 #### 🤖 **agents/** - E2E Test Agents
+
 - **8 agent files** covering specialized testing domains
 - Each agent focuses on specific functionality areas
 - Implement shared patterns and standardized test structures
 
 **Agent Categories:**
+
 - `01-auth-navigation.spec.ts` - Authentication and navigation flows
-- `02-core-financial.spec.ts` - Core financial transactions (invoices, receipts, payments)
+- `02-core-financial.spec.ts` - Core financial transactions (invoices, receipts,
+  payments)
 - `03-sales-ar.spec.ts` - Sales and accounts receivable workflows
 - `04-tax-modules.spec.ts` - VAT and WHT tax modules
 - `05-expansion-modules.spec.ts` - All 6 expansion modules
@@ -28,15 +34,17 @@ The E2E tests are organized into 6 main categories:
 - `99-full-coverage-test.spec.ts` - Complete end-to-end coverage
 
 #### 📋 **comprehensive/** - Comprehensive Test Suites
+
 - **18 module-specific files** covering all system modules
 - Test every button, form field, and functionality
 - Database verification integration
 - Performance monitoring
 
 **Module Coverage:**
+
 - `accounts.spec.ts` - Chart of accounts management
 - `customers.spec.ts` - Customer master data
-- `vendors.spec.ts` - Vendor master data  
+- `vendors.spec.ts` - Vendor master data
 - `products.spec.ts` - Product inventory
 - `invoices.spec.ts` - Sales invoice workflows
 - `purchases.spec.ts` - Purchase workflows
@@ -52,16 +60,19 @@ The E2E tests are organized into 6 main categories:
 - `void-reverse-pagination.spec.ts` - Void and reverse operations
 
 #### 🧪 **comprehensive/** - Additional Test Components
+
 - `test-helpers.ts` - Shared utilities and login functions
 - `README.md` - Comprehensive testing documentation
 - `TEST_TEMPLATES.md` - Test structure templates
 
 #### 🔄 **workflows/** - Workflow Integration Tests
+
 - **5 workflow files** testing end-to-end business processes
 - Integration between multiple modules
 - Data flow and state verification
 
 **Workflows Covered:**
+
 - `invoice-workflow.spec.ts` - Complete invoice lifecycle
 - `journal-workflow.spec.ts` - Journal entry creation and posting
 - `inventory-workflow.spec.ts` - Stock management workflows
@@ -69,16 +80,19 @@ The E2E tests are organized into 6 main categories:
 - `reporting.spec.ts` - Financial report generation
 
 #### 📊 **performance/** - Performance Tests
+
 - `performance.spec.ts` - Page load times and performance metrics
 - Database query validation
 - Memory leak detection
 
 #### 👁️ **visual/** - Visual Regression Tests
+
 - `visual-regression.spec.ts` - UI consistency verification
 - Cross-browser compatibility
 - Responsive design validation
 
 #### 🎯 **Critical Path Tests**
+
 - `critical-workflows.spec.ts` - Business-critical workflows
 - `login.spec.ts` - Authentication flows
 - `dashboard.spec.ts` - Key dashboard functionality
@@ -89,6 +103,7 @@ The E2E tests are organized into 6 main categories:
 ### Playwright Configuration (`/Users/tong/Thai-acc/playwright.config.ts`)
 
 **Key Settings:**
+
 - **Base URL:** `http://localhost:3000`
 - **Test Timeout:** 60 seconds per test
 - **Retries:** 2 in CI, 0 locally
@@ -99,33 +114,51 @@ The E2E tests are organized into 6 main categories:
 
 ### Rate Limiting Bypass
 
-**Critical Configuration:** All tests use the `x-playwright-test: true` header to bypass rate limiting.
+**Critical Configuration:** All tests use the `x-playwright-test: true` header
+to bypass rate limiting.
 
 **Usage Patterns:**
+
 ```typescript
 test.use({
-  extraHTTPHeaders: { 'x-playwright-test': 'true' }
-})
+  extraHTTPHeaders: { 'x-playwright-test': 'true' },
+});
 
 // Or in individual test files:
-await page.setExtraHTTPHeaders({ 'x-playwright-test': 'true' })
+await page.setExtraHTTPHeaders({ 'x-playwright-test': 'true' });
 ```
 
-**Why This Matters:** The application implements rate limiting for security, but tests need rapid execution without delays. This header bypasses rate limiting while maintaining security in production.
+**Why This Matters:** The application implements rate limiting for security, but
+tests need rapid execution without delays. This header bypasses rate limiting
+while maintaining security in production.
 
 ## Test Credentials and Users
 
 ### Standard Test Users
+
 ```typescript
 const TEST_USERS = {
-  admin: { email: 'admin@thaiaccounting.com', password: 'admin123', role: 'ADMIN' },
-  accountant: { email: 'accountant@thaiaccounting.com', password: 'acc123', role: 'ACCOUNTANT' },
+  admin: {
+    email: 'admin@thaiaccounting.com',
+    password: 'admin123',
+    role: 'ADMIN',
+  },
+  accountant: {
+    email: 'accountant@thaiaccounting.com',
+    password: 'acc123',
+    role: 'ACCOUNTANT',
+  },
   user: { email: 'user@thaiaccounting.com', password: 'user123', role: 'USER' },
-  viewer: { email: 'viewer@thaiaccounting.com', password: 'viewer123', role: 'VIEWER' },
-}
+  viewer: {
+    email: 'viewer@thaiaccounting.com',
+    password: 'viewer123',
+    role: 'VIEWER',
+  },
+};
 ```
 
 ### Test Data Patterns
+
 - Customers: `CUST001`, `บริษัท ทดสอบ จำกัด`, Tax ID: `1234567890123`
 - Vendors: `VEND001`, `บริษัท ผู้ขายทดสอบ จำกัด`, Tax ID: `9876543210987`
 - Products: `PROD001`, `สินค้าทดสอบ`, Unit Price: ฿1,000
@@ -194,17 +227,19 @@ CI=true npx playwright test
 ### 1. Test Structure Patterns
 
 #### Agent Tests
+
 ```typescript
 test.describe('Agent Category', () => {
   test('should perform specific functionality', async ({ page }) => {
     // Setup
     // Action
     // Assertion
-  })
-})
+  });
+});
 ```
 
 #### Comprehensive Module Tests
+
 ```typescript
 test.describe('Module Name - Comprehensive Tests', () => {
   let loginPage: LoginPage;
@@ -225,6 +260,7 @@ test.describe('Module Name - Comprehensive Tests', () => {
 ```
 
 #### Workflow Tests
+
 ```typescript
 test.describe('Business Workflow', () => {
   test('should complete full process flow', async ({ page }) => {
@@ -239,6 +275,7 @@ test.describe('Business Workflow', () => {
 ### 2. Login Pattern
 
 #### Standard Login
+
 ```typescript
 await page.goto('/');
 await page.fill('input[type="email"]', 'admin@thaiaccounting.com');
@@ -247,6 +284,7 @@ await page.click('button:has-text("เข้าสู่ระบบ")');
 ```
 
 #### Role-Based Login
+
 ```typescript
 async function loginAs(page: Page, role: keyof typeof TEST_CREDENTIALS) {
   const credentials = TEST_CREDENTIALS[role];
@@ -257,13 +295,19 @@ async function loginAs(page: Page, role: keyof typeof TEST_CREDENTIALS) {
 ### 3. Database Verification Pattern
 
 ```typescript
-import { verifyRecordCount, verifyRecordExists, verifyJournalEntry } from '../../tests/utils/db-verification';
+import {
+  verifyRecordCount,
+  verifyRecordExists,
+  verifyJournalEntry,
+} from '../../tests/utils/db-verification';
 
 // Verify record creation
 await verifyRecordCount('Invoice', 1);
 
 // Verify specific record exists
-const invoice = await verifyRecordExists('Invoice', { invoiceNumber: 'INV-001' });
+const invoice = await verifyRecordExists('Invoice', {
+  invoiceNumber: 'INV-001',
+});
 
 // Verify journal entry was created
 await verifyJournalEntry(invoice.journalEntryId);
@@ -288,6 +332,7 @@ for (const navItem of navItems) {
 ### 5. Financial Testing Patterns
 
 #### Currency Handling
+
 ```typescript
 // Input validation
 const inputAmount = '1,234.56';
@@ -299,6 +344,7 @@ await expect(page.locator('.amount-display')).toHaveText('฿1,234.56');
 ```
 
 #### VAT Calculations
+
 ```typescript
 // Expected calculations (7% VAT)
 const calculations = {
@@ -306,15 +352,16 @@ const calculations = {
   line2: { qty: 1, price: 5000, amount: 5000, vat: 350 },
   subtotal: 10000,
   totalVat: 700,
-  total: 10700
+  total: 10700,
 };
 ```
 
 ## Test Categories and Coverage
 
 ### Test Tags
+
 - `@smoke` - Critical path verification
-- `@critical` - Business-critical workflows  
+- `@critical` - Business-critical workflows
 - `@high` - High priority functionality
 - `@medium` - Standard functionality
 - `@low` - Optional features
@@ -325,14 +372,16 @@ const calculations = {
 - `@database` - Database operations
 
 ### Browser Matrix
-| Browser | Desktop | Mobile | CI Headless |
-|---------|---------|--------|-------------|
-| Chromium | ✅ | ✅ | ✅ |
-| Firefox | ✅ | ❌ | ❌ |
-| WebKit | ✅ | ❌ | ❌ |
-| Edge | ✅ | ❌ | ❌ |
+
+| Browser  | Desktop | Mobile | CI Headless |
+| -------- | ------- | ------ | ----------- |
+| Chromium | ✅      | ✅     | ✅          |
+| Firefox  | ✅      | ❌     | ❌          |
+| WebKit   | ✅      | ❌     | ❌          |
+| Edge     | ✅      | ❌     | ❌          |
 
 ### Mobile Devices
+
 - iPhone 12 (iOS)
 - iPhone SE (iOS)
 - Galaxy S8 (Android)
@@ -342,31 +391,37 @@ const calculations = {
 ## Testing Best Practices
 
 ### 1. Test Isolation
+
 - Each test should be independent
 - Clean up test data after each test
 - Use unique identifiers for test records
 
 ### 2. Performance Testing
+
 - Monitor page load times
 - Check database query efficiency
 - Validate memory usage patterns
 
 ### 3. Cross-Browser Testing
+
 - Test on all supported browsers
 - Validate responsive design
 - Check for browser-specific bugs
 
 ### 4. Database Validation
+
 - Verify data integrity after operations
 - Check journal entry creation
 - Validate audit trail logging
 
 ### 5. Error Handling
+
 - Test error scenarios
 - Validate error messages
 - Check recovery mechanisms
 
 ### 6. Security Testing
+
 - Verify authentication flows
 - Test authorization levels
 - Check for security vulnerabilities
@@ -374,11 +429,13 @@ const calculations = {
 ## Test Reports and Artifacts
 
 ### Output Directories
+
 - `playwright-report/` - HTML reports with screenshots
 - `test-results/` - JSON and JUnit results
 - `e2e/comprehensive/logs/` - Detailed test execution logs
 
 ### Report Types
+
 - **HTML Reports**: Detailed browser-like view with screenshots
 - **JSON Results**: Machine-readable test data
 - **JUnit XML**: CI/CD integration format
@@ -387,30 +444,35 @@ const calculations = {
 ## Critical Test Scenarios
 
 ### 1. Authentication Tests
+
 - Login with valid credentials
 - Login with invalid credentials
 - Session management
 - Role-based access control
 
 ### 2. Navigation Tests
+
 - Sidebar menu items
 - URL routing
 - Page loading
 - Breadcrumb navigation
 
 ### 3. Financial Transaction Tests
+
 - Invoice creation and approval
 - Payment processing
 - Journal entry generation
 - VAT calculation
 
 ### 4. Integration Tests
+
 - Cross-module data flow
 - Database synchronization
 - API consistency
 - UI responsiveness
 
 ### 5. Performance Tests
+
 - Page load optimization
 - Database query performance
 - Memory usage
@@ -419,16 +481,18 @@ const calculations = {
 ## Test Data Management
 
 ### Test Data Cleanup
+
 ```typescript
 test.afterAll(async ({ page }) => {
   // Clean up test invoices
   await prisma.invoice.deleteMany({
-    where: { invoiceNumber: { startsWith: 'TEST-' } }
+    where: { invoiceNumber: { startsWith: 'TEST-' } },
   });
 });
 ```
 
 ### Test Data Persistence
+
 - Use unique identifiers for test records
 - Avoid conflicts with production data
 - Maintain data consistency across tests
@@ -436,6 +500,7 @@ test.afterAll(async ({ page }) => {
 ## Development Workflow
 
 ### Adding New Tests
+
 1. Create test file in appropriate directory
 2. Follow naming conventions: `[category]-[module]-spec.ts`
 3. Use established patterns and utilities
@@ -443,12 +508,14 @@ test.afterAll(async ({ page }) => {
 5. Add to appropriate test categories
 
 ### Test Maintenance
+
 - Update tests when UI changes
 - Verify test data remains valid
 - Update expected values as requirements change
 - Remove obsolete test files
 
 ### CI/CD Integration
+
 - Tests run on every commit
 - Full suite executes in CI environment
 - Performance tests monitor regression
@@ -457,12 +524,14 @@ test.afterAll(async ({ page }) => {
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Rate Limiting**: Ensure `x-playwright-test: true` header is present
 2. **Database State**: Reset database before full test runs
 3. **Authentication**: Verify test credentials are correct
 4. **Browser Timing**: Use appropriate wait times for async operations
 
 ### Debug Commands
+
 ```bash
 # Run single test with debugging
 npx playwright test e2e/agents/01-auth-navigation.spec.ts --headed
@@ -476,4 +545,6 @@ npx playwright test --timeout 30000
 
 ---
 
-**Note**: This E2E suite provides comprehensive coverage of the Thai Accounting ERP System. Always run tests before deployment to ensure system reliability and functionality.
+**Note**: This E2E suite provides comprehensive coverage of the Thai Accounting
+ERP System. Always run tests before deployment to ensure system reliability and
+functionality.

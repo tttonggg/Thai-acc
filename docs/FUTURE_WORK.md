@@ -1,25 +1,29 @@
 # Future Work - Thai Accounting ERP System
 
-**Last Updated:** March 19, 2026
-**Current Status:** ✅ Core System 100% Complete - All 7 Modules Functional
+**Last Updated:** March 19, 2026 **Current Status:** ✅ Core System 100%
+Complete - All 7 Modules Functional
 
-This document outlines planned enhancements, bug fixes, and improvements for the Thai Accounting ERP System.
+This document outlines planned enhancements, bug fixes, and improvements for the
+Thai Accounting ERP System.
 
 ---
 
 ## 🚨 High Priority Fixes
 
 ### 1. **Quotations Module - Complete Workflow Implementation**
-**Status:** API and schema complete, frontend needs completion
-**Estimated Effort:** 8-12 hours
+
+**Status:** API and schema complete, frontend needs completion **Estimated
+Effort:** 8-12 hours
 
 **Current State:**
+
 - ✅ Prisma schema complete (Quotation, QuotationLine models)
 - ✅ API endpoints implemented
 - ✅ 8-state workflow defined (DRAFT → SENT → APPROVED → CONVERTED → Invoice)
 - ❌ Frontend components incomplete
 
 **Remaining Work:**
+
 - [ ] Complete quotation-list.tsx (list view with filtering)
 - [ ] Complete quotation-form.tsx (create/edit form)
 - [ ] Complete quotation-view-dialog.tsx (details view with workflow actions)
@@ -30,6 +34,7 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 - [ ] E2E tests for quotation workflow
 
 **Files to Create/Modify:**
+
 - `src/components/quotations/quotation-list.tsx` (new, ~750 lines)
 - `src/components/quotations/quotation-form.tsx` (new, ~900 lines)
 - `src/components/quotations/quotation-view-dialog.tsx` (new, ~1,100 lines)
@@ -41,10 +46,12 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 ---
 
 ### 2. **Invoice Commenting Feature - Complete Implementation**
-**Status:** Backend complete, frontend partial (70% done)
-**Estimated Effort:** 4-6 hours
+
+**Status:** Backend complete, frontend partial (70% done) **Estimated Effort:**
+4-6 hours
 
 **Current State:**
+
 - ✅ Prisma schema (InvoiceComment model)
 - ✅ API endpoints (GET, POST, PUT, DELETE)
 - ✅ Real-time functionality infrastructure
@@ -54,6 +61,7 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 - ❌ Rich text editor incomplete
 
 **Remaining Work:**
+
 - [ ] Complete comment thread view (nested replies)
 - [ ] Implement @mention autocomplete (dropdown with user search)
 - [ ] Add attachment support (file upload, preview, download)
@@ -63,7 +71,9 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 - [ ] Comment activity timeline
 
 **Files to Modify:**
-- `src/components/invoices/invoice-comment-dialog.tsx` (significant expansion needed)
+
+- `src/components/invoices/invoice-comment-dialog.tsx` (significant expansion
+  needed)
 - `src/app/api/invoices/[id]/comments/route.ts` (add real-time endpoints)
 
 **Dependencies:** None - can be implemented independently
@@ -73,9 +83,11 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 ## 📊 Medium Priority Enhancements
 
 ### 3. **Dashboard Improvements**
+
 **Estimated Effort:** 6-8 hours
 
 **Planned Features:**
+
 - [ ] Add customizable dashboard widgets
 - [ ] Implement drag-and-drop dashboard layout
 - [ ] Add more chart types (bar charts, line charts for trends)
@@ -89,6 +101,7 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 - [ ] Currency exposure summary (if multi-currency enabled)
 
 **Files to Create/Modify:**
+
 - `src/components/dashboard/dashboard.tsx` (major refactoring)
 - `src/components/dashboard/widget-library.tsx` (new)
 - `src/components/dashboard/widget-config-dialog.tsx` (new)
@@ -99,9 +112,11 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 ---
 
 ### 4. **Reporting System Enhancements**
+
 **Estimated Effort:** 10-15 hours
 
 **Planned Features:**
+
 - [ ] Custom report builder
 - [ ] Scheduled report generation & email delivery
 - [ ] Report templates (save/load custom report configurations)
@@ -115,6 +130,7 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 - [ ] Graphical reports (charts, graphs, heatmaps)
 
 **Files to Create/Modify:**
+
 - `src/components/reports/custom-report-builder.tsx` (new)
 - `src/components/reports/report-template-manager.tsx` (new)
 - `src/components/reports/report-scheduler.tsx` (new)
@@ -126,9 +142,11 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 ---
 
 ### 5. **Multi-Currency Support**
+
 **Estimated Effort:** 12-16 hours
 
 **Scope:**
+
 - [ ] Currency master data (add/edit currencies, exchange rates)
 - [ ] Automatic exchange rate updates (API integration)
 - [ ] Multi-currency transactions (record in foreign currency)
@@ -139,12 +157,14 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 - [ ] Base currency change functionality
 
 **Database Changes:**
+
 - [ ] Enhance Currency model (add exchange rate history)
 - [ ] Add ExchangeRate table (date-based rates)
 - [ ] Add foreign currency fields to all transaction tables
 - [ ] Add unrealized gain/loss accounts
 
 **Files to Create/Modify:**
+
 - `src/components/currencies/currency-manager.tsx` (new)
 - `src/components/currencies/exchange-rate-manager.tsx` (new)
 - `src/lib/currency-service.ts` (new, conversion logic)
@@ -156,9 +176,11 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 ---
 
 ### 6. **Budget Management Module**
+
 **Estimated Effort:** 16-20 hours
 
 **Scope:**
+
 - [ ] Budget master data (create annual/quarterly/monthly budgets)
 - [ ] Budget by account (chart of accounts level)
 - [ ] Budget by department (cost center tracking)
@@ -170,6 +192,7 @@ This document outlines planned enhancements, bug fixes, and improvements for the
 - [ ] Budget alerts (spending thresholds)
 
 **Database Schema:**
+
 ```prisma
 model Budget {
   id              String   @id @default(cuid())
@@ -198,6 +221,7 @@ model BudgetLine {
 ```
 
 **Files to Create:**
+
 - `src/components/budgets/budget-list.tsx` (new)
 - `src/components/budgets/budget-form.tsx` (new)
 - `src/components/budgets/budget-vs-actual-report.tsx` (new)
@@ -211,9 +235,11 @@ model BudgetLine {
 ## 🔧 Low Priority Improvements
 
 ### 7. **Performance Optimizations**
+
 **Estimated Effort:** 8-12 hours
 
 **Planned Improvements:**
+
 - [ ] Implement React virtualization for large lists (react-window)
 - [ ] Add pagination to all list views (currently some load all records)
 - [ ] Optimize database queries (add proper indexes, use select optimization)
@@ -226,6 +252,7 @@ model BudgetLine {
 - [ ] Implement read replicas (if using PostgreSQL)
 
 **Files to Modify:**
+
 - `src/lib/api-utils.ts` (add caching layer)
 - `prisma/schema.prisma` (add indexes)
 - `next.config.ts` (enable advanced optimizations)
@@ -233,9 +260,11 @@ model BudgetLine {
 ---
 
 ### 8. **Mobile Responsiveness Improvements**
+
 **Estimated Effort:** 6-8 hours
 
 **Planned Improvements:**
+
 - [ ] Mobile-optimized forms (stacked layouts, larger touch targets)
 - [ ] Responsive data tables (horizontal scroll, card view on mobile)
 - [ ] Mobile navigation (bottom tab bar, hamburger menu)
@@ -246,6 +275,7 @@ model BudgetLine {
 - [ ] PWA improvements (install prompt, offline indicators)
 
 **Files to Modify:**
+
 - `src/components/layout/keerati-sidebar.tsx` (mobile nav)
 - `src/components/ui/*.tsx` (mobile optimizations)
 - `src/app/globals.css` (mobile-specific styles)
@@ -253,11 +283,14 @@ model BudgetLine {
 ---
 
 ### 9. **Security Enhancements**
+
 **Estimated Effort:** 10-12 hours
 
 **Planned Improvements:**
+
 - [ ] Two-factor authentication (2FA) with TOTP
-- [ ] Session management improvements (session timeout, concurrent session limits)
+- [ ] Session management improvements (session timeout, concurrent session
+      limits)
 - [ ] Audit logging for all sensitive operations
 - [ ] Role-based access control (RBAC) refinement (granular permissions)
 - [ ] IP whitelist/blacklist for API access
@@ -268,6 +301,7 @@ model BudgetLine {
 - [ ] Security headers (CSP, HSTS, X-Frame-Options, etc.)
 
 **Files to Modify:**
+
 - `src/lib/auth.ts` (2FA implementation)
 - `src/lib/api-security.ts` (enhanced security)
 - `src/middleware.ts` (security headers)
@@ -276,11 +310,14 @@ model BudgetLine {
 ---
 
 ### 10. **Integration Capabilities**
+
 **Estimated Effort:** 16-20 hours (per integration)
 
 **Planned Integrations:**
+
 - [ ] **Banks**: Automated bank statement import (API/SCRAPE)
-- [ ] **e-Commerce**: Platform integrations (Shopify, WooCommerce, Shopee, Lazada)
+- [ ] **e-Commerce**: Platform integrations (Shopify, WooCommerce, Shopee,
+      Lazada)
 - [ ] **Payment Gateways**: Stripe, Omise, KBank PromptPay QR
 - [ ] **e-Tax Revenue Department**: Filing tax returns directly
 - [ ] **Social Security**: Online SSC filing
@@ -289,6 +326,7 @@ model BudgetLine {
 - [ ] **Accounting Software**: Import/export to QuickBooks, Xero
 
 **Files to Create:**
+
 - `src/lib/integrations/bank-api.ts` (new)
 - `src/lib/integrations/ecommerce-api.ts` (new)
 - `src/lib/integrations/payment-gateway-api.ts` (new)
@@ -299,19 +337,26 @@ model BudgetLine {
 ## 🐛 Known Bugs & Issues
 
 ### 1. **Table Structure Warnings**
+
 **Status:** Fixed ✅
+
 - Invalid HTML nesting in Chart of Accounts - resolved with React.Fragment
 
 ### 2. **Form Field Size Issues**
+
 **Status:** Fixed ✅
+
 - All form fields now use `!h-11 text-base` for proper sizing
 
 ### 3. **Console Errors**
+
 **Status:** Most Fixed ✅
+
 - vendors.map/products.filter errors - resolved
 - Quotations API 500 error - resolved
 
 **Remaining Minor Issues:**
+
 - [ ] Occasional NextAuth session warnings (non-critical)
 - [ ] Missing icon-192x192.png file (PWA icon)
 - [ ] HMR warnings about deprecated middleware (upgrade to Next.js proxy)
@@ -321,11 +366,13 @@ model BudgetLine {
 ## 📈 Architecture Improvements
 
 ### 1. **Migration to Next.js File-Based Routing**
+
 **Current State:** Hybrid SPA pattern (client-side routing with History API)
-**Proposed:** Full Next.js App Router with file-based routing
-**Estimated Effort:** 40-60 hours (major refactoring)
+**Proposed:** Full Next.js App Router with file-based routing **Estimated
+Effort:** 40-60 hours (major refactoring)
 
 **Benefits:**
+
 - Better SEO (if needed)
 - Server-side rendering benefits
 - More standard Next.js patterns
@@ -333,12 +380,14 @@ model BudgetLine {
 - Improved streaming and incremental static regeneration
 
 **Challenges:**
+
 - Significant refactoring of page.tsx routing logic
 - All modules need individual route files
 - State management needs rethinking
 - URL handling needs to be standardized
 
 **Migration Path:**
+
 1. Start with new modules (use file-based routing from start)
 2. Gradually migrate existing modules one by one
 3. Keep SPA routing as fallback during migration
@@ -347,11 +396,13 @@ model BudgetLine {
 ---
 
 ### 2. **State Management Refactoring**
-**Current State:** Mix of useState, props, and some Zustand
-**Proposed:** Centralized state management with Zustand or Redux
-**Estimated Effort:** 20-30 hours
+
+**Current State:** Mix of useState, props, and some Zustand **Proposed:**
+Centralized state management with Zustand or Redux **Estimated Effort:** 20-30
+hours
 
 **Benefits:**
+
 - Consistent state management across app
 - Better debugging (time-travel debugging)
 - Easier testing (mock stores)
@@ -361,11 +412,12 @@ model BudgetLine {
 ---
 
 ### 3. **API Layer Standardization**
-**Current State:** Mix of API response formats
-**Proposed:** Consistent API response structure and error handling
-**Estimated Effort:** 10-15 hours
+
+**Current State:** Mix of API response formats **Proposed:** Consistent API
+response structure and error handling **Estimated Effort:** 10-15 hours
 
 **Standard Response Format:**
+
 ```typescript
 {
   success: true,
@@ -377,6 +429,7 @@ model BudgetLine {
 ```
 
 **Standardized Error Handling:**
+
 - Validation errors (400)
 - Authentication errors (401)
 - Authorization errors (403)
@@ -388,10 +441,12 @@ model BudgetLine {
 ## 🧪 Testing Improvements
 
 ### 1. **Increase Test Coverage**
-**Current State:** ~60% coverage (E2E good, unit tests lacking)
-**Target:** 90%+ coverage
+
+**Current State:** ~60% coverage (E2E good, unit tests lacking) **Target:** 90%+
+coverage
 
 **Planned Additions:**
+
 - [ ] Unit tests for all service modules (inventory-service.ts, etc.)
 - [ ] Integration tests for API endpoints
 - [ ] Component tests for React components (using React Testing Library)
@@ -402,10 +457,12 @@ model BudgetLine {
 ---
 
 ### 2. **Test Data Management**
-**Current State:** Manual test data creation
-**Proposed:** Automated test data factories
+
+**Current State:** Manual test data creation **Proposed:** Automated test data
+factories
 
 **Implementation:**
+
 - Use Faker.js or similar for generating realistic test data
 - Create test data factories for all entities
 - Implement test database cleanup between runs
@@ -416,10 +473,11 @@ model BudgetLine {
 ## 📚 Documentation Improvements
 
 ### 1. **API Documentation**
-**Status:** Incomplete
-**Proposed:** OpenAPI/Swagger documentation
+
+**Status:** Incomplete **Proposed:** OpenAPI/Swagger documentation
 
 **Tools:**
+
 - Swagger UI for interactive API docs
 - Auto-generate from TypeScript types
 - Include request/response examples
@@ -428,10 +486,11 @@ model BudgetLine {
 ---
 
 ### 2. **User Documentation**
-**Status:** Basic README
-**Proposed:** Comprehensive user manual
+
+**Status:** Basic README **Proposed:** Comprehensive user manual
 
 **Sections:**
+
 - Getting started guide
 - Feature tutorials (with screenshots)
 - Video tutorials (Loom recordings)
@@ -442,10 +501,11 @@ model BudgetLine {
 ---
 
 ### 3. **Developer Documentation**
-**Status:** Good (CLAUDE.md)
-**Proposed:** Expansion
+
+**Status:** Good (CLAUDE.md) **Proposed:** Expansion
 
 **Additions:**
+
 - Architecture decision records (ADRs)
 - Contribution guidelines
 - Code review checklist
@@ -458,9 +518,11 @@ model BudgetLine {
 ## 🎨 UI/UX Improvements
 
 ### 1. **Dark Mode Support**
+
 **Estimated Effort:** 8-10 hours
 
 **Scope:**
+
 - [ ] Add dark mode toggle in user settings
 - [ ] Implement theme provider with context
 - [ ] Dark mode styles for all components
@@ -470,9 +532,11 @@ model BudgetLine {
 ---
 
 ### 2. **Accessibility (a11y) Improvements**
+
 **Estimated Effort:** 12-15 hours
 
 **Scope:**
+
 - [ ] WCAG 2.1 AA compliance
 - [ ] Keyboard navigation for all features
 - [ ] Screen reader support (ARIA labels)
@@ -485,12 +549,14 @@ model BudgetLine {
 ---
 
 ### 3. **Thai Localization Completeness**
+
 **Estimated Effort:** 4-6 hours
 
-**Current State:** Mostly Thai, some English mixed in
-**Proposed:** Complete Thai localization
+**Current State:** Mostly Thai, some English mixed in **Proposed:** Complete
+Thai localization
 
 **Tasks:**
+
 - [ ] Audit all UI text for mixed languages
 - [ ] Create Thai translation file
 - [ ] Ensure date/time formats are Thai Buddhist era
@@ -503,9 +569,11 @@ model BudgetLine {
 ## 🔮 Future Module Ideas
 
 ### 1. **Job Costing / Project Accounting**
+
 Track costs and revenue by project/job.
 
 **Features:**
+
 - Project master data
 - Job/phase/cost of account hierarchy
 - Time tracking integration
@@ -518,9 +586,11 @@ Track costs and revenue by project/job.
 ---
 
 ### 2. **Point of Sale (POS)**
+
 Integrated POS for retail businesses.
 
 **Features:**
+
 - Product barcode scanning
 - Receipt printing
 - Cash drawer management
@@ -533,9 +603,11 @@ Integrated POS for retail businesses.
 ---
 
 ### 3. **Fixed Asset Registry Enhancement**
+
 Beyond current depreciation features.
 
 **Additional Features:**
+
 - Asset disposal (sale, scrapping, donation)
 - Asset transfer between locations
 - Asset impairment testing
@@ -548,9 +620,11 @@ Beyond current depreciation features.
 ---
 
 ### 4. **Inventory Forecasting**
+
 Predict inventory needs.
 
 **Features:**
+
 - Demand forecasting (based on historical sales)
 - Reorder point calculation
 - Economic order quantity (EOQ) optimization
@@ -564,9 +638,11 @@ Predict inventory needs.
 ---
 
 ### 5. **Manufacturing / Production**
+
 For manufacturing businesses.
 
 **Features:**
+
 - Bill of materials (BOM)
 - Work orders
 - Production scheduling
@@ -581,9 +657,11 @@ For manufacturing businesses.
 ---
 
 ### 6. **HR & Time Tracking Expansion**
+
 Beyond current payroll features.
 
 **Additional Features:**
+
 - Employee self-service portal
 - Leave management (sick leave, vacation, etc.)
 - Timesheet management
@@ -598,9 +676,11 @@ Beyond current payroll features.
 ---
 
 ### 7. **Document Management System**
+
 Centralized document storage and management.
 
 **Features:**
+
 - Document repository (contracts, invoices, receipts, etc.)
 - Document versioning
 - Document workflow (approval, review)
@@ -617,7 +697,9 @@ Centralized document storage and management.
 ## 🚀 Performance & Scalability
 
 ### 1. **Database Optimization**
+
 **Tasks:**
+
 - [ ] Add composite indexes for frequent queries
 - [ ] Implement query result caching (Redis)
 - [ ] Add database connection pooling
@@ -629,7 +711,9 @@ Centralized document storage and management.
 ---
 
 ### 2. **Application Performance**
+
 **Tasks:**
+
 - [ ] Implement server-side caching (Redis/Memcached)
 - [ ] Add CDN for static assets (images, fonts, etc.)
 - [ ] Optimize images (WebP format, lazy loading, compression)
@@ -642,7 +726,9 @@ Centralized document storage and management.
 ---
 
 ### 3. **Scalability Planning**
+
 **Considerations:**
+
 - [ ] Implement horizontal scaling (load balancer)
 - [ ] Add queue system for background jobs (BullMQ)
 - [ ] Implement rate limiting per user
@@ -655,7 +741,9 @@ Centralized document storage and management.
 ## 🔒 Security Hardening
 
 ### 1. **Authentication & Authorization**
+
 **Tasks:**
+
 - [ ] Implement password strength requirements
 - [ ] Add password history tracking
 - [ ] Implement account lockout after failed attempts
@@ -667,7 +755,9 @@ Centralized document storage and management.
 ---
 
 ### 2. **Data Protection**
+
 **Tasks:**
+
 - [ ] Implement field-level encryption (sensitive fields)
 - [ ] Add data masking in logs (hide credit card numbers, etc.)
 - [ ] Implement audit logging for all data access
@@ -679,7 +769,9 @@ Centralized document storage and management.
 ---
 
 ### 3. **API Security**
+
 **Tasks:**
+
 - [ ] Add API request signing (HMAC)
 - [ ] Implement API key management
 - [ ] Add API usage quotas per user
@@ -693,7 +785,9 @@ Centralized document storage and management.
 ## 📊 Reporting & Analytics Expansion
 
 ### 1. **Advanced Financial Reports**
+
 **New Reports:**
+
 - [ ] Cash flow statement (direct and indirect method)
 - [ ] Statement of changes in equity
 - [ ] Segment reporting (by department, location, etc.)
@@ -707,7 +801,9 @@ Centralized document storage and management.
 ---
 
 ### 2. **Business Intelligence (BI) Dashboard**
+
 **Features:**
+
 - [ ] Customizable dashboards per user role
 - [ ] Drag-and-drop widget arrangement
 - [ ] Real-time KPI monitoring
@@ -720,7 +816,9 @@ Centralized document storage and management.
 ---
 
 ### 3. **Predictive Analytics**
+
 **Features:**
+
 - [ ] Cash flow forecasting
 - [ ] Revenue forecasting
 - [ ] Expense trending
@@ -733,27 +831,28 @@ Centralized document storage and management.
 
 ## 🎯 Priority Matrix
 
-| Priority | Category | Item | Effort | Impact | Dependencies |
-|----------|----------|------|--------|--------|--------------|
-| 🔴 High | Bug Fix | Quotations Module Frontend | 8-12h | High | None |
-| 🔴 High | Bug Fix | Invoice Commenting (70% → 100%) | 4-6h | Medium | None |
-| 🟡 Medium | Enhancement | Dashboard Improvements | 6-8h | High | None |
-| 🟡 Medium | Enhancement | Reporting Enhancements | 10-15h | High | None |
-| 🟡 Medium | New Feature | Multi-Currency | 12-16h | High | Many modules |
-| 🟡 Medium | New Feature | Budget Management | 16-20h | High | None |
-| 🟢 Low | Optimization | Performance Optimization | 8-12h | Medium | None |
-| 🟢 Low | Enhancement | Mobile Responsiveness | 6-8h | Medium | None |
-| 🟢 Low | Enhancement | Security Enhancements | 10-12h | High | None |
-| 🔵 Future | Integration | Bank APIs | 16-20h | High | None |
-| 🔵 Future | New Feature | Job Costing | 20-30h | Medium | None |
-| 🔵 Future | New Feature | POS System | 30-40h | Medium | None |
-| 🔵 Future | Refactoring | File-Based Routing Migration | 40-60h | Low | Architecture |
+| Priority  | Category     | Item                            | Effort | Impact | Dependencies |
+| --------- | ------------ | ------------------------------- | ------ | ------ | ------------ |
+| 🔴 High   | Bug Fix      | Quotations Module Frontend      | 8-12h  | High   | None         |
+| 🔴 High   | Bug Fix      | Invoice Commenting (70% → 100%) | 4-6h   | Medium | None         |
+| 🟡 Medium | Enhancement  | Dashboard Improvements          | 6-8h   | High   | None         |
+| 🟡 Medium | Enhancement  | Reporting Enhancements          | 10-15h | High   | None         |
+| 🟡 Medium | New Feature  | Multi-Currency                  | 12-16h | High   | Many modules |
+| 🟡 Medium | New Feature  | Budget Management               | 16-20h | High   | None         |
+| 🟢 Low    | Optimization | Performance Optimization        | 8-12h  | Medium | None         |
+| 🟢 Low    | Enhancement  | Mobile Responsiveness           | 6-8h   | Medium | None         |
+| 🟢 Low    | Enhancement  | Security Enhancements           | 10-12h | High   | None         |
+| 🔵 Future | Integration  | Bank APIs                       | 16-20h | High   | None         |
+| 🔵 Future | New Feature  | Job Costing                     | 20-30h | Medium | None         |
+| 🔵 Future | New Feature  | POS System                      | 30-40h | Medium | None         |
+| 🔵 Future | Refactoring  | File-Based Routing Migration    | 40-60h | Low    | Architecture |
 
 ---
 
 ## 📝 Implementation Guidelines
 
 ### Starting a New Feature
+
 1. **Review FUTURE_WORK.md** - Check if already planned
 2. **Create GitHub Issue** - Document requirements and acceptance criteria
 3. **Update this file** - Add to appropriate section
@@ -764,6 +863,7 @@ Centralized document storage and management.
 8. **Code review** - Peer review before merge
 
 ### Bug Fix Process
+
 1. **Reproduce bug** - Understand root cause
 2. **Write failing test** - Test that reproduces the bug
 3. **Fix bug** - Make minimal changes
@@ -777,8 +877,8 @@ Centralized document storage and management.
 ## 📅 Release Roadmap
 
 ### Version 1.1 (Next Release)
-**Target:** April 2026
-**Focus:** Complete unfinished features
+
+**Target:** April 2026 **Focus:** Complete unfinished features
 
 - [ ] Quotations module frontend (100%)
 - [ ] Invoice commenting (100%)
@@ -787,8 +887,8 @@ Centralized document storage and management.
 - [ ] Test coverage improvements
 
 ### Version 1.2
-**Target:** May 2026
-**Focus:** Reporting and Analytics
+
+**Target:** May 2026 **Focus:** Reporting and Analytics
 
 - [ ] Advanced financial reports
 - [ ] Custom report builder
@@ -796,8 +896,8 @@ Centralized document storage and management.
 - [ ] BI dashboard
 
 ### Version 1.3
-**Target:** June 2026
-**Focus:** Integration and Automation
+
+**Target:** June 2026 **Focus:** Integration and Automation
 
 - [ ] Bank API integration
 - [ ] Payment gateway integration
@@ -805,8 +905,8 @@ Centralized document storage and management.
 - [ ] Workflow automation
 
 ### Version 2.0
-**Target:** Q3 2026
-**Focus:** Major Features and Refactoring
+
+**Target:** Q3 2026 **Focus:** Major Features and Refactoring
 
 - [ ] Multi-currency support
 - [ ] File-based routing migration
@@ -828,6 +928,7 @@ We welcome contributions! Please:
 6. **Be patient** - Code review process takes time
 
 **Areas Especially Welcoming:**
+
 - Bug fixes
 - Test improvements
 - Documentation improvements
@@ -839,11 +940,11 @@ We welcome contributions! Please:
 ## 📞 Contact & Support
 
 For questions about future work:
+
 - **GitHub Issues:** https://github.com/[org]/[repo]/issues
 - **Discussions:** https://github.com/[org]/[repo]/discussions
 - **Email:** support@example.com
 
 ---
 
-**Last Reviewed:** March 19, 2026
-**Next Review Date:** April 1, 2026
+**Last Reviewed:** March 19, 2026 **Next Review Date:** April 1, 2026

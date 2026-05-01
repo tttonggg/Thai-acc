@@ -19,9 +19,13 @@ export class AccountsPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("ผังบัญชี"), h1:has-text("Chart of Accounts")');
-    this.newAccountButton = page.locator('button:has-text("สร้างบัญชี"), button:has-text("New Account")');
+    this.newAccountButton = page.locator(
+      'button:has-text("สร้างบัญชี"), button:has-text("New Account")'
+    );
     this.accountsTable = page.locator('table, [role="table"]').first();
-    this.searchInput = page.locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]').first();
+    this.searchInput = page
+      .locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]')
+      .first();
   }
 
   /**
@@ -62,16 +66,21 @@ export class AccountsPage {
     await this.page.locator('button:has-text("บันทึก"), button:has-text("Save")').click();
 
     // Wait for success
-    await this.page.waitForSelector('text=บันทึกสำเร็จ, text=Saved successfully', { timeout: 5000 });
+    await this.page.waitForSelector('text=บันทึกสำเร็จ, text=Saved successfully', {
+      timeout: 5000,
+    });
   }
 
   /**
    * Edit account
    */
-  async editAccount(accountCode: string, updates: Partial<{
-    name: string;
-    nameEn: string;
-  }>) {
+  async editAccount(
+    accountCode: string,
+    updates: Partial<{
+      name: string;
+      nameEn: string;
+    }>
+  ) {
     const accountRow = this.accountsTable.locator(`tr:has-text("${accountCode}")`);
     await accountRow.locator('button:has-text("แก้ไข"), button:has-text("Edit")').click();
 

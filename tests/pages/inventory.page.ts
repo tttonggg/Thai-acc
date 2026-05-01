@@ -18,8 +18,12 @@ export class InventoryPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("สต็อกสินค้า"), h1:has-text("Inventory")');
-    this.stockBalancesTab = page.locator('button:has-text("ยอดคงเหลือ"), tab:has-text("Stock Balances")');
-    this.stockMovementsTab = page.locator('button:has-text("การเคลื่อนไหว"), tab:has-text("Movements")');
+    this.stockBalancesTab = page.locator(
+      'button:has-text("ยอดคงเหลือ"), tab:has-text("Stock Balances")'
+    );
+    this.stockMovementsTab = page.locator(
+      'button:has-text("การเคลื่อนไหว"), tab:has-text("Movements")'
+    );
     this.warehousesTab = page.locator('button:has-text("คลังสินค้า"), tab:has-text("Warehouses")');
     this.stockBalancesTable = page.locator('table').first();
     this.movementsTable = page.locator('table').nth(1);

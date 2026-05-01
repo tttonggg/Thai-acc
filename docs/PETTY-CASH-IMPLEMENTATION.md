@@ -2,16 +2,20 @@
 
 ## Summary
 
-This implementation adds automatic GL journal entry generation for petty cash vouchers in the Thai Accounting ERP System. When a petty cash voucher is approved or reimbursed, corresponding journal entries are created automatically.
+This implementation adds automatic GL journal entry generation for petty cash
+vouchers in the Thai Accounting ERP System. When a petty cash voucher is
+approved or reimbursed, corresponding journal entries are created automatically.
 
 ## Files Created
 
 ### 1. Petty Cash Service
+
 **File**: `/Users/tong/Thai-acc/src/lib/petty-cash-service.ts`
 
 **Purpose**: Core service for handling petty cash voucher operations
 
 **Key Function**: `createVoucherJournalEntry()`
+
 - Creates journal entry when voucher is approved
 - Double-entry bookkeeping:
   - **Debit**: Expense account (from voucher's `glExpenseAccountId`)
@@ -20,27 +24,31 @@ This implementation adds automatic GL journal entry generation for petty cash vo
 - Generates sequential journal entry numbers (JV-YYYYMM-NNNN format)
 
 **Parameters**:
+
 ```typescript
 {
-  voucherId: string
-  voucherNo: string
-  voucherDate: Date
-  amount: number
-  payee: string
-  description: string
-  glExpenseAccountId: string
-  pettyCashFundAccountId: string
+  voucherId: string;
+  voucherNo: string;
+  voucherDate: Date;
+  amount: number;
+  payee: string;
+  description: string;
+  glExpenseAccountId: string;
+  pettyCashFundAccountId: string;
 }
 ```
 
 ### 2. Approve Voucher Endpoint
-**File**: `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/approve/route.ts`
+
+**File**:
+`/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/approve/route.ts`
 
 **Endpoint**: `POST /api/petty-cash/vouchers/[id]/approve`
 
 **Purpose**: Approve a petty cash voucher and create GL journal entry
 
 **Process**:
+
 1. Validates voucher exists
 2. Checks if already approved (has `journalEntryId`)
 3. Creates journal entry via service
@@ -48,6 +56,7 @@ This implementation adds automatic GL journal entry generation for petty cash vo
 5. Returns updated voucher and journal entry
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -60,13 +69,16 @@ This implementation adds automatic GL journal entry generation for petty cash vo
 ```
 
 ### 3. Reimburse Voucher Endpoint
-**File**: `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/reimburse/route.ts`
+
+**File**:
+`/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/reimburse/route.ts`
 
 **Endpoint**: `POST /api/petty-cash/vouchers/[id]/reimburse`
 
 **Purpose**: Reimburse petty cash fund (replenish from cash/bank)
 
 **Request Body**:
+
 ```json
 {
   "cashBankAccountId": "string" // ID of cash/bank account to credit
@@ -74,6 +86,7 @@ This implementation adds automatic GL journal entry generation for petty cash vo
 ```
 
 **Process**:
+
 1. Validates voucher exists
 2. Checks if already reimbursed
 3. Creates reimbursement journal entry:
@@ -83,6 +96,7 @@ This implementation adds automatic GL journal entry generation for petty cash vo
 5. Updates fund's `currentBalance`
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -96,13 +110,16 @@ This implementation adds automatic GL journal entry generation for petty cash vo
 ```
 
 ### 4. Voucher Details Endpoint
+
 **File**: `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/route.ts`
 
 **Endpoints**:
+
 - `GET /api/petty-cash/vouchers/[id]` - Get single voucher details
 - `DELETE /api/petty-cash/vouchers/[id]` - Delete voucher (only if not approved)
 
 **Delete Protection**:
+
 - Cannot delete voucher if it has a journal entry (already approved)
 - Restores fund balance when deleting unapproved vouchers
 - Returns error if attempting to delete approved voucher
@@ -110,6 +127,7 @@ This implementation adds automatic GL journal entry generation for petty cash vo
 ## Accounting Logic
 
 ### Journal Entry for Voucher Approval
+
 ```
 เบิกเงินสดย่อย PCV-2026-0001 - Office Supplies
 
@@ -124,6 +142,7 @@ Dr. ค่าใช้จ่าย (Expense Account)      1,000.00
 ```
 
 ### Journal Entry for Fund Reimbursement
+
 ```
 เติมเงินสดย่อย Petty Cash Fund A ใบเบิก PCV-2026-0001
 
@@ -140,6 +159,7 @@ Dr. เงินสดย่อย (Petty Cash Fund)    1,000.00
 ## Database Schema Used
 
 ### PettyCashVoucher Model
+
 ```prisma
 model PettyCashVoucher {
   id                 String        @id @default(cuid())
@@ -158,6 +178,7 @@ model PettyCashVoucher {
 ```
 
 ### JournalEntry Model (Existing)
+
 ```prisma
 model JournalEntry {
   id           String        @id @default(cuid())
@@ -178,6 +199,7 @@ model JournalEntry {
 ## Usage Example
 
 ### 1. Create Voucher (Existing Endpoint)
+
 ```bash
 POST /api/petty-cash/vouchers
 {
@@ -191,6 +213,7 @@ POST /api/petty-cash/vouchers
 ```
 
 ### 2. Approve Voucher (New)
+
 ```bash
 POST /api/petty-cash/vouchers/{voucherId}/approve
 ```
@@ -198,6 +221,7 @@ POST /api/petty-cash/vouchers/{voucherId}/approve
 **Result**: Creates journal entry and links to voucher
 
 ### 3. Reimburse Fund (New)
+
 ```bash
 POST /api/petty-cash/vouchers/{voucherId}/reimburse
 {
@@ -205,16 +229,19 @@ POST /api/petty-cash/vouchers/{voucherId}/reimburse
 }
 ```
 
-**Result**: Marks voucher reimbursed, updates fund balance, creates reimbursement journal entry
+**Result**: Marks voucher reimbursed, updates fund balance, creates
+reimbursement journal entry
 
 ## Validation
 
 ### Double-Entry Bookkeeping Verification
+
 - Debits always equal credits
 - Total debit = Total credit for each journal entry
 - Validation happens at journal entry creation
 
 ### Business Rules
+
 1. Cannot approve already approved voucher
 2. Cannot reimburse already reimbursed voucher
 3. Cannot delete approved voucher (must create reversing entry)
@@ -224,6 +251,7 @@ POST /api/petty-cash/vouchers/{voucherId}/reimburse
 ## API Response Format
 
 ### Success Response
+
 ```json
 {
   "success": true,
@@ -233,6 +261,7 @@ POST /api/petty-cash/vouchers/{voucherId}/reimburse
 ```
 
 ### Error Response
+
 ```json
 {
   "success": false,
@@ -263,12 +292,14 @@ POST /api/petty-cash/vouchers/{voucherId}/reimburse
 ## Files Modified/Created
 
 **Created**:
+
 - `/Users/tong/Thai-acc/src/lib/petty-cash-service.ts`
 - `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/route.ts`
 - `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/approve/route.ts`
 - `/Users/tong/Thai-acc/src/app/api/petty-cash/vouchers/[id]/reimburse/route.ts`
 
 **No modifications needed to**:
+
 - Schema (already has `journalEntryId` and `isReimbursed` fields)
 - Existing voucher creation endpoint
 - Existing fund management endpoints

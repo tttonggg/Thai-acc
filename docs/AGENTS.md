@@ -1,14 +1,20 @@
 # AGENTS.md - Thai Accounting ERP System
 
-This file provides essential guidance for AI coding agents working on the **Thai Accounting ERP System** (โปรแกรมบัญชีมาตรฐานไทย).
+This file provides essential guidance for AI coding agents working on the **Thai
+Accounting ERP System** (โปรแกรมบัญชีมาตรฐานไทย).
 
 ## Project Overview
 
-This is a comprehensive accounting application designed for Thai SME businesses, complying with Thai Financial Reporting Standards (TFRS). The system supports Thai tax requirements including VAT (ภาษีมูลค่าเพิ่ม) at 7%, Withholding Tax (ภาษีหัก ณ ที่จ่าย) PND3/PND53, and Social Security calculations.
+This is a comprehensive accounting application designed for Thai SME businesses,
+complying with Thai Financial Reporting Standards (TFRS). The system supports
+Thai tax requirements including VAT (ภาษีมูลค่าเพิ่ม) at 7%, Withholding Tax
+(ภาษีหัก ณ ที่จ่าย) PND3/PND53, and Social Security calculations.
 
-**Implementation Status**: ✅ **100% COMPLETE** - All core modules and 6 expansion modules fully implemented and integrated:
+**Implementation Status**: ✅ **100% COMPLETE** - All core modules and 6
+expansion modules fully implemented and integrated:
 
 ### Core Modules
+
 - Chart of Accounts (ผังบัญชี)
 - Journal Entries (บันทึกบัญชี)
 - Sales Invoices (ใบกำกับภาษี/ใบเสร็จรับเงิน)
@@ -21,6 +27,7 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 - Financial Reports (งบการเงิน)
 
 ### Expansion Modules (Phase 1-3 Complete)
+
 - WHT Automation & 50 Tawi (ภาษีหัก ณ ที่จ่าย)
 - Inventory & Stock Management (คลังสินค้า)
 - Fixed Assets & Depreciation (ทะเบียนทรัพย์สิน)
@@ -29,6 +36,7 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 - Payroll & Compensation (เงินเดือน)
 
 ### Additional Features
+
 - Purchase Requests & Orders (ใบขอซื้อ/ใบสั่งซื้อ)
 - Multi-currency Support
 - Budget Management
@@ -39,23 +47,23 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 
 ## Technology Stack
 
-| Category | Technology | Version |
-|----------|------------|---------|
-| Framework | Next.js (App Router) | 16.1.1 |
-| Language | TypeScript | 5.x |
-| Styling | Tailwind CSS | 4.x |
-| UI Components | shadcn/ui (Radix UI) | New York style |
-| Database | Prisma ORM + PostgreSQL/SQLite | 6.11.1 |
-| Authentication | NextAuth.js | 4.24.11 |
-| State Management | Zustand | 5.x |
-| Data Fetching | TanStack Query | 5.x |
-| Forms | React Hook Form + Zod | 7.x / 4.x |
-| Icons | Lucide React | 0.525.0 |
-| Testing | Vitest + Playwright | 4.x / 1.x |
-| PDF Generation | jsPDF + pdfkit | 4.x / 0.17.x |
-| Excel Export | xlsx | 0.18.x |
-| GraphQL | Apollo Server | 5.x |
-| Runtime | Bun (preferred) or Node.js | - |
+| Category         | Technology                     | Version        |
+| ---------------- | ------------------------------ | -------------- |
+| Framework        | Next.js (App Router)           | 16.1.1         |
+| Language         | TypeScript                     | 5.x            |
+| Styling          | Tailwind CSS                   | 4.x            |
+| UI Components    | shadcn/ui (Radix UI)           | New York style |
+| Database         | Prisma ORM + PostgreSQL/SQLite | 6.11.1         |
+| Authentication   | NextAuth.js                    | 4.24.11        |
+| State Management | Zustand                        | 5.x            |
+| Data Fetching    | TanStack Query                 | 5.x            |
+| Forms            | React Hook Form + Zod          | 7.x / 4.x      |
+| Icons            | Lucide React                   | 0.525.0        |
+| Testing          | Vitest + Playwright            | 4.x / 1.x      |
+| PDF Generation   | jsPDF + pdfkit                 | 4.x / 0.17.x   |
+| Excel Export     | xlsx                           | 0.18.x         |
+| GraphQL          | Apollo Server                  | 5.x            |
+| Runtime          | Bun (preferred) or Node.js     | -              |
 
 ## Project Structure
 
@@ -149,6 +157,7 @@ This is a comprehensive accounting application designed for Thai SME businesses,
 ## Build and Development Commands
 
 ### Development
+
 ```bash
 # Development server (port 3000)
 bun run dev              # or: npm run dev
@@ -162,6 +171,7 @@ npm run start:node       # Start with Node.js
 ```
 
 ### Code Quality
+
 ```bash
 bun run lint             # Run ESLint
 bun run lint:fix         # Fix ESLint issues
@@ -171,6 +181,7 @@ bun run type-check       # TypeScript type checking
 ```
 
 ### Database Operations
+
 ```bash
 bun run db:generate      # Generate Prisma client (REQUIRED after schema changes)
 bun run db:push         # Push schema without migrations
@@ -181,6 +192,7 @@ bun run seed:fresh      # Reset + seed
 ```
 
 ### Testing
+
 ```bash
 # Unit & Integration Tests (Vitest)
 bun run test             # Run Vitest in watch mode
@@ -203,6 +215,7 @@ bun run test:all         # Run all tests (unit + integration + e2e)
 ```
 
 ### Docker
+
 ```bash
 bun run docker:build      # Build Docker image
 bun run docker:run        # Run Docker container
@@ -210,12 +223,14 @@ bun run docker:compose:up # Start with docker-compose (full stack)
 ```
 
 ### Security
+
 ```bash
 bun run security:scan     # Scan for secrets
 bun run security:deps     # Check dependencies
 ```
 
-**Important**: Always run `bun run db:generate` after modifying `prisma/schema.prisma`.
+**Important**: Always run `bun run db:generate` after modifying
+`prisma/schema.prisma`.
 
 ## Environment Variables
 
@@ -247,7 +262,9 @@ ENABLE_SWAGGER=true
 ENABLE_DEBUG_ROUTES=false
 ```
 
-**Production Note**: In standalone mode, `DATABASE_URL` must use an **absolute path** for SQLite:
+**Production Note**: In standalone mode, `DATABASE_URL` must use an **absolute
+path** for SQLite:
+
 ```env
 # Correct for production:
 DATABASE_URL=file:/absolute/path/to/.next/standalone/prisma/dev.db
@@ -258,12 +275,14 @@ See `.env.example` for all available configuration options.
 ## Code Style Guidelines
 
 ### TypeScript Configuration
+
 - Target: ES2017
 - Strict mode enabled but `noImplicitAny: false` for flexibility
 - Path alias `@/` maps to `./src/`
 - JSX: `react-jsx`
 
 ### Naming Conventions
+
 - **Components**: PascalCase (e.g., `InvoiceList.tsx`)
 - **Files**: kebab-case for utilities, camelCase for services
 - **API Routes**: Route handlers use HTTP method names (GET, POST, PUT, DELETE)
@@ -271,6 +290,7 @@ See `.env.example` for all available configuration options.
 - **Enums**: UPPER_SNAKE_CASE for values
 
 ### Component Patterns
+
 ```typescript
 // Use functional components with explicit types
 interface InvoiceListProps {
@@ -284,6 +304,7 @@ export function InvoiceList({ invoices, onSelect }: InvoiceListProps) {
 ```
 
 ### API Route Patterns
+
 ```typescript
 // Standard API route structure
 import { z } from 'zod';
@@ -297,7 +318,7 @@ const schema = z.object({
 export async function GET(req: Request) {
   const session = await auth();
   if (!session) return new Response('Unauthorized', { status: 401 });
-  
+
   // Fetch data
   return Response.json({ success: true, data: result });
 }
@@ -305,17 +326,19 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const session = await auth();
   if (!session) return new Response('Unauthorized', { status: 401 });
-  
+
   const body = await req.json();
   const validated = schema.parse(body);
-  
+
   // Create record
   return Response.json({ success: true, data: created });
 }
 ```
 
 ### ESLint Rules
+
 The project uses relaxed ESLint rules for development efficiency:
+
 - `@typescript-eslint/no-explicit-any`: off
 - `@typescript-eslint/no-unused-vars`: off
 - `react-hooks/exhaustive-deps`: off
@@ -325,11 +348,12 @@ The project uses relaxed ESLint rules for development efficiency:
 ## Testing Strategy
 
 ### Unit Tests (Vitest)
+
 - **Location**: `src/lib/__tests__/` or co-located with source files
 - **Setup**: `src/test/setup.ts`
 - **Environment**: jsdom for DOM testing
 - **Coverage**: v8 provider with text/json/html/lcov reports
-- **Thresholds**: 
+- **Thresholds**:
   - Lines: 90%
   - Functions: 90%
   - Branches: 85%
@@ -338,6 +362,7 @@ The project uses relaxed ESLint rules for development efficiency:
 - **Retry**: 2 retries for flaky tests
 
 ### E2E Tests (Playwright)
+
 - **Location**: `e2e/` directory (28 test files)
 - **Browsers**: Chromium, Firefox, WebKit, Microsoft Edge
 - **Mobile**: iPhone 12, iPhone SE, Galaxy S8, iPad, iPad Pro
@@ -348,18 +373,20 @@ The project uses relaxed ESLint rules for development efficiency:
 - **Workers**: 1 in CI for stability
 
 ### Test Categories
-| Category | Files | Description |
-|----------|-------|-------------|
-| Authentication | `01-login-*.spec.ts`, `login*.spec.ts` | Login flows, MFA, session management |
-| Master Data | `02-master-*.spec.ts` | Customers, vendors, products, accounts |
-| Transactions | `03-accounting-*.spec.ts` | Journal entries, invoices |
-| Navigation | `04-sidebar-*.spec.ts`, `05-sidebar-*.spec.ts` | UI navigation tests |
-| Reports | `04-database-validation-*.spec.ts` | Financial reports, VAT reports |
-| Module Tests | `0*-modules-*.spec.ts` | All expansion modules |
-| Production | `10-production-*.spec.ts` | Comprehensive production tests |
-| Critical | `critical-workflows.spec.ts` | Business-critical paths |
+
+| Category       | Files                                          | Description                            |
+| -------------- | ---------------------------------------------- | -------------------------------------- |
+| Authentication | `01-login-*.spec.ts`, `login*.spec.ts`         | Login flows, MFA, session management   |
+| Master Data    | `02-master-*.spec.ts`                          | Customers, vendors, products, accounts |
+| Transactions   | `03-accounting-*.spec.ts`                      | Journal entries, invoices              |
+| Navigation     | `04-sidebar-*.spec.ts`, `05-sidebar-*.spec.ts` | UI navigation tests                    |
+| Reports        | `04-database-validation-*.spec.ts`             | Financial reports, VAT reports         |
+| Module Tests   | `0*-modules-*.spec.ts`                         | All expansion modules                  |
+| Production     | `10-production-*.spec.ts`                      | Comprehensive production tests         |
+| Critical       | `critical-workflows.spec.ts`                   | Business-critical paths                |
 
 ### Running Specific Tests
+
 ```bash
 # Run specific E2E test
 npx playwright test e2e/login-fixed.spec.ts
@@ -374,7 +401,10 @@ bun run test src/lib/__tests__/thai-tax.test.ts
 ## Key Architectural Patterns
 
 ### 1. Service Layer Pattern
-Business logic is encapsulated in service modules (`src/lib/*-service.ts`). Services handle:
+
+Business logic is encapsulated in service modules (`src/lib/*-service.ts`).
+Services handle:
+
 - GL (General Ledger) posting
 - Complex calculations (tax, depreciation, costing)
 - Data transformations
@@ -383,17 +413,23 @@ Business logic is encapsulated in service modules (`src/lib/*-service.ts`). Serv
 Example flow: API Route → Service → Prisma → Database
 
 ### 2. Double-Entry Bookkeeping
+
 All financial transactions must balance (debit = credit). Key models:
+
 - `JournalEntry` - Header record
 - `JournalLine` - Individual debit/credit lines
 
 ### 3. Document-Driven Accounting
+
 Documents automatically generate journal entries when posted:
+
 - Invoices, Receipts, Payments → Journal entries
 - Track via `journalEntryId` foreign keys
 
 ### 4. Hierarchical Chart of Accounts
+
 4-level account structure with Thai standard codes:
+
 - **1xxx** - Assets (สินทรัพย์)
 - **2xxx** - Liabilities (หนี้สิน)
 - **3xxx** - Equity (ทุน)
@@ -401,21 +437,27 @@ Documents automatically generate journal entries when posted:
 - **5xxx** - Expenses (ค่าใช้จ่าย)
 
 ### 5. Role-Based Access Control (RBAC)
+
 Four user roles with decreasing permissions:
+
 - **ADMIN** - Full access including user management
 - **ACCOUNTANT** - Full accounting operations
 - **USER** - Limited operations (no settings)
 - **VIEWER** - Read-only access
 
 ### 6. Document Numbering
+
 Automatic sequential numbering with configurable formats:
+
 ```typescript
 // Format: {prefix}{yyyy}{mm}-{0000}
 // Example: INV-202603-0001
 ```
 
 ### 7. SPA Architecture
+
 The application uses a Single Page Application architecture:
+
 - Main entry point: `src/app/page.tsx`
 - Module switching via state management
 - All modules rendered in the same page with conditional display
@@ -424,6 +466,7 @@ The application uses a Single Page Application architecture:
 ## Thai-Specific Features
 
 ### Localization Functions (`src/lib/thai-accounting.ts`)
+
 - `formatThaiDate()` - Buddhist era (พ.ศ.) format: DD/MM/YYYY
 - `formatCurrency()` - Thai Baht formatting with Satang
 - `numberToThaiText()` - Convert numbers to Thai words (for checks)
@@ -433,6 +476,7 @@ The application uses a Single Page Application architecture:
 - `calculateSSC()` - Social Security contributions (5% capped at ฿750)
 
 ### Tax Structures
+
 ```typescript
 // VAT
 VAT_RATE = 7%
@@ -454,6 +498,7 @@ SSC_RATE = 5% (max ฿750/month for employee)
 ```
 
 ### Thai Language Support
+
 - UI language: Thai (primary)
 - Error messages: Thai
 - Date format: DD/MM/YYYY (Buddhist year +543)
@@ -463,6 +508,7 @@ SSC_RATE = 5% (max ฿750/month for employee)
 ## Security Considerations
 
 ### Authentication & Authorization
+
 - JWT-based sessions (8-hour expiry)
 - bcrypt password hashing (12 rounds)
 - NextAuth.js with credentials provider
@@ -471,33 +517,39 @@ SSC_RATE = 5% (max ฿750/month for employee)
 - Password strength validation with zxcvbn
 
 ### Middleware Protection (`src/middleware.ts`)
+
 - **Rate Limiting**: Strict for auth, moderate for API
 - **CSRF Protection**: Required for POST/PUT/PATCH/DELETE
 - **Security Headers**: CSP, X-Frame-Options, X-Content-Type-Options, etc.
 - **Test Bypass**: `x-playwright-test: true` header for E2E tests
 
 ### CSRF Protection
+
 - CSRF tokens required for state-changing operations
 - Token validation in API routes
 - Exempt paths configured in `csrf-service.ts`
 
 ### Input Validation
+
 - All API inputs use Zod schemas (`src/lib/validations.ts`)
 - File upload restrictions (size, type)
 - SQL injection prevention via Prisma
 
 ### Audit & Logging
+
 - Tamper-evident audit logs with hash chain
 - Activity logging for all user actions
 - IP address and user agent tracking
 - Security event logging (login, logout, failures)
 
 ### Encryption
+
 - Sensitive data encryption at rest
 - Environment variable encryption support
 - Secure session management
 
 ### Production Security
+
 - HTTPS required
 - `NEXTAUTH_SECRET` must be set
 - Absolute database paths in standalone mode
@@ -506,17 +558,19 @@ SSC_RATE = 5% (max ฿750/month for employee)
 
 ## Test Accounts
 
-| Email | Password | Role |
-|-------|----------|------|
-| admin@thaiaccounting.com | admin123 | ADMIN |
-| accountant@thaiaccounting.com | acc123 | ACCOUNTANT |
-| user@thaiaccounting.com | user123 | USER |
-| viewer@thaiaccounting.com | viewer123 | VIEWER |
+| Email                         | Password  | Role       |
+| ----------------------------- | --------- | ---------- |
+| admin@thaiaccounting.com      | admin123  | ADMIN      |
+| accountant@thaiaccounting.com | acc123    | ACCOUNTANT |
+| user@thaiaccounting.com       | user123   | USER       |
+| viewer@thaiaccounting.com     | viewer123 | VIEWER     |
 
 ## Docker Deployment
 
 ### Development Stack
+
 Full development environment with docker-compose:
+
 - Next.js app (port 3000)
 - PostgreSQL (port 5432)
 - Redis (port 6379)
@@ -526,22 +580,27 @@ Full development environment with docker-compose:
 - Grafana (port 3001)
 
 ### Production Dockerfile
+
 Multi-stage build for optimized production image:
+
 1. **Dependencies stage**: Install and generate Prisma client
 2. **Builder stage**: Build Next.js application
 3. **Runner stage**: Production-optimized image with non-root user
 
 ### Standalone Build
+
 ```bash
 bun run build
 # Output: .next/standalone/server.js
 ```
 
-**CRITICAL**: Update `.next/standalone/.env` with absolute `DATABASE_URL` path before starting.
+**CRITICAL**: Update `.next/standalone/.env` with absolute `DATABASE_URL` path
+before starting.
 
 ## Common Development Tasks
 
 ### Adding a New Module
+
 1. Create Prisma models in `prisma/schema.prisma`
 2. Run `bun run db:generate`
 3. Add document type to `DocumentNumber` seed data
@@ -553,6 +612,7 @@ bun run build
 9. Add E2E tests in `e2e/`
 
 ### Modifying Database Schema
+
 ```bash
 # 1. Edit prisma/schema.prisma
 # 2. Generate client
@@ -566,6 +626,7 @@ bun run db:migrate
 ```
 
 ### Adding New API Endpoints
+
 1. Create route file in `src/app/api/[resource]/route.ts`
 2. Add Zod validation schema in `src/lib/validations.ts`
 3. Implement CRUD operations
@@ -575,23 +636,30 @@ bun run db:migrate
 ## Troubleshooting
 
 ### Login Issues
+
 If seeing "อีเมลหรือรหัสผ่านไม่ถูกต้อง" (Email or password incorrect):
+
 1. Check `DATABASE_URL` uses absolute path in production
 2. Verify database exists: `ls -lh .next/standalone/prisma/dev.db`
-3. Check Prisma connection: `node -e "const { PrismaClient } = require('@prisma/client'); const p = new PrismaClient(); p.user.findMany().then(u => console.log('Users:', u.length)).finally(() => p.\$disconnect());"`
+3. Check Prisma connection:
+   `node -e "const { PrismaClient } = require('@prisma/client'); const p = new PrismaClient(); p.user.findMany().then(u => console.log('Users:', u.length)).finally(() => p.\$disconnect());"`
 
 ### Build Issues
+
 - Ensure `bun run db:generate` was run after schema changes
 - Check `tsconfig.tsbuildinfo` can be safely deleted if stale
 - Verify Node.js version compatibility (18+)
 
 ### Database Connection Issues
+
 - SQLite: Check file permissions
 - Prisma: Run `bun run db:generate` after any schema change
 - Migration conflicts: Use `bun run db:reset` (destroys data)
 
 ### Prisma Client Issues
+
 If you see "PrismaClient is not configured to run in Edge Runtime":
+
 - Ensure you're not importing from `@prisma/client` in middleware
 - Use separate service files for database operations
 - Keep `thai-accounting.ts` free of database imports
@@ -599,12 +667,14 @@ If you see "PrismaClient is not configured to run in Edge Runtime":
 ## File Modification Guidelines
 
 ### DO NOT Modify
+
 - `src/components/ui/*` - shadcn/ui components (use `npx shadcn add` instead)
 - `node_modules/` - Use package manager
 - `.next/` - Build output
 - `prisma/migrations/` - After creation (unless fixing)
 
 ### Modify with Caution
+
 - `prisma/schema.prisma` - Requires regeneration
 - `src/lib/db.ts` - Prisma client singleton
 - `src/lib/auth.ts` - Auth configuration affects all routes
@@ -612,6 +682,7 @@ If you see "PrismaClient is not configured to run in Edge Runtime":
 - `src/app/page.tsx` - Main entry point with module routing
 
 ### Safe to Modify
+
 - `src/components/[module]/*` - Module components
 - `src/app/api/[resource]/*` - API routes
 - `src/lib/*-service.ts` - Business logic
@@ -634,4 +705,5 @@ If you see "PrismaClient is not configured to run in Edge Runtime":
 
 **Last Updated**: 2026-03-18
 
-For questions or issues, refer to existing documentation files or run tests to verify functionality.
+For questions or issues, refer to existing documentation files or run tests to
+verify functionality.

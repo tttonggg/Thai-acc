@@ -1,17 +1,18 @@
 # Currency Display & Calculation Audit - Reports
 
-**Audit Date**: 2026-04-14
-**Auditor**: Data Engineer Agent
-**Scope**: All report components and API routes
-**Currency Standard**: Integer Satang (1/100 Baht) in database, divide by 100 for display
+**Audit Date**: 2026-04-14 **Auditor**: Data Engineer Agent **Scope**: All
+report components and API routes **Currency Standard**: Integer Satang (1/100
+Baht) in database, divide by 100 for display
 
 ---
 
 ## Executive Summary
 
-**CRITICAL FINDING**: All report components display Satang directly without dividing by 100, causing amounts to appear **100x larger than actual values**.
+**CRITICAL FINDING**: All report components display Satang directly without
+dividing by 100, causing amounts to appear **100x larger than actual values**.
 
-**Impact**: EVERY financial report shows incorrect amounts (e.g., ฿1,000,000 instead of ฿10,000.00)
+**Impact**: EVERY financial report shows incorrect amounts (e.g., ฿1,000,000
+instead of ฿10,000.00)
 
 **Status**: 🔴 CRITICAL - System-wide bug affecting all financial reporting
 
@@ -19,7 +20,8 @@
 
 ## Database Schema Verification
 
-✅ **All monetary fields stored as Int (Satang)** - Confirmed in `prisma/schema.prisma`:
+✅ **All monetary fields stored as Int (Satang)** - Confirmed in
+`prisma/schema.prisma`:
 
 ```prisma
 debit       Int  // เดบิต (สตางค์)
@@ -43,31 +45,39 @@ taxAmount   Int  // ภาษีที่หัก (สตางค์)
 **Status**: ❌ **CRITICAL BUG**
 
 **Calculations** (Lines 169-171):
+
 ```typescript
-const totalVatOutput = vatOutputRecords.reduce((sum, r) => sum + r.vat, 0)
-const totalVatInput = vatInputRecords.reduce((sum, r) => sum + r.vat, 0)
-const netVatVal = totalVatOutput - totalVatInput
+const totalVatOutput = vatOutputRecords.reduce((sum, r) => sum + r.vat, 0);
+const totalVatInput = vatInputRecords.reduce((sum, r) => sum + r.vat, 0);
+const netVatVal = totalVatOutput - totalVatInput;
 ```
+
 - ❌ Sums Satang values directly
 - ❌ Does NOT divide by 100 for display
 
 **Display Examples**:
+
 - Line 322: `฿{totalVatOutput?.toLocaleString() ?? '0'}` - Shows Satang as Baht
 - Line 333: `฿{totalVatInput?.toLocaleString() ?? '0'}` - Shows Satang as Baht
 - Line 345: `฿{netVatVal?.toLocaleString() ?? '0'}` - Shows Satang as Baht
 - Line 394: `฿{record.amount?.toLocaleString() ?? '0'}` - Shows Satang as Baht
 - Line 395: `฿{record.vat?.toLocaleString() ?? '0'}` - Shows Satang as Baht
-- Line 400: `฿{vatOutputRecords.reduce((s, r) => s + (r.amount || 0), 0).toLocaleString()}` - ❌ WRONG
+- Line 400:
+  `฿{vatOutputRecords.reduce((s, r) => s + (r.amount || 0), 0).toLocaleString()}` -
+  ❌ WRONG
 
 **Print Function** (Lines 181-264):
+
 ```typescript
 <p>ภาษีขาย (Output VAT): ${totalVatOutput.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
 <p>ภาษีซื้อ (Input VAT): ${totalVatInput.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
 ```
+
 - ❌ Formats Satang as Baht with 2 decimal places
 - ❌ Double conversion: shows "700.00" for ฿7.00 (700 Satang)
 
 **Bug Summary**:
+
 - Calculation: ✅ Correct (sums Satang)
 - Display: ❌ **Wrong** (displays Satang as Baht, 100x too large)
 - Fix needed: Divide all totals by 100 before display
@@ -79,32 +89,43 @@ const netVatVal = totalVatOutput - totalVatInput
 **Status**: ❌ **CRITICAL BUG**
 
 **Calculations** (Lines 143-144):
+
 ```typescript
-const totalPnd3 = pnd3Records.reduce((sum, r) => sum + (r.tax || 0), 0)
-const totalPnd53 = pnd53Records.reduce((sum, r) => sum + (r.tax || 0), 0)
+const totalPnd3 = pnd3Records.reduce((sum, r) => sum + (r.tax || 0), 0);
+const totalPnd53 = pnd53Records.reduce((sum, r) => sum + (r.tax || 0), 0);
 ```
+
 - ✅ Correctly sums Satang values
 - ❌ Does NOT divide by 100 for display
 
 **Display Examples**:
+
 - Line 295: `฿{totalPnd3.toLocaleString()}` - ❌ Shows Satang as Baht
 - Line 307: `฿{totalPnd53.toLocaleString()}` - ❌ Shows Satang as Baht
-- Line 319: `฿{(totalPnd3 + totalPnd53).toLocaleString()}` - ❌ Shows Satang as Baht
+- Line 319: `฿{(totalPnd3 + totalPnd53).toLocaleString()}` - ❌ Shows Satang as
+  Baht
 - Line 361: `฿{record.income.toLocaleString()}` - ❌ Shows Satang as Baht
 - Line 363: `฿{record.tax.toLocaleString()}` - ❌ Shows Satang as Baht
-- Line 368: `฿{pnd53Records.reduce((s, r) => s + (r.income || 0), 0).toLocaleString()}` - ❌ WRONG
+- Line 368:
+  `฿{pnd53Records.reduce((s, r) => s + (r.income || 0), 0).toLocaleString()}` -
+  ❌ WRONG
 - Line 401: `฿{record.income.toLocaleString()}` - ❌ Shows Satang as Baht
 - Line 403: `฿{record.tax.toLocaleString()}` - ❌ Shows Satang as Baht
-- Line 408: `฿{pnd3Records.reduce((s, r) => s + (r.income || 0), 0).toLocaleString()}` - ❌ WRONG
+- Line 408:
+  `฿{pnd3Records.reduce((s, r) => s + (r.income || 0), 0).toLocaleString()}` -
+  ❌ WRONG
 
 **Print Function** (Lines 153-244):
+
 ```typescript
 <p>ภงด.3 (เงินเดือน/ค่าจ้าง): ${totalPnd3.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
 <p>ภงด.53 (ค่าบริการ/ค่าเช่า): ${totalPnd53.toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
 ```
+
 - ❌ Same double conversion bug as VAT report
 
 **Bug Summary**:
+
 - Calculation: ✅ Correct (sums Satang)
 - Display: ❌ **Wrong** (displays Satang as Baht, 100x too large)
 - Fix needed: Divide all totals by 100 before display
@@ -116,36 +137,51 @@ const totalPnd53 = pnd53Records.reduce((sum, r) => sum + (r.tax || 0), 0)
 **Status**: ❌ **CRITICAL BUG**
 
 **Trial Balance Print Function** (Lines 332-357):
+
 ```typescript
-const totalDebit = accounts.reduce((sum: number, a: any) => sum + (a.debit || 0), 0)
-const totalCredit = accounts.reduce((sum: number, a: any) => sum + (a.credit || 0), 0)
+const totalDebit = accounts.reduce(
+  (sum: number, a: any) => sum + (a.debit || 0),
+  0
+);
+const totalCredit = accounts.reduce(
+  (sum: number, a: any) => sum + (a.credit || 0),
+  0
+);
 ```
+
 - ✅ Correctly sums Satang values
 - ❌ Does NOT divide by 100 before display
 
 **Display** (Lines 350-351, 356-357):
+
 ```typescript
 <td class="text-right">${(acc.debit || 0) > 0 ? acc.debit.toLocaleString('th-TH', {minimumFractionDigits: 2}) : ''}</td>
 <td class="text-right">${(acc.credit || 0) > 0 ? acc.credit.toLocaleString('th-TH', {minimumFractionDigits: 2}) : ''}</td>
 ```
+
 - ❌ Displays Satang as Baht
 
 **Balance Sheet Print Function** (Lines 362-376):
+
 ```typescript
 <p>สินทรัพย์หมุนเวียน: ${(data.currentAssets || 0).toLocaleString('th-TH')} บาท</p>
 <p>สินทรัพย์ไม่หมุนเวียน: ${(data.nonCurrentAssets || 0).toLocaleString('th-TH')} บาท</p>
 <p style="font-weight: bold;">รวมสินทรัพย์: ${(data.totalAssets || 0).toLocaleString('th-TH')} บาท</p>
 ```
+
 - ❌ All amounts displayed without dividing by 100
 
 **Income Statement Print Function** (Lines 377-392):
+
 ```typescript
 <p>รายได้จากการขาย: ${(data.revenue || 0).toLocaleString('th-TH')} บาท</p>
 <p>ต้นทุนขาย: ${(data.costOfSales || 0).toLocaleString('th-TH')} บาท</p>
 ```
+
 - ❌ All amounts displayed without dividing by 100
 
 **Bug Summary**:
+
 - All three report types (Trial Balance, Balance Sheet, Income Statement)
 - Calculation: ✅ Correct (sums Satang from API)
 - Display: ❌ **Wrong** (displays Satang as Baht, 100x too large)
@@ -158,16 +194,19 @@ const totalCredit = accounts.reduce((sum: number, a: any) => sum + (a.credit || 
 **Status**: ❌ **CRITICAL BUG**
 
 **Display Examples** (Lines 754, 762, 810, 815):
+
 ```typescript
 ฿{reportData.totals?.debit?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'}
 ฿{reportData.totals?.credit?.toLocaleString('th-TH', { minimumFractionDigits: 2 }) || '0.00'}
 {account.debit > 0 ? `฿${account.debit.toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
 {account.credit > 0 ? `฿${account.credit.toLocaleString('th-TH', { minimumFractionDigits: 2 })}` : '-'}
 ```
+
 - ❌ Displays Satang as Baht
 - ❌ Uses `minimumFractionDigits: 2` which creates double-conversion visual bug
 
 **Bug Summary**:
+
 - Calculation: ✅ Correct (sums Satang from API)
 - Display: ❌ **Wrong** (displays Satang as Baht, 100x too large)
 - Fix needed: Divide all monetary values by 100 before display
@@ -181,14 +220,17 @@ const totalCredit = accounts.reduce((sum: number, a: any) => sum + (a.credit || 
 **Status**: ✅ **CORRECT**
 
 **Return Values** (Lines 147-148):
+
 ```typescript
-const totalDebit = accounts.reduce((sum, acc) => sum + acc.debit, 0)
-const totalCredit = accounts.reduce((sum, acc) => sum + acc.credit, 0)
+const totalDebit = accounts.reduce((sum, acc) => sum + acc.debit, 0);
+const totalCredit = accounts.reduce((sum, acc) => sum + acc.credit, 0);
 ```
+
 - ✅ Returns Satang values (Integers)
 - ✅ Client responsible for dividing by 100
 
-**Note**: API correctly returns Satang. The bug is in the component display layer.
+**Note**: API correctly returns Satang. The bug is in the component display
+layer.
 
 ---
 
@@ -197,16 +239,31 @@ const totalCredit = accounts.reduce((sum, acc) => sum + acc.credit, 0)
 **Status**: ✅ **CORRECT**
 
 **Return Values** (Lines 88-95, 99-106):
+
 ```typescript
-const totalVatOutput = transformedOutputRecords.reduce((sum, r) => sum + r.vat, 0)
-const totalVatInput = transformedInputRecords.reduce((sum, r) => sum + r.vat, 0)
-const totalOutputAmount = transformedOutputRecords.reduce((sum, r) => sum + r.amount, 0)
-const totalInputAmount = transformedInputRecords.reduce((sum, r) => sum + r.amount, 0)
+const totalVatOutput = transformedOutputRecords.reduce(
+  (sum, r) => sum + r.vat,
+  0
+);
+const totalVatInput = transformedInputRecords.reduce(
+  (sum, r) => sum + r.vat,
+  0
+);
+const totalOutputAmount = transformedOutputRecords.reduce(
+  (sum, r) => sum + r.amount,
+  0
+);
+const totalInputAmount = transformedInputRecords.reduce(
+  (sum, r) => sum + r.amount,
+  0
+);
 ```
+
 - ✅ Returns Satang values (from `vatRecord.vatAmount` - Int field)
 - ✅ Client responsible for dividing by 100
 
-**Note**: API correctly returns Satang. The bug is in the component display layer.
+**Note**: API correctly returns Satang. The bug is in the component display
+layer.
 
 ---
 
@@ -215,16 +272,19 @@ const totalInputAmount = transformedInputRecords.reduce((sum, r) => sum + r.amou
 **Status**: ✅ **CORRECT**
 
 **Return Values** (Lines 27-32):
+
 ```typescript
 totalIncomeAmount: records.reduce((s, r) => s + r.incomeAmount, 0),
 totalWhtAmount: records.reduce((s, r) => s + r.whtAmount, 0),
 pnd3Amount: records.filter(r => r.type === 'PND3').reduce((s, r) => s + r.whtAmount, 0),
 pnd53Amount: records.filter(r => r.type === 'PND53').reduce((s, r) => s + r.whtAmount, 0),
 ```
+
 - ✅ Returns Satang values (from `withholdingTax.whtAmount` - Int field)
 - ✅ Client responsible for dividing by 100
 
-**Note**: API correctly returns Satang. The bug is in the component display layer.
+**Note**: API correctly returns Satang. The bug is in the component display
+layer.
 
 ---
 
@@ -233,15 +293,18 @@ pnd53Amount: records.filter(r => r.type === 'PND53').reduce((s, r) => s + r.whtA
 **Status**: ✅ **CORRECT**
 
 **Return Values** (Lines 212-214):
+
 ```typescript
-const totalAssets = assets.reduce((sum, acc) => sum + acc.amount, 0)
-const totalLiabilities = liabilities.reduce((sum, acc) => sum + acc.amount, 0)
-const totalEquity = equity.reduce((sum, acc) => sum + acc.amount, 0)
+const totalAssets = assets.reduce((sum, acc) => sum + acc.amount, 0);
+const totalLiabilities = liabilities.reduce((sum, acc) => sum + acc.amount, 0);
+const totalEquity = equity.reduce((sum, acc) => sum + acc.amount, 0);
 ```
+
 - ✅ Returns Satang values (Integers)
 - ✅ Client responsible for dividing by 100
 
-**Note**: API correctly returns Satang. The bug is in the component display layer.
+**Note**: API correctly returns Satang. The bug is in the component display
+layer.
 
 ---
 
@@ -253,12 +316,12 @@ const totalEquity = equity.reduce((sum, acc) => sum + acc.amount, 0)
 
 ```typescript
 // ❌ WRONG - Current implementation
-const total = records.reduce((sum, r) => sum + r.amount, 0) // Sums Satang (correct)
-return `฿${total.toLocaleString()}` // Displays Satang as Baht (WRONG - 100x too large)
+const total = records.reduce((sum, r) => sum + r.amount, 0); // Sums Satang (correct)
+return `฿${total.toLocaleString()}`; // Displays Satang as Baht (WRONG - 100x too large)
 
 // ✅ CORRECT - Should be
-const total = records.reduce((sum, r) => sum + r.amount, 0) // Sums Satang (correct)
-return `฿${(total / 100).toLocaleString()}` // Converts to Baht (CORRECT)
+const total = records.reduce((sum, r) => sum + r.amount, 0); // Sums Satang (correct)
+return `฿${(total / 100).toLocaleString()}`; // Converts to Baht (CORRECT)
 ```
 
 ### Why This Happened
@@ -278,11 +341,13 @@ This is a **presentation layer bug**, not a data integrity bug.
 **Severity**: 🔴 **CRITICAL**
 
 **Example**:
+
 - Actual: ฿10,000.00 (1,000,000 Satang)
 - Displayed: ฿1,000,000.00 (1,000,000 shown as Baht)
 - **User sees 100x larger amounts**
 
 **Affected Reports**:
+
 1. ✅ Trial Balance - ALL debit/credit totals wrong
 2. ✅ Balance Sheet - ALL asset/liability/equity totals wrong
 3. ✅ Income Statement - ALL revenue/expense totals wrong
@@ -343,12 +408,14 @@ Some reports use `{ minimumFractionDigits: 2 }` on Satang values:
 ```
 
 **Why this happens**:
+
 - Satang value: 700 (integer)
 - toLocaleString with minimumFractionDigits: 2
 - Result: "700.00" (adds decimal to integer, treating it as Baht)
 - Correct: Should divide by 100 first, then format
 
 **Example from code**:
+
 ```typescript
 // Line 322 in vat-report.tsx
 ฿{totalVatOutput?.toLocaleString() ?? '0'}
@@ -370,28 +437,29 @@ Some reports use `{ minimumFractionDigits: 2 }` on Satang values:
 Add to report component tests:
 
 ```typescript
-expect(screen.getByText('฿1,234.56')).toBeInTheDocument()
-expect(screen.queryByText('฿123,456')).not.toBeInTheDocument()
+expect(screen.getByText('฿1,234.56')).toBeInTheDocument();
+expect(screen.queryByText('฿123,456')).not.toBeInTheDocument();
 ```
 
 ---
 
 ## Summary Table
 
-| Report | Calculation | Display | Fix Needed | Priority |
-|--------|-------------|---------|------------|----------|
-| VAT Report | ✅ Sum Satang | ❌ Show Satang | Divide by 100 | 🔴 Critical |
-| WHT Report | ✅ Sum Satang | ❌ Show Satang | Divide by 100 | 🔴 Critical |
-| Trial Balance | ✅ Sum Satang | ❌ Show Satang | Divide by 100 | 🔴 Critical |
-| Balance Sheet | ✅ Sum Satang | ❌ Show Satang | Divide by 100 | 🔴 Critical |
+| Report           | Calculation   | Display        | Fix Needed    | Priority    |
+| ---------------- | ------------- | -------------- | ------------- | ----------- |
+| VAT Report       | ✅ Sum Satang | ❌ Show Satang | Divide by 100 | 🔴 Critical |
+| WHT Report       | ✅ Sum Satang | ❌ Show Satang | Divide by 100 | 🔴 Critical |
+| Trial Balance    | ✅ Sum Satang | ❌ Show Satang | Divide by 100 | 🔴 Critical |
+| Balance Sheet    | ✅ Sum Satang | ❌ Show Satang | Divide by 100 | 🔴 Critical |
 | Income Statement | ✅ Sum Satang | ❌ Show Satang | Divide by 100 | 🔴 Critical |
-| Custom Reports | ✅ Sum Satang | ❌ Show Satang | Divide by 100 | 🔴 Critical |
+| Custom Reports   | ✅ Sum Satang | ❌ Show Satang | Divide by 100 | 🔴 Critical |
 
 ---
 
 ## Conclusion
 
-**All report components have the same bug**: Displaying Satang (integer) values directly as Baht without dividing by 100.
+**All report components have the same bug**: Displaying Satang (integer) values
+directly as Baht without dividing by 100.
 
 **Root Cause**: Missing conversion step in presentation layer.
 
@@ -403,5 +471,5 @@ expect(screen.queryByText('฿123,456')).not.toBeInTheDocument()
 
 ---
 
-**Audit Complete** ✅
-**Next Action**: Fix all report display bugs (separate task - NOT included in this audit)
+**Audit Complete** ✅ **Next Action**: Fix all report display bugs (separate
+task - NOT included in this audit)

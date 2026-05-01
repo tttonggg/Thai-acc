@@ -129,7 +129,10 @@ export async function clickButtonContaining(page: Page, text: string): Promise<v
  */
 export async function fillField(page: Page, label: string, value: string): Promise<void> {
   // Find input by associated label
-  const input = page.locator(`${SELECTORS.LABEL}:text-is("${label}")`).locator('..').locator('input');
+  const input = page
+    .locator(`${SELECTORS.LABEL}:text-is("${label}")`)
+    .locator('..')
+    .locator('input');
   await input.fill(value);
 }
 
@@ -140,7 +143,11 @@ export async function fillField(page: Page, label: string, value: string): Promi
  * @param placeholder - Input placeholder text
  * @param value - Value to enter
  */
-export async function fillFieldByPlaceholder(page: Page, placeholder: string, value: string): Promise<void> {
+export async function fillFieldByPlaceholder(
+  page: Page,
+  placeholder: string,
+  value: string
+): Promise<void> {
   const input = page.locator(`${SELECTORS.INPUT}[placeholder="${placeholder}"]`);
   await input.fill(value);
 }
@@ -154,7 +161,10 @@ export async function fillFieldByPlaceholder(page: Page, placeholder: string, va
  */
 export async function selectOption(page: Page, label: string, value: string): Promise<void> {
   // Find select by associated label
-  const select = page.locator(`${SELECTORS.LABEL}:text-is("${label}")`).locator('..').locator('select');
+  const select = page
+    .locator(`${SELECTORS.LABEL}:text-is("${label}")`)
+    .locator('..')
+    .locator('select');
   await select.selectOption(value);
 }
 
@@ -165,7 +175,11 @@ export async function selectOption(page: Page, label: string, value: string): Pr
  * @param placeholder - Input placeholder text
  * @param value - Option value to select
  */
-export async function selectOptionByPlaceholder(page: Page, placeholder: string, value: string): Promise<void> {
+export async function selectOptionByPlaceholder(
+  page: Page,
+  placeholder: string,
+  value: string
+): Promise<void> {
   const select = page.locator(`${SELECTORS.SELECT}[placeholder="${placeholder}"]`);
   await select.selectOption(value);
 }
@@ -304,7 +318,7 @@ export async function screenshotOnFailure(
 
   await page.screenshot({
     path: filename,
-    fullPage
+    fullPage,
   });
 
   console.log(`Screenshot saved: ${filename}`);
@@ -519,8 +533,8 @@ export async function waitForApiResponse(
   callback: () => Promise<void>
 ): Promise<any> {
   const [response] = await Promise.all([
-    page.waitForResponse(resp => resp.url().includes(urlPattern)),
-    callback()
+    page.waitForResponse((resp) => resp.url().includes(urlPattern)),
+    callback(),
   ]);
 
   return response.json();
@@ -546,7 +560,7 @@ export async function retry<T>(
     } catch (error) {
       lastError = error as Error;
       if (i < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+        await new Promise((resolve) => setTimeout(resolve, delay * Math.pow(2, i)));
       }
     }
   }
@@ -572,7 +586,7 @@ export async function pause(page: Page, message?: string): Promise<void> {
  */
 export function bypassRateLimiting(page: Page): void {
   page.setExtraHTTPHeaders({
-    'x-playwright-test': 'true'
+    'x-playwright-test': 'true',
   });
 }
 

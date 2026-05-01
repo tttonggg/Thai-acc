@@ -18,7 +18,9 @@ export class BankingPage {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("ธนาคาร"), h1:has-text("Banking")');
     this.newBankAccountButton = page.locator('button:has-text("สร้างบัญชีธนาคาร")');
-    this.bankAccountsTab = page.locator('button:has-text("บัญชีธนาคาร"), tab:has-text("Bank Accounts")');
+    this.bankAccountsTab = page.locator(
+      'button:has-text("บัญชีธนาคาร"), tab:has-text("Bank Accounts")'
+    );
     this.chequesTab = page.locator('button:has-text("เช็ค"), tab:has-text("Cheques")');
     this.bankAccountsTable = page.locator('table').first();
     this.chequesTable = page.locator('table').nth(1);
@@ -66,7 +68,10 @@ export class BankingPage {
     await this.page.locator('button:has-text("บันทึก")').click();
   }
 
-  async updateChequeStatus(chequeNumber: string, newStatus: 'DEPOSITED' | 'CLEARED' | 'BOUNCED' | 'CANCELLED') {
+  async updateChequeStatus(
+    chequeNumber: string,
+    newStatus: 'DEPOSITED' | 'CLEARED' | 'BOUNCED' | 'CANCELLED'
+  ) {
     await this.chequesTab.click();
     const row = this.chequesTable.locator(`tr:has-text("${chequeNumber}")`);
     await row.locator('button:has-text("อัพเดทสถานะ")').click();

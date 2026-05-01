@@ -42,7 +42,7 @@ test.describe('Banking Module - Comprehensive Tests', () => {
   test('should deposit cheque', async ({ page }) => {
     const onHandCheque = await page.locator('tr').filter({ hasText: 'ON_HAND' }).first();
 
-    if (await onHandCheque.count() > 0) {
+    if ((await onHandCheque.count()) > 0) {
       await onHandCheque.locator('button:has-text("ฝาก")').click();
       await page.waitForSelector('[data-sonner-toast]', { timeout: 5000 });
 
@@ -54,7 +54,7 @@ test.describe('Banking Module - Comprehensive Tests', () => {
   test('should clear deposited cheque', async ({ page }) => {
     const depositedCheque = await page.locator('tr').filter({ hasText: 'DEPOSITED' }).first();
 
-    if (await depositedCheque.count() > 0) {
+    if ((await depositedCheque.count()) > 0) {
       await depositedCheque.locator('button:has-text("ผ่าน")').click();
       await page.waitForSelector('[data-sonner-toast]', { timeout: 5000 });
 

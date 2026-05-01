@@ -14,7 +14,9 @@ export class PaymentsPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("ใบจ่ายเงิน"), h1:has-text("Payments")');
-    this.newPaymentButton = page.locator('button:has-text("สร้างใบจ่าย"), button:has-text("New Payment")');
+    this.newPaymentButton = page.locator(
+      'button:has-text("สร้างใบจ่าย"), button:has-text("New Payment")'
+    );
     this.paymentsTable = page.locator('table, [role="table"]').first();
   }
 
@@ -36,7 +38,9 @@ export class PaymentsPage {
     await this.page.fill('input[name="amount"]', data.amount.toString());
 
     if (data.purchaseNumber) {
-      await this.page.locator('select[name="purchaseId"]').selectOption({ label: data.purchaseNumber });
+      await this.page
+        .locator('select[name="purchaseId"]')
+        .selectOption({ label: data.purchaseNumber });
     }
 
     if (data.paymentMethod) {

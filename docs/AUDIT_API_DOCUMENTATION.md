@@ -8,32 +8,35 @@ GET /api/invoices/[id]/audit
 
 ## Description
 
-Retrieves a comprehensive audit trail for an invoice, combining both general invoice changes (from `AuditLog` model) and line item changes (from `InvoiceLineItemAudit` model).
+Retrieves a comprehensive audit trail for an invoice, combining both general
+invoice changes (from `AuditLog` model) and line item changes (from
+`InvoiceLineItemAudit` model).
 
 ## Authentication
 
 - **Required**: Yes (via NextAuth session)
-- **Permissions**: Users can access audit logs for their own invoices. ADMIN users can access all invoices.
+- **Permissions**: Users can access audit logs for their own invoices. ADMIN
+  users can access all invoices.
 
 ## Request Parameters
 
 ### Path Parameters
 
-| Parameter | Type   | Required | Description            |
-|-----------|--------|----------|------------------------|
-| id        | string | Yes      | Invoice ID (cuid)      |
+| Parameter | Type   | Required | Description       |
+| --------- | ------ | -------- | ----------------- |
+| id        | string | Yes      | Invoice ID (cuid) |
 
 ### Query Parameters
 
-| Parameter   | Type   | Required | Default | Description                                                 |
-|-------------|--------|----------|---------|-------------------------------------------------------------|
-| action      | string | No       | -       | Filter by action type (CREATED, UPDATED, DELETED, VIEW, EXPORT) |
-| entityType  | string | No       | -       | Filter by entity type (INVOICE, LINE_ITEM)                  |
-| userId      | string | No       | -       | Filter by user who made the changes                        |
-| startDate   | string | No       | -       | ISO 8601 date string (e.g., 2026-01-01)                     |
-| endDate     | string | No       | -       | ISO 8601 date string (e.g., 2026-12-31)                     |
-| limit       | number | No       | 50      | Number of entries per page (max: 100)                       |
-| cursor      | string | No       | -       | Pagination cursor (ISO date string for next page)           |
+| Parameter  | Type   | Required | Default | Description                                                     |
+| ---------- | ------ | -------- | ------- | --------------------------------------------------------------- |
+| action     | string | No       | -       | Filter by action type (CREATED, UPDATED, DELETED, VIEW, EXPORT) |
+| entityType | string | No       | -       | Filter by entity type (INVOICE, LINE_ITEM)                      |
+| userId     | string | No       | -       | Filter by user who made the changes                             |
+| startDate  | string | No       | -       | ISO 8601 date string (e.g., 2026-01-01)                         |
+| endDate    | string | No       | -       | ISO 8601 date string (e.g., 2026-12-31)                         |
+| limit      | number | No       | 50      | Number of entries per page (max: 100)                           |
+| cursor     | string | No       | -       | Pagination cursor (ISO date string for next page)               |
 
 ## Response Format
 
@@ -120,6 +123,7 @@ Retrieves a comprehensive audit trail for an invoice, combining both general inv
 ### Error Responses
 
 #### 401 Unauthorized
+
 ```json
 {
   "success": false,
@@ -128,6 +132,7 @@ Retrieves a comprehensive audit trail for an invoice, combining both general inv
 ```
 
 #### 403 Forbidden
+
 ```json
 {
   "success": false,
@@ -136,6 +141,7 @@ Retrieves a comprehensive audit trail for an invoice, combining both general inv
 ```
 
 #### 404 Not Found
+
 ```json
 {
   "success": false,
@@ -144,6 +150,7 @@ Retrieves a comprehensive audit trail for an invoice, combining both general inv
 ```
 
 #### 500 Server Error
+
 ```json
 {
   "success": false,
@@ -154,14 +161,14 @@ Retrieves a comprehensive audit trail for an invoice, combining both general inv
 ## Thai Field Name Mappings
 
 | Field (English) | Field Name (Thai) |
-|-----------------|-------------------|
+| --------------- | ----------------- |
 | description     | รายการ            |
 | quantity        | จำนวน             |
 | unit            | หน่วย             |
-| unitPrice       | ราคาต่อหน่วย        |
+| unitPrice       | ราคาต่อหน่วย      |
 | discount        | ส่วนลด            |
-| vatRate         | อัตรา VAT          |
-| notes           | หมายเหตุ           |
+| vatRate         | อัตรา VAT         |
+| notes           | หมายเหตุ          |
 
 ## Usage Examples
 
@@ -211,81 +218,85 @@ curl -X GET "http://localhost:3000/api/invoices/clm123/audit?action=UPDATED&enti
 
 ```typescript
 interface AuditEntry {
-  id: string
-  action: string
-  entityType: 'INVOICE' | 'LINE_ITEM'
-  entityId: string
-  beforeState: any
-  afterState: any
-  userId: string
-  userName: string | null
-  createdAt: string
-  thaiDate: string
-  field?: string | null
-  fieldName?: string
-  oldValue?: string | null
-  newValue?: string | null
+  id: string;
+  action: string;
+  entityType: 'INVOICE' | 'LINE_ITEM';
+  entityId: string;
+  beforeState: any;
+  afterState: any;
+  userId: string;
+  userName: string | null;
+  createdAt: string;
+  thaiDate: string;
+  field?: string | null;
+  fieldName?: string;
+  oldValue?: string | null;
+  newValue?: string | null;
   lineItem?: {
-    id: string
-    description: string
-    lineNo: number
-  } | null
-  changeReason?: string | null
+    id: string;
+    description: string;
+    lineNo: number;
+  } | null;
+  changeReason?: string | null;
 }
 
 interface AuditResponse {
-  success: boolean
+  success: boolean;
   data: {
-    entries: AuditEntry[]
-    nextCursor: string | null
-    totalEntries: number
+    entries: AuditEntry[];
+    nextCursor: string | null;
+    totalEntries: number;
     filters: {
-      action: string | null
-      entityType: string | null
-      userId: string | null
-      startDate: string | null
-      endDate: string | null
-    }
-  }
+      action: string | null;
+      entityType: string | null;
+      userId: string | null;
+      startDate: string | null;
+      endDate: string | null;
+    };
+  };
 }
 
 async function fetchInvoiceAuditLog(
   invoiceId: string,
   params?: {
-    action?: string
-    entityType?: string
-    userId?: string
-    startDate?: string
-    endDate?: string
-    limit?: number
-    cursor?: string
+    action?: string;
+    entityType?: string;
+    userId?: string;
+    startDate?: string;
+    endDate?: string;
+    limit?: number;
+    cursor?: string;
   }
 ): Promise<AuditResponse> {
-  const queryParams = new URLSearchParams()
+  const queryParams = new URLSearchParams();
 
-  if (params?.action) queryParams.append('action', params.action)
-  if (params?.entityType) queryParams.append('entityType', params.entityType)
-  if (params?.userId) queryParams.append('userId', params.userId)
-  if (params?.startDate) queryParams.append('startDate', params.startDate)
-  if (params?.endDate) queryParams.append('endDate', params.endDate)
-  if (params?.limit) queryParams.append('limit', params.limit.toString())
-  if (params?.cursor) queryParams.append('cursor', params.cursor)
+  if (params?.action) queryParams.append('action', params.action);
+  if (params?.entityType) queryParams.append('entityType', params.entityType);
+  if (params?.userId) queryParams.append('userId', params.userId);
+  if (params?.startDate) queryParams.append('startDate', params.startDate);
+  if (params?.endDate) queryParams.append('endDate', params.endDate);
+  if (params?.limit) queryParams.append('limit', params.limit.toString());
+  if (params?.cursor) queryParams.append('cursor', params.cursor);
 
-  const response = await fetch(`/api/invoices/${invoiceId}/audit?${queryParams.toString()}`)
-  return response.json()
+  const response = await fetch(
+    `/api/invoices/${invoiceId}/audit?${queryParams.toString()}`
+  );
+  return response.json();
 }
 
 // Usage
 const auditData = await fetchInvoiceAuditLog('clm123', {
   action: 'UPDATED',
   entityType: 'LINE_ITEM',
-  limit: 20
-})
+  limit: 20,
+});
 
-console.log(`Total entries: ${auditData.data.totalEntries}`)
-auditData.data.entries.forEach(entry => {
-  console.log(`[${entry.thaiDate}] ${entry.action}: ${entry.fieldName || entry.entityType}`)
-})
+console.log(`Total entries: ${auditData.data.totalEntries}`);
+auditData.data.entries.forEach((entry) => {
+  console.log(
+    `[${entry.thaiDate}] ${entry.action}: ${entry.fieldName || entry.entityType}`
+  );
+});
 ```
 
 ## React Hook Example
@@ -366,7 +377,8 @@ function InvoiceAuditLog({ invoiceId }: { invoiceId: string }) {
 
 ## Security Features
 
-1. **IDOR Protection**: Users can only access audit logs for invoices they created (unless ADMIN)
+1. **IDOR Protection**: Users can only access audit logs for invoices they
+   created (unless ADMIN)
 2. **Authentication Required**: All requests must have a valid NextAuth session
 3. **Input Validation**: All query parameters are validated and sanitized
 4. **SQL Injection Prevention**: Uses Prisma ORM with parameterized queries
@@ -376,24 +388,31 @@ function InvoiceAuditLog({ invoiceId }: { invoiceId: string }) {
 
 1. **Default Limit**: 50 entries per page to balance performance and usability
 2. **Maximum Limit**: Capped at 100 entries per request
-3. **Database Indexing**: Queries leverage existing indexes on `AuditLog` and `InvoiceLineItemAudit` models
-4. **Cursor Pagination**: Efficient for large datasets, avoiding OFFSET performance issues
-5. **Combined Queries**: Fetches both invoice and line item logs in parallel, then combines in memory
+3. **Database Indexing**: Queries leverage existing indexes on `AuditLog` and
+   `InvoiceLineItemAudit` models
+4. **Cursor Pagination**: Efficient for large datasets, avoiding OFFSET
+   performance issues
+5. **Combined Queries**: Fetches both invoice and line item logs in parallel,
+   then combines in memory
 
 ## Thai Date Formatting
 
-All timestamps include a `thaiDate` field formatted as `DD/MM/YYYY` with Buddhist era (year + 543). For example:
+All timestamps include a `thaiDate` field formatted as `DD/MM/YYYY` with
+Buddhist era (year + 543). For example:
+
 - `2026-03-18` → `18/03/2569`
 - `2025-12-31` → `31/12/2568`
 
 ## Testing
 
-See `/e2e/critical-workflows.spec.ts` for E2E test coverage of audit log functionality.
+See `/e2e/critical-workflows.spec.ts` for E2E test coverage of audit log
+functionality.
 
 ## Related Files
 
 - **API Route**: `/src/app/api/invoices/[id]/audit/route.ts`
-- **Database Models**: `AuditLog`, `InvoiceLineItemAudit` (in `prisma/schema.prisma`)
+- **Database Models**: `AuditLog`, `InvoiceLineItemAudit` (in
+  `prisma/schema.prisma`)
 - **UI Component**: `/src/components/invoices/audit-log.tsx`
 - **Type Definitions**: See `AuditEntry` interface in the route file
 - **Utility Functions**: `formatThaiDate` in `/src/lib/thai-accounting.ts`

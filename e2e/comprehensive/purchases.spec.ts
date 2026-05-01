@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../../tests/pages/login.page';
 import { PurchasesPage } from '../../tests/pages/purchases.page';
-import { verifyRecordCount, verifyJournalEntry, getAllRecords } from '../../tests/utils/db-verification';
+import {
+  verifyRecordCount,
+  verifyJournalEntry,
+  getAllRecords,
+} from '../../tests/utils/db-verification';
 import { TEST_USERS, URLs } from '../../tests/utils/constants';
 
 /**

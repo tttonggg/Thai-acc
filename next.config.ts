@@ -1,7 +1,7 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
-const buildHash = require('child_process').execSync('git rev-parse --short HEAD').toString().trim()
-const buildTime = new Date().toISOString()
+const buildHash = require('child_process').execSync('git rev-parse --short HEAD').toString().trim();
+const buildTime = new Date().toISOString();
 
 const nextConfig: NextConfig = {
   env: {
@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BUILD_TIME: buildTime,
   },
   // Enable standalone mode for production deployment
-  output: "standalone",
+  output: 'standalone',
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
@@ -20,19 +20,39 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['@prisma/client', 'prisma'],
   async rewrites() {
     const modulePaths = [
-      '/accounts', '/journal', '/invoices', '/vat', '/wht',
-      '/customers', '/vendors', '/purchase-requests', '/purchase-orders',
-      '/purchases', '/payments', '/credit-notes', '/debit-notes',
-      '/inventory', '/products', '/warehouses', '/stock-takes',
-      '/banking', '/assets', '/payroll', '/employees',
-      '/petty-cash', '/reports', '/settings', '/users',
-      '/cash-flow', '/recurring',
+      '/accounts',
+      '/journal',
+      '/invoices',
+      '/vat',
+      '/wht',
+      '/customers',
+      '/vendors',
+      '/purchase-requests',
+      '/purchase-orders',
+      '/purchases',
+      '/payments',
+      '/credit-notes',
+      '/debit-notes',
+      '/inventory',
+      '/products',
+      '/warehouses',
+      '/stock-takes',
+      '/banking',
+      '/assets',
+      '/payroll',
+      '/employees',
+      '/petty-cash',
+      '/reports',
+      '/settings',
+      '/users',
+      '/cash-flow',
+      '/recurring',
     ];
 
     return [
       // SPA Routing - rewrite module paths to root
       // CRITICAL: Do not rewrite _next/static, _next/image, or static assets
-      ...modulePaths.map(path => ({
+      ...modulePaths.map((path) => ({
         source: path,
         destination: '/',
       })),

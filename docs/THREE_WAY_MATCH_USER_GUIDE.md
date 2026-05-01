@@ -21,6 +21,7 @@ All three should match. This prevents overpayment, fraud, and processing errors.
 ### Step 2: System Auto-Fills Lines
 
 When you enter a valid PO number:
+
 - ✅ System fetches PO details automatically
 - ✅ Lines are pre-filled with PO data
 - ✅ Quantities default to "remaining to invoice" (PO Qty - Already Received)
@@ -30,31 +31,34 @@ When you enter a valid PO number:
 
 A validation panel appears showing:
 
-| Column | Description |
-|--------|-------------|
-| ลำดับ | Line number |
-| รายการ | Item description |
-| PO | Quantity ordered |
-| รับแล้ว | Quantity already received (from GRN) |
-| ใบซื้อ | Quantity on this invoice |
-| สถานะปริมาณ | Quantity variance status |
-| ราคา PO | Unit price from PO |
-| ราคาใบซื้อ | Unit price on invoice |
-| สถานะ | Overall match status |
+| Column      | Description                          |
+| ----------- | ------------------------------------ |
+| ลำดับ       | Line number                          |
+| รายการ      | Item description                     |
+| PO          | Quantity ordered                     |
+| รับแล้ว     | Quantity already received (from GRN) |
+| ใบซื้อ      | Quantity on this invoice             |
+| สถานะปริมาณ | Quantity variance status             |
+| ราคา PO     | Unit price from PO                   |
+| ราคาใบซื้อ  | Unit price on invoice                |
+| สถานะ       | Overall match status                 |
 
 ### Step 4: Understand Status Colors
 
 #### 🟢 Green (✅ ตรงกัน) - All Match
+
 - Quantity variance ≤ 5%
 - Price variance ≤ 3%
 - **Action**: You can save immediately
 
 #### 🟡 Yellow (⚠️ แจ้งเตือน) - Warning
+
 - Quantity variance: 5-10%
 - Price variance: 3-5%
 - **Action**: Review carefully, but you can still save
 
 #### 🔴 Red (🔴 ระงับ) - Blocked
+
 - Quantity variance > 10%
 - Price variance > 5%
 - **Action**: Must take corrective action
@@ -64,6 +68,7 @@ A validation panel appears showing:
 When blocked (red), you have two options:
 
 #### Option A: Request Override (ขออนุมัติพิเศษ)
+
 1. Click **📝 ขออนุมัติพิเศษ (Override)** button
 2. Enter detailed reason:
    - Why the variance occurred
@@ -73,11 +78,13 @@ When blocked (red), you have two options:
 4. Now you can save the invoice
 
 **Example reasons:**
+
 - "ราคาปรับตามราคาตลาด อ้างอิงใบเสนอราคาใหม่ #XXX"
 - "ปริมาณเปลี่ยนตามการตรวจสอบจริง แนบใบรับสินค้า #XXX"
 - "Vendor แจ้งเปลี่ยนรุ่นสินค้า อ้างอิงอีเมลวันที่ XX/XX/XX"
 
 #### Option B: Return to Vendor (แจ้งฝ่ายจัดซื้อ)
+
 1. Click **📧 แจ้งฝ่ายจัดซื้อ (Return to Vendor)**
 2. System will notify procurement team to:
    - Verify PO accuracy
@@ -88,29 +95,30 @@ When blocked (red), you have two options:
 
 ### Quantity Variance
 
-| PO Qty | GRN Qty | Invoice Qty | Variance | Status |
-|--------|---------|-------------|----------|--------|
-| 100 | 100 | 100 | 0% | ✅ Match |
-| 100 | 100 | 95 | 5% | ⚠️ Warning |
-| 100 | 100 | 92 | 8% | ⚠️ Warning |
-| 100 | 100 | 89 | 11% | 🔴 Blocked |
+| PO Qty | GRN Qty | Invoice Qty | Variance | Status     |
+| ------ | ------- | ----------- | -------- | ---------- |
+| 100    | 100     | 100         | 0%       | ✅ Match   |
+| 100    | 100     | 95          | 5%       | ⚠️ Warning |
+| 100    | 100     | 92          | 8%       | ⚠️ Warning |
+| 100    | 100     | 89          | 11%      | 🔴 Blocked |
 
 **Formula**: `|PO Qty - Invoice Qty| ÷ PO Qty × 100`
 
 ### Price Variance
 
-| PO Price | Invoice Price | Variance | Status |
-|----------|---------------|----------|--------|
-| ฿100 | ฿100 | 0% | ✅ Match |
-| ฿100 | ฿103 | 3% | ✅ Match |
-| ฿100 | ฿104 | 4% | ⚠️ Warning |
-| ฿100 | ฿106 | 6% | 🔴 Blocked |
+| PO Price | Invoice Price | Variance | Status     |
+| -------- | ------------- | -------- | ---------- |
+| ฿100     | ฿100          | 0%       | ✅ Match   |
+| ฿100     | ฿103          | 3%       | ✅ Match   |
+| ฿100     | ฿104          | 4%       | ⚠️ Warning |
+| ฿100     | ฿106          | 6%       | 🔴 Blocked |
 
 **Formula**: `|PO Price - Invoice Price| ÷ PO Price × 100`
 
 ## Best Practices
 
 ### ✅ DO
+
 - Always enter PO number when available
 - Review warnings carefully before saving
 - Provide detailed override reasons with documentation references
@@ -118,6 +126,7 @@ When blocked (red), you have two options:
 - Keep audit trail complete (no vague reasons like "ตกลงแล้ว")
 
 ### ❌ DON'T
+
 - Don't override without investigating the variance
 - Don't use generic override reasons ("อนุมัติแล้ว", "OK")
 - Don't ignore warning messages (even if you can still save)
@@ -126,9 +135,11 @@ When blocked (red), you have two options:
 ## Common Scenarios
 
 ### Scenario 1: Partial Shipment
+
 **Situation**: PO for 100 units, received 80 units (2 shipments of 40 each)
 
 **First Invoice (40 units)**:
+
 - PO Qty: 100
 - GRN Qty: 40
 - Invoice Qty: 40
@@ -136,6 +147,7 @@ When blocked (red), you have two options:
 - **Action**: Accept and invoice (partial shipment is normal)
 
 **Second Invoice (40 units)**:
+
 - PO Qty: 100
 - GRN Qty: 80
 - Invoice Qty: 40
@@ -145,28 +157,35 @@ When blocked (red), you have two options:
 **Note**: System tracks total received, not per invoice
 
 ### Scenario 2: Price Change
+
 **Situation**: Vendor increases price due to market conditions
 
 **Invoice shows**:
+
 - PO Price: ฿100
 - Invoice Price: ฿107
 - Variance: 7% → **Red Blocked**
 
 **Actions**:
+
 1. Check if vendor provided price increase notice
 2. Verify with procurement team
 3. If approved, use override with reason:
-   - "Vendor แจ้งขึ้นราคา อ้างอิงอีเมลวันที่ 14/04/2026 อนุมัติโดยผู้จัดการฝ่ายจัดซื้อ"
+   - "Vendor แจ้งขึ้นราคา อ้างอิงอีเมลวันที่ 14/04/2026
+     อนุมัติโดยผู้จัดการฝ่ายจัดซื้อ"
 
 ### Scenario 3: Quantity Discrepancy
+
 **Situation**: Vendor ships different quantity than ordered
 
 **Invoice shows**:
+
 - PO Qty: 100
 - Invoice Qty: 110 (vendor sent extra)
 - Variance: 10% → **Red Blocked**
 
 **Actions**:
+
 1. Check if extra units were actually received
 2. Verify GRN quantity matches invoice
 3. If correct, use override:
@@ -176,26 +195,34 @@ When blocked (red), you have two options:
 ## Troubleshooting
 
 ### Q: Panel doesn't appear when I enter PO number
+
 **A**: Check that:
+
 - PO number is correct (try searching in PO list)
 - PO status is "OPEN" (not fully received/closed)
 - Vendor on invoice matches vendor on PO
 
 ### Q: Can't see GRN Qty column
+
 **A**: This is expected if:
+
 - GRN module hasn't been implemented yet
 - Shows receivedQty directly from PO instead
 - System uses PO's receivedQty field
 
 ### Q: Override reason keeps getting rejected
+
 **A**: Ensure:
+
 - Reason is detailed (not just "OK")
 - Includes reference numbers or dates
 - Explains WHY variance occurred
 - You have authority to approve overrides
 
 ### Q: Variance calculation seems wrong
+
 **A**: Check:
+
 - System calculates variance vs PO, not vs GRN
 - Percentages are relative to PO values
 - Price variance is per-unit, not total
@@ -203,6 +230,7 @@ When blocked (red), you have two options:
 ## Audit & Compliance
 
 All three-way match data is stored in invoice metadata:
+
 ```json
 {
   "threeWayMatch": {
@@ -218,6 +246,7 @@ All three-way match data is stored in invoice metadata:
 ```
 
 **Access this data for**:
+
 - Internal audit reports
 - Vendor performance analysis
 - Process improvement insights
@@ -227,14 +256,15 @@ All three-way match data is stored in invoice metadata:
 
 **Current Tolerance Settings** (can be customized per vendor in future):
 
-| Metric | Warning | Block |
-|--------|---------|-------|
-| Quantity Variance | > 5% | > 10% |
-| Price Variance | > 3% | > 5% |
+| Metric            | Warning | Block |
+| ----------------- | ------- | ----- |
+| Quantity Variance | > 5%    | > 10% |
+| Price Variance    | > 3%    | > 5%  |
 
 ## Support
 
 For questions or issues:
+
 1. Check this guide first
 2. Contact procurement team for PO/GRN issues
 3. Contact IT team for system issues

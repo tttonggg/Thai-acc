@@ -3,6 +3,7 @@
 ## 🚀 Overview
 
 This repository now has automatic CI/CD pipeline that:
+
 - ✅ Runs tests on every push
 - ✅ Builds the application
 - ✅ Deploys to your VPS automatically
@@ -16,37 +17,41 @@ This repository now has automatic CI/CD pipeline that:
 
 ## 🔧 Step 1: Configure GitHub Secrets
 
-Go to your GitHub repository settings: `https://github.com/tttonggg/Thai-acc/settings/secrets/actions`
+Go to your GitHub repository settings:
+`https://github.com/tttonggg/Thai-acc/settings/secrets/actions`
 
 Click **"New repository secret"** and add these secrets:
 
 ### Required Secrets:
 
-| Secret Name | Description | Example Value |
-|-------------|-------------|----------------|
-| `VPS_HOST` | Your VPS IP address or domain | `135.181.107.76` or `acc.k56mm.uk` |
-| `VPS_USER` | SSH username | `root` |
-| `VPS_SSH_PRIVATE_KEY` | Your SSH private key | (Copy from `~/.ssh/id_rsa`) |
-| `VPS_APP_PATH` | Application path on VPS | `/root/thai-acc` |
-| `DATABASE_URL` | Database connection string | `file:/root/thai-acc/prisma/dev.db` |
-| `NEXTAUTH_URL` | Your application URL | `https://acc.k56mm.uk` |
-| `NEXTAUTH_SECRET` | NextAuth secret key | (Generate random 32+ char string) |
+| Secret Name           | Description                   | Example Value                       |
+| --------------------- | ----------------------------- | ----------------------------------- |
+| `VPS_HOST`            | Your VPS IP address or domain | `135.181.107.76` or `acc.k56mm.uk`  |
+| `VPS_USER`            | SSH username                  | `root`                              |
+| `VPS_SSH_PRIVATE_KEY` | Your SSH private key          | (Copy from `~/.ssh/id_rsa`)         |
+| `VPS_APP_PATH`        | Application path on VPS       | `/root/thai-acc`                    |
+| `DATABASE_URL`        | Database connection string    | `file:/root/thai-acc/prisma/dev.db` |
+| `NEXTAUTH_URL`        | Your application URL          | `https://acc.k56mm.uk`              |
+| `NEXTAUTH_SECRET`     | NextAuth secret key           | (Generate random 32+ char string)   |
 
 ### How to Get These Values:
 
 #### 1. VPS_HOST
+
 ```bash
 # Your VPS IP
 echo "135.181.107.76"
 ```
 
 #### 2. VPS_USER
+
 ```bash
 # Usually root for VPS
 echo "root"
 ```
 
 #### 3. VPS_SSH_PRIVATE_KEY
+
 ```bash
 # On your local machine, copy your SSH private key
 cat ~/.ssh/id_rsa
@@ -60,12 +65,14 @@ cat ~/.ssh/your_vps_key
 ```
 
 #### 4. VPS_APP_PATH
+
 ```bash
 # Path where your app is deployed on VPS
 echo "/root/thai-acc"
 ```
 
 #### 5. DATABASE_URL
+
 ```bash
 # Check current .env on VPS
 ssh root@135.181.107.76 "cat /root/thai-acc/.env | grep DATABASE_URL"
@@ -74,11 +81,13 @@ echo "file:/root/thai-acc/prisma/dev.db"
 ```
 
 #### 6. NEXTAUTH_URL
+
 ```bash
 echo "https://acc.k56mm.uk"
 ```
 
 #### 7. NEXTAUTH_SECRET
+
 ```bash
 # Generate a random secret
 openssl rand -base64 32
@@ -89,6 +98,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ## 🔧 Step 2: Prepare Your VPS
 
 ### 2.1 Install PM2 (Process Manager)
+
 ```bash
 # SSH into your VPS
 ssh root@135.181.107.76
@@ -102,6 +112,7 @@ pm2 startup
 ```
 
 ### 2.2 Create Deployment Directory
+
 ```bash
 # Ensure app directory exists
 mkdir -p /root/thai-acc
@@ -109,12 +120,14 @@ cd /root/thai-acc
 ```
 
 ### 2.3 Copy Deployment Script to VPS
+
 ```bash
 # From your local machine
 scp scripts/vps-deploy.sh root@135.181.107.76:/root/thai-acc/scripts/
 ```
 
 ### 2.4 Make Script Executable
+
 ```bash
 # On VPS
 chmod +x /root/thai-acc/scripts/vps-deploy.sh
@@ -146,6 +159,7 @@ git push origin main
 ```
 
 Then manually deploy on VPS:
+
 ```bash
 # SSH into VPS
 ssh root@135.181.107.76
@@ -179,6 +193,7 @@ cd /root/thai-acc/.next/standalone && bun run start
 Once manual deployment works:
 
 1. **Push to GitHub**:
+
 ```bash
 git add .
 git commit -m "Configure CI/CD pipeline"
@@ -214,8 +229,9 @@ curl https://acc.k56mm.uk/api/health
 ## 🎯 How It Works
 
 ### Automatic Deployment (On Push to Main)
+
 ```
-You push code → GitHub Actions triggers → 
+You push code → GitHub Actions triggers →
   ├─ Run tests
   ├─ Build application
   ├─ Upload to VPS
@@ -224,6 +240,7 @@ You push code → GitHub Actions triggers →
 ```
 
 ### Manual Deployment (Using GitHub UI)
+
 1. Go to: https://github.com/tttonggg/Thai-acc/actions
 2. Click "CI/CD Pipeline" workflow
 3. Click "Run workflow" button
@@ -233,11 +250,13 @@ You push code → GitHub Actions triggers →
 ## 📊 Monitoring
 
 ### View Deployment Logs
+
 - **GitHub**: https://github.com/tttonggg/Thai-acc/actions
 - **VPS Logs**: `ssh root@135.181.107.76 "tail -f /root/thai-acc/deploy.log"`
 - **PM2 Logs**: `ssh root@135.181.107.76 "pm2 logs keerati-erp"`
 
 ### Check Application Status
+
 ```bash
 # SSH into VPS
 ssh root@135.181.107.76
@@ -325,5 +344,6 @@ bun run lint:fix
 ---
 
 **Need Help?** Check the logs at:
+
 - GitHub Actions: https://github.com/tttonggg/Thai-acc/actions
 - VPS Deployment: `/root/thai-acc/deploy.log`

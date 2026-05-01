@@ -20,9 +20,13 @@ export class CustomersPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("ลูกหนี้"), h1:has-text("Customers")');
-    this.newCustomerButton = page.locator('button:has-text("สร้างลูกค้า"), button:has-text("New Customer")');
+    this.newCustomerButton = page.locator(
+      'button:has-text("สร้างลูกค้า"), button:has-text("New Customer")'
+    );
     this.customersTable = page.locator('table, [role="table"]').first();
-    this.searchInput = page.locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]').first();
+    this.searchInput = page
+      .locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]')
+      .first();
   }
 
   /**
@@ -102,17 +106,22 @@ export class CustomersPage {
     await this.page.locator('button:has-text("บันทึก"), button:has-text("Save")').click();
 
     // Wait for success
-    await this.page.waitForSelector('text=บันทึกสำเร็จ, text=Saved successfully', { timeout: 5000 });
+    await this.page.waitForSelector('text=บันทึกสำเร็จ, text=Saved successfully', {
+      timeout: 5000,
+    });
   }
 
   /**
    * Edit customer
    */
-  async editCustomer(customerName: string, updates: Partial<{
-    name: string;
-    phone: string;
-    email: string;
-  }>) {
+  async editCustomer(
+    customerName: string,
+    updates: Partial<{
+      name: string;
+      phone: string;
+      email: string;
+    }>
+  ) {
     const customerRow = this.customersTable.locator(`tr:has-text("${customerName}")`);
     await customerRow.locator('button:has-text("แก้ไข"), button:has-text("Edit")').click();
 

@@ -3,7 +3,7 @@ import { POLineItem, PurchaseOrderData } from '../../e2e/helpers/purchase-helper
 
 /**
  * PurchaseOrdersPage Object Model
- * 
+ *
  * Handles all interactions with the Purchase Orders module including:
  * - Creating, viewing, editing POs
  * - Submitting to vendor
@@ -22,9 +22,13 @@ export class PurchaseOrdersPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("ใบสั่งซื้อ"), h1:has-text("Purchase Order")');
-    this.createButton = page.locator('button:has-text("สร้างใบสั่งซื้อ"), button:has-text("Create PO")');
+    this.createButton = page.locator(
+      'button:has-text("สร้างใบสั่งซื้อ"), button:has-text("Create PO")'
+    );
     this.searchInput = page.locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]');
-    this.statusFilter = page.locator('select').filter({ hasText: /สถานะ|Status|ทุกสถานะ|All Status/ });
+    this.statusFilter = page
+      .locator('select')
+      .filter({ hasText: /สถานะ|Status|ทุกสถานะ|All Status/ });
     this.poTable = page.locator('table');
     this.poTableBody = page.locator('table tbody');
   }
@@ -35,16 +39,18 @@ export class PurchaseOrdersPage {
   async goto(): Promise<void> {
     // Navigate via sidebar menu
     await this.page.goto('/');
-    
+
     // Click on งานซื้อ menu
-    const purchasesMenu = this.page.locator('text=งานซื้อ, button:has-text("งานซื้อ"), [data-testid="purchases-menu"]').first();
+    const purchasesMenu = this.page
+      .locator('text=งานซื้อ, button:has-text("งานซื้อ"), [data-testid="purchases-menu"]')
+      .first();
     if (await purchasesMenu.isVisible().catch(() => false)) {
       await purchasesMenu.click();
     }
-    
+
     // Click on ใบสั่งซื้อ submenu
     await this.page.click('text=ใบสั่งซื้อ (PO), a:has-text("ใบสั่งซื้อ")');
-    
+
     // Wait for page to load
     await this.pageTitle.waitFor({ state: 'visible', timeout: 10000 });
   }
@@ -93,7 +99,10 @@ export class PurchaseOrdersPage {
 
     // Fill shipping terms
     if (data.shippingTerms) {
-      await this.page.fill('input[name="shippingTerms"], textarea[name="shippingTerms"]', data.shippingTerms);
+      await this.page.fill(
+        'input[name="shippingTerms"], textarea[name="shippingTerms"]',
+        data.shippingTerms
+      );
     }
 
     // Fill payment terms
@@ -127,7 +136,10 @@ export class PurchaseOrdersPage {
     const linePrefix = `lines[${index}]`;
 
     // Fill description
-    await this.page.fill(`input[name="${linePrefix}.description"], textarea[name="${linePrefix}.description"]`, line.description);
+    await this.page.fill(
+      `input[name="${linePrefix}.description"], textarea[name="${linePrefix}.description"]`,
+      line.description
+    );
 
     // Select product if provided
     if (line.productId) {
@@ -155,7 +167,9 @@ export class PurchaseOrdersPage {
    * Save PO (create or update)
    */
   async save(): Promise<void> {
-    await this.page.click('button[type="submit"], button:has-text("บันทึก"), button:has-text("Save")');
+    await this.page.click(
+      'button[type="submit"], button:has-text("บันทึก"), button:has-text("Save")'
+    );
     await this.page.waitForSelector('[data-sonner-toast]', { timeout: 5000 });
   }
 
@@ -175,12 +189,15 @@ export class PurchaseOrdersPage {
 
     // Get the created PO info
     await this.page.waitForTimeout(500);
-    
+
     // Find the newly created PO in the table
-    const vendorName = await this.page.locator(`select[name="vendorId"] option[value="${data.vendorId}"]`).textContent().catch(() => '');
+    const vendorName = await this.page
+      .locator(`select[name="vendorId"] option[value="${data.vendorId}"]`)
+      .textContent()
+      .catch(() => '');
     const row = this.poTableBody.locator('tr').filter({ hasText: vendorName }).first();
-    const orderNo = await row.locator('td').first().textContent() || '';
-    
+    const orderNo = (await row.locator('td').first().textContent()) || '';
+
     return { id: '', orderNo: orderNo.trim() };
   }
 
@@ -209,15 +226,20 @@ export class PurchaseOrdersPage {
    */
   async submitPO(orderNo: string): Promise<void> {
     await this.openPODetail(orderNo);
-    
+
     // Click submit button
-    await this.page.click('button:has-text("ส่งให้ผู้ขาย"), button:has-text("Submit"), button:has-text("Send")');
-    
+    await this.page.click(
+      'button:has-text("ส่งให้ผู้ขาย"), button:has-text("Submit"), button:has-text("Send")'
+    );
+
     // Confirm submission
     await this.page.click('button:has-text("ยืนยัน"), button:has-text("Confirm")');
-    
+
     // Wait for success toast
-    await this.page.waitForSelector('[data-sonner-toast]:has-text("ส่ง"), [data-sonner-toast]:has-text("Sent")', { timeout: 5000 });
+    await this.page.waitForSelector(
+      '[data-sonner-toast]:has-text("ส่ง"), [data-sonner-toast]:has-text("Sent")',
+      { timeout: 5000 }
+    );
   }
 
   /**
@@ -225,66 +247,78 @@ export class PurchaseOrdersPage {
    */
   async confirmPO(orderNo: string): Promise<void> {
     await this.openPODetail(orderNo);
-    
+
     // Click confirm button
     await this.page.click('button:has-text("ยืนยัน"), button:has-text("Confirm")');
-    
+
     // Wait for success toast
-    await this.page.waitForSelector('[data-sonner-toast]:has-text("ยืนยัน"), [data-sonner-toast]:has-text("Confirmed")', { timeout: 5000 });
+    await this.page.waitForSelector(
+      '[data-sonner-toast]:has-text("ยืนยัน"), [data-sonner-toast]:has-text("Confirmed")',
+      { timeout: 5000 }
+    );
   }
 
   /**
    * Mark PO as shipped
    */
-  async shipPO(orderNo: string, trackingInfo?: { trackingNumber?: string; shippingMethod?: string }): Promise<void> {
+  async shipPO(
+    orderNo: string,
+    trackingInfo?: { trackingNumber?: string; shippingMethod?: string }
+  ): Promise<void> {
     await this.openPODetail(orderNo);
-    
+
     // Click ship button
     await this.page.click('button:has-text("จัดส่ง"), button:has-text("Ship")');
-    
+
     // Fill tracking info if provided
     if (trackingInfo?.trackingNumber) {
       await this.page.fill('input[name="trackingNumber"]', trackingInfo.trackingNumber);
     }
-    
+
     if (trackingInfo?.shippingMethod) {
       await this.page.fill('input[name="shippingMethod"]', trackingInfo.shippingMethod);
     }
-    
+
     // Confirm
     await this.page.click('button:has-text("ยืนยัน"), button:has-text("Confirm")');
-    
+
     // Wait for success toast
-    await this.page.waitForSelector('[data-sonner-toast]:has-text("จัดส่ง"), [data-sonner-toast]:has-text("Shipped")', { timeout: 5000 });
+    await this.page.waitForSelector(
+      '[data-sonner-toast]:has-text("จัดส่ง"), [data-sonner-toast]:has-text("Shipped")',
+      { timeout: 5000 }
+    );
   }
 
   /**
    * Receive PO items
    */
   async receivePO(
-    orderNo: string, 
+    orderNo: string,
     receivedItems: Array<{ lineId?: string; receivedQty: number; notes?: string }>
   ): Promise<void> {
     await this.openPODetail(orderNo);
-    
+
     // Click receive button
     await this.page.click('button:has-text("รับสินค้า"), button:has-text("Receive")');
-    
+
     // Fill received quantities
     for (let i = 0; i < receivedItems.length; i++) {
       const item = receivedItems[i];
       await this.page.fill(`input[name="receivedQty[${i}]"]`, item.receivedQty.toString());
-      
+
       if (item.notes) {
         await this.page.fill(`textarea[name="notes[${i}]"]`, item.notes);
       }
     }
-    
+
     // Confirm receipt
     await this.page.click('button:has-text("ยืนยัน"), button:has-text("Confirm")');
-    
+
     // Wait for success toast
-    await this.page.waitForSelector('[data-sonner-toast]:has-text("รับ"), [data-sonner-toast]:has-text("Received")', { timeout: 5000 });
+    await this.page.waitForSelector(
+      '[data-sonner-toast]:has-text("รับ"), [data-sonner-toast]:has-text("Received")',
+      { timeout: 5000 }
+    );
   }
 
   /**
@@ -292,18 +326,21 @@ export class PurchaseOrdersPage {
    */
   async cancelPO(orderNo: string, reason: string): Promise<void> {
     await this.openPODetail(orderNo);
-    
+
     // Click cancel button
     await this.page.click('button:has-text("ยกเลิก"), button:has-text("Cancel")');
-    
+
     // Fill cancellation reason
     await this.page.fill('textarea[name="reason"], textarea[name="cancellationReason"]', reason);
-    
+
     // Confirm cancellation
     await this.page.click('button:has-text("ยืนยัน"), button:has-text("Confirm")');
-    
+
     // Wait for success toast
-    await this.page.waitForSelector('[data-sonner-toast]:has-text("ยกเลิก"), [data-sonner-toast]:has-text("Cancelled")', { timeout: 5000 });
+    await this.page.waitForSelector(
+      '[data-sonner-toast]:has-text("ยกเลิก"), [data-sonner-toast]:has-text("Cancelled")',
+      { timeout: 5000 }
+    );
   }
 
   /**
@@ -311,13 +348,15 @@ export class PurchaseOrdersPage {
    */
   async deletePO(orderNo: string): Promise<void> {
     const row = this.poTableBody.locator('tr').filter({ hasText: orderNo }).first();
-    
+
     // Click delete button
     await row.locator('button:has-text("ลบ"), button:has-text("Delete")').click();
-    
+
     // Confirm deletion
-    await this.page.click('button:has-text("ยืนยัน"), button:has-text("Confirm"), button:has-text("ลบ")');
-    
+    await this.page.click(
+      'button:has-text("ยืนยัน"), button:has-text("Confirm"), button:has-text("ลบ")'
+    );
+
     // Wait for success toast
     await this.page.waitForSelector('[data-sonner-toast]:has-text("ลบ")', { timeout: 5000 });
   }
@@ -342,7 +381,9 @@ export class PurchaseOrdersPage {
   /**
    * Get PO count from stats
    */
-  async getPOCountByStatus(status: 'DRAFT' | 'SENT' | 'CONFIRMED' | 'SHIPPED' | 'RECEIVED' | 'CANCELLED'): Promise<number> {
+  async getPOCountByStatus(
+    status: 'DRAFT' | 'SENT' | 'CONFIRMED' | 'SHIPPED' | 'RECEIVED' | 'CANCELLED'
+  ): Promise<number> {
     const statusLabels: Record<string, string> = {
       DRAFT: 'ฉบับร่าง',
       SENT: 'ส่งแล้ว',
@@ -353,7 +394,7 @@ export class PurchaseOrdersPage {
     };
 
     const card = this.page.locator('.card, [data-card]').filter({ hasText: statusLabels[status] });
-    const countText = await card.locator('.text-2xl, [data-count]').textContent() || '0';
+    const countText = (await card.locator('.text-2xl, [data-count]').textContent()) || '0';
     return parseInt(countText, 10);
   }
 
@@ -380,8 +421,8 @@ export class PurchaseOrdersPage {
   async getPOTotal(orderNo: string): Promise<number> {
     const row = this.poTableBody.locator('tr').filter({ hasText: orderNo });
     const amountCell = row.locator('td').filter({ hasText: '฿' });
-    const amountText = await amountCell.textContent() || '0';
-    
+    const amountText = (await amountCell.textContent()) || '0';
+
     // Parse amount (remove currency symbol and commas)
     return parseFloat(amountText.replace(/[฿,]/g, ''));
   }

@@ -3,37 +3,40 @@
 ## Problem
 
 Production build was failing with error:
+
 ```
 error: Error validating datasource `db`: the URL must start with the protocol `postgresql://` or `postgres://`.
 ```
 
-This occurred because the Prisma schema was hardcoded to use PostgreSQL, but the standalone deployment used SQLite.
+This occurred because the Prisma schema was hardcoded to use PostgreSQL, but the
+standalone deployment used SQLite.
 
 ## Solution
 
-Implemented **Dynamic Schema Resolution** that automatically selects the appropriate schema based on `DATABASE_URL`.
+Implemented **Dynamic Schema Resolution** that automatically selects the
+appropriate schema based on `DATABASE_URL`.
 
 ## Files Created/Modified
 
 ### 1. New Files Created
 
-| File | Description |
-|------|-------------|
-| `prisma/schema-loader.js` | Dynamic schema selector based on DATABASE_URL |
-| `prisma/schema-postgres.prisma` | PostgreSQL-specific schema |
-| `prisma/schema-sqlite.prisma` | SQLite-specific schema |
-| `scripts/prepare-schemas.js` | Generates schema variants from source |
-| `scripts/build-production.js` | Production build preparation with SQLite |
-| `docs/DATABASE_SETUP.md` | Comprehensive database setup documentation |
-| `.env.example` | Updated with dual-database configuration examples |
+| File                            | Description                                       |
+| ------------------------------- | ------------------------------------------------- |
+| `prisma/schema-loader.js`       | Dynamic schema selector based on DATABASE_URL     |
+| `prisma/schema-postgres.prisma` | PostgreSQL-specific schema                        |
+| `prisma/schema-sqlite.prisma`   | SQLite-specific schema                            |
+| `scripts/prepare-schemas.js`    | Generates schema variants from source             |
+| `scripts/build-production.js`   | Production build preparation with SQLite          |
+| `docs/DATABASE_SETUP.md`        | Comprehensive database setup documentation        |
+| `.env.example`                  | Updated with dual-database configuration examples |
 
 ### 2. Modified Files
 
-| File | Changes |
-|------|---------|
-| `package.json` | Updated build scripts to use schema-loader |
-| `.env` | PostgreSQL URL (existing) |
-| `.env.production` | SQLite with absolute path (existing) |
+| File              | Changes                                    |
+| ----------------- | ------------------------------------------ |
+| `package.json`    | Updated build scripts to use schema-loader |
+| `.env`            | PostgreSQL URL (existing)                  |
+| `.env.production` | SQLite with absolute path (existing)       |
 
 ## How It Works
 
@@ -55,11 +58,11 @@ Implemented **Dynamic Schema Resolution** that automatically selects the appropr
 
 ### Key Differences Between Schemas
 
-| Feature | PostgreSQL | SQLite |
-|---------|------------|--------|
-| Provider | `postgresql` | `sqlite` |
-| Array fields | `String[]` | `Json?` |
-| ID generation | `cuid()` | `cuid()` (both supported) |
+| Feature       | PostgreSQL   | SQLite                    |
+| ------------- | ------------ | ------------------------- |
+| Provider      | `postgresql` | `sqlite`                  |
+| Array fields  | `String[]`   | `Json?`                   |
+| ID generation | `cuid()`     | `cuid()` (both supported) |
 
 ## Usage
 
@@ -132,9 +135,12 @@ prisma/
 
 ## Important Notes
 
-1. **schema.prisma** is now the active schema file that gets overwritten by the loader
-2. **schema-postgres.prisma** and **schema-sqlite.prisma** are the source variants
-3. After modifying schema, run `npm run db:prepare-schemas` to regenerate variants
+1. **schema.prisma** is now the active schema file that gets overwritten by the
+   loader
+2. **schema-postgres.prisma** and **schema-sqlite.prisma** are the source
+   variants
+3. After modifying schema, run `npm run db:prepare-schemas` to regenerate
+   variants
 4. For production standalone, always use **absolute path** for SQLite database
 
 ## Migration Path
@@ -168,4 +174,5 @@ npm run build  # Uses SQLite for standalone by default
 
 ## Status
 
-✅ **COMPLETE** - Production build now supports both PostgreSQL and SQLite automatically.
+✅ **COMPLETE** - Production build now supports both PostgreSQL and SQLite
+automatically.

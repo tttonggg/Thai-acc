@@ -2,12 +2,15 @@
 
 ## Overview
 
-This implementation adds automatic GL journal entry generation when cheques are cleared or bounced in the Thai Accounting ERP System.
+This implementation adds automatic GL journal entry generation when cheques are
+cleared or bounced in the Thai Accounting ERP System.
 
 ## Schema Changes
 
 ### Updated `Cheque` Model
-Added `journalEntryId` field to track the GL journal entry created when a cheque clears.
+
+Added `journalEntryId` field to track the GL journal entry created when a cheque
+clears.
 
 ```prisma
 model Cheque {
@@ -32,19 +35,22 @@ model Cheque {
 
 ### 1. `/src/lib/cheque-service.ts`
 
-Core service library containing all cheque clearing logic with GL journal entry generation.
+Core service library containing all cheque clearing logic with GL journal entry
+generation.
 
 #### Functions
 
-**`clearCheque(chequeId, clearedDate, userId?)`**
-Main function that routes to appropriate handler based on cheque type.
+**`clearCheque(chequeId, clearedDate, userId?)`** Main function that routes to
+appropriate handler based on cheque type.
 
-**`createReceivedChequeJournalEntry(chequeId, clearedDate, userId?)`**
-Creates GL entry when a RECEIVED cheque clears:
+**`createReceivedChequeJournalEntry(chequeId, clearedDate, userId?)`** Creates
+GL entry when a RECEIVED cheque clears:
+
 - **Debit**: Bank Account (Asset increases)
 - **Credit**: Accounts Receivable (Asset decreases)
 
 Example entry:
+
 ```
 เช็ครับเลขที่ CHK001 ผ่าน ธนาคารกรุงเทพ
 
@@ -52,12 +58,14 @@ Dr. 1111 เงินสด - ธนาคารกรุงเทพ    10,000.
 Cr. 1121 ลูกหนี้การค้า                      10,000.00
 ```
 
-**`createPaymentChequeJournalEntry(chequeId, clearedDate, userId?)`**
-Creates GL entry when a PAYMENT cheque clears:
+**`createPaymentChequeJournalEntry(chequeId, clearedDate, userId?)`** Creates GL
+entry when a PAYMENT cheque clears:
+
 - **Debit**: Accounts Payable (Liability decreases)
 - **Credit**: Bank Account (Asset decreases)
 
 Example entry:
+
 ```
 เช็คจ่ายเลขที่ CHK002 ผ่าน ธนาคารกรุงเทพ
 
@@ -65,13 +73,15 @@ Dr. 2110 เจ้าหนี้การค้า               5,000.00
 Cr. 1111 เงินสด - ธนาคารกรุงเทพ     5,000.00
 ```
 
-**`bounceCheque(chequeId, bouncedDate, reason?, userId?)`**
-Creates reversing entry when a cheque bounces:
+**`bounceCheque(chequeId, bouncedDate, reason?, userId?)`** Creates reversing
+entry when a cheque bounces:
+
 - Reverses the original clearing entry
 - Marks original entry as REVERSED
 - Updates cheque status to BOUNCED
 
 Example reversing entry:
+
 ```
 เช็คเลขที่ CHK001 เด้ง ( insufficient funds )
 
@@ -85,13 +95,14 @@ RESTful API endpoint for managing individual cheques.
 
 #### Endpoints
 
-**GET `/api/cheques/[id]`**
-Retrieve a single cheque by ID with bank account details.
+**GET `/api/cheques/[id]`** Retrieve a single cheque by ID with bank account
+details.
 
-**PATCH `/api/cheques/[id]`**
-Update cheque status with automatic GL entry generation.
+**PATCH `/api/cheques/[id]`** Update cheque status with automatic GL entry
+generation.
 
 Request body:
+
 ```json
 {
   "status": "CLEARED" | "DEPOSITED" | "BOUNCED" | "CANCELLED",
@@ -101,18 +112,23 @@ Request body:
 ```
 
 Response:
+
 ```json
 {
   "success": true,
   "data": {
-    "cheque": { /* updated cheque with journalEntryId */ },
-    "journalEntry": { /* created GL entry */ }
+    "cheque": {
+      /* updated cheque with journalEntryId */
+    },
+    "journalEntry": {
+      /* created GL entry */
+    }
   }
 }
 ```
 
-**DELETE `/api/cheques/[id]`**
-Delete a cheque (only allowed if no journal entry exists).
+**DELETE `/api/cheques/[id]`** Delete a cheque (only allowed if no journal entry
+exists).
 
 ## Cheque Workflow
 
@@ -140,7 +156,8 @@ Delete a cheque (only allowed if no journal entry exists).
 - **1121** - ลูกหนี้การค้า (Accounts Receivable)
 - **2110** - เจ้าหนี้การค้า (Accounts Payable)
 
-Note: Bank accounts are dynamically selected based on the cheque's `bankAccount.glAccountId`.
+Note: Bank accounts are dynamically selected based on the cheque's
+`bankAccount.glAccountId`.
 
 ## Usage Examples
 
@@ -153,14 +170,14 @@ fetch('/api/cheques/cheque-id-123', {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     status: 'CLEARED',
-    clearedDate: '2026-03-15'
-  })
-})
+    clearedDate: '2026-03-15',
+  }),
+});
 
 // Programmatic usage
-import { clearCheque } from '@/lib/cheque-service'
+import { clearCheque } from '@/lib/cheque-service';
 
-const journalEntry = await clearCheque('cheque-id-123', new Date(), 'user-id')
+const journalEntry = await clearCheque('cheque-id-123', new Date(), 'user-id');
 ```
 
 ### Clear a Payment Cheque
@@ -171,9 +188,9 @@ fetch('/api/cheques/cheque-id-456', {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     status: 'CLEARED',
-    clearedDate: '2026-03-15'
-  })
-})
+    clearedDate: '2026-03-15',
+  }),
+});
 ```
 
 ### Bounce a Cheque
@@ -185,24 +202,25 @@ fetch('/api/cheques/cheque-id-123', {
   body: JSON.stringify({
     status: 'BOUNCED',
     clearedDate: '2026-03-16',
-    bounceReason: 'insufficient funds'
-  })
-})
+    bounceReason: 'insufficient funds',
+  }),
+});
 
 // Programmatic usage
-import { bounceCheque } from '@/lib/cheque-service'
+import { bounceCheque } from '@/lib/cheque-service';
 
 const reversingEntry = await bounceCheque(
   'cheque-id-123',
   new Date(),
   'insufficient funds',
   'user-id'
-)
+);
 ```
 
 ## Double-Entry Validation
 
-All journal entries created by the cheque clearing service are guaranteed to balance:
+All journal entries created by the cheque clearing service are guaranteed to
+balance:
 
 - **Total Debit** always equals **Total Credit**
 - Each entry has exactly 2 lines (one debit, one credit)
@@ -227,11 +245,14 @@ Error messages are returned in Thai with HTTP status codes:
 ## Database Impact
 
 ### New Journal Entries
+
 Each cleared/bounced cheque creates:
+
 - 1 `JournalEntry` record
 - 2 `JournalLine` records (debit & credit)
 
 ### Updated Records
+
 - `Cheque.journalEntryId` is set when cleared
 - `Cheque.status` and `Cheque.clearedDate` are updated
 - Original `JournalEntry.status` set to 'REVERSED' when bounced
@@ -260,6 +281,7 @@ Potential improvements:
 ## Compliance
 
 This implementation follows Thai Accounting Standards:
+
 - ✓ Double-entry bookkeeping
 - ✓ Proper audit trail
 - ✓ Transaction dates

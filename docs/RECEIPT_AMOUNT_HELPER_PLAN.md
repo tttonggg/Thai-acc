@@ -1,7 +1,6 @@
 # Receipt Amount Helper Feature - Implementation Plan
 
-**Date**: 2026-04-16
-**Status**: Ready to implement
+**Date**: 2026-04-16 **Status**: Ready to implement
 
 ---
 
@@ -14,7 +13,8 @@ Based on user feedback, the receipt form needs:
    - จ่ายเต็มจำนวน (Pay Full) - Auto-fill total unpaid amount
    - Pay for specific invoice - Dropdown to select invoice from unpaid list
    - Custom amount - Manual input
-3. **Partial payment tracking** - Store each payment per invoice and show remaining balance
+3. **Partial payment tracking** - Store each payment per invoice and show
+   remaining balance
 
 ---
 
@@ -25,8 +25,9 @@ Based on user feedback, the receipt form needs:
 **File**: `src/components/receipts/receipt-form.tsx`
 
 **Current Layout** (around line 500-600):
+
 ```tsx
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
   <div className="space-y-2">
     <Label>ผู้รับเงิน</Label>
     <Select>...</Select>
@@ -39,21 +40,22 @@ Based on user feedback, the receipt form needs:
 ```
 
 **New Layout** - Add Quick-Fill Section:
+
 ```tsx
 <div className="space-y-4">
   {/* Existing: Payer & Payment Method fields */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
     <div>...</div> {/* Payer */}
     <div>...</div> {/* Payment Method */}
   </div>
 
   {/* NEW: Amount Quick-Fill Section */}
-  <Card className="bg-blue-50 border-blue-200">
+  <Card className="border-blue-200 bg-blue-50">
     <CardHeader>
       <CardTitle className="text-base">จำนวนเงินที่ต้องการชำระเงิน</CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="flex flex-wrap gap-2 mb-3">
+      <div className="mb-3 flex flex-wrap gap-2">
         <Button
           variant="default"
           size="sm"
@@ -62,20 +64,21 @@ Based on user feedback, the receipt form needs:
         >
           ฿1,070.00 จ่ายเต็มจำนวน
         </Button>
-        
+
         <Select onValueChange={handleSelectInvoice}>
           <SelectTrigger className="flex-[2]">
             <SelectValue placeholder="เลือกใบแจ้ง/ใบวาซื้อ..." />
           </SelectTrigger>
           <SelectContent>
-            {unpaidInvoices.map(invoice => (
+            {unpaidInvoices.map((invoice) => (
               <SelectItem key={invoice.id} value={invoice.id}>
-                {invoice.invoiceNo} - ค้างจ่าย ฿{invoice.balance.toLocaleString()}
+                {invoice.invoiceNo} - ค้างจ่าย ฿
+                {invoice.balance.toLocaleString()}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        
+
         <Input
           type="number"
           placeholder="ระบุกจำนวน"
@@ -84,10 +87,10 @@ Based on user feedback, the receipt form needs:
           className="flex-[2]"
         />
       </div>
-      
-      <div className="flex justify-between items-center text-sm">
+
+      <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">ยอดรวมที่จะจ่าย:</span>
-        <span className="font-semibold text-lg">
+        <span className="text-lg font-semibold">
           ฿{totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
         </span>
       </div>
@@ -97,12 +100,7 @@ Based on user feedback, the receipt form needs:
   {/* Existing: Amount Input (now read-only or calculated) */}
   <div className="space-y-2">
     <Label>จำนวนเงิน</Label>
-    <Input
-      type="number"
-      value={totalAmount}
-      readOnly
-      className="bg-gray-100"
-    />
+    <Input type="number" value={totalAmount} readOnly className="bg-gray-100" />
   </div>
 </div>
 ```
@@ -115,34 +113,34 @@ Based on user feedback, the receipt form needs:
 
 ```typescript
 // New state variables
-const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('')
-const [customAmount, setCustomAmount] = useState<string>('')
+const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('');
+const [customAmount, setCustomAmount] = useState<string>('');
 
 // Calculate totals from unpaid invoices
-const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + inv.balance, 0)
+const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + inv.balance, 0);
 
 // Handle "Pay Full" - sum all unpaid invoices
 const handlePayFull = () => {
-  setTotalAmount(totalUnpaid)
+  setTotalAmount(totalUnpaid);
   // Add all unpaid invoices to allocations
-  const allocations = unpaidInvoices.map(invoice => ({
+  const allocations = unpaidInvoices.map((invoice) => ({
     invoiceId: invoice.id,
     invoiceNo: invoice.invoiceNo,
     amount: invoice.balance, // Full balance
     whtCategory: 'SERVICE',
     whtRate: 3,
     whtAmount: Math.round((invoice.balance * 3) / 100),
-  }))
-  form.setValue('allocations', allocations)
-}
+  }));
+  form.setValue('allocations', allocations);
+};
 
 // Handle "Select Invoice" - fill that invoice's balance
 const handleSelectInvoice = (invoiceId: string) => {
-  const invoice = unpaidInvoices.find(inv => inv.id === invoiceId)
+  const invoice = unpaidInvoices.find((inv) => inv.id === invoiceId);
   if (invoice) {
-    setTotalAmount(invoice.balance)
-    setSelectedInvoiceId(invoiceId)
-    
+    setTotalAmount(invoice.balance);
+    setSelectedInvoiceId(invoiceId);
+
     // Create allocation for just this invoice
     const allocation = {
       invoiceId: invoice.id,
@@ -151,18 +149,18 @@ const handleSelectInvoice = (invoiceId: string) => {
       whtCategory: 'SERVICE',
       whtRate: 3,
       whtAmount: Math.round((invoice.balance * 3) / 100),
-    }
-    form.setValue('allocations', [allocation])
+    };
+    form.setValue('allocations', [allocation]);
   }
-}
+};
 
 // Handle "Custom Amount"
 const handleCustomAmount = (amount: string) => {
-  setCustomAmount(amount)
-  setTotalAmount(parseFloat(amount) || 0)
+  setCustomAmount(amount);
+  setTotalAmount(parseFloat(amount) || 0);
   // Don't pre-fill allocations - let user manually allocate
-  form.setValue('allocations', [])
-}
+  form.setValue('allocations', []);
+};
 ```
 
 ---
@@ -189,17 +187,22 @@ The receipt form already fetches unpaid invoices. Show them in a table:
       </TableHeader>
       <TableBody>
         {unpaidInvoices.map((invoice) => (
-          <TableRow 
+          <TableRow
             key={invoice.id}
             className="cursor-pointer hover:bg-muted/50"
             onClick={() => handleSelectInvoice(invoice.id)}
           >
             <TableCell>{invoice.invoiceNo}</TableCell>
             <TableCell>
-              ฿{invoice.balance.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+              ฿
+              {invoice.balance.toLocaleString('th-TH', {
+                minimumFractionDigits: 2,
+              })}
             </TableCell>
             <TableCell>
-              {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('th-TH') : '-'}
+              {invoice.dueDate
+                ? new Date(invoice.dueDate).toLocaleDateString('th-TH')
+                : '-'}
             </TableCell>
             <TableCell>
               <Badge>{getStatusBadge(invoice.status)}</Badge>
@@ -210,9 +213,9 @@ The receipt form already fetches unpaid invoices. Show them in a table:
                 placeholder="ระบุก"
                 defaultValue={invoice.balance}
                 onBlur={(e) => {
-                  const amount = parseFloat(e.target.value) || 0
+                  const amount = parseFloat(e.target.value) || 0;
                   if (amount > 0) {
-                    handleCustomAmount(amount.toString())
+                    handleCustomAmount(amount.toString());
                   }
                 }}
               />
@@ -232,6 +235,7 @@ The receipt form already fetches unpaid invoices. Show them in a table:
 **Check**: Does `Receipt` model support partial payments?
 
 Current schema (should already have):
+
 - `amount` - Total receipt amount
 - `invoiceId` - Optional linked invoice
 - `allocations` - JSON field with payment breakdown
@@ -241,9 +245,9 @@ If `allocations` field doesn't exist, add it:
 ```prisma
 model Receipt {
   // ... existing fields
-  
+
   allocations Json?  // Store payment breakdown: [{ invoiceId, amount, date }]
-  
+
   // ... other fields
 }
 ```
@@ -253,11 +257,13 @@ model Receipt {
 ### Phase 5: API Changes
 
 **No API changes needed** - The receipt creation already supports:
+
 - Total amount field
 - Invoice linkages
 - Payment allocations
 
 **Verify POST /api/receipts** handles:
+
 ```typescript
 {
   amount: number,           // Total receipt amount in Baht
@@ -311,6 +317,7 @@ model Receipt {
 ## Implementation Priority
 
 **Medium** - Improves UX but not critical
+
 - Can be done alongside other tasks
 - No database schema changes expected
 - Component-only changes

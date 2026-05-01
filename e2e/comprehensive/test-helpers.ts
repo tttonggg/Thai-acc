@@ -1,5 +1,5 @@
-import { Page, request } from '@playwright/test'
-import { request as apiRequest } from '@playwright/test'
+import { Page, request } from '@playwright/test';
+import { request as apiRequest } from '@playwright/test';
 
 // ============================================
 // TEST CREDENTIALS
@@ -8,26 +8,26 @@ export const TEST_CREDENTIALS = {
   admin: {
     email: 'admin@thaiaccounting.com',
     password: 'admin123',
-    role: 'ADMIN'
+    role: 'ADMIN',
   },
   accountant: {
     email: 'accountant@thaiaccounting.com',
     password: 'acc123',
-    role: 'ACCOUNTANT'
+    role: 'ACCOUNTANT',
   },
   user: {
     email: 'user@thaiaccounting.com',
     password: 'user123',
-    role: 'USER'
+    role: 'USER',
   },
   viewer: {
     email: 'viewer@thaiaccounting.com',
     password: 'viewer123',
-    role: 'VIEWER'
-  }
-}
+    role: 'VIEWER',
+  },
+};
 
-export const BASE_URL = 'http://localhost:3000'
+export const BASE_URL = 'http://localhost:3000';
 
 // ============================================
 // LOGIN HELPERS
@@ -37,104 +37,111 @@ export const BASE_URL = 'http://localhost:3000'
  * Login as a specific user role
  */
 export async function loginAs(page: Page, role: keyof typeof TEST_CREDENTIALS) {
-  const credentials = TEST_CREDENTIALS[role]
+  const credentials = TEST_CREDENTIALS[role];
 
   // Clear cookies to ensure fresh login
-  await page.context().clearCookies()
+  await page.context().clearCookies();
 
   // Navigate to login page
-  await page.goto(BASE_URL)
-  await page.waitForLoadState('networkidle')
+  await page.goto(BASE_URL);
+  await page.waitForLoadState('networkidle');
 
   // Wait for form to be visible
-  const emailInput = page.locator('input[type="email"]')
-  const passwordInput = page.locator('input[type="password"]')
-  const submitButton = page.locator('button[type="submit"]')
+  const emailInput = page.locator('input[type="email"]');
+  const passwordInput = page.locator('input[type="password"]');
+  const submitButton = page.locator('button[type="submit"]');
 
-  await emailInput.waitFor({ state: 'visible', timeout: 10000 })
-  await passwordInput.waitFor({ state: 'visible', timeout: 10000 })
-  await submitButton.waitFor({ state: 'visible', timeout: 10000 })
+  await emailInput.waitFor({ state: 'visible', timeout: 10000 });
+  await passwordInput.waitFor({ state: 'visible', timeout: 10000 });
+  await submitButton.waitFor({ state: 'visible', timeout: 10000 });
 
   // Fill credentials
-  await emailInput.fill(credentials.email)
-  await passwordInput.fill(credentials.password)
+  await emailInput.fill(credentials.email);
+  await passwordInput.fill(credentials.password);
 
   // Wait a moment for any validation
-  await page.waitForTimeout(300)
+  await page.waitForTimeout(300);
 
   // Click submit button
-  await submitButton.click()
+  await submitButton.click();
 
   // Wait for navigation
-  await page.waitForTimeout(4000)
+  await page.waitForTimeout(4000);
 
   // Check for sidebar to confirm successful login
-  const sidebar = page.locator('nav, aside').first()
-  const sidebarVisible = await sidebar.isVisible().catch(() => false)
+  const sidebar = page.locator('nav, aside').first();
+  const sidebarVisible = await sidebar.isVisible().catch(() => false);
 
   if (!sidebarVisible) {
     // Take debug screenshot
-    await page.screenshot({ path: 'test-results/login-debug.png', fullPage: true })
+    await page.screenshot({ path: 'test-results/login-debug.png', fullPage: true });
 
     // Check if still on login page with error
-    const errorVisible = await page.locator('text=ไม่ถูกต้อง').isVisible().catch(() => false)
+    const errorVisible = await page
+      .locator('text=ไม่ถูกต้อง')
+      .isVisible()
+      .catch(() => false);
 
     if (errorVisible) {
-      throw new Error('Login failed: Invalid credentials')
+      throw new Error('Login failed: Invalid credentials');
     }
-    throw new Error('Login failed: Sidebar not visible')
+    throw new Error('Login failed: Sidebar not visible');
   }
 
-  console.log(`✅ Login successful as ${credentials.role}`)
-  return sidebar
+  console.log(`✅ Login successful as ${credentials.role}`);
+  return sidebar;
 }
 
 /**
  * Login with retry logic for flaky logins
  */
-export async function loginWithRetry(page: Page, role: keyof typeof TEST_CREDENTIALS = 'admin', maxRetries = 3) {
+export async function loginWithRetry(
+  page: Page,
+  role: keyof typeof TEST_CREDENTIALS = 'admin',
+  maxRetries = 3
+) {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      await loginAs(page, role)
-      return
+      await loginAs(page, role);
+      return;
     } catch (error) {
-      console.log(`Login attempt ${i + 1} failed, retrying...`)
-      await page.waitForTimeout(2000)
+      console.log(`Login attempt ${i + 1} failed, retrying...`);
+      await page.waitForTimeout(2000);
     }
   }
-  throw new Error('Login failed after all retries')
+  throw new Error('Login failed after all retries');
 }
 
 /**
  * Get authenticated API context
  */
 export async function getAuthenticatedContext(role: keyof typeof TEST_CREDENTIALS = 'admin') {
-  const credentials = TEST_CREDENTIALS[role]
+  const credentials = TEST_CREDENTIALS[role];
 
   const context = await apiRequest.newContext({
     extraHTTPHeaders: {
-      'x-playwright-test': 'true'
-    }
-  })
+      'x-playwright-test': 'true',
+    },
+  });
 
   // First get CSRF token
-  const csrfResponse = await context.get(`${BASE_URL}/api/auth/csrf`)
-  const { csrfToken } = await csrfResponse.json()
+  const csrfResponse = await context.get(`${BASE_URL}/api/auth/csrf`);
+  const { csrfToken } = await csrfResponse.json();
 
   // Login
   const loginResponse = await context.post(`${BASE_URL}/api/auth/callback/credentials`, {
     data: {
       email: credentials.email,
       password: credentials.password,
-      csrfToken
-    }
-  })
+      csrfToken,
+    },
+  });
 
   if (!loginResponse.ok()) {
-    throw new Error('API Login failed')
+    throw new Error('API Login failed');
   }
 
-  return context
+  return context;
 }
 
 // ============================================
@@ -145,37 +152,37 @@ export async function getAuthenticatedContext(role: keyof typeof TEST_CREDENTIAL
  * Find and click sidebar button by Thai or English text
  */
 export async function clickSidebarButton(page: Page, thaiText: string, englishText?: string) {
-  const buttons = page.locator('aside nav button')
-  const count = await buttons.count()
+  const buttons = page.locator('aside nav button');
+  const count = await buttons.count();
 
   for (let i = 0; i < count; i++) {
-    const text = await buttons.nth(i).textContent()
+    const text = await buttons.nth(i).textContent();
     if (text && (text.includes(thaiText) || (englishText && text.includes(englishText)))) {
-      await buttons.nth(i).click()
-      console.log(`✅ Clicked sidebar button: ${thaiText}`)
-      return true
+      await buttons.nth(i).click();
+      console.log(`✅ Clicked sidebar button: ${thaiText}`);
+      return true;
     }
   }
 
-  throw new Error(`Sidebar button not found: ${thaiText} / ${englishText}`)
+  throw new Error(`Sidebar button not found: ${thaiText} / ${englishText}`);
 }
 
 /**
  * Navigate to a specific module
  */
 export async function navigateToModule(page: Page, moduleThai: string, moduleEnglish?: string) {
-  await clickSidebarButton(page, moduleThai, moduleEnglish)
-  await page.waitForTimeout(1500)
+  await clickSidebarButton(page, moduleThai, moduleEnglish);
+  await page.waitForTimeout(1500);
 
   // Verify navigation succeeded
-  const header = page.locator('h1').first()
-  const headerVisible = await header.isVisible().catch(() => false)
+  const header = page.locator('h1').first();
+  const headerVisible = await header.isVisible().catch(() => false);
 
   if (!headerVisible) {
-    throw new Error(`Failed to navigate to module: ${moduleThai}`)
+    throw new Error(`Failed to navigate to module: ${moduleThai}`);
   }
 
-  console.log(`✅ Navigated to: ${moduleThai}`)
+  console.log(`✅ Navigated to: ${moduleThai}`);
 }
 
 // ============================================
@@ -191,17 +198,17 @@ export async function verifyRecordExists(
   code: string,
   expectedFields?: Record<string, any>
 ) {
-  const response = await context.get(`${BASE_URL}${endpoint}`)
-  const result = await response.json()
+  const response = await context.get(`${BASE_URL}${endpoint}`);
+  const result = await response.json();
 
   if (!result.success) {
-    throw new Error(`Failed to fetch records from ${endpoint}`)
+    throw new Error(`Failed to fetch records from ${endpoint}`);
   }
 
-  const record = result.data.find((r: any) => r.code === code)
+  const record = result.data.find((r: any) => r.code === code);
 
   if (!record) {
-    throw new Error(`Record not found: ${code} in ${endpoint}`)
+    throw new Error(`Record not found: ${code} in ${endpoint}`);
   }
 
   // Verify expected fields if provided
@@ -210,67 +217,67 @@ export async function verifyRecordExists(
       if (record[key] !== value) {
         throw new Error(
           `Field verification failed for ${code}: ${key} expected ${value} but got ${record[key]}`
-        )
+        );
       }
     }
   }
 
-  console.log(`✅ Verified record exists: ${code}`)
-  return record
+  console.log(`✅ Verified record exists: ${code}`);
+  return record;
 }
 
 /**
  * Verify record was deleted
  */
 export async function verifyRecordDeleted(context: any, endpoint: string, code: string) {
-  const response = await context.get(`${BASE_URL}${endpoint}`)
-  const result = await response.json()
+  const response = await context.get(`${BASE_URL}${endpoint}`);
+  const result = await response.json();
 
   if (!result.success) {
-    throw new Error(`Failed to fetch records from ${endpoint}`)
+    throw new Error(`Failed to fetch records from ${endpoint}`);
   }
 
-  const record = result.data.find((r: any) => r.code === code)
+  const record = result.data.find((r: any) => r.code === code);
 
   if (record) {
-    throw new Error(`Record should be deleted but still exists: ${code}`)
+    throw new Error(`Record should be deleted but still exists: ${code}`);
   }
 
-  console.log(`✅ Verified record deleted: ${code}`)
+  console.log(`✅ Verified record deleted: ${code}`);
 }
 
 /**
  * Get record by code
  */
 export async function getRecordByCode(context: any, endpoint: string, code: string) {
-  const response = await context.get(`${BASE_URL}${endpoint}`)
-  const result = await response.json()
+  const response = await context.get(`${BASE_URL}${endpoint}`);
+  const result = await response.json();
 
   if (!result.success) {
-    throw new Error(`Failed to fetch records from ${endpoint}`)
+    throw new Error(`Failed to fetch records from ${endpoint}`);
   }
 
-  const record = result.data.find((r: any) => r.code === code)
+  const record = result.data.find((r: any) => r.code === code);
 
   if (!record) {
-    throw new Error(`Record not found: ${code} in ${endpoint}`)
+    throw new Error(`Record not found: ${code} in ${endpoint}`);
   }
 
-  return record
+  return record;
 }
 
 /**
  * Count records
  */
 export async function countRecords(context: any, endpoint: string) {
-  const response = await context.get(`${BASE_URL}${endpoint}`)
-  const result = await response.json()
+  const response = await context.get(`${BASE_URL}${endpoint}`);
+  const result = await response.json();
 
   if (!result.success) {
-    throw new Error(`Failed to fetch records from ${endpoint}`)
+    throw new Error(`Failed to fetch records from ${endpoint}`);
   }
 
-  return result.data.length
+  return result.data.length;
 }
 
 // ============================================
@@ -282,28 +289,28 @@ export async function countRecords(context: any, endpoint: string) {
  */
 export async function fillFormByLabels(page: Page, fields: Record<string, string>) {
   for (const [label, value] of Object.entries(fields)) {
-    const labelElement = page.locator(`label:has-text("${label}")`).first()
+    const labelElement = page.locator(`label:has-text("${label}")`).first();
 
     if (await labelElement.isVisible().catch(() => false)) {
       // Find input associated with label
-      const inputId = await labelElement.getAttribute('for')
-      let input: any
+      const inputId = await labelElement.getAttribute('for');
+      let input: any;
 
       if (inputId) {
-        input = page.locator(`#${inputId}`)
+        input = page.locator(`#${inputId}`);
       } else {
         // Try to find input near label
-        input = labelElement.locator('..').locator('input, textarea, select').first()
+        input = labelElement.locator('..').locator('input, textarea, select').first();
       }
 
       if (await input.isVisible().catch(() => false)) {
-        await input.fill(value)
-        console.log(`  ✅ Filled field: ${label} = ${value}`)
+        await input.fill(value);
+        console.log(`  ✅ Filled field: ${label} = ${value}`);
       } else {
-        console.log(`  ⚠️ Input not found for label: ${label}`)
+        console.log(`  ⚠️ Input not found for label: ${label}`);
       }
     } else {
-      console.log(`  ⚠️ Label not found: ${label}`)
+      console.log(`  ⚠️ Label not found: ${label}`);
     }
   }
 }
@@ -312,48 +319,48 @@ export async function fillFormByLabels(page: Page, fields: Record<string, string
  * Click button by text
  */
 export async function clickButton(page: Page, text: string) {
-  const button = page.locator(`button:has-text("${text}")`).first()
+  const button = page.locator(`button:has-text("${text}")`).first();
 
   if (!(await button.isVisible().catch(() => false))) {
-    throw new Error(`Button not found: ${text}`)
+    throw new Error(`Button not found: ${text}`);
   }
 
-  await button.click()
-  console.log(`✅ Clicked button: ${text}`)
-  await page.waitForTimeout(500)
+  await button.click();
+  console.log(`✅ Clicked button: ${text}`);
+  await page.waitForTimeout(500);
 }
 
 /**
  * Take screenshot with automatic directory creation
  */
 export async function takeScreenshot(page: Page, path: string) {
-  const fs = require('fs')
-  const dir = path.substring(0, path.lastIndexOf('/'))
+  const fs = require('fs');
+  const dir = path.substring(0, path.lastIndexOf('/'));
 
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true })
+    fs.mkdirSync(dir, { recursive: true });
   }
 
-  await page.screenshot({ path, fullPage: true })
-  console.log(`📸 Screenshot saved: ${path}`)
+  await page.screenshot({ path, fullPage: true });
+  console.log(`📸 Screenshot saved: ${path}`);
 }
 
 /**
  * Wait for toast notification
  */
 export async function waitForToast(page: Page, timeout = 3000) {
-  await page.waitForTimeout(500)
+  await page.waitForTimeout(500);
 
-  const toast = page.locator('[role="alert"], [class*="toast"], .toast').first()
+  const toast = page.locator('[role="alert"], [class*="toast"], .toast').first();
 
   try {
-    await toast.waitFor({ state: 'visible', timeout })
-    const text = await toast.textContent()
-    console.log(`🔔 Toast notification: ${text}`)
-    return text
+    await toast.waitFor({ state: 'visible', timeout });
+    const text = await toast.textContent();
+    console.log(`🔔 Toast notification: ${text}`);
+    return text;
   } catch {
-    console.log('⚠️ No toast notification found')
-    return null
+    console.log('⚠️ No toast notification found');
+    return null;
   }
 }
 
@@ -361,18 +368,18 @@ export async function waitForToast(page: Page, timeout = 3000) {
  * Verify table has data
  */
 export async function verifyTableHasData(page: Page) {
-  const table = page.locator('table').first()
-  await expect(table, 'Table should be visible').toBeVisible({ timeout: 5000 })
+  const table = page.locator('table').first();
+  await expect(table, 'Table should be visible').toBeVisible({ timeout: 5000 });
 
-  const rows = table.locator('tbody tr')
-  const rowCount = await rows.count()
+  const rows = table.locator('tbody tr');
+  const rowCount = await rows.count();
 
   if (rowCount === 0) {
-    throw new Error('Table has no data')
+    throw new Error('Table has no data');
   }
 
-  console.log(`✅ Table has ${rowCount} rows`)
-  return rowCount
+  console.log(`✅ Table has ${rowCount} rows`);
+  return rowCount;
 }
 
 // ============================================
@@ -383,15 +390,15 @@ export async function verifyTableHasData(page: Page) {
  * Generate unique test code with timestamp
  */
 export function generateTestCode(prefix: string) {
-  const timestamp = Date.now().toString().slice(-6)
-  return `${prefix}${timestamp}`
+  const timestamp = Date.now().toString().slice(-6);
+  return `${prefix}${timestamp}`;
 }
 
 /**
  * Generate test customer data
  */
 export function generateTestCustomer() {
-  const code = generateTestCode('CUST')
+  const code = generateTestCode('CUST');
   return {
     code,
     name: `บริษัท ทดสอบ ${code} จำกัด`,
@@ -405,15 +412,15 @@ export function generateTestCustomer() {
     phone: '02-111-1111',
     email: `test${code.toLowerCase()}@company.com`,
     creditLimit: 100000,
-    creditDays: 30
-  }
+    creditDays: 30,
+  };
 }
 
 /**
  * Generate test vendor data
  */
 export function generateTestVendor() {
-  const code = generateTestCode('VEND')
+  const code = generateTestCode('VEND');
   return {
     code,
     name: `บริษัท ผู้ขาย ${code} จำกัด`,
@@ -424,15 +431,15 @@ export function generateTestVendor() {
     postalCode: '10300',
     phone: '02-222-2222',
     email: `vendor${code.toLowerCase()}@company.com`,
-    creditDays: 30
-  }
+    creditDays: 30,
+  };
 }
 
 /**
  * Generate test product data
  */
 export function generateTestProduct() {
-  const code = generateTestCode('PROD')
+  const code = generateTestCode('PROD');
   return {
     code,
     name: `สินค้าทดสอบ ${code}`,
@@ -442,8 +449,8 @@ export function generateTestProduct() {
     cost: 500,
     vatType: 'VAT7',
     incomeType: 'service',
-    isInventoryItem: true
-  }
+    isInventoryItem: true,
+  };
 }
 
 // ============================================
@@ -456,19 +463,19 @@ export function generateTestProduct() {
 export async function deleteTestRecord(context: any, endpoint: string, code: string) {
   try {
     // First get the record to find its ID
-    const response = await context.get(`${BASE_URL}${endpoint}`)
-    const result = await response.json()
+    const response = await context.get(`${BASE_URL}${endpoint}`);
+    const result = await response.json();
 
     if (result.success) {
-      const record = result.data.find((r: any) => r.code === code)
+      const record = result.data.find((r: any) => r.code === code);
 
       if (record) {
-        await context.delete(`${BASE_URL}${endpoint}/${record.id}`)
-        console.log(`🗑️ Deleted test record: ${code}`)
+        await context.delete(`${BASE_URL}${endpoint}/${record.id}`);
+        console.log(`🗑️ Deleted test record: ${code}`);
       }
     }
   } catch (error) {
-    console.log(`⚠️ Failed to delete test record ${code}:`, error)
+    console.log(`⚠️ Failed to delete test record ${code}:`, error);
   }
 }
 
@@ -477,18 +484,18 @@ export async function deleteTestRecord(context: any, endpoint: string, code: str
  */
 export async function cleanupTestRecords(context: any, endpoint: string, prefix: string) {
   try {
-    const response = await context.get(`${BASE_URL}${endpoint}`)
-    const result = await response.json()
+    const response = await context.get(`${BASE_URL}${endpoint}`);
+    const result = await response.json();
 
     if (result.success) {
-      const testRecords = result.data.filter((r: any) => r.code && r.code.startsWith(prefix))
+      const testRecords = result.data.filter((r: any) => r.code && r.code.startsWith(prefix));
 
       for (const record of testRecords) {
-        await context.delete(`${BASE_URL}${endpoint}/${record.id}`)
-        console.log(`🗑️ Cleaned up test record: ${record.code}`)
+        await context.delete(`${BASE_URL}${endpoint}/${record.id}`);
+        console.log(`🗑️ Cleaned up test record: ${record.code}`);
       }
     }
   } catch (error) {
-    console.log(`⚠️ Failed to cleanup test records with prefix ${prefix}:`, error)
+    console.log(`⚠️ Failed to cleanup test records with prefix ${prefix}:`, error);
   }
 }

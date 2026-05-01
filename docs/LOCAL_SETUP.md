@@ -2,7 +2,8 @@
 
 ## Thai Accounting ERP - Developer Setup
 
-This guide will walk you through setting up the Thai Accounting ERP system on your local machine for development.
+This guide will walk you through setting up the Thai Accounting ERP system on
+your local machine for development.
 
 ---
 
@@ -24,12 +25,12 @@ This guide will walk you through setting up the Thai Accounting ERP system on yo
 
 ### Required Software
 
-| Software | Version | Download |
-|----------|---------|----------|
-| Node.js | 18.x LTS or higher | [nodejs.org](https://nodejs.org) |
-| Bun (optional but recommended) | 1.0.0+ | [bun.sh](https://bun.sh) |
-| Git | 2.30+ | [git-scm.com](https://git-scm.com) |
-| SQLite | 3.35+ | Included with Node.js |
+| Software                       | Version            | Download                           |
+| ------------------------------ | ------------------ | ---------------------------------- |
+| Node.js                        | 18.x LTS or higher | [nodejs.org](https://nodejs.org)   |
+| Bun (optional but recommended) | 1.0.0+             | [bun.sh](https://bun.sh)           |
+| Git                            | 2.30+              | [git-scm.com](https://git-scm.com) |
+| SQLite                         | 3.35+              | Included with Node.js              |
 
 ### System Requirements
 
@@ -97,6 +98,7 @@ curl -fsSL https://bun.sh/install | bash
 ```
 
 Verify installation:
+
 ```bash
 bun --version
 # Should show 1.0.0 or higher
@@ -138,6 +140,7 @@ npm install
 ```
 
 This installs:
+
 - Next.js and React
 - Prisma ORM
 - Tailwind CSS
@@ -180,6 +183,7 @@ API_KEY=""
 ```
 
 Generate a secure secret:
+
 ```bash
 # macOS/Linux
 openssl rand -base64 32
@@ -250,12 +254,14 @@ bun run seed:fresh
 ### Database Seeding
 
 The seed process creates:
+
 - Default admin user
 - 181 Thai standard chart of accounts
 - Sample customers and vendors
 - Document numbering sequences
 
 Default credentials after seeding:
+
 - **Admin:** admin@thaiaccounting.com / admin123
 - **Accountant:** accountant@thaiaccounting.com / acc123
 - **User:** user@thaiaccounting.com / user123
@@ -267,28 +273,28 @@ Default credentials after seeding:
 
 ### Required Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | Database connection string | `file:./prisma/dev.db` |
-| `NEXTAUTH_URL` | Application URL | `http://localhost:3000` |
-| `NEXTAUTH_SECRET` | JWT signing secret | Generate random string |
+| Variable          | Description                | Example                 |
+| ----------------- | -------------------------- | ----------------------- |
+| `DATABASE_URL`    | Database connection string | `file:./prisma/dev.db`  |
+| `NEXTAUTH_URL`    | Application URL            | `http://localhost:3000` |
+| `NEXTAUTH_SECRET` | JWT signing secret         | Generate random string  |
 
 ### Optional Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment mode | `development` |
-| `PORT` | Server port | `3000` |
-| `LOG_LEVEL` | Logging level | `info` |
-| `RATE_LIMIT_ENABLED` | Enable rate limiting | `false` |
+| Variable             | Description          | Default       |
+| -------------------- | -------------------- | ------------- |
+| `NODE_ENV`           | Environment mode     | `development` |
+| `PORT`               | Server port          | `3000`        |
+| `LOG_LEVEL`          | Logging level        | `info`        |
+| `RATE_LIMIT_ENABLED` | Enable rate limiting | `false`       |
 
 ### Feature Flags
 
-| Variable | Description |
-|----------|-------------|
-| `ENABLE_WEBHOOKS` | Enable webhook system |
-| `ENABLE_ANALYTICS` | Enable usage analytics |
-| `ENABLE_MFA` | Enable multi-factor authentication |
+| Variable           | Description                        |
+| ------------------ | ---------------------------------- |
+| `ENABLE_WEBHOOKS`  | Enable webhook system              |
+| `ENABLE_ANALYTICS` | Enable usage analytics             |
+| `ENABLE_MFA`       | Enable multi-factor authentication |
 
 ---
 
@@ -305,6 +311,7 @@ npm run dev
 ```
 
 Features:
+
 - Hot module replacement
 - Source maps enabled
 - Detailed error messages
@@ -323,11 +330,13 @@ bun run start
 ### Development with Debugging
 
 **VS Code:**
+
 1. Open Run and Debug panel (Ctrl+Shift+D)
 2. Select "Next.js: debug full stack"
 3. Press F5
 
 **Chrome DevTools:**
+
 ```bash
 # Start with inspect flag
 node --inspect node_modules/next/dist/bin/next dev
@@ -385,12 +394,14 @@ bun run test:e2e:ui
 ### Database Management
 
 **Prisma Studio (GUI):**
+
 ```bash
 bunx prisma studio
 # Opens at http://localhost:5555
 ```
 
 **Database Browser:**
+
 - Open `prisma/dev.db` in TablePlus or DB Browser
 - View and edit data directly
 
@@ -401,6 +412,7 @@ bunx prisma studio
 ### Issue: Port 3000 already in use
 
 **Solution:**
+
 ```bash
 # Find process using port 3000
 # macOS/Linux:
@@ -416,12 +428,14 @@ PORT=3001 bun run dev
 ### Issue: Database connection error
 
 **Symptoms:**
+
 ```
 Error: Database connection failed
 PrismaClientInitializationError
 ```
 
 **Solutions:**
+
 1. Check DATABASE_URL in .env
 2. Ensure database file exists (SQLite)
 3. Regenerate Prisma client:
@@ -437,6 +451,7 @@ PrismaClientInitializationError
 ### Issue: Module not found errors
 
 **Solution:**
+
 ```bash
 # Clear module cache
 rm -rf node_modules
@@ -452,6 +467,7 @@ bun run build
 ### Issue: Prisma client generation fails
 
 **Solution:**
+
 ```bash
 # Clear Prisma cache
 rm -rf node_modules/.prisma
@@ -464,6 +480,7 @@ bun run db:generate
 ### Issue: Authentication not working
 
 **Solutions:**
+
 1. Check NEXTAUTH_SECRET is set
 2. Verify NEXTAUTH_URL matches your URL
 3. Check browser cookies are enabled
@@ -476,12 +493,14 @@ bun run db:generate
 ### Windows-Specific Issues
 
 **Issue:** Script execution policy
+
 ```powershell
 # Run PowerShell as Administrator
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 **Issue:** Path separators
+
 ```bash
 # Use forward slashes in .env
 DATABASE_URL="file:./prisma/dev.db"
@@ -490,11 +509,13 @@ DATABASE_URL="file:./prisma/dev.db"
 ### macOS-Specific Issues
 
 **Issue:** Xcode command line tools
+
 ```bash
 xcode-select --install
 ```
 
 **Issue:** Permission denied
+
 ```bash
 # Fix npm/bun permissions
 sudo chown -R $(whoami) ~/.npm
@@ -504,6 +525,7 @@ sudo chown -R $(whoami) ~/.bun
 ### Linux-Specific Issues
 
 **Issue:** Node.js version too old
+
 ```bash
 # Use nvm to install latest
 nvm install 18
@@ -512,6 +534,7 @@ nvm alias default 18
 ```
 
 **Issue:** Missing build tools
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get install build-essential
@@ -579,4 +602,4 @@ If you encounter issues:
 
 ---
 
-*Last Updated: March 16, 2026*
+_Last Updated: March 16, 2026_

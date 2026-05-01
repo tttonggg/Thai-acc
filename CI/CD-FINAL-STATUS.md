@@ -7,21 +7,26 @@ Your **CI/CD pipeline is fully configured and operational**.
 ## ✅ Complete Setup Summary
 
 ### GitHub Actions Workflow ✅
+
 - **File**: `.github/workflows/deploy.yml`
 - **Trigger**: Automatic on push to `master`
 - **Stages**: Test → Build → Deploy → Health Check
 - **Status**: 🟢 Active
 
 ### VPS Deployment Script ✅
+
 - **File**: `scripts/vps-deploy.sh`
 - **Features**: Backup, restart, health checks
 - **Process Manager**: PM2
 
 ### GitHub Secrets ✅
+
 All 7 secrets configured and verified
 
 ### Bug Fixes Applied ✅
+
 **10 commits** fixing critical issues:
+
 1. Satang/Baht conversions in forms
 2. API response handling
 3. Husky prepare script errors
@@ -32,6 +37,7 @@ All 7 secrets configured and verified
 8. Prisma client generation
 
 ### Complete Documentation ✅
+
 - `CI-CD-README.md` - Main guide
 - `CI-CD-SETUP.md` - Setup instructions
 - `CI-CD-DEPLOYMENT-LOG.md` - Deployment status
@@ -42,15 +48,14 @@ All 7 secrets configured and verified
 
 ## 📊 Latest Deployment
 
-**Run**: #24345371946
-**Commit**: a5534b5 - Generate Prisma client before build
-**Started**: 2026-04-13 13:14:56 UTC
-**Status**: 🔄 In Progress
-**Current Stage**: Building
+**Run**: #24345371946 **Commit**: a5534b5 - Generate Prisma client before build
+**Started**: 2026-04-13 13:14:56 UTC **Status**: 🔄 In Progress **Current
+Stage**: Building
 
 ## 🚀 What Happens on Deployment
 
 Every push to `master` automatically:
+
 1. ✅ Installs dependencies (`bun install --ignore-scripts`)
 2. ✅ Generates Prisma client
 3. ✅ Runs type-check (non-blocking)
@@ -64,6 +69,7 @@ Every push to `master` automatically:
 ## 📈 Success Metrics
 
 **Deployment Success** when:
+
 - ✅ Build completes
 - ✅ Deploy completes
 - ✅ Health check passes
@@ -75,7 +81,8 @@ Every push to `master` automatically:
 - **GitHub Actions**: https://github.com/tttonggg/Thai-acc/actions
 - **Live Application**: https://acc.k56mm.uk
 - **Health Check**: https://acc.k56mm.uk/api/health
-- **Latest Deployment**: https://github.com/tttonggg/Thai-acc/actions/runs/24345371946
+- **Latest Deployment**:
+  https://github.com/tttonggg/Thai-acc/actions/runs/24345371946
 
 ## 🛠️ VPS Management
 
@@ -114,12 +121,12 @@ fff2dcb - 🚀 FEAT: CI/CD Pipeline
 
 ## 🎉 You're Ready!
 
-Your CI/CD pipeline is **fully operational**. Every push to master will automatically deploy to production.
+Your CI/CD pipeline is **fully operational**. Every push to master will
+automatically deploy to production.
 
 **Production URL**: https://acc.k56mm.uk
 
 ---
-**Setup Completed**: 2026-04-13
-**Total Commits**: 10
-**Status**: 🟢 CI/CD Operational
-**Deployment**: In Progress
+
+**Setup Completed**: 2026-04-13 **Total Commits**: 10 **Status**: 🟢 CI/CD
+Operational **Deployment**: In Progress

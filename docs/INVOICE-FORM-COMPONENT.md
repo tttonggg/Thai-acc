@@ -2,13 +2,17 @@
 
 ## Overview
 
-The Invoice Form component (`/src/components/invoices/invoice-form.tsx`) is a comprehensive form for creating sales documents in the Thai Accounting ERP system. It supports multiple document types including Tax Invoices, Receipts, Delivery Orders, Credit Notes, and Debit Notes.
+The Invoice Form component (`/src/components/invoices/invoice-form.tsx`) is a
+comprehensive form for creating sales documents in the Thai Accounting ERP
+system. It supports multiple document types including Tax Invoices, Receipts,
+Delivery Orders, Credit Notes, and Debit Notes.
 
 ## Features Implemented
 
 ### 1. Form Fields
 
 #### Customer Information
+
 - **Customer Selection** (Required)
   - Dropdown populated from `/api/customers`
   - Displays customer code, name, and tax ID
@@ -27,11 +31,14 @@ The Invoice Form component (`/src/components/invoices/invoice-form.tsx`) is a co
   - Debit Note (ใบเพิ่มหนี้)
 
 #### Reference Information
+
 - **Reference Number** (Optional)
 - **Purchase Order Number** (Optional)
 
 #### Line Items (Dynamic)
+
 Each line item includes:
+
 - **Product Selection** (Optional)
   - Dropdown from `/api/products`
   - Auto-fills description, unit, and price
@@ -54,6 +61,7 @@ Each line item includes:
   - Auto-calculated: (Quantity × Price) - Discount
 
 #### Totals Section
+
 - **Subtotal**: Sum of all line totals
 - **Discount**: Percentage or fixed amount
 - **VAT**: Auto-calculated based on line VAT rates
@@ -64,6 +72,7 @@ Each line item includes:
 - **Net Total**: Grand total - Withholding tax
 
 #### Additional Information
+
 - **Withholding Tax Rate** (Optional)
 - **Notes** (Optional)
 
@@ -115,6 +124,7 @@ Each line item includes:
 ### 3. Validation
 
 #### Field-Level Validation
+
 - **Customer**: Required selection
 - **At least 1 line item**: Required
 - **Line Item Description**: Required, cannot be empty
@@ -123,6 +133,7 @@ Each line item includes:
 - **Thai Tax ID**: 13 digits if provided (backend validation)
 
 #### Form-Level Validation
+
 - All required fields must be filled
 - At least one line item must exist
 - Line items must have valid quantities and prices
@@ -131,19 +142,31 @@ Each line item includes:
 ### 4. UI Components Used
 
 ```tsx
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/hooks/use-toast'
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 ```
 
 ### 5. Thai Language Support
 
 All UI text is in Thai:
+
 - Labels: "ลูกค้า", "วันที่เอกสาร", "รายการสินค้า/บริการ"
 - Buttons: "บันทึก", "ยกเลิก", "เพิ่มรายการ"
 - Error messages: "กรุณาเลือกลูกค้า", "จำนวนต้องมากกว่า 0"
@@ -177,17 +200,20 @@ netTotal = grandTotal - withholdingAmount
 ### 8. User Experience Features
 
 #### Loading States
+
 - Initial data fetch (customers, products, invoice number)
 - Form submission (disabled state with spinner)
 - Visual feedback during all async operations
 
 #### Error Handling
+
 - Field-level error messages
 - Toast notifications for success/error
 - Form-level validation summaries
 - API error handling with fallbacks
 
 #### Accessibility
+
 - Proper ARIA labels
 - Keyboard navigation support
 - Focus management on dialog open/close
@@ -197,50 +223,55 @@ netTotal = grandTotal - withholdingAmount
 
 ```typescript
 interface InvoiceFormProps {
-  open: boolean                    // Dialog open state
-  onClose: () => void             // Close handler
-  onSuccess: () => void           // Success callback (refresh list)
-  defaultType?: 'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE'
+  open: boolean; // Dialog open state
+  onClose: () => void; // Close handler
+  onSuccess: () => void; // Success callback (refresh list)
+  defaultType?:
+    | 'TAX_INVOICE'
+    | 'RECEIPT'
+    | 'DELIVERY_NOTE'
+    | 'CREDIT_NOTE'
+    | 'DEBIT_NOTE';
 }
 ```
 
 ### 10. Integration Example
 
 ```tsx
-import { InvoiceForm } from '@/components/invoices/invoice-form'
+import { InvoiceForm } from '@/components/invoices/invoice-form';
 
 function InvoicePage() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [invoiceType, setInvoiceType] = useState('TAX_INVOICE')
+  const [isOpen, setIsOpen] = useState(false);
+  const [invoiceType, setInvoiceType] = useState('TAX_INVOICE');
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>
-        สร้างเอกสารใหม่
-      </Button>
+      <Button onClick={() => setIsOpen(true)}>สร้างเอกสารใหม่</Button>
 
       <InvoiceForm
         open={isOpen}
         onClose={() => setIsOpen(false)}
         onSuccess={() => {
           // Refresh invoice list
-          console.log('Invoice created successfully')
+          console.log('Invoice created successfully');
         }}
         defaultType={invoiceType}
       />
     </>
-  )
+  );
 }
 ```
 
 ## Files Created/Modified
 
 ### Created Files
+
 1. `/src/components/invoices/invoice-form.tsx` - Main form component
 2. `/src/app/api/products/route.ts` - Products API endpoint
 3. `/src/app/api/invoices/next-number/route.ts` - Invoice number generator
 
 ### Modified Files
+
 1. `/src/components/invoices/invoice-list.tsx` - Integrated form component
 2. `/src/app/api/reports/trial-balance/route.ts` - Fixed syntax error
 
@@ -292,6 +323,7 @@ function InvoicePage() {
 ## Future Enhancements
 
 Potential improvements for later iterations:
+
 - [ ] Edit existing invoices
 - [ ] Save as draft
 - [ ] Line item templates

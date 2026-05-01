@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * Prepare Prisma Schemas
- * 
+ *
  * This script generates schema-postgres.prisma and schema-sqlite.prisma
  * from schema.prisma (the source of truth).
- * 
+ *
  * Usage: node scripts/prepare-schemas.js
  */
 

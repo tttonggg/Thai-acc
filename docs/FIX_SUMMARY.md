@@ -3,12 +3,17 @@
 ## 1. ใบเพิ่มหนี้ (Debit Notes) - ไม่มีปุ่มเพิ่มรายการ ✅ แก้ไขแล้ว
 
 ### ปัญหา
-เมื่อไม่มีข้อมูลใบเพิ่มหนี้ หน้าจอแสดง "ไม่พบข้อมูล" แต่ไม่มีปุ่ม "สร้างใบเพิ่มหนี้"
+
+เมื่อไม่มีข้อมูลใบเพิ่มหนี้ หน้าจอแสดง "ไม่พบข้อมูล" แต่ไม่มีปุ่ม
+"สร้างใบเพิ่มหนี้"
 
 ### สาเหตุ
-ในโค้ดตรวจสอบเงื่อนไข `if (!debitNotes || debitNotes.length === 0)` มีการ return  early โดยไม่มีปุ่มสร้าง
+
+ในโค้ดตรวจสอบเงื่อนไข `if (!debitNotes || debitNotes.length === 0)` มีการ return
+early โดยไม่มีปุ่มสร้าง
 
 ### การแก้ไข
+
 **ไฟล์:** `src/components/debit-notes/debit-note-list.tsx`
 
 ```typescript
@@ -59,25 +64,31 @@ if (!debitNotes || debitNotes.length === 0) {
 ## 2. ใบสั่งซื้อ (Purchase Order) - ปุ่มสร้างไม่ทำงาน ✅ แก้ไขแล้ว
 
 ### ปัญหา
+
 ปุ่ม "สร้างใบสั่งซื้อ" ไม่มี onClick handler
 
 ### การแก้ไข
+
 **ไฟล์:** `src/components/purchase-orders/purchase-order-list.tsx`
 
 ### รายการแก้ไข:
+
 1. **Import PurchaseOrderForm:**
+
 ```typescript
-import { PurchaseOrderForm } from './purchase-order-form'
+import { PurchaseOrderForm } from './purchase-order-form';
 ```
 
 2. **Add state:**
+
 ```typescript
-const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 ```
 
 3. **Add onClick to button:**
+
 ```typescript
-<Button 
+<Button
   className="bg-blue-600 hover:bg-blue-700"
   onClick={() => setIsAddDialogOpen(true)}  // ✅ เพิ่ม onClick
 >
@@ -87,6 +98,7 @@ const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 ```
 
 4. **Add Dialog at the end:**
+
 ```typescript
 <PurchaseOrderForm
   open={isAddDialogOpen}
@@ -107,6 +119,7 @@ const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 ## 3. สร้าง index.ts สำหรับ Components ✅ แก้ไขแล้ว
 
 ### ไฟล์ที่สร้าง:
+
 - `src/components/credit-notes/index.ts`
 - `src/components/debit-notes/index.ts`
 - `src/components/purchase-orders/index.ts` (มีอยู่แล้ว)
@@ -115,11 +128,11 @@ const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
 ## สรุปการแก้ไขทั้งหมด
 
-| ปัญหา | ไฟล์ | สถานะ |
-|-------|------|--------|
-| ใบเพิ่มหนี้ไม่มีปุ่มเพิ่ม | `debit-note-list.tsx` | ✅ แก้ไขแล้ว |
-| ใบสั่งซื้อปุ่มไม่ทำงาน | `purchase-order-list.tsx` | ✅ แก้ไขแล้ว |
-| ไม่มี index.ts | `credit-notes/`, `debit-notes/` | ✅ สร้างแล้ว |
+| ปัญหา                     | ไฟล์                            | สถานะ        |
+| ------------------------- | ------------------------------- | ------------ |
+| ใบเพิ่มหนี้ไม่มีปุ่มเพิ่ม | `debit-note-list.tsx`           | ✅ แก้ไขแล้ว |
+| ใบสั่งซื้อปุ่มไม่ทำงาน    | `purchase-order-list.tsx`       | ✅ แก้ไขแล้ว |
+| ไม่มี index.ts            | `credit-notes/`, `debit-notes/` | ✅ สร้างแล้ว |
 
 ---
 

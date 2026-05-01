@@ -20,9 +20,13 @@ export class ProductsPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("สินค้าและบริการ"), h1:has-text("Products")');
-    this.newProductButton = page.locator('button:has-text("สร้างสินค้า"), button:has-text("New Product")');
+    this.newProductButton = page.locator(
+      'button:has-text("สร้างสินค้า"), button:has-text("New Product")'
+    );
     this.productsTable = page.locator('table, [role="table"]').first();
-    this.searchInput = page.locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]').first();
+    this.searchInput = page
+      .locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]')
+      .first();
   }
 
   /**
@@ -90,17 +94,22 @@ export class ProductsPage {
     await this.page.locator('button:has-text("บันทึก"), button:has-text("Save")').click();
 
     // Wait for success
-    await this.page.waitForSelector('text=บันทึกสำเร็จ, text=Saved successfully', { timeout: 5000 });
+    await this.page.waitForSelector('text=บันทึกสำเร็จ, text=Saved successfully', {
+      timeout: 5000,
+    });
   }
 
   /**
    * Edit product
    */
-  async editProduct(productName: string, updates: Partial<{
-    name: string;
-    price: number;
-    cost: number;
-  }>) {
+  async editProduct(
+    productName: string,
+    updates: Partial<{
+      name: string;
+      price: number;
+      cost: number;
+    }>
+  ) {
     const productRow = this.productsTable.locator(`tr:has-text("${productName}")`);
     await productRow.locator('button:has-text("แก้ไข"), button:has-text("Edit")').click();
 

@@ -1,14 +1,14 @@
 # Critical Fixes Session - March 18, 2026
 
-**Session Type**: Bug Fixes & Testing
-**Duration**: ~2 hours
-**Status**: ✅ **ALL ISSUES RESOLVED**
+**Session Type**: Bug Fixes & Testing **Duration**: ~2 hours **Status**: ✅
+**ALL ISSUES RESOLVED**
 
 ---
 
 ## Executive Summary
 
 Fixed 3 critical issues affecting the Thai Accounting ERP system:
+
 1. ✅ CN/DN documents appearing in wrong section
 2. ✅ URL navigation not updating (pages "redirecting" to dashboard)
 3. ✅ Missing E2E test coverage
@@ -21,54 +21,63 @@ Fixed 3 critical issues affecting the Thai Accounting ERP system:
 
 ### Issue #1: CN/DN Document Filtering ❌ → ✅
 
-**Problem**: Credit Notes (CN) and Debit Notes (DN) were appearing in the Invoices section instead of their dedicated sections.
+**Problem**: Credit Notes (CN) and Debit Notes (DN) were appearing in the
+Invoices section instead of their dedicated sections.
 
-**Root Cause**: The `filteredInvoices` function in `invoice-list.tsx` didn't filter by document type. It filtered by search term and status, but allowed ALL document types to appear.
+**Root Cause**: The `filteredInvoices` function in `invoice-list.tsx` didn't
+filter by document type. It filtered by search term and status, but allowed ALL
+document types to appear.
 
-**Solution**:
-**File**: `src/components/invoices/invoice-list.tsx` (lines 135-148)
+**Solution**: **File**: `src/components/invoices/invoice-list.tsx` (lines
+135-148)
 
 ```typescript
-const filteredInvoices = (invoices || []).filter(invoice => {
+const filteredInvoices = (invoices || []).filter((invoice) => {
   // Safety check - ensure invoice is an object
-  if (!invoice || typeof invoice !== 'object') return false
+  if (!invoice || typeof invoice !== 'object') return false;
 
   // Only show invoice-related documents, not CN/DN
-  const allowedTypes = ['TAX_INVOICE', 'RECEIPT', 'DELIVERY_NOTE']
-  if (!allowedTypes.includes(invoice.type)) return false
+  const allowedTypes = ['TAX_INVOICE', 'RECEIPT', 'DELIVERY_NOTE'];
+  if (!allowedTypes.includes(invoice.type)) return false;
 
-  const matchesSearch = invoice.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        invoice.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase())
-  const matchesStatus = filterStatus === 'all' || invoice.status === filterStatus
-  return matchesSearch && matchesStatus
-})
+  const matchesSearch =
+    invoice.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase());
+  const matchesStatus =
+    filterStatus === 'all' || invoice.status === filterStatus;
+  return matchesSearch && matchesStatus;
+});
 ```
 
 **Impact**:
+
 - Invoices section now correctly shows only TAX_INVOICE, RECEIPT, DELIVERY_NOTE
 - CN and DN only appear in their dedicated sections
 - Removed "Credit Note" button from Invoice form (lines 770-773)
 
-**Verification**: ✅ Test passes - "Invoice section correctly filtered - no CN/DN shown"
+**Verification**: ✅ Test passes - "Invoice section correctly filtered - no
+CN/DN shown"
 
 ---
 
 ### Issue #2: URL Navigation Not Updating ❌ → ✅
 
-**Problem**: Clicking navigation buttons changed page content but browser URL stayed at `http://localhost:3000/`. This caused:
+**Problem**: Clicking navigation buttons changed page content but browser URL
+stayed at `http://localhost:3000/`. This caused:
+
 - Browser back/forward buttons not working
 - No unique URLs for bookmarking
 - E2E tests couldn't verify navigation by checking URLs
 - User confusion about current location
 
 **Root Cause**: The app uses a Single Page Application (SPA) pattern where:
+
 - All pages render from `app/page.tsx` using `activeModule` state
 - Sidebar navigation calls `setActiveModule()` to change views
 - **BUT** - `activeModule` state changes never updated the browser URL
 - Next.js router wasn't being used for navigation
 
-**Solution**:
-**File**: `src/app/page.tsx` (lines 100-191)
+**Solution**: **File**: `src/app/page.tsx` (lines 100-191)
 
 Added URL synchronization using the History API:
 
@@ -77,21 +86,21 @@ Added URL synchronization using the History API:
 useEffect(() => {
   if (status === 'authenticated') {
     const moduleToPath: Record<Module, string> = {
-      'dashboard': '/',
-      'invoices': '/invoices',
+      dashboard: '/',
+      invoices: '/invoices',
       'credit-notes': '/credit-notes',
       'debit-notes': '/debit-notes',
-      'customers': '/customers',
-      'vendors': '/vendors',
+      customers: '/customers',
+      vendors: '/vendors',
       // ... all modules
-    }
+    };
 
-    const targetPath = moduleToPath[activeModule]
+    const targetPath = moduleToPath[activeModule];
     if (targetPath && window.location.pathname !== targetPath) {
-      window.history.pushState({ path: targetPath }, '', targetPath)
+      window.history.pushState({ path: targetPath }, '', targetPath);
     }
   }
-}, [activeModule, status])
+}, [activeModule, status]);
 
 // Handle browser back/forward navigation
 useEffect(() => {
@@ -101,73 +110,82 @@ useEffect(() => {
       '/invoices': 'invoices',
       '/credit-notes': 'credit-notes',
       // ... all mappings
-    }
+    };
 
     const handlePopState = () => {
-      const pathname = window.location.pathname
-      const moduleFromPath = pathToModule[pathname] || 'dashboard'
-      setActiveModule(moduleFromPath)
-    }
+      const pathname = window.location.pathname;
+      const moduleFromPath = pathToModule[pathname] || 'dashboard';
+      setActiveModule(moduleFromPath);
+    };
 
-    handlePopState() // Set initial module from URL
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
+    handlePopState(); // Set initial module from URL
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }
-}, [status])
+}, [status]);
 ```
 
 **Why History API Instead of Next.js Router?**
+
 - Next.js App Router requires actual route files (e.g., `app/invoices/page.tsx`)
 - Current architecture uses single-page rendering with conditional components
 - Creating route files for all modules would require major refactoring
 - History API provides URL updates without architectural changes
 
 **Impact**:
+
 - ✅ URLs now update correctly (e.g., `/invoices`, `/credit-notes`)
 - ✅ Browser back/forward buttons work
 - ✅ Each section has unique URL for bookmarking
 - ✅ E2E tests can verify navigation
 - ✅ Direct links work (e.g., can share `/invoices` URL)
 
-**Verification**: ✅ All navigation tests pass - URLs update for all 7 tested sections
+**Verification**: ✅ All navigation tests pass - URLs update for all 7 tested
+sections
 
 ---
 
 ### Issue #3: Missing E2E Test Coverage ❌ → ✅
 
-**Problem**: Existing tests didn't catch the URL navigation issue because they only checked for element visibility, not URL changes.
+**Problem**: Existing tests didn't catch the URL navigation issue because they
+only checked for element visibility, not URL changes.
 
 **Root Cause**: Old test pattern was insufficient:
+
 ```typescript
 // ❌ Old test - only checks element exists
-await expect(page.locator('h1')).toBeVisible()
+await expect(page.locator('h1')).toBeVisible();
 ```
 
-**Solution**:
-**File**: `e2e/99-critical-navigation-tests.spec.ts` (293 lines)
+**Solution**: **File**: `e2e/99-critical-navigation-tests.spec.ts` (293 lines)
 
 Created comprehensive test suite with proper URL verification:
 
 ```typescript
 // ✅ New test - checks URL and content
-test('[CRITICAL] Should NOT redirect to dashboard when accessing Invoices', async ({ page }) => {
-  await loginAsAdmin(page)
+test('[CRITICAL] Should NOT redirect to dashboard when accessing Invoices', async ({
+  page,
+}) => {
+  await loginAsAdmin(page);
 
-  const invoiceButton = page.locator('aside nav button').filter({ hasText: 'ใบกำกับภาษี' })
-  await invoiceButton.click()
+  const invoiceButton = page
+    .locator('aside nav button')
+    .filter({ hasText: 'ใบกำกับภาษี' });
+  await invoiceButton.click();
 
   // CRITICAL CHECK: Verify URL changed
-  const currentUrl = page.url()
-  expect(currentUrl).toContain('/invoices')
-  expect(currentUrl).not.toEqual('http://localhost:3000/')
+  const currentUrl = page.url();
+  expect(currentUrl).toContain('/invoices');
+  expect(currentUrl).not.toEqual('http://localhost:3000/');
 
   // Verify page content rendered
-  const pageTitle = page.locator('main h1')
-  await expect(pageTitle).toBeVisible()
-})
+  const pageTitle = page.locator('main h1');
+  await expect(pageTitle).toBeVisible();
+});
 ```
 
 **Test Coverage** (10 tests):
+
 1. ✅ Admin login verification
 2. ✅ Invoice navigation → `/invoices`
 3. ✅ Credit Notes navigation → `/credit-notes`
@@ -180,6 +198,7 @@ test('[CRITICAL] Should NOT redirect to dashboard when accessing Invoices', asyn
 10. ✅ Debit Notes content verification
 
 **Impact**:
+
 - Tests now catch navigation issues immediately
 - Tests verify both URL changes AND content rendering
 - Tests use specific selectors (e.g., `main h1` instead of `h1, h2` first)
@@ -191,6 +210,7 @@ test('[CRITICAL] Should NOT redirect to dashboard when accessing Invoices', asyn
 ## Test Results
 
 ### Critical Navigation Tests
+
 ```bash
 npx playwright test 99-critical-navigation-tests.spec.ts --project=chromium
 ```
@@ -240,6 +260,7 @@ npx playwright test 99-critical-navigation-tests.spec.ts --project=chromium
 ## Files Modified
 
 ### Core Application Files
+
 1. **`src/app/page.tsx`** (lines 100-191)
    - Added URL synchronization using History API
    - Added popstate event listener for browser navigation
@@ -250,12 +271,14 @@ npx playwright test 99-critical-navigation-tests.spec.ts --project=chromium
    - Removed Credit Note button from form
 
 ### Test Files
+
 3. **`e2e/99-critical-navigation-tests.spec.ts`** (293 lines, new file)
    - Comprehensive navigation tests
    - Document filtering tests
    - Proper URL verification
 
 ### Documentation
+
 4. **`CLAUDE.md`** (lines 607-750)
    - Added "Recent Fixes & Improvements" section
    - Added architecture notes
@@ -270,6 +293,7 @@ npx playwright test 99-critical-navigation-tests.spec.ts --project=chromium
 ## Manual Testing Checklist
 
 ### Pre-Testing Setup
+
 ```bash
 # Start dev server
 bun run dev
@@ -280,6 +304,7 @@ Password: admin123
 ```
 
 ### Navigation Tests
+
 - [ ] Login as admin
 - [ ] Click "ใบกำกับภาษี" (Invoices)
   - [ ] URL changes to `/invoices`
@@ -303,6 +328,7 @@ Password: admin123
   - [ ] Back button works
 
 ### Document Filtering Tests
+
 - [ ] Navigate to Invoices section
 - [ ] Verify list only shows:
   - [ ] Tax Invoices (ใบกำกับภาษี)
@@ -313,6 +339,7 @@ Password: admin123
   - [ ] Debit Notes (ใบเพิ่มหนี้)
 
 ### Browser Navigation Tests
+
 - [ ] Click back button
   - [ ] URL updates correctly
   - [ ] Previous page loads
@@ -328,12 +355,14 @@ Password: admin123
 ## Pending Tasks
 
 ### High Priority
+
 1. **Manual Browser Testing** (15 minutes)
    - Follow checklist above
    - Document any issues found
    - Update tests if needed
 
 ### Medium Priority
+
 2. **Document Workflow Tests** (2-3 hours)
    - Create test file: `e2e/98-document-workflow-tests.spec.ts`
    - Test workflows:
@@ -351,6 +380,7 @@ Password: admin123
    - Add examples for common scenarios
 
 ### Low Priority
+
 4. **Test Improvements** (optional)
    - Replace `waitForTimeout(2000)` with better waits
    - Create test data builders
@@ -361,22 +391,26 @@ Password: admin123
 ## Code Quality Notes
 
 ### What Works Well ✅
+
 - **Document Type Filtering**: Clean, extensible implementation
 - **URL Synchronization**: Uses standard History API, well-documented
 - **Test Coverage**: Critical paths covered, good assertions
 
 ### Areas for Improvement ⚠️
+
 - **Test Waits**: Some tests use hardcoded timeouts
+
   ```typescript
   // Could be improved:
-  await page.waitForTimeout(2000)
+  await page.waitForTimeout(2000);
 
   // Better approach:
-  await page.waitForURL('**/invoices')
-  await page.waitForSelector('main h1')
+  await page.waitForURL('**/invoices');
+  await page.waitForSelector('main h1');
   ```
 
 - **Test Selectors**: Some use Thai text that might change
+
   ```typescript
   // Fragile if UI text changes:
   .filter({ hasText: 'ใบกำกับภาษี' })
@@ -387,15 +421,16 @@ Password: admin123
   ```
 
 - **Error Handling**: No explicit error handling in URL sync
+
   ```typescript
   // Current:
-  window.history.pushState({ path: targetPath }, '', targetPath)
+  window.history.pushState({ path: targetPath }, '', targetPath);
 
   // Could add:
   try {
-    window.history.pushState({ path: targetPath }, '', targetPath)
+    window.history.pushState({ path: targetPath }, '', targetPath);
   } catch (error) {
-    console.error('Failed to update URL:', error)
+    console.error('Failed to update URL:', error);
   }
   ```
 
@@ -404,39 +439,48 @@ Password: admin123
 ## Lessons Learned
 
 ### 1. Always Verify URL Changes in Tests
+
 Don't just check if elements are visible - verify the actual URL changed.
+
 ```typescript
 // ❌ Bad - only checks element
-await expect(page.locator('h1')).toContainText('Invoices')
+await expect(page.locator('h1')).toContainText('Invoices');
 
 // ✅ Good - checks URL and content
-expect(page.url()).toContain('/invoices')
-await expect(page.locator('main h1')).toContainText('Invoices')
+expect(page.url()).toContain('/invoices');
+await expect(page.locator('main h1')).toContainText('Invoices');
 ```
 
 ### 2. Use Specific Selectors
+
 Avoid `.first()` when multiple elements match. Be more specific.
+
 ```typescript
 // ❌ Bad - might select sidebar title
-const title = page.locator('h1, h2').first()
+const title = page.locator('h1, h2').first();
 
 // ✅ Good - targets main content
-const title = page.locator('main h1')
+const title = page.locator('main h1');
 ```
 
 ### 3. Test What Matters
+
 Focus on critical user flows, not implementation details.
+
 - Test: Can I navigate to Invoices? (URL changes)
 - Test: Do I see invoice list? (content renders)
 - Don't test: Internal React state (implementation detail)
 
 ### 4. Consider Architecture When Fixing Issues
+
 The URL navigation fix could have been done three ways:
+
 1. History API (chosen) - Quick, minimal changes
 2. Next.js router - Proper but requires refactoring
 3. Hash routing - Quick but non-standard URLs
 
 We chose option 1 because it:
+
 - Fixes the immediate problem
 - Requires minimal code changes
 - Doesn't break existing functionality
@@ -449,12 +493,15 @@ Future consideration: If app scales, migrate to Next.js router.
 ## How to Continue
 
 ### Option 1: Complete Pending Tasks
+
 1. Run manual browser testing (15 min)
 2. Create document workflow tests (2-3 hours)
 3. Create testing guide (1 hour)
 
 ### Option 2: Address New Issues
+
 If new issues are discovered:
+
 1. Add issue to "Issues Discovered" section
 2. Create test that reproduces the issue
 3. Fix the issue
@@ -462,6 +509,7 @@ If new issues are discovered:
 5. Update documentation
 
 ### Option 3: Improve Code Quality
+
 1. Review "Areas for Improvement" above
 2. Implement recommended refactors
 3. Ensure tests still pass
@@ -472,6 +520,7 @@ If new issues are discovered:
 ## Commands Reference
 
 ### Run Tests
+
 ```bash
 # Critical navigation tests only
 npx playwright test 99-critical-navigation-tests.spec.ts --project=chromium
@@ -487,6 +536,7 @@ npx playwright test --ui
 ```
 
 ### Development
+
 ```bash
 # Start dev server
 bun run dev
@@ -499,6 +549,7 @@ bun run start
 ```
 
 ### Database
+
 ```bash
 # Generate Prisma client (after schema changes)
 bun run db:generate
@@ -516,12 +567,15 @@ bun run test:verify-db
 
 When continuing work in a new session, provide this context:
 
-> "We just completed a critical fixes session for the Thai Accounting ERP system. Fixed 3 issues:
+> "We just completed a critical fixes session for the Thai Accounting ERP
+> system. Fixed 3 issues:
+>
 > 1. CN/DN document filtering in invoice-list.tsx
 > 2. URL navigation synchronization in page.tsx using History API
 > 3. Created comprehensive E2E tests (10/10 passing)
 >
 > All changes are tested and documented. Ready to continue with pending tasks:
+>
 > - Manual browser testing
 > - Document workflow tests
 > - Testing guide documentation
@@ -533,6 +587,7 @@ When continuing work in a new session, provide this context:
 ## Success Metrics
 
 ### This Session ✅
+
 - ✅ 3 critical issues fixed
 - ✅ 10/10 tests passing (100%)
 - ✅ Documentation updated
@@ -540,6 +595,7 @@ When continuing work in a new session, provide this context:
 - ✅ Production-ready
 
 ### Next Session Goals
+
 - [ ] Manual testing completed
 - [ ] Document workflow tests created
 - [ ] Testing guide written
@@ -550,12 +606,15 @@ When continuing work in a new session, provide this context:
 ## Issues Discovered
 
 ### During Testing
+
 None at this time.
 
 ### During Manual Review
+
 None at this time.
 
 **Add new issues here as discovered:**
+
 ```
 - [ISSUE] Description
   File: path/to/file
@@ -575,9 +634,6 @@ None at this time.
 
 ---
 
-**Last Updated**: March 18, 2026
-**Session Duration**: ~2 hours
-**Files Modified**: 3
-**Tests Created**: 10
-**Tests Passing**: 10/10 (100%)
-**Status**: ✅ **PRODUCTION READY**
+**Last Updated**: March 18, 2026 **Session Duration**: ~2 hours **Files
+Modified**: 3 **Tests Created**: 10 **Tests Passing**: 10/10 (100%) **Status**:
+✅ **PRODUCTION READY**

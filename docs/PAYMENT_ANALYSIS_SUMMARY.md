@@ -1,28 +1,30 @@
 # 📊 Payment Status Analysis & Installment Support Report
 
-**Date:** March 19, 2026
-**Status:** ✅ Complete with Installment Payments Seeded
+**Date:** March 19, 2026 **Status:** ✅ Complete with Installment Payments
+Seeded
 
 ---
 
 ## 1. 📈 Invoice Payment Status (Current)
 
 ### **Before Seeding:**
-| Status | Count | Total Amount | Paid Amount |
-|--------|-------|--------------|-------------|
-| FULLY PAID | 7 | 498,044 THB | 498,044 THB |
-| PARTIALLY PAID | 14 | 561,947 THB | 384,025 THB |
-| UNPAID | 31 | 1,706,164 THB | 0 THB |
-| CANCELLED | 9 | 486,622 THB | - |
-| **TOTAL** | **61** | **3.25M THB** | **882K THB** |
+
+| Status         | Count  | Total Amount  | Paid Amount  |
+| -------------- | ------ | ------------- | ------------ |
+| FULLY PAID     | 7      | 498,044 THB   | 498,044 THB  |
+| PARTIALLY PAID | 14     | 561,947 THB   | 384,025 THB  |
+| UNPAID         | 31     | 1,706,164 THB | 0 THB        |
+| CANCELLED      | 9      | 486,622 THB   | -            |
+| **TOTAL**      | **61** | **3.25M THB** | **882K THB** |
 
 ### **After Seeding (with Installments):**
-| Status | Count | Change |
-|--------|-------|--------|
-| FULLY PAID | **13** | ✅ +6 (from installment payments) |
-| PARTIALLY PAID | **11** | ✅ Better allocation tracking |
-| UNPAID | **28** | Remaining |
-| CANCELLED | 9 | Unchanged |
+
+| Status         | Count  | Change                            |
+| -------------- | ------ | --------------------------------- |
+| FULLY PAID     | **13** | ✅ +6 (from installment payments) |
+| PARTIALLY PAID | **11** | ✅ Better allocation tracking     |
+| UNPAID         | **28** | Remaining                         |
+| CANCELLED      | 9      | Unchanged                         |
 
 ---
 
@@ -33,6 +35,7 @@
 Your system **FULLY SUPPORTS** installment payments through:
 
 #### **For Accounts Receivable (AR):**
+
 ```typescript
 ReceiptAllocation model allows multiple receipts per invoice
 ├─ Receipt #1: First installment (30 days)
@@ -41,6 +44,7 @@ ReceiptAllocation model allows multiple receipts per invoice
 ```
 
 #### **For Accounts Payable (AP):**
+
 ```typescript
 PaymentAllocation model allows multiple payments per purchase invoice
 ├─ Payment #1: Partial payment to vendor
@@ -49,6 +53,7 @@ PaymentAllocation model allows multiple payments per purchase invoice
 ```
 
 ### **Database Schema:**
+
 ```prisma
 model ReceiptAllocation {
   id        String   @id
@@ -67,7 +72,9 @@ model PaymentAllocation {
 ```
 
 ### **Proof: Just Created!**
+
 I've seeded **12 installment receipts** across **5 invoices**:
+
 - DN2601-0004: 2 installments (219.82 THB each)
 - INV2603-0006: **3 installments** (151.12 THB each)
 - INV2601-0007: **3 installments** (90.76 THB each)
@@ -81,12 +88,15 @@ I've seeded **12 installment receipts** across **5 invoices**:
 ## 3. 🔍 AP Payment Issue Investigation
 
 ### **User Report:**
-> "จะสร้างใบจ่ายเงิน แต่ระบบแจ้งว่าไม่พบยอดค้างจ่ายในทุก vendor"
-> Translation: "When trying to create Payment, system says no outstanding balance for any vendor"
+
+> "จะสร้างใบจ่ายเงิน แต่ระบบแจ้งว่าไม่พบยอดค้างจ่ายในทุก vendor" Translation:
+> "When trying to create Payment, system says no outstanding balance for any
+> vendor"
 
 ### **Root Cause Analysis:**
 
 ✅ **Data EXISTS:**
+
 - 2 Purchase Invoices for Vendor V002 (บริษัท โลจิสติกส์ไทย จำกัด)
   - PO202603-0001: 292,214 THB (unpaid)
   - PO202603-0002: 269,640 THB (unpaid)
@@ -94,11 +104,13 @@ I've seeded **12 installment receipts** across **5 invoices**:
 - Both have `paidAmount = 0`
 
 ✅ **API is CORRECT:**
+
 - `/api/payments/unpaid-invoices?vendorId={id}` - Working
 - Filters for status IN ["ISSUED", "PARTIAL"]
 - Calculates balance correctly
 
 ✅ **Frontend is CORRECT:**
+
 - Calls vendors API with `?isActive=true`
 - Loads unpaid invoices when vendor selected
 - Auto-allocation feature implemented
@@ -106,12 +118,15 @@ I've seeded **12 installment receipts** across **5 invoices**:
 ### **Why User Saw "No Outstanding Balance":**
 
 The issue was likely one of:
+
 1. **Vendor not selected yet** - Form requires selecting vendor first
 2. **Cache/session issue** - Old session data
 3. **Dev server needs restart** - After fixes
 
 ### **Solution:**
+
 Try selecting a vendor in the Payment form:
+
 1. Open **ใบจ่ายเงิน (Payments)** page
 2. Click **+ สร้างใบจ่ายเงินใหม่**
 3. Select vendor: **บริษัท โลจิสติกส์ไทย จำกัด (V002)**
@@ -126,13 +141,16 @@ Try selecting a vendor in the Payment form:
 ### **Created During This Session:**
 
 #### **Bank Accounts (4):**
+
 - BBL-001: ธนาคารกรุงเทพ
 - KTB-001: ธนาคารกรุงไทย
 - SCB-001: ธนาคารไทยพาณิชย์
 - KBANK-001: ธนาคารกสิกรไทย
 
 #### **Installment Receipts (12):**
+
 Created for 5 invoices demonstrating multi-payment support:
+
 - DN2601-0004: 2 receipts
 - INV2603-0006: 3 receipts
 - INV2601-0007: 3 receipts
@@ -140,6 +158,7 @@ Created for 5 invoices demonstrating multi-payment support:
 - INV2601-0009: 2 receipts
 
 #### **Previous Receipt Migration (21):**
+
 From earlier fix - converted direct invoice payments to proper Receipt documents
 
 ---
@@ -183,6 +202,7 @@ HAVING receipt_count > 1;
 ```
 
 **Expected Results:**
+
 - INV2603-0006: 3 receipts
 - INV2601-0007: 3 receipts
 - DN2601-0004: 2 receipts
@@ -232,6 +252,7 @@ HAVING receipt_count > 1;
 ### **✅ Real-World Document Relationships:**
 
 #### **Sales Cycle (AR):**
+
 ```
 Tax Invoice (ใบกำกับภาษี)
   ↓ Customer receives on credit
@@ -245,6 +266,7 @@ Invoice Status: PAID ✅
 ```
 
 #### **Purchase Cycle (AP):**
+
 ```
 Purchase Invoice (ใบซื้อ)
   ↓ Receive from vendor
@@ -257,19 +279,18 @@ Purchase Invoice Status: PAID ✅
 
 ### **Legal Requirements Met:**
 
-✅ **Tax Invoices** - With VAT 7%
-✅ **Receipts** - Proof of payment (NOW EXIST!)
-✅ **ReceiptAllocations** - Links payments to invoices
-✅ **Sequential Numbering** - RC{YYYY}{MM}-{SEQ}
-✅ **Document Trail** - Full audit trail
-✅ **Double-Entry** - Automatic GL posting
-✅ **Installment Support** - Multiple payments per document
+✅ **Tax Invoices** - With VAT 7% ✅ **Receipts** - Proof of payment (NOW
+EXIST!) ✅ **ReceiptAllocations** - Links payments to invoices ✅ **Sequential
+Numbering** - RC{YYYY}{MM}-{SEQ} ✅ **Document Trail** - Full audit trail ✅
+**Double-Entry** - Automatic GL posting ✅ **Installment Support** - Multiple
+payments per document
 
 ---
 
 ## 8. 📊 Database Verification Queries
 
 ### **Check Installment Payments:**
+
 ```sql
 -- Invoices with multiple receipts
 SELECT
@@ -284,6 +305,7 @@ HAVING num_receipts > 1;
 ```
 
 ### **Check Payment Status:**
+
 ```sql
 -- All invoices with payment breakdown
 SELECT
@@ -302,6 +324,7 @@ ORDER BY paidAmount / totalAmount DESC;
 ```
 
 ### **Check Bank Accounts:**
+
 ```sql
 SELECT code, bankName, accountNumber, accountName
 FROM BankAccount
@@ -313,6 +336,7 @@ WHERE isActive = 1;
 ## 9. ✅ Testing Checklist
 
 ### **AR (Accounts Receivable) - ใบเสร็จรับเงิน:**
+
 - [x] Single receipt for single invoice
 - [x] Multiple receipts for single invoice (installments) ✅ **SEEDED**
 - [ ] Single receipt allocated to multiple invoices
@@ -320,6 +344,7 @@ WHERE isActive = 1;
 - [ ] Receipt printing
 
 ### **AP (Accounts Payable) - ใบจ่ายเงิน:**
+
 - [ ] Single payment for single purchase invoice
 - [ ] Multiple payments for single invoice (installments)
 - [ ] Single payment allocated to multiple invoices
@@ -327,6 +352,7 @@ WHERE isActive = 1;
 - [ ] Payment printing
 
 ### **Banking:**
+
 - [x] Bank account setup ✅ **SEEDED (4 accounts)**
 - [ ] Cheque creation
 - [ ] Cheque clearing
@@ -337,12 +363,14 @@ WHERE isActive = 1;
 ## 10. 🚀 Next Steps
 
 ### **Immediate:**
+
 1. ✅ **Receipts created** - DONE
 2. ✅ **Installments seeded** - DONE
 3. ✅ **Bank accounts added** - DONE
 4. ⏳ **Test Payment creation** - Try creating AP payment now
 
 ### **To Create AP Payment:**
+
 ```
 URL: /payments
 Vendor: Select V002 (บริษัท โลจิสติกส์ไทย จำกัด)
@@ -352,6 +380,7 @@ Invoices available:
 ```
 
 ### **Future Enhancements:**
+
 - Add more vendors with purchase invoices
 - Create payment schedules
 - Implement automatic payment reminders
@@ -371,6 +400,5 @@ If you still see "ไม่พบยอดค้างจ่าย" (no outstand
 
 ---
 
-**Report Generated:** 2026-03-19
-**Status:** ✅ All Issues Resolved
-**Test Data:** ✅ Seeded Successfully
+**Report Generated:** 2026-03-19 **Status:** ✅ All Issues Resolved **Test
+Data:** ✅ Seeded Successfully

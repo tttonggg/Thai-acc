@@ -1,12 +1,16 @@
 # Phase A: Security Hardening Implementation Summary
 
 ## Overview
-This document summarizes the security hardening implementation for the Thai Accounting ERP system, completing Phase A (92→100 points).
+
+This document summarizes the security hardening implementation for the Thai
+Accounting ERP system, completing Phase A (92→100 points).
 
 ## A1. Advanced Authentication (2 points)
 
 ### MFA/TOTP Implementation
+
 **File:** `src/lib/mfa.ts`
+
 - ✅ TOTP secret generation using speakeasy
 - ✅ QR code generation for setup
 - ✅ TOTP verification with configurable window
@@ -15,11 +19,14 @@ This document summarizes the security hardening implementation for the Thai Acco
 - ✅ Prisma User model fields: `mfaSecret`, `mfaEnabled`, `mfaVerifiedAt`
 
 **API Route:** `src/app/api/security/mfa/route.ts`
+
 - POST /api/security/mfa - Setup, verify, disable MFA
 - GET /api/security/mfa - Check MFA status
 
 ### Password Strength
+
 **File:** `src/lib/password-validator.ts`
+
 - ✅ zxcvbn integration for password strength analysis
 - ✅ Minimum score 3/4 enforcement
 - ✅ Blocked password list (common passwords)
@@ -27,16 +34,20 @@ This document summarizes the security hardening implementation for the Thai Acco
 - ✅ Strong password generator
 
 **API Route:** `src/app/api/security/password/route.ts`
+
 - POST /api/security/password - Check strength, change/reset password
 
 ### Session Management
+
 **Prisma Models:** UserSession added to schema
+
 - ✅ Max 3 concurrent sessions per user (configurable)
 - ✅ Session metadata (IP, userAgent, createdAt, lastActiveAt)
 - ✅ Session rotation support
 - ✅ Session invalidation API
 
 **API Route:** `src/app/api/security/sessions/route.ts`
+
 - GET /api/security/sessions - List active sessions
 - DELETE /api/security/sessions - Revoke sessions
 - POST /api/security/sessions - Revoke other sessions
@@ -44,7 +55,9 @@ This document summarizes the security hardening implementation for the Thai Acco
 ## A2. Audit Logging (2 points)
 
 ### AuditLog Model
+
 **Prisma Schema:** Already exists in schema
+
 ```prisma
 model AuditLog {
   id          String   @id @default(cuid())
@@ -63,7 +76,9 @@ model AuditLog {
 ```
 
 ### Audit Service
+
 **File:** `src/lib/audit-service.ts`
+
 - ✅ Log all financial mutations (CREATE, UPDATE, DELETE, POST, VOID)
 - ✅ SHA-256 hash chain for tamper-evidence
 - ✅ Sensitive data sanitization
@@ -81,20 +96,25 @@ model AuditLog {
   - logPayrollMutation
 
 **API Route:** `src/app/api/security/audit/route.ts`
+
 - GET /api/security/audit - Get audit logs with filtering
 - POST /api/security/audit - Verify integrity
 
 **File:** `src/lib/audit-middleware.ts`
+
 - Higher-order functions for wrapping API handlers with audit logging
 - auditCreate, auditUpdate, auditDelete, auditPost, auditVoid helpers
 
 **Example Integration:** `src/app/api/invoices/audited-route.ts`
+
 - Demonstrates audit logging integration with invoice CRUD operations
 
 ## A3. Data Encryption (2 points)
 
 ### Field-Level Encryption
+
 **File:** `src/lib/encryption.ts`
+
 - ✅ AES-256 encryption using crypto-js
 - ✅ Encrypt/decrypt functions for sensitive fields
 - ✅ Field-level encryption for:
@@ -112,17 +132,22 @@ model AuditLog {
 ## A4. API Security (2 points)
 
 ### CSRF Protection
+
 **File:** `src/lib/csrf.ts`
+
 - ✅ CSRF token generation with 24-hour expiry
 - ✅ Token validation (single-use for sensitive operations)
 - ✅ Automatic cleanup of expired tokens
 - ✅ Exempt path configuration
 
 **API Route:** `src/app/api/csrf/token/route.ts`
+
 - GET /api/csrf/token - Generate new CSRF token
 
 ### Webhook Security
+
 **File:** `src/lib/webhook-security.ts`
+
 - ✅ HMAC-SHA256 signature verification
 - ✅ Encrypted webhook secret storage
 - ✅ Exponential backoff retry logic
@@ -131,6 +156,7 @@ model AuditLog {
 - ✅ Event type constants
 
 **API Route:** `src/app/api/security/webhooks/route.ts`
+
 - GET /api/security/webhooks - List webhooks
 - POST /api/security/webhooks - Create webhook, test, rotate secret
 - PUT /api/security/webhooks - Update webhook
@@ -139,6 +165,7 @@ model AuditLog {
 ## Installation Requirements
 
 The following packages are required:
+
 ```bash
 npm install speakeasy qrcode zxcvbn crypto-js
 npm install --save-dev @types/speakeasy @types/qrcode @types/zxcvbn @types/crypto-js
@@ -149,6 +176,7 @@ npm install --save-dev @types/speakeasy @types/qrcode @types/zxcvbn @types/crypt
 The Prisma schema has been updated with the following models:
 
 ### UserSession Model
+
 ```prisma
 model UserSession {
   id           String    @id @default(cuid())
@@ -165,6 +193,7 @@ model UserSession {
 ```
 
 ### Existing Models (Already Present)
+
 - AuditLog - Tamper-evident audit logging
 - CsrfToken - CSRF protection tokens
 - WebhookEndpoint - Webhook configuration
@@ -172,21 +201,21 @@ model UserSession {
 
 ## API Endpoints Summary
 
-| Endpoint | Method | Description | Auth |
-|----------|--------|-------------|------|
-| /api/security/mfa | GET | Check MFA status | Required |
-| /api/security/mfa | POST | Setup/verify/disable MFA | Required |
-| /api/security/password | POST | Check strength, change password | Varies |
-| /api/security/sessions | GET | List active sessions | Required |
-| /api/security/sessions | DELETE | Revoke sessions | Required |
-| /api/security/sessions | POST | Revoke other sessions | Required |
-| /api/security/audit | GET | Get audit logs | Admin/Accountant |
-| /api/security/audit | POST | Verify integrity | Admin |
-| /api/security/webhooks | GET | List webhooks | Admin |
-| /api/security/webhooks | POST | Create/test webhooks | Admin |
-| /api/security/webhooks | PUT | Update webhook | Admin |
-| /api/security/webhooks | DELETE | Delete webhook | Admin |
-| /api/csrf/token | GET | Get CSRF token | Required |
+| Endpoint               | Method | Description                     | Auth             |
+| ---------------------- | ------ | ------------------------------- | ---------------- |
+| /api/security/mfa      | GET    | Check MFA status                | Required         |
+| /api/security/mfa      | POST   | Setup/verify/disable MFA        | Required         |
+| /api/security/password | POST   | Check strength, change password | Varies           |
+| /api/security/sessions | GET    | List active sessions            | Required         |
+| /api/security/sessions | DELETE | Revoke sessions                 | Required         |
+| /api/security/sessions | POST   | Revoke other sessions           | Required         |
+| /api/security/audit    | GET    | Get audit logs                  | Admin/Accountant |
+| /api/security/audit    | POST   | Verify integrity                | Admin            |
+| /api/security/webhooks | GET    | List webhooks                   | Admin            |
+| /api/security/webhooks | POST   | Create/test webhooks            | Admin            |
+| /api/security/webhooks | PUT    | Update webhook                  | Admin            |
+| /api/security/webhooks | DELETE | Delete webhook                  | Admin            |
+| /api/csrf/token        | GET    | Get CSRF token                  | Required         |
 
 ## Environment Variables
 
@@ -239,6 +268,7 @@ SESSION_MAX_AGE=28800  # 8 hours in seconds
 ## Files Created/Modified
 
 ### New Files
+
 1. `src/lib/mfa.ts` - MFA/TOTP service
 2. `src/lib/password-validator.ts` - Password strength validation
 3. `src/lib/encryption.ts` - Encryption service
@@ -256,6 +286,7 @@ SESSION_MAX_AGE=28800  # 8 hours in seconds
 15. `src/app/api/invoices/audited-route.ts` - Example audited invoice API
 
 ### Modified Files
+
 1. `prisma/schema.prisma` - Added UserSession model
 
 ## Testing
@@ -263,16 +294,19 @@ SESSION_MAX_AGE=28800  # 8 hours in seconds
 To verify the implementation:
 
 1. Generate Prisma client:
+
    ```bash
    npx prisma generate
    ```
 
 2. Run database migration (if needed):
+
    ```bash
    npx prisma db push
    ```
 
 3. Test MFA setup:
+
    ```bash
    curl -X POST /api/security/mfa \
      -H "Authorization: Bearer <token>" \
@@ -280,6 +314,7 @@ To verify the implementation:
    ```
 
 4. Test password strength:
+
    ```bash
    curl -X POST /api/security/password \
      -d '{"action":"check","password":"test123"}'
@@ -294,6 +329,7 @@ To verify the implementation:
 ## Compliance
 
 This implementation addresses:
+
 - ✅ SOC 2 Type II requirements for access control
 - ✅ ISO 27001 security controls
 - ✅ Thai PDPA data protection requirements
@@ -301,6 +337,5 @@ This implementation addresses:
 
 ---
 
-**Implementation Date:** 2026-03-16
-**Status:** Complete
-**Score:** 92 → 100 (8 points added)
+**Implementation Date:** 2026-03-16 **Status:** Complete **Score:** 92 → 100 (8
+points added)

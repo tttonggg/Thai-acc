@@ -17,19 +17,20 @@
 
 ## Monitoring Overview
 
-Effective monitoring ensures the Thai Accounting ERP system remains available, performant, and secure. This guide covers comprehensive monitoring strategies.
+Effective monitoring ensures the Thai Accounting ERP system remains available,
+performant, and secure. This guide covers comprehensive monitoring strategies.
 
 ### Key Metrics to Monitor
 
-| Category | Metric | Threshold |
-|----------|--------|-----------|
-| System | CPU Usage | > 80% |
-| System | Memory Usage | > 85% |
-| System | Disk Usage | > 85% |
-| Application | Response Time | > 2s |
-| Application | Error Rate | > 1% |
-| Database | Query Time | > 1s |
-| Database | Connection Count | > 80% |
+| Category    | Metric           | Threshold |
+| ----------- | ---------------- | --------- |
+| System      | CPU Usage        | > 80%     |
+| System      | Memory Usage     | > 85%     |
+| System      | Disk Usage       | > 85%     |
+| Application | Response Time    | > 2s      |
+| Application | Error Rate       | > 1%      |
+| Database    | Query Time       | > 1s      |
+| Database    | Connection Count | > 80%     |
 
 ---
 
@@ -48,7 +49,7 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     ports:
-      - "9090:9090"
+      - '9090:9090'
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -59,7 +60,7 @@ services:
       - grafana_data:/var/lib/grafana
       - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
     ports:
-      - "3001:3000"
+      - '3001:3000'
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
 
@@ -124,7 +125,13 @@ netstat -tuln | grep :3000
 ```typescript
 // app/api/metrics/route.ts
 import { NextResponse } from 'next/server';
-import { register, collectDefaultMetrics, Gauge, Counter, Histogram } from 'prom-client';
+import {
+  register,
+  collectDefaultMetrics,
+  Gauge,
+  Counter,
+  Histogram,
+} from 'prom-client';
 
 // Collect default metrics
 collectDefaultMetrics();
@@ -242,15 +249,15 @@ sqlite3 /home/thaiacc/erp/data/prod.db "PRAGMA optimize;"
 SELECT count(*) FROM pg_stat_activity;
 
 -- Slow queries
-SELECT query, calls, mean_time, total_time 
-FROM pg_stat_statements 
-ORDER BY mean_time DESC 
+SELECT query, calls, mean_time, total_time
+FROM pg_stat_statements
+ORDER BY mean_time DESC
 LIMIT 10;
 
 -- Table sizes
-SELECT schemaname, tablename, 
+SELECT schemaname, tablename,
        pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size
-FROM pg_tables 
+FROM pg_tables
 WHERE schemaname = 'public'
 ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 
@@ -274,7 +281,7 @@ services:
   loki:
     image: grafana/loki:latest
     ports:
-      - "3100:3100"
+      - '3100:3100'
     volumes:
       - ./loki-config.yml:/etc/loki/local-config.yaml
 
@@ -320,20 +327,22 @@ export const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'thai-acc' },
   transports: [
-    new winston.transports.File({ 
-      filename: '/var/log/thai-acc/error.log', 
-      level: 'error' 
+    new winston.transports.File({
+      filename: '/var/log/thai-acc/error.log',
+      level: 'error',
     }),
-    new winston.transports.File({ 
-      filename: '/var/log/thai-acc/combined.log' 
+    new winston.transports.File({
+      filename: '/var/log/thai-acc/combined.log',
     }),
   ],
 });
 
 if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple()
-  }));
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+    })
+  );
 }
 ```
 
@@ -381,13 +390,15 @@ groups:
   - name: thai-acc-alerts
     rules:
       - alert: HighCPUUsage
-        expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        expr:
+          100 - (avg by (instance)
+          (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
         for: 5m
         labels:
           severity: warning
         annotations:
-          summary: "High CPU usage detected"
-          description: "CPU usage is above 80% for more than 5 minutes"
+          summary: 'High CPU usage detected'
+          description: 'CPU usage is above 80% for more than 5 minutes'
 
       - alert: ApplicationDown
         expr: up{job="thai-acc-app"} == 0
@@ -395,8 +406,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Application is down"
-          description: "Thai Accounting ERP application is not responding"
+          summary: 'Application is down'
+          description: 'Thai Accounting ERP application is not responding'
 
       - alert: HighErrorRate
         expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
@@ -404,8 +415,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "High error rate"
-          description: "Error rate is above 5%"
+          summary: 'High error rate'
+          description: 'Error rate is above 5%'
 
       - alert: DiskSpaceLow
         expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.15
@@ -413,8 +424,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Low disk space"
-          description: "Disk space is below 15%"
+          summary: 'Low disk space'
+          description: 'Disk space is below 15%'
 ```
 
 ### Simple Alert Script
@@ -475,18 +486,18 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const start = Date.now();
-  
+
   const response = NextResponse.next();
-  
+
   const duration = Date.now() - start;
-  
+
   // Log slow requests
   if (duration > 1000) {
     console.warn(`Slow request: ${request.url} took ${duration}ms`);
   }
-  
+
   response.headers.set('X-Response-Time', `${duration}ms`);
-  
+
   return response;
 }
 ```

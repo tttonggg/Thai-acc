@@ -2,7 +2,10 @@
 
 ## Overview
 
-Complete Receipts Management UI for the Thai Accounting ERP system has been successfully implemented. This module allows users to record customer payments for invoices, allocate payments to multiple invoices, handle withholding tax deductions, and automatically generate journal entries.
+Complete Receipts Management UI for the Thai Accounting ERP system has been
+successfully implemented. This module allows users to record customer payments
+for invoices, allocate payments to multiple invoices, handle withholding tax
+deductions, and automatically generate journal entries.
 
 ## What Was Created
 
@@ -37,6 +40,7 @@ Complete Receipts Management UI for the Thai Accounting ERP system has been succ
 ### 2. Backend API Routes
 
 #### `/api/receipts/route.ts`
+
 - **GET** - List receipts with filters
   - Query params: page, limit, status, customerId, startDate, endDate, search
   - Includes customer, bankAccount, allocations with invoice details
@@ -50,6 +54,7 @@ Complete Receipts Management UI for the Thai Accounting ERP system has been succ
   - Creates receipt with allocations in transaction
 
 #### `/api/receipts/[id]/route.ts`
+
 - **GET** - Get single receipt with all details
   - Includes customer, bankAccount, allocations with invoices
   - Calculates totals
@@ -64,6 +69,7 @@ Complete Receipts Management UI for the Thai Accounting ERP system has been succ
   - Cascade deletes allocations
 
 #### `/api/receipts/[id]/post/route.ts`
+
 - **POST** - Post receipt to create journal entry
   - Validates draft status
   - Requires at least one allocation
@@ -73,6 +79,7 @@ Complete Receipts Management UI for the Thai Accounting ERP system has been succ
   - Updates receipt status to POSTED
 
 #### `/api/receipts/unpaid-invoices/route.ts`
+
 - **GET** - Get unpaid invoices for a customer
   - Query param: customerId (required)
   - Returns invoices with ISSUED or PARTIAL status
@@ -80,6 +87,7 @@ Complete Receipts Management UI for the Thai Accounting ERP system has been succ
   - Filters only invoices with outstanding balance
 
 #### `/api/receipts/[id]/export/pdf/route.ts`
+
 - **GET** - Export receipt as HTML (can be converted to PDF)
   - Generates professional Thai receipt format
   - Includes company header
@@ -91,7 +99,9 @@ Complete Receipts Management UI for the Thai Accounting ERP system has been succ
 ### 3. Frontend Components
 
 #### `receipt-list.tsx` - Main list view
+
 **Features:**
+
 - Summary cards showing:
   - Draft receipts count
   - Posted amount this month
@@ -114,7 +124,9 @@ Complete Receipts Management UI for the Thai Accounting ERP system has been succ
 - Toast notifications
 
 #### `receipt-form.tsx` - Create/Edit form
+
 **Features:**
+
 - **Payment Details Section:**
   - Receipt date picker
   - Customer dropdown
@@ -150,7 +162,9 @@ Complete Receipts Management UI for the Thai Accounting ERP system has been succ
 - Success/error handling
 
 #### `receipt-view-dialog.tsx` - Read-only view dialog
+
 **Features:**
+
 - Displays all receipt information in read-only format
 - Shows customer details
 - Payment method and bank details
@@ -166,20 +180,26 @@ Complete Receipts Management UI for the Thai Accounting ERP system has been succ
 - Error handling
 
 #### `index.ts` - Component exports
+
 - Exports all receipt components for easy importing
 
 ## API Integration Points
 
 ### Customer Management
+
 - `GET /api/customers` - Fetch customer list for dropdown
 
 ### Bank Account Management
+
 - `GET /api/bank-accounts` - Fetch bank accounts for transfer/cheque payments
 
 ### Invoice Management
-- `GET /api/receipts/unpaid-invoices?customerId=xxx` - Fetch unpaid invoices for allocation
+
+- `GET /api/receipts/unpaid-invoices?customerId=xxx` - Fetch unpaid invoices for
+  allocation
 
 ### Receipt Operations
+
 - `GET /api/receipts` - List receipts
 - `GET /api/receipts/[id]` - Get single receipt
 - `POST /api/receipts` - Create receipt
@@ -191,50 +211,41 @@ Complete Receipts Management UI for the Thai Accounting ERP system has been succ
 ## Features Implemented
 
 ### Core Functionality
-✅ Multi-invoice payment allocation
-✅ Automatic receipt number generation (RCP-YYYYMM-####)
-✅ Customer AR balance display
-✅ Unpaid invoice listing per customer
-✅ Auto-allocate to oldest invoices
-✅ Manual allocation control
-✅ WHT deduction support (per invoice)
-✅ Multi-payment method support (Cash, Transfer, Cheque, Credit, Other)
-✅ Bank account selection
-✅ Cheque tracking (number and date)
-✅ Unallocated amount tracking (customer credit)
+
+✅ Multi-invoice payment allocation ✅ Automatic receipt number generation
+(RCP-YYYYMM-####) ✅ Customer AR balance display ✅ Unpaid invoice listing per
+customer ✅ Auto-allocate to oldest invoices ✅ Manual allocation control ✅ WHT
+deduction support (per invoice) ✅ Multi-payment method support (Cash, Transfer,
+Cheque, Credit, Other) ✅ Bank account selection ✅ Cheque tracking (number and
+date) ✅ Unallocated amount tracking (customer credit)
 
 ### Accounting Integration
-✅ GL posting (debit cash/bank, credit AR, credit WHT payable)
-✅ Automatic journal entry generation
-✅ Invoice balance updates
-✅ Invoice status updates (Partial, Paid)
-✅ Chart of accounts integration:
-  - 1110 - Cash
-  - 1120 - Accounts Receivable
-  - 2130 - WHT Payable
-  - Bank accounts from BankAccount table
+
+✅ GL posting (debit cash/bank, credit AR, credit WHT payable) ✅ Automatic
+journal entry generation ✅ Invoice balance updates ✅ Invoice status updates
+(Partial, Paid) ✅ Chart of accounts integration:
+
+- 1110 - Cash
+- 1120 - Accounts Receivable
+- 2130 - WHT Payable
+- Bank accounts from BankAccount table
 
 ### Status Workflow
-✅ DRAFT → POSTED → CANCELLED
-✅ Only draft receipts can be edited
-✅ Only draft receipts can be deleted
-✅ Posted receipts create journal entries
+
+✅ DRAFT → POSTED → CANCELLED ✅ Only draft receipts can be edited ✅ Only draft
+receipts can be deleted ✅ Posted receipts create journal entries
 
 ### User Interface
-✅ Responsive design (mobile-friendly)
-✅ Two-column layout (payment details + allocations)
-✅ Real-time validation
-✅ Loading states
-✅ Error handling
-✅ Toast notifications
-✅ Thai language support
-✅ Summary cards with key metrics
-✅ Search and filter functionality
-✅ Professional HTML export
+
+✅ Responsive design (mobile-friendly) ✅ Two-column layout (payment details +
+allocations) ✅ Real-time validation ✅ Loading states ✅ Error handling ✅
+Toast notifications ✅ Thai language support ✅ Summary cards with key metrics
+✅ Search and filter functionality ✅ Professional HTML export
 
 ## Data Models
 
 ### Receipt Model
+
 ```typescript
 {
   id: string
@@ -261,17 +272,18 @@ Complete Receipts Management UI for the Thai Accounting ERP system has been succ
 ```
 
 ### ReceiptAllocation Model
+
 ```typescript
 {
-  id: string
-  receiptId: string
-  invoiceId: string
-  amount: number                 // Payment amount
-  whtRate: number                // WHT percentage (0-100)
-  whtAmount: number              // Calculated WHT amount
-  receipt: Receipt
-  invoice: Invoice
-  createdAt: DateTime
+  id: string;
+  receiptId: string;
+  invoiceId: string;
+  amount: number; // Payment amount
+  whtRate: number; // WHT percentage (0-100)
+  whtAmount: number; // Calculated WHT amount
+  receipt: Receipt;
+  invoice: Invoice;
+  createdAt: DateTime;
 }
 ```
 
@@ -340,7 +352,7 @@ const receiptData = {
       whtAmount: 0,
     },
   ],
-}
+};
 
 // POST /api/receipts
 // Creates receipt with RCP-202603-0001
@@ -393,6 +405,7 @@ const receiptData = {
 To use this module:
 
 1. **Run database migration:**
+
    ```bash
    npx prisma db push
    # or
@@ -404,12 +417,13 @@ To use this module:
    - Route to receipts page component
 
 3. **Create receipts page:**
+
    ```tsx
    // app/receipts/page.tsx
-   import { ReceiptList } from '@/components/receipts'
+   import { ReceiptList } from '@/components/receipts';
 
    export default function ReceiptsPage() {
-     return <ReceiptList />
+     return <ReceiptList />;
    }
    ```
 

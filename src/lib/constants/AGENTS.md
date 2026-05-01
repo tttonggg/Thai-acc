@@ -5,15 +5,17 @@
 
 ## Purpose
 
-Application-wide constants and configurations for error messages, Thai accounting rules, and system-wide values.
+Application-wide constants and configurations for error messages, Thai
+accounting rules, and system-wide values.
 
 ## Parent Reference
+
 <!-- Parent: ../AGENTS.md -->
 
 ## Key Files
 
-| File | Description |
-|------|-------------|
+| File                | Description                              |
+| ------------------- | ---------------------------------------- |
 | `error-messages.ts` | Standardized Thai/English error messages |
 
 ## For AI Agents

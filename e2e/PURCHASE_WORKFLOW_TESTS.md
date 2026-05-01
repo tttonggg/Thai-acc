@@ -2,65 +2,66 @@
 
 ## Overview
 
-ชุดทดสอบ E2E สำหรับระบบ Purchase Request (PR) และ Purchase Order (PO) ใน Thai Accounting ERP
+ชุดทดสอบ E2E สำหรับระบบ Purchase Request (PR) และ Purchase Order (PO) ใน Thai
+Accounting ERP
 
 ## Test Files
 
-| File | Description |
-|------|-------------|
-| `purchase-workflow.spec.ts` | Main test file with all PR/PO test cases |
-| `helpers/purchase-helpers.ts` | Reusable helper functions and API wrappers |
-| `../tests/pages/purchase-requests.page.ts` | Page Object Model for PR module |
-| `../tests/pages/purchase-orders.page.ts` | Page Object Model for PO module |
+| File                                       | Description                                |
+| ------------------------------------------ | ------------------------------------------ |
+| `purchase-workflow.spec.ts`                | Main test file with all PR/PO test cases   |
+| `helpers/purchase-helpers.ts`              | Reusable helper functions and API wrappers |
+| `../tests/pages/purchase-requests.page.ts` | Page Object Model for PR module            |
+| `../tests/pages/purchase-orders.page.ts`   | Page Object Model for PO module            |
 
 ## Test Coverage
 
 ### Purchase Request Tests
 
-| Test ID | Description |
-|---------|-------------|
+| Test ID    | Description                                 |
+| ---------- | ------------------------------------------- |
 | `[PR-001]` | Create new Purchase Request with line items |
-| `[PR-002]` | Submit PR for approval |
-| `[PR-003]` | Approve Purchase Request |
-| `[PR-004]` | Reject Purchase Request |
-| `[PR-005]` | Convert approved PR to PO |
+| `[PR-002]` | Submit PR for approval                      |
+| `[PR-003]` | Approve Purchase Request                    |
+| `[PR-004]` | Reject Purchase Request                     |
+| `[PR-005]` | Convert approved PR to PO                   |
 
 ### Purchase Order Tests
 
-| Test ID | Description |
-|---------|-------------|
+| Test ID    | Description               |
+| ---------- | ------------------------- |
 | `[PO-001]` | Create new Purchase Order |
-| `[PO-002]` | Submit PO to vendor |
-| `[PO-003]` | Confirm Purchase Order |
-| `[PO-004]` | Mark PO as shipped |
-| `[PO-005]` | Receive PO items |
-| `[PO-006]` | Cancel Purchase Order |
+| `[PO-002]` | Submit PO to vendor       |
+| `[PO-003]` | Confirm Purchase Order    |
+| `[PO-004]` | Mark PO as shipped        |
+| `[PO-005]` | Receive PO items          |
+| `[PO-006]` | Cancel Purchase Order     |
 
 ### Workflow Tests
 
-| Test ID | Description |
-|---------|-------------|
+| Test ID          | Description                |
+| ---------------- | -------------------------- |
 | `[WORKFLOW-001]` | Complete PR to PO workflow |
 
 ### Validation Tests
 
-| Test ID | Description |
-|---------|-------------|
-| `[VALIDATION-001]` | PR line item calculations |
+| Test ID            | Description                     |
+| ------------------ | ------------------------------- |
+| `[VALIDATION-001]` | PR line item calculations       |
 | `[VALIDATION-002]` | PO status transition validation |
 
 ### Error Handling Tests
 
-| Test ID | Description |
-|---------|-------------|
+| Test ID       | Description                  |
+| ------------- | ---------------------------- |
 | `[ERROR-001]` | Create PR without line items |
-| `[ERROR-002]` | Create PO without vendor |
+| `[ERROR-002]` | Create PO without vendor     |
 
 ### Filter & Search Tests
 
-| Test ID | Description |
-|---------|-------------|
-| `[FILTER-001]` | Filter PR by status |
+| Test ID        | Description                 |
+| -------------- | --------------------------- |
+| `[FILTER-001]` | Filter PR by status         |
 | `[SEARCH-001]` | Search for Purchase Request |
 
 ## Running the Tests
@@ -168,10 +169,10 @@ Tests automatically capture screenshots at key steps:
 
 Tests use the standard test accounts:
 
-| Role | Email | Password |
-|------|-------|----------|
-| ADMIN | admin@thaiaccounting.com | admin123 |
-| ACCOUNTANT | accountant@thaiaccounting.com | acc123 |
+| Role       | Email                         | Password |
+| ---------- | ----------------------------- | -------- |
+| ADMIN      | admin@thaiaccounting.com      | admin123 |
+| ACCOUNTANT | accountant@thaiaccounting.com | acc123   |
 
 ## PR/PO Workflow States
 

@@ -4,7 +4,8 @@
 
 ### 1. Add to Navigation
 
-Update the sidebar menu in `src/app/page.tsx` to include the custom report builder:
+Update the sidebar menu in `src/app/page.tsx` to include the custom report
+builder:
 
 ```typescript
 {
@@ -21,16 +22,17 @@ Update the sidebar menu in `src/app/page.tsx` to include the custom report build
 Create `src/app/reports/custom/page.tsx`:
 
 ```tsx
-import { CustomReportBuilder } from '@/components/reports/custom-report-builder'
+import { CustomReportBuilder } from '@/components/reports/custom-report-builder';
 
 export default function CustomReportPage() {
-  return <CustomReportBuilder />
+  return <CustomReportBuilder />;
 }
 ```
 
 ### 3. Test the Component
 
-Navigate to `/reports/custom` in your application to test the custom report builder.
+Navigate to `/reports/custom` in your application to test the custom report
+builder.
 
 ## API Testing
 
@@ -88,7 +90,8 @@ curl -X GET http://localhost:3000/api/reports/templates
 
 ## Component Props
 
-The `CustomReportBuilder` component doesn't require any props. It's self-contained and handles all state internally.
+The `CustomReportBuilder` component doesn't require any props. It's
+self-contained and handles all state internally.
 
 ## Dependencies
 
@@ -126,7 +129,8 @@ Make sure these dependencies are installed:
 
 ## Notes
 
-- All existing report endpoints (trial-balance, balance-sheet, etc.) are reused for PDF/Excel exports
+- All existing report endpoints (trial-balance, balance-sheet, etc.) are reused
+  for PDF/Excel exports
 - Template storage uses the existing `ScheduledReport` Prisma model
 - The component follows the existing shadcn/ui patterns used throughout the app
 - Thai language is used for all UI elements

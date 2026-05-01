@@ -1,10 +1,13 @@
 # Excel Export Service
 
-Complete Excel export functionality for Thai Accounting ERP reports using SheetJS (xlsx).
+Complete Excel export functionality for Thai Accounting ERP reports using
+SheetJS (xlsx).
 
 ## Overview
 
-The Excel export service provides comprehensive export functionality for all accounting reports in the Thai ERP system. All exports support Thai language, proper number formatting, and professional styling.
+The Excel export service provides comprehensive export functionality for all
+accounting reports in the Thai ERP system. All exports support Thai language,
+proper number formatting, and professional styling.
 
 ## Features
 
@@ -67,10 +70,12 @@ GET /api/reports/trial-balance/export/excel
 ```
 
 **Query Parameters:**
+
 - `asOfDate` (optional): Date filter (ISO format)
 - `accountId` (optional): Filter by specific account
 
 **Example:**
+
 ```bash
 curl "http://localhost:3000/api/reports/trial-balance/export/excel?asOfDate=2025-03-11" \
   -H "Cookie: next-auth.session-token=YOUR_TOKEN" \
@@ -84,10 +89,12 @@ GET /api/reports/income-statement/export/excel
 ```
 
 **Query Parameters:**
+
 - `startDate` (optional): Start date (ISO format)
 - `endDate` (optional): End date (ISO format)
 
 **Example:**
+
 ```bash
 curl "http://localhost:3000/api/reports/income-statement/export/excel?startDate=2025-01-01&endDate=2025-03-31" \
   -H "Cookie: next-auth.session-token=YOUR_TOKEN" \
@@ -101,9 +108,11 @@ GET /api/reports/balance-sheet/export/excel
 ```
 
 **Query Parameters:**
+
 - `asOfDate` (optional): Date filter (ISO format)
 
 **Example:**
+
 ```bash
 curl "http://localhost:3000/api/reports/balance-sheet/export/excel?asOfDate=2025-03-11" \
   -H "Cookie: next-auth.session-token=YOUR_TOKEN" \
@@ -125,84 +134,84 @@ const exportToExcel = async () => {
           'Content-Type': 'application/json',
         },
       }
-    )
+    );
 
     if (!response.ok) {
-      throw new Error('Export failed')
+      throw new Error('Export failed');
     }
 
     // Get the blob
-    const blob = await response.blob()
+    const blob = await response.blob();
 
     // Create download link
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `trial-balance-${new Date().toISOString().split('T')[0]}.xlsx`
-    document.body.appendChild(a)
-    a.click()
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `trial-balance-${new Date().toISOString().split('T')[0]}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
 
     // Cleanup
-    window.URL.revokeObjectURL(url)
-    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
   } catch (error) {
-    console.error('Export error:', error)
+    console.error('Export error:', error);
   }
-}
+};
 ```
 
 ### Using React Hook
 
 ```typescript
-import { useState } from 'react'
+import { useState } from 'react';
 
 export function useExcelExport() {
-  const [isExporting, setIsExporting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [isExporting, setIsExporting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const exportTrialBalance = async (asOfDate?: string) => {
-    setIsExporting(true)
-    setError(null)
+    setIsExporting(true);
+    setError(null);
 
     try {
-      const params = new URLSearchParams()
+      const params = new URLSearchParams();
       if (asOfDate) {
-        params.set('asOfDate', asOfDate)
+        params.set('asOfDate', asOfDate);
       }
 
       const response = await fetch(
         `/api/reports/trial-balance/export/excel?${params.toString()}`
-      )
+      );
 
       if (!response.ok) {
-        throw new Error('Export failed')
+        throw new Error('Export failed');
       }
 
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `trial-balance-${asOfDate || 'today'}.xlsx`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `trial-balance-${asOfDate || 'today'}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
-      return true
+      return true;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Export failed'
-      setError(message)
-      return false
+      const message = err instanceof Error ? err.message : 'Export failed';
+      setError(message);
+      return false;
     } finally {
-      setIsExporting(false)
+      setIsExporting(false);
     }
-  }
+  };
 
   return {
     exportTrialBalance,
     isExporting,
     error,
-  }
+  };
 }
 ```
 
@@ -212,7 +221,8 @@ export function useExcelExport() {
 
 All Excel exports include professional styling:
 
-- **Header Row**: Bold text, light gray background (#E0E0E0), center alignment, thick bottom border
+- **Header Row**: Bold text, light gray background (#E0E0E0), center alignment,
+  thick bottom border
 - **Total Rows**: Bold text, yellow background (#FFF9E6), right alignment
 - **Subtotal Rows**: Bold text, light blue background (#E6F3FF)
 - **Currency Cells**: Thai currency format (฿#,##0.00), right alignment
@@ -221,6 +231,7 @@ All Excel exports include professional styling:
 ### Column Widths
 
 Auto-calculated column widths with:
+
 - Minimum width: 10 characters
 - Maximum width: 50 characters
 - Padding: 2 characters
@@ -245,85 +256,85 @@ npm install xlsx
 ```typescript
 // Trial Balance
 interface TrialBalanceReportData {
-  accounts: TrialBalanceData[]
+  accounts: TrialBalanceData[];
   totals: {
-    debit: number
-    credit: number
-    isBalanced: boolean
-  }
-  asOfDate: string
+    debit: number;
+    credit: number;
+    isBalanced: boolean;
+  };
+  asOfDate: string;
 }
 
 // Income Statement
 interface IncomeStatementData {
-  revenue: IncomeStatementAccount[]
-  expenses: IncomeStatementAccount[]
-  totalRevenue: number
-  totalExpenses: number
-  netIncome: number
+  revenue: IncomeStatementAccount[];
+  expenses: IncomeStatementAccount[];
+  totalRevenue: number;
+  totalExpenses: number;
+  netIncome: number;
 }
 
 // Balance Sheet
 interface BalanceSheetData {
-  assets: BalanceSheetAccount[]
-  liabilities: BalanceSheetAccount[]
-  equity: BalanceSheetAccount[]
-  totalAssets: number
-  totalLiabilities: number
-  totalEquity: number
-  isBalanced: boolean
+  assets: BalanceSheetAccount[];
+  liabilities: BalanceSheetAccount[];
+  equity: BalanceSheetAccount[];
+  totalAssets: number;
+  totalLiabilities: number;
+  totalEquity: number;
+  isBalanced: boolean;
 }
 
 // AR Aging
 interface ARAgingData {
-  customers: ARAgingCustomer[]
+  customers: ARAgingCustomer[];
   totals: {
-    current: number
-    days30: number
-    days60: number
-    days90: number
-    over90: number
-    total: number
-  }
-  asOfDate: string
+    current: number;
+    days30: number;
+    days60: number;
+    days90: number;
+    over90: number;
+    total: number;
+  };
+  asOfDate: string;
 }
 
 // AP Aging
 interface APAgingData {
-  vendors: APAgingVendor[]
+  vendors: APAgingVendor[];
   totals: {
-    current: number
-    days30: number
-    days60: number
-    days90: number
-    over90: number
-    total: number
-  }
-  asOfDate: string
+    current: number;
+    days30: number;
+    days60: number;
+    days90: number;
+    over90: number;
+    total: number;
+  };
+  asOfDate: string;
 }
 
 // VAT Report
 interface VATReportData {
-  monthlyData: VATMonthlyData[]
+  monthlyData: VATMonthlyData[];
   ytdTotals: {
-    salesVat: number
-    purchaseVat: number
-    payableVat: number
-  }
-  year: number
+    salesVat: number;
+    purchaseVat: number;
+    payableVat: number;
+  };
+  year: number;
 }
 
 // WHT Report
 interface WHTReportData {
-  formType: 'PND3' | 'PND53'
-  month: string
-  year: number
-  entries: WHTEntry[]
+  formType: 'PND3' | 'PND53';
+  month: string;
+  year: number;
+  entries: WHTEntry[];
   totals: {
-    grossAmount: number
-    withholdingTax: number
-    netPayment: number
-  }
+    grossAmount: number;
+    withholdingTax: number;
+    netPayment: number;
+  };
 }
 ```
 
@@ -336,6 +347,7 @@ npm test -- excel-export.test.ts
 ```
 
 All tests verify:
+
 - Buffer generation
 - File format (ZIP signature)
 - Data structure

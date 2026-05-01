@@ -57,6 +57,7 @@
 ## Journal Entry Flow
 
 ### Approval Journal Entry
+
 ```
 ┌─────────────────────────────────────────────┐
 │  Journal Entry: JV-202603-0001              │
@@ -81,6 +82,7 @@
 ```
 
 ### Reimbursement Journal Entry
+
 ```
 ┌─────────────────────────────────────────────┐
 │  Journal Entry: JV-202603-0002              │
@@ -242,6 +244,7 @@ Common Errors:
 ### Double-Entry Verification
 
 **Approval:**
+
 ```
 Assets (Petty Cash Fund) ↓ by voucher amount
 Expenses ↑ by voucher amount
@@ -252,6 +255,7 @@ Assets = Liabilities + Equity + Revenue - Expenses
 ```
 
 **Reimbursement:**
+
 ```
 Assets (Petty Cash Fund) ↑ by voucher amount
 Assets (Cash/Bank) ↓ by voucher amount

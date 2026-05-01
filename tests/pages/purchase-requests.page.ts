@@ -3,7 +3,7 @@ import { PRLineItem, PurchaseRequestData } from '../../e2e/helpers/purchase-help
 
 /**
  * PurchaseRequestsPage Object Model
- * 
+ *
  * Handles all interactions with the Purchase Requests module including:
  * - Creating, viewing, editing PRs
  * - Submitting for approval
@@ -23,10 +23,16 @@ export class PurchaseRequestsPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("ใบขอซื้อ"), h1:has-text("Purchase Request")');
-    this.createButton = page.locator('button:has-text("สร้างใบขอซื้อ"), button:has-text("Create PR")');
+    this.createButton = page.locator(
+      'button:has-text("สร้างใบขอซื้อ"), button:has-text("Create PR")'
+    );
     this.searchInput = page.locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]');
-    this.statusFilter = page.locator('select').filter({ hasText: /สถานะ|Status|ทุกสถานะ|All Status/ });
-    this.priorityFilter = page.locator('select').filter({ hasText: /ความสำคัญ|Priority|ทุกความสำคัญ|All Priority/ });
+    this.statusFilter = page
+      .locator('select')
+      .filter({ hasText: /สถานะ|Status|ทุกสถานะ|All Status/ });
+    this.priorityFilter = page
+      .locator('select')
+      .filter({ hasText: /ความสำคัญ|Priority|ทุกความสำคัญ|All Priority/ });
     this.prTable = page.locator('table');
     this.prTableBody = page.locator('table tbody');
   }
@@ -37,16 +43,18 @@ export class PurchaseRequestsPage {
   async goto(): Promise<void> {
     // Navigate via sidebar menu
     await this.page.goto('/');
-    
+
     // Click on งานซื้อ menu
-    const purchasesMenu = this.page.locator('text=งานซื้อ, button:has-text("งานซื้อ"), [data-testid="purchases-menu"]').first();
+    const purchasesMenu = this.page
+      .locator('text=งานซื้อ, button:has-text("งานซื้อ"), [data-testid="purchases-menu"]')
+      .first();
     if (await purchasesMenu.isVisible().catch(() => false)) {
       await purchasesMenu.click();
     }
-    
+
     // Click on ใบขอซื้อ submenu
     await this.page.click('text=ใบขอซื้อ (PR), a:has-text("ใบขอซื้อ")');
-    
+
     // Wait for page to load
     await this.pageTitle.waitFor({ state: 'visible', timeout: 10000 });
   }
@@ -104,7 +112,10 @@ export class PurchaseRequestsPage {
     const linePrefix = `lines[${index}]`;
 
     // Fill description
-    await this.page.fill(`input[name="${linePrefix}.description"], textarea[name="${linePrefix}.description"]`, line.description);
+    await this.page.fill(
+      `input[name="${linePrefix}.description"], textarea[name="${linePrefix}.description"]`,
+      line.description
+    );
 
     // Select product if provided
     if (line.productId) {
@@ -132,7 +143,9 @@ export class PurchaseRequestsPage {
    * Save PR (create or update)
    */
   async save(): Promise<void> {
-    await this.page.click('button[type="submit"], button:has-text("บันทึก"), button:has-text("Save")');
+    await this.page.click(
+      'button[type="submit"], button:has-text("บันทึก"), button:has-text("Save")'
+    );
     await this.page.waitForSelector('[data-sonner-toast]', { timeout: 5000 });
   }
 
@@ -152,18 +165,18 @@ export class PurchaseRequestsPage {
 
     // Get the created PR info from toast or page
     const toast = this.page.locator('[data-sonner-toast]').first();
-    const toastText = await toast.textContent() || '';
-    
+    const toastText = (await toast.textContent()) || '';
+
     // Extract PR number from toast or look for it in the table
     await this.page.waitForTimeout(500);
-    
+
     // Find the newly created PR in the table
     const row = this.prTableBody.locator('tr').filter({ hasText: data.reason }).first();
-    const requestNo = await row.locator('td').first().textContent() || '';
-    
+    const requestNo = (await row.locator('td').first().textContent()) || '';
+
     // Get the PR ID from the view/edit button
     const viewButton = row.locator('button').first();
-    const onclick = await viewButton.getAttribute('onclick') || '';
+    const onclick = (await viewButton.getAttribute('onclick')) || '';
     const idMatch = onclick.match(/['"]([a-zA-Z0-9_-]+)['"]/);
     const id = idMatch ? idMatch[1] : '';
 
@@ -195,12 +208,14 @@ export class PurchaseRequestsPage {
    */
   async submitPR(requestNo: string): Promise<void> {
     await this.openPRDetail(requestNo);
-    
+
     // Click submit button in dialog
     await this.page.click('button:has-text("ส่งอนุมัติ"), button:has-text("Submit")');
-    
+
     // Wait for success toast
-    await this.page.waitForSelector('[data-sonner-toast]:has-text("ส่งอนุมัติ")', { timeout: 5000 });
+    await this.page.waitForSelector('[data-sonner-toast]:has-text("ส่งอนุมัติ")', {
+      timeout: 5000,
+    });
   }
 
   /**
@@ -208,18 +223,18 @@ export class PurchaseRequestsPage {
    */
   async approvePR(requestNo: string, notes?: string): Promise<void> {
     await this.openPRDetail(requestNo);
-    
+
     // Click approve button
     await this.page.click('button:has-text("อนุมัติ"), button:has-text("Approve")');
-    
+
     // Fill approval notes if provided
     if (notes) {
       await this.page.fill('textarea[name="approvalNotes"], textarea[name="notes"]', notes);
     }
-    
+
     // Confirm approval
     await this.page.click('button:has-text("ยืนยัน"), button:has-text("Confirm")');
-    
+
     // Wait for success toast
     await this.page.waitForSelector('[data-sonner-toast]:has-text("อนุมัติ")', { timeout: 5000 });
   }
@@ -229,16 +244,16 @@ export class PurchaseRequestsPage {
    */
   async rejectPR(requestNo: string, reason: string): Promise<void> {
     await this.openPRDetail(requestNo);
-    
+
     // Click reject button
     await this.page.click('button:has-text("ปฏิเสธ"), button:has-text("Reject")');
-    
+
     // Fill rejection reason
     await this.page.fill('textarea[name="rejectionReason"], textarea[name="reason"]', reason);
-    
+
     // Confirm rejection
     await this.page.click('button:has-text("ยืนยัน"), button:has-text("Confirm")');
-    
+
     // Wait for success toast
     await this.page.waitForSelector('[data-sonner-toast]:has-text("ปฏิเสธ")', { timeout: 5000 });
   }
@@ -246,31 +261,37 @@ export class PurchaseRequestsPage {
   /**
    * Convert PR to PO
    */
-  async convertToPO(requestNo: string, vendorId?: string): Promise<{ poId: string; orderNo: string }> {
+  async convertToPO(
+    requestNo: string,
+    vendorId?: string
+  ): Promise<{ poId: string; orderNo: string }> {
     await this.openPRDetail(requestNo);
-    
+
     // Click convert button
     await this.page.click('button:has-text("แปลงเป็น PO"), button:has-text("Convert to PO")');
-    
+
     // Select vendor if not pre-selected
     if (vendorId) {
       await this.page.selectOption('select[name="vendorId"]', vendorId);
     }
-    
+
     // Confirm conversion
     await this.page.click('button:has-text("ยืนยัน"), button:has-text("Confirm")');
-    
+
     // Wait for success toast
-    await this.page.waitForSelector('[data-sonner-toast]:has-text("แปลง"), [data-sonner-toast]:has-text("PO")', { timeout: 5000 });
-    
+    await this.page.waitForSelector(
+      '[data-sonner-toast]:has-text("แปลง"), [data-sonner-toast]:has-text("PO")',
+      { timeout: 5000 }
+    );
+
     // Get the created PO number
     const toast = this.page.locator('[data-sonner-toast]').first();
-    const toastText = await toast.textContent() || '';
-    
+    const toastText = (await toast.textContent()) || '';
+
     // Extract PO number from toast
     const poMatch = toastText.match(/PO\d{6}-\d{4}/);
     const orderNo = poMatch ? poMatch[0] : '';
-    
+
     return { poId: '', orderNo };
   }
 
@@ -279,13 +300,15 @@ export class PurchaseRequestsPage {
    */
   async deletePR(requestNo: string): Promise<void> {
     const row = this.prTableBody.locator('tr').filter({ hasText: requestNo }).first();
-    
+
     // Click delete button
     await row.locator('button:has-text("ลบ"), button:has-text("Delete")').click();
-    
+
     // Confirm deletion
-    await this.page.click('button:has-text("ยืนยัน"), button:has-text("Confirm"), button:has-text("ลบ")');
-    
+    await this.page.click(
+      'button:has-text("ยืนยัน"), button:has-text("Confirm"), button:has-text("ลบ")'
+    );
+
     // Wait for success toast
     await this.page.waitForSelector('[data-sonner-toast]:has-text("ลบ")', { timeout: 5000 });
   }
@@ -311,14 +334,19 @@ export class PurchaseRequestsPage {
    * Filter by priority
    */
   async filterByPriority(priority: string): Promise<void> {
-    await this.page.selectOption('select:has-text("ความสำคัญ"), select:has-text("Priority")', priority);
+    await this.page.selectOption(
+      'select:has-text("ความสำคัญ"), select:has-text("Priority")',
+      priority
+    );
     await this.page.waitForTimeout(500);
   }
 
   /**
    * Get PR count from stats
    */
-  async getPRCountByStatus(status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'CONVERTED'): Promise<number> {
+  async getPRCountByStatus(
+    status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'CONVERTED'
+  ): Promise<number> {
     const statusLabels: Record<string, string> = {
       DRAFT: 'ฉบับร่าง',
       PENDING: 'รออนุมัติ',
@@ -328,7 +356,7 @@ export class PurchaseRequestsPage {
     };
 
     const card = this.page.locator('.card, [data-card]').filter({ hasText: statusLabels[status] });
-    const countText = await card.locator('.text-2xl, [data-count]').textContent() || '0';
+    const countText = (await card.locator('.text-2xl, [data-count]').textContent()) || '0';
     return parseInt(countText, 10);
   }
 

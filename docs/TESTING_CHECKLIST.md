@@ -1,17 +1,15 @@
 # ✅ Manual Testing Checklist - Currency Fixes
 
-**Date:** 2026-04-15
-**Dev Server:** http://localhost:3000 ✅ Running
-**Database:** ✅ Clean & Seeded (50 invoices, 100 journal entries)
-**Status:** Ready for manual testing
+**Date:** 2026-04-15 **Dev Server:** http://localhost:3000 ✅ Running
+**Database:** ✅ Clean & Seeded (50 invoices, 100 journal entries) **Status:**
+Ready for manual testing
 
 ---
 
 ## 🔐 Login First
 
-**URL:** http://localhost:3000
-**Email:** admin@thaiaccounting.com
-**Password:** admin123
+**URL:** http://localhost:3000 **Email:** admin@thaiaccounting.com **Password:**
+admin123
 
 ---
 
@@ -31,6 +29,7 @@
 4. **Click [บันทึก]**
 
 **✅ Verify:**
+
 - [ ] Subtotal shows: **฿1,234.56**
 - [ ] VAT shows: **฿86.42**
 - [ ] Total shows: **฿1,320.98**
@@ -44,6 +43,7 @@
 **Path:** ขาย (SELL) → ใบกำกับภาษี
 
 **✅ Verify:**
+
 - [ ] Total column shows: **฿1,320.98** (just created)
 - [ ] Outstanding column shows: **฿1,320.98**
 - [ ] **NOT** ฿132,098.00
@@ -63,6 +63,7 @@
 6. **Click [จัดจ่าย]**
 
 **✅ Verify:**
+
 - [ ] WHT Amount shows: **฿39.63**
 - [ ] Net Payment shows: **฿1,281.35**
 - [ ] Remaining shows: **฿179.02**
@@ -75,6 +76,7 @@
 **Path:** Dashboard (หน้าแรก)
 
 **✅ Verify:**
+
 - [ ] AR Total shows: **฿1,320.98** (from Test 3)
 - [ ] Revenue shows correct amount
 - [ ] **NOT** 0.00 (operator precedence bug)
@@ -94,6 +96,7 @@
 4. **Click [บันทึก]**
 
 **✅ Verify:**
+
 - [ ] WHT dropdown shows all 6 categories
 - [ ] Info tooltip shows PND.53 rates
 - [ ] WHT Amount: **฿150.00**
@@ -106,6 +109,7 @@
 **Path:** รายงาน/ภาษี (REPORTS) → VAT Report
 
 **✅ Verify:**
+
 - [ ] Report loads without error
 - [ ] Amounts show: **฿1,320.98** format
 - [ ] **NOT** ฿132,098.00 (100x bug)
@@ -118,6 +122,7 @@
 **Path:** รายงาน/ภาษี (REPORTS) → WHT Report
 
 **✅ Verify:**
+
 - [ ] Report shows WHT: **฿189.63** (฿39.63 + ฿150.00)
 - [ ] **NOT** ฿18,963.00 (100x bug)
 - [ ] PND.3 form shows correct amounts
@@ -129,6 +134,7 @@
 **Path:** บัญชี (ACCOUNTING) → งบทดลอง
 
 **✅ Verify:**
+
 - [ ] Debit = Credit (balanced)
 - [ ] Amounts show in **฿XXX.XX** format
 - [ ] **NOT** ฿XXX,XXX.XX (100x bug)
@@ -140,6 +146,7 @@
 **Path:** รายงาน/ภาษี (REPORTS) → งบดุล
 
 **✅ Verify:**
+
 - [ ] Assets show correct amounts
 - [ ] Liabilities show correct amounts
 - [ ] **NOT** 100x errors
@@ -160,6 +167,7 @@
 4. **Click [บันทึก]**
 
 **✅ Verify:**
+
 - [ ] Line amount: **฿250.00**
 - [ ] Total: **฿267.50** (includes VAT 7%)
 - [ ] **NOT** ฿26,750.00
@@ -169,24 +177,29 @@
 ## 🎯 Critical Verification Points
 
 ### Input Forms
+
 - [ ] Accept decimals: 1234.56 ✅
 - [ ] WHT dropdown shows 6 categories ✅
 - [ ] Tooltips display PND.53 rates ✅
 
 ### Database Storage (Check with Prisma Studio)
+
 ```bash
 npx prisma studio
 ```
+
 - [ ] Amounts stored as Int: 132098 (Satang)
 - [ ] NOT Float: 1320.98
 - [ ] NOT wrong: 13209800
 
 ### Display
+
 - [ ] Shows Baht: ฿1,320.98 ✅
 - [ ] NOT Satang: ฿132,098
 - [ ] NOT 100x: ฿132,098.00
 
 ### Reports
+
 - [ ] No 100x bugs ✅
 - [ ] No 0.00 bugs ✅
 - [ ] Calculations accurate ✅
@@ -195,34 +208,35 @@ npx prisma studio
 
 ## 📊 Test Results Summary
 
-**Total Tests:** 10
-**Estimated Time:** 30-35 minutes
-**Pass Criteria:** 9/10 tests pass (90%)
+**Total Tests:** 10 **Estimated Time:** 30-35 minutes **Pass Criteria:** 9/10
+tests pass (90%)
 
-| Test | Status | Notes |
-|------|--------|-------|
-| 1. Create Invoice | ⏳ | |
-| 2. Invoice List | ⏳ | |
-| 3. Create Receipt | ⏳ | |
-| 4. Dashboard | ⏳ | |
-| 5. Create Payment | ⏳ | |
-| 6. VAT Report | ⏳ | |
-| 7. WHT Report | ⏳ | |
-| 8. Trial Balance | ⏳ | |
-| 9. Balance Sheet | ⏳ | |
-| 10. Purchase Order | ⏳ | |
+| Test               | Status | Notes |
+| ------------------ | ------ | ----- |
+| 1. Create Invoice  | ⏳     |       |
+| 2. Invoice List    | ⏳     |       |
+| 3. Create Receipt  | ⏳     |       |
+| 4. Dashboard       | ⏳     |       |
+| 5. Create Payment  | ⏳     |       |
+| 6. VAT Report      | ⏳     |       |
+| 7. WHT Report      | ⏳     |       |
+| 8. Trial Balance   | ⏳     |       |
+| 9. Balance Sheet   | ⏳     |       |
+| 10. Purchase Order | ⏳     |       |
 
 ---
 
 ## 🐛 If You Find Bugs
 
 **Screenshot the error** and note:
+
 1. What you were doing (step number)
 2. Expected value (what should show)
 3. Actual value (what actually shows)
 4. Browser console errors (F12 → Console)
 
 **Common Bugs to Look For:**
+
 - 🔴 100x error: Shows ฿132,098 instead of ฿1,320.98
 - 🔴 0.00 error: Shows ฿0.00 instead of actual amount
 - 🔴 Satang display: Shows ฿132,098 instead of ฿1,320.98
@@ -233,6 +247,7 @@ npx prisma studio
 ## ✅ When All Tests Pass
 
 **Next Steps:**
+
 1. Document results (screenshots)
 2. Update task status
 3. Deploy to production via CI/CD

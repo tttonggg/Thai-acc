@@ -20,9 +20,13 @@ export class InvoicesPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h1:has-text("ใบกำกับภาษี"), h1:has-text("Invoices")');
-    this.newInvoiceButton = page.locator('button:has-text("สร้างใบแจ้งหนี้"), button:has-text("New Invoice")');
+    this.newInvoiceButton = page.locator(
+      'button:has-text("สร้างใบแจ้งหนี้"), button:has-text("New Invoice")'
+    );
     this.invoicesTable = page.locator('table, [role="table"]').first();
-    this.searchInput = page.locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]').first();
+    this.searchInput = page
+      .locator('input[placeholder*="ค้นหา"], input[placeholder*="Search"]')
+      .first();
   }
 
   /**
@@ -50,10 +54,14 @@ export class InvoicesPage {
     await this.newInvoiceButton.click();
 
     // Wait for form
-    await this.page.locator('input[name="customerId"], select[name="customerId"]').waitFor({ state: 'visible' });
+    await this.page
+      .locator('input[name="customerId"], select[name="customerId"]')
+      .waitFor({ state: 'visible' });
 
     // Select customer
-    await this.page.locator('select[name="customerId"]').selectOption({ label: invoiceData.customerName });
+    await this.page
+      .locator('select[name="customerId"]')
+      .selectOption({ label: invoiceData.customerName });
 
     // Set dates
     if (invoiceData.invoiceDate) {
@@ -73,7 +81,9 @@ export class InvoicesPage {
     await this.page.locator('button:has-text("บันทึก"), button:has-text("Save")').click();
 
     // Wait for success
-    await this.page.waitForSelector('text=บันทึกสำเร็จ, text=Saved successfully', { timeout: 5000 });
+    await this.page.waitForSelector('text=บันทึกสำเร็จ, text=Saved successfully', {
+      timeout: 5000,
+    });
   }
 
   /**
@@ -84,7 +94,10 @@ export class InvoicesPage {
     await this.page.locator('button:has-text("เพิ่มรายการ"), button:has-text("Add Item")').click();
 
     // Select product
-    await this.page.locator('select[name="productId"]').last().selectOption({ label: item.productName });
+    await this.page
+      .locator('select[name="productId"]')
+      .last()
+      .selectOption({ label: item.productName });
 
     // Set quantity and price
     await this.page.locator('input[name="quantity"]').last().fill(item.quantity.toString());
@@ -94,13 +107,16 @@ export class InvoicesPage {
   /**
    * Edit invoice
    */
-  async editInvoice(invoiceNumber: string, updates: {
-    items?: Array<{
-      productName: string;
-      quantity: number;
-      price: number;
-    }>;
-  }) {
+  async editInvoice(
+    invoiceNumber: string,
+    updates: {
+      items?: Array<{
+        productName: string;
+        quantity: number;
+        price: number;
+      }>;
+    }
+  ) {
     const invoiceRow = this.invoicesTable.locator(`tr:has-text("${invoiceNumber}")`);
     await invoiceRow.locator('button:has-text("แก้ไข"), button:has-text("Edit")').click();
 
@@ -134,7 +150,9 @@ export class InvoicesPage {
     await this.page.locator('button:has-text("ยืนยัน"), button:has-text("Confirm")').click();
 
     // Wait for success
-    await this.page.waitForSelector('text=ออกใบกำกับภาษีสำเร็จ, text=Issued successfully', { timeout: 5000 });
+    await this.page.waitForSelector('text=ออกใบกำกับภาษีสำเร็จ, text=Issued successfully', {
+      timeout: 5000,
+    });
   }
 
   /**
@@ -151,7 +169,7 @@ export class InvoicesPage {
   async getInvoiceStatus(invoiceNumber: string): Promise<string> {
     const invoiceRow = this.invoicesTable.locator(`tr:has-text("${invoiceNumber}")`);
     const statusCell = invoiceRow.locator('td').nth(3); // Assuming status is 4th column
-    return await statusCell.textContent() || '';
+    return (await statusCell.textContent()) || '';
   }
 }
 

@@ -1,40 +1,41 @@
 # Comprehensive E2E Test Templates
 
-This document provides templates and detailed specifications for creating the remaining comprehensive test files.
+This document provides templates and detailed specifications for creating the
+remaining comprehensive test files.
 
 ## Template Structure
 
 All test files follow this structure:
 
 ```typescript
-import { test, expect } from '@playwright/test'
-import { /* test helpers */ } from './test-helpers'
+import { test, expect } from '@playwright/test';
+import {} from /* test helpers */ './test-helpers';
 
 // Test data variables
-let testRecordCode: string
-let testRecordData: any
+let testRecordCode: string;
+let testRecordData: any;
 
-test.describe.configure({ mode: 'serial' })
+test.describe.configure({ mode: 'serial' });
 
 test.describe('Module Name - Comprehensive Tests', () => {
-  let apiContext: any
+  let apiContext: any;
 
   test.beforeAll(async () => {
-    apiContext = await getAuthenticatedContext('accountant')
-  })
+    apiContext = await getAuthenticatedContext('accountant');
+  });
 
   test.afterAll(async () => {
-    await apiContext.dispose()
+    await apiContext.dispose();
     // Cleanup test data
-  })
+  });
 
   test.beforeEach(async ({ page }) => {
-    await page.setExtraHTTPHeaders({ 'x-playwright-test': 'true' })
-    await loginWithRetry(page, 'accountant')
-  })
+    await page.setExtraHTTPHeaders({ 'x-playwright-test': 'true' });
+    await loginWithRetry(page, 'accountant');
+  });
 
   // Test sections...
-})
+});
 ```
 
 ---
@@ -42,10 +43,11 @@ test.describe('Module Name - Comprehensive Tests', () => {
 ## 5. Invoices Test Template (`invoices.spec.ts`)
 
 ### Key Data Structures
+
 ```typescript
-let testInvoiceNumber: string
-let testCustomerCode: string // Use existing customer
-let testProductCode: string // Use existing product
+let testInvoiceNumber: string;
+let testCustomerCode: string; // Use existing customer
+let testProductCode: string; // Use existing product
 ```
 
 ### Test Sections
@@ -109,6 +111,7 @@ let testProductCode: string // Use existing product
     - Verify invoice appears in sales report
 
 ### Database Verification Points
+
 - Invoice record created with correct status
 - Journal entry created with debit AR, credit Sales, credit VAT
 - VAT record created with output tax
@@ -116,20 +119,25 @@ let testProductCode: string // Use existing product
 - Customer balance increased
 
 ### Critical Assertions
+
 ```typescript
 // Invoice created
 await verifyRecordExists(apiContext, '/api/invoices', invoiceNumber, {
   status: 'DRAFT',
-  customerId: testCustomerCode
-})
+  customerId: testCustomerCode,
+});
 
 // Journal entry posted
-const journalEntry = await apiContext.get(`/api/journal-entries?invoiceNumber=${invoiceNumber}`)
-expect(journalEntry.data.length).toBeGreaterThan(0)
+const journalEntry = await apiContext.get(
+  `/api/journal-entries?invoiceNumber=${invoiceNumber}`
+);
+expect(journalEntry.data.length).toBeGreaterThan(0);
 
 // VAT record created
-const vatRecord = await apiContext.get(`/api/vat-records?invoiceNumber=${invoiceNumber}`)
-expect(vatRecord.data.length).toBeGreaterThan(0)
+const vatRecord = await apiContext.get(
+  `/api/vat-records?invoiceNumber=${invoiceNumber}`
+);
+expect(vatRecord.data.length).toBeGreaterThan(0);
 ```
 
 ---
@@ -175,6 +183,7 @@ expect(vatRecord.data.length).toBeGreaterThan(0)
    - Filter by status
 
 ### Database Verification Points
+
 - Purchase record created
 - Journal entry created (debit Purchases/VAT Input, credit AP)
 - VAT input record created
@@ -225,6 +234,7 @@ expect(vatRecord.data.length).toBeGreaterThan(0)
    - Filter by date range
 
 ### Database Verification Points
+
 - Receipt record created
 - ReceiptAllocation records created (linked to invoices)
 - WHT record created (if applicable)
@@ -274,6 +284,7 @@ expect(vatRecord.data.length).toBeGreaterThan(0)
    - Test cheque status: ON_HAND → DEPOSITED → CLEARED/BOUNCED
 
 ### Database Verification Points
+
 - Payment record created
 - PaymentAllocation records created
 - WHT record created (if applicable)
@@ -329,6 +340,7 @@ expect(vatRecord.data.length).toBeGreaterThan(0)
    - Filter by status (active/inactive)
 
 ### Database Verification Points
+
 - Asset record created
 - DepreciationSchedule records created (one per month)
 - NBV calculated correctly: Cost - Accumulated Depreciation
@@ -396,6 +408,7 @@ expect(vatRecord.data.length).toBeGreaterThan(0)
    - Verify reconciliation saved
 
 ### Database Verification Points
+
 - BankAccount record created
 - Cheque record created
 - Cheque status workflow: ON_HAND → DEPOSITED → CLEARED/BOUNCED → CANCELLED
@@ -469,6 +482,7 @@ expect(vatRecord.data.length).toBeGreaterThan(0)
    - Filter by status
 
 ### Database Verification Points
+
 - Employee record created
 - PayrollRun record created
 - Payroll records created (one per employee)
@@ -477,16 +491,18 @@ expect(vatRecord.data.length).toBeGreaterThan(0)
 - Journal entry created with correct accounts
 
 ### SSC Calculation Example
+
 ```typescript
 // Employee salary: ฿20,000
 // Employee SSC: 5% of 20,000 = ฿1,000 → capped at ฿750
 // Employer SSC: 5% of 20,000 = ฿1,000 → capped at ฿750
 
-const employeeSSC = Math.min(salary * 0.05, 750)
-const employerSSC = Math.min(salary * 0.05, 750)
+const employeeSSC = Math.min(salary * 0.05, 750);
+const employerSSC = Math.min(salary * 0.05, 750);
 ```
 
 ### PND1 Progressive Rates (2024)
+
 ```
 0 - 150,000:   0%
 150,001 - 500,000:   5%
@@ -565,6 +581,7 @@ const employerSSC = Math.min(salary * 0.05, 750)
    - Verify fund balance restored
 
 ### Database Verification Points
+
 - PettyCashFund record created
 - PettyCashVoucher record created
 - Fund balance tracked correctly
@@ -651,6 +668,7 @@ const employerSSC = Math.min(salary * 0.05, 750)
     - Verify transfer status changed to COMPLETED
 
 ### Database Verification Points
+
 - StockBalance records created/updated
 - StockMovement records created with correct type
 - WAC cost recalculated after each movement
@@ -658,12 +676,13 @@ const employerSSC = Math.min(salary * 0.05, 750)
 - Transfer records created with status
 
 ### WAC Calculation Example
+
 ```typescript
 // Initial: 10 units @ ฿100 = ฿1,000
 // Receive: 20 units @ ฿120 = ฿2,400
 // New WAC = (1,000 + 2,400) / (10 + 20) = ฿113.33
 
-const newWAC = (totalCost + incomingCost) / (totalQty + incomingQty)
+const newWAC = (totalCost + incomingCost) / (totalQty + incomingQty);
 ```
 
 ---
@@ -702,6 +721,7 @@ const newWAC = (totalCost + incomingCost) / (totalQty + incomingQty)
    - Verify PDF contains credit note details
 
 ### Database Verification Points
+
 - CreditNote record created
 - Journal entry created (debit Sales Returns, credit AR)
 - Stock movement created (type: RECEIVE) if return stock
@@ -743,6 +763,7 @@ const newWAC = (totalCost + incomingCost) / (totalQty + incomingQty)
    - Verify PDF contains debit note details
 
 ### Database Verification Points
+
 - DebitNote record created
 - Journal entry created (debit Purchases, credit AP)
 - Stock movement created (if applicable)
@@ -753,25 +774,25 @@ const newWAC = (totalCost + incomingCost) / (totalQty + incomingQty)
 
 ## Quick Reference: Thai Accounting Terms
 
-| Thai | English | Context |
-|------|---------|---------|
-| บัญชี | Account | Chart of Accounts |
-| ลูกหนี้ | Accounts Receivable | Customers |
-| เจ้าหนี้ | Accounts Payable | Vendors |
-| ใบกำกับภาษี | Tax Invoice | Sales Invoice |
-| ใบซื้อ | Purchase Invoice | Purchase |
-| ใบเสร็จรับเงิน | Receipt | Payment from customer |
-| ใบจ่ายเงิน | Payment Voucher | Payment to vendor |
-| ใบลดหนี้ | Credit Note | Sales return |
-| ใบเพิ่มหนี้ | Debit Note | Purchase return |
-| ภาษีมูลค่าเพิ่ม | VAT | Value Added Tax |
-| ภาษีหัก ณ ที่จ่าย | WHT | Withholding Tax |
-| ประกันสังคม | SSC | Social Security |
-| สต็อกสินค้า | Inventory | Stock management |
-| ทรัพย์สินถาวร | Fixed Assets | Assets |
-| เงินสดย่อย | Petty Cash | Petty cash |
-| คลังสินค้า | Warehouse | Inventory location |
-| ต้นทุนเฉลี่ย | WAC | Weighted Average Cost |
+| Thai              | English             | Context               |
+| ----------------- | ------------------- | --------------------- |
+| บัญชี             | Account             | Chart of Accounts     |
+| ลูกหนี้           | Accounts Receivable | Customers             |
+| เจ้าหนี้          | Accounts Payable    | Vendors               |
+| ใบกำกับภาษี       | Tax Invoice         | Sales Invoice         |
+| ใบซื้อ            | Purchase Invoice    | Purchase              |
+| ใบเสร็จรับเงิน    | Receipt             | Payment from customer |
+| ใบจ่ายเงิน        | Payment Voucher     | Payment to vendor     |
+| ใบลดหนี้          | Credit Note         | Sales return          |
+| ใบเพิ่มหนี้       | Debit Note          | Purchase return       |
+| ภาษีมูลค่าเพิ่ม   | VAT                 | Value Added Tax       |
+| ภาษีหัก ณ ที่จ่าย | WHT                 | Withholding Tax       |
+| ประกันสังคม       | SSC                 | Social Security       |
+| สต็อกสินค้า       | Inventory           | Stock management      |
+| ทรัพย์สินถาวร     | Fixed Assets        | Assets                |
+| เงินสดย่อย        | Petty Cash          | Petty cash            |
+| คลังสินค้า        | Warehouse           | Inventory location    |
+| ต้นทุนเฉลี่ย      | WAC                 | Weighted Average Cost |
 
 ---
 
