@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { DashboardCustomizer, DashboardWidget, presetWidgets } from '@/components/dashboard/dashboard-customizer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,7 +13,8 @@ import {
   Users, 
   FileText,
   AlertCircle,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react'
 import { QuickAccessCard, useRecentItems } from '@/components/personalization/recent-items'
 import { ActivityFeed } from '@/components/websocket/websocket-provider'
@@ -220,19 +222,53 @@ function QuickActionsWidget() {
 }
 
 function TaxSummaryWidget() {
+  // Default to current month
+  const now = new Date()
+  const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+  const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['vat-summary', startDate, endDate],
+    queryFn: async () => {
+      const res = await fetch(`/api/reports/vat?startDate=${startDate}&endDate=${endDate}`)
+      if (!res.ok) throw new Error('Failed to fetch VAT data')
+      return res.json()
+    },
+  })
+
+  const outputAmount = (data?.outputAmount ?? 0) / 100 // convert from satang
+  const inputAmount = (data?.inputAmount ?? 0) / 100
+  const netPayable = outputAmount - inputAmount
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-6">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (error || !data?.success) {
+    return (
+      <div className="p-3 text-sm text-destructive">
+        เกิดข้อผิดพลาดในการโหลดข้อมูลภาษี
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-3">
       <div className="p-3 bg-muted rounded-lg">
         <p className="text-xs text-muted-foreground">ภาษีขาย (Output VAT)</p>
-        <p className="text-lg font-medium">฿87,500</p>
+        <p className="text-lg font-medium">฿{outputAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</p>
       </div>
       <div className="p-3 bg-muted rounded-lg">
         <p className="text-xs text-muted-foreground">ภาษีซื้อ (Input VAT)</p>
-        <p className="text-lg font-medium">฿59,500</p>
+        <p className="text-lg font-medium">฿{inputAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</p>
       </div>
       <div className="p-3 bg-primary/10 rounded-lg">
         <p className="text-xs text-muted-foreground">ต้องชำระ</p>
-        <p className="text-lg font-bold text-primary">฿28,000</p>
+        <p className="text-lg font-bold text-primary">฿{netPayable.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</p>
       </div>
     </div>
   )
