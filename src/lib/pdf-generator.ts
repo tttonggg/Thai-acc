@@ -11,6 +11,43 @@
  *
  * For MVP, this implementation uses English labels with Thai data where possible.
  * Full Thai font support requires font file conversion and embedding.
+ *
+ * ════════════════════════════════════════════════════════════════════════════
+ * jsPDF v4 + jspdf-autotable v5 MIGRATION PENDING
+ * ════════════════════════════════════════════════════════════════════════════
+ *
+ * CURRENT: jsPDF v4.2.0 + jspdf-autotable v5.0.7
+ *
+ * PROBLEM: jspdf-autotable v5 changed its API from:
+ *   OLD (v3): doc.autoTable({ head, body, ... })
+ *   NEW (v5): autoTable(doc, { head, body, ... })
+ *
+ * SYMPTOMS: All 9 PDF generation tests fail with:
+ *   TypeError: doc.autoTable is not a function
+ *
+ * TO MIGRATE:
+ *   1. Change import from:
+ *        import 'jspdf-autotable';
+ *      to:
+ *        import { autoTable } from 'jspdf-autotable';
+ *
+ *   2. Change all 14 occurrences of:
+ *        doc.autoTable({ ... })
+ *      to:
+ *        autoTable(doc, { ... })
+ *
+ *   3. Change lastAutoTable access from:
+ *        doc.lastAutoTable.finalY
+ *      to:
+ *        doc.previousAutoTable?.finalY
+ *
+ *   4. Remove the declare module 'jspdf' augmentation
+ *
+ *   5. Uncomment and run tests in src/lib/__tests__/pdf-generator.test.ts
+ *
+ * LOCATION OF doc.autoTable CALLS (14 total):
+ *   Lines: 308, 661, 784, 874, 997, 1045, 1275, 1328, 1573, 1622, 1832, 1875, 2069, 2112
+ * ════════════════════════════════════════════════════════════════════════════
  */
 
 import { prisma } from '@/lib/db';
