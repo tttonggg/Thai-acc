@@ -3,6 +3,7 @@ import prisma from '@/lib/db'
 import { requireRole } from '@/lib/api-utils'
 import { existsSync, statSync } from 'fs'
 import { join } from 'path'
+import { execSync } from 'child_process'
 
 // GET /api/admin/health - System health metrics (ADMIN only)
 export async function GET(request: NextRequest) {
@@ -93,7 +94,6 @@ export async function GET(request: NextRequest) {
     // Get disk usage (macOS/Linux)
     let diskUsage = { free: 0, total: 0, used: 0, percentage: 0 }
     try {
-      const { execSync } = require('child_process')
       const output = execSync('df -h / | tail -1', { encoding: 'utf-8' })
       const parts = output.split(/\s+/)
       if (parts.length > 4) {

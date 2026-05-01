@@ -161,7 +161,10 @@ export class ConnectionPoolManager {
 
     this.healthCheckInterval = setInterval(async () => {
       try {
-        await this.prisma?.$queryRaw`SELECT 1`
+        const prisma = this.prisma
+        if (prisma) {
+          await prisma.$queryRaw`SELECT 1`
+        }
         this.metrics.recordHealthCheck(true)
       } catch (error) {
         this.metrics.recordHealthCheck(false)
@@ -187,7 +190,10 @@ export class ConnectionPoolManager {
       try {
         await new Promise(resolve => setTimeout(resolve, this.config.retryDelay * Math.pow(2, i)))
         this.initializePrisma()
-        await this.prisma?.$queryRaw`SELECT 1`
+        const prisma = this.prisma
+        if (prisma) {
+          await prisma.$queryRaw`SELECT 1`
+        }
         console.log('[Connection Pool] Reconnected successfully')
         return
       } catch (error) {

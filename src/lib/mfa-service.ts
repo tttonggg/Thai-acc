@@ -5,7 +5,7 @@
 
 import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
-import { encrypt, decrypt } from './encryption-service';
+import { encrypt, decrypt, createHash } from './encryption-service';
 import { prisma } from './db';
 
 export interface MFASetupResult {
@@ -242,7 +242,6 @@ export function validateBackupCode(
   inputCode: string,
   hashedCodes: string[]
 ): boolean {
-  const { createHash } = require('./encryption-service');
   const inputHash = createHash(inputCode.toUpperCase().trim());
   return hashedCodes.includes(inputHash);
 }

@@ -3,7 +3,7 @@
 // เริ่มต้น scheduler เมื่อแอป start
 // ============================================
 
-import { startScheduler, getSchedulerStatus } from './scheduler'
+import { startScheduler, getSchedulerStatus, stopScheduler } from './scheduler'
 
 // Flag to ensure we only initialize once
 let initialized = false
@@ -29,14 +29,12 @@ export function initializeScheduler(): void {
   // Handle graceful shutdown
   process.on('SIGTERM', () => {
     console.log('[SchedulerInit] SIGTERM received, cleaning up...')
-    const { stopScheduler } = require('./scheduler')
     stopScheduler()
     process.exit(0)
   })
 
   process.on('SIGINT', () => {
     console.log('[SchedulerInit] SIGINT received, cleaning up...')
-    const { stopScheduler } = require('./scheduler')
     stopScheduler()
     process.exit(0)
   })

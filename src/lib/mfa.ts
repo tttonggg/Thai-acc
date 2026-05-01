@@ -5,6 +5,7 @@
 
 import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
+import * as crypto from 'crypto';
 import { encrypt, decrypt } from './encryption';
 import { prisma } from './db';
 
@@ -251,7 +252,6 @@ export function validateBackupCode(
   inputCode: string,
   hashedCodes: string[]
 ): boolean {
-  const crypto = require('crypto');
   const inputHash = crypto
     .createHash('sha256')
     .update(inputCode.toUpperCase().trim())

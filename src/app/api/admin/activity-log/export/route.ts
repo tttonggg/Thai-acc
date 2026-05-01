@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const dateFrom = searchParams.get('dateFrom')
     const dateTo = searchParams.get('dateTo')
     const action = searchParams.get('action')
-    const module = searchParams.get('module')
+    const docModule = searchParams.get('module')
     const status = searchParams.get('status')
 
     // Build where clause
@@ -21,8 +21,8 @@ export async function GET(request: NextRequest) {
       where.action = action
     }
 
-    if (module) {
-      where.module = module
+    if (docModule) {
+      where.module = docModule
     }
 
     if (status && status !== 'all') {

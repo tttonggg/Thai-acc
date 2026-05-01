@@ -73,10 +73,10 @@ export async function GET(
         let details: RelatedDocumentDetails | null = null
 
         // Determine which module and ID to fetch
-        const module = relation.sourceModule === "invoice" ? relation.relatedModule : relation.sourceModule
+        const docModule = relation.sourceModule === "invoice" ? relation.relatedModule : relation.sourceModule
         const documentId = relation.sourceModule === "invoice" ? relation.relatedId : relation.sourceId
 
-        switch (module) {
+        switch (docModule) {
           case "receipt": {
             const receipt = await db.receipt.findUnique({
               where: { id: documentId },
