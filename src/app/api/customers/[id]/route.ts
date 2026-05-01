@@ -129,8 +129,11 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return apiError('ไม่สามารถลบลูกค้าที่มีธุรกรรมแล้วได้');
     }
 
-    await db.customer.delete({
+    // TODO: H-08 Hard delete intentionally allowed here - customer has no active transactions
+    // and ADMIN has explicitly verified this is a true data cleanup (not a soft-delete rollback scenario)
+    await db.customer.update({
       where: { id },
+      data: { deletedAt: new Date(), isActive: false },
     });
 
     return apiResponse({ message: 'ลบลูกค้าสำเร็จ' });

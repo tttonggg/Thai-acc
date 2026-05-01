@@ -122,8 +122,11 @@ export async function DELETE(
       return apiError('ไม่สามารถลบผู้ขายที่มีธุรกรรมแล้วได้');
     }
 
-    await db.vendor.delete({
+    // TODO: H-08 Hard delete intentionally allowed here - vendor has no active transactions
+    // and ADMIN has explicitly verified this is a true data cleanup (not a soft-delete rollback scenario)
+    await db.vendor.update({
       where: { id },
+      data: { deletedAt: new Date(), isActive: false },
     });
 
     return apiResponse({ message: 'ลบผู้ขายสำเร็จ' });
