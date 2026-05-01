@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect, Suspense } from 'react';
 import { PWAProvider } from '@/components/pwa/pwa-provider';
 import { OfflineSyncProvider } from '@/components/offline-sync/offline-sync-provider';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
 import dynamic from 'next/dynamic';
 
 const WebSocketProviderDynamic = dynamic(

@@ -1,58 +1,71 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { signOut } from 'next-auth/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { KeeratiSidebar } from '@/components/layout/keerati-sidebar';
-import { Dashboard } from '@/components/dashboard/dashboard';
-import { EntityManagement } from '@/components/entities/entity-management';
-import { CurrencyManagement } from '@/components/currencies/currency-management';
-import { ChartOfAccounts } from '@/components/accounts/chart-of-accounts';
-import { JournalEntry } from '@/components/journal/journal-entry';
-import { InvoiceList } from '@/components/invoices/invoice-list';
-import { InvoiceDetailPage } from '@/components/invoices/invoice-detail-page';
-import { VatReport } from '@/components/vat/vat-report';
-import { WhtWithTabs } from '@/components/wht/wht-with-tabs';
-import { CustomerList } from '@/components/ar/customer-list';
-import { VendorList } from '@/components/ap/vendor-list';
-import { PaymentList } from '@/components/payments/payment-list';
-import { CreditNoteList } from '@/components/credit-notes/credit-note-list';
-import { DebitNoteList } from '@/components/debit-notes/debit-note-list';
-import { InventoryPage } from '@/components/inventory/inventory-page';
-import { BankingPage } from '@/components/banking/banking-page';
-import { AssetsPage } from '@/components/assets/assets-page';
-import { PayrollPage } from '@/components/payroll/payroll-page';
-import { ProvidentFundManagement } from '@/components/payroll/provident-fund-management';
-import { LeaveManagement } from '@/components/leave/leave-management';
-import { PettyCashPage } from '@/components/petty-cash/petty-cash-page';
-import { ProductsPage } from '@/components/products/products-page';
-import { StockTakePage } from '@/components/stock-takes/stock-take-page';
-import { PurchaseRequestList } from '@/components/purchase-requests/purchase-request-list';
-import { PurchaseOrderList } from '@/components/purchase-orders/purchase-order-list';
-import { PurchaseList } from '@/components/purchases/purchase-list';
-import { QuotationList } from '@/components/quotations/quotation-list';
-import { GoodsReceiptNotesList } from '@/components/goods-receipt-notes';
-import { ReceiptList } from '@/components/receipts/receipt-list';
-import { Reports } from '@/components/reports/reports';
-import { CashFlowReport } from '@/components/reports/cash-flow-report';
-import { PeriodManagement } from '@/components/accounting-periods/period-management';
-import { BudgetManagement } from '@/components/budgets/budget-management';
-import { Settings } from '@/components/settings/settings';
-import { LoginPage } from '@/components/auth/login-page';
-import { UserManagement } from '@/components/auth/user-management';
-import { PermissionGuard } from '@/components/auth/permission-guard';
-import { eventBus, EVENTS } from '@/lib/events';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { DataExportPage } from '@/components/admin/data-export-page';
-import { BackupRestorePage } from '@/components/admin/backup-restore-page';
-import { DataImportPage } from '@/components/admin/data-import-page';
-import { ActivityLogPage } from '@/components/admin/activity-log-page';
-import { RoleManagement } from '@/components/admin/role-management/role-management';
-import { ApproverConfig } from '@/components/admin/approver-config/approver-config';
-import { WebhookManagement, ApiAnalytics } from '@/components/admin';
-import { RecurringDocuments } from '@/components/recurring/recurring-documents';
-import { SSOFiling } from '@/components/payroll/sso-filing';
+// Lazy-loaded module components for code-splitting
+const Dashboard = lazy(() => import('@/components/dashboard/dashboard'));
+const EntityManagement = lazy(() => import('@/components/entities/entity-management'));
+const CurrencyManagement = lazy(() => import('@/components/currencies/currency-management'));
+const ChartOfAccounts = lazy(() => import('@/components/accounts/chart-of-accounts'));
+const JournalEntry = lazy(() => import('@/components/journal/journal-entry'));
+const InvoiceList = lazy(() => import('@/components/invoices/invoice-list'));
+const InvoiceDetailPage = lazy(() => import('@/components/invoices/invoice-detail-page'));
+const VatReport = lazy(() => import('@/components/vat/vat-report'));
+const WhtWithTabs = lazy(() => import('@/components/wht/wht-with-tabs'));
+const CustomerList = lazy(() => import('@/components/ar/customer-list'));
+const VendorList = lazy(() => import('@/components/ap/vendor-list'));
+const PaymentList = lazy(() => import('@/components/payments/payment-list'));
+const CreditNoteList = lazy(() => import('@/components/credit-notes/credit-note-list'));
+const DebitNoteList = lazy(() => import('@/components/debit-notes/debit-note-list'));
+const InventoryPage = lazy(() => import('@/components/inventory/inventory-page'));
+const BankingPage = lazy(() => import('@/components/banking/banking-page'));
+const AssetsPage = lazy(() => import('@/components/assets/assets-page'));
+const PayrollPage = lazy(() => import('@/components/payroll/payroll-page'));
+const ProvidentFundManagement = lazy(() => import('@/components/payroll/provident-fund-management'));
+const LeaveManagement = lazy(() => import('@/components/leave/leave-management'));
+const PettyCashPage = lazy(() => import('@/components/petty-cash/petty-cash-page'));
+const ProductsPage = lazy(() => import('@/components/products/products-page'));
+const StockTakePage = lazy(() => import('@/components/stock-takes/stock-take-page'));
+const PurchaseRequestList = lazy(() => import('@/components/purchase-requests/purchase-request-list'));
+const PurchaseOrderList = lazy(() => import('@/components/purchase-orders/purchase-order-list'));
+const PurchaseList = lazy(() => import('@/components/purchases/purchase-list'));
+const QuotationList = lazy(() => import('@/components/quotations/quotation-list'));
+const GoodsReceiptNotesList = lazy(() => import('@/components/goods-receipt-notes'));
+const ReceiptList = lazy(() => import('@/components/receipts/receipt-list'));
+const Reports = lazy(() => import('@/components/reports/reports'));
+const CashFlowReport = lazy(() => import('@/components/reports/cash-flow-report'));
+const PeriodManagement = lazy(() => import('@/components/accounting-periods/period-management'));
+const BudgetManagement = lazy(() => import('@/components/budgets/budget-management'));
+const Settings = lazy(() => import('@/components/settings/settings'));
+const LoginPage = lazy(() => import('@/components/auth/login-page'));
+const UserManagement = lazy(() => import('@/components/auth/user-management'));
+const PermissionGuard = lazy(() => import('@/components/auth/permission-guard'));
+const DataExportPage = lazy(() => import('@/components/admin/data-export-page'));
+const BackupRestorePage = lazy(() => import('@/components/admin/backup-restore-page'));
+const DataImportPage = lazy(() => import('@/components/admin/data-import-page'));
+const ActivityLogPage = lazy(() => import('@/components/admin/activity-log-page'));
+const RoleManagement = lazy(() => import('@/components/admin/role-management/role-management'));
+const ApproverConfig = lazy(() => import('@/components/admin/approver-config/approver-config'));
+const WebhookManagement = lazy(() => import('@/components/admin').then(m => ({ default: m.WebhookManagement })));
+const ApiAnalytics = lazy(() => import('@/components/admin').then(m => ({ default: m.ApiAnalytics })));
+const RecurringDocuments = lazy(() => import('@/components/recurring/recurring-documents'));
+const SSOFiling = lazy(() => import('@/components/payroll/sso-filing'));
+
+// Module loading skeleton fallback
+function ModuleSkeleton() {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
+        <p className="mt-4 text-gray-600">กำลังโหลด...</p>
+      </div>
+    </div>
+  );
+}
 import {
   Loader2,
   LayoutDashboard,
@@ -137,9 +150,39 @@ export type Module =
 export default function Home() {
   const { data: session, status } = useSession();
   const store = useAuthStore();
+  const queryClient = useQueryClient();
   const [activeModule, setActiveModule] = useState<Module>('dashboard');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Prefetch dashboard data on mount for faster initial load
+  useEffect(() => {
+    if (status === 'authenticated') {
+      queryClient.prefetchQuery({
+        queryKey: ['dashboard-stats'],
+        queryFn: async () => {
+          const res = await fetch(`/api/dashboard`, { credentials: 'include' });
+          if (!res.ok) throw new Error('Failed to fetch dashboard');
+          const json = await res.json();
+          if (!json.success) throw new Error(json.error || 'Unknown error');
+          return json.data;
+        },
+        staleTime: 2 * 60 * 1000, // 2 minutes
+      });
+
+      queryClient.prefetchQuery({
+        queryKey: ['recent-invoices'],
+        queryFn: async () => {
+          const res = await fetch(`/api/invoices?limit=10&sort=createdAt:desc`, { credentials: 'include' });
+          if (!res.ok) throw new Error('Failed to fetch recent invoices');
+          const json = await res.json();
+          if (!json.success) throw new Error(json.error || 'Unknown error');
+          return json.data;
+        },
+        staleTime: 2 * 60 * 1000, // 2 minutes
+      });
+    }
+  }, [status, queryClient]);
 
   // Fetch permissions on mount and store in auth - MUST be at top level
   useEffect(() => {
@@ -331,7 +374,7 @@ export default function Home() {
 
   // Not authenticated - show login page
   if (status === 'unauthenticated' || !session) {
-    return <LoginPage />;
+    return <Suspense fallback={<ModuleSkeleton />}><LoginPage /></Suspense>;
   }
 
   // Authenticated - show main app
@@ -586,7 +629,7 @@ export default function Home() {
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden bg-[var(--background)] pt-16 md:pt-0">
         {/* Content Area */}
-        <main className="flex-1 overflow-auto p-6">{renderModule()}</main>
+        <main className="flex-1 overflow-auto p-6"><Suspense fallback={<ModuleSkeleton />}>{renderModule()}</Suspense></main>
       </div>
     </div>
   );
