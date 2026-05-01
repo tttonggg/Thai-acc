@@ -200,6 +200,8 @@ export const usePreferencesStore = create<PreferencesState>()(
     {
       name: 'thai-erp-preferences',
       storage: createJSONStorage(() => localStorage),
+      skipHydration: true,
+      // Persist only changed keys - partialize selects which keys to persist
       partialize: (state) => ({
         theme: state.theme,
         language: state.language,

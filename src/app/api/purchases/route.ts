@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    // Fetch purchase invoices without vendor first to avoid null relationship errors
+    // Fetch purchase invoices with vendor and lines in optimized query
     const [purchases, total] = await Promise.all([
       db.purchaseInvoice.findMany({
         where,
@@ -62,10 +62,18 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
         include: {
+          vendor: {
+            select: {
+              id: true,
+              code: true,
+              name: true,
+              taxId: true,
+            },
+          },
           lines: {
             select: {
               id: true,
-              description: true,
+              productId: true,
               quantity: true,
               unit: true,
               unitPrice: true,
@@ -78,29 +86,8 @@ export async function GET(request: NextRequest) {
       db.purchaseInvoice.count({ where }),
     ]);
 
-    // Fetch vendors separately for purchases that have them
-    const vendorIds = purchases.map((p: any) => p.vendorId).filter((id: string) => id != null);
-    const vendors =
-      vendorIds.length > 0
-        ? await db.vendor.findMany({
-            where: {
-              id: { in: vendorIds },
-            },
-            select: { id: true, code: true, name: true, taxId: true },
-          })
-        : [];
-
-    // Create a map for quick vendor lookup
-    const vendorMap = new Map(vendors.map((v: any) => [v.id, v]));
-
-    // Attach vendors to purchases
-    const purchasesWithVendors = purchases.map((p: any) => ({
-      ...p,
-      vendor: p.vendorId ? vendorMap.get(p.vendorId) || null : null,
-    }));
-
     // Filter out purchases with null vendors (data integrity issue)
-    const validPurchases = purchasesWithVendors.filter((p: any) => p.vendor !== null);
+    const validPurchases = purchases.filter((p: any) => p.vendor !== null);
 
     // Transform data to match frontend interface (flatten vendor.name to vendorName)
     console.log('Raw purchases data:', JSON.stringify(validPurchases, null, 2).substring(0, 500));

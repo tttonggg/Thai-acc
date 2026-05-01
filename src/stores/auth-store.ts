@@ -65,8 +65,12 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'thai-accounting-auth',
-      // Only persist user/auth state, NOT permissions - permissions come from API on each session
-      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+      skipHydration: true,
+      // Only persist user.id, user.role, and isAuthenticated - strip derived/permission state
+      partialize: (state) => ({
+        user: state.user ? { id: state.user.id, role: state.user.role } : null,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );

@@ -3,9 +3,9 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000 2>&1 | tee dev.log",
-    "dev:3001": "next dev -p 3001",
-    "dev:3002": "next dev -p 3002",
+    "dev": "next dev --turbopack -p 3000 2>&1 | tee dev.log",
+    "dev:3001": "next dev --turbopack -p 3001",
+    "dev:3002": "next dev --turbopack -p 3002",
     "build": "npm run db:select-schema && next build --webpack && npm run build:standalone",
     "build:standalone": "mkdir -p .next/standalone/thai-acc/.next && cp -r .next/static .next/standalone/thai-acc/.next/ && cp -r public .next/standalone/thai-acc/ && node scripts/build-production.js && cd .next/standalone && npm install --omit=dev --legacy-peer-deps --ignore-scripts && cp -r node_modules/.prisma node_modules/@prisma 2>/dev/null; cd ../.. && echo 'Build complete! Standalone directory ready.' && echo 'IMPORTANT: Update .next/standalone/thai-acc/.env with absolute DATABASE_URL path'",
     "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
@@ -58,7 +58,9 @@
     "security:sbom": "./scripts/security/generate-sbom.sh",
     "security:deps": "./scripts/security/dependency-check.sh",
     "ci:all": "npm run lint && npm run type-check && npm run test:coverage && npm run build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "postinstall": "prisma generate",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@apollo/server": "^5.4.0",
@@ -153,6 +155,7 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.4",
     "@percy/cli": "^1.30.7",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",

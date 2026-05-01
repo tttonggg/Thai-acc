@@ -85,8 +85,21 @@ export async function GET(request: NextRequest) {
       prisma.invoice.findMany({
         where,
         include: {
-          customer: true,
-          lines: true,
+          customer: {
+            select: {
+              id: true,
+              name: true,
+              code: true,
+            },
+          },
+          lines: {
+            select: {
+              id: true,
+              productId: true,
+              quantity: true,
+              amount: true,
+            },
+          },
           _count: {
             select: {
               comments: true,

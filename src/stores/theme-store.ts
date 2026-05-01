@@ -158,6 +158,7 @@ export const useThemeStore = create<ThemeState>()(
     }),
     {
       name: 'keerati-theme-storage',
+      skipHydration: true,
       onRehydrateStorage: () => (state) => {
         // Apply theme on rehydrate from localStorage
         if (state && typeof document !== 'undefined') {
