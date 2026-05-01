@@ -1,5 +1,9 @@
 'use client';
 
+// TODO: Consider splitting this large form (1184 lines) following the invoice-list pattern
+// See: src/components/invoices/invoice-list-virtual.tsx for virtualization reference
+// Consider extracting: line-item-editor, payment-allocation, receipt-details sections
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
