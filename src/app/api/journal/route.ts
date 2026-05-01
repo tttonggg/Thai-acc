@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Require ACCOUNTANT or ADMIN role
-    await requireRole(['ACCOUNTANT', 'ADMIN']);
+    const user = await requireRole(['ACCOUNTANT', 'ADMIN']);
 
     const body = await request.json();
     const validatedData = journalEntrySchema.parse(body);
@@ -178,6 +178,7 @@ export async function POST(request: NextRequest) {
         totalCredit,
         notes: dataInSatang.notes,
         status: 'DRAFT',
+        createdById: user.id,
         lines: {
           create: dataInSatang.lines.map((line, index) => ({
             lineNo: index + 1,

@@ -277,6 +277,7 @@ export async function POST(request: NextRequest) {
         unallocated,
         notes: validatedData.notes,
         status: 'DRAFT',
+        createdById: user.id,
         allocations: {
           create: validatedData.allocations.map((alloc) => ({
             invoiceId: alloc.invoiceId,

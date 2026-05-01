@@ -233,6 +233,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           data: {
             status: 'ISSUED',
             journalEntryId: revenueJournalEntry.id,
+            issuedById: user.id,
           },
         });
 
