@@ -151,10 +151,10 @@ export function extractUserIdFromRequest(request: Request): string | null {
  */
 export const rateLimitPresets = {
   // Strict: For sensitive operations (login, password reset)
-  // 5 attempts per 15 minutes to prevent brute force attacks
+  // 20 attempts per 15 minutes to prevent brute force while allowing legitimate retries
   strict: {
-    limit: 5,
-    window: 15 * 60 * 1000, // 5 requests per 15 minutes
+    limit: 20,
+    window: 15 * 60 * 1000, // 20 requests per 15 minutes
     useUserBased: false,
   },
 
