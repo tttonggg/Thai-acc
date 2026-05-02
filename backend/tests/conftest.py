@@ -11,6 +11,8 @@ from src.models.user import User
 from src.models.contact import Contact
 from src.models.product import Product
 from src.models.project import Project
+from src.models.gl import ChartOfAccount
+from src.utils.seed_coa import seed_coa_for_company
 
 # Use in-memory SQLite for tests
 TEST_DATABASE_URL = "sqlite:///:memory:"
@@ -37,7 +39,7 @@ def db():
 
 @pytest.fixture
 def test_company(db):
-    """Create a test company."""
+    """Create a test company with seeded COA."""
     company = Company(
         name="บริษัท ทดสอบ จำกัด",
         tax_id="1234567890123",
@@ -45,6 +47,8 @@ def test_company(db):
     db.add(company)
     db.commit()
     db.refresh(company)
+    # Seed standard Chart of Accounts for test company
+    seed_coa_for_company(db, str(company.id))
     return company
 
 
@@ -109,6 +113,35 @@ def test_project(db, test_company, test_contact):
     db.commit()
     db.refresh(project)
     return project
+
+
+@pytest.fixture
+def test_coa_account(db, test_company):
+    """Get first COA account for the test company."""
+    account = db.query(ChartOfAccount).filter(
+        ChartOfAccount.company_id == test_company.id,
+    ).first()
+    return account
+
+
+@pytest.fixture
+def test_cash_account(db, test_company):
+    """Get cash asset COA account for the test company."""
+    account = db.query(ChartOfAccount).filter(
+        ChartOfAccount.company_id == test_company.id,
+        ChartOfAccount.code == "11000",
+    ).first()
+    return account
+
+
+@pytest.fixture
+def test_ar_account(db, test_company):
+    """Get AR COA account for the test company."""
+    account = db.query(ChartOfAccount).filter(
+        ChartOfAccount.company_id == test_company.id,
+        ChartOfAccount.code == "11200",
+    ).first()
+    return account
 
 
 @pytest.fixture

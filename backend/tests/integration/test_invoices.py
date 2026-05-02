@@ -42,9 +42,10 @@ class TestInvoices:
         )
         quotation_id = quotation_resp.json()["id"]
         
-        # Accept the quotation
+        # Sent -> accepted
+        client.put(f"/api/v1/quotations/{quotation_id}/status", headers=auth_headers, json={"status": "sent"})
         client.put(f"/api/v1/quotations/{quotation_id}/status", headers=auth_headers, json={"status": "accepted"})
-        
+
         # Create invoice from quotation
         response = client.post(
             "/api/v1/invoices",
@@ -142,10 +143,11 @@ class TestInvoices:
             },
         )
         invoice_id = create_resp.json()["id"]
-        
-        # Mark as paid
+
+        # draft -> sent -> paid
+        client.put(f"/api/v1/invoices/{invoice_id}/status", headers=auth_headers, json={"status": "sent"})
         client.put(f"/api/v1/invoices/{invoice_id}/status", headers=auth_headers, json={"status": "paid"})
-        
+
         # Try to update
         response = client.put(
             f"/api/v1/invoices/{invoice_id}",

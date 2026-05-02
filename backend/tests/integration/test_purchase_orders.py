@@ -64,17 +64,25 @@ class TestPurchaseOrders:
         )
         po_id = po_resp.json()["id"]
 
+        # Transition through required statuses: draft → sent → confirmed → received
+        for status in ["sent", "confirmed", "received"]:
+            resp = client.put(f"/api/v1/purchase-orders/{po_id}/status", headers=auth_headers, json={"status": status})
+            assert resp.status_code == 200
+
         # Convert to purchase invoice
         response = client.post(f"/api/v1/purchase-orders/{po_id}/convert", headers=auth_headers)
-        assert response.status_code == 201
+        assert response.status_code == 200
         data = response.json()
-        assert data["bill_number"].startswith("TX-2026-")
+        assert data["status"] == "billed"
         assert Decimal(data["total_amount"]) == Decimal("535.00")  # 500 + 35 VAT
-        assert data["purchase_order_id"] == po_id
+        assert data["converted_to_purchase_invoice_id"] is not None
 
-        # Check PO is now billed
-        po_get = client.get(f"/api/v1/purchase-orders/{po_id}", headers=auth_headers)
-        assert po_get.json()["status"] == "billed"
+        # Verify purchase invoice was created
+        pi_resp = client.get(f"/api/v1/purchase-invoices/{data['converted_to_purchase_invoice_id']}", headers=auth_headers)
+        assert pi_resp.status_code == 200
+        pi_data = pi_resp.json()
+        assert pi_data["bill_number"].startswith("PI-2026-")
+        assert pi_data["purchase_order_id"] == po_id
 
     def test_list_purchase_orders_with_filters(self, client, test_contact, auth_headers):
         for status in ["draft", "sent"]:

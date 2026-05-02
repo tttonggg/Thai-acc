@@ -107,7 +107,7 @@ def _build_expense_claim_response(claim: ExpenseClaim) -> dict:
         "notes": claim.notes,
         "contact_name": claim.contact.name if claim.contact else None,
         "project_name": claim.project.name if claim.project else None,
-        "approver_name": claim.approver.name if claim.approver else None,
+        "approver_name": f"{claim.approver.first_name} {claim.approver.last_name}" if claim.approver else None,
         "created_at": claim.created_at,
         "updated_at": claim.updated_at,
     }

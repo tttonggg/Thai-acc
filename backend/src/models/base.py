@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 from sqlalchemy import Column, String, DateTime, event
-from sqlalchemy.dialects.postgresql import UUID
+from .types import CrossPlatformUUID as UUID
 from ..core.database import Base
 
 

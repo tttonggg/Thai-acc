@@ -265,7 +265,6 @@ def list_purchase_invoices(
     current_user: User = Depends(get_current_user),
 ):
     query = db.query(PurchaseInvoice).options(
-        joinedload(PurchaseInvoice.items),
         joinedload(PurchaseInvoice.contact),
         joinedload(PurchaseInvoice.project),
         joinedload(PurchaseInvoice.purchase_order),
@@ -301,7 +300,6 @@ def get_purchase_invoice(
     current_user: User = Depends(get_current_user),
 ):
     purchase_invoice = db.query(PurchaseInvoice).options(
-        joinedload(PurchaseInvoice.items),
         joinedload(PurchaseInvoice.contact),
         joinedload(PurchaseInvoice.project),
         joinedload(PurchaseInvoice.purchase_order),

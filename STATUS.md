@@ -91,7 +91,7 @@
 | `005` | invoices.e_tax_xml/timestamp/submitted_at/error, e_tax_submissions |
 | `006` | bank_statement_imports, bank_statement_lines |
 
-### Tests (6 Test Files)
+### Tests (10 Test Files)
 
 | File | Coverage |
 |------|----------|
@@ -101,6 +101,10 @@
 | `test_projects.py` | Create, duplicate code, filters, update, invoice tagging |
 | `test_purchase_orders.py` | Create, status transitions, convert to PI, filters, calc |
 | `test_purchase_invoices.py` | Create, status transitions, filters, calc |
+| `test_expense_claims.py` | Create, status transitions, approval, delete, GL posting, categories |
+| `test_accounting.py` | COA seeding, JE CRUD, trial balance, income statement, balance sheet, AR/AP aging |
+| `test_bank_accounts.py` | CRUD, reconciliation, statement import (CSV), auto-match, unreconcile |
+| `test_e_tax.py` | XML generation, status flow, validation, RD spec compliance |
 
 ### Deployment
 
@@ -122,7 +126,7 @@
 | **1** | **~~Contact Detail Enhancements~~** | ✅ Done | Unified transaction history across 6 document types. Summary cards. Filter tabs. | Low | ~20 min |
 | **2** | **~~Product Detail Enhancements~~** | ✅ Done | Stock movement history. Sales/purchase summary cards. Filter tabs. | Low | ~20 min |
 | **3** | **~~Project Detail Enhancements~~** | ✅ Done | Budget progress bar. Financials panel (quoted/invoiced/received/cost/profit/margin). Transaction history. | Medium | ~25 min |
-| **4** | **Tests** | 🔥 High | PO, Purchase Invoice, Expense Claim, Accounting, Bank Reconciliation, e-Tax, Bank Statement. CI pipeline needs these. | Medium | ~30 min |
+| **4** | **~~Tests~~** | ✅ Done | PO, Purchase Invoice, Expense Claim, Accounting, Bank Reconciliation, e-Tax, Bank Statement. 90 integration tests passing. | Medium | ~30 min |
 | **5** | **Multi-currency** | Medium | USD/EUR/CNY. Adds `currency_code` to invoices/POs. Exchange rates. Important for import/export SMEs. | Medium | ~30 min |
 | **6** | **Dashboard Charts** | Medium | Revenue trends, expense breakdown. Visual appeal, decision support. | Medium | ~25 min |
 | **7** | **SSL / Custom Domain** | Medium | Let's Encrypt. Production polish. Required before public launch. | Low | ~15 min |

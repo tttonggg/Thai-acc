@@ -55,27 +55,31 @@ STANDARD_COA = [
 ]
 
 
+from uuid import UUID
+
+
 def seed_coa_for_company(db: Session, company_id: str) -> None:
     """Seed standard Chart of Accounts for a company."""
+    cid = UUID(company_id) if isinstance(company_id, str) else company_id
     existing = db.query(ChartOfAccount).filter(
-        ChartOfAccount.company_id == company_id
+        ChartOfAccount.company_id == cid
     ).first()
-    
+
     if existing:
         print(f"COA already exists for company {company_id}, skipping...")
         return
-    
+
     accounts = []
     for acc_data in STANDARD_COA:
         accounts.append(ChartOfAccount(
-            company_id=company_id,
+            company_id=cid,
             code=acc_data["code"],
             name=acc_data["name"],
             name_en=acc_data["name_en"],
             account_type=acc_data["account_type"],
             account_sub_type=acc_data["account_sub_type"],
         ))
-    
+
     db.add_all(accounts)
     db.commit()
     print(f"Seeded {len(accounts)} COA accounts for company {company_id}")

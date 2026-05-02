@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, Index
-from sqlalchemy.dialects.postgresql import UUID
+from .types import CrossPlatformUUID as UUID
 from .base import BaseModel
 
 

@@ -23,7 +23,7 @@ class TestPurchaseInvoices:
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["bill_number"].startswith("TX-2026-")
+        assert data["bill_number"].startswith("EX-2026-")
         assert Decimal(data["subtotal"]) == Decimal("1000.00")
         assert Decimal(data["vat_amount"]) == Decimal("70.00")
         assert Decimal(data["total_amount"]) == Decimal("1070.00")

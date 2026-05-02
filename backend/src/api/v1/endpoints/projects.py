@@ -58,8 +58,8 @@ class ProjectResponse(BaseModel):
     status: str
     contact_id: Optional[UUID]
     contact_name: Optional[str] = None
-    created_at: date
-    updated_at: date
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
