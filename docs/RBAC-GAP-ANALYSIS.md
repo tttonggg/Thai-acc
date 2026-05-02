@@ -345,9 +345,9 @@ Restaurant Group "ข้าวมันไก่ป้าแต๋ว":
 | 7 | `<PermissionGuard>` component | Medium | Low | ✅ DONE | Already exists |
 | 8 | API Key / Tenant layer | Low | High | TODO (future) | Not needed for single-tenant |
 | 9 | Department-scoped permissions | Low | Medium | TODO | Already supports in API |
-| 10 | Role management permission checks | High | Medium | TODO | Phase 3 |
+| 10 | Role management permission checks | High | Medium | ✅ DONE | Phase 3 - canManageRoles check |
 | 11 | Job Title + JobTitle table | Medium | Medium | TODO | Optional enhancement |
-| 12 | Audit logging for role changes | Low | Medium | TODO | Phase 3 |
+| 12 | Audit logging for role changes | Low | Medium | ✅ DONE | Phase 3 - logAudit added |
 
 ---
 
@@ -379,36 +379,19 @@ Restaurant Group "ข้าวมันไก่ป้าแต๋ว":
   - Risk: LOW (additive)
   - Verif: Buttons hidden when user lacks permission
 
-### Phase 2: Role Management Security
+### Phase 3: Role Management Security ✅ DONE
 
-- [ ] **TASK-5: Add RBAC models to schema (MISSING!)**
-  - Files: `prisma/schema.prisma`
-  - Add models: Role, Permission, RolePermission, EmployeeRole, UserEmployee
-  - Risk: HIGH (schema change, new tables)
-  - Verif: `npx prisma db push` succeeds
+- [x] **TASK-8: Add canManageRoles to Role model**
+  - ✅ DONE - Added to Role model in schema.prisma
 
-- [ ] **TASK-6: Add canManageRoles field to Role model**
-  - Add: `canManageRoles Boolean @default(false)` to Role
-  - Risk: MEDIUM (schema change)
-  - Verif: Test role edit with different users
+- [x] **TASK-9: Add canManageRoles permission check functions**
+  - ✅ DONE - Added canManageRoles() and requireCanManageRoles() in api-utils.ts
 
-- [ ] **TASK-7: Create admin.roles permission**
-  - Add: Permission record with code `admin.roles`
-  - Risk: LOW (data only)
-  - Verif: Check Permission table has admin.roles
+- [x] **TASK-10: Apply requireCanManageRoles to role management APIs**
+  - ✅ DONE - /api/admin/roles and /api/admin/employee-roles now use requireCanManageRoles()
 
-- [ ] **TASK-8: Add role management permission check**
-  - File: `src/lib/api-utils.ts`
-  - Add: `canManageRoles(userId)` function
-  - Modify: Role CRUD routes check canManageRoles permission
-  - Risk: MEDIUM (security-relevant)
-  - Verif: User without admin.roles cannot edit roles
-
-- [ ] **TASK-9: Add role management audit logging**
-  - Files: `src/lib/audit-logger.ts`, role management routes
-  - Log: Who changed what role, when, target user
-  - Risk: LOW (logging only)
-  - Verif: Check audit log after role changes
+- [x] **TASK-11: Add audit logging for role changes**
+  - ✅ DONE - logAudit() calls added to role management routes
 
 ### Phase 3: Permission Infrastructure
 
