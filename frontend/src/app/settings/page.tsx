@@ -3,7 +3,8 @@
 import { useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { useCompanies, useUpdateMyCompany } from "@/hooks/useApi";
-import { Building2, Mail, Phone, MapPin, Pencil, Save, X } from "lucide-react";
+import { authApi } from "@/lib/api";
+import { Building2, Mail, Phone, MapPin, Pencil, Save, X, Lock, KeyRound } from "lucide-react";
 
 export default function SettingsPage() {
   const { data: companies, isLoading } = useCompanies();
@@ -19,6 +20,16 @@ export default function SettingsPage() {
     email: "",
     fiscal_year_start_month: "1",
   });
+
+  // Password change state
+  const [pwForm, setPwForm] = useState({
+    current_password: "",
+    new_password: "",
+    confirm_password: "",
+  });
+  const [pwError, setPwError] = useState("");
+  const [pwSuccess, setPwSuccess] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
 
   const startEditing = () => {
     if (company) {
@@ -53,6 +64,35 @@ export default function SettingsPage() {
     } catch (err) {
       console.error(err);
       alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError("");
+    setPwSuccess("");
+
+    if (pwForm.new_password !== pwForm.confirm_password) {
+      setPwError("รหัสผ่านใหม่ไม่ตรงกัน");
+      return;
+    }
+    if (pwForm.new_password.length < 6) {
+      setPwError("รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร");
+      return;
+    }
+
+    setPwLoading(true);
+    try {
+      await authApi.changePassword({
+        current_password: pwForm.current_password,
+        new_password: pwForm.new_password,
+      });
+      setPwSuccess("เปลี่ยนรหัสผ่านสำเร็จ");
+      setPwForm({ current_password: "", new_password: "", confirm_password: "" });
+    } catch (err: any) {
+      setPwError(err.response?.data?.detail || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setPwLoading(false);
     }
   };
 
@@ -244,6 +284,78 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+
+        {/* Password Change Section */}
+        <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-8 max-w-2xl">
+          <div className="flex items-center gap-3 mb-6">
+            <KeyRound className="w-5 h-5 text-peak-purple" />
+            <h2 className="text-lg font-semibold text-gray-900">เปลี่ยนรหัสผ่าน</h2>
+          </div>
+
+          {pwError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+              {pwError}
+            </div>
+          )}
+          {pwSuccess && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-600">
+              {pwSuccess}
+            </div>
+          )}
+
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">รหัสผ่านปัจจุบัน</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="password"
+                  value={pwForm.current_password}
+                  onChange={(e) => setPwForm((prev) => ({ ...prev, current_password: e.target.value }))}
+                  required
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-peak-purple/20 focus:border-peak-purple"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">รหัสผ่านใหม่</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="password"
+                  value={pwForm.new_password}
+                  onChange={(e) => setPwForm((prev) => ({ ...prev, new_password: e.target.value }))}
+                  required
+                  minLength={6}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-peak-purple/20 focus:border-peak-purple"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">ยืนยันรหัสผ่านใหม่</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="password"
+                  value={pwForm.confirm_password}
+                  onChange={(e) => setPwForm((prev) => ({ ...prev, confirm_password: e.target.value }))}
+                  required
+                  minLength={6}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-peak-purple/20 focus:border-peak-purple"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={pwLoading}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-peak-purple to-peak-teal text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {pwLoading ? "กำลังบันทึก..." : "เปลี่ยนรหัสผ่าน"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </AppLayout>
   );

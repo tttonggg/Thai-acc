@@ -3,7 +3,10 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, Field
 
 from ....core.database import get_db
-from ....core.security import verify_password, create_access_token, get_password_hash, get_current_user
+from ....core.security import (
+    verify_password, create_access_token, create_refresh_token,
+    decode_refresh_token, get_password_hash, get_current_user,
+)
 from ....core.limiter import limiter
 from ....models.user import User
 from ....models.company import Company
@@ -18,6 +21,7 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
     user: dict
 
@@ -29,6 +33,15 @@ class RegisterRequest(BaseModel):
     last_name: str = Field(..., min_length=1, max_length=100)
     company_name: str = Field(..., min_length=1, max_length=255)
     company_tax_id: str = Field(..., min_length=13, max_length=13)
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(..., min_length=1)
+    new_password: str = Field(..., min_length=6)
 
 
 class UserResponse(BaseModel):
@@ -50,9 +63,11 @@ def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
     if not user or not verify_password(data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
-    token = create_access_token({"sub": str(user.id), "company_id": str(user.company_id)})
+    access_token = create_access_token({"sub": str(user.id), "company_id": str(user.company_id)})
+    refresh_token = create_refresh_token({"sub": str(user.id)})
     return {
-        "access_token": token,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
         "user": {
             "id": str(user.id),
@@ -99,10 +114,12 @@ def register(request: Request, data: RegisterRequest, db: Session = Depends(get_
     db.commit()
     db.refresh(user)
     
-    # Return token
-    token = create_access_token({"sub": str(user.id), "company_id": str(user.company_id)})
+    # Return tokens
+    access_token = create_access_token({"sub": str(user.id), "company_id": str(user.company_id)})
+    refresh_token = create_refresh_token({"sub": str(user.id)})
     return {
-        "access_token": token,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
         "user": {
             "id": str(user.id),
@@ -112,6 +129,63 @@ def register(request: Request, data: RegisterRequest, db: Session = Depends(get_
             "role": user.role,
         }
     }
+
+
+@router.post("/refresh", response_model=LoginResponse)
+def refresh_token(data: RefreshRequest, db: Session = Depends(get_db)):
+    """Refresh access token using a refresh token."""
+    payload = decode_refresh_token(data.refresh_token)
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token",
+        )
+    
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token payload",
+        )
+    
+    user = db.query(User).filter(User.id == user_id, User.is_active == True).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found or inactive",
+        )
+    
+    access_token = create_access_token({"sub": str(user.id), "company_id": str(user.company_id)})
+    new_refresh_token = create_refresh_token({"sub": str(user.id)})
+    return {
+        "access_token": access_token,
+        "refresh_token": new_refresh_token,
+        "token_type": "bearer",
+        "user": {
+            "id": str(user.id),
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "role": user.role,
+        }
+    }
+
+
+@router.post("/change-password")
+@limiter.limit("5/minute")
+def change_password(
+    request: Request,
+    data: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Change current user's password."""
+    if not verify_password(data.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
+    
+    current_user.hashed_password = get_password_hash(data.new_password)
+    db.commit()
+    return {"message": "Password changed successfully"}
 
 
 @router.get("/me", response_model=UserResponse)

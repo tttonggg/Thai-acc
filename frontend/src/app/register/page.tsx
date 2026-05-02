@@ -54,8 +54,8 @@ export default function RegisterPage() {
         company_name: form.companyName,
         company_tax_id: form.companyTaxId,
       });
-      const { access_token, user } = res.data;
-      login(access_token, user);
+      const { access_token, refresh_token, user } = res.data;
+      login(access_token, refresh_token, user);
       router.push("/");
     } catch (err: any) {
       setError(err.response?.data?.detail || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");

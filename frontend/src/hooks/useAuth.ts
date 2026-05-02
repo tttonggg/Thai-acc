@@ -28,14 +28,16 @@ export function useAuth() {
     setIsLoading(false);
   }, []);
 
-  const login = (token: string, userData: User) => {
+  const login = (token: string, refreshToken: string, userData: User) => {
     localStorage.setItem("access_token", token);
+    localStorage.setItem("refresh_token", refreshToken);
     localStorage.setItem("user_data", JSON.stringify(userData));
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
     localStorage.removeItem("user_data");
     setUser(null);
     window.location.href = "/login";
