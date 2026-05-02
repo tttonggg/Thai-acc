@@ -1,0 +1,336 @@
+from sqlalchemy.orm import Session
+from ..models.gl import JournalEntry, JournalEntryLine, ChartOfAccount
+from ..models.invoice import Invoice
+from ..models.purchase_invoice import PurchaseInvoice
+from ..models.receipt import Receipt
+from ..models.expense_claim import ExpenseClaim
+
+
+class GLPostingService:
+    """Service for posting double-entry journal entries to the General Ledger."""
+    
+    def __init__(self, db: Session, company_id: str):
+        self.db = db
+        self.company_id = company_id
+    
+    def _get_account_by_code(self, code: str) -> ChartOfAccount | None:
+        """Lookup GL account by code."""
+        return self.db.query(ChartOfAccount).filter(
+            ChartOfAccount.company_id == self.company_id,
+            ChartOfAccount.code == code,
+            ChartOfAccount.is_active == "Y",
+        ).first()
+    
+    def _get_account_by_sub_type(self, account_type: str, sub_type: str) -> ChartOfAccount | None:
+        """Lookup GL account by sub-type."""
+        return self.db.query(ChartOfAccount).filter(
+            ChartOfAccount.company_id == self.company_id,
+            ChartOfAccount.account_type == account_type,
+            ChartOfAccount.account_sub_type == sub_type,
+            ChartOfAccount.is_active == "Y",
+        ).first()
+    
+    def _create_journal_entry(self, entry_type: str, document_id, document_number: str,
+                              entry_date, description: str, lines: list) -> JournalEntry | None:
+        """Create a balanced journal entry."""
+        total_debit = sum(line.get("debit", 0) for line in lines)
+        total_credit = sum(line.get("credit", 0) for line in lines)
+        
+        if total_debit != total_credit:
+            raise ValueError(f"Journal entry unbalanced: Dr {total_debit} != Cr {total_credit}")
+        
+        if total_debit == 0:
+            return None  # No entry needed
+        
+        entry = JournalEntry(
+            company_id=self.company_id,
+            entry_type=entry_type,
+            document_id=document_id,
+            document_number=document_number,
+            entry_date=entry_date,
+            description=description,
+            total_debit=total_debit,
+            total_credit=total_credit,
+        )
+        self.db.add(entry)
+        self.db.flush()
+        
+        for line in lines:
+            self.db.add(JournalEntryLine(
+                journal_entry_id=entry.id,
+                account_id=line["account_id"],
+                description=line.get("description", ""),
+                debit_amount=line.get("debit", 0),
+                credit_amount=line.get("credit", 0),
+                contact_id=line.get("contact_id"),
+                project_id=line.get("project_id"),
+            ))
+        
+        return entry
+    
+    def post_invoice(self, invoice: Invoice) -> JournalEntry | None:
+        """Post GL when invoice is created.
+        
+        Dr. Accounts Receivable (ลูกหนี้การค้า)     total_amount
+            Cr. Sales Revenue (รายได้จากการขาย)     subtotal
+            Cr. VAT Output (ภาษีมูลค่าเพิ่มขาย)      vat_amount
+        """
+        ar_account = self._get_account_by_code("11200")  # ลูกหนี้การค้า
+        revenue_account = self._get_account_by_code("41000")  # รายได้จากการขาย
+        vat_account = self._get_account_by_code("21100")  # ภาษีมูลค่าเพิ่มขาย
+        
+        if not all([ar_account, revenue_account, vat_account]):
+            return None  # COA not seeded yet
+        
+        lines = []
+        
+        # Dr. Accounts Receivable
+        lines.append({
+            "account_id": ar_account.id,
+            "debit": invoice.total_amount,
+            "credit": 0,
+            "description": f"ลูกหนี้จากใบแจ้งหนี้ {invoice.invoice_number}",
+            "contact_id": invoice.contact_id,
+            "project_id": invoice.project_id,
+        })
+        
+        # Cr. Sales Revenue
+        lines.append({
+            "account_id": revenue_account.id,
+            "debit": 0,
+            "credit": invoice.subtotal,
+            "description": f"รายได้จากการขาย {invoice.invoice_number}",
+            "contact_id": invoice.contact_id,
+            "project_id": invoice.project_id,
+        })
+        
+        # Cr. VAT Output
+        if invoice.vat_amount > 0:
+            lines.append({
+                "account_id": vat_account.id,
+                "debit": 0,
+                "credit": invoice.vat_amount,
+                "description": f"ภาษีมูลค่าเพิ่มขาย {invoice.invoice_number}",
+                "contact_id": invoice.contact_id,
+                "project_id": invoice.project_id,
+            })
+        
+        return self._create_journal_entry(
+            entry_type="invoice",
+            document_id=invoice.id,
+            document_number=invoice.invoice_number,
+            entry_date=invoice.issue_date,
+            description=f"บันทึกบัญชีใบแจ้งหนี้ {invoice.invoice_number}",
+            lines=lines,
+        )
+    
+    def post_purchase_invoice(self, purchase_invoice: PurchaseInvoice) -> JournalEntry | None:
+        """Post GL when purchase invoice is created.
+        
+        Dr. Inventory/Expense (สินค้าคงเหลือ/ค่าใช้จ่าย)  subtotal
+        Dr. VAT Input (ภาษีมูลค่าเพิ่มซื้อ)                  vat_amount
+            Cr. Accounts Payable (เจ้าหนี้การค้า)            total_amount
+        """
+        inventory_account = self._get_account_by_code("11400")  # สินค้าคงเหลือ
+        cogs_account = self._get_account_by_code("51000")  # ต้นทุนขาย
+        vat_account = self._get_account_by_code("21200")  # ภาษีมูลค่าเพิ่มซื้อ
+        ap_account = self._get_account_by_code("21000")  # เจ้าหนี้การค้า
+        
+        debit_account = inventory_account or cogs_account
+        
+        if not all([debit_account, vat_account, ap_account]):
+            return None  # COA not seeded yet
+        
+        lines = []
+        
+        # Dr. Inventory/Expense
+        lines.append({
+            "account_id": debit_account.id,
+            "debit": purchase_invoice.subtotal,
+            "credit": 0,
+            "description": f"สินค้า/ค่าใช้จ่ายจากใบแจ้งหนี้ซื้อ {purchase_invoice.bill_number}",
+            "contact_id": purchase_invoice.contact_id,
+            "project_id": purchase_invoice.project_id,
+        })
+        
+        # Dr. VAT Input
+        if purchase_invoice.vat_amount > 0:
+            lines.append({
+                "account_id": vat_account.id,
+                "debit": purchase_invoice.vat_amount,
+                "credit": 0,
+                "description": f"ภาษีมูลค่าเพิ่มซื้อ {purchase_invoice.bill_number}",
+                "contact_id": purchase_invoice.contact_id,
+                "project_id": purchase_invoice.project_id,
+            })
+        
+        # Cr. Accounts Payable
+        lines.append({
+            "account_id": ap_account.id,
+            "debit": 0,
+            "credit": purchase_invoice.total_amount,
+            "description": f"เจ้าหนี้จากใบแจ้งหนี้ซื้อ {purchase_invoice.bill_number}",
+            "contact_id": purchase_invoice.contact_id,
+            "project_id": purchase_invoice.project_id,
+        })
+        
+        return self._create_journal_entry(
+            entry_type="purchase_invoice",
+            document_id=purchase_invoice.id,
+            document_number=purchase_invoice.bill_number,
+            entry_date=purchase_invoice.bill_date,
+            description=f"บันทึกบัญชีใบแจ้งหนี้ซื้อ {purchase_invoice.bill_number}",
+            lines=lines,
+        )
+    
+    def post_receipt(self, receipt: Receipt) -> JournalEntry | None:
+        """Post GL when receipt is created.
+        
+        Dr. Cash/Bank (เงินสด/ธนาคาร)              total_amount
+        Dr. WHT Receivable (ลูกหนี้ภาษีหัก ณ ที่จ่าย)  wht_amount
+            Cr. Accounts Receivable (ลูกหนี้การค้า)  amount + wht_amount
+        """
+        cash_account = self._get_account_by_code("11000")  # เงินสด (fallback)
+        bank_account = self._get_account_by_code("11100")  # เงินฝากธนาคาร
+        ar_account = self._get_account_by_code("11200")  # ลูกหนี้การค้า
+        wht_account = self._get_account_by_code("11300")  # ลูกหนี้เงินสดนำส่ง
+        
+        if not all([ar_account]):
+            return None
+        
+        # Use bank account for bank_transfer/cheque/credit_card, cash for others
+        if receipt.payment_method in ["bank_transfer", "cheque", "credit_card"]:
+            debit_account = bank_account or cash_account
+        else:
+            debit_account = cash_account or bank_account
+        
+        if not debit_account:
+            return None
+        
+        lines = []
+        
+        # Dr. Cash/Bank
+        lines.append({
+            "account_id": debit_account.id,
+            "debit": receipt.total_amount,
+            "credit": 0,
+            "description": f"รับเงินจากใบเสร็จ {receipt.receipt_number}",
+            "contact_id": receipt.contact_id,
+            "project_id": receipt.project_id,
+        })
+        
+        # Dr. WHT Receivable (if any)
+        if receipt.wht_amount > 0 and wht_account:
+            lines.append({
+                "account_id": wht_account.id,
+                "debit": receipt.wht_amount,
+                "credit": 0,
+                "description": f"ภาษีหัก ณ ที่จ่าย {receipt.receipt_number}",
+                "contact_id": receipt.contact_id,
+                "project_id": receipt.project_id,
+            })
+        
+        # Cr. Accounts Receivable
+        total_cr = receipt.amount + receipt.wht_amount
+        lines.append({
+            "account_id": ar_account.id,
+            "debit": 0,
+            "credit": total_cr,
+            "description": f"ลดลูกหนี้จากใบเสร็จ {receipt.receipt_number}",
+            "contact_id": receipt.contact_id,
+            "project_id": receipt.project_id,
+        })
+        
+        return self._create_journal_entry(
+            entry_type="receipt",
+            document_id=receipt.id,
+            document_number=receipt.receipt_number,
+            entry_date=receipt.receipt_date,
+            description=f"บันทึกบัญชีรับเงิน {receipt.receipt_number}",
+            lines=lines,
+        )
+    
+    def post_expense_claim(self, claim: ExpenseClaim) -> JournalEntry | None:
+        """Post GL when expense claim is paid.
+
+        Map category to expense account code:
+        - travel → "52000" (Selling Expenses / ค่าใช้จ่ายในการขาย)
+        - meal → "52000"
+        - office → "52500" (Administrative Expenses / ค่าใช้จ่ายในการบริหาร)
+        - supplies → "51000" (Cost of Goods Sold / ต้นทุนขาย)
+        - transportation → "52000"
+        - other → "52500"
+
+        Dr. Expense account                    amount
+        Dr. VAT Input (if vat_amount > 0)      vat_amount
+            Cr. Cash/Bank (11000 or 11100)     total_amount
+        """
+        category_to_account = {
+            "travel": "52000",
+            "meal": "52000",
+            "office": "52500",
+            "supplies": "51000",
+            "transportation": "52000",
+            "other": "52500",
+        }
+        expense_code = category_to_account.get(claim.category, "52500")
+        expense_account = self._get_account_by_code(expense_code)
+        vat_account = self._get_account_by_code("11900")  # ภาษีซื้อ
+        cash_account = self._get_account_by_code("11000")  # เงินสด
+        bank_account = self._get_account_by_code("11100")  # เงินฝากธนาคาร
+
+        if not expense_account:
+            return None  # COA not seeded yet
+
+        debit_account = bank_account or cash_account
+        if not debit_account:
+            return None
+
+        lines = []
+
+        # Dr. Expense account
+        lines.append({
+            "account_id": expense_account.id,
+            "debit": claim.amount,
+            "credit": 0,
+            "description": f"ค่าใช้จ่าย {claim.claim_number}",
+            "contact_id": claim.contact_id,
+            "project_id": claim.project_id,
+        })
+
+        # Dr. VAT Input (if any)
+        if claim.vat_amount > 0 and vat_account:
+            lines.append({
+                "account_id": vat_account.id,
+                "debit": claim.vat_amount,
+                "credit": 0,
+                "description": f"ภาษีซื้อ {claim.claim_number}",
+                "contact_id": claim.contact_id,
+                "project_id": claim.project_id,
+            })
+
+        # Cr. Cash/Bank
+        lines.append({
+            "account_id": debit_account.id,
+            "debit": 0,
+            "credit": claim.total_amount,
+            "description": f"จ่ายเงินค่าใช้จ่าย {claim.claim_number}",
+            "contact_id": claim.contact_id,
+            "project_id": claim.project_id,
+        })
+
+        return self._create_journal_entry(
+            entry_type="expense_claim",
+            document_id=claim.id,
+            document_number=claim.claim_number,
+            entry_date=claim.expense_date,
+            description=f"บันทึกบัญชีจ่ายเงินเบิกค่าใช้จ่าย {claim.claim_number}",
+            lines=lines,
+        )
+
+    def validate_balance(self, journal_entry: JournalEntry) -> bool:
+        """Validate that a journal entry balances."""
+        lines = journal_entry.lines.all()
+        total_dr = sum(line.debit_amount for line in lines)
+        total_cr = sum(line.credit_amount for line in lines)
+        return total_dr == total_cr and total_dr > 0

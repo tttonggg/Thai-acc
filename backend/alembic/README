@@ -1,0 +1,22 @@
+# Thai ACC Backend - Alembic Migrations
+
+## Setup
+
+```bash
+cd backend
+
+# Initialize alembic (already done)
+alembic init alembic
+
+# Create a new migration
+alembic revision --autogenerate -m "description"
+
+# Run migrations
+alembic upgrade head
+
+# Downgrade one step
+alembic downgrade -1
+
+# View current version
+alembic current
+```
