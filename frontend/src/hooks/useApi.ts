@@ -14,6 +14,7 @@ import {
   expenseClaimApi,
   accountingApi,
   bankAccountApi,
+  stockAdjustmentApi,
 } from "@/lib/api";
 
 // Contacts
@@ -558,10 +559,47 @@ export function useSubmitETax() {
   });
 }
 
+// Stock Adjustments
+export function useStockAdjustments(params?: { product_id?: string; adjustment_type?: string }) {
+  return useQuery({
+    queryKey: ["stock-adjustments", params],
+    queryFn: () => stockAdjustmentApi.list(params).then((res) => res.data),
+  });
+}
+
+export function useCreateStockAdjustment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: stockAdjustmentApi.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stock-adjustments"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["product"] });
+    },
+  });
+}
+
+export function useStockMovements(productId: string) {
+  return useQuery({
+    queryKey: ["stock-movements", productId],
+    queryFn: () => stockAdjustmentApi.getMovements(productId).then((res) => res.data),
+    enabled: !!productId,
+  });
+}
+
 export function useETaxHistory(invoiceId: string) {
   return useQuery({
     queryKey: ["etax-history", invoiceId],
     queryFn: () => invoiceApi.getETaxHistory(invoiceId).then((res) => res.data),
     enabled: !!invoiceId,
+  });
+}
+
+// FIFO Layers
+export function useFifoLayers(productId: string) {
+  return useQuery({
+    queryKey: ["fifo-layers", productId],
+    queryFn: () => productApi.getFifoLayers(productId).then((res) => res.data),
+    enabled: !!productId,
   });
 }

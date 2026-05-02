@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Thai ACC API",
     description="Thai cloud accounting SaaS - PEAK Alternative",
-    version="0.2.2-alpha",
+    version="0.3.0-alpha",
     lifespan=lifespan,
 )
 app.state.limiter = limiter
@@ -78,10 +78,10 @@ async def health_check():
     return {
         "status": "healthy" if db_ok else "degraded",
         "database": "connected" if db_ok else "disconnected",
-        "version": "0.2.2-alpha"
+        "version": "0.3.0-alpha"
     }
 
 
 @app.get("/")
 async def root():
-    return {"message": "Thai ACC API", "docs": "/docs", "version": "0.2.2-alpha"}
+    return {"message": "Thai ACC API", "docs": "/docs", "version": "0.3.0-alpha"}

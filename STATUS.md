@@ -1,7 +1,7 @@
 # Thai ACC — Development Status
 
 > **Last Updated:** 2026-05-02
-> **Version:** 0.2.2-alpha
+> **Version:** 0.3.0-alpha
 
 ---
 
@@ -29,6 +29,9 @@
 | **Document Numbering** | `models/document_sequence.py`, `services/document_numbering.py` | Sequential {PREFIX}-{YEAR}-{SEQ:04d} |
 | **COA Seeding** | `utils/seed_coa.py` | 25 standard Thai GL accounts |
 | **e-Tax Invoice** | `services/e_tax.py`, `models/e_tax_submission.py` | XML generation, open adapter pattern (Email + RD API), 4 endpoints |
+| **Multi-Currency** | `models/exchange_rate.py`, `api/v1/endpoints/exchange_rates.py` | THB/USD/EUR/CNY/JPY/GBP support on invoices/quotations/POs/PIs/receipts/claims. Exchange rate API. GL in base currency |
+| **Stock Adjustments** | `models/stock_adjustment.py`, `api/v1/endpoints/stock_adjustments.py` | Initial/loss/damage/found/correction adjustments. Auto-update qty_on_hand. GL posting. Movement history |
+| **FIFO Costing** | `models/inventory_batch.py`, `services/gl_posting.py` | FIFO inventory batches from purchase invoices. COGS auto-calculation on invoice creation. FIFO layers API |
 
 **Key Features:**
 - ✅ All endpoints filter by `company_id` (multi-tenant)
@@ -61,8 +64,8 @@
 | **Accounting** | `/accounting` | Chart of Accounts, Journal Entries |
 | **Reports** | `/reports` | Trial Balance, Income Statement, Balance Sheet, AR Aging, AP Aging |
 | **Bank Accounts** | `/bank-accounts` | List, detail with reconciliation UI + statement import + auto-match |
-| **Settings** | `/settings` | Company profile display |
-| **Login/Register** | `/login`, `/register` | Auth with JWT storage |
+| **Settings** | `/settings` | Editable company profile, password change form |
+| **Login/Register** | `/login`, `/register` | Auth with JWT storage + automatic token refresh |
 
 **UI Features:**
 - ✅ PEAK-inspired purple→teal gradient branding
@@ -77,8 +80,11 @@
 - ✅ Print support (`print:hidden` on sidebar/action buttons)
 - ✅ Dashboard with KPI cards and project performance widget
 - ✅ Contact detail: summary cards (invoiced/paid/outstanding/purchased) + transaction history table with filter tabs
-- ✅ Product detail: stock alert + summary cards (sold/purchased quantities & amounts) + transaction history table with filter tabs
+- ✅ Product detail: stock alert + summary cards (sold/purchased quantities & amounts) + transaction history table with filter tabs + **stock adjustment form + FIFO layers table + movement history**
 - ✅ Project detail: budget progress bar + financials summary (quoted/invoiced/received/cost/profit) + transaction history table with filter tabs
+- ✅ Currency selector on invoice/quotation/PO/PI forms with THB equivalent display
+- ✅ Exchange rate management API and auto-lookup
+- ✅ Automatic JWT token refresh via Axios interceptor
 
 ### Database (6 Migrations)
 
@@ -90,6 +96,8 @@
 | `004` | bank_accounts.gl_account_id, journal_entry_lines.is_reconciled, bank_account_transactions |
 | `005` | invoices.e_tax_xml/timestamp/submitted_at/error, e_tax_submissions |
 | `006` | bank_statement_imports, bank_statement_lines |
+| `007` | companies.base_currency, exchange_rates, currency_code + exchange_rate on invoices/quotations/POs/PIs/receipts/claims |
+| `008` | inventory_batches (FIFO layers) |
 
 ### Tests (10 Test Files)
 
@@ -127,10 +135,10 @@
 | **2** | **~~Product Detail Enhancements~~** | ✅ Done | Stock movement history. Sales/purchase summary cards. Filter tabs. | Low | ~20 min |
 | **3** | **~~Project Detail Enhancements~~** | ✅ Done | Budget progress bar. Financials panel (quoted/invoiced/received/cost/profit/margin). Transaction history. | Medium | ~25 min |
 | **4** | **~~Tests~~** | ✅ Done | PO, Purchase Invoice, Expense Claim, Accounting, Bank Reconciliation, e-Tax, Bank Statement. 90 integration tests passing. | Medium | ~30 min |
-| **5** | **Multi-currency** | Medium | USD/EUR/CNY. Adds `currency_code` to invoices/POs. Exchange rates. Important for import/export SMEs. | Medium | ~30 min |
-| **6** | **Dashboard Charts** | Medium | Revenue trends, expense breakdown. Visual appeal, decision support. | Medium | ~25 min |
-| **7** | **SSL / Custom Domain** | Medium | Let's Encrypt. Production polish. Required before public launch. | Low | ~15 min |
-| **8** | **Inventory Management** | Low | FIFO costing, stock adjustments, barcode. Advanced feature. | High | ~45 min |
+| **5** | **~~Multi-currency~~** | ✅ Done | THB/USD/EUR/CNY/JPY/GBP support. Exchange rates API. Currency selector in forms. GL in base currency. | Medium | ~30 min |
+| **6** | **~~Inventory Management~~** | ✅ Done | FIFO costing with inventory batches, stock adjustments (initial/loss/damage/found/correction), movement history, FIFO layers UI. | High | ~45 min |
+| **7** | **Dashboard Charts** | Medium | Revenue trends, expense breakdown. Visual appeal, decision support. | Medium | ~25 min |
+| **8** | **SSL / Custom Domain** | Medium | Let's Encrypt. Production polish. Required before public launch. | Low | ~15 min |
 | **9** | **Payroll** | Low | Thai SSO, P.N.D.1K. Complex regulatory. Save for last. | High | ~60 min |
 | **10** | **Multi-company** | Low | Switch between company books. Enterprise feature. | High | ~40 min |
 | **11** | **Audit Trail UI** | Low | View change history on documents. Compliance feature. | Medium | ~30 min |
@@ -173,4 +181,4 @@ npm run dev
 
 ---
 
-*Thai ACC v0.2.2-alpha — PEAK Alternative with Project Cost Control + e-Tax Invoice + Bank Reconciliation + Accounting Reports + Contact/Product/Project Detail Enhancements + Security Hardening + Missing Pages*
+*Thai ACC v0.3.0-alpha — PEAK Alternative with Project Cost Control + e-Tax Invoice + Bank Reconciliation + Accounting Reports + Multi-Currency + FIFO Inventory + Security Hardening*

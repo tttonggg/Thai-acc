@@ -16,6 +16,9 @@ from .gl import ChartOfAccount, JournalEntry, JournalEntryLine
 from .e_tax_submission import ETaxSubmission
 from .bank_statement_import import BankStatementImport
 from .bank_statement_line import BankStatementLine
+from .exchange_rate import ExchangeRate
+from .stock_adjustment import StockAdjustment, StockMovement
+from .inventory_batch import InventoryBatch
 
 __all__ = [
     "BaseModel", "Company", "User", "Contact", "Product",
@@ -24,5 +27,6 @@ __all__ = [
     "Receipt", "PurchaseOrder", "PurchaseOrderItem",
     "PurchaseInvoice", "PurchaseInvoiceItem",
     "ExpenseClaim", "ChartOfAccount", "JournalEntry", "JournalEntryLine",
-    "ETaxSubmission", "BankStatementImport", "BankStatementLine"
+    "ETaxSubmission", "BankStatementImport", "BankStatementLine",
+    "ExchangeRate", "StockAdjustment", "StockMovement", "InventoryBatch",
 ]

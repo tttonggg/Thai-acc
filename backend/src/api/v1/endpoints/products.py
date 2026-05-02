@@ -367,6 +367,61 @@ def get_product_transactions(
     )
 
 
+# ============================================================
+# FIFO Inventory Layers
+# ============================================================
+
+class FifoLayerItem(BaseModel):
+    id: UUID
+    quantity: Decimal
+    unit_cost: Decimal
+    remaining_qty: Decimal
+    purchase_date: str
+    purchase_invoice_id: Optional[UUID]
+    is_active: bool
+
+
+@router.get("/{product_id}/fifo-layers", response_model=List[FifoLayerItem])
+def get_product_fifo_layers(
+    product_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get FIFO inventory batches for a product."""
+    from ....models.inventory_batch import InventoryBatch
+
+    product = db.query(Product).filter(
+        Product.id == product_id,
+        Product.company_id == current_user.company_id,
+        Product.deleted_at.is_(None)
+    ).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    batches = (
+        db.query(InventoryBatch)
+        .filter(
+            InventoryBatch.product_id == product_id,
+            InventoryBatch.company_id == current_user.company_id,
+        )
+        .order_by(InventoryBatch.purchase_date.asc(), InventoryBatch.created_at.asc())
+        .all()
+    )
+
+    return [
+        FifoLayerItem(
+            id=b.id,
+            quantity=b.quantity,
+            unit_cost=b.unit_cost,
+            remaining_qty=b.remaining_qty,
+            purchase_date=b.purchase_date.isoformat() if b.purchase_date else "",
+            purchase_invoice_id=b.purchase_invoice_id,
+            is_active=b.is_active,
+        )
+        for b in batches
+    ]
+
+
 def _get_status_label(status: str, doc_type: str) -> str:
     """Map status codes to Thai labels."""
     labels = {

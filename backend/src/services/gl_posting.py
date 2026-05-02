@@ -1,7 +1,10 @@
+from decimal import Decimal
 from sqlalchemy.orm import Session
 from ..models.gl import JournalEntry, JournalEntryLine, ChartOfAccount
-from ..models.invoice import Invoice
-from ..models.purchase_invoice import PurchaseInvoice
+from ..models.invoice import Invoice, InvoiceItem
+from ..models.purchase_invoice import PurchaseInvoice, PurchaseInvoiceItem
+from ..models.product import Product
+from ..models.inventory_batch import InventoryBatch
 from ..models.receipt import Receipt
 from ..models.expense_claim import ExpenseClaim
 
@@ -115,7 +118,7 @@ class GLPostingService:
                 "project_id": invoice.project_id,
             })
         
-        return self._create_journal_entry(
+        entry = self._create_journal_entry(
             entry_type="invoice",
             document_id=invoice.id,
             document_number=invoice.invoice_number,
@@ -123,7 +126,70 @@ class GLPostingService:
             description=f"บันทึกบัญชีใบแจ้งหนี้ {invoice.invoice_number}",
             lines=lines,
         )
-    
+
+        # Post COGS for tracked inventory items
+        self._post_invoice_cogs(invoice)
+
+        return entry
+
+    def _post_invoice_cogs(self, invoice: Invoice) -> JournalEntry | None:
+        """Post COGS by consuming FIFO batches for invoice items."""
+        items = (
+            self.db.query(InvoiceItem)
+            .filter(InvoiceItem.invoice_id == invoice.id)
+            .all()
+        )
+
+        total_cogs = Decimal("0")
+        for item in items:
+            if not item.product_id:
+                continue
+            product = self.db.query(Product).filter(
+                Product.id == item.product_id,
+                Product.company_id == self.company_id,
+            ).first()
+            if not product or not product.track_inventory:
+                continue
+            qty = Decimal(str(item.quantity))
+            if qty <= 0:
+                continue
+            total_cogs += self._consume_fifo(str(item.product_id), qty)
+
+        if total_cogs <= 0:
+            return None
+
+        cogs_account = self._get_account_by_code("51000")  # ต้นทุนขาย
+        inventory_account = self._get_account_by_code("11400")  # สินค้าคงเหลือ
+
+        if not cogs_account or not inventory_account:
+            return None
+
+        return self._create_journal_entry(
+            entry_type="cogs",
+            document_id=invoice.id,
+            document_number=invoice.invoice_number,
+            entry_date=invoice.issue_date,
+            description=f"ต้นทุนขายจากใบแจ้งหนี้ {invoice.invoice_number}",
+            lines=[
+                {
+                    "account_id": cogs_account.id,
+                    "debit": total_cogs,
+                    "credit": 0,
+                    "description": f"ต้นทุนขาย {invoice.invoice_number}",
+                    "contact_id": invoice.contact_id,
+                    "project_id": invoice.project_id,
+                },
+                {
+                    "account_id": inventory_account.id,
+                    "debit": 0,
+                    "credit": total_cogs,
+                    "description": f"ลดสินค้าคงเหลือ {invoice.invoice_number}",
+                    "contact_id": invoice.contact_id,
+                    "project_id": invoice.project_id,
+                },
+            ],
+        )
+
     def post_purchase_invoice(self, purchase_invoice: PurchaseInvoice) -> JournalEntry | None:
         """Post GL when purchase invoice is created.
         
@@ -174,7 +240,7 @@ class GLPostingService:
             "project_id": purchase_invoice.project_id,
         })
         
-        return self._create_journal_entry(
+        entry = self._create_journal_entry(
             entry_type="purchase_invoice",
             document_id=purchase_invoice.id,
             document_number=purchase_invoice.bill_number,
@@ -182,7 +248,85 @@ class GLPostingService:
             description=f"บันทึกบัญชีใบแจ้งหนี้ซื้อ {purchase_invoice.bill_number}",
             lines=lines,
         )
-    
+
+        # Create inventory batches for tracked products
+        self._create_inventory_batches(purchase_invoice)
+
+        return entry
+
+    def _create_inventory_batches(self, purchase_invoice: PurchaseInvoice) -> None:
+        """Create FIFO inventory batches from purchase invoice items."""
+        items = (
+            self.db.query(PurchaseInvoiceItem)
+            .filter(PurchaseInvoiceItem.purchase_invoice_id == purchase_invoice.id)
+            .all()
+        )
+        for item in items:
+            if not item.product_id:
+                continue
+            product = self.db.query(Product).filter(
+                Product.id == item.product_id,
+                Product.company_id == self.company_id,
+            ).first()
+            if not product or not product.track_inventory:
+                continue
+            # Calculate unit cost (handle division by zero)
+            qty = Decimal(str(item.quantity))
+            if qty == 0:
+                continue
+            unit_cost = Decimal(str(item.amount)) / qty
+            batch = InventoryBatch(
+                company_id=self.company_id,
+                product_id=item.product_id,
+                quantity=qty,
+                unit_cost=unit_cost,
+                remaining_qty=qty,
+                purchase_date=purchase_invoice.bill_date,
+                purchase_invoice_id=purchase_invoice.id,
+                is_active=True,
+            )
+            self.db.add(batch)
+        self.db.flush()
+
+    def _consume_fifo(self, product_id: str, quantity: Decimal) -> Decimal:
+        """Consume inventory batches via FIFO and return total COGS."""
+        batches = (
+            self.db.query(InventoryBatch)
+            .filter(
+                InventoryBatch.company_id == self.company_id,
+                InventoryBatch.product_id == product_id,
+                InventoryBatch.remaining_qty > 0,
+                InventoryBatch.is_active == True,
+            )
+            .order_by(InventoryBatch.purchase_date.asc(), InventoryBatch.created_at.asc())
+            .all()
+        )
+
+        remaining = quantity
+        total_cogs = Decimal("0")
+
+        for batch in batches:
+            if remaining <= 0:
+                break
+            consume = min(remaining, batch.remaining_qty)
+            total_cogs += consume * batch.unit_cost
+            batch.remaining_qty -= consume
+            remaining -= consume
+            if batch.remaining_qty <= 0:
+                batch.is_active = False
+
+        # If still remaining, fallback to product cost_price
+        if remaining > 0:
+            product = self.db.query(Product).filter(
+                Product.id == product_id,
+                Product.company_id == self.company_id,
+            ).first()
+            if product:
+                total_cogs += remaining * Decimal(str(product.cost_price))
+
+        self.db.flush()
+        return total_cogs
+
     def post_receipt(self, receipt: Receipt) -> JournalEntry | None:
         """Post GL when receipt is created.
         
@@ -325,6 +469,72 @@ class GLPostingService:
             document_number=claim.claim_number,
             entry_date=claim.expense_date,
             description=f"บันทึกบัญชีจ่ายเงินเบิกค่าใช้จ่าย {claim.claim_number}",
+            lines=lines,
+        )
+
+    def post_stock_adjustment(self, adjustment, user_id: str) -> JournalEntry | None:
+        """Post GL for stock adjustment.
+
+        Increase stock:
+            Dr. Inventory (11400)     total_value
+                Cr. Adjustment account (52900)  total_value
+
+        Decrease stock:
+            Dr. Adjustment account (52900)  total_value
+                Cr. Inventory (11400)     total_value
+        """
+        from ..models.stock_adjustment import StockAdjustment
+        if not isinstance(adjustment, StockAdjustment):
+            return None
+
+        inventory_account = self._get_account_by_code("11400")  # สินค้าคงเหลือ
+        adjustment_account = self._get_account_by_code("52900")  # รายได้/ค่าใช้จ่ายอื่น
+
+        if not inventory_account:
+            return None
+
+        # Fallback: if no adjustment account, use expense account
+        if not adjustment_account:
+            adjustment_account = self._get_account_by_code("52500")
+        if not adjustment_account:
+            return None
+
+        lines = []
+        if adjustment.quantity_change > 0:
+            # Increase stock
+            lines.append({
+                "account_id": inventory_account.id,
+                "debit": adjustment.total_value,
+                "credit": 0,
+                "description": f"ปรับเพิ่มสต็อก {adjustment.product.name if adjustment.product else ''}",
+            })
+            lines.append({
+                "account_id": adjustment_account.id,
+                "debit": 0,
+                "credit": adjustment.total_value,
+                "description": f"ปรับเพิ่มสต็อก {adjustment.adjustment_type}",
+            })
+        else:
+            # Decrease stock
+            lines.append({
+                "account_id": adjustment_account.id,
+                "debit": adjustment.total_value,
+                "credit": 0,
+                "description": f"ปรับลดสต็อก {adjustment.adjustment_type}",
+            })
+            lines.append({
+                "account_id": inventory_account.id,
+                "debit": 0,
+                "credit": adjustment.total_value,
+                "description": f"ปรับลดสต็อก {adjustment.product.name if adjustment.product else ''}",
+            })
+
+        return self._create_journal_entry(
+            entry_type="stock_adjustment",
+            document_id=adjustment.id,
+            document_number=f"ADJ-{adjustment.id[:8]}",
+            entry_date=adjustment.created_at.date() if adjustment.created_at else None,
+            description=f"ปรับสต็อก {adjustment.adjustment_type} - {adjustment.product.name if adjustment.product else ''}",
             lines=lines,
         )
 

@@ -101,6 +101,14 @@ export const authApi = {
     api.post("/auth/change-password", data),
 };
 
+export const stockAdjustmentApi = {
+  list: (params?: { product_id?: string; adjustment_type?: string }) =>
+    api.get("/stock-adjustments", { params }),
+  create: (data: any) => api.post("/stock-adjustments", data),
+  getMovements: (productId: string) =>
+    api.get(`/stock-adjustments/movements/${productId}`),
+};
+
 export const companyApi = {
   list: () => api.get("/companies"),
   get: (id: string) => api.get(`/companies/${id}`),
@@ -126,6 +134,7 @@ export const productApi = {
   update: (id: string, data: any) => api.put(`/products/${id}`, data),
   delete: (id: string) => api.delete(`/products/${id}`),
   getTransactions: (id: string) => api.get(`/products/${id}/transactions`),
+  getFifoLayers: (id: string) => api.get(`/products/${id}/fifo-layers`),
 };
 
 export const projectApi = {
