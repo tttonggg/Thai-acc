@@ -18,8 +18,9 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
 
-# Install dependencies with exact versions
-RUN npm ci --only=production --ignore-scripts && \
+# Install ALL dependencies (needed for build)
+# Use --legacy-peer-deps to handle version conflicts
+RUN npm install --ignore-scripts --legacy-peer-deps && \
     npm cache clean --force
 
 # Generate Prisma client
@@ -35,7 +36,7 @@ WORKDIR /app
 # Install build dependencies
 RUN apk add --no-cache libc6-compat openssl
 
-# Copy dependencies from deps stage
+# Copy ALL dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=deps /app/prisma ./prisma
@@ -49,10 +50,6 @@ ENV NODE_ENV=production
 
 # Build application
 RUN npm run build
-
-# Remove dev dependencies after build
-RUN npm prune --production && \
-    npm cache clean --force
 
 # ============================================
 # Stage 3: Production Runner
