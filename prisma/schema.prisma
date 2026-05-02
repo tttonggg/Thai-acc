@@ -1047,6 +1047,9 @@ model User {
   createdSOs          SalesOrder[]       @relation("SOCreator")
   updatedSOs          SalesOrder[]       @relation("SOUpdater")
   documentAttachments DocumentAttachment[]
+
+  // RBAC Relations
+  userEmployee UserEmployee?
 }
 
 enum UserRole {
@@ -1557,9 +1560,93 @@ model Employee {
   metadata         Json?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+
+  // RBAC Relations
+  userEmployee     UserEmployee?
+  employeeRoles     EmployeeRole[]
   payrolls         Payroll[]
 
   @@index([deletedAt])
+}
+
+// ============================================
+// RBAC - Role-Based Access Control Models
+// ============================================
+
+// Role definitions
+model Role {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  description   String?
+  isSystem      Boolean  @default(false)
+  canManageRoles Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+  employeeRoles   EmployeeRole[]
+}
+
+// Permission definitions
+model Permission {
+  id          String   @id @default(cuid())
+  code        String   @unique // module.entity.action format
+  module      String
+  entity      String
+  action      String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+}
+
+// Junction: Role ↔ Permission
+model RolePermission {
+  id           String   @id @default(cuid())
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+// Junction: User ↔ Employee (1:1)
+model UserEmployee {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  employeeId String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([employeeId])
+}
+
+// Junction: Employee ↔ Role (N:N with optional department)
+model EmployeeRole {
+  id           String   @id @default(cuid())
+  employeeId   String
+  roleId       String
+  departmentId String?
+  isPrimary     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  role         Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  department    Department? @relation(fields: [departmentId], references: [id])
+
+  @@unique([employeeId, roleId, departmentId])
+  @@index([employeeId])
+  @@index([roleId])
+  @@index([departmentId])
 }
 
 model PayrollRun {
@@ -2205,6 +2292,7 @@ model Department {
   // Relations
   purchaseRequests PurchaseRequest[] @relation("PRDepartment")
   budgets         DepartmentBudget[]
+  employeeRoles   EmployeeRole[]
 
   createdById     String
   createdBy       User                @relation("DeptCreator", fields: [createdById], references: [id])
