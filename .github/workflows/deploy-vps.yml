@@ -124,7 +124,7 @@ jobs:
               --restart unless-stopped \
               -p 3000:3000 \
               -e NODE_ENV=production \
-              -e DATABASE_URL=file:$VOLUME_PATH/prisma/dev.db \
+              -e DATABASE_URL=file:/app/prisma/dev.db \
               -e NEXTAUTH_URL=https://acc.k56mm.uk \
               -e NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }} \
               -e NEXTAUTH_DISABLE_NON_LOCALHOST=true \
