@@ -233,6 +233,14 @@ export function usePurchaseOrders(
   });
 }
 
+export function usePurchaseOrder(id: string) {
+  return useQuery({
+    queryKey: ["purchase-order", id],
+    queryFn: () => purchaseOrderApi.get(id).then((res) => res.data),
+    enabled: !!id,
+  });
+}
+
 export function useCreatePurchaseOrder() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -270,6 +278,14 @@ export function usePurchaseInvoices(
   });
 }
 
+export function usePurchaseInvoice(id: string) {
+  return useQuery({
+    queryKey: ["purchase-invoice", id],
+    queryFn: () => purchaseInvoiceApi.get(id).then((res) => res.data),
+    enabled: !!id,
+  });
+}
+
 export function useCreatePurchaseInvoice() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -304,6 +320,14 @@ export function useExpenseClaims(
   return useQuery({
     queryKey: ["expense-claims", params],
     queryFn: () => expenseClaimApi.list(params).then((res) => res.data),
+  });
+}
+
+export function useExpenseClaim(id: string) {
+  return useQuery({
+    queryKey: ["expense-claim", id],
+    queryFn: () => expenseClaimApi.get(id).then((res) => res.data),
+    enabled: !!id,
   });
 }
 
