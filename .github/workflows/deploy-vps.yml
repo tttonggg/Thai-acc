@@ -10,9 +10,13 @@ on:
     branches: [master]
   workflow_dispatch:  # Allow manual trigger
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/thai-acc
+  IMAGE_NAME: ${{ github.repository }}
   VERSION: ${{ github.sha }}
 
 jobs:
