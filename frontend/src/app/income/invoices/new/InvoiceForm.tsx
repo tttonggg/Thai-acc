@@ -33,12 +33,23 @@ export default function InvoiceForm() {
   const [dueDate, setDueDate] = useState("");
   const [vatRate, setVatRate] = useState("7");
   const [discountAmount, setDiscountAmount] = useState("0");
+  const [currencyCode, setCurrencyCode] = useState("THB");
+  const [exchangeRate, setExchangeRate] = useState("1");
   const [notes, setNotes] = useState("");
   const [terms, setTerms] = useState("");
   const [items, setItems] = useState<LineItem[]>([
     { id: 1, description: "", quantity: "1", unit_price: "0", discount_percent: "0" },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const currencies = [
+    { code: "THB", label: "THB - บาท" },
+    { code: "USD", label: "USD - ดอลลาร์สหรัฐ" },
+    { code: "EUR", label: "EUR - ยูโร" },
+    { code: "CNY", label: "CNY - หยวนจีน" },
+    { code: "JPY", label: "JPY - เยนญี่ปุ่น" },
+    { code: "GBP", label: "GBP - ปอนด์สเตอร์ลิง" },
+  ];
 
   const addItem = () => {
     setItems([...items, { id: Date.now(), description: "", quantity: "1", unit_price: "0", discount_percent: "0" }]);
@@ -78,6 +89,8 @@ export default function InvoiceForm() {
         project_id: projectId || undefined,
         vat_rate: parseFloat(vatRate),
         discount_amount: parseFloat(discountAmount),
+        currency_code: currencyCode,
+        exchange_rate: parseFloat(exchangeRate) || 1,
         notes: notes || undefined,
         terms: terms || undefined,
         items: items.map((item) => ({
@@ -220,6 +233,33 @@ export default function InvoiceForm() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">สรุปยอด</h2>
             <div className="grid grid-cols-2 gap-4 max-w-md ml-auto">
+              <div className="text-right text-sm text-gray-600">สกุลเงิน:</div>
+              <div className="text-right">
+                <select
+                  value={currencyCode}
+                  onChange={(e) => setCurrencyCode(e.target.value)}
+                  className="w-32 px-3 py-1 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-peak-purple/20 focus:border-peak-purple"
+                >
+                  {currencies.map((c) => (
+                    <option key={c.code} value={c.code}>{c.code}</option>
+                  ))}
+                </select>
+              </div>
+              {currencyCode !== "THB" && (
+                <>
+                  <div className="text-right text-sm text-gray-600">อัตราแลกเปลี่ยน:</div>
+                  <div className="text-right">
+                    <input
+                      type="number"
+                      value={exchangeRate}
+                      onChange={(e) => setExchangeRate(e.target.value)}
+                      min="0.000001"
+                      step="0.01"
+                      className="w-32 px-3 py-1 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-peak-purple/20 focus:border-peak-purple"
+                    />
+                  </div>
+                </>
+              )}
               <div className="text-right text-sm text-gray-600">ราคาก่อนภาษี:</div>
               <div className="text-right text-sm font-medium">{formatCurrency(subtotal)}</div>
               <div className="text-right text-sm text-gray-600">VAT ({vatRate}%):</div>
@@ -229,7 +269,14 @@ export default function InvoiceForm() {
                 <input type="number" value={discountAmount} onChange={(e) => setDiscountAmount(e.target.value)} min="0" step="0.01" className="w-32 px-3 py-1 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-peak-purple/20 focus:border-peak-purple" />
               </div>
               <div className="text-right text-base font-bold text-gray-900 border-t pt-2">ยอดรวมสุทธิ:</div>
-              <div className="text-right text-base font-bold text-peak-purple border-t pt-2">{formatCurrency(totalAmount)}</div>
+              <div className="text-right text-base font-bold text-peak-purple border-t pt-2">
+                {formatCurrency(totalAmount)} {currencyCode}
+                {currencyCode !== "THB" && (
+                  <span className="block text-xs font-normal text-gray-500">
+                    ≈ {formatCurrency(totalAmount * (parseFloat(exchangeRate) || 1))} THB
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
