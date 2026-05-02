@@ -274,6 +274,34 @@ bun run build        # Creates standalone output in .next/standalone/
 # MUST run from: cd .next/standalone/thai-acc && node server.js
 ```
 
+**⚠️ CROSS-PLATFORM DEVELOPMENT (macOS → Linux VPS)**
+
+This project builds on macOS but deploys to Linux VPS. Prisma binaries are platform-specific.
+
+**The Problem:**
+- macOS builds produce `darwin-arm64` Prisma engines
+- Linux VPS needs `debian-openssl-3.0.x` engines
+- Using macOS build on Linux → "Database connection error" + 401 auth failures
+
+**Recommended Solution - Docker CI/CD:**
+
+GitHub Actions builds Docker container (Linux-native), VPS pulls and runs it:
+1. `Dockerfile` - multi-stage build for standalone Next.js
+2. `deploy-vps.yml` - builds image, pushes to GitHub Container Registry, VPS pulls
+
+**Benefits:**
+- ✅ Build once, run anywhere (Linux container = Linux VPS)
+- ✅ No more Prisma platform mismatch
+- ✅ Cached Docker layers = faster builds
+- ✅ Same image tested = deployed
+
+**Manual Docker (if needed):**
+```bash
+# Build locally
+docker build -t thai-acc .
+docker run -p 3000:3000 thai-acc
+```
+
 ---
 
 ## Framework Architecture: Module Plugin System
