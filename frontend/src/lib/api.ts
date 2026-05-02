@@ -48,6 +48,7 @@ export const companyApi = {
   list: () => api.get("/companies"),
   get: (id: string) => api.get(`/companies/${id}`),
   create: (data: any) => api.post("/companies", data),
+  updateMy: (data: any) => api.put("/companies/my", data),
 };
 
 export const contactApi = {

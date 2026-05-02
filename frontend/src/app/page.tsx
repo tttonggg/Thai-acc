@@ -16,7 +16,9 @@ import {
   DollarSign,
   FolderKanban,
   Receipt,
+  BarChart3,
 } from "lucide-react";
+import SimpleBarChart from "@/components/SimpleBarChart";
 
 export default function DashboardPage() {
   const { data: quotations } = useQuery({
@@ -62,6 +64,25 @@ export default function DashboardPage() {
 
   const pendingQuotations = quotations?.filter((q: any) => q.status === "sent").length || 0;
   const lowStockProducts = products?.filter((p: any) => parseFloat(p.quantity_on_hand) <= parseFloat(p.reorder_point)).length || 0;
+
+  // Monthly revenue chart data (last 6 months)
+  const monthlyRevenue = (() => {
+    const months: { label: string; value: number }[] = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const monthTotal = (invoices || [])
+        .filter((inv: any) => inv.issue_date?.startsWith(monthKey))
+        .reduce((sum: number, inv: any) => sum + parseFloat(inv.total_amount || 0), 0);
+      const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+      months.push({
+        label: thaiMonths[d.getMonth()],
+        value: monthTotal,
+      });
+    }
+    return months;
+  })();
 
   // Recent Activity: combine latest 5 invoices + receipts sorted by created_at
   const recentInvoices = (invoices || [])
@@ -115,6 +136,15 @@ export default function DashboardPage() {
             bgColor="bg-red-50"
             alert={overdueAmount > 0}
           />
+        </div>
+
+        {/* Revenue Chart */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <BarChart3 className="w-5 h-5 text-peak-purple" />
+            <h3 className="font-semibold text-gray-900">แนวโน้มยอดขาย (6 เดือน)</h3>
+          </div>
+          <SimpleBarChart data={monthlyRevenue} color="#7c3aed" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

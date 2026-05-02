@@ -94,6 +94,16 @@ export function useCompanies() {
   });
 }
 
+export function useUpdateMyCompany() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: companyApi.updateMy,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+    },
+  });
+}
+
 // Projects
 export function useProjects(params?: { status?: string; search?: string }) {
   return useQuery({
