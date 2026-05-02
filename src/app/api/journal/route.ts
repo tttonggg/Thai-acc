@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { z } from 'zod';
-import { requireAuth, requireRole } from '@/lib/api-utils';
+import { requireAuth, requirePermission } from '@/lib/api-utils';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 import { checkPeriodStatus } from '@/lib/period-service';
 
@@ -61,8 +61,8 @@ async function generateEntryNumber(): Promise<string> {
 // GET - List journal entries (ACCOUNTANT or ADMIN only)
 export async function GET(request: NextRequest) {
   try {
-    // Require ACCOUNTANT or ADMIN role
-    await requireRole(['ACCOUNTANT', 'ADMIN']);
+    // Require journal.read permission
+    await requirePermission('journal', 'read');
 
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
@@ -156,8 +156,8 @@ export async function GET(request: NextRequest) {
 // POST - Create journal entry (ACCOUNTANT or ADMIN only)
 export async function POST(request: NextRequest) {
   try {
-    // Require ACCOUNTANT or ADMIN role
-    await requireRole(['ACCOUNTANT', 'ADMIN']);
+    // Require journal.create permission
+    await requirePermission('journal', 'create');
 
     const body = await request.json();
     const validatedData = journalEntrySchema.parse(body);
