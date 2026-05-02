@@ -1,7 +1,13 @@
 import type { NextConfig } from 'next';
 
-const buildHash = require('child_process').execSync('git rev-parse --short HEAD').toString().trim();
-const buildTime = new Date().toISOString();
+let buildHash = 'unknown';
+let buildTime = new Date().toISOString();
+
+try {
+  buildHash = require('child_process').execSync('git rev-parse --short HEAD').toString().trim();
+} catch {
+  buildHash = 'docker-build';
+}
 
 const nextConfig: NextConfig = {
   env: {
