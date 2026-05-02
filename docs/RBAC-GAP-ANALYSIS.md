@@ -339,7 +339,7 @@ Restaurant Group "ข้าวมันไก่ป้าแต๋ว":
 | 1 | JWT expiry 8h → 1h | Medium | Low | ✅ DONE | Phase 1 complete |
 | 2 | **RBAC models in schema** (Role, Permission, EmployeeRole, UserEmployee) | HIGH | HIGH | ✅ DONE | Phase 2 complete - tables created |
 | 3 | Add canManageRoles to Role | Medium | Low | ✅ DONE | Added to Role model |
-| 4 | Replace `requireRole` → `checkUserPermission` | High | High | TODO | Use existing checkUserPermission |
+| 4 | Replace `requireRole` → `checkUserPermission` | High | High | ✅ DONE | Phase 4 - 18 routes migrated |
 | 5 | Amount-based approval rules | High | Medium | TODO | DocumentApprovalRule model |
 | 6 | `usePermission()` hook | Medium | Low | ✅ DONE | Phase 1 complete |
 | 7 | `<PermissionGuard>` component | Medium | Low | ✅ DONE | Already exists |
