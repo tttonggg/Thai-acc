@@ -1,7 +1,7 @@
 # Thai ACC — Development Status
 
 > **Last Updated:** 2026-05-02
-> **Version:** 0.2.1-alpha
+> **Version:** 0.2.2-alpha
 
 ---
 
@@ -172,4 +172,4 @@ npm run dev
 
 ---
 
-*Thai ACC v0.2.1-alpha — PEAK Alternative with Project Cost Control + e-Tax Invoice + Bank Reconciliation + Accounting Reports + Contact/Product/Project Detail Enhancements*
+*Thai ACC v0.2.2-alpha — PEAK Alternative with Project Cost Control + e-Tax Invoice + Bank Reconciliation + Accounting Reports + Contact/Product/Project Detail Enhancements + Security Hardening + Missing Pages*

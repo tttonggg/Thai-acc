@@ -100,7 +100,7 @@ export default function Sidebar() {
           <span>ออกจากระบบ</span>
         </button>
         <div className="text-xs text-gray-400 px-2">
-          Thai ACC v0.1.0
+          Thai ACC v0.2.2-alpha
         </div>
       </div>
     </aside>

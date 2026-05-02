@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, Field
 
 from ....core.database import get_db
 from ....core.security import verify_password, create_access_token, get_password_hash, get_current_user
+from ....core.limiter import limiter
 from ....models.user import User
 from ....models.company import Company
 
@@ -43,7 +44,8 @@ class UserResponse(BaseModel):
 
 
 @router.post("/login", response_model=LoginResponse)
-def login(data: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email, User.is_active == True).first()
     if not user or not verify_password(data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
@@ -63,7 +65,8 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/register", response_model=LoginResponse, status_code=status.HTTP_201_CREATED)
-def register(data: RegisterRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def register(request: Request, data: RegisterRequest, db: Session = Depends(get_db)):
     # Check if email exists
     existing_user = db.query(User).filter(User.email == data.email).first()
     if existing_user:
