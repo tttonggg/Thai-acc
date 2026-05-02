@@ -9,7 +9,7 @@ export async function GET() {
 
     const roles = await db.role.findMany({
       include: {
-        permissions: {
+        rolePermissions: {
           include: {
             permission: true,
           },
@@ -20,7 +20,7 @@ export async function GET() {
           },
         },
       },
-      orderBy: [{ type: 'asc' }, { name: 'asc' }],
+      orderBy: { name: 'asc' },
     });
 
     return NextResponse.json({ success: true, data: roles });
@@ -58,8 +58,7 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description,
-        type: 'CUSTOM',
-        permissions: permissionIds?.length
+        rolePermissions: permissionIds?.length
           ? {
               create: permissionIds.map((permId: string) => ({
                 permissionId: permId,
@@ -68,7 +67,7 @@ export async function POST(request: NextRequest) {
           : undefined,
       },
       include: {
-        permissions: {
+        rolePermissions: {
           include: {
             permission: true,
           },

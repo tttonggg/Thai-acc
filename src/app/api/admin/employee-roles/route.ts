@@ -10,10 +10,9 @@ export async function GET() {
     const employeeRoles = await db.employeeRole.findMany({
       include: {
         employee: true,
-        department: true,
         role: true,
       },
-      orderBy: [{ departmentId: 'asc' }, { employeeId: 'asc' }],
+      orderBy: { employeeId: 'asc' },
     });
 
     return NextResponse.json({ success: true, data: employeeRoles });
@@ -34,45 +33,34 @@ export async function POST(request: NextRequest) {
     await requirePermission('admin', 'manage');
 
     const body = await request.json();
-    const { employeeId, departmentId, roleId, isPrimary } = body;
+    const { employeeId, roleId } = body;
 
-    if (!employeeId || !departmentId || !roleId) {
+    if (!employeeId || !roleId) {
       return NextResponse.json(
-        { success: false, error: 'employeeId, departmentId, and roleId are required' },
+        { success: false, error: 'employeeId and roleId are required' },
         { status: 400 }
       );
     }
 
     // Check if assignment already exists
     const existing = await db.employeeRole.findFirst({
-      where: { employeeId, departmentId, roleId },
+      where: { employeeId, roleId },
     });
 
     if (existing) {
       return NextResponse.json(
-        { success: false, error: 'Employee already has this role in this department' },
+        { success: false, error: 'Employee already has this role' },
         { status: 400 }
       );
-    }
-
-    // If setting as primary, unset other primary roles for this employee
-    if (isPrimary) {
-      await db.employeeRole.updateMany({
-        where: { employeeId, isPrimary: true },
-        data: { isPrimary: false },
-      });
     }
 
     const employeeRole = await db.employeeRole.create({
       data: {
         employeeId,
-        departmentId,
         roleId,
-        isPrimary: isPrimary || false,
       },
       include: {
         employee: true,
-        department: true,
         role: true,
       },
     });

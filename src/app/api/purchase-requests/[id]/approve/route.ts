@@ -20,9 +20,7 @@ const approveSchema = z.object({
 async function canUserApprove(
   userId: string,
   userRole: string,
-  departmentId: string | null,
   documentType: string,
-  amount: number
 ): Promise<boolean> {
   // ADMIN can always approve
   if (userRole === 'ADMIN') return true;
@@ -31,7 +29,6 @@ async function canUserApprove(
   const configs = await prisma.documentApproverConfig.findMany({
     where: {
       documentType,
-      isActive: true,
     },
     orderBy: { approvalOrder: 'asc' },
   });
@@ -43,18 +40,9 @@ async function canUserApprove(
 
   // Check if user matches any active config
   for (const config of configs) {
-    if (config.approverType === 'ROLE' && config.approverId) {
-      const role = await prisma.role.findUnique({ where: { id: config.approverId } });
-      if (role && role.name === userRole) return true;
-    }
-    if (config.approverType === 'USER' && config.approverId === userId) return true;
-    if (config.approverType === 'DEPARTMENT_HEAD' && config.approverDepartmentId === departmentId) {
-      // Check if user is manager of that department
-      const dept = await prisma.department.findUnique({
-        where: { id: config.approverDepartmentId },
-      });
-      if (dept && dept.managerId === userId) return true;
-    }
+    // Find the role by roleId and compare with user's role name
+    const role = await prisma.role.findUnique({ where: { id: config.roleId } });
+    if (role && role.name === userRole) return true;
   }
 
   return false;
@@ -101,9 +89,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const canApprove = await canUserApprove(
       user.id,
       user.role,
-      pr.departmentId,
-      'PURCHASE_REQUEST',
-      pr.estimatedAmount
+      'PURCHASE_REQUEST'
     );
 
     if (!canApprove) {
@@ -177,22 +163,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
               lineNo: 'asc',
             },
           },
-        },
-      });
-
-      // Log to ApprovalAudit
-      await tx.approvalAudit.create({
-        data: {
-          documentType: 'PURCHASE_REQUEST',
-          documentId: id,
-          approverId: user.id,
-          approverRole: user.role,
-          action: 'APPROVED',
-          comments: validatedData.notes || null,
-          metadata: JSON.stringify({
-            requestNo: updated.requestNo,
-            amount: pr.estimatedAmount,
-          }),
         },
       });
 
