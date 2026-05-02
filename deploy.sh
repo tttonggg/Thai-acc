@@ -17,6 +17,15 @@ echo " Thai ACC Production Deploy"
 echo " Target: $VPS_HOST"
 echo "========================================"
 
+# 0. Pre-deploy verification
+echo ""
+echo "[0/6] Running pre-deploy checks..."
+if [ -f "scripts/deploy-check.sh" ]; then
+    bash scripts/deploy-check.sh
+else
+    echo "⚠️  deploy-check.sh not found, skipping checks"
+fi
+
 # 1. Build frontend locally
 echo ""
 echo "[1/6] Building frontend locally..."
@@ -27,19 +36,20 @@ npm run build
 echo ""
 echo "[2/6] Creating deploy tarball..."
 cd "$LOCAL_PROJECT"
-tar czf /tmp/thai-acc-deploy.tar.gz \
-  --exclude='.git' \
-  --exclude='node_modules' \
-  --exclude='__pycache__' \
-  --exclude='*.pyc' \
-  --exclude='.venv' \
-  --exclude='venv' \
-  --exclude='*.log' \
-  --exclude='.DS_Store' \
-  --exclude='*.tar.gz' \
-  --exclude='frontend/node_modules' \
-  --exclude='frontend/.next/cache' \
-  .
+# Use find+tar for precise exclusions (tar --exclude matches substrings)
+find . \
+  -path './.git' -prune -o \
+  -path './frontend/node_modules' -prune -o \
+  -path './backend/.venv' -prune -o \
+  -path './backend/venv' -prune -o \
+  -path './__pycache__' -prune -o \
+  -path './frontend/.next/cache' -prune -o \
+  -type f \
+  ! -name '.DS_Store' \
+  ! -name '*.pyc' \
+  ! -name '*.log' \
+  ! -name '*.tar.gz' \
+  -print | tar czf /tmp/thai-acc-deploy.tar.gz -T -
 
 # 3. Transfer to VPS
 echo ""

@@ -436,7 +436,114 @@ When working on a feature:
 
 ---
 
-## 12. Skills Library
+## 12. Production File Manifest & Deployment Safety
+
+> **Critical:** `.gitignore` can silently break production. Read this before modifying `.gitignore` or `deploy.sh`.
+
+### Files Required in Production
+
+| Category | File | Source | Notes |
+|----------|------|--------|-------|
+| **Backend** | `backend/Dockerfile` | Git | Must be committed |
+| **Backend** | `backend/requirements.txt` | Git | Must be committed |
+| **Backend** | `backend/src/` | Git | All source code |
+| **Backend** | `backend/alembic/versions/` | Git | Migration files |
+| **Frontend** | `frontend/Dockerfile` | Git | Must be committed |
+| **Frontend** | `frontend/package.json` | Git | Must be committed |
+| **Frontend** | `frontend/.next/standalone/` | **Local build** | Gitignored, built by `npm run build` |
+| **Frontend** | `frontend/.next/static/` | **Local build** | Gitignored, built by `npm run build` |
+| **Frontend** | `frontend/public/` | Git | Static assets |
+| **Infra** | `docker-compose.prod.yml` | Git | Must be committed |
+| **Infra** | `nginx.prod.conf` | Git | Must be committed |
+| **Secrets** | `.env` | **Manual** | Gitignored, copied via `scp` in `deploy.sh` |
+| **Scripts** | `deploy.sh` | Git | Must be committed |
+| **Scripts** | `scripts/deploy-check.sh` | Git | Pre-deploy validation |
+
+### `.gitignore` Rules (DO NOT CHANGE WITHOUT REVIEW)
+
+```
+# Safe to gitignore (rebuilt or installed on VPS)
+node_modules/
+.next/cache/
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
+*.log
+.DS_Store
+*.tar.gz
+*.node
+
+# DANGER: These are gitignored but REQUIRED in production
+.env              # Secrets — manually copied by deploy.sh
+.env.local        # Local overrides
+```
+
+### Pre-Deploy Check
+
+Always run before deploying:
+
+```bash
+bash scripts/deploy-check.sh
+```
+
+This validates:
+- All required committed files exist and are not accidentally gitignored
+- `.env` exists locally (required for `deploy.sh`)
+- `.env` contains required keys (`DB_PASSWORD`, `JWT_SECRET_KEY`)
+- No sensitive untracked files are floating around
+
+The check is also run automatically by:
+- `deploy.sh` (step 0)
+- GitHub Actions deploy workflow
+
+### If Production Breaks After Deploy
+
+1. **Check if `.env` exists on VPS:**
+   ```bash
+   ssh -i ~/.ssh/test root@135.181.107.76 'cat /root/thai-acc/.env'
+   ```
+
+2. **Check if frontend standalone output was included:**
+   ```bash
+   ssh -i ~/.ssh/test root@135.181.107.76 'ls -la /root/thai-acc/frontend/.next/standalone/'
+   ```
+
+3. **Check container logs:**
+   ```bash
+   ssh -i ~/.ssh/test root@135.181.107.76 'docker compose logs --tail 50 backend'
+   ssh -i ~/.ssh/test root@135.181.107.76 'docker compose logs --tail 50 frontend'
+   ```
+
+4. **Check health endpoint:**
+   ```bash
+   curl http://135.181.107.76:3001/health
+   ```
+
+### Frontend Dockerfile (Standalone Mode)
+
+The frontend **does NOT rebuild on the VPS**. It uses the prebuilt standalone output:
+
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY .next/standalone/peak-acc/frontend ./
+COPY .next/static ./.next/static
+COPY public ./public
+ENV NEXT_PUBLIC_API_URL=/api/v1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+This avoids OOM crashes on small VPS instances.
+
+---
+
+## 13. Skills Library
 
 Reusable skills in `/Users/tong/peak-acc/skills/`:
 - `build/fastapi.md` — FastAPI patterns

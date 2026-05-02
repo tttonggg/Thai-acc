@@ -1,44 +1,81 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import AppLayout from "@/components/AppLayout";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { useProjectFinancials } from "@/hooks/useApi";
+import { useProjectFinancials, useProjectTransactions } from "@/hooks/useApi";
 import { formatCurrency, formatThaiDate } from "@/lib/utils";
-import { ArrowLeft, FolderKanban, Calendar, Users, TrendingUp, AlertCircle, Pencil, Receipt, ShoppingCart, Wallet } from "lucide-react";
+import { ArrowLeft, FolderKanban, Calendar, Users, TrendingUp, AlertCircle, Pencil, Receipt, ShoppingCart, Wallet, FileText } from "lucide-react";
 
 export default function ProjectDetailPage() {
   const params = useParams();
   const projectId = params.id as string;
+  const [filter, setFilter] = useState<"all" | "sales" | "purchase" | "expense">("all");
 
-  const { data: project, isLoading } = useQuery({
+  const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ["project", projectId],
     queryFn: () => api.get(`/projects/${projectId}`).then((res) => res.data),
   });
 
-  const { data: invoices } = useQuery({
-    queryKey: ["invoices", { project_id: projectId }],
-    queryFn: () => api.get("/invoices", { params: { project_id: projectId } }).then((res) => res.data),
-    enabled: !!projectId,
-  });
+  const { data: fin, isLoading: finLoading } = useProjectFinancials(projectId);
+  const { data: txData, isLoading: txLoading } = useProjectTransactions(projectId);
 
-  const { data: fin } = useProjectFinancials(projectId);
+  const isLoading = projectLoading || finLoading || txLoading;
 
   if (isLoading) return <AppLayout><div className="p-8 text-center">กำลังโหลด...</div></AppLayout>;
   if (!project) return <AppLayout><div className="p-8 text-center">ไม่พบโครงการ</div></AppLayout>;
 
-  const totalRevenue = invoices?.reduce((sum: number, inv: any) => sum + parseFloat(inv.total_amount || 0), 0) || 0;
   const budgetUsed = parseFloat(project.budget_amount || 0) > 0
     ? (parseFloat(project.actual_cost || 0) / parseFloat(project.budget_amount || 0)) * 100
     : 0;
   const remaining = parseFloat(project.budget_amount || 0) - parseFloat(project.actual_cost || 0);
   const isOverBudget = remaining < 0;
 
+  const summary = txData?.summary;
+  const allTransactions = txData?.transactions || [];
+
+  const filteredTransactions = allTransactions.filter((t: any) => {
+    if (filter === "all") return true;
+    if (filter === "sales") return ["quotation", "invoice", "receipt"].includes(t.document_type);
+    if (filter === "purchase") return ["purchase_order", "purchase_invoice"].includes(t.document_type);
+    if (filter === "expense") return t.document_type === "expense_claim";
+    return true;
+  });
+
+  const docTypeColors: Record<string, string> = {
+    quotation: "bg-gray-100 text-gray-700",
+    invoice: "bg-blue-100 text-blue-700",
+    receipt: "bg-green-100 text-green-700",
+    purchase_order: "bg-orange-100 text-orange-700",
+    purchase_invoice: "bg-amber-100 text-amber-700",
+    expense_claim: "bg-red-100 text-red-700",
+  };
+
+  const statusColors: Record<string, string> = {
+    draft: "bg-gray-100 text-gray-600",
+    sent: "bg-blue-100 text-blue-600",
+    accepted: "bg-green-100 text-green-600",
+    rejected: "bg-red-100 text-red-600",
+    converted: "bg-purple-100 text-purple-600",
+    paid: "bg-green-100 text-green-600",
+    partially_paid: "bg-yellow-100 text-yellow-700",
+    overdue: "bg-red-100 text-red-600",
+    cancelled: "bg-gray-200 text-gray-500",
+    confirmed: "bg-green-100 text-green-600",
+    received: "bg-teal-100 text-teal-600",
+    billed: "bg-indigo-100 text-indigo-600",
+    submitted: "bg-blue-100 text-blue-600",
+    approved: "bg-green-100 text-green-600",
+    reimbursed: "bg-green-100 text-green-600",
+  };
+
   return (
     <AppLayout>
-      <div className="p-8 max-w-5xl">
+      <div className="p-8 max-w-6xl">
+        {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link href="/projects" className="text-gray-500 hover:text-gray-700">
             <ArrowLeft className="w-5 h-5" />
@@ -126,7 +163,7 @@ export default function ProjectDetailPage() {
               <TrendingUp className="w-5 h-5 text-gray-400" />
               <div>
                 <p className="text-sm text-gray-500">รายได้รวม</p>
-                <p className="font-medium text-gray-900">{formatCurrency(totalRevenue)}</p>
+                <p className="font-medium text-gray-900">{formatCurrency(fin?.invoiced_amount || 0)}</p>
               </div>
             </div>
           </div>
@@ -206,46 +243,107 @@ export default function ProjectDetailPage() {
           </div>
         )}
 
-        {/* Linked Invoices */}
-        {invoices && invoices.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900">ใบแจ้งหนี้ที่เกี่ยวข้อง</h3>
+        {/* Transaction History */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">ประวัติธุรกรรมโครงการ</h3>
+
+            {/* Filter Tabs */}
+            <div className="flex gap-2">
+              {[
+                { key: "all", label: "ทั้งหมด" },
+                { key: "sales", label: "ขาย" },
+                { key: "purchase", label: "ซื้อ" },
+                { key: "expense", label: "เบิกจ่าย" },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setFilter(tab.key as any)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    filter === tab.key
+                      ? "bg-teal-600 text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">เลขที่</th>
-                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">วันที่</th>
-                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">สถานะ</th>
-                  <th className="text-right px-6 py-3 text-sm font-semibold text-gray-700">ยอดรวม</th>
+          </div>
+
+          {/* Transaction Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">ประเภท</th>
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">เลขที่เอกสาร</th>
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">วันที่</th>
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">ลูกค้า/ผู้จำหน่าย</th>
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">สถานะ</th>
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">รายละเอียด</th>
+                  <th className="text-right px-6 py-3 font-medium text-gray-500">จำนวนเงิน</th>
                 </tr>
               </thead>
-              <tbody>
-                {invoices.map((inv: any) => (
-                  <tr key={inv.id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                    <td className="px-6 py-3">
-                      <Link href={`/income/invoices/${inv.id}`} className="text-peak-purple hover:underline font-medium">
-                        {inv.invoice_number}
-                      </Link>
+              <tbody className="divide-y divide-gray-100">
+                {filteredTransactions.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                      ไม่มีธุรกรรม
                     </td>
-                    <td className="px-6 py-3 text-sm text-gray-600">{formatThaiDate(inv.issue_date)}</td>
-                    <td className="px-6 py-3">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                        inv.status === "paid" ? "bg-green-50 text-green-700" :
-                        inv.status === "partially_paid" ? "bg-yellow-50 text-yellow-700" :
-                        "bg-blue-50 text-blue-700"
-                      }`}>
-                        {inv.status === "paid" ? "ชำระแล้ว" : inv.status === "partially_paid" ? "บางส่วน" : "รอชำระ"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 text-right text-sm font-medium">{formatCurrency(inv.total_amount)}</td>
                   </tr>
-                ))}
+                ) : (
+                  filteredTransactions.map((t: any) => (
+                    <tr key={t.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${docTypeColors[t.document_type] || "bg-gray-100 text-gray-700"}`}
+                        >
+                          <FileText className="w-3 h-3" />
+                          {t.document_type_label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Link
+                          href={t.link}
+                          className="font-medium text-teal-600 hover:text-teal-800 hover:underline"
+                        >
+                          {t.document_number}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {t.document_date ? formatThaiDate(t.document_date) : "-"}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {t.contact_name || "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex px-2 py-1 rounded-md text-xs font-medium ${statusColors[t.status] || "bg-gray-100 text-gray-600"}`}
+                        >
+                          {t.status_label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
+                        {t.description || "-"}
+                      </td>
+                      <td className="px-6 py-4 text-right font-medium text-gray-900">
+                        {formatCurrency(t.amount)}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
-        )}
+
+          {filteredTransactions.length > 0 && (
+            <div className="px-6 py-3 border-t border-gray-200 text-xs text-gray-500">
+              แสดง {filteredTransactions.length} รายการ
+              {allTransactions.length > 100 && " (แสดงสูงสุด 100 รายการล่าสุด)"}
+            </div>
+          )}
+        </div>
       </div>
     </AppLayout>
   );

@@ -43,6 +43,14 @@ export function useUpdateContact() {
   });
 }
 
+export function useContactTransactions(contactId: string) {
+  return useQuery({
+    queryKey: ["contact-transactions", contactId],
+    queryFn: () => contactApi.getTransactions(contactId).then((res) => res.data),
+    enabled: !!contactId,
+  });
+}
+
 // Products
 export function useProducts(params?: { category?: string; search?: string }) {
   return useQuery({
@@ -67,6 +75,14 @@ export function useUpdateProduct() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["product", vars.id] });
     },
+  });
+}
+
+export function useProductTransactions(productId: string) {
+  return useQuery({
+    queryKey: ["product-transactions", productId],
+    queryFn: () => productApi.getTransactions(productId).then((res) => res.data),
+    enabled: !!productId,
   });
 }
 
@@ -117,6 +133,14 @@ export function useProjectsFinancialsSummary() {
   return useQuery({
     queryKey: ["projects-financials-summary"],
     queryFn: () => projectApi.financialsSummary().then((res) => res.data),
+  });
+}
+
+export function useProjectTransactions(projectId: string) {
+  return useQuery({
+    queryKey: ["project-transactions", projectId],
+    queryFn: () => projectApi.getTransactions(projectId).then((res) => res.data),
+    enabled: !!projectId,
   });
 }
 

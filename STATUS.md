@@ -1,7 +1,7 @@
 # Thai ACC — Development Status
 
-> **Last Updated:** 2026-05-01
-> **Version:** 0.2.0-alpha
+> **Last Updated:** 2026-05-02
+> **Version:** 0.2.1-alpha
 
 ---
 
@@ -13,9 +13,9 @@
 |--------|-------|--------|
 | **Auth** | `core/security.py`, `api/v1/endpoints/auth.py` | JWT login/register, role-based access |
 | **Company** | `models/company.py`, `api/v1/endpoints/companies.py` | CRUD, auto-COA seeding on create |
-| **Contacts** | `models/contact.py`, `api/v1/endpoints/contacts.py` | CRUD, search, soft delete |
-| **Products** | `models/product.py`, `api/v1/endpoints/products.py` | CRUD, SKU validation, inventory tracking |
-| **Projects** | `models/project.py`, `api/v1/endpoints/projects.py` | CRUD, budget tracking, cost control, financials endpoint |
+| **Contacts** | `models/contact.py`, `api/v1/endpoints/contacts.py` | CRUD, search, soft delete, **transaction history endpoint** |
+| **Products** | `models/product.py`, `api/v1/endpoints/products.py` | CRUD, SKU validation, inventory tracking, **transaction history endpoint** |
+| **Projects** | `models/project.py`, `api/v1/endpoints/projects.py` | CRUD, budget tracking, cost control, financials endpoint, **transaction history endpoint** |
 | **Quotations** | `models/quotation.py`, `api/v1/endpoints/quotations.py` | Full lifecycle, status transitions, line items |
 | **Invoices** | `models/invoice.py`, `api/v1/endpoints/invoices.py` | Create from quotation, due date auto-calc, status, **e-Tax XML + submit + history** |
 | **Receipts** | `models/receipt.py`, `api/v1/endpoints/receipts.py` | Payment methods, WHT, invoice status update |
@@ -50,9 +50,9 @@
 | Page | Path | Features |
 |------|------|----------|
 | **Dashboard** | `/` | KPIs (sales, received, AR, overdue), project widget, recent activity |
-| **Contacts** | `/contacts` | List, search, type filter, credit limit display, detail page, edit form |
-| **Products** | `/products` | List, search, category filter, stock levels, detail page, edit form |
-| **Projects** | `/projects` | List with revenue/cost/profit columns, search, detail with financials panel, edit form |
+| **Contacts** | `/contacts` | List, search, type filter, credit limit display, **detail page with transaction history + summary cards**, edit form |
+| **Products** | `/products` | List, search, category filter, stock levels, **detail page with transaction history + summary cards**, edit form |
+| **Projects** | `/projects` | List with revenue/cost/profit columns, search, **detail page with financials panel + transaction history + budget progress**, edit form |
 | **Income** | `/income` | Tabbed view: Quotations, Invoices (with e-Tax filter), Receipts |
 | **Quotations** | Create, detail, edit | Dynamic line items, auto-calc, status transitions |
 | **Invoices** | Create, detail (with e-Tax panel), edit | Quotation conversion, due date, print support, e-Tax status |
@@ -76,6 +76,9 @@
 - ✅ e-Tax status badges and filter buttons
 - ✅ Print support (`print:hidden` on sidebar/action buttons)
 - ✅ Dashboard with KPI cards and project performance widget
+- ✅ Contact detail: summary cards (invoiced/paid/outstanding/purchased) + transaction history table with filter tabs
+- ✅ Product detail: stock alert + summary cards (sold/purchased quantities & amounts) + transaction history table with filter tabs
+- ✅ Project detail: budget progress bar + financials summary (quoted/invoiced/received/cost/profit) + transaction history table with filter tabs
 
 ### Database (6 Migrations)
 
@@ -88,7 +91,7 @@
 | `005` | invoices.e_tax_xml/timestamp/submitted_at/error, e_tax_submissions |
 | `006` | bank_statement_imports, bank_statement_lines |
 
-### Tests (4 Test Files)
+### Tests (6 Test Files)
 
 | File | Coverage |
 |------|----------|
@@ -96,6 +99,8 @@
 | `test_invoices.py` | Create, from quotation, status transitions, filters, calc |
 | `test_receipts.py` | Create, invoice status update, WHT, delete reversal |
 | `test_projects.py` | Create, duplicate code, filters, update, invoice tagging |
+| `test_purchase_orders.py` | Create, status transitions, convert to PI, filters, calc |
+| `test_purchase_invoices.py` | Create, status transitions, filters, calc |
 
 ### Deployment
 
@@ -108,24 +113,30 @@
 
 ---
 
-## ⏳ Remaining Work
+## ⏳ Feature Roadmap (Recommended Order)
 
-### High Priority
-1. **Multi-currency** — USD, EUR, CNY alongside THB on invoices, POs, bank accounts
-2. **Contact/Product/Project detail enhancements** — Transaction history, stock movements, budget vs actual charts
-3. **Tests** — pytest coverage for PO, purchase invoices, expense claims, accounting, bank reconciliation, e-Tax, bank statement import
+> **Orchestrator analysis:** Ordered by business value × dependency chain × complexity
 
-### Medium Priority
-5. **SSL** — Let's Encrypt for custom domain
-6. **Mobile Optimization** — Responsive improvements for mobile
-7. **API Documentation** — OpenAPI/Swagger enhancements
-8. **Dashboard Charts** — Revenue trend charts, expense breakdown
+| # | Feature | Priority | Why This Order | Complexity | Est. Time |
+|---|---------|----------|----------------|------------|-----------|
+| **1** | **~~Contact Detail Enhancements~~** | ✅ Done | Unified transaction history across 6 document types. Summary cards. Filter tabs. | Low | ~20 min |
+| **2** | **~~Product Detail Enhancements~~** | ✅ Done | Stock movement history. Sales/purchase summary cards. Filter tabs. | Low | ~20 min |
+| **3** | **~~Project Detail Enhancements~~** | ✅ Done | Budget progress bar. Financials panel (quoted/invoiced/received/cost/profit/margin). Transaction history. | Medium | ~25 min |
+| **4** | **Tests** | 🔥 High | PO, Purchase Invoice, Expense Claim, Accounting, Bank Reconciliation, e-Tax, Bank Statement. CI pipeline needs these. | Medium | ~30 min |
+| **5** | **Multi-currency** | Medium | USD/EUR/CNY. Adds `currency_code` to invoices/POs. Exchange rates. Important for import/export SMEs. | Medium | ~30 min |
+| **6** | **Dashboard Charts** | Medium | Revenue trends, expense breakdown. Visual appeal, decision support. | Medium | ~25 min |
+| **7** | **SSL / Custom Domain** | Medium | Let's Encrypt. Production polish. Required before public launch. | Low | ~15 min |
+| **8** | **Inventory Management** | Low | FIFO costing, stock adjustments, barcode. Advanced feature. | High | ~45 min |
+| **9** | **Payroll** | Low | Thai SSO, P.N.D.1K. Complex regulatory. Save for last. | High | ~60 min |
+| **10** | **Multi-company** | Low | Switch between company books. Enterprise feature. | High | ~40 min |
+| **11** | **Audit Trail UI** | Low | View change history on documents. Compliance feature. | Medium | ~30 min |
 
-### Low Priority
-9. **Inventory Management** — FIFO costing, stock adjustments, barcode
-10. **Payroll** — Thai social security, P.N.D.1K, bank payment files
-11. **Multi-company** — Switch between company books
-12. **Audit Trail UI** — View change history on documents
+### Why This Order?
+1. **Contact/Product/Project details first** — These are "quick wins" that use existing data. Users immediately see the value of all modules working together.
+2. **Tests next** — Once detail pages are done, the core feature set is stable. Tests lock in quality before adding complexity (multi-currency, inventory).
+3. **Multi-currency** — Opens the product to import/export businesses. Medium complexity, high business value.
+4. **Dashboard Charts + SSL** — Polish features. Make the product feel complete and production-ready.
+5. **Inventory + Payroll + Multi-company** — Advanced features for later. High complexity, smaller user base.
 
 ---
 
@@ -157,4 +168,4 @@ npm run dev
 
 ---
 
-*Thai ACC v0.2.0-alpha — PEAK Alternative with Project Cost Control + e-Tax Invoice + Bank Reconciliation + Accounting Reports*
+*Thai ACC v0.2.1-alpha — PEAK Alternative with Project Cost Control + e-Tax Invoice + Bank Reconciliation + Accounting Reports + Contact/Product/Project Detail Enhancements*

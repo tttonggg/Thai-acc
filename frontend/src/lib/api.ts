@@ -57,6 +57,7 @@ export const contactApi = {
   create: (data: any) => api.post("/contacts", data),
   update: (id: string, data: any) => api.put(`/contacts/${id}`, data),
   delete: (id: string) => api.delete(`/contacts/${id}`),
+  getTransactions: (id: string) => api.get(`/contacts/${id}/transactions`),
 };
 
 export const productApi = {
@@ -66,6 +67,7 @@ export const productApi = {
   create: (data: any) => api.post("/products", data),
   update: (id: string, data: any) => api.put(`/products/${id}`, data),
   delete: (id: string) => api.delete(`/products/${id}`),
+  getTransactions: (id: string) => api.get(`/products/${id}/transactions`),
 };
 
 export const projectApi = {
@@ -77,6 +79,7 @@ export const projectApi = {
   delete: (id: string) => api.delete(`/projects/${id}`),
   financials: (id: string) => api.get(`/projects/${id}/financials`),
   financialsSummary: () => api.get("/projects/financials/summary"),
+  getTransactions: (id: string) => api.get(`/projects/${id}/transactions`),
 };
 
 export const quotationApi = {

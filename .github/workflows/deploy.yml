@@ -22,6 +22,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Pre-deploy file check
+        run: |
+          if [ -f "scripts/deploy-check.sh" ]; then
+            bash scripts/deploy-check.sh
+          else
+            echo "⚠️  deploy-check.sh not found, skipping"
+          fi
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -39,18 +47,20 @@ jobs:
 
       - name: Create deploy tarball
         run: |
-          tar czf /tmp/thai-acc-deploy.tar.gz \
-            --exclude='.git' \
-            --exclude='*/node_modules' \
-            --exclude='__pycache__' \
-            --exclude='*.pyc' \
-            --exclude='.venv' \
-            --exclude='venv' \
-            --exclude='*.log' \
-            --exclude='.DS_Store' \
-            --exclude='*.tar.gz' \
-            --exclude='frontend/.next/cache' \
-            .
+          # Use find+tar for precise exclusions (tar --exclude matches substrings)
+          find . \
+            -path './.git' -prune -o \
+            -path './frontend/node_modules' -prune -o \
+            -path './backend/.venv' -prune -o \
+            -path './backend/venv' -prune -o \
+            -path './__pycache__' -prune -o \
+            -path './frontend/.next/cache' -prune -o \
+            -type f \
+            ! -name '.DS_Store' \
+            ! -name '*.pyc' \
+            ! -name '*.log' \
+            ! -name '*.tar.gz' \
+            -print | tar czf /tmp/thai-acc-deploy.tar.gz -T -
 
       - name: Copy files to VPS
         uses: appleboy/scp-action@v0.1.7
