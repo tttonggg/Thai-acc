@@ -222,7 +222,7 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
-    maxAge: 8 * 60 * 60, // 8 hours
+    maxAge: 60 * 60, // 1 hour - reduced from 8 hours for security
   },
   trustHost: true,
   secret: process.env.NEXTAUTH_SECRET || 'dev-only-secret-change-in-production',

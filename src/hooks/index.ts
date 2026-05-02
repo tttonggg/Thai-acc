@@ -3,6 +3,7 @@
 export { useDeleteConfirm } from './use-delete-confirm';
 export { useIsMobile } from './use-mobile';
 export { useToast } from './use-toast';
+export { usePermission, useAnyPermission, useAllPermissions } from './usePermission';
 
 // Export keyboard shortcuts
 export {
