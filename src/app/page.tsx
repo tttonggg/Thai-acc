@@ -7,8 +7,6 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useQueryClient } from '@tanstack/react-query';
 import { KeeratiSidebar } from '@/components/layout/keerati-sidebar';
 import { eventBus, EVENTS } from '@/lib/events';
-import { initPlugins } from '@/lib/plugin-registry';
-import { pluginEventBus } from '@/lib/plugin-event-bus';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 // Lazy-loaded module components for code-splitting
 const Dashboard = lazy(() => import('@/components/dashboard/dashboard').then(m => ({ default: m.Dashboard })));
@@ -217,12 +215,9 @@ export default function Home() {
         isActive: true,
       });
       loadPermissions();
-      // Initialize plugins after session loads (non-critical, wrap in try/catch)
-      import('@/lib/db').then(({ prisma }) => {
-        initPlugins({ db: prisma, eventBus: pluginEventBus, config: {} }).catch((err) =>
-          console.warn('[plugins] Init failed:', err)
-        );
-      });
+      // NOTE: Plugin initialization (initPlugins) is server-only.
+      // Real plugin system will be initialized via API route or server component,
+      // not from client useEffect. Current plugins are stubs — no init needed.
     }
   }, [session]);
 
