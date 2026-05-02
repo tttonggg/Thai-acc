@@ -346,7 +346,7 @@ Restaurant Group "ข้าวมันไก่ป้าแต๋ว":
 | 8 | API Key / Tenant layer | Low | High | TODO (future) | Not needed for single-tenant |
 | 9 | Department-scoped permissions | Low | Medium | TODO | Already supports in API |
 | 10 | Role management permission checks | High | Medium | ✅ DONE | Phase 3 - canManageRoles check |
-| 11 | Job Title + JobTitle table | Medium | Medium | TODO | Optional enhancement |
+| 11 | Job Title + JobTitle table | Medium | Medium | ✅ DONE | Phase 5 - schema complete |
 | 12 | Audit logging for role changes | Low | Medium | ✅ DONE | Phase 3 - logAudit added |
 
 ---

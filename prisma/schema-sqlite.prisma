@@ -1561,12 +1561,36 @@ model Employee {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
+  // Job Title linking
+  jobTitleId       String?
+  jobTitle         JobTitle? @relation(fields: [jobTitleId], references: [id])
+
   // RBAC Relations
   userEmployee     UserEmployee?
   employeeRoles     EmployeeRole[]
   payrolls         Payroll[]
 
   @@index([deletedAt])
+  @@index([jobTitleId])
+}
+
+// ============================================
+// ตำแหน่งงาน / Job Titles
+// ============================================
+model JobTitle {
+  id          String   @id @default(cuid())
+  name        String   // ชื่อตำแหน่ง เช่น "ผู้จัดการบัญชี"
+  nameEn      String?  // ชื่อภาษาอังกฤษ
+  department  String   // แผนก เช่น "บัญชี"
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  employees   Employee[]
+
+  @@index([department])
+  @@index([isActive])
 }
 
 // ============================================
