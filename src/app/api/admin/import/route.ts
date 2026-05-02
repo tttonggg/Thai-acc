@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireRole } from '@/lib/api-utils';
+import { requirePermission } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
 import prisma from '@/lib/db';
 import { z } from 'zod';
@@ -7,7 +7,7 @@ import { z } from 'zod';
 // GET - Import history
 export async function GET(request: NextRequest) {
   try {
-    await requireRole(['ADMIN']);
+    await requirePermission('admin', 'manage');
 
     const searchParams = request.nextUrl.searchParams;
     const dataType = searchParams.get('dataType');
@@ -428,7 +428,10 @@ export async function POST(request: NextRequest) {
 
   try {
     // Check admin role
-    const user = await requireRole(['ADMIN']);
+    const user = await requirePermission('admin', 'manage');
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const formData = await request.formData();
     const file = formData.get('file') as File;

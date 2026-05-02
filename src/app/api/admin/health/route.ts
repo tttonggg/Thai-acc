@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
-import { requireRole } from '@/lib/api-utils';
+import { requirePermission } from '@/lib/api-utils';
 import { existsSync, statSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
@@ -9,7 +9,7 @@ import { execSync } from 'child_process';
 export async function GET(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole(['ADMIN']);
+    await requirePermission('admin', 'manage');
 
     const startTime = Date.now();
 

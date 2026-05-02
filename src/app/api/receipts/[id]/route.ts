@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { z } from 'zod';
-import { requireAuth, requireRole } from '@/lib/api-utils';
+import { requireAuth, requirePermission } from '@/lib/api-utils';
 import { generateDocumentNumber } from '@/lib/thai-accounting';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireAuth();
-    await requireRole(['ACCOUNTANT', 'ADMIN']);
+    await requirePermission('src', 'read');
 
     const { id } = await params;
     const body = await request.json();
@@ -216,7 +216,7 @@ export async function DELETE(
 ) {
   try {
     await requireAuth();
-    await requireRole(['ACCOUNTANT', 'ADMIN']);
+    await requirePermission('src', 'read');
 
     const { id } = await params;
 

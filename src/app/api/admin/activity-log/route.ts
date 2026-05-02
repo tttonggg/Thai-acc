@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
-import { requireRole } from '@/lib/api-utils';
+import { requirePermission } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
 import { z } from 'zod';
 
@@ -21,7 +21,7 @@ const querySchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole(['ADMIN']);
+    await requirePermission('admin', 'manage');
 
     const { searchParams } = new URL(request.url);
     const query = querySchema.parse(Object.fromEntries(searchParams));
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
   try {
     // This endpoint is for internal use - called by other services
     // We still require authentication but not necessarily ADMIN role
-    const user = await requireRole(['ADMIN']);
+    const user = await requirePermission('admin', 'manage');
 
     const body = await request.json();
 

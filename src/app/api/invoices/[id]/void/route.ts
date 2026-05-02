@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
-import { requireAuth, requireRole } from '@/lib/api-utils';
+import { requireAuth, requirePermission } from '@/lib/api-utils';
 import { logActivity } from '@/lib/activity-logger';
 import { getClientIp } from '@/lib/api-utils';
 
@@ -11,7 +11,7 @@ import { getClientIp } from '@/lib/api-utils';
  */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireRole(['ACCOUNTANT', 'ADMIN']);
+    const user = await requirePermission('src', 'read');
     const { id } = await params;
     const ipAddress = getClientIp(request.headers);
     const body = await request.json();

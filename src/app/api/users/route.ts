@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { z } from 'zod';
 import * as bcrypt from 'bcryptjs';
-import { requireRole, apiError, apiResponse } from '@/lib/api-utils';
+import { requirePermission, apiError, apiResponse } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
 
 // Validation schema
@@ -18,7 +18,7 @@ const userSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole(['ADMIN']);
+    await requirePermission('user', 'manage');
 
     const users = await prisma.user.findMany({
       select: {
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole(['ADMIN']);
+    await requirePermission('user', 'manage');
 
     const body = await request.json();
     const validatedData = userSchema.parse(body);

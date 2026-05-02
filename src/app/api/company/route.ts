@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { requireAuth, requireRole } from '@/lib/api-utils';
+import { requireAuth, requirePermission } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
 
 // Validation schema for company info
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     // Require ADMIN role for company updates
-    await requireRole(['ADMIN']);
+    await requirePermission('company', 'manage');
 
     const body = await req.json();
     const validated = companyInfoSchema.parse(body);

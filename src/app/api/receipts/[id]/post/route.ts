@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { requireRole } from '@/lib/api-utils';
+import { requirePermission } from '@/lib/api-utils';
 import { generateDocNumber } from '@/lib/api-utils';
 import { checkPeriodStatus } from '@/lib/period-service';
 
@@ -8,8 +8,8 @@ import { checkPeriodStatus } from '@/lib/period-service';
 // Debits Cash/Bank and credits AR for customer payments
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Require ACCOUNTANT or ADMIN role
-    const user = await requireRole(['ADMIN', 'ACCOUNTANT']);
+    // Require receipt.post permission
+    await requirePermission('receipt', 'post');
 
     const { id } = await params;
 

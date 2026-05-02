@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireRole } from '@/lib/api-utils';
+import { requirePermission } from '@/lib/api-utils';
 import { prisma } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireRole(['ADMIN', 'ACCOUNTANT']);
+    const user = await requirePermission('admin', 'read');
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const body = await request.json();
     const { dataTypes, format, dateFrom, dateTo, includeDeleted } = body;

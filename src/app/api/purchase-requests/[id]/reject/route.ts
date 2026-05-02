@@ -21,7 +21,7 @@ const rejectSchema = z.object({
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require ADMIN or ACCOUNTANT role
-    const user = await requireRole(['ADMIN', 'ACCOUNTANT']);
+    const user = await requirePermission('src', 'read');
 
     const { id } = await params;
 

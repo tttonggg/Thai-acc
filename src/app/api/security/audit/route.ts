@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireRole, getClientIp } from '@/lib/api-utils';
+import { requirePermission, getClientIp } from '@/lib/api-utils';
 import {
   getAuditLogs,
   verifyAuditIntegrity,
@@ -18,7 +18,7 @@ import { logSecurityEvent } from '@/lib/audit-service';
 // GET - Get audit logs
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireRole(['ADMIN', 'ACCOUNTANT']);
+    const user = await requirePermission('security', 'read');
 
     const url = new URL(request.url);
     const userId = url.searchParams.get('userId') || undefined;
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
 // POST - Verify audit integrity or other actions
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireRole(['ADMIN']);
+    const user = await requirePermission('security', 'manage');
     const body = await request.json();
     const { action } = body;
 

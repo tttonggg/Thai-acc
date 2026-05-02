@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireRole, getClientIp } from '@/lib/api-utils';
+import { requirePermission, getClientIp } from '@/lib/api-utils';
 import {
   createWebhookEndpoint,
   getWebhookDeliveries,
@@ -23,7 +23,7 @@ import { prisma } from '@/lib/db';
 // GET - List webhooks
 export async function GET(request: NextRequest) {
   try {
-    await requireRole(['ADMIN']);
+    await requirePermission('security', 'manage');
 
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
 // POST - Create webhook or perform action
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireRole(['ADMIN']);
+    const user = await requirePermission('security', 'manage');
     const body = await request.json();
     const { action, id } = body;
 
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
 // PUT - Update webhook
 export async function PUT(request: NextRequest) {
   try {
-    const user = await requireRole(['ADMIN']);
+    const user = await requirePermission('security', 'manage');
     const body = await request.json();
     const { id, name, url: webhookUrl, events, isActive, retryCount } = body;
 
@@ -223,7 +223,7 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete webhook
 export async function DELETE(request: NextRequest) {
   try {
-    const user = await requireRole(['ADMIN']);
+    const user = await requirePermission('security', 'manage');
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
 

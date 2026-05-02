@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireRole } from '@/lib/api-utils';
+import { requirePermission } from '@/lib/api-utils';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
@@ -89,7 +89,7 @@ const companyImportSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Require ADMIN role
-    await requireRole(['ADMIN']);
+    await requirePermission('backup', 'manage');
 
     const backup = await request.json();
 

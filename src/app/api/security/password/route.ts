@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth, requireRole, getClientIp } from '@/lib/api-utils';
+import { requireAuth, requirePermission, getClientIp } from '@/lib/api-utils';
 import { checkPasswordStrength, validatePasswordStrength } from '@/lib/password-validator';
 import { changePassword, resetPassword } from '@/lib/auth-full';
 import { logSecurityEvent } from '@/lib/audit-service';
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'reset') {
       // Reset password (admin only)
-      const admin = await requireRole(['ADMIN']);
+      const admin = await requirePermission('security', 'manage');
       const { userId, newPassword } = body;
 
       if (!userId || !newPassword) {

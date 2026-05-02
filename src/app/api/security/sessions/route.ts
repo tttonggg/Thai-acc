@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth, requireRole, getClientIp } from '@/lib/api-utils';
+import { requireAuth, requirePermission, getClientIp } from '@/lib/api-utils';
 import {
   getUserSessions,
   invalidateOtherSessions,
@@ -78,7 +78,7 @@ export async function DELETE(request: NextRequest) {
 
       if (targetUserId && targetUserId !== user.id) {
         // Check if admin
-        await requireRole(['ADMIN']);
+        await requirePermission('security', 'manage');
 
         await invalidateAllUserSessions(targetUserId);
 
