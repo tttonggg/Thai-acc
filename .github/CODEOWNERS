@@ -1,0 +1,19 @@
+# Code Review Assignment
+# Every PR requires at least 1 review before merging
+
+# Backend changes
+/backend/src/ @tttonggg
+/backend/tests/ @tttonggg
+/backend/alembic/ @tttonggg
+
+# Frontend changes
+/frontend/src/ @tttonggg
+
+# Infrastructure & Config
+/.github/workflows/ @tttonggg
+/docker-compose*.yml @tttonggg
+/deploy.sh @tttonggg
+/nginx*.conf @tttonggg
+
+# Documentation
+*.md @tttonggg
