@@ -27,7 +27,11 @@ class Invoice(BaseModel):
     # Status: draft, sent, paid, partially_paid, overdue, cancelled
     status = Column(String(20), nullable=False, default="draft")
     
-    # Amounts
+    # Currency
+    currency_code = Column(String(3), nullable=False, default="THB")
+    exchange_rate = Column(Numeric(19, 6), nullable=False, default=1)
+    
+    # Amounts (in document currency)
     subtotal = Column(Numeric(19, 4), nullable=False, default=0)
     vat_rate = Column(Numeric(5, 2), nullable=False, default=7)
     vat_amount = Column(Numeric(19, 4), nullable=False, default=0)

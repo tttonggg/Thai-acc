@@ -20,6 +20,10 @@ class Receipt(BaseModel):
     # Dates
     receipt_date = Column(Date, nullable=False)
     
+    # Currency
+    currency_code = Column(String(3), nullable=False, default="THB")
+    exchange_rate = Column(Numeric(19, 6), nullable=False, default=1)
+
     # Amounts
     amount = Column(Numeric(19, 4), nullable=False, default=0)
     vat_amount = Column(Numeric(19, 4), nullable=False, default=0)

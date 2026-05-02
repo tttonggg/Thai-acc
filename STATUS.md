@@ -165,9 +165,10 @@ npm run dev
 
 ## VPS Production
 
-- **URL:** `http://135.181.107.76:3001`
-- **Health:** `http://135.181.107.76:3001/health`
-- **API Docs:** `http://135.181.107.76:3001/docs`
+- **URL:** `https://acc3.k56mm.uk/`
+- **IP:** `http://135.181.107.76:3001`
+- **Health:** `https://acc3.k56mm.uk/health`
+- **API Docs:** `https://acc3.k56mm.uk/docs`
 - **Deploy:** `./deploy.sh`
 
 ---

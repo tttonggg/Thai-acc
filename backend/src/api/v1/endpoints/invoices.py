@@ -37,6 +37,8 @@ class InvoiceCreate(BaseModel):
     terms: Optional[str] = None
     vat_rate: Decimal = Field(default=Decimal("7"), ge=0, le=100)
     discount_amount: Decimal = Field(default=Decimal("0"), ge=0)
+    currency_code: str = Field(default="THB", pattern="^(THB|USD|EUR|CNY|JPY|GBP)$")
+    exchange_rate: Decimal = Field(default=Decimal("1"), gt=0)
     items: List[InvoiceItemCreate] = Field(..., min_length=1)
 
 
@@ -49,6 +51,8 @@ class InvoiceUpdate(BaseModel):
     terms: Optional[str] = None
     vat_rate: Optional[Decimal] = Field(None, ge=0, le=100)
     discount_amount: Optional[Decimal] = Field(None, ge=0)
+    currency_code: Optional[str] = Field(None, pattern="^(THB|USD|EUR|CNY|JPY|GBP)$")
+    exchange_rate: Optional[Decimal] = Field(None, gt=0)
     items: Optional[List[InvoiceItemCreate]] = None
 
 
@@ -75,6 +79,8 @@ class InvoiceResponse(BaseModel):
     issue_date: date
     due_date: date
     status: str
+    currency_code: str
+    exchange_rate: Decimal
     subtotal: Decimal
     vat_rate: Decimal
     vat_amount: Decimal
@@ -130,6 +136,8 @@ def _build_invoice_response(invoice: Invoice, preloaded_items: Optional[List[Inv
         "issue_date": invoice.issue_date,
         "due_date": invoice.due_date,
         "status": invoice.status,
+        "currency_code": invoice.currency_code,
+        "exchange_rate": invoice.exchange_rate,
         "subtotal": invoice.subtotal,
         "vat_rate": invoice.vat_rate,
         "vat_amount": invoice.vat_amount,
@@ -244,6 +252,8 @@ def create_invoice(
         issue_date=data.issue_date,
         due_date=due_date,
         status="draft",
+        currency_code=data.currency_code,
+        exchange_rate=data.exchange_rate,
         subtotal=subtotal,
         vat_rate=data.vat_rate,
         vat_amount=vat_amount,
@@ -393,6 +403,12 @@ def update_invoice(
         ).first()
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
+
+    # Handle currency update
+    if "currency_code" in update_data:
+        invoice.currency_code = update_data.pop("currency_code")
+    if "exchange_rate" in update_data:
+        invoice.exchange_rate = Decimal(str(update_data.pop("exchange_rate")))
 
     # Handle items replacement
     if "items" in update_data and update_data["items"] is not None:

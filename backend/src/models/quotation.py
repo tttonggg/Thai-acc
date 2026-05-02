@@ -18,7 +18,11 @@ class Quotation(BaseModel):
     # Status: draft, sent, accepted, rejected, converted
     status = Column(String(20), nullable=False, default="draft")
     
-    # Amounts (all THB)
+    # Currency
+    currency_code = Column(String(3), nullable=False, default="THB")
+    exchange_rate = Column(Numeric(19, 6), nullable=False, default=1)
+    
+    # Amounts
     subtotal = Column(Numeric(19, 4), nullable=False, default=0)
     vat_rate = Column(Numeric(5, 2), nullable=False, default=7)  # Default 7%
     vat_amount = Column(Numeric(19, 4), nullable=False, default=0)
