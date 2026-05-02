@@ -67,7 +67,7 @@ export async function createStockTake(params: {
     });
     if (existingTake) {
       throw new Error(
-        `มีการตรวจนับสต็อกที่ดำเนินการอยู่ (${existingTake.takeNo}) กรุณาดำเนินการให้เสร็จก่อน`
+        `มีการตรวจนับสต็อกที่ดำเนินการอยู่ (${existingTake.stockTakeNumber}) กรุณาดำเนินการให้เสร็จก่อน`
       );
     }
 
@@ -92,7 +92,7 @@ export async function createStockTake(params: {
     // Create stock take header
     const stockTake = await tx.stockTake.create({
       data: {
-        takeNo,
+        stockTakeNumber: takeNo,
         date: date || new Date(),
         warehouseId,
         status: 'DRAFT',
@@ -109,8 +109,8 @@ export async function createStockTake(params: {
             productId: balance.productId,
             systemQuantity: balance.quantity,
             actualQuantity: balance.quantity, // Initialize with system quantity
-            varianceQuantity: 0, // No variance initially
-            unitCost: balance.unitCost,
+            varianceQty: 0, // No variance initially
+            costPerUnit: balance.unitCost,
             notes: null,
           },
           include: {
@@ -126,7 +126,7 @@ export async function createStockTake(params: {
       summary: {
         totalItems: lines.length,
         totalSystemQty: lines.reduce((sum, line) => sum + line.systemQuantity, 0),
-        totalSystemValue: lines.reduce((sum, line) => sum + line.systemQuantity * line.unitCost, 0),
+        totalSystemValue: lines.reduce((sum, line) => sum + line.systemQuantity * line.costPerUnit, 0),
       },
     };
   });
@@ -170,7 +170,7 @@ export async function updateStockTakeLine(params: {
       where: { id: lineId },
       data: {
         actualQuantity,
-        varianceQuantity,
+        varianceQty: varianceQuantity,
         notes,
       },
       include: {
@@ -180,7 +180,7 @@ export async function updateStockTakeLine(params: {
     });
 
     // Calculate variance value
-    const varianceValue = varianceQuantity * updatedLine.unitCost;
+    const varianceValue = varianceQuantity * updatedLine.costPerUnit;
 
     return {
       ...updatedLine,
@@ -238,11 +238,6 @@ export async function approveStockTake(params: { takeId: string; approverId: str
       where: { id: takeId },
       data: {
         status: 'COMPLETED',
-        metadata: {
-          ...((stockTake.metadata as any) || {}),
-          approverId,
-          approvedAt: new Date().toISOString(),
-        },
       },
       include: {
         lines: {
@@ -255,15 +250,15 @@ export async function approveStockTake(params: { takeId: string; approverId: str
 
     // Calculate summary
     const totalVarianceQty = updatedTake.lines.reduce(
-      (sum, line) => sum + line.varianceQuantity,
+      (sum, line) => sum + line.varianceQty,
       0
     );
     const totalVarianceValue = updatedTake.lines.reduce(
-      (sum, line) => sum + line.varianceQuantity * line.unitCost,
+      (sum, line) => sum + line.varianceQty * line.costPerUnit,
       0
     );
-    const lossLines = updatedTake.lines.filter((line) => line.varianceQuantity < 0);
-    const gainLines = updatedTake.lines.filter((line) => line.varianceQuantity > 0);
+    const lossLines = updatedTake.lines.filter((line) => line.varianceQty < 0);
+    const gainLines = updatedTake.lines.filter((line) => line.varianceQty > 0);
 
     return {
       ...updatedTake,
@@ -272,10 +267,10 @@ export async function approveStockTake(params: { takeId: string; approverId: str
         totalVarianceQty,
         totalVarianceValue,
         totalLoss: lossLines.reduce(
-          (sum, line) => sum + Math.abs(line.varianceQuantity) * line.unitCost,
+          (sum, line) => sum + Math.abs(line.varianceQty) * line.costPerUnit,
           0
         ),
-        totalGain: gainLines.reduce((sum, line) => sum + line.varianceQuantity * line.unitCost, 0),
+        totalGain: gainLines.reduce((sum, line) => sum + line.varianceQty * line.costPerUnit, 0),
         lossCount: lossLines.length,
         gainCount: gainLines.length,
       },
@@ -318,7 +313,7 @@ export async function postStockTake(params: {
     }
 
     // Check if already posted
-    if ((stockTake.metadata as any)?.posted) {
+    if ((stockTake as any).metadata?.posted) {
       throw new Error('การตรวจนับนี้ได้ลงบัญชีแล้ว');
     }
 
@@ -336,8 +331,8 @@ export async function postStockTake(params: {
       throw new Error('ไม่พบบัญชีค่าใช้จ่ายผลต่างสต็อก (5210) กรุณาระบุบัญชี');
     }
 
-    // Calculate total variance by product
-    const varianceLines = stockTake.lines.filter((line) => line.varianceQuantity !== 0);
+    // Calculate variance by product
+    const varianceLines = stockTake.lines.filter((line) => line.varianceQty !== 0);
 
     if (varianceLines.length === 0) {
       throw new Error('ไม่มีผลต่างในการตรวจนับ ไม่จำเป็นต้องลงบัญชี');
@@ -357,12 +352,12 @@ export async function postStockTake(params: {
 
     // Calculate totals - loss and gain tracked separately
     const totalLoss = varianceLines
-      .filter((line) => line.varianceQuantity < 0)
-      .reduce((sum, line) => sum + Math.abs(line.varianceQuantity) * line.unitCost, 0);
+      .filter((line) => line.varianceQty < 0)
+      .reduce((sum, line) => sum + Math.abs(line.varianceQty) * line.costPerUnit, 0);
 
     const totalGain = varianceLines
-      .filter((line) => line.varianceQuantity > 0)
-      .reduce((sum, line) => sum + line.varianceQuantity * line.unitCost, 0);
+      .filter((line) => line.varianceQty > 0)
+      .reduce((sum, line) => sum + line.varianceQty * line.costPerUnit, 0);
 
     // Import generateDocNumber for transaction-safe number generation
     const { generateDocNumber } = require('@/lib/api-utils');
@@ -377,8 +372,8 @@ export async function postStockTake(params: {
         data: {
           entryNo: lossEntryNo,
           date: new Date(),
-          description: `ผลต่างสต็อก (ขาด) - ${stockTake.warehouse.name} (${stockTake.takeNo})`,
-          reference: stockTake.takeNo,
+          description: `ผลต่างสต็อก (ขาด) - ${stockTake.warehouse.name} (${stockTake.stockTakeNumber})`,
+          reference: stockTake.stockTakeNumber,
           documentType: 'STOCK_TAKE',
           documentId: stockTake.id,
           totalDebit: totalLoss,
@@ -392,14 +387,14 @@ export async function postStockTake(params: {
               {
                 lineNo: 1,
                 accountId: expenseAccountId,
-                description: `ผลต่างสต็อก (ขาด) - ${stockTake.takeNo}`,
+                description: `ผลต่างสต็อก (ขาด) - ${stockTake.stockTakeNumber}`,
                 debit: totalLoss,
                 credit: 0,
               },
               {
                 lineNo: 2,
                 accountId: inventoryAccountId,
-                description: `ปรับปรุงสินค้าคงคลัง - ${stockTake.takeNo}`,
+                description: `ปรับปรุงสินค้าคงคลัง - ${stockTake.stockTakeNumber}`,
                 debit: 0,
                 credit: totalLoss,
               },
@@ -417,8 +412,8 @@ export async function postStockTake(params: {
         data: {
           entryNo: gainEntryNo,
           date: new Date(),
-          description: `ผลต่างสต็อก (เกิน) - ${stockTake.warehouse.name} (${stockTake.takeNo})`,
-          reference: stockTake.takeNo,
+          description: `ผลต่างสต็อก (เกิน) - ${stockTake.warehouse.name} (${stockTake.stockTakeNumber})`,
+          reference: stockTake.stockTakeNumber,
           documentType: 'STOCK_TAKE',
           documentId: stockTake.id,
           totalDebit: totalGain,
@@ -432,14 +427,14 @@ export async function postStockTake(params: {
               {
                 lineNo: 1,
                 accountId: inventoryAccountId,
-                description: `ปรับปรุงสินค้าคงคลัง - ${stockTake.takeNo}`,
+                description: `ปรับปรุงสินค้าคงคลัง - ${stockTake.stockTakeNumber}`,
                 debit: totalGain,
                 credit: 0,
               },
               {
                 lineNo: 2,
                 accountId: expenseAccountId,
-                description: `ผลต่างสต็อก (เกิน) - ${stockTake.takeNo}`,
+                description: `ผลต่างสต็อก (เกิน) - ${stockTake.stockTakeNumber}`,
                 debit: 0,
                 credit: totalGain,
               },
@@ -455,7 +450,7 @@ export async function postStockTake(params: {
 
     // Update stock balances for variances
     for (const line of stockTake.lines) {
-      if (line.varianceQuantity === 0) continue;
+      if (line.varianceQty === 0) continue;
 
       const currentBalance = await tx.stockBalance.findUnique({
         where: {
@@ -471,7 +466,7 @@ export async function postStockTake(params: {
       }
 
       // Update stock balance
-      const newQuantity = currentBalance.quantity + line.varianceQuantity;
+      const newQuantity = currentBalance.quantity + line.varianceQty;
       const newTotalCost = newQuantity * currentBalance.unitCost;
 
       await tx.stockBalance.update({
@@ -493,13 +488,13 @@ export async function postStockTake(params: {
           productId: line.productId,
           warehouseId: stockTake.warehouseId,
           type: 'ADJUST',
-          quantity: line.varianceQuantity,
-          unitCost: line.unitCost,
-          totalCost: Math.abs(line.varianceQuantity) * line.unitCost,
+          quantity: line.varianceQty,
+          unitCost: line.costPerUnit,
+          totalCost: Math.abs(line.varianceQty) * line.costPerUnit,
           date: new Date(),
           referenceId: stockTake.id,
-          referenceNo: stockTake.takeNo,
-          notes: `ผลต่างการตรวจนับ: ${line.varianceQuantity > 0 ? '+' : ''}${line.varianceQuantity}`,
+          referenceNo: stockTake.stockTakeNumber,
+          notes: `ผลต่างการตรวจนับ: ${line.varianceQty > 0 ? '+' : ''}${line.varianceQty}`,
         },
       });
     }
@@ -508,13 +503,7 @@ export async function postStockTake(params: {
     const updatedTake = await tx.stockTake.update({
       where: { id: takeId },
       data: {
-        metadata: {
-          ...((stockTake.metadata as any) || {}),
-          posted: true,
-          postedAt: new Date().toISOString(),
-          postedById: userId,
-          journalEntryIds: journalEntries.map(je => je.id),
-        },
+        status: 'POSTED',
       },
       include: {
         lines: {
