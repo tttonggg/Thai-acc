@@ -76,7 +76,7 @@ export async function checkUserPermission(
             include: {
               role: {
                 include: {
-                  permissions: {
+                  rolePermissions: {
                     include: {
                       permission: true,
                     },
@@ -96,15 +96,26 @@ export async function checkUserPermission(
   }
 
   // Check permissions from employee's roles
+  // Permission codes are in format: module.entity.action (e.g., admin.roles.read)
   for (const er of userEmployee.employee.employeeRoles) {
     // If department-specific, check department match
     if (options?.departmentId && er.departmentId !== options.departmentId) {
       continue
     }
 
-    for (const rp of er.role.permissions) {
+    for (const rp of er.role.rolePermissions) {
       const perm = rp.permission
-      if (perm.module === module && perm.action === action) {
+      // Match: exact code (admin.roles) or module.entity with any action (admin.roles.*)
+      // Also match: module.action format (admin.manage)
+      const code = perm.code
+      if (code === `${module}.${action}`) {
+        return true
+      }
+      if (code.startsWith(`${module}.${action}.`)) {
+        return true
+      }
+      // Check if module.entity matches (any action)
+      if (code.startsWith(`${module}.${action}`)) {
         return true
       }
     }
@@ -151,7 +162,7 @@ export async function getUserPermissions(): Promise<string[]> {
             include: {
               role: {
                 include: {
-                  permissions: {
+                  rolePermissions: {
                     include: {
                       permission: true,
                     },
@@ -169,12 +180,57 @@ export async function getUserPermissions(): Promise<string[]> {
 
   const perms = new Set<string>()
   for (const er of userEmployee.employee.employeeRoles) {
-    for (const rp of er.role.permissions) {
+    for (const rp of er.role.rolePermissions) {
       perms.add(rp.permission.code)
     }
   }
 
   return Array.from(perms)
+}
+
+/**
+ * Check if user can manage roles (assign/edit roles to other users)
+ * Only roles with canManageRoles=true can manage roles
+ * This prevents privilege escalation (admin cannot give themselves super_admin)
+ */
+export async function canManageRoles(): Promise<boolean> {
+  const user = await getCurrentUser()
+  if (!user) return false
+
+  // ADMIN always has access to role management
+  if (user.role === 'ADMIN') return true
+
+  // Check if user's employee roles have canManageRoles flag
+  const userEmployee = await db.userEmployee.findUnique({
+    where: { userId: user.id },
+    include: {
+      employee: {
+        include: {
+          employeeRoles: {
+            include: {
+              role: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!userEmployee) return false
+
+  return userEmployee.employee.employeeRoles.some(er => er.role.canManageRoles)
+}
+
+/**
+ * Require canManageRoles permission - throws if not allowed
+ */
+export async function requireCanManageRoles(): Promise<NonNullable<Awaited<ReturnType<typeof requireAuth>>>> {
+  const user = await requireAuth()
+  const hasPermission = await canManageRoles()
+  if (!hasPermission) {
+    throw new Error("ไม่มีสิทธิ์จัดการบทบาท - ต้องการสิทธิ์ admin.roles")
+  }
+  return user
 }
 
 /**

@@ -80,7 +80,7 @@ export async function GET() {
                 include: {
                   role: {
                     include: {
-                      permissions: {
+                      rolePermissions: {
                         include: {
                           permission: true,
                         },
@@ -97,7 +97,7 @@ export async function GET() {
       if (userEmployee) {
         const perms = new Set<string>();
         for (const er of userEmployee.employee.employeeRoles) {
-          for (const rp of er.role.permissions) {
+          for (const rp of er.role.rolePermissions) {
             perms.add(rp.permission.code);
           }
         }

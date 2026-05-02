@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requirePermission } from '@/lib/api-utils';
+import { requireCanManageRoles, getClientIp } from '@/lib/api-utils';
+import { logAudit } from '@/lib/audit-logger';
 import { db } from '@/lib/db';
 
 // GET /api/admin/employee-roles - List all employee role assignments
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    await requirePermission('admin', 'manage');
+    await requireCanManageRoles();
 
     const employeeRoles = await db.employeeRole.findMany({
       include: {
@@ -31,7 +32,12 @@ export async function GET() {
 // POST /api/admin/employee-roles - Assign a role to an employee in a department
 export async function POST(request: NextRequest) {
   try {
-    await requirePermission('admin', 'manage');
+    const user = await requireCanManageRoles();
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    const ipAddress = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
 
     const body = await request.json();
     const { employeeId, departmentId, roleId, isPrimary } = body;
@@ -77,6 +83,18 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Audit log
+    await logAudit({
+      userId: user.id,
+      action: 'CREATE',
+      entityType: 'EmployeeRole',
+      entityId: employeeRole.id,
+      beforeState: null,
+      afterState: { employeeId, departmentId, roleId, isPrimary },
+      ipAddress,
+      userAgent,
+    });
+
     return NextResponse.json({ success: true, data: employeeRole }, { status: 201 });
   } catch (error) {
     if (error instanceof Error) {
@@ -89,7 +107,9 @@ export async function POST(request: NextRequest) {
 // DELETE /api/admin/employee-roles - Remove a role from an employee
 export async function DELETE(request: NextRequest) {
   try {
-    await requirePermission('admin', 'manage');
+    const user = await requireCanManageRoles();
+    const ipAddress = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -101,8 +121,23 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Get current state for audit
+    const current = await db.employeeRole.findUnique({ where: { id } });
+
     await db.employeeRole.delete({
       where: { id },
+    });
+
+    // Audit log
+    await logAudit({
+      userId: user.id,
+      action: 'DELETE',
+      entityType: 'EmployeeRole',
+      entityId: id,
+      beforeState: current ? { employeeId: current.employeeId, departmentId: current.departmentId, roleId: current.roleId } : null,
+      afterState: null,
+      ipAddress,
+      userAgent,
     });
 
     return NextResponse.json({ success: true, data: { id } });

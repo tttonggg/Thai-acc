@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requirePermission } from '@/lib/api-utils';
+import { requireCanManageRoles } from '@/lib/api-utils';
+import { logAudit } from '@/lib/audit-logger';
 import { db } from '@/lib/db';
+import { getClientIp } from '@/lib/api-utils';
 
 // GET /api/admin/roles - List all roles with permissions
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    await requirePermission('admin', 'manage');
+    await requireCanManageRoles();
 
     const roles = await db.role.findMany({
       include: {
-        permissions: {
+        rolePermissions: {
           include: {
             permission: true,
           },
@@ -20,7 +22,7 @@ export async function GET() {
           },
         },
       },
-      orderBy: [{ type: 'asc' }, { name: 'asc' }],
+      orderBy: { name: 'asc' },
     });
 
     return NextResponse.json({ success: true, data: roles });
@@ -35,7 +37,9 @@ export async function GET() {
 // POST /api/admin/roles - Create a new custom role
 export async function POST(request: NextRequest) {
   try {
-    await requirePermission('admin', 'manage');
+    const user = await requireCanManageRoles();
+    const ipAddress = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
 
     const body = await request.json();
     const { name, description, permissionIds } = body;
@@ -58,8 +62,7 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description,
-        type: 'CUSTOM',
-        permissions: permissionIds?.length
+        rolePermissions: permissionIds?.length
           ? {
               create: permissionIds.map((permId: string) => ({
                 permissionId: permId,
@@ -68,12 +71,24 @@ export async function POST(request: NextRequest) {
           : undefined,
       },
       include: {
-        permissions: {
+        rolePermissions: {
           include: {
             permission: true,
           },
         },
       },
+    });
+
+    // Audit log
+    await logAudit({
+      userId: user.id,
+      action: 'CREATE',
+      entityType: 'Role',
+      entityId: role.id,
+      beforeState: null,
+      afterState: { name, description, permissionIds },
+      ipAddress,
+      userAgent,
     });
 
     return NextResponse.json({ success: true, data: role }, { status: 201 });
