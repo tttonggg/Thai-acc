@@ -3,9 +3,9 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AppLayout from "@/components/AppLayout";
-import { useExpenseClaim, useDeleteExpenseClaim } from "@/hooks/useApi";
+import { useExpenseClaim, useDeleteExpenseClaim, useUpdateExpenseClaimStatus } from "@/hooks/useApi";
 import { formatCurrency, formatThaiDate } from "@/lib/utils";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Pencil, Send, CheckCircle, Wallet, XCircle } from "lucide-react";
 
 export default function ExpenseClaimDetailPage() {
   const params = useParams();
@@ -13,6 +13,7 @@ export default function ExpenseClaimDetailPage() {
   const id = params.id as string;
   const { data: claim, isLoading } = useExpenseClaim(id);
   const deleteClaim = useDeleteExpenseClaim();
+  const updateStatus = useUpdateExpenseClaimStatus();
 
   const handleDelete = async () => {
     if (!confirm("ต้องการลบใบเบิกค่าใช้จ่ายนี้?")) return;
@@ -21,6 +22,15 @@ export default function ExpenseClaimDetailPage() {
       router.push("/expenses");
     } catch (err) {
       alert("ไม่สามารถลบใบเบิกที่ไม่ใช่สถานะร่างได้");
+    }
+  };
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!confirm(`เปลี่ยนสถานะเป็น "${statusLabels[newStatus]}"?`)) return;
+    try {
+      await updateStatus.mutateAsync({ id, status: newStatus });
+    } catch (err: any) {
+      alert(err.response?.data?.detail || "ไม่สามารถเปลี่ยนสถานะได้");
     }
   };
 
@@ -85,7 +95,56 @@ export default function ExpenseClaimDetailPage() {
               <p className="text-gray-500 mt-1">ใบเบิกค่าใช้จ่าย</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {["draft", "rejected"].includes(claim.status) && (
+              <Link
+                href={`/expenses/expense-claims/${id}/edit`}
+                className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+                แก้ไข
+              </Link>
+            )}
+            {claim.status === "draft" && (
+              <button
+                onClick={() => handleStatusChange("submitted")}
+                disabled={updateStatus.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                <Send className="w-4 h-4" />
+                ส่งอนุมัติ
+              </button>
+            )}
+            {claim.status === "submitted" && (
+              <>
+                <button
+                  onClick={() => handleStatusChange("approved")}
+                  disabled={updateStatus.isPending}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  อนุมัติ
+                </button>
+                <button
+                  onClick={() => handleStatusChange("rejected")}
+                  disabled={updateStatus.isPending}
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 rounded-lg font-medium hover:bg-red-50 transition-colors disabled:opacity-50"
+                >
+                  <XCircle className="w-4 h-4" />
+                  ปฏิเสธ
+                </button>
+              </>
+            )}
+            {claim.status === "approved" && (
+              <button
+                onClick={() => handleStatusChange("paid")}
+                disabled={updateStatus.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+              >
+                <Wallet className="w-4 h-4" />
+                จ่ายเงิน
+              </button>
+            )}
             {claim.status === "draft" && (
               <button
                 onClick={handleDelete}

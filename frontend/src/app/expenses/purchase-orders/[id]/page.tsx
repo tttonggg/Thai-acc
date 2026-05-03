@@ -3,9 +3,9 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AppLayout from "@/components/AppLayout";
-import { usePurchaseOrder, useDeletePurchaseOrder } from "@/hooks/useApi";
+import { usePurchaseOrder, useDeletePurchaseOrder, useUpdatePurchaseOrderStatus, useConvertPurchaseOrder } from "@/hooks/useApi";
 import { formatCurrency, formatThaiDate } from "@/lib/utils";
-import { ArrowLeft, Trash2, FileText } from "lucide-react";
+import { ArrowLeft, Trash2, FileText, Pencil, Send, CheckCircle, Package, Receipt, XCircle } from "lucide-react";
 
 export default function PurchaseOrderDetailPage() {
   const params = useParams();
@@ -13,6 +13,8 @@ export default function PurchaseOrderDetailPage() {
   const id = params.id as string;
   const { data: po, isLoading } = usePurchaseOrder(id);
   const deletePO = useDeletePurchaseOrder();
+  const updateStatus = useUpdatePurchaseOrderStatus();
+  const convertPO = useConvertPurchaseOrder();
 
   const handleDelete = async () => {
     if (!confirm("ต้องการลบใบสั่งซื้อนี้?")) return;
@@ -21,6 +23,27 @@ export default function PurchaseOrderDetailPage() {
       router.push("/expenses");
     } catch (err) {
       alert("ไม่สามารถลบใบสั่งซื้อที่ไม่ใช่สถานะร่างได้");
+    }
+  };
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!confirm(`เปลี่ยนสถานะเป็น "${statusLabels[newStatus]}"?`)) return;
+    try {
+      await updateStatus.mutateAsync({ id, status: newStatus });
+    } catch (err: any) {
+      alert(err.response?.data?.detail || "ไม่สามารถเปลี่ยนสถานะได้");
+    }
+  };
+
+  const handleConvert = async () => {
+    if (!confirm("แปลงใบสั่งซื้อนี้เป็นใบแจ้งหนี้ซื้อ?")) return;
+    try {
+      const res = await convertPO.mutateAsync(id);
+      if (res.data?.converted_to_purchase_invoice_id) {
+        router.push(`/expenses/purchase-invoices/${res.data.converted_to_purchase_invoice_id}`);
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.detail || "ไม่สามารถแปลงได้");
     }
   };
 
@@ -77,7 +100,76 @@ export default function PurchaseOrderDetailPage() {
               <p className="text-gray-500 mt-1">ใบสั่งซื้อ</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {po.status === "draft" && (
+              <Link
+                href={`/expenses/purchase-orders/${id}/edit`}
+                className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+                แก้ไข
+              </Link>
+            )}
+            {po.status === "draft" && (
+              <button
+                onClick={() => handleStatusChange("sent")}
+                disabled={updateStatus.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                <Send className="w-4 h-4" />
+                ส่ง
+              </button>
+            )}
+            {po.status === "sent" && (
+              <button
+                onClick={() => handleStatusChange("confirmed")}
+                disabled={updateStatus.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
+              >
+                <CheckCircle className="w-4 h-4" />
+                ยืนยัน
+              </button>
+            )}
+            {po.status === "confirmed" && (
+              <button
+                onClick={() => handleStatusChange("received")}
+                disabled={updateStatus.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition-colors disabled:opacity-50"
+              >
+                <Package className="w-4 h-4" />
+                รับสินค้า
+              </button>
+            )}
+            {po.status === "received" && (
+              <>
+                <button
+                  onClick={handleConvert}
+                  disabled={convertPO.isPending}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+                >
+                  <Receipt className="w-4 h-4" />
+                  แปลงเป็นบิล
+                </button>
+                <button
+                  onClick={() => handleStatusChange("billed")}
+                  disabled={updateStatus.isPending}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-peak-purple text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  <Receipt className="w-4 h-4" />
+                  บันทึกบัญชี
+                </button>
+              </>
+            )}
+            {["draft", "sent", "confirmed", "received"].includes(po.status) && (
+              <button
+                onClick={() => handleStatusChange("cancelled")}
+                disabled={updateStatus.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 rounded-lg font-medium hover:bg-red-50 transition-colors disabled:opacity-50"
+              >
+                <XCircle className="w-4 h-4" />
+                ยกเลิก
+              </button>
+            )}
             {po.status === "draft" && (
               <button
                 onClick={handleDelete}

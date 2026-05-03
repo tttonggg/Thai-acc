@@ -51,7 +51,7 @@ export default function StockAdjustmentsPage() {
             </div>
           </div>
           <Link
-            href="/products"
+            href="/stock-adjustments/new"
             className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-peak-purple to-peak-teal text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" />

@@ -3,9 +3,9 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AppLayout from "@/components/AppLayout";
-import { usePurchaseInvoice, useDeletePurchaseInvoice } from "@/hooks/useApi";
+import { usePurchaseInvoice, useDeletePurchaseInvoice, useUpdatePurchaseInvoiceStatus } from "@/hooks/useApi";
 import { formatCurrency, formatThaiDate } from "@/lib/utils";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Pencil, CheckCircle, Check, XCircle, Wallet } from "lucide-react";
 
 export default function PurchaseInvoiceDetailPage() {
   const params = useParams();
@@ -13,6 +13,7 @@ export default function PurchaseInvoiceDetailPage() {
   const id = params.id as string;
   const { data: pi, isLoading } = usePurchaseInvoice(id);
   const deletePI = useDeletePurchaseInvoice();
+  const updateStatus = useUpdatePurchaseInvoiceStatus();
 
   const handleDelete = async () => {
     if (!confirm("ต้องการลบใบแจ้งหนี้ซื้อนี้?")) return;
@@ -21,6 +22,15 @@ export default function PurchaseInvoiceDetailPage() {
       router.push("/expenses");
     } catch (err) {
       alert("ไม่สามารถลบใบแจ้งหนี้ซื้อที่ไม่ใช่สถานะร่างได้");
+    }
+  };
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!confirm(`เปลี่ยนสถานะเป็น "${statusLabels[newStatus]}"?`)) return;
+    try {
+      await updateStatus.mutateAsync({ id, status: newStatus });
+    } catch (err: any) {
+      alert(err.response?.data?.detail || "ไม่สามารถเปลี่ยนสถานะได้");
     }
   };
 
@@ -79,7 +89,56 @@ export default function PurchaseInvoiceDetailPage() {
               <p className="text-gray-500 mt-1">ใบแจ้งหนี้ซื้อ</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {["draft", "received"].includes(pi.status) && (
+              <Link
+                href={`/expenses/purchase-invoices/${id}/edit`}
+                className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+                แก้ไข
+              </Link>
+            )}
+            {pi.status === "draft" && (
+              <button
+                onClick={() => handleStatusChange("received")}
+                disabled={updateStatus.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition-colors disabled:opacity-50"
+              >
+                <CheckCircle className="w-4 h-4" />
+                รับบิล
+              </button>
+            )}
+            {pi.status === "received" && (
+              <button
+                onClick={() => handleStatusChange("approved")}
+                disabled={updateStatus.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                <Check className="w-4 h-4" />
+                อนุมัติ
+              </button>
+            )}
+            {pi.status === "approved" && (
+              <button
+                onClick={() => handleStatusChange("paid")}
+                disabled={updateStatus.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
+              >
+                <Wallet className="w-4 h-4" />
+                จ่ายเงิน
+              </button>
+            )}
+            {["draft", "received", "approved", "partially_paid"].includes(pi.status) && (
+              <button
+                onClick={() => handleStatusChange("cancelled")}
+                disabled={updateStatus.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 rounded-lg font-medium hover:bg-red-50 transition-colors disabled:opacity-50"
+              >
+                <XCircle className="w-4 h-4" />
+                ยกเลิก
+              </button>
+            )}
             {pi.status === "draft" && (
               <button
                 onClick={handleDelete}

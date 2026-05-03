@@ -280,6 +280,29 @@ export function useDeletePurchaseOrder() {
   });
 }
 
+export function useUpdatePurchaseOrderStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      purchaseOrderApi.updateStatus(id, status),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["purchase-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["purchase-order", vars.id] });
+    },
+  });
+}
+
+export function useConvertPurchaseOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => purchaseOrderApi.convert(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["purchase-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["purchase-invoices"] });
+    },
+  });
+}
+
 // Purchase Invoices
 export function usePurchaseInvoices(
   params?: { status?: string; contact_id?: string; project_id?: string; is_overdue?: boolean; search?: string }
@@ -325,6 +348,18 @@ export function useDeletePurchaseInvoice() {
   });
 }
 
+export function useUpdatePurchaseInvoiceStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      purchaseInvoiceApi.updateStatus(id, status),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["purchase-invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["purchase-invoice", vars.id] });
+    },
+  });
+}
+
 // Expense Claims
 export function useExpenseClaims(
   params?: { status?: string; category?: string; contact_id?: string; project_id?: string; search?: string }
@@ -367,6 +402,18 @@ export function useDeleteExpenseClaim() {
   return useMutation({
     mutationFn: (id: string) => expenseClaimApi.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["expense-claims"] }),
+  });
+}
+
+export function useUpdateExpenseClaimStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      expenseClaimApi.updateStatus(id, status),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["expense-claims"] });
+      queryClient.invalidateQueries({ queryKey: ["expense-claim", vars.id] });
+    },
   });
 }
 
