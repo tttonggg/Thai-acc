@@ -11,7 +11,7 @@ export default function RootPage() {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
-      router.replace("/income");
+      router.replace("/dashboard");
     } else {
       setIsLoggedIn(false);
     }

@@ -23,7 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/", label: "หน้าแรก", icon: LayoutDashboard },
+  { href: "/dashboard", label: "หน้าแรก", icon: LayoutDashboard },
   { href: "/contacts", label: "ลูกค้า & ผู้ติดต่อ", icon: Users },
   { href: "/products", label: "สินค้า", icon: Package },
   { href: "/stock-adjustments", label: "ปรับสต็อก", icon: Boxes },
@@ -45,7 +45,7 @@ export default function Sidebar() {
     <aside className="w-64 bg-white border-r border-gray-200 min-h-screen flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-gray-100">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/dashboard" className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-peak-purple to-peak-teal flex items-center justify-center">
             <span className="text-white font-bold text-lg">T</span>
           </div>

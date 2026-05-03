@@ -56,7 +56,7 @@ export default function RegisterPage() {
       });
       const { access_token, refresh_token, user } = res.data;
       login(access_token, refresh_token, user);
-      router.push("/");
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.detail || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
     } finally {
