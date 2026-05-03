@@ -2,14 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { satangToBaht } from '@/lib/currency';
+import { performanceMonitor } from '@/lib/performance-monitor';
 
 // GET - Dashboard summary (requires authentication)
 export async function GET(request: NextRequest) {
+  const reqStartTime = performanceMonitor.startRequest();
+
   try {
-    // Require authentication - pass request context
+    // Require authentication
     await requireAuth();
 
     const searchParams = request.nextUrl.searchParams;
+    const startTime = Date.now(); // Reset after auth for data-timing
     const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString());
     const month = searchParams.get('month') ? parseInt(searchParams.get('month')!) : null;
 
@@ -151,7 +155,7 @@ export async function GET(request: NextRequest) {
       (apBalance._sum.totalAmount || 0) - (apBalance._sum.paidAmount || 0)
     );
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: {
         summary: {
@@ -216,6 +220,11 @@ export async function GET(request: NextRequest) {
         },
       },
     });
+
+    // Track performance: monitor tracks full request, header shows data-only time
+    performanceMonitor.endRequest(reqStartTime, '/api/dashboard', 'GET', 200);
+    response.headers.set('X-Response-Time', `${Date.now() - startTime}ms`);
+    return response;
   } catch (error: any) {
     console.error('Dashboard API error:', error);
     console.error('Stack:', error?.stack);
@@ -228,13 +237,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
+    const errorDuration = performanceMonitor.endRequest(reqStartTime, '/api/dashboard', 'GET', 500);
+    const errorResponse = NextResponse.json(
       {
         success: false,
         error: 'เกิดข้อผิดพลาดในการดึงข้อมูล: ' + (error?.message || 'Unknown error'),
       },
       { status: 500 }
     );
+    errorResponse.headers.set('X-Response-Time', `${errorDuration}ms`);
+    return errorResponse;
   }
 }
 
