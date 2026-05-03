@@ -230,6 +230,14 @@ export const accountingApi = {
     api.get("/accounting/reports/ap-aging", { params }),
 };
 
+export const exchangeRateApi = {
+  list: (params?: { from_currency?: string; to_currency?: string }) =>
+    api.get("/exchange-rates", { params }),
+  create: (data: any) => api.post("/exchange-rates", data),
+  getLatest: (from: string, to: string) =>
+    api.get(`/exchange-rates/latest/${from}/${to}`),
+};
+
 export const bankAccountApi = {
   list: (params?: { account_type?: string }) =>
     api.get("/bank-accounts", { params }),

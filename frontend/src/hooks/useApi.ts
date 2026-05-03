@@ -15,6 +15,7 @@ import {
   accountingApi,
   bankAccountApi,
   stockAdjustmentApi,
+  exchangeRateApi,
 } from "@/lib/api";
 
 // Contacts
@@ -601,5 +602,29 @@ export function useFifoLayers(productId: string) {
     queryKey: ["fifo-layers", productId],
     queryFn: () => productApi.getFifoLayers(productId).then((res) => res.data),
     enabled: !!productId,
+  });
+}
+
+// Exchange Rates
+export function useExchangeRates(params?: { from_currency?: string; to_currency?: string }) {
+  return useQuery({
+    queryKey: ["exchange-rates", params],
+    queryFn: () => exchangeRateApi.list(params).then((res) => res.data),
+  });
+}
+
+export function useCreateExchangeRate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: exchangeRateApi.create,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["exchange-rates"] }),
+  });
+}
+
+export function useLatestExchangeRate(from: string, to: string) {
+  return useQuery({
+    queryKey: ["exchange-rate-latest", from, to],
+    queryFn: () => exchangeRateApi.getLatest(from, to).then((res) => res.data),
+    enabled: !!from && !!to,
   });
 }

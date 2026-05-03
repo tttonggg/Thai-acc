@@ -234,6 +234,41 @@ def get_receipt(
     return _build_receipt_response(receipt)
 
 
+@router.put("/{receipt_id}", response_model=ReceiptResponse)
+def update_receipt(
+    receipt_id: UUID,
+    data: ReceiptUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    receipt = db.query(Receipt).filter(
+        Receipt.id == receipt_id,
+        Receipt.company_id == current_user.company_id,
+        Receipt.deleted_at.is_(None),
+    ).first()
+    if not receipt:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+
+    if receipt.status == "cancelled":
+        raise HTTPException(status_code=400, detail="Cannot update cancelled receipt")
+
+    # Update fields
+    if data.receipt_date is not None:
+        receipt.receipt_date = data.receipt_date
+    if data.payment_method is not None:
+        receipt.payment_method = data.payment_method
+    if data.payment_reference is not None:
+        receipt.payment_reference = data.payment_reference
+    if data.bank_account_id is not None:
+        receipt.bank_account_id = data.bank_account_id
+    if data.notes is not None:
+        receipt.notes = data.notes
+
+    db.commit()
+    db.refresh(receipt)
+    return _build_receipt_response(receipt)
+
+
 @router.delete("/{receipt_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_receipt(
     receipt_id: UUID,

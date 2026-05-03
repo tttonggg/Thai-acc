@@ -32,6 +32,8 @@ class QuotationCreate(BaseModel):
     project_id: Optional[UUID] = None
     notes: Optional[str] = None
     terms: Optional[str] = None
+    currency_code: str = Field(default="THB", max_length=3)
+    exchange_rate: Decimal = Field(default=Decimal("1"), gt=0)
     vat_rate: Decimal = Field(default=Decimal("7"), ge=0, le=100)
     discount_amount: Decimal = Field(default=Decimal("0"), ge=0)
     items: List[QuotationItemCreate] = Field(..., min_length=1)
@@ -75,6 +77,8 @@ class QuotationResponse(BaseModel):
     vat_amount: Decimal
     total_amount: Decimal
     discount_amount: Decimal
+    currency_code: str
+    exchange_rate: Decimal
     notes: Optional[str]
     terms: Optional[str]
     project_id: Optional[UUID]
@@ -127,6 +131,8 @@ def _build_quotation_response(
         "vat_amount": quotation.vat_amount,
         "total_amount": quotation.total_amount,
         "discount_amount": quotation.discount_amount,
+        "currency_code": quotation.currency_code,
+        "exchange_rate": quotation.exchange_rate,
         "notes": quotation.notes,
         "terms": quotation.terms,
         "project_id": quotation.project_id,
@@ -206,6 +212,8 @@ def create_quotation(
         issue_date=data.issue_date,
         expiry_date=data.expiry_date,
         status="draft",
+        currency_code=data.currency_code,
+        exchange_rate=data.exchange_rate,
         subtotal=subtotal,
         vat_rate=data.vat_rate,
         vat_amount=vat_amount,

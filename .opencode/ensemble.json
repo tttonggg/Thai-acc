@@ -7,21 +7,19 @@
   "defaultModel": "opencode-go/kimi-k2.6",
   "modelPool": [
     "opencode-go/kimi-k2.6",
-    "opencode-go/glm-5.1",
-    "opencode-go/qwen-3.6",
-    "opencode-go/minimax-m2.7",
     "opencode-go/deepseek-4-pro"
   ],
   "modelsByAgent": {
+    "orchestrator": "opencode-go/kimi-k2.6",
     "planner": "opencode-go/kimi-k2.6",
-    "researcher": "opencode-go/qwen-3.6",
-    "architect": "opencode-go/glm-5.1",
-    "backend": "opencode-go/glm-5.1",
+    "researcher": "opencode-go/kimi-k2.6",
+    "architect": "opencode-go/kimi-k2.6",
+    "backend": "opencode-go/kimi-k2.6",
     "frontend": "opencode-go/kimi-k2.6",
-    "database": "opencode-go/glm-5.1",
+    "database": "opencode-go/kimi-k2.6",
     "qa": "opencode-go/deepseek-4-pro",
     "reviewer": "opencode-go/deepseek-4-pro",
-    "devops": "opencode-go/qwen-3.6",
+    "devops": "opencode-go/kimi-k2.6",
     "feedback": "opencode-go/kimi-k2.6"
   },
   "modelAssignment": "default",

@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from uuid import UUID
 from decimal import Decimal
+from datetime import datetime
 
 from ....core.database import get_db
 from ....core.security import get_current_user
@@ -34,7 +35,7 @@ class StockAdjustmentResponse(BaseModel):
     total_value: Decimal
     reason: Optional[str]
     reference_number: Optional[str]
-    created_at: str
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -52,7 +53,7 @@ class StockMovementResponse(BaseModel):
     total_value: Decimal
     reference_document_type: Optional[str]
     reference_document_id: Optional[UUID]
-    created_at: str
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -136,7 +137,6 @@ def create_stock_adjustment(
             gl_service.post_stock_adjustment(adjustment, str(current_user.id))
         except Exception:
             # GL posting failure shouldn't block adjustment
-            db.rollback()
             pass
 
     db.commit()

@@ -6,7 +6,7 @@ import AppLayout from "@/components/AppLayout";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { formatCurrency, formatThaiDate } from "@/lib/utils";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, Printer, Pencil } from "lucide-react";
 
 export default function ReceiptDetailPage() {
   const params = useParams();
@@ -33,10 +33,19 @@ export default function ReceiptDetailPage() {
               <p className="text-gray-500 mt-1">ใบเสร็จรับเงิน</p>
             </div>
           </div>
-          <button className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
-            <Printer className="w-4 h-4" />
-            พิมพ์
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/income/receipts/${receiptId}/edit`}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+              แก้ไข
+            </Link>
+            <button className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+              <Printer className="w-4 h-4" />
+              พิมพ์
+            </button>
+          </div>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-6">

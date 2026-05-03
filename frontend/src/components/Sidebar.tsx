@@ -17,6 +17,8 @@ import {
   BookOpen,
   BarChart3,
   Landmark,
+  ArrowLeftRight,
+  Boxes,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,12 +26,14 @@ const navItems = [
   { href: "/", label: "หน้าแรก", icon: LayoutDashboard },
   { href: "/contacts", label: "ลูกค้า & ผู้ติดต่อ", icon: Users },
   { href: "/products", label: "สินค้า", icon: Package },
+  { href: "/stock-adjustments", label: "ปรับสต็อก", icon: Boxes },
   { href: "/projects", label: "โครงการ", icon: FolderKanban },
   { href: "/expenses", label: "รายจ่าย", icon: Receipt },
   { href: "/income", label: "รายรับ", icon: FileText },
   { href: "/bank-accounts", label: "ธนาคาร", icon: Landmark },
   { href: "/accounting", label: "บัญชี", icon: BookOpen },
   { href: "/reports", label: "รายงาน", icon: BarChart3 },
+  { href: "/exchange-rates", label: "อัตราแลกเปลี่ยน", icon: ArrowLeftRight },
   { href: "/settings", label: "ตั้งค่า", icon: Settings },
 ];
 
@@ -100,7 +104,7 @@ export default function Sidebar() {
           <span>ออกจากระบบ</span>
         </button>
         <div className="text-xs text-gray-400 px-2">
-          Thai ACC v0.2.2-alpha
+          Thai ACC v0.3.0-alpha
         </div>
       </div>
     </aside>

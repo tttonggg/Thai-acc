@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from uuid import UUID
 from decimal import Decimal
-from datetime import date
+from datetime import date, datetime
 
 from ....core.database import get_db
 from ....core.security import get_current_user
@@ -29,7 +29,7 @@ class ExchangeRateResponse(BaseModel):
     rate: Decimal
     effective_date: date
     source: Optional[str]
-    created_at: date
+    created_at: datetime
 
     class Config:
         from_attributes = True

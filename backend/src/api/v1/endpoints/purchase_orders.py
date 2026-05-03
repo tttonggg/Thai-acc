@@ -32,6 +32,8 @@ class PurchaseOrderCreate(BaseModel):
     expected_date: Optional[date] = None
     project_id: Optional[UUID] = None
     notes: Optional[str] = None
+    currency_code: str = Field(default="THB", max_length=3)
+    exchange_rate: Decimal = Field(default=Decimal("1"), gt=0)
     vat_rate: Decimal = Field(default=Decimal("7"), ge=0, le=100)
     discount_amount: Decimal = Field(default=Decimal("0"), ge=0)
     items: List[PurchaseOrderItemCreate] = Field(..., min_length=1)
@@ -74,6 +76,8 @@ class PurchaseOrderResponse(BaseModel):
     vat_amount: Decimal
     total_amount: Decimal
     discount_amount: Decimal
+    currency_code: str
+    exchange_rate: Decimal
     notes: Optional[str]
     project_id: Optional[UUID]
     converted_to_purchase_invoice_id: Optional[UUID]
@@ -126,6 +130,8 @@ def _build_purchase_order_response(
         "vat_amount": purchase_order.vat_amount,
         "total_amount": purchase_order.total_amount,
         "discount_amount": purchase_order.discount_amount,
+        "currency_code": purchase_order.currency_code,
+        "exchange_rate": purchase_order.exchange_rate,
         "notes": purchase_order.notes,
         "project_id": purchase_order.project_id,
         "converted_to_purchase_invoice_id": purchase_order.converted_to_purchase_invoice_id,
@@ -204,6 +210,8 @@ def create_purchase_order(
         order_date=data.order_date,
         expected_date=data.expected_date,
         status="draft",
+        currency_code=data.currency_code,
+        exchange_rate=data.exchange_rate,
         subtotal=subtotal,
         vat_rate=data.vat_rate,
         vat_amount=vat_amount,
