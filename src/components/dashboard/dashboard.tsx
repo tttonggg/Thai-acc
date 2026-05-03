@@ -351,15 +351,6 @@ export function Dashboard({
     fetchDashboard();
 
     return () => {
-<<<<<<< Updated upstream
-      eventBus.off(EVENTS.INVOICE_CREATED, handleChange);
-      eventBus.off(EVENTS.INVOICE_UPDATED, handleChange);
-      eventBus.off(EVENTS.INVOICE_DELETED, handleChange);
-      eventBus.off(EVENTS.RECEIPT_CREATED, handleChange);
-      eventBus.off(EVENTS.RECEIPT_UPDATED, handleChange);
-    };
-  }, [toast]);
-=======
       eventBus.off(EVENTS.INVOICE_CREATED, handleChange)
       eventBus.off(EVENTS.INVOICE_UPDATED, handleChange)
       eventBus.off(EVENTS.INVOICE_DELETED, handleChange)
@@ -367,7 +358,6 @@ export function Dashboard({
       eventBus.off(EVENTS.RECEIPT_UPDATED, handleChange)
     }
   }, [])
->>>>>>> Stashed changes
 
   // Fetch module statistics
   useEffect(() => {
