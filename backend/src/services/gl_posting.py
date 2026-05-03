@@ -538,6 +538,224 @@ class GLPostingService:
             lines=lines,
         )
 
+    def post_sales_credit_note(self, note) -> JournalEntry | None:
+        """Post GL when sales credit note is confirmed.
+
+        Dr. Sales Returns (รายได้ลด)          subtotal
+        Dr. VAT Output (ภาษีขาย)              vat_amount (reverse)
+            Cr. Accounts Receivable (ลูกหนี้)   total_amount
+        """
+        from ..models.credit_note import CreditNote
+        if not isinstance(note, CreditNote):
+            return None
+
+        ar_account = self._get_account_by_code("11200")  # ลูกหนี้การค้า
+        revenue_account = self._get_account_by_code("41000")  # รายได้จากการขาย
+        vat_account = self._get_account_by_code("21100")  # ภาษีมูลค่าเพิ่มขาย
+
+        if not all([ar_account, revenue_account, vat_account]):
+            return None
+
+        lines = []
+
+        # Dr. Sales Returns (using same revenue account or a returns account)
+        lines.append({
+            "account_id": revenue_account.id,
+            "debit": note.subtotal,
+            "credit": 0,
+            "description": f"ลดรายได้จากใบลดหนี้ {note.document_number}",
+            "contact_id": note.contact_id,
+        })
+
+        # Dr. VAT Output (reverse)
+        if note.vat_amount > 0:
+            lines.append({
+                "account_id": vat_account.id,
+                "debit": note.vat_amount,
+                "credit": 0,
+                "description": f"ลดภาษีขายจากใบลดหนี้ {note.document_number}",
+                "contact_id": note.contact_id,
+            })
+
+        # Cr. Accounts Receivable
+        lines.append({
+            "account_id": ar_account.id,
+            "debit": 0,
+            "credit": note.total_amount,
+            "description": f"ลดลูกหนี้จากใบลดหนี้ {note.document_number}",
+            "contact_id": note.contact_id,
+        })
+
+        return self._create_journal_entry(
+            entry_type="sales_credit_note",
+            document_id=note.id,
+            document_number=note.document_number,
+            entry_date=note.issue_date,
+            description=f"บันทึกบัญชีใบลดหนี้ {note.document_number}",
+            lines=lines,
+        )
+
+    def reverse_sales_credit_note(self, note) -> JournalEntry | None:
+        """Reverse GL when sales credit note is cancelled."""
+        from ..models.credit_note import CreditNote
+        if not isinstance(note, CreditNote):
+            return None
+
+        ar_account = self._get_account_by_code("11200")
+        revenue_account = self._get_account_by_code("41000")
+        vat_account = self._get_account_by_code("21100")
+
+        if not all([ar_account, revenue_account, vat_account]):
+            return None
+
+        lines = []
+
+        # Reverse: Cr. Sales Returns
+        lines.append({
+            "account_id": revenue_account.id,
+            "debit": 0,
+            "credit": note.subtotal,
+            "description": f"ยกเลิกใบลดหนี้ {note.document_number}",
+            "contact_id": note.contact_id,
+        })
+
+        # Reverse: Cr. VAT Output
+        if note.vat_amount > 0:
+            lines.append({
+                "account_id": vat_account.id,
+                "debit": 0,
+                "credit": note.vat_amount,
+                "description": f"ยกเลิกใบลดหนี้ {note.document_number}",
+                "contact_id": note.contact_id,
+            })
+
+        # Reverse: Dr. AR
+        lines.append({
+            "account_id": ar_account.id,
+            "debit": note.total_amount,
+            "credit": 0,
+            "description": f"ยกเลิกใบลดหนี้ {note.document_number}",
+            "contact_id": note.contact_id,
+        })
+
+        return self._create_journal_entry(
+            entry_type="sales_credit_note_reversal",
+            document_id=note.id,
+            document_number=note.document_number,
+            entry_date=note.issue_date,
+            description=f"ยกเลิกใบลดหนี้ {note.document_number}",
+            lines=lines,
+        )
+
+    def post_sales_debit_note(self, note) -> JournalEntry | None:
+        """Post GL when sales debit note is confirmed.
+
+        Dr. Accounts Receivable (ลูกหนี้)      total_amount
+            Cr. Sales Revenue (รายได้)          subtotal
+            Cr. VAT Output (ภาษีขาย)            vat_amount
+        """
+        from ..models.credit_note import CreditNote
+        if not isinstance(note, CreditNote):
+            return None
+
+        ar_account = self._get_account_by_code("11200")
+        revenue_account = self._get_account_by_code("41000")
+        vat_account = self._get_account_by_code("21100")
+
+        if not all([ar_account, revenue_account, vat_account]):
+            return None
+
+        lines = []
+
+        # Dr. AR
+        lines.append({
+            "account_id": ar_account.id,
+            "debit": note.total_amount,
+            "credit": 0,
+            "description": f"เพิ่มลูกหนี้จากใบเพิ่มหนี้ {note.document_number}",
+            "contact_id": note.contact_id,
+        })
+
+        # Cr. Sales Revenue
+        lines.append({
+            "account_id": revenue_account.id,
+            "debit": 0,
+            "credit": note.subtotal,
+            "description": f"รายได้จากใบเพิ่มหนี้ {note.document_number}",
+            "contact_id": note.contact_id,
+        })
+
+        # Cr. VAT Output
+        if note.vat_amount > 0:
+            lines.append({
+                "account_id": vat_account.id,
+                "debit": 0,
+                "credit": note.vat_amount,
+                "description": f"ภาษีขายจากใบเพิ่มหนี้ {note.document_number}",
+                "contact_id": note.contact_id,
+            })
+
+        return self._create_journal_entry(
+            entry_type="sales_debit_note",
+            document_id=note.id,
+            document_number=note.document_number,
+            entry_date=note.issue_date,
+            description=f"บันทึกบัญชีใบเพิ่มหนี้ {note.document_number}",
+            lines=lines,
+        )
+
+    def reverse_sales_debit_note(self, note) -> JournalEntry | None:
+        """Reverse GL when sales debit note is cancelled."""
+        from ..models.credit_note import CreditNote
+        if not isinstance(note, CreditNote):
+            return None
+
+        ar_account = self._get_account_by_code("11200")
+        revenue_account = self._get_account_by_code("41000")
+        vat_account = self._get_account_by_code("21100")
+
+        if not all([ar_account, revenue_account, vat_account]):
+            return None
+
+        lines = []
+
+        # Reverse: Cr. AR
+        lines.append({
+            "account_id": ar_account.id,
+            "debit": 0,
+            "credit": note.total_amount,
+            "description": f"ยกเลิกใบเพิ่มหนี้ {note.document_number}",
+            "contact_id": note.contact_id,
+        })
+
+        # Reverse: Dr. Revenue
+        lines.append({
+            "account_id": revenue_account.id,
+            "debit": note.subtotal,
+            "credit": 0,
+            "description": f"ยกเลิกใบเพิ่มหนี้ {note.document_number}",
+            "contact_id": note.contact_id,
+        })
+
+        # Reverse: Dr. VAT
+        if note.vat_amount > 0:
+            lines.append({
+                "account_id": vat_account.id,
+                "debit": note.vat_amount,
+                "credit": 0,
+                "description": f"ยกเลิกใบเพิ่มหนี้ {note.document_number}",
+                "contact_id": note.contact_id,
+            })
+
+        return self._create_journal_entry(
+            entry_type="sales_debit_note_reversal",
+            document_id=note.id,
+            document_number=note.document_number,
+            entry_date=note.issue_date,
+            description=f"ยกเลิกใบเพิ่มหนี้ {note.document_number}",
+            lines=lines,
+        )
+
     def validate_balance(self, journal_entry: JournalEntry) -> bool:
         """Validate that a journal entry balances."""
         lines = journal_entry.lines.all()

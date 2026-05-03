@@ -16,6 +16,7 @@ import {
   bankAccountApi,
   stockAdjustmentApi,
   exchangeRateApi,
+  creditNoteApi,
 } from "@/lib/api";
 
 // Contacts
@@ -673,5 +674,70 @@ export function useLatestExchangeRate(from: string, to: string) {
     queryKey: ["exchange-rate-latest", from, to],
     queryFn: () => exchangeRateApi.getLatest(from, to).then((res) => res.data),
     enabled: !!from && !!to,
+  });
+}
+
+// Credit Notes
+export function useCreditNotes(params?: { note_type?: string; status?: string; contact_id?: string; search?: string }) {
+  return useQuery({
+    queryKey: ["credit-notes", params],
+    queryFn: () => creditNoteApi.list(params).then((res) => res.data),
+  });
+}
+
+export function useCreditNote(id: string) {
+  return useQuery({
+    queryKey: ["credit-note", id],
+    queryFn: () => creditNoteApi.get(id).then((res) => res.data),
+    enabled: !!id,
+  });
+}
+
+export function useCreateCreditNote() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: creditNoteApi.create,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["credit-notes"] }),
+  });
+}
+
+export function useUpdateCreditNote() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => creditNoteApi.update(id, data),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["credit-notes"] });
+      queryClient.invalidateQueries({ queryKey: ["credit-note", vars.id] });
+    },
+  });
+}
+
+export function useConfirmCreditNote() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => creditNoteApi.confirm(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["credit-notes"] });
+      queryClient.invalidateQueries({ queryKey: ["credit-note", id] });
+    },
+  });
+}
+
+export function useCancelCreditNote() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => creditNoteApi.cancel(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["credit-notes"] });
+      queryClient.invalidateQueries({ queryKey: ["credit-note", id] });
+    },
+  });
+}
+
+export function useDeleteCreditNote() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => creditNoteApi.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["credit-notes"] }),
   });
 }

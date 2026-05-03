@@ -19,6 +19,7 @@ from .bank_statement_line import BankStatementLine
 from .exchange_rate import ExchangeRate
 from .stock_adjustment import StockAdjustment, StockMovement
 from .inventory_batch import InventoryBatch
+from .credit_note import CreditNote, CreditNoteItem
 
 __all__ = [
     "BaseModel", "Company", "User", "Contact", "Product",
@@ -29,4 +30,5 @@ __all__ = [
     "ExpenseClaim", "ChartOfAccount", "JournalEntry", "JournalEntryLine",
     "ETaxSubmission", "BankStatementImport", "BankStatementLine",
     "ExchangeRate", "StockAdjustment", "StockMovement", "InventoryBatch",
+    "CreditNote", "CreditNoteItem",
 ]

@@ -230,6 +230,17 @@ export const accountingApi = {
     api.get("/accounting/reports/ap-aging", { params }),
 };
 
+export const creditNoteApi = {
+  list: (params?: { note_type?: string; status?: string; contact_id?: string; search?: string }) =>
+    api.get("/credit-notes", { params }),
+  get: (id: string) => api.get(`/credit-notes/${id}`),
+  create: (data: any) => api.post("/credit-notes", data),
+  update: (id: string, data: any) => api.put(`/credit-notes/${id}`, data),
+  confirm: (id: string) => api.post(`/credit-notes/${id}/confirm`),
+  cancel: (id: string) => api.post(`/credit-notes/${id}/cancel`),
+  delete: (id: string) => api.delete(`/credit-notes/${id}`),
+};
+
 export const exchangeRateApi = {
   list: (params?: { from_currency?: string; to_currency?: string }) =>
     api.get("/exchange-rates", { params }),

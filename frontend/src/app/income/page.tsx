@@ -7,6 +7,7 @@ import {
   useQuotations,
   useInvoices,
   useReceipts,
+  useCreditNotes,
 } from "@/hooks/useApi";
 import { formatCurrency, formatThaiDate } from "@/lib/utils";
 import { Plus, FileText, Clock, CheckCircle, AlertCircle, Filter } from "lucide-react";
@@ -15,6 +16,7 @@ const tabs = [
   { key: "quotations", label: "ใบเสนอราคา" },
   { key: "invoices", label: "ใบแจ้งหนี้" },
   { key: "receipts", label: "ใบเสร็จ" },
+  { key: "credit-notes", label: "ลด/เพิ่มหนี้" },
 ];
 
 export default function IncomePage() {
@@ -61,6 +63,7 @@ export default function IncomePage() {
         {activeTab === "quotations" && <QuotationsTab />}
         {activeTab === "invoices" && <InvoicesTab />}
         {activeTab === "receipts" && <ReceiptsTab />}
+        {activeTab === "credit-notes" && <CreditNotesTab />}
       </div>
     </AppLayout>
   );
@@ -279,6 +282,54 @@ function ReceiptsTab() {
                 <td className="px-6 py-4 text-sm text-gray-600">{formatThaiDate(r.receipt_date)}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">{r.payment_method}</td>
                 <td className="px-6 py-4 text-right text-sm font-medium text-green-600">{formatCurrency(r.total_amount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+function CreditNotesTab() {
+  const { data: notes, isLoading } = useCreditNotes();
+
+  const typeLabels: Record<string, string> = {
+    sales_credit: "ใบลดหนี้",
+    sales_debit: "ใบเพิ่มหนี้",
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      {isLoading ? (
+        <div className="p-8 text-center text-gray-500">กำลังโหลด...</div>
+      ) : notes?.length === 0 ? (
+        <div className="p-8 text-center text-gray-500">ยังไม่มีใบลด/เพิ่มหนี้</div>
+      ) : (
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50/50">
+              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">เลขที่</th>
+              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">ประเภท</th>
+              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">ลูกค้า</th>
+              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">วันที่</th>
+              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">สถานะ</th>
+              <th className="text-right px-6 py-4 text-sm font-semibold text-gray-700">ยอดรวม</th>
+            </tr>
+          </thead>
+          <tbody>
+            {notes?.map((n: any) => (
+              <tr key={n.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                <td className="px-6 py-4">
+                  <Link href={`/income/credit-notes/${n.id}`} className="font-medium text-peak-purple hover:underline">
+                    {n.document_number}
+                  </Link>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">{typeLabels[n.note_type] || n.note_type}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{n.contact_name || "-"}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{formatThaiDate(n.issue_date)}</td>
+                <td className="px-6 py-4"><StatusBadge status={n.status} /></td>
+                <td className="px-6 py-4 text-right text-sm font-medium text-gray-900">{formatCurrency(n.total_amount)}</td>
               </tr>
             ))}
           </tbody>
