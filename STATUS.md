@@ -1,6 +1,6 @@
 # Thai ACC — Development Status
 
-> **Last Updated:** 2026-05-02
+> **Last Updated:** 2026-05-03
 > **Version:** 0.3.0-alpha
 
 ---
@@ -32,6 +32,7 @@
 | **Multi-Currency** | `models/exchange_rate.py`, `api/v1/endpoints/exchange_rates.py` | THB/USD/EUR/CNY/JPY/GBP support on invoices/quotations/POs/PIs/receipts/claims. Exchange rate API. GL in base currency |
 | **Stock Adjustments** | `models/stock_adjustment.py`, `api/v1/endpoints/stock_adjustments.py` | Initial/loss/damage/found/correction adjustments. Auto-update qty_on_hand. GL posting. Movement history |
 | **FIFO Costing** | `models/inventory_batch.py`, `services/gl_posting.py` | FIFO inventory batches from purchase invoices. COGS auto-calculation on invoice creation. FIFO layers API |
+| **Credit/Debit Notes** | `models/credit_note.py`, `api/v1/endpoints/credit_notes.py` | Sales credit notes (ลดหนี้) and debit notes (เพิ่มหนี้). Link to invoice. GL auto-posting + reversal on cancel |
 
 **Key Features:**
 - ✅ All endpoints filter by `company_id` (multi-tenant)
@@ -56,10 +57,11 @@
 | **Contacts** | `/contacts` | List, search, type filter, credit limit display, **detail page with transaction history + summary cards**, edit form |
 | **Products** | `/products` | List, search, category filter, stock levels, **detail page with transaction history + summary cards**, edit form |
 | **Projects** | `/projects` | List with revenue/cost/profit columns, search, **detail page with financials panel + transaction history + budget progress**, edit form |
-| **Income** | `/income` | Tabbed view: Quotations, Invoices (with e-Tax filter), Receipts |
+| **Income** | `/income` | Tabbed view: Quotations, Invoices (with e-Tax filter), Receipts, Credit/Debit Notes |
 | **Quotations** | Create, detail, edit | Dynamic line items, auto-calc, status transitions |
 | **Invoices** | Create, detail (with e-Tax panel), edit | Quotation conversion, due date, print support, e-Tax status |
 | **Receipts** | Create, detail | Payment form, WHT, invoice selector |
+| **Credit/Debit Notes** | List, create, detail | Type selector (credit/debit), invoice link, line items, confirm/cancel actions |
 | **Expenses** | `/expenses` | Tabbed: Purchase Orders, Purchase Invoices, Expense Claims |
 | **Accounting** | `/accounting` | Chart of Accounts, Journal Entries |
 | **Reports** | `/reports` | Trial Balance, Income Statement, Balance Sheet, AR Aging, AP Aging |
@@ -86,7 +88,7 @@
 - ✅ Exchange rate management API and auto-lookup
 - ✅ Automatic JWT token refresh via Axios interceptor
 
-### Database (6 Migrations)
+### Database (9 Migrations)
 
 | Migration | Tables / Changes |
 |-----------|-----------------|
@@ -98,8 +100,9 @@
 | `006` | bank_statement_imports, bank_statement_lines |
 | `007` | companies.base_currency, exchange_rates, currency_code + exchange_rate on invoices/quotations/POs/PIs/receipts/claims |
 | `008` | inventory_batches (FIFO layers) |
+| `009` | credit_notes, credit_note_items |
 
-### Tests (10 Test Files)
+### Tests (11 Test Files)
 
 | File | Coverage |
 |------|----------|
@@ -113,6 +116,7 @@
 | `test_accounting.py` | COA seeding, JE CRUD, trial balance, income statement, balance sheet, AR/AP aging |
 | `test_bank_accounts.py` | CRUD, reconciliation, statement import (CSV), auto-match, unreconcile |
 | `test_e_tax.py` | XML generation, status flow, validation, RD spec compliance |
+| `test_credit_notes.py` | Create credit/debit notes, confirm/cancel, GL posting/reversal, company filtering |
 
 ### Deployment
 
