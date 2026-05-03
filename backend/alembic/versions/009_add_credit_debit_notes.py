@@ -13,7 +13,7 @@ from src.models.types import CrossPlatformUUID
 
 # revision identifiers, used by Alembic.
 revision: str = '009'
-down_revision: Union[str, None] = '008_add_inventory_batches'
+down_revision: Union[str, None] = '008'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
