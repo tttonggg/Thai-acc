@@ -10,8 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth()
-
+    const user = await requireAuth()
     const { id } = await params
 
     const attachment = await db.documentAttachment.findFirst({
@@ -35,6 +34,15 @@ export async function GET(
         success: false,
         error: 'ไม่พบเอกสารแนบ'
       }, { status: 404 })
+    }
+
+    // RBAC: only uploadedById or ADMIN can view
+    const admin = await isAdmin()
+    if (attachment.uploadedById !== user.id && !admin) {
+      return NextResponse.json({
+        success: false,
+        error: 'ไม่มีสิทธิ์ดูเอกสารแนบนี้'
+      }, { status: 403 })
     }
 
     return NextResponse.json({

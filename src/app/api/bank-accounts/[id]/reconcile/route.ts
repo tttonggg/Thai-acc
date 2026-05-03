@@ -2,7 +2,7 @@
 // POST endpoint to create bank reconciliation
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
-import { requireAuth } from '@/lib/api-utils'
+import { requireAuth, isAdmin } from '@/lib/api-utils'
 import { z } from 'zod'
 
 // Validation schema for reconciliation request
@@ -35,6 +35,16 @@ export async function POST(
       return NextResponse.json(
         { success: false, error: 'ไม่พบบัญชีธนาคาร' },
         { status: 404 }
+      )
+    }
+
+    // IDOR protection: only ADMIN or the user who created the bank account can reconcile
+    const user = await requireAuth()
+    const admin = await isAdmin()
+    if (bankAccount.createdById !== user.id && !admin) {
+      return NextResponse.json(
+        { success: false, error: 'ไม่มีสิทธิ์กระทบยอดบัญชีนี้' },
+        { status: 403 }
       )
     }
 
@@ -187,10 +197,31 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth()
+    const user = await requireAuth()
     const { id } = await params
 
     const bankAccountId = id
+
+    // Verify bank account exists and user has access
+    const bankAccount = await prisma.bankAccount.findUnique({
+      where: { id: bankAccountId },
+    })
+
+    if (!bankAccount) {
+      return NextResponse.json(
+        { success: false, error: 'ไม่พบบัญชีธนาคาร' },
+        { status: 404 }
+      )
+    }
+
+    // IDOR protection: only ADMIN or the user who created the bank account can view
+    const admin = await isAdmin()
+    if (bankAccount.createdById !== user.id && !admin) {
+      return NextResponse.json(
+        { success: false, error: 'ไม่มีสิทธิ์ดูข้อมูลบัญชีนี้' },
+        { status: 403 }
+      )
+    }
 
     // Fetch unreconciled cheques
     const unreconciledCheques = await prisma.cheque.findMany({
