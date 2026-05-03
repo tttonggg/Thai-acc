@@ -48,7 +48,6 @@ function BankAccountsTab() {
     if (res.success) setAccounts(res.data)
     setLoading(false)
   }, [])
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     fetchAll()
   }, [fetchAll])
@@ -180,7 +179,6 @@ function ChequeRegisterTab() {
     if (accRes.success) setAccounts(accRes.data)
     setLoading(false)
   }, [])
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     fetchAll()
   }, [fetchAll])
@@ -390,7 +388,6 @@ function ReconciliationTab() {
 
   // Calculate book balance when cheques are selected/deselected
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
     if (selectedAccountId && unreconciledCheques.length > 0) {
       const selectedChequeObjects = unreconciledCheques.filter(c => selectedCheques.has(c.id))
       const bookBalance = selectedChequeObjects.reduce((acc, cheque) => {
@@ -401,7 +398,6 @@ function ReconciliationTab() {
       const stmtBalance = parseFloat(statementBalance) || 0
       setDifference(stmtBalance - bookBalance)
     }
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [selectedCheques, statementBalance, unreconciledCheques])
 
   const handleReconcile = async () => {
