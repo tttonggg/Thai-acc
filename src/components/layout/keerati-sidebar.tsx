@@ -381,7 +381,9 @@ interface SidebarProps {
 }
 
 const roleLabels: Record<string, string> = {
+  OWNER: 'เจ้าของกิจการ',
   ADMIN: 'ผู้ดูแลระบบ',
+  SENIOR_ACCOUNTANT: 'หัวหน้าบัญชี',
   ACCOUNTANT: 'นักบัญชี',
   USER: 'ผู้ใช้ทั่วไป',
   VIEWER: 'ผู้ชมเท่านั้น',
@@ -554,8 +556,8 @@ export function KeeratiSidebar({
 
   // Permission check helper
   const hasPermission = (module: string, action: string): boolean => {
-    // ADMIN has all permissions
-    if (userRole === 'ADMIN') return true;
+    // OWNER and ADMIN have all permissions
+    if (userRole === 'OWNER' || userRole === 'ADMIN') return true;
     // Use passed permissions or fallback to auth store
     const perms = permissions.length > 0 ? permissions : authStore.permissions;
     const code = `${module}.${action}`;
