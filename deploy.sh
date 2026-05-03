@@ -36,6 +36,8 @@ npm run build
 echo ""
 echo "[2/6] Creating deploy tarball..."
 cd "$LOCAL_PROJECT"
+# Strip macOS extended attributes to avoid Linux tar warnings
+xattr -cr . 2>/dev/null || true
 # Use find+tar for precise exclusions (tar --exclude matches substrings)
 find . \
   -path './.git' -prune -o \
