@@ -246,61 +246,48 @@ ssh -i ~/.ssh/test root@135.181.107.76
 
 **To restart the production server only** (not the tunnel):
 ```bash
-ssh -i ~/.ssh/test root@135.181.107.76 "fuser -k 3000/tcp 2>/dev/null; sleep 2; cd /root/thai-acc/.next/standalone/thai-acc && nohup node server.js > /root/thai-acc/server.log 2>&1 &"
+ssh -i ~/.ssh/test root@135.181.107.76 "docker restart thai-acc-app"
 ```
-
-**⚠️ CRITICAL - Server Path**: The standalone server MUST run from `.next/standalone/thai-acc/` directory. Static files (manifest.json, icons, JS chunks) will 404 if running from wrong directory.
 
 **To check server status** (without touching tunnel):
 ```bash
 ssh -i ~/.ssh/test root@135.181.107.76 "curl -s http://localhost:3000/api/health"
 ```
 
-**Current VPS .env** (`/root/thai-acc/.env`):
-```
-DATABASE_URL=file:/root/thai-acc/prisma/dev.db
-NEXTAUTH_URL=https://acc.k56mm.uk
-NEXTAUTH_SECRET=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY=
-NODE_ENV=production
-BYPASS_CSRF=true
-```
+**⚠️ IMPORTANT - Other projects on VPS**: `/root/thai-acc/` belongs to a DIFFERENT project (acc3.k56mm.uk). Our project runs as Docker container `thai-acc-app` with data at `/root/data/thai-acc-erp/`. **Never touch `/root/thai-acc/`.**
 
-### Production Build
+**Container details**:
+- Container: `thai-acc-app`
+- Image: `ghcr.io/tttonggg/thai-acc:latest`
+- Port: 3000
+- Volume: `/root/data/thai-acc-erp:/app/prisma` (SQLite database)
+- DB ownership: UID 1001 (nextjs user)
 
+### Production Deployment (Docker CI/CD)
+
+**Push to master triggers automatic deployment via GitHub Actions:**
+1. `deploy-vps.yml` builds Docker image on GitHub Actions (Linux-native)
+2. Pushes to GitHub Container Registry (GHCR)
+3. SSH into VPS, pulls `:latest` image, recreates container
+
+**Manual deploy (if needed):**
 ```bash
-bun run build        # Creates standalone output in .next/standalone/
-# Upload .next/standalone/ to VPS at /root/thai-acc/
-# Server entry: .next/standalone/thai-acc/server.js
-# MUST run from: cd .next/standalone/thai-acc && node server.js
+ssh -i ~/.ssh/test root@135.181.107.76 "
+  docker stop thai-acc-app 2>/dev/null; docker rm thai-acc-app 2>/dev/null
+  docker pull ghcr.io/tttonggg/thai-acc:latest
+  docker run -d --name thai-acc-app --restart unless-stopped -p 3000:3000 \
+    -e NODE_ENV=production \
+    -e DATABASE_URL=file:/app/prisma/dev.db \
+    -e NEXTAUTH_URL=https://acc.k56mm.uk \
+    -e NEXTAUTH_SECRET=B/lLqgzybPsxU6dNnvb/wG5XuEpfVfU68pVN0A7KseY= \
+    -e BYPASS_CSRF=true \
+    -v /root/data/thai-acc-erp:/app/prisma \
+    ghcr.io/tttonggg/thai-acc:latest
+  chown -R 1001:1001 /root/data/thai-acc-erp/
+"
 ```
 
-**⚠️ CROSS-PLATFORM DEVELOPMENT (macOS → Linux VPS)**
-
-This project builds on macOS but deploys to Linux VPS. Prisma binaries are platform-specific.
-
-**The Problem:**
-- macOS builds produce `darwin-arm64` Prisma engines
-- Linux VPS needs `debian-openssl-3.0.x` engines
-- Using macOS build on Linux → "Database connection error" + 401 auth failures
-
-**Recommended Solution - Docker CI/CD:**
-
-GitHub Actions builds Docker container (Linux-native), VPS pulls and runs it:
-1. `Dockerfile` - multi-stage build for standalone Next.js
-2. `deploy-vps.yml` - builds image, pushes to GitHub Container Registry, VPS pulls
-
-**Benefits:**
-- ✅ Build once, run anywhere (Linux container = Linux VPS)
-- ✅ No more Prisma platform mismatch
-- ✅ Cached Docker layers = faster builds
-- ✅ Same image tested = deployed
-
-**Manual Docker (if needed):**
-```bash
-# Build locally
-docker build -t thai-acc .
-docker run -p 3000:3000 thai-acc
-```
+**⚠️ CROSS-PLATFORM NOTE**: Never build standalone on macOS and deploy to Linux VPS (Prisma engine mismatch). Always use Docker CI/CD pipeline.
 
 ---
 

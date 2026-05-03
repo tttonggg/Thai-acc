@@ -17,7 +17,6 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/thai-acc
-  VERSION: ${{ github.sha }}
 
 jobs:
   # ============================================
@@ -86,9 +85,9 @@ jobs:
             #!/bin/bash
             set -e
 
-            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}"
+            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
             CONTAINER_NAME="thai-acc-app"
-            VOLUME_PATH="/root/thai-acc"
+            VOLUME_PATH="/root/data/thai-acc-erp"
 
             echo "🔄 Starting Docker deployment..."
             echo "📦 Image: $IMAGE"
@@ -102,20 +101,8 @@ jobs:
             echo "📥 Pulling Docker image..."
             docker pull $IMAGE
 
-            # Create volume directory
-            mkdir -p $VOLUME_PATH/prisma
-
-            # Backup database if exists
-            if [ -f "$VOLUME_PATH/prisma/dev.db" ]; then
-              cp $VOLUME_PATH/prisma/dev.db /tmp/thai-acc-db-backup.db
-              echo "✅ Database backed up"
-            fi
-
-            # Backup .env if exists
-            if [ -f "$VOLUME_PATH/.env" ]; then
-              cp $VOLUME_PATH/.env /tmp/thai-acc-env-backup
-              echo "✅ .env backed up"
-            fi
+            # Ensure volume directory exists
+            mkdir -p $VOLUME_PATH
 
             # Start new container
             echo "🚀 Starting container..."
@@ -127,21 +114,21 @@ jobs:
               -e DATABASE_URL=file:/app/prisma/dev.db \
               -e NEXTAUTH_URL=https://acc.k56mm.uk \
               -e NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }} \
-              -e NEXTAUTH_DISABLE_NON_LOCALHOST=true \
-              -v $VOLUME_PATH/prisma:/app/prisma \
+              -e BYPASS_CSRF=true \
+              -v $VOLUME_PATH:/app/prisma \
               $IMAGE
 
-            # Restore database
-            if [ -f /tmp/thai-acc-db-backup.db ]; then
-              cp /tmp/thai-acc-db-backup.db $VOLUME_PATH/prisma/dev.db
-              echo "✅ Database restored"
+            # Fix file ownership for nextjs user (UID 1001)
+            chown -R 1001:1001 $VOLUME_PATH/
+
+            # Push schema if database exists
+            if [ -f "$VOLUME_PATH/dev.db" ]; then
+              echo "📐 Pushing schema updates..."
+              docker exec $CONTAINER_NAME npx prisma db push --schema=/app/node_modules/.prisma/client/schema.prisma --accept-data-loss --skip-generate 2>/dev/null || true
             fi
 
-            # Restore .env
-            if [ -f /tmp/thai-acc-env-backup ]; then
-              cp /tmp/thai-acc-env-backup $VOLUME_PATH/.env
-              echo "✅ .env restored"
-            fi
+            # Restart to pick up schema changes
+            docker restart $CONTAINER_NAME
 
             # Wait for container to start
             echo "⏳ Waiting for app to start..."
@@ -161,16 +148,6 @@ jobs:
               fi
               sleep 2
             done
-
-            # Check tunnel
-            echo "🌐 Checking cloudflared tunnel..."
-            if pgrep -f "cloudflared tunnel run" > /dev/null; then
-              echo "✅ Tunnel running"
-            else
-              echo "⚠️  Starting tunnel..."
-              nohup cloudflared tunnel run --token ${{ secrets.CLOUDFLARED_TUNNEL_TOKEN }} > /tmp/cloudflared.log 2>&1 &
-              sleep 3
-            fi
 
             echo "🎉 Deployment complete!"
             echo "📍 https://acc.k56mm.uk"
