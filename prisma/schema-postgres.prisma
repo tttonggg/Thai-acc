@@ -1011,6 +1011,8 @@ model User {
 }
 
 enum UserRole {
+  OWNER // เจ้าของกิจการ
+  SENIOR_ACCOUNTANT // หัวหน้าบัญชี
   ADMIN // ผู้ดูแลระบบ
   ACCOUNTANT // นักบัญชี
   USER // ผู้ใช้ทั่วไป
