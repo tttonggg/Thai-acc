@@ -1,5 +1,9 @@
 'use client';
 
+// TODO: Consider splitting this large form (1184 lines) following the invoice-list pattern
+// See: src/components/invoices/invoice-list-virtual.tsx for virtualization reference
+// Consider extracting: line-item-editor, payment-allocation, receipt-details sections
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -115,9 +119,9 @@ const getAgingStatus = (dueDate: string) => {
 };
 
 export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormProps) {
-  const [customers, setCustomers] = useState([]);
-  const [bankAccounts, setBankAccounts] = useState([]);
-  const [unpaidInvoices, setUnpaidInvoices] = useState([]);
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [bankAccounts, setBankAccounts] = useState<any[]>([]);
+  const [unpaidInvoices, setUnpaidInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('');
@@ -587,7 +591,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                             mode="single"
                             selected={new Date(field.value)}
                             onSelect={(date) =>
-                              field.setValue(date?.toISOString().split('T')[0] || '')
+                              (field as any).setValue(date?.toISOString().split('T')[0] || '')
                             }
                             disabled={(date) => date > new Date()}
                             initialFocus
@@ -730,7 +734,7 @@ export function ReceiptForm({ open, onClose, onSuccess, receipt }: ReceiptFormPr
                               mode="single"
                               selected={field.value ? new Date(field.value) : undefined}
                               onSelect={(date) =>
-                                field.setValue(date?.toISOString().split('T')[0] || '')
+                                (field as any).setValue(date?.toISOString().split('T')[0] || '')
                               }
                               initialFocus
                             />

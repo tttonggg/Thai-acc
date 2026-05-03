@@ -486,7 +486,7 @@ function ChequeRegisterTab() {
         open={showEdit}
         onClose={() => setShowEdit(false)}
         onSuccess={fetchAll}
-        cheque={selectedCheque}
+        cheque={selectedCheque as any}
         bankAccounts={accounts}
       />
 

@@ -1,5 +1,9 @@
 'use client';
 
+// TODO: Consider splitting this large form (1339 lines) following the invoice-list pattern
+// See: src/components/invoices/invoice-list-virtual.tsx for virtualization reference
+// Consider extracting: line-item-editor, vendor-selection, purchase-details sections
+
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Save, Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

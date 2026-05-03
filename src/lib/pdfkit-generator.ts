@@ -247,6 +247,7 @@ export async function generateThaiTestPDF(): Promise<Buffer> {
  * สร้าง PDF ใบกำกับภาษีด้วย PDFKit
  */
 export async function generateInvoicePDFWithPDFKit(invoice: any): Promise<Buffer> {
+  const company = await getCompanyInfo();
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: 'A4',
@@ -266,7 +267,6 @@ export async function generateInvoicePDFWithPDFKit(invoice: any): Promise<Buffer
 
       doc.font(regularFontPath);
 
-      const company = await getCompanyInfo();
       const pageWidth = doc.page.width;
       const margin = 50;
       let yPos = 50;
@@ -550,6 +550,7 @@ export async function generateInvoicePDFWithPDFKit(invoice: any): Promise<Buffer
  * Generate Receipt PDF with PDFKit
  */
 export async function generateReceiptPDFWithPDFKit(receipt: any): Promise<Buffer> {
+  const company = await getCompanyInfo();
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: 'A4',
@@ -568,7 +569,6 @@ export async function generateReceiptPDFWithPDFKit(receipt: any): Promise<Buffer
 
       doc.font(regularFontPath);
 
-      const company = await getCompanyInfo();
       const pageWidth = doc.page.width;
       const margin = 50;
       let yPos = 50;
@@ -730,6 +730,7 @@ export async function generateReceiptPDFWithPDFKit(receipt: any): Promise<Buffer
  * Generate Payslip PDF with PDFKit
  */
 export async function generatePayslipPDFWithPDFKit(data: any): Promise<Buffer> {
+  const company = data.company || (await getCompanyInfo());
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: 'A4',
@@ -748,7 +749,6 @@ export async function generatePayslipPDFWithPDFKit(data: any): Promise<Buffer> {
 
       doc.font(regularFontPath);
 
-      const company = data.company || (await getCompanyInfo());
       const pageWidth = doc.page.width;
       const margin = 50;
       let yPos = 50;
@@ -902,8 +902,7 @@ export async function generatePayslipPDFWithPDFKit(data: any): Promise<Buffer> {
       doc
         .rect(margin, yPos, pageWidth - margin * 2, 30)
         .fillColor('lightgreen')
-        .fill()
-        .uncurve();
+        .fill();
 
       doc
         .fillColor('darkgreen')

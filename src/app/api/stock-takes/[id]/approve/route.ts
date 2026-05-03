@@ -36,7 +36,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return notFoundError('ไม่พบการตรวจนับสต็อก');
     }
 
-    if (stockTake.status === 'COMPLETED') {
+    if (stockTake.status === 'POSTED') {
       return apiError('การตรวจนับสต็อกนี้ได้รับการอนุมัติแล้ว');
     }
 

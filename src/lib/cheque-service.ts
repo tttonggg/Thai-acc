@@ -13,10 +13,12 @@ import prisma from '@/lib/db';
 export async function createReceivedChequeJournalEntry(
   chequeId: string,
   clearedDate: Date,
-  userId?: string
+  userId?: string,
+  tx?: any
 ) {
-  return await prisma.$transaction(async (tx) => {
-    const cheque = await tx.cheque.findUnique({
+  // Helper function to execute the core logic with a transaction client
+  const executeWithTx = async (ctx: any) => {
+    const cheque = await ctx.cheque.findUnique({
       where: { id: chequeId },
       include: { bankAccount: true },
     });
@@ -28,7 +30,7 @@ export async function createReceivedChequeJournalEntry(
     }
 
     // Get AR account (default: 1121 - ลูกหนี้การค้า)
-    const arAccount = await tx.chartOfAccount.findFirst({
+    const arAccount = await ctx.chartOfAccount.findFirst({
       where: { code: '1121' },
     });
 
@@ -37,13 +39,13 @@ export async function createReceivedChequeJournalEntry(
     }
 
     // Generate journal entry number
-    const count = await tx.journalEntry.count();
+    const count = await ctx.journalEntry.count();
     const entryNo = `CHQ-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(count + 1).padStart(4, '0')}`;
 
     let lineNo = 1;
 
     // Create journal entry for received cheque clearing
-    const journalEntry = await tx.journalEntry.create({
+    const journalEntry = await ctx.journalEntry.create({
       data: {
         entryNo,
         date: clearedDate,
@@ -75,7 +77,7 @@ export async function createReceivedChequeJournalEntry(
     });
 
     // Update cheque with journal entry ID and cleared status
-    await tx.cheque.update({
+    await ctx.cheque.update({
       where: { id: chequeId },
       data: {
         status: 'CLEARED',
@@ -85,7 +87,14 @@ export async function createReceivedChequeJournalEntry(
     });
 
     return journalEntry;
-  });
+  };
+
+  // If tx is provided (already in a transaction), use it directly
+  // Otherwise create a new transaction
+  if (tx) {
+    return executeWithTx(tx);
+  }
+  return await prisma.$transaction(executeWithTx);
 }
 
 /**
@@ -96,10 +105,12 @@ export async function createReceivedChequeJournalEntry(
 export async function createPaymentChequeJournalEntry(
   chequeId: string,
   clearedDate: Date,
-  userId?: string
+  userId?: string,
+  tx?: any
 ) {
-  return await prisma.$transaction(async (tx) => {
-    const cheque = await tx.cheque.findUnique({
+  const prismaTx = tx || prisma;
+  return await prismaTx.$transaction(async (ctx) => {
+    const cheque = await ctx.cheque.findUnique({
       where: { id: chequeId },
       include: { bankAccount: true },
     });
@@ -111,7 +122,7 @@ export async function createPaymentChequeJournalEntry(
     }
 
     // Get AP account (default: 2110 - เจ้าหนี้การค้า)
-    const apAccount = await tx.chartOfAccount.findFirst({
+    const apAccount = await ctx.chartOfAccount.findFirst({
       where: { code: '2110' },
     });
 
@@ -120,13 +131,13 @@ export async function createPaymentChequeJournalEntry(
     }
 
     // Generate journal entry number
-    const count = await tx.journalEntry.count();
+    const count = await ctx.journalEntry.count();
     const entryNo = `CHQ-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(count + 1).padStart(4, '0')}`;
 
     let lineNo = 1;
 
     // Create journal entry for payment cheque clearing
-    const journalEntry = await tx.journalEntry.create({
+    const journalEntry = await ctx.journalEntry.create({
       data: {
         entryNo,
         date: clearedDate,
@@ -158,7 +169,7 @@ export async function createPaymentChequeJournalEntry(
     });
 
     // Update cheque with journal entry ID and cleared status
-    await tx.cheque.update({
+    await ctx.cheque.update({
       where: { id: chequeId },
       data: {
         status: 'CLEARED',
@@ -174,20 +185,23 @@ export async function createPaymentChequeJournalEntry(
 /**
  * Main function to clear a cheque and create GL entries
  * Routes to the appropriate function based on cheque type
+ * FIXED: Status check + routing now wrapped in $transaction to prevent TOCTOU race
  */
 export async function clearCheque(chequeId: string, clearedDate: Date, userId?: string) {
-  const cheque = await prisma.cheque.findUnique({ where: { id: chequeId } });
+  return await prisma.$transaction(async (tx) => {
+    const cheque = await tx.cheque.findUnique({ where: { id: chequeId } });
 
-  if (!cheque) throw new Error('Cheque not found');
-  if (cheque.status === 'CLEARED') throw new Error('Cheque already cleared');
-  if (cheque.status === 'CANCELLED') throw new Error('Cannot clear cancelled cheque');
-  if (cheque.status === 'BOUNCED') throw new Error('Cannot clear bounced cheque');
+    if (!cheque) throw new Error('Cheque not found');
+    if (cheque.status === 'CLEARED') throw new Error('Cheque already cleared');
+    if (cheque.status === 'CANCELLED') throw new Error('Cannot clear cancelled cheque');
+    if (cheque.status === 'BOUNCED') throw new Error('Cannot clear bounced cheque');
 
-  if (cheque.type === 'RECEIVE') {
-    return createReceivedChequeJournalEntry(chequeId, clearedDate, userId);
-  } else {
-    return createPaymentChequeJournalEntry(chequeId, clearedDate, userId);
-  }
+    if (cheque.type === 'RECEIVE') {
+      return await createReceivedChequeJournalEntry(chequeId, clearedDate, userId, tx);
+    } else {
+      return await createPaymentChequeJournalEntry(chequeId, clearedDate, userId, tx);
+    }
+  });
 }
 
 /**
@@ -199,67 +213,70 @@ export async function bounceCheque(
   reason?: string,
   userId?: string
 ) {
-  const cheque = await prisma.cheque.findUnique({
-    where: { id: chequeId },
-    include: { bankAccount: true },
-  });
+  // B-04: Wrap all payment+cheque+GL ops in $transaction for atomicity
+  return await prisma.$transaction(async (tx) => {
+    const cheque = await tx.cheque.findUnique({
+      where: { id: chequeId },
+      include: { bankAccount: true },
+    });
 
-  if (!cheque) throw new Error('Cheque not found');
-  if (!cheque.journalEntryId) throw new Error('No journal entry found for this cheque');
-  if (cheque.status === 'BOUNCED') throw new Error('Cheque already marked as bounced');
+    if (!cheque) throw new Error('Cheque not found');
+    if (!cheque.journalEntryId) throw new Error('No journal entry found for this cheque');
+    if (cheque.status === 'BOUNCED') throw new Error('Cheque already marked as bounced');
 
-  const existingEntry = await prisma.journalEntry.findUnique({
-    where: { id: cheque.journalEntryId },
-    include: { lines: true },
-  });
+    const existingEntry = await tx.journalEntry.findUnique({
+      where: { id: cheque.journalEntryId },
+      include: { lines: true },
+    });
 
-  if (!existingEntry) throw new Error('Original journal entry not found');
+    if (!existingEntry) throw new Error('Original journal entry not found');
 
-  // Generate reversing entry number
-  const count = await prisma.journalEntry.count();
-  const entryNo = `CHQ-REV-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(count + 1).padStart(4, '0')}`;
+    // Generate reversing entry number
+    const count = await tx.journalEntry.count();
+    const entryNo = `CHQ-REV-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(count + 1).padStart(4, '0')}`;
 
-  let lineNo = 1;
+    let lineNo = 1;
 
-  // Create reversing entry (swap debit/credit)
-  const reversingEntry = await prisma.journalEntry.create({
-    data: {
-      entryNo,
-      date: bouncedDate,
-      description: `เช็คเลขที่ ${cheque.chequeNo} เด้ง${reason ? ` (${reason})` : ''}`,
-      reference: cheque.chequeNo,
-      documentType: 'CHEQUE_BOUNCE',
-      documentId: cheque.id,
-      status: 'POSTED',
-      isReversing: true,
-      reversingId: existingEntry.id,
-      createdById: userId,
-      lines: {
-        create: existingEntry.lines.map((line) => ({
-          lineNo: lineNo++,
-          accountId: line.accountId,
-          description: `เช็คเด้งเลขที่ ${cheque.chequeNo}`,
-          debit: line.credit, // Swap credit to debit
-          credit: line.debit, // Swap debit to credit
-        })),
+    // Create reversing entry (swap debit/credit)
+    const reversingEntry = await tx.journalEntry.create({
+      data: {
+        entryNo,
+        date: bouncedDate,
+        description: `เช็คเลขที่ ${cheque.chequeNo} เด้ง${reason ? ` (${reason})` : ''}`,
+        reference: cheque.chequeNo,
+        documentType: 'CHEQUE_BOUNCE',
+        documentId: cheque.id,
+        status: 'POSTED',
+        isReversing: true,
+        reversingId: existingEntry.id,
+        createdById: userId,
+        lines: {
+          create: existingEntry.lines.map((line) => ({
+            lineNo: lineNo++,
+            accountId: line.accountId,
+            description: `เช็คเด้งเลขที่ ${cheque.chequeNo}`,
+            debit: line.credit, // Swap credit to debit
+            credit: line.debit, // Swap debit to credit
+          })),
+        },
       },
-    },
-  });
+    });
 
-  // Mark original entry as reversed
-  await prisma.journalEntry.update({
-    where: { id: existingEntry.id },
-    data: { status: 'REVERSED' },
-  });
+    // Mark original entry as reversed
+    await tx.journalEntry.update({
+      where: { id: existingEntry.id },
+      data: { status: 'REVERSED' },
+    });
 
-  // Update cheque status
-  await prisma.cheque.update({
-    where: { id: chequeId },
-    data: {
-      status: 'BOUNCED',
-      clearedDate: bouncedDate,
-    },
-  });
+    // Update cheque status
+    await tx.cheque.update({
+      where: { id: chequeId },
+      data: {
+        status: 'BOUNCED',
+        clearedDate: bouncedDate,
+      },
+    });
 
-  return reversingEntry;
+    return reversingEntry;
+  });
 }

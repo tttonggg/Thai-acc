@@ -62,37 +62,41 @@ export async function postMonthlyDepreciation(scheduleId: string, userId?: strin
 
   let lineNo = 1;
 
-  const journalEntry = await prisma.journalEntry.create({
-    data: {
-      entryNo,
-      entryDate: schedule.date,
-      description: `ค่าเสื่อมราคา ${asset.name} ${schedule.date.getMonth() + 1}/${schedule.date.getFullYear()}`,
-      status: 'POSTED',
-      createdById: userId,
-      lines: {
-        create: [
-          {
-            lineNo: lineNo++,
-            accountId: asset.depExpenseAccountId,
-            description: `ค่าเสื่อมราคา ${asset.name}`,
-            debit: schedule.amount,
-            credit: 0,
-          },
-          {
-            lineNo: lineNo++,
-            accountId: asset.accumDepAccountId,
-            description: `ค่าเสื่อมราคาสะสม ${asset.name}`,
-            debit: 0,
-            credit: schedule.amount,
-          },
-        ],
-      },
-    },
-  });
+  const journalEntry = await prisma.$transaction(async (tx) => {
+    const je = await tx.journalEntry.create({
+      data: {
+        entryNo,
+        entryDate: new Date(schedule.date),
+        description: `ค่าเสื่อมราคา ${asset.name} ${schedule.date.getMonth() + 1}/${schedule.date.getFullYear()}`,
+        status: 'POSTED',
+        createdById: userId,
+        lines: {
+          create: [
+            {
+              lineNo: lineNo++,
+              accountId: asset.depExpenseAccountId,
+              description: `ค่าเสื่อมราคา ${asset.name}`,
+              debit: schedule.amount,
+              credit: 0,
+            },
+            {
+              lineNo: lineNo++,
+              accountId: asset.accumDepAccountId,
+              description: `ค่าเสื่อมราคาสะสม ${asset.name}`,
+              debit: 0,
+              credit: schedule.amount,
+            },
+          ],
+        },
+      } as any,
+    });
 
-  await prisma.depreciationSchedule.update({
-    where: { id: scheduleId },
-    data: { posted: true, journalEntryId: journalEntry.id },
+    await tx.depreciationSchedule.update({
+      where: { id: scheduleId },
+      data: { posted: true, journalEntryId: je.id },
+    });
+
+    return je;
   });
 
   return journalEntry;

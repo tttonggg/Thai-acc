@@ -3,31 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   Plus,
-  Search,
-  Edit,
-  Eye,
-  Download,
-  Printer,
   FileText,
-  Loader2,
-  MessageSquare,
-  Send,
 } from 'lucide-react';
 import { eventBus, EVENTS } from '@/lib/events';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -36,25 +17,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { InvoiceForm } from '@/components/invoices/invoice-form';
-import { InvoiceEditDialog } from '@/components/invoices/invoice-edit-dialog';
+import { InvoiceFilters } from '@/components/invoices/invoice-filters';
+import { InvoiceTable } from '@/components/invoices/invoice-table';
+import { InvoicePagination } from '@/components/invoices/invoice-pagination';
 import { useToast } from '@/hooks/use-toast';
-import { getStatusBadgeProps } from '@/lib/status-badge';
 
 interface Invoice {
   id: string;
   invoiceNo: string;
   invoiceDate: string;
   dueDate?: string;
-  date?: string; // Keep for backward compatibility
+  date?: string;
   customerName: string;
   subtotal: number;
   vatAmount: number;
@@ -76,89 +50,10 @@ interface Invoice {
     phone?: string;
     email?: string;
   };
+  lines?: any[];
 }
 
-const statusLabels: Record<string, string> = {
-  DRAFT: 'ร่าง',
-  ISSUED: 'ออกแล้ว',
-  PARTIAL: 'รับชำระบางส่วน',
-  PAID: 'รับชำระเต็มจำนวน',
-  CANCELLED: 'ยกเลิก',
-};
-
-// Dark pastel status pills
-const statusPillClass: Record<string, string> = {
-  DRAFT: 'bg-slate-700/50 text-slate-400',
-  ISSUED: 'bg-indigo-500/15 text-indigo-400',
-  PARTIAL: 'bg-cyan-500/15 text-cyan-400',
-  PAID: 'bg-teal-500/15 text-teal-400',
-  CANCELLED: 'bg-slate-700/50 text-slate-500',
-};
-
-const getStatusBadge = (status: string) => {
-  // keep getStatusBadgeProps import alive (used for variant logic elsewhere if needed)
-  void getStatusBadgeProps;
-  const cls = statusPillClass[status] ?? 'bg-slate-700/50 text-slate-400';
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${cls}`}
-    >
-      {statusLabels[status] ?? status}
-    </span>
-  );
-};
-
-const typeLabels: Record<string, string> = {
-  TAX_INVOICE: 'ใบกำกับภาษี',
-  RECEIPT: 'ใบเสร็จรับเงิน',
-  DELIVERY_NOTE: 'ใบส่งของ',
-  CREDIT_NOTE: 'ใบลดหนี้',
-  DEBIT_NOTE: 'ใบเพิ่มหนี้',
-};
-
-// Quick filter options
 type QuickFilter = 'all' | 'pending' | 'overdue' | 'done';
-const quickFilters: { value: QuickFilter; label: string; activeClass: string }[] = [
-  {
-    value: 'all',
-    label: 'ทั้งหมด',
-    activeClass: 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700',
-  },
-  {
-    value: 'pending',
-    label: 'รอดำเนินการ',
-    activeClass: 'bg-amber-500/20 text-amber-400 border-amber-500/40 hover:bg-amber-500/30',
-  },
-  {
-    value: 'overdue',
-    label: 'เร่งด่วน',
-    activeClass: 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30',
-  },
-  {
-    value: 'done',
-    label: 'เสร็จสิ้น',
-    activeClass: 'bg-teal-500/20 text-teal-400 border-teal-500/40 hover:bg-teal-500/30',
-  },
-];
-
-// Compute aging badge for outstanding invoices
-function getAgingBadge(invoice: Invoice) {
-  if (invoice.status === 'PAID' || invoice.status === 'CANCELLED' || invoice.status === 'DRAFT') {
-    return null;
-  }
-  const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
-  if (!dueDate) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diffDays = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays > 0) {
-    return { label: `เกิน ${diffDays} วัน`, cls: 'bg-red-500/15 text-red-400' };
-  }
-  if (diffDays >= -7) {
-    return { label: 'ใกล้ครบกำหนด', cls: 'bg-amber-500/15 text-amber-400' };
-  }
-  return null;
-}
 
 export function InvoiceList() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -169,14 +64,13 @@ export function InvoiceList() {
     'TAX_INVOICE' | 'RECEIPT' | 'DELIVERY_NOTE' | 'CREDIT_NOTE' | 'DEBIT_NOTE'
   >('TAX_INVOICE');
   const [refreshKey, setRefreshKey] = useState(0);
-  const [editInvoiceId, setEditInvoiceId] = useState<string | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null);
   const [printingInvoice, setPrintingInvoice] = useState<string | null>(null);
   const [postingInvoice, setPostingInvoice] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0, totalPages: 0 });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -184,7 +78,13 @@ export function InvoiceList() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/invoices`, { credentials: 'include' });
+        const params = new URLSearchParams();
+        params.set('page', String(pagination.page));
+        params.set('limit', String(pagination.limit));
+        if (filterStatus !== 'all') params.set('status', filterStatus);
+        if (searchTerm) params.set('search', searchTerm);
+
+        const res = await fetch(`/api/invoices?${params.toString()}`, { credentials: 'include' });
         if (!res.ok) throw new Error('Fetch failed');
         const result = await res.json();
         const invoicesData = result.data || [];
@@ -192,6 +92,9 @@ export function InvoiceList() {
           throw new Error('Invalid invoices data format');
         }
         setInvoices(invoicesData);
+        if (result.pagination) {
+          setPagination(prev => ({ ...prev, ...result.pagination }));
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล';
         setError(message);
@@ -205,7 +108,7 @@ export function InvoiceList() {
       }
     };
     fetchInvoices();
-  }, [refreshKey, toast]);
+  }, [refreshKey, pagination.page, pagination.limit, filterStatus, searchTerm, toast]);
 
   const filteredInvoices = (invoices || []).filter((invoice) => {
     if (!invoice || typeof invoice !== 'object') return false;
@@ -216,7 +119,6 @@ export function InvoiceList() {
     const matchesSearch =
       invoice.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       invoice.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || invoice.status === filterStatus;
 
     if (quickFilter !== 'all') {
       const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
@@ -235,24 +137,13 @@ export function InvoiceList() {
       }
     }
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   const handleInvoiceSuccess = () => {
     setRefreshKey((prev) => prev + 1);
     setIsAddDialogOpen(false);
     eventBus.emit(EVENTS.INVOICE_CREATED);
-  };
-
-  const handleEditInvoiceSuccess = () => {
-    setRefreshKey((prev) => prev + 1);
-    setIsEditDialogOpen(false);
-    setEditInvoiceId(null);
-  };
-
-  const openEditDialog = (invoiceId: string) => {
-    setEditInvoiceId(invoiceId);
-    setIsEditDialogOpen(true);
   };
 
   const openInvoiceForm = (
@@ -262,12 +153,12 @@ export function InvoiceList() {
     setIsAddDialogOpen(true);
   };
 
-  const handleView = (invoiceId: string) => {
-    handlePrintInvoice(invoiceId, false);
-  };
-
   const handleViewDetail = (invoiceId: string) => {
     eventBus.emit(EVENTS.INVOICE_VIEW_DETAIL, invoiceId);
+  };
+
+  const handleView = (invoiceId: string) => {
+    handlePrintInvoice(invoiceId, false);
   };
 
   const handlePrint = async (invoiceId: string) => {
@@ -764,7 +655,7 @@ export function InvoiceList() {
       document.body.removeChild(a);
 
       toast({ title: 'ดาวน์โหลดสำเร็จ', description: `ดาวน์โหลด ${invoiceNo} เรียบร้อยแล้ว` });
-    } catch (error) {
+    } catch {
       toast({
         title: 'ดาวน์โหลดไม่สำเร็จ',
         description: 'กรุณาลองอีกครั้ง',
@@ -961,235 +852,35 @@ export function InvoiceList() {
         </div>
       </div>
 
-      {/* Quick Filter Buttons */}
-      <div className="flex flex-wrap gap-2">
-        {quickFilters.map((qf) => (
-          <button
-            key={qf.value}
-            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-              quickFilter === qf.value
-                ? qf.activeClass
-                : 'border-slate-700 bg-slate-800/40 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
-            }`}
-            onClick={() => setQuickFilter(qf.value)}
-          >
-            {qf.label}
-          </button>
-        ))}
-      </div>
+      {/* Filters Component */}
+      <InvoiceFilters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filterStatus={filterStatus}
+        onStatusChange={setFilterStatus}
+        quickFilter={quickFilter}
+        onQuickFilterChange={setQuickFilter}
+      />
 
-      {/* Search & Filter */}
-      <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4">
-        <div className="flex flex-col gap-3 md:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-            <Input
-              placeholder="ค้นหาตามชื่อลูกค้าหรือเลขที่เอกสาร..."
-              className="border-slate-700 bg-slate-900/60 pl-10 text-slate-200 placeholder:text-slate-500 focus-visible:ring-indigo-500/50"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-full border-slate-700 bg-slate-900/60 text-slate-200 focus:ring-indigo-500/50 md:w-[200px]">
-              <SelectValue placeholder="สถานะ" />
-            </SelectTrigger>
-            <SelectContent className="border-slate-700 bg-slate-900 text-slate-200">
-              <SelectItem value="all">ทั้งหมด</SelectItem>
-              <SelectItem value="DRAFT">ร่าง</SelectItem>
-              <SelectItem value="ISSUED">ออกแล้ว</SelectItem>
-              <SelectItem value="PARTIAL">รับชำระบางส่วน</SelectItem>
-              <SelectItem value="PAID">รับชำระเต็มจำนวน</SelectItem>
-              <SelectItem value="CANCELLED">ยกเลิก</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      {/* Virtualized Table Component */}
+      <InvoiceTable
+        invoices={filteredInvoices}
+        onViewDetail={handleViewDetail}
+        onView={handleView}
+        onEdit={() => {}}
+        onPrint={handlePrint}
+        onDownload={handleDownload}
+        onPost={handlePostInvoice}
+        printingInvoice={printingInvoice}
+        downloadingInvoice={downloadingInvoice}
+        postingInvoice={postingInvoice}
+      />
 
-      {/* Invoice Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-700 bg-slate-800/50">
-        <ScrollArea className="w-full">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-800/80">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">
-                  เลขที่
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">
-                  วันที่
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">
-                  ประเภท
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">
-                  ลูกค้า
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-400">
-                  ยอดค้างรับ
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-400">
-                  ยอดรวม
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">
-                  สถานะ
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-400">
-                  คอมเมนต์
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-400">
-                  จัดการ
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-slate-900">
-              {filteredInvoices.map((invoice) => {
-                const outstanding = Math.max(
-                  0,
-                  (invoice.totalAmount ?? 0) - (invoice.paidAmount ?? 0)
-                );
-                const agingBadge = getAgingBadge(invoice);
-                return (
-                  <tr
-                    key={invoice.id}
-                    className="cursor-pointer border-t border-slate-700/50 transition-colors hover:bg-slate-800/30"
-                    onClick={() => handleViewDetail(invoice.id)}
-                  >
-                    <td className="px-4 py-3 font-mono text-xs text-slate-200">
-                      {invoice.invoiceNo}
-                    </td>
-                    <td className="px-4 py-3 text-slate-300">
-                      {invoice.invoiceDate
-                        ? new Date(invoice.invoiceDate).toLocaleDateString('th-TH')
-                        : '-'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center rounded border border-slate-600/50 bg-slate-700/60 px-2 py-0.5 text-xs font-medium text-slate-300">
-                        {typeLabels[invoice.type]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-slate-200">{invoice.customerName}</td>
-                    <td className="px-4 py-3 text-right">
-                      <span
-                        className={outstanding > 0 ? 'font-semibold text-red-400' : 'text-teal-400'}
-                      >
-                        ฿
-                        {outstanding.toLocaleString('th-TH', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right font-semibold text-slate-200">
-                      ฿
-                      {(invoice.totalAmount ?? 0).toLocaleString('th-TH', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-col gap-1">
-                        {getStatusBadge(invoice.status)}
-                        {agingBadge && (
-                          <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${agingBadge.cls}`}
-                          >
-                            {agingBadge.label}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {invoice._count?.comments ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-700/60 px-2 py-0.5 text-xs text-slate-300">
-                          <MessageSquare className="h-3 w-3" />
-                          {invoice._count.comments}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-slate-600">-</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap justify-center gap-1">
-                        {invoice.status === 'DRAFT' && (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="h-8 bg-indigo-600 px-2 text-white hover:bg-indigo-700"
-                            onClick={(e) => handlePostInvoice(invoice.id, e)}
-                            disabled={postingInvoice === invoice.id}
-                          >
-                            {postingInvoice === invoice.id ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Send className="mr-1 h-3 w-3" />
-                            )}
-                            ออก
-                          </Button>
-                        )}
-                        <button
-                          className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-700/60 hover:text-slate-200"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleView(invoice.id);
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button
-                          className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-indigo-500/10 hover:text-indigo-400"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEditDialog(invoice.id);
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-teal-500/10 hover:text-teal-400 disabled:opacity-40"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePrint(invoice.id);
-                          }}
-                          disabled={printingInvoice === invoice.id}
-                        >
-                          {printingInvoice === invoice.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Printer className="h-4 w-4" />
-                          )}
-                        </button>
-                        <button
-                          className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-purple-500/10 hover:text-purple-400 disabled:opacity-40"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDownload(invoice.id, invoice.invoiceNo);
-                          }}
-                          disabled={downloadingInvoice === invoice.id}
-                        >
-                          {downloadingInvoice === invoice.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Download className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </ScrollArea>
-      </div>
-
-      {editInvoiceId && (
-        <InvoiceEditDialog
-          invoiceId={editInvoiceId}
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          onSuccess={handleEditInvoiceSuccess}
-        />
-      )}
+      {/* Pagination */}
+      <InvoicePagination
+        pagination={pagination}
+        onPageChange={(page) => setPagination(prev => ({ ...prev, page }))}
+      />
     </div>
   );
 }

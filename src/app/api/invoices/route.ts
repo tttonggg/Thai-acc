@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { z } from 'zod';
 import { requireAuth, generateDocNumber } from '@/lib/api-utils';
-import { logCreate } from '@/lib/activity-logger';
+import { logCreate, logCreateTx } from '@/lib/activity-logger';
 import { getClientIp } from '@/lib/api-utils';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 import { validateCsrfToken, getCsrfTokenFromHeaders } from '@/lib/csrf-service-server';
@@ -40,40 +40,8 @@ const invoiceSchema = z.object({
   lines: z.array(invoiceLineSchema).min(1, 'ต้องมีอย่างน้อย 1 รายการ'),
 });
 
-// Generate invoice number
-async function generateInvoiceNumber(type: string): Promise<string> {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-
-  const prefixes: Record<string, string> = {
-    TAX_INVOICE: 'INV',
-    RECEIPT: 'RC',
-    DELIVERY_NOTE: 'DN',
-    CREDIT_NOTE: 'CN',
-    DEBIT_NOTE: 'DN',
-  };
-
-  const prefix = `${prefixes[type] || 'INV'}-${year}${month}`;
-
-  const lastInvoice = await prisma.invoice.findFirst({
-    where: {
-      invoiceNo: {
-        startsWith: prefix,
-      },
-    },
-    orderBy: { invoiceNo: 'desc' },
-  });
-
-  let nextNum = 1;
-  if (lastInvoice) {
-    const parts = lastInvoice.invoiceNo.split('-');
-    const lastNum = parseInt(parts[parts.length - 1] || '0');
-    nextNum = lastNum + 1;
-  }
-
-  return `${prefix}-${String(nextNum).padStart(4, '0')}`;
-}
+// C-03: Invoice number generation uses generateDocNumber for transaction safety
+// Map document types to prefixes - must be unique per type
 
 // GET - List invoices (requires authentication)
 export async function GET(request: NextRequest) {
@@ -117,8 +85,24 @@ export async function GET(request: NextRequest) {
       prisma.invoice.findMany({
         where,
         include: {
-          customer: true,
-          lines: true,
+          customer: {
+            select: {
+              id: true,
+              name: true,
+              code: true,
+            },
+          },
+          lines: {
+            select: {
+              id: true,
+              productId: true,
+              quantity: true,
+              amount: true,
+              unitPrice: true,
+              discount: true,
+              vatAmount: true,
+            },
+          },
           _count: {
             select: {
               comments: true,
@@ -260,64 +244,69 @@ export async function POST(request: NextRequest) {
     const prefix = typeToPrefix[validatedData.type] || 'INV';
     const invoiceNo = await generateDocNumber(validatedData.type, prefix);
 
-    const invoice = await prisma.invoice.create({
-      data: {
-        invoiceNo,
-        invoiceDate: validatedData.invoiceDate,
-        dueDate: validatedData.dueDate,
-        customerId: validatedData.customerId,
-        type: validatedData.type,
-        reference: validatedData.reference,
-        poNumber: validatedData.poNumber,
-        subtotal: bahtToSatang(subtotal),
-        vatRate: 7,
-        vatAmount: bahtToSatang(vatAmount),
-        totalAmount: bahtToSatang(totalAmount),
-        discountAmount: bahtToSatang(validatedData.discountAmount),
-        discountPercent: validatedData.discountPercent,
-        withholdingRate: finalWhtRate,
-        withholdingAmount: bahtToSatang(withholdingAmount),
-        netAmount: bahtToSatang(netAmount),
-        paidAmount: 0,
-        status: 'DRAFT',
-        createdById: user.id,
-        notes: validatedData.notes,
-        internalNotes: validatedData.internalNotes,
-        terms: validatedData.terms,
-        lines: {
-          create: validatedData.lines.map((line, index) => ({
-            lineNo: index + 1,
-            productId: line.productId,
-            description: line.description,
-            quantity: line.quantity,
-            unit: line.unit,
-            unitPrice: bahtToSatang(line.unitPrice),
-            discount: bahtToSatang(line.discount),
-            amount: bahtToSatang(line.amount),
-            vatRate: line.vatRate,
-            vatAmount: bahtToSatang(line.vatAmount),
-          })),
+    const invoice = await prisma.$transaction(async (tx) => {
+      const newInvoice = await tx.invoice.create({
+        data: {
+          invoiceNo,
+          invoiceDate: validatedData.invoiceDate,
+          dueDate: validatedData.dueDate,
+          customerId: validatedData.customerId,
+          type: validatedData.type,
+          reference: validatedData.reference,
+          poNumber: validatedData.poNumber,
+          subtotal: bahtToSatang(subtotal),
+          vatRate: 7,
+          vatAmount: bahtToSatang(vatAmount),
+          totalAmount: bahtToSatang(totalAmount),
+          discountAmount: bahtToSatang(validatedData.discountAmount),
+          discountPercent: validatedData.discountPercent,
+          withholdingRate: finalWhtRate,
+          withholdingAmount: bahtToSatang(withholdingAmount),
+          netAmount: bahtToSatang(netAmount),
+          paidAmount: 0,
+          status: 'DRAFT',
+          createdById: user.id,
+          notes: validatedData.notes,
+          internalNotes: validatedData.internalNotes,
+          terms: validatedData.terms,
+          lines: {
+            create: validatedData.lines.map((line, index) => ({
+              lineNo: index + 1,
+              productId: line.productId,
+              description: line.description,
+              quantity: line.quantity,
+              unit: line.unit,
+              unitPrice: bahtToSatang(line.unitPrice),
+              discount: bahtToSatang(line.discount),
+              amount: bahtToSatang(line.amount),
+              vatRate: line.vatRate,
+              vatAmount: bahtToSatang(line.vatAmount),
+            })),
+          },
         },
-      },
-      include: {
-        customer: true,
-        lines: true,
-      },
-    });
+        include: {
+          customer: true,
+          lines: true,
+        },
+      });
 
-    // Log invoice creation
-    await logCreate(
-      user.id,
-      'invoices',
-      invoice.id,
-      {
-        invoiceNo: invoice.invoiceNo,
-        customerId: invoice.customerId,
-        totalAmount: invoice.totalAmount,
-        type: invoice.type,
-      },
-      ipAddress
-    );
+      // Log invoice creation within transaction
+      await logCreateTx(
+        tx,
+        user.id,
+        'invoices',
+        newInvoice.id,
+        {
+          invoiceNo: newInvoice.invoiceNo,
+          customerId: newInvoice.customerId,
+          totalAmount: newInvoice.totalAmount,
+          type: newInvoice.type,
+        },
+        ipAddress
+      );
+
+      return newInvoice;
+    });
 
     // Convert Satang to Baht for response
     const invoiceInBaht = {

@@ -852,10 +852,10 @@ export function PurchaseRequestList() {
               )}
 
               {/* Notes */}
-              {selectedPR.notes && (
+              {(selectedPR as any).notes && (
                 <div className="space-y-2">
                   <Label>หมายเหตุ</Label>
-                  <p className="rounded bg-gray-50 p-3 text-sm">{selectedPR.notes}</p>
+                  <p className="rounded bg-gray-50 p-3 text-sm">{(selectedPR as any).notes}</p>
                 </div>
               )}
 

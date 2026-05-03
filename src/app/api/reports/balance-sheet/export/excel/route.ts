@@ -219,7 +219,7 @@ export async function GET(request: NextRequest) {
     const dateStr = asOfDate || new Date().toISOString().split('T')[0];
 
     // Return Excel file
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="balance-sheet-${dateStr}.xlsx"`,

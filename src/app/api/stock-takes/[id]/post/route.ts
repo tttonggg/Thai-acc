@@ -38,7 +38,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return notFoundError('ไม่พบการตรวจนับสต็อก');
     }
 
-    if (stockTake.status === 'COMPLETED') {
+    if (stockTake.status === 'POSTED') {
       return apiError('การตรวจนับสต็อกนี้ได้ลงบัญชีแล้ว');
     }
 
@@ -81,7 +81,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     // Only create journal entry if there's a variance
-    let journalEntry = null;
+    let journalEntry: Awaited<ReturnType<typeof db.journalEntry.create>> | null = null;
     if (Math.abs(totalVarianceValue) > 0.01) {
       // Generate journal entry number
       const now = new Date();
@@ -108,20 +108,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const entryNo = `${prefix}-${String(nextNum).padStart(4, '0')}`;
 
       // Create journal entry lines
-      const journalLines = [];
+      const journalLines: Array<{
+        accountId: string;
+        description: string;
+        debit: number;
+        credit: number;
+      }> = [];
 
       if (totalVarianceValue > 0) {
         // Stock increase (positive variance)
         // Debit Inventory, Credit Variance Expense
         journalLines.push({
           accountId: inventoryAccount.id,
-          description: `ปรับสต็อกเพิ่ม - การตรวจนับ ${stockTake.takeNo}`,
+          description: `ปรับสต็อกเพิ่ม - การตรวจนับ ${stockTake.stockTakeNumber}`,
           debit: Math.abs(totalVarianceValue),
           credit: 0,
         });
         journalLines.push({
           accountId: varianceAccount.id,
-          description: `ปรับสต็อกเพิ่ม - การตรวจนับ ${stockTake.takeNo}`,
+          description: `ปรับสต็อกเพิ่ม - การตรวจนับ ${stockTake.stockTakeNumber}`,
           debit: 0,
           credit: Math.abs(totalVarianceValue),
         });
@@ -130,13 +135,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         // Debit Variance Expense, Credit Inventory
         journalLines.push({
           accountId: varianceAccount.id,
-          description: `ปรับสต็อกลด - การตรวจนับ ${stockTake.takeNo}`,
+          description: `ปรับสต็อกลด - การตรวจนับ ${stockTake.stockTakeNumber}`,
           debit: Math.abs(totalVarianceValue),
           credit: 0,
         });
         journalLines.push({
           accountId: inventoryAccount.id,
-          description: `ปรับสต็อกลด - การตรวจนับ ${stockTake.takeNo}`,
+          description: `ปรับสต็อกลด - การตรวจนับ ${stockTake.stockTakeNumber}`,
           debit: 0,
           credit: Math.abs(totalVarianceValue),
         });
@@ -146,9 +151,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       journalEntry = await db.journalEntry.create({
         data: {
           entryNo,
-          date: stockTake.date,
-          description: `การตรวจนับสต็อก ${stockTake.takeNo} ณ คลัง ${stockTake.warehouse.name}`,
-          reference: stockTake.takeNo,
+          date: stockTake.takeDate,
+          description: `การตรวจนับสต็อก ${stockTake.stockTakeNumber} ณ คลัง ${stockTake.warehouse.name}`,
+          reference: stockTake.stockTakeNumber,
           documentType: 'STOCK_TAKE',
           documentId: stockTake.id,
           totalDebit: Math.abs(totalVarianceValue),
@@ -166,33 +171,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     // Update stock balances and record stock movements
     for (const line of stockTake.lines) {
-      if (Math.abs(line.varianceQuantity) > 0.001) {
+      if (Math.abs(line.varianceQty) > 0.001) {
         // Record stock movement for variance
         await recordStockMovement({
           productId: line.productId,
           warehouseId: stockTake.warehouseId,
           type: 'COUNT', // Stock count adjustment
-          quantity: line.varianceQuantity,
-          unitCost: line.product.cost || 0,
+          quantity: line.varianceQty,
+          unitCost: line.product.costPrice || 0,
           referenceId: stockTake.id,
-          referenceNo: stockTake.takeNo,
-          notes: `ปรับปรุงตามการตรวจนับ ${stockTake.takeNo}`,
+          referenceNo: stockTake.stockTakeNumber,
+          notes: `ปรับปรุงตามการตรวจนับ ${stockTake.stockTakeNumber}`,
           sourceChannel: 'STOCK_TAKE',
         });
       }
     }
 
-    // Update stock take status to COMPLETED
+    // Update stock take status to POSTED
     const updated = await db.stockTake.update({
       where: { id },
       data: {
-        status: 'COMPLETED',
-        metadata: {
-          ...((stockTake.metadata as any) || {}),
-          journalEntryId: journalEntry?.id,
-          postedAt: new Date().toISOString(),
-          postedBy: user.email,
-        },
+        status: 'POSTED',
+        journalEntryId: journalEntry?.id,
       },
       include: {
         warehouse: true,

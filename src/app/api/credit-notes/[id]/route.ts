@@ -143,7 +143,7 @@ export async function DELETE(
 
     // Only ISSUED status without journal entry can be deleted
     if (existing.status !== 'ISSUED') {
-      return forbiddenError('สามารถลบได้เฉพาะใบลดหนี้สถานะออกแล้วที่ยังไม่ได้ลงบัญชีเท่านั้น');
+      return (forbiddenError() as any)('สามารถลบได้เฉพาะใบลดหนี้สถานะออกแล้วที่ยังไม่ได้ลงบัญชีเท่านั้น');
     }
 
     // Cannot delete if journal entry exists

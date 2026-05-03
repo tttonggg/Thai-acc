@@ -747,7 +747,7 @@ export function CustomerList() {
 
       {/* Edit Dialog */}
       <CustomerEditDialog
-        customer={editDialog.customer}
+        customer={editDialog.customer as any}
         open={editDialog.open}
         onOpenChange={(open) => setEditDialog({ open, customer: null })}
         onSuccess={() => setRefreshKey((prev) => prev + 1)}

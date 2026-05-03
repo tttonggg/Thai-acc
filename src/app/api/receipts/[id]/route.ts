@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { z } from 'zod';
 import { requireAuth, requirePermission } from '@/lib/api-utils';
-import { generateDocumentNumber } from '@/lib/thai-accounting';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 
 // Validation schema for receipt allocation
@@ -154,44 +153,44 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     // Calculate unallocated amount — convert to Satang
     const unallocated = bahtToSatang(validatedData.amount - totalAllocation);
 
-    // Delete existing allocations
-    await prisma.receiptAllocation.deleteMany({
-      where: { receiptId: id },
-    });
-
-    // Update receipt
-    const receipt = await prisma.receipt.update({
-      where: { id },
-      data: {
-        receiptDate: validatedData.receiptDate,
-        customerId: validatedData.customerId,
-        paymentMethod: validatedData.paymentMethod,
-        bankAccountId: validatedData.bankAccountId,
-        chequeNo: validatedData.chequeNo,
-        chequeDate: validatedData.chequeDate,
-        amount: bahtToSatang(validatedData.amount),
-        whtAmount: bahtToSatang(totalWht),
-        unallocated,
-        notes: validatedData.notes,
-        allocations: {
-          create: validatedData.allocations.map((alloc) => ({
-            invoiceId: alloc.invoiceId,
-            amount: bahtToSatang(alloc.amount),
-            whtRate: alloc.whtRate,
-            whtAmount: bahtToSatang(alloc.whtAmount),
-          })),
-        },
-      },
-      include: {
-        customer: true,
-        bankAccount: true,
-        allocations: {
-          include: {
-            invoice: true,
+    // Delete existing allocations and update receipt atomically
+    const [, receipt] = await prisma.$transaction([
+      prisma.receiptAllocation.deleteMany({
+        where: { receiptId: id },
+      }),
+      prisma.receipt.update({
+        where: { id },
+        data: {
+          receiptDate: validatedData.receiptDate,
+          customerId: validatedData.customerId,
+          paymentMethod: validatedData.paymentMethod,
+          bankAccountId: validatedData.bankAccountId,
+          chequeNo: validatedData.chequeNo,
+          chequeDate: validatedData.chequeDate,
+          amount: bahtToSatang(validatedData.amount),
+          whtAmount: bahtToSatang(totalWht),
+          unallocated,
+          notes: validatedData.notes,
+          allocations: {
+            create: validatedData.allocations.map((alloc) => ({
+              invoiceId: alloc.invoiceId,
+              amount: bahtToSatang(alloc.amount),
+              whtRate: alloc.whtRate,
+              whtAmount: bahtToSatang(alloc.whtAmount),
+            })),
           },
         },
-      },
-    });
+        include: {
+          customer: true,
+          bankAccount: true,
+          allocations: {
+            include: {
+              invoice: true,
+            },
+          },
+        },
+      }),
+    ]);
 
     return NextResponse.json({ success: true, data: receipt });
   } catch (error: any) {

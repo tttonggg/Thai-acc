@@ -18,17 +18,18 @@ export async function checkPeriodStatus(date: Date): Promise<PeriodCheckResult> 
   const year = date.getFullYear();
   const month = date.getMonth() + 1; // 1-12
 
-  const period = await prisma.accountingPeriod.findUnique({
-    where: { year_month: { year, month } },
-  });
+  // B-09: Use upsert in transaction to prevent race between findUnique+create
+  const period = await prisma.$transaction(async (tx) => {
+    const existing = await tx.accountingPeriod.findUnique({
+      where: { year_month: { year, month } },
+    });
 
-  // If no period exists, create it as OPEN by default
-  if (!period) {
-    const newPeriod = await prisma.accountingPeriod.create({
+    if (existing) return existing;
+
+    return tx.accountingPeriod.create({
       data: { year, month, status: 'OPEN' },
     });
-    return { isValid: true, period: newPeriod };
-  }
+  });
 
   if (period.status === 'CLOSED' || period.status === 'LOCKED') {
     return {
@@ -271,7 +272,7 @@ export async function generatePeriodReconciliationReport(
     // Check against expected balance (would come from previous period + current period)
     // For now, just check if debits = credits for this account in this period
     const currentPeriodLines = lines.filter(
-      (l) => l.entry.date >= startDate && l.entry.date <= endDate && l.entry.status === 'POSTED'
+      (l) => (l.entryId as any).date >= startDate && (l.entryId as any).date <= endDate && (l.entryId as any).status === 'POSTED'
     );
 
     const currentDebitSum = currentPeriodLines.reduce((sum, l) => sum + l.debit, 0);

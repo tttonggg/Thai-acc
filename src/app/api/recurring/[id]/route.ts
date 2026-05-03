@@ -83,7 +83,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const body = await request.json();
     const validatedData = updateRecurringSchema.parse(body);
 
-    const recurring = await updateRecurringDocument(id, validatedData);
+    const recurring = await updateRecurringDocument(id, validatedData as any);
 
     return NextResponse.json({ success: true, data: recurring });
   } catch (error: any) {

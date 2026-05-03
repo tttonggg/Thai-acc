@@ -161,8 +161,6 @@ export function RecentItemsSidebar({ userId, onNavigate, className }: RecentItem
 
   const handleItemClick = (item: RecentItem) => {
     onNavigate(item.module, item.recordId);
-    // Update accessed time
-    recordAccess(item.module, item.recordId, item.recordName, item.recordType, 'view');
   };
 
   const handleClear = async () => {

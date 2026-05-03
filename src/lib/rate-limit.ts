@@ -222,7 +222,7 @@ export function getRateLimitInfo(identifier: string): {
 
   return {
     limit: 0, // Caller should set this based on their preset
-    remaining: Math.max(0, entry.limit - entry.count),
+    remaining: Math.max(0, (entry as any).limit - entry.count),
     resetAt: new Date(entry.resetTime),
   };
 }

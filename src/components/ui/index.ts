@@ -20,7 +20,6 @@ export * from './badge';
 export * from './switch';
 export * from './tabs';
 export * from './toast';
-export * from './toaster';
 export * from './form';
 export * from './calendar';
 export * from './popover';

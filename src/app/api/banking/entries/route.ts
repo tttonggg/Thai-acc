@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
         entryId: e.id,
         matchedEntryId: e.matchedEntryId,
         matchedEntryType: e.matchedEntryType as 'JOURNAL_ENTRY' | 'PAYMENT' | 'RECEIPT' | null,
-        matchConfidence: e.matchConfidence ?? 100,
+        matchConfidence: (e as any).matchConfidence ?? 100,
         matchReason: 'จับคู่แล้ว',
       })),
       unmatched: unmatchedEntries,

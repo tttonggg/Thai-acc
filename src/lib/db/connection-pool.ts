@@ -107,12 +107,12 @@ export class ConnectionPoolManager {
             url: url.toString(),
           },
         },
-        log: this.getLogConfig(),
+        log: this.getLogConfig() as any,
       });
     } else {
       // SQLite doesn't need pooling
       this.prisma = new PrismaClient({
-        log: this.getLogConfig(),
+        log: this.getLogConfig() as any,
       });
     }
 
@@ -130,7 +130,7 @@ export class ConnectionPoolManager {
   private setupMiddleware() {
     if (!this.prisma) return;
 
-    this.prisma.$use(async (params, next) => {
+    (this.prisma as any).$use(async (params, next) => {
       const start = Date.now();
       const operation = `${params.model}.${params.action}`;
 

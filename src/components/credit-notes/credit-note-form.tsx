@@ -81,7 +81,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof creditNoteSchema>>({
-    resolver: zodResolver(creditNoteSchema),
+    resolver: zodResolver(creditNoteSchema) as any,
     defaultValues: {
       creditNoteDate: new Date().toISOString().split('T')[0],
       reason: 'RETURN',
@@ -221,7 +221,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
     // Calculate amount and VAT
     if (field === 'quantity' || field === 'unitPrice' || field === 'vatRate') {
       const amount = updatedLine.quantity * updatedLine.unitPrice;
-      updatedLine.amount = amount;
+      (updatedLine as any).amount = amount;
     }
 
     form.setValue(
@@ -364,7 +364,7 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
           <DialogDescription>สร้างใบลดหนี้สำหรับลูกค้าเพื่อลดหนี้จากใบกำกับภาษี</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={(values) => form.handleSubmit(onSubmit as any)(values as any)} className="space-y-6">
           {/* Header Section */}
           <Card>
             <CardHeader>

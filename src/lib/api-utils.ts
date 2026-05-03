@@ -80,13 +80,13 @@ export async function checkUserPermission(
                     include: {
                       permission: true,
                     },
-                  },
+                  } as any,
                 },
               },
             },
           },
         },
-      },
+      } as any,
     },
   })
 
@@ -166,13 +166,13 @@ export async function getUserPermissions(): Promise<string[]> {
                     include: {
                       permission: true,
                     },
-                  },
+                  } as any,
                 },
               },
             },
           },
         },
-      },
+      } as any,
     },
   })
 
@@ -182,7 +182,6 @@ export async function getUserPermissions(): Promise<string[]> {
   for (const er of userEmployee.employee.employeeRoles) {
     for (const rp of er.role.rolePermissions) {
       perms.add(rp.permission.code)
-    }
   }
 
   return Array.from(perms)

@@ -23,17 +23,20 @@ interface CreateJEResult {
   lines: Array<{ accountCode: string; accountName: string; debit: number; credit: number }>;
 }
 
-// Account codes (hard-coded per spec)
-const AC = {
-  CASH: '1100',
-  BANK: '1101',
-  AR: '1102',
-  INPUT_VAT: '1103',
-  AP: '2100',
-  WHT_PAYABLE: '2101',
-  REVENUE: '4100',
-  COGS: '5100',
+// Account codes - typed constant for consistency
+// NOTE: These should eventually be migrated to SystemSettings for tenant-level configuration
+const ACCOUNT_CODES = {
+  CASH: '1100',         // เงินสด
+  BANK: '1101',         // ธนาคาร
+  AR: '1102',           // ลูกหนี้
+  INPUT_VAT: '1103',    // VATรับคืน
+  AP: '2100',           // VATจ่าย/เจ้าหนี้
+  WHT_PAYABLE: '2101', // WHTจ่าย
+  REVENUE: '4100',      // รายได้
+  COGS: '5100',         // ต้นทุน
 } as const;
+
+type AccountCodeKey = keyof typeof ACCOUNT_CODES;
 
 async function getAccountId(tx: PrismaTx, code: string): Promise<string> {
   const a = await tx.chartOfAccount.findUnique({ where: { code }, select: { id: true } });
@@ -111,7 +114,7 @@ export async function onInvoicePosted(invoiceId: string): Promise<CreateJEResult
   if (!p.isValid) throw new Error(p.error || 'ไม่สามารถสร้างรายการบัญชีในงวดที่ปิดแล้ว');
 
   return prisma.$transaction(async (tx) => {
-    const arCode = invoice.customer.accountReceivableCode || '1102';
+    const arCode = (invoice.customer as any).accountReceivableCode || '1102';
     const lines: JELine[] = [
       {
         accountId: await getAccountId(tx, arCode),
@@ -120,13 +123,13 @@ export async function onInvoicePosted(invoiceId: string): Promise<CreateJEResult
         credit: 0,
       },
       {
-        accountId: await getAccountId(tx, AC.REVENUE),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.REVENUE),
         description: `รายได้ ${invoice.invoiceNo}`,
         debit: 0,
         credit: invoice.subtotal,
       },
       {
-        accountId: await getAccountId(tx, AC.AP),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.AP),
         description: `VAT ขาย ${invoice.invoiceNo}`,
         debit: 0,
         credit: invoice.vatAmount,
@@ -134,7 +137,7 @@ export async function onInvoicePosted(invoiceId: string): Promise<CreateJEResult
     ];
     if (invoice.withholdingAmount > 0) {
       lines.push({
-        accountId: await getAccountId(tx, AC.WHT_PAYABLE),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.WHT_PAYABLE),
         description: `WHT ${invoice.invoiceNo}`,
         debit: 0,
         credit: invoice.withholdingAmount,
@@ -172,7 +175,7 @@ export async function onReceiptPosted(receiptId: string): Promise<CreateJEResult
   if (!p.isValid) throw new Error(p.error || 'ไม่สามารถสร้างรายการบัญชีในงวดที่ปิดแล้ว');
 
   return prisma.$transaction(async (tx) => {
-    const cbCode = r.paymentMethod === 'CASH' ? AC.CASH : AC.BANK;
+    const cbCode = r.paymentMethod === 'CASH' ? ACCOUNT_CODES.CASH : ACCOUNT_CODES.BANK;
     const lines: JELine[] = [
       {
         accountId: await getAccountId(tx, cbCode),
@@ -181,7 +184,7 @@ export async function onReceiptPosted(receiptId: string): Promise<CreateJEResult
         credit: 0,
       },
       {
-        accountId: await getAccountId(tx, AC.AR),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.AR),
         description: `ชำระหนี้ ${r.receiptNo}`,
         debit: 0,
         credit: r.amount,
@@ -190,13 +193,13 @@ export async function onReceiptPosted(receiptId: string): Promise<CreateJEResult
     if (r.whtAmount > 0) {
       lines.push(
         {
-          accountId: await getAccountId(tx, AC.INPUT_VAT),
+          accountId: await getAccountId(tx, ACCOUNT_CODES.INPUT_VAT),
           description: `WHT รับคืน ${r.receiptNo}`,
           debit: r.whtAmount,
           credit: 0,
         },
         {
-          accountId: await getAccountId(tx, AC.WHT_PAYABLE),
+          accountId: await getAccountId(tx, ACCOUNT_CODES.WHT_PAYABLE),
           description: `WHT ค้างนำส่ง ${r.receiptNo}`,
           debit: 0,
           credit: r.whtAmount,
@@ -235,10 +238,10 @@ export async function onPaymentPosted(paymentId: string): Promise<CreateJEResult
     throw new Error(periodCheck.error || 'ไม่สามารถสร้างรายการบัญชีในงวดที่ปิดแล้ว');
 
   return prisma.$transaction(async (tx) => {
-    const cbCode = p.paymentMethod === 'CASH' ? AC.CASH : AC.BANK;
+    const cbCode = p.paymentMethod === 'CASH' ? ACCOUNT_CODES.CASH : ACCOUNT_CODES.BANK;
     const lines: JELine[] = [
       {
-        accountId: await getAccountId(tx, AC.AP),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.AP),
         description: `จ่ายชำระหนี้ ${p.vendor.name}`,
         debit: p.amount,
         credit: 0,
@@ -284,19 +287,19 @@ export async function onPurchaseInvoicePosted(purchaseInvoiceId: string): Promis
   return prisma.$transaction(async (tx) => {
     const lines: JELine[] = [
       {
-        accountId: await getAccountId(tx, AC.COGS),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.COGS),
         description: `ต้นทุนซื้อ ${pi.invoiceNo}`,
         debit: pi.subtotal,
         credit: 0,
       },
       {
-        accountId: await getAccountId(tx, AC.INPUT_VAT),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.INPUT_VAT),
         description: `VAT ซื้อ ${pi.invoiceNo}`,
         debit: pi.vatAmount,
         credit: 0,
       },
       {
-        accountId: await getAccountId(tx, AC.AP),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.AP),
         description: `เจ้าหนี้ - ${pi.vendor.name}`,
         debit: 0,
         credit: pi.totalAmount,
@@ -304,7 +307,7 @@ export async function onPurchaseInvoicePosted(purchaseInvoiceId: string): Promis
     ];
     if (pi.withholdingAmount > 0) {
       lines.push({
-        accountId: await getAccountId(tx, AC.WHT_PAYABLE),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.WHT_PAYABLE),
         description: `WHT ${pi.invoiceNo}`,
         debit: pi.withholdingAmount,
         credit: 0,
@@ -343,19 +346,19 @@ export async function onCreditNotePosted(creditNoteId: string): Promise<CreateJE
   return prisma.$transaction(async (tx) => {
     const lines: JELine[] = [
       {
-        accountId: await getAccountId(tx, AC.REVENUE),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.REVENUE),
         description: `คืน/ลดหนี้ ${cn.creditNoteNo}`,
         debit: cn.subtotal,
         credit: 0,
       },
       {
-        accountId: await getAccountId(tx, AC.AP),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.AP),
         description: `VAT คืน ${cn.creditNoteNo}`,
         debit: cn.vatAmount,
         credit: 0,
       },
       {
-        accountId: await getAccountId(tx, AC.AR),
+        accountId: await getAccountId(tx, ACCOUNT_CODES.AR),
         description: `ลดหนี้ ${cn.customer.name}`,
         debit: 0,
         credit: cn.totalAmount,

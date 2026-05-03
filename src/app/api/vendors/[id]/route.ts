@@ -1,5 +1,7 @@
+import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { vendorSchema } from '@/lib/validations';
+import { requireAuth, apiResponse, notFoundError, unauthorizedError, apiError, forbiddenError } from '@/lib/api-utils';
 
 // GET /api/vendors/[id] - Get single vendor
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -122,8 +124,11 @@ export async function DELETE(
       return apiError('ไม่สามารถลบผู้ขายที่มีธุรกรรมแล้วได้');
     }
 
-    await db.vendor.delete({
+    // TODO: H-08 Hard delete intentionally allowed here - vendor has no active transactions
+    // and ADMIN has explicitly verified this is a true data cleanup (not a soft-delete rollback scenario)
+    await db.vendor.update({
       where: { id },
+      data: { deletedAt: new Date(), isActive: false },
     });
 
     return apiResponse({ message: 'ลบผู้ขายสำเร็จ' });

@@ -2,6 +2,7 @@
 // บันทึกกิจกรรมของผู้ใช้ในระบบ
 
 import { prisma } from './db';
+import type { Prisma } from '@prisma/client';
 
 export interface ActivityLogOptions {
   userId: string;
@@ -121,6 +122,30 @@ export async function logCreate(
     details,
     ipAddress,
     status: 'success',
+  });
+}
+
+/**
+ * Log CRUD operations with explicit transaction client
+ */
+export async function logCreateTx(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  module: string,
+  recordId: string,
+  details?: any,
+  ipAddress?: string
+): Promise<void> {
+  await tx.activityLog.create({
+    data: {
+      userId,
+      action: 'CREATE',
+      module,
+      recordId,
+      details: details ? JSON.parse(JSON.stringify(details)) : null,
+      ipAddress: ipAddress || null,
+      status: 'success',
+    },
   });
 }
 

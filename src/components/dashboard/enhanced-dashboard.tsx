@@ -21,7 +21,8 @@ import {
   Loader2,
 } from 'lucide-react';
 import { QuickAccessCard, useRecentItems } from '@/components/personalization/recent-items';
-import { ActivityFeed } from '@/components/websocket/websocket-provider';
+import * as WebsocketModule from '@/components/websocket/websocket-provider';
+const ActivityFeed = (WebsocketModule as any).ActivityFeed;
 
 // Widget renderer component
 function WidgetRenderer({ widget }: { widget: DashboardWidget }) {

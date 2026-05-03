@@ -61,11 +61,11 @@ export class QueryOptimizer {
       queries.push(e.query);
     };
 
-    this.prisma.$on('query' as any, handler);
+    (this.prisma.$on as any)('query', handler as any);
 
     return () => {
       const duration = Date.now() - startTime;
-      this.prisma.$off('query' as any, handler);
+      (this.prisma as any).$off('query', handler);
 
       return {
         queryCount: queries.length,

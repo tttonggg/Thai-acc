@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     // Return PDF file
     const filename = `balance-sheet-${endDate}.pdf`;
-    return new NextResponse(pdfBytes, {
+    return new NextResponse(new Uint8Array(pdfBytes), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${filename}"`,

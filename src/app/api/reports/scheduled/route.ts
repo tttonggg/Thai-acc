@@ -129,8 +129,8 @@ export async function POST(request: NextRequest) {
     const report = await prisma.scheduledReport.create({
       data: {
         ...validated,
-        createdBy: session.user?.id || 'system',
-      },
+        createdBy: session?.id || 'system',
+      } as any,
     });
 
     return NextResponse.json({

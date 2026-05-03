@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { VirtualTable, VirtualTableColumn } from '@/components/virtual-scroll';
 import {
   BulkActionsToolbar,
@@ -60,6 +60,7 @@ export function CustomerListVirtual({
   const { selectedIds, selectedCount, toggleSelection, selectAll, clearSelection, isSelected } =
     useBulkSelection(customers);
   const { toast } = useToast();
+  const selectedIdsRef = useRef<string[]>([]);
 
   const columns: VirtualTableColumn<Customer>[] = [
     {
@@ -79,7 +80,7 @@ export function CustomerListVirtual({
       header: 'เลขประจำตัวผู้เสียภาษี',
       width: 140,
       sortable: true,
-      formatter: (value) => value || '-',
+      formatter: (value, row?): React.ReactNode => (value ? String(value) : '-'),
     },
     {
       key: 'contact',
@@ -110,7 +111,7 @@ export function CustomerListVirtual({
       header: 'จังหวัด',
       width: 100,
       sortable: true,
-      formatter: (value) => value || '-',
+      formatter: (value, row?): React.ReactNode => (value ? String(value) : '-'),
     },
     {
       key: 'creditLimit',
@@ -276,7 +277,7 @@ export function CustomerListVirtual({
         maxHeight={600}
         selectable
         selectedIds={selectedIds}
-        onSelect={toggleSelection}
+        onSelect={(ids) => { const safeIds = Array.isArray(ids) ? ids : [ids]; selectedIdsRef.current = safeIds; toggleSelection(safeIds[0]); }}
         onRowClick={onView}
         emptyMessage="ไม่พบลูกค้า"
       />

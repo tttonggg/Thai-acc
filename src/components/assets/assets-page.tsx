@@ -522,7 +522,7 @@ function AssetListTab() {
 
       {/* Edit Dialog */}
       <AssetEditDialog
-        asset={selectedAsset}
+        asset={selectedAsset as any}
         open={showEdit}
         onOpenChange={setShowEdit}
         onSuccess={fetch}

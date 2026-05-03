@@ -42,7 +42,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           select: {
             id: true,
             fiscalYear: true,
-            amount: true,
+            allocatedAmount: true,
+            usedAmount: true,
           },
         },
         lines: {
@@ -187,7 +188,7 @@ export async function DELETE(
 
     // Creator or ADMIN only
     if (user.role !== 'ADMIN' && existing.createdById !== user.id) {
-      return forbiddenError('ไม่มีสิทธิ์ลบใบสั่งซื้อนี้');
+      return forbiddenError();
     }
 
     // Soft delete + cascade

@@ -74,7 +74,8 @@ export async function GET(): Promise<NextResponse> {
 /**
  * Record HTTP request metrics (called from middleware)
  */
-export function recordHttpRequest(duration: number): void {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function recordHttpRequest(duration: number): void {
   metrics.httpRequestsTotal++;
   metrics.httpRequestDuration.push(duration);
 

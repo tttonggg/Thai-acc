@@ -90,7 +90,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       const result = await recordStockMovement({
         productId: originalMovement.productId,
         warehouseId: originalMovement.warehouseId,
-        type: oppositeType,
+        type: oppositeType as any,
         quantity: originalMovement.quantity, // Will be negated based on type
         unitCost: originalMovement.unitCost,
         referenceId: id,

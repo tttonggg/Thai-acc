@@ -586,13 +586,13 @@ async function generateAgingAR(config: any, dateFilter: Date) {
     include: {
       invoices: {
         where: {
-          status: { in: ['ISSUED', 'OVERDUE'] },
+          status: { in: ['ISSUED', 'OVERDUE'] as any },
         },
       },
     },
-  });
+  }) as any;
 
-  const agingData = customers.map((customer) => {
+  const agingData = customers.map((customer: any) => {
     const agingBuckets = {
       current: 0,
       days30: 0,
@@ -650,13 +650,13 @@ async function generateAgingAP(config: any, dateFilter: Date) {
     include: {
       purchaseInvoices: {
         where: {
-          status: { in: ['ISSUED', 'OVERDUE'] },
+          status: { in: ['ISSUED', 'OVERDUE'] as any },
         },
       },
     },
-  });
+  }) as any;
 
-  const agingData = vendors.map((vendor) => {
+  const agingData = vendors.map((vendor: any) => {
     const agingBuckets = {
       current: 0,
       days30: 0,

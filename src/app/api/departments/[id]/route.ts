@@ -20,13 +20,14 @@ const departmentUpdateSchema = z.object({
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
+    const { id } = await params;
 
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     const department = await prisma.department.findUnique({
-      where: { id: id },
+      where: { id },
       include: {
         manager: {
           select: {
@@ -97,6 +98,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
+    const { id } = await params;
 
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
@@ -109,7 +111,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     // Check if department exists
     const existing = await prisma.department.findUnique({
-      where: { id: id },
+      where: { id },
     });
 
     if (!existing) {
@@ -172,7 +174,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const department = await prisma.department.update({
-      where: { id: id },
+      where: { id },
       data: validatedData,
       include: {
         manager: {
@@ -235,6 +237,7 @@ export async function DELETE(
 ) {
   try {
     const session = await auth();
+    const { id } = await params;
 
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
@@ -247,7 +250,7 @@ export async function DELETE(
 
     // Check if department exists
     const existing = await prisma.department.findUnique({
-      where: { id: id },
+      where: { id },
       include: {
         _count: {
           select: {
@@ -280,7 +283,7 @@ export async function DELETE(
     }
 
     await prisma.department.delete({
-      where: { id: id },
+      where: { id },
     });
 
     return NextResponse.json({

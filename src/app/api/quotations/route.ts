@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
           lines: {
             create: lines,
           },
-        },
+        } as any,
         include: {
           customer: {
             select: {
@@ -333,7 +333,7 @@ export async function POST(request: NextRequest) {
       discountAmount: satangToBaht(quotation.discountAmount),
       vatAmount: satangToBaht(quotation.vatAmount),
       totalAmount: satangToBaht(quotation.totalAmount),
-      lines: quotation.lines.map((line: any) => ({
+      lines: (quotation as any).lines?.map((line: any) => ({
         ...line,
         unitPrice: satangToBaht(line.unitPrice),
         discount: satangToBaht(line.discount),

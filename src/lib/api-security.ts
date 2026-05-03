@@ -55,7 +55,7 @@ export function verifyWebhookRequest(req: NextRequest, payload: string, secret: 
  * Get client IP address
  */
 export function getClientIp(req: NextRequest): string {
-  return req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || req.ip || 'unknown';
+  return req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || (req as any).ip || 'unknown';
 }
 
 /**

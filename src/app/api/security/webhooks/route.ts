@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
 
       await logSecurityEvent(
         user.id,
-        'CREATE',
+        'CREATE' as any,
         { resource: 'webhook', webhookId: result.id },
         ipAddress,
         userAgent
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
 
       await logSecurityEvent(
         user.id,
-        'UPDATE',
+        'UPDATE' as any,
         { resource: 'webhook', webhookId: id, action: 'rotate_secret' },
         ipAddress,
         userAgent
@@ -198,7 +198,7 @@ export async function PUT(request: NextRequest) {
 
     await logSecurityEvent(
       user.id,
-      'UPDATE',
+      'UPDATE' as any,
       { resource: 'webhook', webhookId: id },
       ipAddress,
       userAgent
@@ -240,7 +240,7 @@ export async function DELETE(request: NextRequest) {
 
     await logSecurityEvent(
       user.id,
-      'DELETE',
+      'DELETE' as any,
       { resource: 'webhook', webhookId: id },
       ipAddress,
       userAgent

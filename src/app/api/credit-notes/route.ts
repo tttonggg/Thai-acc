@@ -390,6 +390,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Convert Satang to Baht for response
+    if (!completeCreditNote) {
+      return apiError('เกิดข้อผิดพลาดในการสร้างใบลดหนี้', 500);
+    }
     const creditNoteInBaht = {
       ...completeCreditNote,
       subtotal: satangToBaht(completeCreditNote.subtotal),

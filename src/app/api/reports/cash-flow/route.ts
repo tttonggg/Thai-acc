@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
+import type { ChartOfAccount, JournalLine, JournalEntry } from '@prisma/client';
 
 /**
  * GET /api/reports/cash-flow
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Get all accounts
-    const accounts = await prisma.account.findMany({
+    const accounts = await prisma.chartOfAccount.findMany({
       where: { isActive: true },
     });
     const accountMap = new Map(accounts.map((a) => [a.id, a]));
@@ -157,7 +158,7 @@ export async function GET(request: NextRequest) {
     let totalWorkingCapitalChange = 0;
 
     for (const [accountId, wc] of wcChanges) {
-      const account = accountMap.get(accountId);
+      const account = accountMap.get(accountId) as (ChartOfAccount & { type: string }) | undefined;
       if (!account) continue;
 
       // Get prior period balance

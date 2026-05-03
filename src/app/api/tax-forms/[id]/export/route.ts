@@ -16,7 +16,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { searchParams } = new URL(req.url);
     const format = searchParams.get('format') || 'pdf';
 
-    let buffer: Buffer;
+    let buffer: Uint8Array;
     let contentType: string;
     let filename: string;
 
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return errorResponse('Invalid format', 400);
     }
 
-    return new Response(buffer, {
+    return new Response(buffer as any, {
       headers: {
         'Content-Type': contentType,
         'Content-Disposition': `attachment; filename="${filename}"`,

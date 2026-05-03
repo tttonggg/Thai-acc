@@ -237,7 +237,7 @@ export async function generateBudgetVsActualReport(
   };
   if (accountType) where.type = accountType;
 
-  const accounts = await prisma.chartOfAccount.findMany({ where });
+  const accounts = await prisma.chartOfAccount.findMany({ where: where as any });
 
   const report: BudgetVsActualReport = {
     year,
@@ -367,7 +367,7 @@ export async function generateVarianceAnalysis(year: number): Promise<VarianceAn
     }
 
     // Calculate monthly trend
-    const monthData = [];
+    const monthData: { month: number; budget: number; actual: number }[] = [];
     for (let month = 1; month <= 12; month++) {
       const monthStart = new Date(year, month - 1, 1);
       const monthEnd = new Date(year, month, 0, 23, 59, 59);
@@ -382,8 +382,8 @@ export async function generateVarianceAnalysis(year: number): Promise<VarianceAn
     analysis.trends.push({
       accountId: budget.accountId,
       accountName: budget.account.name,
-      monthData,
-    });
+      data: monthData.map(m => ({ ...m, isDetail: false })),
+    } as any);
   }
 
   return analysis;

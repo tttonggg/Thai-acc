@@ -8,6 +8,7 @@ import {
   unauthorizedError,
   notFoundError,
   forbiddenError,
+  calculateInvoiceTotals,
 } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
 
@@ -29,12 +30,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             },
           },
         },
-        payments: {
+        paymentAllocations: {
           select: {
             id: true,
-            paymentNo: true,
-            paymentDate: true,
             amount: true,
+            whtRate: true,
+            whtAmount: true,
           },
         },
         journalEntry: {
@@ -185,8 +186,8 @@ export async function DELETE(
     const existing = await db.purchaseInvoice.findUnique({
       where: { id },
       include: {
-        payments: true,
-      },
+        paymentAllocations: true,
+      } as any,
     });
 
     if (!existing) {
@@ -195,23 +196,23 @@ export async function DELETE(
 
     // Only DRAFT status
     if (existing.status !== 'DRAFT') {
-      return forbiddenError('สามารถลบได้เฉพาะใบซื้อสถานะร่างเท่านั้น');
+      return apiError('สามารถลบได้เฉพาะใบซื้อสถานะร่างเท่านั้น', 403);
     }
 
     // Creator or ADMIN only
     if (user.role !== 'ADMIN' && existing.createdById !== user.id) {
-      return forbiddenError('ไม่มีสิทธิ์ลบใบซื้อนี้');
+      return apiError('ไม่มีสิทธิ์ลบใบซื้อนี้', 403);
     }
 
-    if (existing.payments.length > 0) {
+    if ((existing as any).paymentAllocations?.length > 0) {
       return apiError('ไม่สามารถลบใบซื้อที่มีการจ่ายเงินแล้วได้');
     }
 
     // Soft-delete + cascade children
     await db.$transaction([
-      db.purchaseInvoiceLine.deleteMany({ where: { purchaseId: id } }),
-      db.paymentAllocation.deleteMany({ where: { invoiceId: id } }),
-      db.vatRecord.deleteMany({ where: { referenceId: id, documentType: 'PURCHASE' } }),
+      db.purchaseInvoiceLine.deleteMany({ where: { purchaseId: id } } as any),
+      db.paymentAllocation.deleteMany({ where: { invoiceId: id } } as any),
+      db.vatRecord.deleteMany({ where: { referenceId: id, documentType: 'PURCHASE' } } as any),
       db.purchaseInvoice.update({
         where: { id },
         data: { deletedAt: new Date(), isActive: false, deletedBy: user.id },

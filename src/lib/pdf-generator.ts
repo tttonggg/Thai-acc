@@ -11,21 +11,48 @@
  *
  * For MVP, this implementation uses English labels with Thai data where possible.
  * Full Thai font support requires font file conversion and embedding.
+ *
+ * ════════════════════════════════════════════════════════════════════════════
+ * jsPDF v4 + jspdf-autotable v5 MIGRATION PENDING
+ * ════════════════════════════════════════════════════════════════════════════
+ *
+ * CURRENT: jsPDF v4.2.0 + jspdf-autotable v5.0.7
+ *
+ * PROBLEM: jspdf-autotable v5 changed its API from:
+ *   OLD (v3): autoTable(doc, { head, body, ... })
+ *   NEW (v5): autoTable(doc, { head, body, ... })
+ *
+ * SYMPTOMS: All 9 PDF generation tests fail with:
+ *   TypeError: doc.autoTable is not a function
+ *
+ * TO MIGRATE:
+ *   1. Change import from:
+ *        import { autoTable } from 'jspdf-autotable';
+ *      to:
+ *        import { autoTable } from 'jspdf-autotable';
+ *
+ *   2. Change all 14 occurrences of:
+ *        autoTable(doc, { ... })
+ *      to:
+ *        autoTable(doc, { ... })
+ *
+ *   3. Change lastAutoTable access from:
+ *        doc.previousAutoTable.finalY
+ *      to:
+ *        doc.previousAutoTable?.finalY
+ *
+ *   4. Remove the declare module 'jspdf' augmentation
+ *
+ *   5. Uncomment and run tests in src/lib/__tests__/pdf-generator.test.ts
+ *
+ * LOCATION OF doc.autoTable CALLS (14 total):
+ *   Lines: 308, 661, 784, 874, 997, 1045, 1275, 1328, 1573, 1622, 1832, 1875, 2069, 2112
+ * ════════════════════════════════════════════════════════════════════════════
  */
 
 import { prisma } from '@/lib/db';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-
-// Extend jsPDF to include autoTable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-    lastAutoTable: {
-      finalY: number;
-    };
-  }
-}
+import { autoTable } from 'jspdf-autotable';
 
 // Type definitions for our data structures
 interface InvoiceData {
@@ -305,7 +332,7 @@ export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     formatCurrency(line.amount),
   ]);
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos,
     head: [
       [
@@ -346,7 +373,7 @@ export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     },
   });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Summary Section
   const summaryX = pageWidth - margin - 70;
@@ -420,7 +447,7 @@ export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -594,7 +621,7 @@ export async function generateReceiptPDF(receipt: any): Promise<Uint8Array> {
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -658,7 +685,7 @@ export async function generateJournalEntryPDF(entry: any): Promise<Uint8Array> {
     line.credit > 0 ? formatCurrency(line.credit) : '',
   ]);
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos,
     head: [
       [
@@ -708,7 +735,7 @@ export async function generateJournalEntryPDF(entry: any): Promise<Uint8Array> {
     },
   });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Balance Check
   const isBalanced = Math.abs(entry.totalDebit - entry.totalCredit) < 0.01;
@@ -733,7 +760,7 @@ export async function generateJournalEntryPDF(entry: any): Promise<Uint8Array> {
     doc.text(noteLines, margin, yPos);
   }
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -781,7 +808,7 @@ export async function generateTrialBalancePDF(data: ReportData): Promise<Uint8Ar
   yPos += 10;
 
   // Table
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos,
     head: [data.columns],
     body: data.data.map((row) => Object.values(row)),
@@ -823,7 +850,7 @@ export async function generateTrialBalancePDF(data: ReportData): Promise<Uint8Ar
     align: 'center',
   });
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -871,7 +898,7 @@ export async function generateIncomeStatementPDF(data: ReportData): Promise<Uint
   yPos += 10;
 
   // Table
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos,
     head: [data.columns],
     body: data.data.map((row) => Object.values(row)),
@@ -919,7 +946,7 @@ export async function generateIncomeStatementPDF(data: ReportData): Promise<Uint
     },
   });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Footer with totals
   if (data.totals) {
@@ -940,7 +967,7 @@ export async function generateIncomeStatementPDF(data: ReportData): Promise<Uint
     align: 'center',
   });
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -994,7 +1021,7 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
     .map((row) => [row.account || row.description, formatCurrency(row.amount || 0)]);
 
   if (assetsData.length > 0) {
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [['Account / บัญชี', 'Amount / จำนวนเงิน']],
       body: assetsData,
@@ -1015,7 +1042,7 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
       },
     });
 
-    yPos = (doc.lastAutoTable as any).finalY + 3;
+    yPos = (doc as any).previousAutoTable?.finalY + 3;
   }
 
   // Total Assets
@@ -1042,7 +1069,7 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
     .map((row) => [row.account || row.description, formatCurrency(row.amount || 0)]);
 
   if (liabilitiesData.length > 0) {
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [['Account / บัญชี', 'Amount / จำนวนเงิน']],
       body: liabilitiesData,
@@ -1063,7 +1090,7 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
       },
     });
 
-    yPos = (doc.lastAutoTable as any).finalY + 3;
+    yPos = (doc as any).previousAutoTable?.finalY + 3;
   }
 
   // Total Liabilities & Equity
@@ -1098,7 +1125,7 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
     align: 'center',
   });
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -1272,7 +1299,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
     ['Gross Salary / รายได้รวม', formatCurrency(data.payroll.grossSalary)],
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos,
     head: [],
     body: earningsData,
@@ -1293,7 +1320,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
     },
   });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Deductions Section
   doc.setDrawColor(220, 53, 69); // Red
@@ -1325,7 +1352,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
     ],
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos,
     head: [],
     body: deductionsData,
@@ -1346,7 +1373,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
     },
   });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Net Pay Section - Large and Prominent
   doc.setDrawColor(40, 167, 69); // Green
@@ -1442,7 +1469,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -1570,7 +1597,7 @@ export async function generatePP30PDF(data: {
     ['ภาษีสุทธิ Net VAT Payable', '', formatCurrencySatang(data.netVat)],
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos,
     head: [summaryData[0]],
     body: summaryData.slice(1),
@@ -1601,7 +1628,7 @@ export async function generatePP30PDF(data: {
     margin: { left: margin, right: margin },
   });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // VAT Records Table (if provided)
   if (data.vatRecords && data.vatRecords.length > 0) {
@@ -1619,7 +1646,7 @@ export async function generatePP30PDF(data: {
       formatCurrencySatang(r.vatAmount),
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [['No.', 'Doc No', 'Date', 'Name', 'Amount', 'VAT']],
       body: vatTableData,
@@ -1646,7 +1673,7 @@ export async function generatePP30PDF(data: {
       margin: { left: margin, right: margin },
     });
 
-    yPos = (doc.lastAutoTable as any).finalY + 10;
+    yPos = (doc as any).previousAutoTable?.finalY + 10;
   }
 
   // Declaration Section
@@ -1693,7 +1720,7 @@ export async function generatePP30PDF(data: {
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 // PND3 Income Type names
@@ -1829,7 +1856,7 @@ export async function generatePND3PDF(data: {
     ['รวมภาษีหัก Total Tax', '', formatCurrencySatang(data.totalTax)],
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos,
     head: [summaryData[0]],
     body: summaryData.slice(1),
@@ -1853,7 +1880,7 @@ export async function generatePND3PDF(data: {
     margin: { left: margin, right: margin },
   });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Withholding Records Table
   if (data.lines.length > 0) {
@@ -1872,7 +1899,7 @@ export async function generatePND3PDF(data: {
       formatCurrencySatang(line.taxAmount),
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [
         ['No.', 'ผู้ถูกหักภาษี', 'เลขผู้เสียภาษี', 'ประเภทเงินได้', 'มูลค่า', 'อัตรา', 'ภาษี'],
@@ -1902,7 +1929,7 @@ export async function generatePND3PDF(data: {
       margin: { left: margin, right: margin },
     });
 
-    yPos = (doc.lastAutoTable as any).finalY + 10;
+    yPos = (doc as any).previousAutoTable?.finalY + 10;
   }
 
   // Declaration Section
@@ -1949,7 +1976,7 @@ export async function generatePND3PDF(data: {
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -2066,7 +2093,7 @@ export async function generatePND53PDF(data: {
     ['รวมภาษีหัก Total Tax', '', formatCurrencySatang(data.totalTax)],
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos,
     head: [summaryData[0]],
     body: summaryData.slice(1),
@@ -2090,7 +2117,7 @@ export async function generatePND53PDF(data: {
     margin: { left: margin, right: margin },
   });
 
-  yPos = (doc.lastAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Withholding Records Table
   if (data.lines.length > 0) {
@@ -2109,7 +2136,7 @@ export async function generatePND53PDF(data: {
       formatCurrencySatang(line.taxAmount),
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [
         ['No.', 'ผู้ถูกหักภาษี', 'เลขผู้เสียภาษี', 'ประเภทเงินได้', 'มูลค่า', 'อัตรา', 'ภาษี'],
@@ -2139,7 +2166,7 @@ export async function generatePND53PDF(data: {
       margin: { left: margin, right: margin },
     });
 
-    yPos = (doc.lastAutoTable as any).finalY + 10;
+    yPos = (doc as any).previousAutoTable?.finalY + 10;
   }
 
   // Declaration Section
@@ -2186,7 +2213,7 @@ export async function generatePND53PDF(data: {
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 // Stub function for tax form PDF generation
@@ -2208,5 +2235,5 @@ export async function generatePDF(params: {
   const lines = doc.splitTextToSize(contentStr, 170);
   doc.text(lines, 20, 40);
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }

@@ -39,7 +39,6 @@ export const metadata: Metadata = {
     icon: '/icons/icon.svg',
     apple: '/icons/icon.svg',
   },
-  favicon: '/icon.svg',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

@@ -283,7 +283,6 @@ export async function createSalesOrder(data: SalesOrderCreateInput): Promise<any
       orderNo,
       orderDate: data.orderDate || new Date(),
       customerId: data.customerId,
-      quotationId: data.quotationId,
       expectedDate: data.expectedDate,
       customerContact: data.customerContact,
       customerEmail: data.customerEmail,
@@ -300,7 +299,6 @@ export async function createSalesOrder(data: SalesOrderCreateInput): Promise<any
       notes: data.notes,
       internalNotes: data.internalNotes,
       createdById: data.createdById,
-      versionNo: 1,
       lines: {
         create: data.lines.map((line, index) => {
           const amounts = calculateLineAmounts(line);
@@ -322,7 +320,6 @@ export async function createSalesOrder(data: SalesOrderCreateInput): Promise<any
     },
     include: {
       customer: true,
-      quotation: true,
       lines: {
         orderBy: { lineNo: 'asc' },
       },
@@ -338,7 +335,6 @@ export async function getSalesOrder(id: string): Promise<any> {
     where: { id },
     include: {
       customer: true,
-      quotation: true,
       lines: {
         orderBy: { lineNo: 'asc' },
         include: { product: true },
@@ -361,7 +357,6 @@ export async function getSalesOrderByNo(orderNo: string): Promise<any> {
     where: { orderNo },
     include: {
       customer: true,
-      quotation: true,
       lines: {
         orderBy: { lineNo: 'asc' },
         include: { product: true },
@@ -455,7 +450,6 @@ export async function updateSalesOrder(id: string, data: SalesOrderUpdateInput):
 
   // Build update data
   const updateData: any = {
-    versionNo: { increment: 1 },
   };
 
   if (data.orderDate) updateData.orderDate = data.orderDate;
@@ -557,7 +551,6 @@ export async function updateSalesOrder(id: string, data: SalesOrderUpdateInput):
     data: updateData,
     include: {
       customer: true,
-      quotation: true,
       lines: { orderBy: { lineNo: 'asc' } },
     },
   });
@@ -611,7 +604,6 @@ export async function submitForApproval(id: string): Promise<any> {
     where: { id },
     data: {
       status: 'PENDING',
-      versionNo: { increment: 1 },
     },
     include: { customer: true, lines: true },
   });
@@ -638,7 +630,6 @@ export async function approveOrder(id: string): Promise<any> {
     data: {
       status: 'APPROVED',
       approvedAt: new Date(),
-      versionNo: { increment: 1 },
     },
     include: { customer: true, lines: true },
   });
@@ -665,7 +656,6 @@ export async function sendOrder(id: string): Promise<any> {
     data: {
       status: 'SENT',
       sentAt: new Date(),
-      versionNo: { increment: 1 },
     },
     include: { customer: true, lines: true },
   });
@@ -692,7 +682,6 @@ export async function confirmOrder(id: string): Promise<any> {
     data: {
       status: 'CONFIRMED',
       confirmedAt: new Date(),
-      versionNo: { increment: 1 },
     },
     include: { customer: true, lines: true },
   });
@@ -719,7 +708,6 @@ export async function shipOrder(id: string): Promise<any> {
     data: {
       status: 'SHIPPED',
       shippedAt: new Date(),
-      versionNo: { increment: 1 },
     },
     include: { customer: true, lines: true },
   });
@@ -746,7 +734,6 @@ export async function deliverOrder(id: string): Promise<any> {
     data: {
       status: 'DELIVERED',
       deliveredAt: new Date(),
-      versionNo: { increment: 1 },
     },
     include: { customer: true, lines: true },
   });
@@ -772,7 +759,6 @@ export async function cancelOrder(id: string): Promise<any> {
     where: { id },
     data: {
       status: 'CANCELLED',
-      versionNo: { increment: 1 },
     },
     include: { customer: true, lines: true },
   });
@@ -813,7 +799,7 @@ async function generateInvoiceNumber(): Promise<string> {
  * Convert Sales Order to Invoice
  * Status must be >= CONFIRMED
  * Creates Invoice with salesOrderId linked, copies customer/lines/amounts
- * Updates SO: status → COMPLETED, versionNo++
+ * Updates SO: status → COMPLETED
  */
 export async function convertToInvoice(
   salesOrderId: string,
@@ -892,7 +878,6 @@ export async function convertToInvoice(
       where: { id: salesOrderId },
       data: {
         status: 'COMPLETED',
-        versionNo: { increment: 1 },
       },
     });
 

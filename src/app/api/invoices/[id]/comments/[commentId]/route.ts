@@ -1,6 +1,8 @@
+import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { z } from 'zod';
 import { updateInvoiceCommentSchema } from '@/lib/validations';
+import { requireAuth, apiResponse, notFoundError, unauthorizedError, apiError } from '@/lib/api-utils';
 
 // PUT /api/invoices/[id]/comments/[commentId] - Update comment
 export async function PUT(
@@ -113,9 +115,10 @@ export async function PUT(
       // If comment was just resolved, create notifications for mentioned users
       if (validatedData.resolved && !comment.resolved) {
         // Notify mentioned users
-        if (comment.mentions && comment.mentions.length > 0) {
+        const mentions = (comment.mentions as string[]) || [];
+        if (mentions.length > 0) {
           await tx.commentNotification.createMany({
-            data: comment.mentions
+            data: mentions
               .filter((userId) => userId !== user.id) // Don't notify self
               .map((userId) => ({
                 userId,
@@ -123,12 +126,12 @@ export async function PUT(
                 invoiceId: id,
                 type: 'RESOLVED',
               })),
-            skipDuplicates: true,
           });
         }
+      }
 
-        // Notify parent comment author if this is a reply
-        if (comment.parentId) {
+      // Notify parent comment author if this is a reply
+      if (comment.parentId) {
           const parentComment = await tx.invoiceComment.findUnique({
             where: { id: comment.parentId },
             select: { userId: true },
@@ -153,7 +156,6 @@ export async function PUT(
                   type: 'RESOLVED',
                 },
               });
-            }
           }
         }
       }
@@ -165,7 +167,7 @@ export async function PUT(
           action: 'UPDATE',
           entityType: 'InvoiceComment',
           entityId: commentId,
-          beforeState: previousState,
+          beforeState: previousState as any,
           afterState: {
             content: updated.content,
             isInternal: updated.isInternal,
@@ -173,7 +175,7 @@ export async function PUT(
             resolvedAt: updated.resolvedAt,
             resolvedBy: updated.resolvedBy,
           },
-        },
+        } as any,
       });
 
       return updated;
@@ -309,9 +311,9 @@ export async function DELETE(
           action: 'DELETE',
           entityType: 'InvoiceComment',
           entityId: commentId,
-          beforeState: commentData,
-          afterState: null,
-        },
+          beforeState: commentData as any,
+          afterState: undefined as any,
+        } as any,
       });
     });
 

@@ -182,7 +182,7 @@ export const resolvers = {
         where: {
           ...(type && { type }),
           ...(isActive !== undefined && { isActive }),
-        },
+        } as any,
         orderBy: { code: 'asc' },
       });
     },
@@ -366,7 +366,7 @@ export const resolvers = {
           deletedAt: null,
           ...(type && { type }),
           ...(isActive !== undefined && { isActive }),
-        },
+        } as any,
         orderBy: { name: 'asc' },
       });
     },
@@ -388,7 +388,7 @@ export const resolvers = {
         where: {
           isActive: true,
           ...(status && { status }),
-        },
+        } as any,
         orderBy: { invoiceDate: 'desc' },
       });
     },
@@ -953,7 +953,7 @@ export const resolvers = {
       requireAdmin(context);
       return prisma.user.update({
         where: { id },
-        data: { role },
+        data: { role: role as any },
       });
     },
 

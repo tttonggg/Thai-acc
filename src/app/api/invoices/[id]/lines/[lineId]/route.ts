@@ -1,6 +1,8 @@
+import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { invoiceLineEditSchema } from '@/lib/validations';
 import { headers } from 'next/headers';
+import { requireAuth, apiResponse, notFoundError, unauthorizedError, apiError, forbiddenError } from '@/lib/api-utils';
 
 // GET /api/invoices/[id]/lines/[lineId] - Get single line item with audit history
 export async function GET(
@@ -493,7 +495,7 @@ export async function DELETE(
         entityType: 'InvoiceLine',
         entityId: lineId,
         beforeState: JSON.stringify(result),
-        afterState: null,
+        afterState: undefined as any,
         ipAddress: headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown',
         userAgent: headersList.get('user-agent') || 'unknown',
         hash: '', // Tamper-evident hash would be computed here

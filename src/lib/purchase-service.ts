@@ -536,7 +536,7 @@ export async function convertPRToPO(
         lines: {
           create: poLinesData,
         },
-      },
+      } as any,
       include: {
         vendor: true,
         purchaseRequest: true,

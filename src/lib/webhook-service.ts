@@ -128,12 +128,12 @@ export async function deliverWebhook(
           webhookId,
           event,
           payload: JSON.stringify(data),
-          signature,
+          signature: signature as any,
           responseStatus: response.status,
           responseBody: await response.text(),
           duration: 0,
           success: response.ok,
-        },
+        } as any,
       });
 
       if (response.ok) {
@@ -155,10 +155,10 @@ export async function deliverWebhook(
           webhookId,
           event,
           payload: JSON.stringify(data),
-          signature,
+          signature: signature as any,
           success: false,
           error: lastError,
-        },
+        } as any,
       });
     }
 
@@ -215,7 +215,7 @@ export async function rotateWebhookSecret(webhookId: string): Promise<string | n
   try {
     await prisma.webhookEndpoint.update({
       where: { id: webhookId },
-      data: { secret: encryptedSecret },
+      data: { secret: encryptedSecret as any },
     });
     return newSecret;
   } catch {

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
-import { requireAuth as requireAuthApi } from '@/lib/api-auth';
+import { requireAuth as requireAuthApi, AuthError } from '@/lib/api-auth';
 import {
   apiResponse,
   apiError,
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    // Fetch purchase invoices without vendor first to avoid null relationship errors
+    // Fetch purchase invoices with vendor and lines in optimized query
     const [purchases, total] = await Promise.all([
       db.purchaseInvoice.findMany({
         where,
@@ -62,10 +62,18 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
         include: {
+          vendor: {
+            select: {
+              id: true,
+              code: true,
+              name: true,
+              taxId: true,
+            },
+          },
           lines: {
             select: {
               id: true,
-              description: true,
+              productId: true,
               quantity: true,
               unit: true,
               unitPrice: true,
@@ -78,29 +86,8 @@ export async function GET(request: NextRequest) {
       db.purchaseInvoice.count({ where }),
     ]);
 
-    // Fetch vendors separately for purchases that have them
-    const vendorIds = purchases.map((p: any) => p.vendorId).filter((id: string) => id != null);
-    const vendors =
-      vendorIds.length > 0
-        ? await db.vendor.findMany({
-            where: {
-              id: { in: vendorIds },
-            },
-            select: { id: true, code: true, name: true, taxId: true },
-          })
-        : [];
-
-    // Create a map for quick vendor lookup
-    const vendorMap = new Map(vendors.map((v: any) => [v.id, v]));
-
-    // Attach vendors to purchases
-    const purchasesWithVendors = purchases.map((p: any) => ({
-      ...p,
-      vendor: p.vendorId ? vendorMap.get(p.vendorId) || null : null,
-    }));
-
     // Filter out purchases with null vendors (data integrity issue)
-    const validPurchases = purchasesWithVendors.filter((p: any) => p.vendor !== null);
+    const validPurchases = purchases.filter((p: any) => p.vendor !== null);
 
     // Transform data to match frontend interface (flatten vendor.name to vendorName)
     console.log('Raw purchases data:', JSON.stringify(validPurchases, null, 2).substring(0, 500));
@@ -209,77 +196,82 @@ export async function POST(request: NextRequest) {
       validatedData.withholdingRate
     );
 
-    // Create purchase invoice with lines
-    const purchase = await db.purchaseInvoice.create({
-      data: {
-        invoiceNo,
-        vendorInvoiceNo: validatedData.vendorInvoiceNo,
-        invoiceDate: new Date(validatedData.invoiceDate),
-        dueDate: validatedData.dueDate ? new Date(validatedData.dueDate) : null,
-        vendorId: validatedData.vendorId,
-        type: validatedData.type,
-        reference: validatedData.reference,
-        poNumber: validatedData.poNumber,
-        subtotal: bahtToSatang(totals.subtotal),
-        discountAmount: bahtToSatang(totals.totalDiscount),
-        vatRate: 7,
-        vatAmount: bahtToSatang(totals.vatAmount),
-        totalAmount: bahtToSatang(totals.totalAmount),
-        withholdingRate: validatedData.withholdingRate,
-        withholdingAmount: bahtToSatang(totals.withholdingAmount),
-        netAmount: bahtToSatang(totals.netAmount),
-        notes: validatedData.notes,
-        internalNotes: validatedData.internalNotes,
-        createdById: user.id,
-        lines: {
-          create: validatedData.lines.map((line, index) => ({
-            lineNo: index + 1,
-            productId: line.productId,
-            description: line.description,
-            quantity: line.quantity,
-            unit: line.unit,
-            unitPrice: bahtToSatang(line.unitPrice),
-            discount: bahtToSatang(line.discount),
-            amount: bahtToSatang(line.quantity * line.unitPrice - line.discount),
-            vatRate: line.vatRate,
-            vatAmount: bahtToSatang(
-              (line.quantity * line.unitPrice - line.discount) * (line.vatRate / 100)
-            ),
-            notes: line.notes,
-          })),
+    // ✅ H-05: Wrap purchase create + VAT create + status update in atomic transaction
+    const purchase = await db.$transaction(async (tx) => {
+      // Create purchase invoice with lines
+      const newPurchase = await tx.purchaseInvoice.create({
+        data: {
+          invoiceNo,
+          vendorInvoiceNo: validatedData.vendorInvoiceNo,
+          invoiceDate: new Date(validatedData.invoiceDate),
+          dueDate: validatedData.dueDate ? new Date(validatedData.dueDate) : null,
+          vendorId: validatedData.vendorId,
+          type: validatedData.type,
+          reference: validatedData.reference,
+          poNumber: validatedData.poNumber,
+          subtotal: bahtToSatang(totals.subtotal),
+          discountAmount: bahtToSatang(totals.totalDiscount),
+          vatRate: 7,
+          vatAmount: bahtToSatang(totals.vatAmount),
+          totalAmount: bahtToSatang(totals.totalAmount),
+          withholdingRate: validatedData.withholdingRate,
+          withholdingAmount: bahtToSatang(totals.withholdingAmount),
+          netAmount: bahtToSatang(totals.netAmount),
+          notes: validatedData.notes,
+          internalNotes: validatedData.internalNotes,
+          createdById: user.id,
+          lines: {
+            create: validatedData.lines.map((line, index) => ({
+              lineNo: index + 1,
+              productId: line.productId,
+              description: line.description,
+              quantity: line.quantity,
+              unit: line.unit,
+              unitPrice: bahtToSatang(line.unitPrice),
+              discount: bahtToSatang(line.discount),
+              amount: bahtToSatang(line.quantity * line.unitPrice - line.discount),
+              vatRate: line.vatRate,
+              vatAmount: bahtToSatang(
+                (line.quantity * line.unitPrice - line.discount) * (line.vatRate / 100)
+              ),
+              notes: line.notes,
+            })),
+          },
         },
-      },
-      include: {
-        vendor: true,
-        lines: true,
-      },
-    });
+        include: {
+          vendor: true,
+          lines: true,
+        },
+      });
 
-    // Create VAT record for input tax
-    await db.vatRecord.create({
-      data: {
-        type: 'INPUT',
-        documentNo: purchase.invoiceNo,
-        documentDate: purchase.invoiceDate,
-        documentType: 'PURCHASE',
-        referenceId: purchase.id,
-        vendorId: purchase.vendorId,
-        vendorName: vendor.name,
-        vendorTaxId: vendor.taxId,
-        description: `ใบซื้อ ${purchase.invoiceNo}`,
-        subtotal: purchase.subtotal,
-        vatRate: purchase.vatRate,
-        vatAmount: purchase.vatAmount,
-        totalAmount: purchase.totalAmount,
-        taxMonth: purchase.invoiceDate.getMonth() + 1,
-        taxYear: purchase.invoiceDate.getFullYear(),
-      },
-    });
+      // Create VAT record for input tax
+      await tx.vatRecord.create({
+        data: {
+          type: 'INPUT',
+          documentNo: newPurchase.invoiceNo,
+          documentDate: newPurchase.invoiceDate,
+          documentType: 'PURCHASE',
+          referenceId: newPurchase.id,
+          vendorId: newPurchase.vendorId,
+          vendorName: vendor.name,
+          vendorTaxId: vendor.taxId,
+          description: `ใบซื้อ ${newPurchase.invoiceNo}`,
+          subtotal: newPurchase.subtotal,
+          vatRate: newPurchase.vatRate,
+          vatAmount: newPurchase.vatAmount,
+          totalAmount: newPurchase.totalAmount,
+          taxMonth: newPurchase.invoiceDate.getMonth() + 1,
+          taxYear: newPurchase.invoiceDate.getFullYear(),
+        },
+      });
 
-    // Update status to issued
-    await db.purchaseInvoice.update({
-      where: { id: purchase.id },
-      data: { status: 'ISSUED' },
+      // Update status to issued
+      await tx.purchaseInvoice.update({
+        where: { id: newPurchase.id },
+        data: { status: 'ISSUED' },
+      });
+
+      return newPurchase;
     });
 
     // ✅ OPTIMIZED: Record stock movements for inventory items in batch

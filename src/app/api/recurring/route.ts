@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     const recurring = await createRecurringDocument({
       ...validatedData,
       createdBy: user.id,
-    });
+    } as any);
 
     return NextResponse.json({ success: true, data: recurring }, { status: 201 });
   } catch (error: any) {

@@ -12,7 +12,7 @@ import {
 import { get, set, del, keys } from 'idb-keyval';
 import { usePWA } from '@/components/pwa/pwa-provider';
 
-interface PendingChange {
+export interface PendingChange {
   id: string;
   timestamp: number;
   operation: 'create' | 'update' | 'delete';
@@ -43,7 +43,7 @@ interface OfflineSyncContextType {
   ) => void;
 }
 
-interface Conflict {
+export interface Conflict {
   id: string;
   change: PendingChange;
   serverData: unknown;
@@ -145,7 +145,7 @@ export function OfflineSyncProvider({
 
       // Try to sync immediately if online
       if (isOnline) {
-        syncNowRef.current();
+        syncNow();
       }
     },
     [pendingChanges, isOnline]

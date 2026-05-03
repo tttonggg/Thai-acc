@@ -13,13 +13,13 @@ import { db } from '@/lib/db';
 
 // Validation schema for updating stock take
 const updateStockTakeSchema = z.object({
-  date: z
+  takeDate: z
     .string()
     .transform((val) => new Date(val))
     .optional(),
   warehouseId: z.string().optional(),
   notes: z.string().optional(),
-  status: z.enum(['DRAFT', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
+  status: z.enum(['DRAFT', 'IN_PROGRESS', 'PENDING_APPROVAL', 'APPROVED', 'POSTED', 'CANCELLED']).optional(),
 });
 
 // Validation schema for stock take lines
@@ -83,7 +83,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return notFoundError('ไม่พบการตรวจนับสต็อก');
     }
 
-    if (existing.status === 'COMPLETED') {
+    if (existing.status === 'POSTED') {
       return apiError('ไม่สามารถแก้ไขการตรวจนับสต็อกที่เสร็จสมบูรณ์แล้วได้');
     }
 
@@ -100,18 +100,16 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       // Delete existing lines and recreate
       await db.$transaction(async (tx) => {
         await tx.stockTakeLine.deleteMany({
-          where: { takeId: id },
+          where: { stockTakeId: id },
         });
 
         // Recreate lines with updated actual quantities
         for (const line of validatedLines) {
           // Get current system stock
-          const balance = await tx.stockBalance.findUnique({
+          const balance = await tx.stockBalance.findFirst({
             where: {
-              productId_warehouseId: {
-                productId: line.productId,
-                warehouseId: existing.warehouseId,
-              },
+              productId: line.productId,
+              warehouseId: existing.warehouseId,
             },
           });
 
@@ -124,19 +122,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             where: { id: line.productId },
           });
 
-          const unitCost = product?.cost || 0;
+          const unitCost = product?.costPrice || 0;
           const varianceValue = variance * unitCost;
 
           await tx.stockTakeLine.create({
             data: {
-              takeId: id,
+              stockTakeId: id,
               productId: line.productId,
-              systemQuantity: systemQty,
-              actualQuantity: actualQty,
-              varianceQuantity: variance,
+              expectedQty: systemQty,
+              actualQty: actualQty,
+              varianceQty: variance,
               varianceValue: varianceValue,
               notes: line.notes,
-            },
+              costPerUnit: unitCost,
+            } as any,
           });
         }
       });
@@ -163,7 +162,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const stockTake = await db.stockTake.update({
       where: { id },
       data: {
-        ...(validatedData.date && { date: validatedData.date }),
+        ...(validatedData.takeDate && { takeDate: validatedData.takeDate }),
         ...(validatedData.warehouseId && { warehouseId: validatedData.warehouseId }),
         ...(validatedData.notes !== undefined && { notes: validatedData.notes }),
         ...(validatedData.status && { status: validatedData.status }),
@@ -213,7 +212,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return apiError('การตรวจนับสต็อกนี้ถูกยกเลิกแล้ว');
     }
 
-    if (existing.status === 'COMPLETED') {
+    if (existing.status === 'POSTED') {
       return apiError('ไม่สามารถยกเลิกการตรวจนับสต็อกที่เสร็จสมบูรณ์แล้วได้');
     }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { z } from 'zod';
-import { requireAuth, requirePermission } from '@/lib/api-utils';
+import { requireAuth, requirePermission, generateDocNumber } from '@/lib/api-utils';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 import { checkPeriodStatus } from '@/lib/period-service';
 
@@ -32,31 +32,8 @@ const journalEntrySchema = z
     { message: 'ยอดเดบิตและเครดิตต้องเท่ากัน' }
   );
 
-// Generate entry number
-async function generateEntryNumber(): Promise<string> {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-
-  const prefix = `JV-${year}${month}`;
-
-  const lastEntry = await prisma.journalEntry.findFirst({
-    where: {
-      entryNo: {
-        startsWith: prefix,
-      },
-    },
-    orderBy: { entryNo: 'desc' },
-  });
-
-  let nextNum = 1;
-  if (lastEntry) {
-    const lastNum = parseInt(lastEntry.entryNo.split('-')[2] || '0');
-    nextNum = lastNum + 1;
-  }
-
-  return `${prefix}-${String(nextNum).padStart(4, '0')}`;
-}
+// NOTE: Entry number generation moved to generateDocNumber() in api-utils.ts
+// which is transaction-safe. Used directly inline in POST handler.
 
 // GET - List journal entries (ACCOUNTANT or ADMIN only)
 export async function GET(request: NextRequest) {
@@ -157,7 +134,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Require journal.create permission
-    await requirePermission('journal', 'create');
+    const user = await requirePermission('journal', 'create');
 
     const body = await request.json();
     const validatedData = journalEntrySchema.parse(body);
@@ -185,8 +162,8 @@ export async function POST(request: NextRequest) {
     const totalDebit = dataInSatang.lines.reduce((sum, line) => sum + line.debit, 0);
     const totalCredit = dataInSatang.lines.reduce((sum, line) => sum + line.credit, 0);
 
-    // Generate entry number
-    const entryNo = await generateEntryNumber();
+    // Generate entry number (transaction-safe via generateDocNumber)
+    const entryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE');
 
     // Create journal entry with lines
     const entry = await prisma.journalEntry.create({
@@ -201,6 +178,7 @@ export async function POST(request: NextRequest) {
         totalCredit,
         notes: dataInSatang.notes,
         status: 'DRAFT',
+        createdById: user.id,
         lines: {
           create: dataInSatang.lines.map((line, index) => ({
             lineNo: index + 1,

@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
       where: {
         ...(year && { year }),
         ...(month && { month }),
-        ...(formType && { formType }),
+        ...(formType && { formType: formType as any }),
       },
       include: { lines: true },
       orderBy: [{ year: 'desc' }, { month: 'desc' }],

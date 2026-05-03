@@ -72,7 +72,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const result = await prisma.$transaction(
       async (tx) => {
         // 1. Create reversal journal entry if original was posted
-        let reversalEntryNo;
+        let reversalEntryNo: string | undefined;
         if (invoice.journalEntryId) {
           const now = new Date();
           const year = now.getFullYear();
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           },
         });
 
-        return updated;
+        return { updated, reversalEntryNo };
       },
       { maxWait: 5000, timeout: 10000 }
     );
@@ -175,7 +175,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       success: true,
       data: {
         ...result,
-        reversalEntryNo,
+        reversalEntryNo: result.reversalEntryNo,
       },
       message: 'ยกเลิกใบกำกับภาษีเรียบร้อยแล้ว',
     });

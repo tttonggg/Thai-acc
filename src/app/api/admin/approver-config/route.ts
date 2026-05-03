@@ -31,16 +31,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       documentType,
-      condition,
-      approverType,
-      approverId,
-      approverDepartmentId,
       approvalOrder,
+      roleId,
     } = body;
 
-    if (!documentType || !approverType) {
+    if (!documentType || !approvalOrder || !roleId) {
       return NextResponse.json(
-        { success: false, error: 'documentType and approverType are required' },
+        { success: false, error: 'documentType, approvalOrder, and roleId are required' },
         { status: 400 }
       );
     }
@@ -48,11 +45,8 @@ export async function POST(request: NextRequest) {
     const config = await db.documentApproverConfig.create({
       data: {
         documentType,
-        condition: condition || null,
-        approverType,
-        approverId: approverId || null,
-        approverDepartmentId: approverDepartmentId || null,
-        approvalOrder: approvalOrder || 1,
+        approvalOrder,
+        roleId,
       },
     });
 

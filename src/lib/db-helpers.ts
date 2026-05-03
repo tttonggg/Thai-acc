@@ -155,7 +155,7 @@ export async function transactionWithRetry<T>(
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await prisma.$transaction(async (tx) => {
-        return await callback(tx);
+        return await callback(tx as any);
       });
     } catch (error: any) {
       // Retry on deadlock (code P2034)
@@ -180,7 +180,7 @@ export async function executeTransaction<T>(
   prisma: PrismaClient,
   operations: ((tx: PrismaClient) => Promise<any>)[]
 ): Promise<T[]> {
-  return await prisma.$transaction(operations.map((op) => async (tx) => await op(tx)));
+  return await (prisma as any).$transaction(operations.map((op) => async (tx) => await op(tx)));
 }
 
 // ============================================================================

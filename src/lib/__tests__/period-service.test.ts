@@ -25,6 +25,7 @@ const {
   mockJournalEntryCount,
   mockChartOfAccountFindMany,
   mockJournalLineFindMany,
+  mockTransaction,
 } = vi.hoisted(() => ({
   mockFindUnique: vi.fn(),
   mockFindMany: vi.fn(),
@@ -35,12 +36,35 @@ const {
   mockJournalEntryCount: vi.fn(),
   mockChartOfAccountFindMany: vi.fn(),
   mockJournalLineFindMany: vi.fn(),
+  mockTransaction: vi.fn((callback: any) => {
+    const tx = {
+      accountingPeriod: {
+        findUnique: mockFindUnique,
+        findMany: mockFindMany,
+        create: mockCreate,
+        update: mockUpdate,
+        upsert: mockUpsert,
+      },
+      journalEntry: {
+        findMany: mockJournalEntryFindMany,
+        count: mockJournalEntryCount,
+      },
+      journalLine: {
+        findMany: mockJournalLineFindMany,
+      },
+      chartOfAccount: {
+        findMany: mockChartOfAccountFindMany,
+      },
+    };
+    return callback(tx);
+  }),
 }));
 
 // Mock the prisma client with proper structure for both default and named exports
 vi.mock('@/lib/db', async () => {
   return {
     prisma: {
+      $transaction: mockTransaction,
       accountingPeriod: {
         findUnique: mockFindUnique,
         findMany: mockFindMany,
@@ -60,6 +84,7 @@ vi.mock('@/lib/db', async () => {
       },
     },
     default: {
+      $transaction: mockTransaction,
       accountingPeriod: {
         findUnique: mockFindUnique,
         findMany: mockFindMany,

@@ -24,6 +24,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       );
     }
 
+    const { id } = await params;
+
     const quotation = await prisma.quotation.findUnique({
       where: { id: id },
     });
@@ -52,7 +54,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: {
         status: 'REJECTED',
         rejectionReason: validatedData.reason,
-        updatedById: session.user.id,
       },
       include: {
         customer: {

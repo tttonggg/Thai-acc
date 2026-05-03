@@ -185,7 +185,7 @@ export function AdvancedFilter({
             <Badge key={index} variant="secondary" className="gap-1">
               <span className="font-medium">{getFieldLabel(filter.field)}</span>
               <span className="text-muted-foreground">{operatorLabels[filter.operator]}</span>
-              <span>{renderFilterValue(filter)}</span>
+              <span>{renderFilterValue(filter) as React.ReactNode}</span>
               <button
                 onClick={() => handleRemoveFilter(index)}
                 className="ml-1 hover:text-destructive"

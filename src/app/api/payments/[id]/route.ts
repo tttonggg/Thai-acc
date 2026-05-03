@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { checkPeriodStatus } from '@/lib/period-service';
+import { bahtToSatang } from '@/lib/currency';
 import {
   requireAuth,
   apiResponse,
@@ -10,6 +11,7 @@ import {
 } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
 import { generateWhtFromPayment } from '@/lib/wht-service';
+import { postPaymentToGL } from '@/lib/payment-gl-service';
 import { z } from 'zod';
 
 // Validation schema
@@ -159,31 +161,29 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         return apiError('ยอดจ่ายรวมต้องไม่น้อยกว่ายอดจัดจ่าย');
       }
 
-      // Delete old allocations
-      await db.paymentAllocation.deleteMany({
-        where: { paymentId: id },
-      });
-
-      // Create new allocations
-      await db.paymentAllocation.createMany({
-        data: validatedData.allocations.map((allocation) => ({
-          paymentId: id,
-          invoiceId: allocation.invoiceId,
-          amount: allocation.amount,
-          whtRate: allocation.whtRate,
-          whtAmount: allocation.whtAmount,
-          notes: allocation.notes,
-        })),
-      });
-
-      // Update payment with new totals
-      await db.payment.update({
-        where: { id: id },
-        data: {
-          whtAmount: totalWHT,
-          unallocated: amount - totalAllocated,
-        },
-      });
+      // Delete old allocations, create new allocations, and update payment in a transaction
+      await db.$transaction([
+        db.paymentAllocation.deleteMany({
+          where: { paymentId: id },
+        }),
+        db.paymentAllocation.createMany({
+          data: validatedData.allocations.map((allocation) => ({
+            paymentId: id,
+            invoiceId: allocation.invoiceId,
+            amount: bahtToSatang(allocation.amount),
+            whtRate: allocation.whtRate,
+            whtAmount: bahtToSatang(allocation.whtAmount),
+            notes: allocation.notes,
+          })),
+        }),
+        db.payment.update({
+          where: { id: id },
+          data: {
+            whtAmount: totalWHT,
+            unallocated: amount - totalAllocated,
+          },
+        }),
+      ]);
     }
 
     // Update payment fields
@@ -308,9 +308,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!periodCheck.isValid) {
       return apiError(periodCheck.error || 'ไม่สามารถลงบัญชีในงวดที่ปิดแล้ว', 400);
     }
-
-    // Import the posting function
-    const { postPaymentToGL } = await import('../route');
 
     // Post to GL in a transaction
     await db.$transaction(async (tx) => {

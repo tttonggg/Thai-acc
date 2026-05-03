@@ -1,30 +1,38 @@
 import { Server as NetServer } from 'http';
-import { Server as SocketIOServer } from 'socket.io';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const SocketIO = require('socket.io') as any;
 import { NextApiRequest } from 'next';
 
 export interface SocketServer extends NetServer {
-  io?: SocketIOServer;
+  io?: any;
 }
 
-export interface SocketWithIO extends NextApiRequest {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface SocketWithIO {
   socket: {
     server: SocketServer;
+  };
+  [key: string]: any;
+  method?: string;
+  url?: string;
+  headers?: {
+    [key: string]: string | string[] | undefined;
   };
 }
 
 // Socket.IO server instance
-let io: SocketIOServer | null = null;
+let io: any = null;
 
-export function getIO(): SocketIOServer | null {
+export function getIO(): any {
   return io;
 }
 
-export function initIO(server: NetServer): SocketIOServer {
+export function initIO(server: NetServer): any {
   if (io) {
     return io;
   }
 
-  io = new SocketIOServer(server, {
+  io = new SocketIO(server, {
     path: '/api/socket/io',
     addTrailingSlash: false,
     cors: {
@@ -36,7 +44,7 @@ export function initIO(server: NetServer): SocketIOServer {
   });
 
   // Set up connection handling
-  io.on('connection', (socket) => {
+  io.on('connection', (socket: any) => {
     console.log('Client connected:', socket.id);
 
     // Join room based on user ID for targeted notifications

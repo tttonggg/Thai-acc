@@ -65,7 +65,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof debitNoteSchema>>({
-    resolver: zodResolver(debitNoteSchema),
+    resolver: zodResolver(debitNoteSchema) as any,
     defaultValues: {
       debitNoteDate: new Date().toISOString().split('T')[0],
       reason: 'ADDITIONAL_CHARGES',
@@ -295,7 +295,7 @@ export function DebitNoteForm({ open, onClose, onSuccess }: DebitNoteFormProps) 
           <DialogDescription>สร้างใบเพิ่มหนี้สำหรับผู้ขายเพื่อเพิ่มหนี้จากใบซื้อ</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={(values) => form.handleSubmit(onSubmit as any)(values as any)} className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">ข้อมูลใบเพิ่มหนี้</CardTitle>

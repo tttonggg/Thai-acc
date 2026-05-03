@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, Paperclip, At, Lock, X, Check } from 'lucide-react';
+import { Loader2, Paperclip, Mail, Lock, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CommentFormData {
@@ -353,7 +353,7 @@ export function CommentInput({
           {/* Mention Hint */}
           {allowMentions && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <At className="h-3 w-3" />
+              <Mail className="h-3 w-3" />
               พิมพ์ @ เพื่อกล่าวถึง
             </div>
           )}

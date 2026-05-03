@@ -137,8 +137,8 @@ export async function logAudit(entry: AuditLogEntry): Promise<void> {
         action: entry.action,
         entityType: entry.entityType,
         entityId: entry.entityId,
-        beforeState: sanitizedBefore ? JSON.stringify(sanitizedBefore) : null,
-        afterState: sanitizedAfter ? JSON.stringify(sanitizedAfter) : null,
+        beforeState: sanitizedBefore ? JSON.stringify(sanitizedBefore) : undefined,
+        afterState: sanitizedAfter ? JSON.stringify(sanitizedAfter) : undefined,
         ipAddress: entry.ipAddress,
         userAgent: entry.userAgent,
         hash,
@@ -319,7 +319,8 @@ export async function logSecurityEvent(
     | 'MFA_DISABLE'
     | 'PASSWORD_RESET'
     | 'SESSION_TERMINATED'
-    | 'PRIVILEGE_ESCALATION',
+    | 'PRIVILEGE_ESCALATION'
+    | 'VIEW',
   details: Record<string, unknown>,
   ipAddress: string,
   userAgent: string

@@ -57,6 +57,22 @@ import { useToast } from '@/hooks/use-toast';
 import { getStatusBadgeProps } from '@/lib/status-badge';
 import { PurchaseOrderForm } from './purchase-order-form';
 
+const statusColors: Record<string, string> = {
+  DRAFT: 'bg-gray-100 text-gray-800 border-gray-300',
+  PENDING: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+  APPROVED: 'bg-green-100 text-green-800 border-green-300',
+  REJECTED: 'bg-red-100 text-red-800 border-red-300',
+  CANCELLED: 'bg-red-100 text-red-800 border-red-300',
+  RECEIVED: 'bg-blue-100 text-blue-800 border-blue-300',
+  PARTIAL: 'bg-orange-100 text-orange-800 border-orange-300',
+};
+
+const paymentStatusColors: Record<string, string> = {
+  UNPAID: 'bg-gray-100 text-gray-800',
+  PARTIAL: 'bg-yellow-100 text-yellow-800',
+  PAID: 'bg-green-100 text-green-800',
+};
+
 interface PurchaseOrder {
   id: string;
   orderNo: string;
@@ -793,14 +809,10 @@ export function PurchaseOrderList() {
       {/* Add PO Dialog */}
       <PurchaseOrderForm
         open={isAddDialogOpen}
-        onClose={() => setIsAddDialogOpen(false)}
+        onOpenChange={setIsAddDialogOpen}
         onSuccess={() => {
           setIsAddDialogOpen(false);
           fetchPOs();
-          toast({
-            title: 'สำเร็จ',
-            description: 'สร้างใบสั่งซื้อเรียบร้อยแล้ว',
-          });
         }}
       />
     </div>

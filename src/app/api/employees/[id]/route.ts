@@ -7,9 +7,10 @@ import { requireAuth } from '@/lib/api-utils';
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireAuth();
+    const { id } = await params;
 
     const employee = await prisma.employee.findUnique({
-      where: { id: id },
+      where: { id },
     });
 
     if (!employee) {
@@ -28,9 +29,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireAuth();
+    const { id } = await params;
 
     const employee = await prisma.employee.findUnique({
-      where: { id: id },
+      where: { id },
     });
 
     if (!employee) {
@@ -61,7 +63,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     const updated = await prisma.employee.update({
-      where: { id: id },
+      where: { id },
       data: {
         employeeCode,
         firstName,
@@ -93,9 +95,10 @@ export async function DELETE(
 ) {
   try {
     await requireAuth();
+    const { id } = await params;
 
     const employee = await prisma.employee.findUnique({
-      where: { id: id },
+      where: { id },
     });
 
     if (!employee) {
@@ -118,7 +121,7 @@ export async function DELETE(
     }
 
     await prisma.employee.delete({
-      where: { id: id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true, message: 'ลบพนักงานสำเร็จ' });

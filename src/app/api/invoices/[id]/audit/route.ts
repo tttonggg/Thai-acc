@@ -1,7 +1,7 @@
+import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { formatThaiDate } from '@/lib/thai-accounting';
-import { apiResponse, notFoundError } from '@/lib/api-utils';
-import { requireAuth } from '@/lib/api-utils';
+import { apiResponse, notFoundError, apiError, unauthorizedError, requireAuth } from '@/lib/api-utils';
 
 interface AuditEntry {
   id: string;
@@ -185,7 +185,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }));
 
     // Transform line item audit logs to unified format
-    const lineItemEntries: AuditEntry[] = lineItemAuditLogs.map((log) => ({
+    const lineItemEntries = lineItemAuditLogs.map((log) => ({
       id: log.id,
       action: log.action,
       entityType: 'LINE_ITEM',

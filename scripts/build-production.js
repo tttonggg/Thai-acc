@@ -94,9 +94,9 @@ PORT=3000
 
   console.log('\n✅ Production build preparation complete!');
   console.log('\n📋 Next steps:');
-  console.log('   1. Update .next/standalone/.env with your absolute DATABASE_URL path');
+  console.log('   1. Update .next/standalone/Desktop/Thai-acc-sandbox/.env with your absolute DATABASE_URL path');
   console.log('   2. Copy your SQLite database to the specified path');
-  console.log('   3. Start the server: npm run start');
+  console.log('   3. Start the server: bun run start');
 }
 
 if (require.main === module) {

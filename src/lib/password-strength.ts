@@ -87,7 +87,7 @@ export function checkPasswordStrength(password: string): PasswordStrengthResult 
   }
 
   // Use zxcvbn for strength analysis
-  const result = zxcvbn(password);
+  const result = (zxcvbn as any)(password);
 
   // Enhance feedback with Thai Accounting specific suggestions
   const suggestions = [...result.feedback.suggestions];

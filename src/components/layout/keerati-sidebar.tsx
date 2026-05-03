@@ -485,7 +485,7 @@ function ThemeCustomizer() {
           <div className="space-y-3">
             <Label className="text-sm font-medium text-[var(--foreground)]">ความมนของขอบ</Label>
             <div className="flex gap-2">
-              {(Object.keys(radiusLabels) as const).map((r) => (
+              {(Object.keys(radiusLabels) as Array<'sm' | 'md' | 'lg' | 'xl'>).map((r) => (
                 <button
                   key={r}
                   onClick={() => setBorderRadius(r)}

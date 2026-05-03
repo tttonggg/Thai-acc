@@ -106,9 +106,9 @@ export function DebitNoteList() {
     if (!dn || typeof dn !== 'object') return false;
 
     const matchesSearch =
-      dn.vendorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dn.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dn.debitNoteNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dn.purchaseInvoice?.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase());
+      (dn.purchaseInvoice as any)?.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || dn.status === filterStatus;
     return matchesSearch && matchesStatus;
   });

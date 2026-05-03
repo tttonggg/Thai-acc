@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Build monthly data from aggregated results
-    const monthlyData = [];
+    const monthlyData: any[] = [];
     for (let i = 11; i >= 0; i--) {
       const monthDate = new Date(taxYear, taxMonth - 1 - i, 1);
       const monthNum = monthDate.getMonth() + 1;
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
         vatOutput: outputRecord?._sum.vatAmount || 0,
         vatInput: inputRecord?._sum.vatAmount || 0,
         net: (outputRecord?._sum.vatAmount || 0) - (inputRecord?._sum.vatAmount || 0),
-      });
+      } as any);
     }
 
     return NextResponse.json({

@@ -44,7 +44,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 // Types
@@ -81,6 +81,7 @@ interface Vendor {
 
 // Form Schema
 const prLineSchema = z.object({
+  lineNo: z.number().optional(),
   productId: z.string().optional(),
   description: z.string().min(1, 'รายการต้องไม่ว่างเปล่า'),
   quantity: z.number().positive('จำนวนต้องมากกว่า 0'),
@@ -124,10 +125,10 @@ export function PurchaseRequestForm({
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [submitting, setSubmitting] = useState<'draft' | 'submit' | null>(null);
-  const { toast } = useToast();
+  // toast imported from sonner at top
 
   const form = useForm<PurchaseRequestFormValues>({
-    resolver: zodResolver(purchaseRequestFormSchema),
+    resolver: zodResolver(purchaseRequestFormSchema) as any,
     defaultValues: {
       requestDate: new Date().toISOString(),
       priority: 'NORMAL',
@@ -263,21 +264,15 @@ export function PurchaseRequestForm({
         throw new Error(result.error || 'สร้างใบขอซื้อไม่สำเร็จ');
       }
 
-      toast({
-        title: 'สำเร็จ',
-        description:
-          submitType === 'submit'
-            ? 'ส่งใบขอซื้อเพื่อขออนุมัติเรียบร้อยแล้ว'
-            : 'บันทึกฉบับร่างเรียบร้อยแล้ว',
-      });
+      toast(
+        submitType === 'submit'
+          ? 'ส่งใบขอซื้อเพื่อขออนุมัติเรียบร้อยแล้ว'
+          : 'บันทึกฉบับร่างเรียบร้อยแล้ว'
+      );
 
       if (onSuccess) onSuccess();
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'เกิดข้อผิดพลาด',
-        description: error instanceof Error ? error.message : 'กรุณาลองอีกครั้ง',
-      });
+      toast.error(error instanceof Error ? error.message : 'กรุณาลองอีกครั้ง');
     } finally {
       setSubmitting(null);
     }
@@ -288,7 +283,7 @@ export function PurchaseRequestForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => onSubmit(data, 'draft'))} className="space-y-6">
+      <form onSubmit={form.handleSubmit((data) => onSubmit(data as any, 'draft'))} className="space-y-6">
         {/* Header */}
         <Card>
           <CardHeader>
@@ -299,7 +294,7 @@ export function PurchaseRequestForm({
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {/* Request Date */}
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="requestDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
@@ -338,7 +333,7 @@ export function PurchaseRequestForm({
 
               {/* Department */}
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="departmentId"
                 render={({ field }) => (
                   <FormItem>
@@ -371,7 +366,7 @@ export function PurchaseRequestForm({
 
               {/* Priority */}
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
@@ -414,7 +409,7 @@ export function PurchaseRequestForm({
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Required Date */}
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="requiredDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
@@ -454,7 +449,7 @@ export function PurchaseRequestForm({
               {/* Budget */}
               {selectedDepartment && (
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="budgetId"
                   render={({ field }) => (
                     <FormItem>
@@ -493,7 +488,7 @@ export function PurchaseRequestForm({
 
             {/* Reason */}
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="reason"
               render={({ field }) => (
                 <FormItem>
@@ -557,7 +552,7 @@ export function PurchaseRequestForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.description`}
                             render={({ field }) => (
                               <FormItem>
@@ -571,7 +566,7 @@ export function PurchaseRequestForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.quantity`}
                             render={({ field }) => (
                               <FormItem>
@@ -592,7 +587,7 @@ export function PurchaseRequestForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.unit`}
                             render={({ field }) => (
                               <FormItem>
@@ -606,7 +601,7 @@ export function PurchaseRequestForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.unitPrice`}
                             render={({ field }) => (
                               <FormItem>
@@ -627,7 +622,7 @@ export function PurchaseRequestForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.discount`}
                             render={({ field }) => (
                               <FormItem>
@@ -648,7 +643,7 @@ export function PurchaseRequestForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.vatRate`}
                             render={({ field }) => (
                               <FormItem>
@@ -721,7 +716,7 @@ export function PurchaseRequestForm({
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="notes"
               render={({ field }) => (
                 <FormItem>
@@ -738,7 +733,7 @@ export function PurchaseRequestForm({
               )}
             />
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="internalNotes"
               render={({ field }) => (
                 <FormItem>
@@ -763,7 +758,7 @@ export function PurchaseRequestForm({
           <Button
             type="button"
             variant="outline"
-            onClick={form.handleSubmit((data) => onSubmit(data, 'draft'))}
+            onClick={form.handleSubmit((data) => onSubmit(data as any, 'draft'))}
             disabled={submitting !== null}
           >
             {submitting === 'draft' ? (
@@ -775,7 +770,7 @@ export function PurchaseRequestForm({
           </Button>
           <Button
             type="button"
-            onClick={form.handleSubmit((data) => onSubmit(data, 'submit'))}
+            onClick={form.handleSubmit((data) => onSubmit(data as any, 'submit'))}
             disabled={submitting !== null}
             className="bg-blue-600 hover:bg-blue-700"
           >

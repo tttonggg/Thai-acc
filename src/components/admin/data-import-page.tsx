@@ -167,7 +167,7 @@ export function DataImportPage() {
       if (result.success) {
         setPreviewResult(result);
       } else {
-        setError(result.error || 'เกิดข้อผิดพลาดในการตรวจสอบ');
+        setError((result as any).error || 'เกิดข้อผิดพลาดในการตรวจสอบ');
       }
     } catch (err) {
       setError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
@@ -211,7 +211,7 @@ export function DataImportPage() {
         // Reload history
         await loadHistory();
       } else {
-        setError(result.error || 'เกิดข้อผิดพลาดในการนำเข้า');
+        setError((result as any).error || 'เกิดข้อผิดพลาดในการนำเข้า');
       }
     } catch (err) {
       setError('เกิดข้อผิดพลาดในการเชื่อมต่อ');

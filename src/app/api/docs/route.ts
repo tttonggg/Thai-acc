@@ -665,5 +665,5 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Re-export the spec for use in other modules
-export { openApiSpec };
+// openApiSpec is defined at module level (line 12) for use in GET handler
+// No re-export needed — spec is consumed internally
