@@ -147,8 +147,8 @@ export async function getUserPermissions(): Promise<string[]> {
   const user = await getCurrentUser()
   if (!user) return []
 
-  // ADMIN gets all permissions
-  if (user.role === 'ADMIN') {
+  // ADMIN and OWNER get all permissions
+  if (user.role === 'ADMIN' || user.role === 'OWNER') {
     const allPerms = await db.permission.findMany()
     return allPerms.map(p => p.code)
   }
