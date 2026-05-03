@@ -29,12 +29,12 @@ export async function requireRole(roles: UserRole[]) {
 
 export async function isAdmin() {
   const user = await getCurrentUser()
-  return user?.role === "ADMIN"
+  return user?.role === "OWNER" || user?.role === "ADMIN"
 }
 
 export async function canEdit() {
   const user = await getCurrentUser()
-  return user?.role === "ADMIN" || user?.role === "ACCOUNTANT"
+  return user?.role === "OWNER" || user?.role === "ADMIN" || user?.role === "ACCOUNTANT" || user?.role === "SENIOR_ACCOUNTANT"
 }
 
 export async function canView() {
@@ -63,8 +63,8 @@ export async function checkUserPermission(
   const user = await getCurrentUser()
   if (!user) return false
 
-  // ADMIN always has access
-  if (user.role === 'ADMIN') return true
+  // OWNER and ADMIN always have full access
+  if (user.role === 'OWNER' || user.role === 'ADMIN') return true
 
   // Get user's employee roles
   const userEmployee = await db.userEmployee.findUnique({
@@ -197,8 +197,8 @@ export async function canManageRoles(): Promise<boolean> {
   const user = await getCurrentUser()
   if (!user) return false
 
-  // ADMIN always has access to role management
-  if (user.role === 'ADMIN') return true
+  // OWNER and ADMIN always have access to role management
+  if (user.role === 'OWNER' || user.role === 'ADMIN') return true
 
   // Check if user's employee roles have canManageRoles flag
   const userEmployee = await db.userEmployee.findUnique({
@@ -239,34 +239,55 @@ export async function requireCanManageRoles(): Promise<NonNullable<Awaited<Retur
  */
 function legacyRoleCheck(role: string, module: string, action: string): boolean {
   const rolePerms: Record<string, Array<{ module: string; action: string }>> = {
-    ACCOUNTANT: [
-      { module: 'invoice', action: 'create' },
-      { module: 'invoice', action: 'read' },
-      { module: 'invoice', action: 'update' },
-      { module: 'invoice', action: 'post' },
-      { module: 'receipt', action: 'create' },
-      { module: 'receipt', action: 'read' },
-      { module: 'receipt', action: 'update' },
-      { module: 'receipt', action: 'post' },
+    OWNER: [
+      // Full access - matches all module:action combinations
+    ],
+    SENIOR_ACCOUNTANT: [
       { module: 'journal', action: 'create' },
       { module: 'journal', action: 'read' },
       { module: 'journal', action: 'post' },
+      { module: 'journal', action: 'void' },
+      { module: 'journal', action: 'approve' },
+      { module: 'invoice', action: 'create' },
+      { module: 'invoice', action: 'read' },
+      { module: 'invoice', action: 'post' },
+      { module: 'invoice', action: 'approve' },
+      { module: 'invoice', action: 'void' },
+      { module: 'receipt', action: 'create' },
+      { module: 'receipt', action: 'read' },
+      { module: 'receipt', action: 'approve' },
+      { module: 'receipt', action: 'void' },
+      { module: 'purchase', action: 'create' },
+      { module: 'purchase', action: 'read' },
+      { module: 'purchase', action: 'approve' },
+      { module: 'purchase', action: 'void' },
+      { module: 'report', action: 'read' },
+    ],
+    ACCOUNTANT: [
+      { module: 'invoice', action: 'create' },
+      { module: 'invoice', action: 'read' },
+      { module: 'receipt', action: 'create' },
+      { module: 'receipt', action: 'read' },
+      { module: 'journal', action: 'create' },
+      { module: 'journal', action: 'read' },
+      { module: 'purchase', action: 'create' },
+      { module: 'purchase', action: 'read' },
       { module: 'report', action: 'read' },
     ],
     USER: [
-      { module: 'pr', action: 'create' },
-      { module: 'pr', action: 'read' },
-      { module: 'pr', action: 'update' },
-      { module: 'pr', action: 'submit' },
-      { module: 'po', action: 'create' },
-      { module: 'po', action: 'read' },
-      { module: 'po', action: 'update' },
+      { module: 'customer', action: 'read' },
+      { module: 'product', action: 'read' },
+      { module: 'quotation', action: 'create' },
+      { module: 'quotation', action: 'read' },
       { module: 'report', action: 'read' },
     ],
     VIEWER: [
       { module: 'report', action: 'read' },
     ],
   }
+
+  // OWNER has full access (empty array = handled by special case below)
+  if (role === 'OWNER' || role === 'ADMIN') return true
 
   const perms = rolePerms[role] || []
   return perms.some(p => p.module === module && p.action === action)
