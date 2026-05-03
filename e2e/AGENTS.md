@@ -1,3 +1,4 @@
+<!-- Parent: ../AGENTS.md -->
 # AGENTS.md - E2E Testing Suite
 
 This file provides essential guidance for AI coding agents working on the **E2E

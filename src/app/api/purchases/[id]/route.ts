@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { purchaseInvoiceSchema } from '@/lib/validations';
@@ -11,6 +12,13 @@ import {
   calculateInvoiceTotals,
 } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
+=======
+import { NextRequest } from "next/server"
+import { db } from "@/lib/db"
+import { purchaseInvoiceSchema } from "@/lib/validations"
+import { apiResponse } from "@/lib/api-utils"
+import { requireAuth, apiError, unauthorizedError, notFoundError, AuthError } from "@/lib/api-auth"
+>>>>>>> Stashed changes
 
 // GET /api/purchases/[id] - Get single purchase invoice
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

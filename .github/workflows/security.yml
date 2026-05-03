@@ -2,9 +2,9 @@ name: Security Testing
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     # Run weekly on Sundays at 00:00
     - cron: '0 0 * * 0'
@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required for SonarQube
+          fetch-depth: 0 # Required for SonarQube
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -193,7 +193,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript', 'typescript' ]
+        language: ['javascript', 'typescript']
 
     steps:
       - uses: actions/checkout@v4
@@ -210,7 +210,7 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:${{matrix.language}}"
+          category: '/language:${{matrix.language}}'
 
   build:
     name: Build Application

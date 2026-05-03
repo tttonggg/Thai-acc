@@ -9,9 +9,13 @@
 
 ## 1. Executive Summary
 
-This document outlines a comprehensive plan to extract the Thai Accounting ERP system into a **reusable multi-tenant ERP framework**. The framework will support Thai-specific accounting features while remaining generic enough for other locales/industries.
+This document outlines a comprehensive plan to extract the Thai Accounting ERP
+system into a **reusable multi-tenant ERP framework**. The framework will
+support Thai-specific accounting features while remaining generic enough for
+other locales/industries.
 
 **Key Outcomes:**
+
 - Extractable framework with plugin architecture
 - Clear separation of Thai-specific vs generic components
 - Multi-tenancy via tenant context
@@ -25,40 +29,40 @@ This document outlines a comprehensive plan to extract the Thai Accounting ERP s
 
 These components are not Thai-specific and can be extracted as-is:
 
-| Component | Location | Description |
-|-----------|----------|-------------|
-| **SPA Routing Engine** | `src/app/page.tsx` | Hybrid SPA pattern with History API |
-| **Auth System** | `src/lib/auth.ts`, `src/lib/api-auth.ts` | NextAuth v4 + RBAC (ADMIN/ACCOUNTANT/USER/VIEWER) |
-| **API Layer** | `src/app/api/*` | RESTful endpoints with Zod validation |
-| **Service Layer** | `src/lib/*-service.ts` | Business logic isolation |
-| **UI Components** | `src/components/ui/` | shadcn/ui base components |
-| **Double-Entry Engine** | `src/lib/journal-*.ts` | Balanced debit/credit transactions |
-| **Multi-Currency** | `src/lib/currency.ts` | Currency conversion + formatting |
-| **PDF/Excel Export** | `src/lib/pdf-*.ts`, `src/lib/excel-export.ts` | Document generation |
-| **Session Management** | `src/lib/session-service.ts` | Session lifecycle |
-| **Audit Logging** | `src/lib/audit-*.ts` | Security + activity logging |
-| **Rate Limiting** | `src/lib/rate-limit.ts` | API protection |
-| **CSRF Protection** | `src/lib/csrf-*.ts` | Request validation |
-| **MFA** | `src/lib/mfa*.ts` | Multi-factor authentication |
-| **Zustand Stores** | `src/stores/*.ts` | Client state management |
+| Component               | Location                                      | Description                                       |
+| ----------------------- | --------------------------------------------- | ------------------------------------------------- |
+| **SPA Routing Engine**  | `src/app/page.tsx`                            | Hybrid SPA pattern with History API               |
+| **Auth System**         | `src/lib/auth.ts`, `src/lib/api-auth.ts`      | NextAuth v4 + RBAC (ADMIN/ACCOUNTANT/USER/VIEWER) |
+| **API Layer**           | `src/app/api/*`                               | RESTful endpoints with Zod validation             |
+| **Service Layer**       | `src/lib/*-service.ts`                        | Business logic isolation                          |
+| **UI Components**       | `src/components/ui/`                          | shadcn/ui base components                         |
+| **Double-Entry Engine** | `src/lib/journal-*.ts`                        | Balanced debit/credit transactions                |
+| **Multi-Currency**      | `src/lib/currency.ts`                         | Currency conversion + formatting                  |
+| **PDF/Excel Export**    | `src/lib/pdf-*.ts`, `src/lib/excel-export.ts` | Document generation                               |
+| **Session Management**  | `src/lib/session-service.ts`                  | Session lifecycle                                 |
+| **Audit Logging**       | `src/lib/audit-*.ts`                          | Security + activity logging                       |
+| **Rate Limiting**       | `src/lib/rate-limit.ts`                       | API protection                                    |
+| **CSRF Protection**     | `src/lib/csrf-*.ts`                           | Request validation                                |
+| **MFA**                 | `src/lib/mfa*.ts`                             | Multi-factor authentication                       |
+| **Zustand Stores**      | `src/stores/*.ts`                             | Client state management                           |
 
 ### 2.2 THAI-SPECIFIC Components (Localized)
 
 These must be kept as locale-specific plugins or configuration:
 
-| Component | Location | Reason |
-|-----------|----------|--------|
-| **Thai Accounting Rules** | `src/lib/thai-accounting.ts` | TFRS compliance, บัญชีไทย |
-| **Thai Date Formatting** | `src/lib/thai-accounting.ts:40-55` | Buddhist calendar (พ.ศ.), DD/MM/YYYY |
-| **Thai Number Text** | `src/lib/thai-accounting.ts:76-142` | หนึ่งบาทถ้วน conversion |
-| **WHT Calculations** | `src/lib/wht-service.ts` | ภาษีหัก ณ ที่จ่าย (PND3, PND53) |
-| **VAT Calculations** | `src/lib/thai-accounting.ts:144-163` | 7% rate, inclusive/exclusive |
-| **Thai Chart of Accounts** | `prisma/seed.ts` | 181 Thai-compliant accounts |
-| **Thai Tax Forms** | `src/lib/tax-form-service.ts` | PND1, PND3, PND53 generation |
-| **SSC Calculations** | `src/lib/payroll-service.ts` | Social Security Office contributions |
-| **Thai Language Labels** | All components | Hardcoded Thai UI text |
-| **Thai Currency Format** | `src/lib/thai-accounting.ts:58-65` | ฿THB formatting |
-| **Document Templates** | `src/lib/templates/` | Thai invoice/receipt templates |
+| Component                  | Location                             | Reason                               |
+| -------------------------- | ------------------------------------ | ------------------------------------ |
+| **Thai Accounting Rules**  | `src/lib/thai-accounting.ts`         | TFRS compliance, บัญชีไทย            |
+| **Thai Date Formatting**   | `src/lib/thai-accounting.ts:40-55`   | Buddhist calendar (พ.ศ.), DD/MM/YYYY |
+| **Thai Number Text**       | `src/lib/thai-accounting.ts:76-142`  | หนึ่งบาทถ้วน conversion              |
+| **WHT Calculations**       | `src/lib/wht-service.ts`             | ภาษีหัก ณ ที่จ่าย (PND3, PND53)      |
+| **VAT Calculations**       | `src/lib/thai-accounting.ts:144-163` | 7% rate, inclusive/exclusive         |
+| **Thai Chart of Accounts** | `prisma/seed.ts`                     | 181 Thai-compliant accounts          |
+| **Thai Tax Forms**         | `src/lib/tax-form-service.ts`        | PND1, PND3, PND53 generation         |
+| **SSC Calculations**       | `src/lib/payroll-service.ts`         | Social Security Office contributions |
+| **Thai Language Labels**   | All components                       | Hardcoded Thai UI text               |
+| **Thai Currency Format**   | `src/lib/thai-accounting.ts:58-65`   | ฿THB formatting                      |
+| **Document Templates**     | `src/lib/templates/`                 | Thai invoice/receipt templates       |
 
 ### 2.3 Analysis Summary
 
@@ -129,14 +133,14 @@ erp-framework/
 
 ### 3.2 Package Responsibilities
 
-| Package | Description | Dependencies |
-|---------|-------------|--------------|
-| `core` | DB, API utils, types, events, config | None |
-| `ui` | shadcn/ui + Tailwind + theme system | core |
-| `plugin-auth-nextauth` | NextAuth v4 integration | core |
-| `plugin-locale-th` | Thai accounting + localization | core |
-| `domain-*` | Business logic for each domain | core, ui |
-| `template-*` | Starter templates | All packages |
+| Package                | Description                          | Dependencies |
+| ---------------------- | ------------------------------------ | ------------ |
+| `core`                 | DB, API utils, types, events, config | None         |
+| `ui`                   | shadcn/ui + Tailwind + theme system  | core         |
+| `plugin-auth-nextauth` | NextAuth v4 integration              | core         |
+| `plugin-locale-th`     | Thai accounting + localization       | core         |
+| `domain-*`             | Business logic for each domain       | core, ui     |
+| `template-*`           | Starter templates                    | All packages |
 
 ---
 
@@ -149,11 +153,11 @@ erp-framework/
 export interface ERPPlugin {
   name: string;
   version: string;
-  
+
   // Lifecycle hooks
   init?(context: PluginContext): Promise<void> | void;
   destroy?(): Promise<void> | void;
-  
+
   // Capabilities
   services?: Record<string, Service>;
   components?: Record<string, React.ComponentType>;
@@ -186,7 +190,7 @@ interface EventBus {
 export const thaiPlugin: ERPPlugin = {
   name: 'locale-th',
   version: '1.0.0',
-  
+
   hooks: {
     'invoice.created': async (invoice, ctx) => {
       // Auto-calculate WHT if applicable
@@ -194,8 +198,8 @@ export const thaiPlugin: ERPPlugin = {
     },
     'journal.validate': async (entry, ctx) => {
       // Ensure Thai chart of accounts compliance
-    }
-  }
+    },
+  },
 };
 ```
 
@@ -205,27 +209,29 @@ export const thaiPlugin: ERPPlugin = {
 // In app entry point
 const app = createERPApp({
   plugins: [
-    nextAuthPlugin({ /* config */ }),
+    nextAuthPlugin({
+      /* config */
+    }),
     thaiLocalePlugin({ vatRate: 7, whtRates: WHT_RATES }),
     invoicingPlugin(),
     paymentsPlugin(),
-  ]
+  ],
 });
 ```
 
 ### 4.4 Built-in Plugin Hooks
 
-| Hook | Timing | Purpose |
-|------|--------|---------|
-| `app.beforeInit` | Before app initialization | Modify config |
-| `app.afterInit` | After app initialization | Post-setup |
-| `db.beforeQuery` | Before database query | Logging, caching |
-| `db.afterQuery` | After database query | Audit trail |
-| `auth.beforeLogin` | Before authentication | MFA check |
-| `auth.afterLogin` | After authentication | Session creation |
-| `invoice.created` | After invoice creation | WHT calculation |
-| `journal.validate` | During journal validation | Balance check |
-| `report.generate` | During report generation | Thai formatting |
+| Hook               | Timing                    | Purpose          |
+| ------------------ | ------------------------- | ---------------- |
+| `app.beforeInit`   | Before app initialization | Modify config    |
+| `app.afterInit`    | After app initialization  | Post-setup       |
+| `db.beforeQuery`   | Before database query     | Logging, caching |
+| `db.afterQuery`    | After database query      | Audit trail      |
+| `auth.beforeLogin` | Before authentication     | MFA check        |
+| `auth.afterLogin`  | After authentication      | Session creation |
+| `invoice.created`  | After invoice creation    | WHT calculation  |
+| `journal.validate` | During journal validation | Balance check    |
+| `report.generate`  | During report generation  | Thai formatting  |
 
 ---
 
@@ -250,18 +256,18 @@ For framework, we need multi-tenant isolation:
 // Core types for multi-tenancy
 interface Tenant {
   id: string;
-  slug: string;           // URL subdomain or path
+  slug: string; // URL subdomain or path
   name: string;
   settings: TenantSettings;
   createdAt: Date;
 }
 
 interface TenantSettings {
-  locale: string;         // 'th' | 'en' | etc.
-  timezone: string;       // 'Asia/Bangkok'
-  currency: string;       // 'THB'
-  fiscalYearStart: Month;  // January (Thailand: April)
-  taxId: string;          // บัญชีภาษีอากร
+  locale: string; // 'th' | 'en' | etc.
+  timezone: string; // 'Asia/Bangkok'
+  currency: string; // 'THB'
+  fiscalYearStart: Month; // January (Thailand: April)
+  taxId: string; // บัญชีภาษีอากร
 }
 
 // Tenant context (injected into all operations)
@@ -274,11 +280,11 @@ interface TenantContext {
 
 ### 5.3 Multi-Tenancy Strategy
 
-| Approach | Pros | Cons | Recommendation |
-|----------|------|------|----------------|
-| **Shared Schema** | Simple, less infrastructure | Row-level security complexity | v1 |
-| **Separate Schema** | Complete isolation | Higher infra cost | v2+ |
-| **Separate Database** | Maximum isolation | Complex migrations | Enterprise |
+| Approach              | Pros                        | Cons                          | Recommendation |
+| --------------------- | --------------------------- | ----------------------------- | -------------- |
+| **Shared Schema**     | Simple, less infrastructure | Row-level security complexity | v1             |
+| **Separate Schema**   | Complete isolation          | Higher infra cost             | v2+            |
+| **Separate Database** | Maximum isolation           | Complex migrations            | Enterprise     |
 
 **Recommendation**: Start with Shared Schema + Row-Level Security
 
@@ -308,18 +314,18 @@ export interface NextAuthPluginConfig {
 
 export const nextAuthPlugin: ERPPlugin = {
   name: 'auth-nextauth',
-  
+
   async init(ctx) {
     // Register NextAuth handlers
     // Setup tenant resolution from subdomain/header
     // Configure role hierarchy
   },
-  
+
   middleware: [
     // Rate limiting per tenant
     // CSRF protection
     // Session validation
-  ]
+  ],
 };
 ```
 
@@ -355,21 +361,22 @@ model Payment { tenantId String ... }
 
 ### 6.3 Model Categories for Packages
 
-| Package | Models |
-|---------|--------|
-| `core` | User, Session, Role, Permission, AuditLog, Setting |
-| `domain-invoicing` | Invoice, InvoiceLine, Receipt |
-| `domain-payments` | Payment, CreditNote, DebitNote |
-| `domain-payroll` | Employee, PayrollPeriod, PayrollEntry |
-| `domain-inventory` | Product, Warehouse, StockMove, StockTake |
-| `domain-assets` | Asset, AssetDepreciation |
-| `plugin-locale-th` | TaxFiling, WithholdingTax, SsciFiling |
+| Package            | Models                                             |
+| ------------------ | -------------------------------------------------- |
+| `core`             | User, Session, Role, Permission, AuditLog, Setting |
+| `domain-invoicing` | Invoice, InvoiceLine, Receipt                      |
+| `domain-payments`  | Payment, CreditNote, DebitNote                     |
+| `domain-payroll`   | Employee, PayrollPeriod, PayrollEntry              |
+| `domain-inventory` | Product, Warehouse, StockMove, StockTake           |
+| `domain-assets`    | Asset, AssetDepreciation                           |
+| `plugin-locale-th` | TaxFiling, WithholdingTax, SsciFiling              |
 
 ---
 
 ## 7. Implementation Phases
 
 ### Phase 1: Core Framework (Weeks 1-4)
+
 - [ ] Extract `packages/core` with base types, DB, events
 - [ ] Define plugin interface
 - [ ] Create event bus system
@@ -377,18 +384,21 @@ model Payment { tenantId String ... }
 - [ ] Migrate auth to plugin
 
 ### Phase 2: UI Foundation (Weeks 3-6)
+
 - [ ] Extract `packages/ui` with shadcn/ui
 - [ ] Create theme system
 - [ ] Build base component library
 - [ ] Extract form/table primitives
 
 ### Phase 3: Auth Plugin (Weeks 5-8)
+
 - [ ] Build `plugin-auth-nextauth`
 - [ ] Implement multi-tenant context
 - [ ] Add RBAC system
 - [ ] Session management
 
 ### Phase 4: Domain Packages (Weeks 7-12)
+
 - [ ] Domain invoicing package
 - [ ] Domain payments package
 - [ ] Domain inventory package
@@ -396,6 +406,7 @@ model Payment { tenantId String ... }
 - [ ] Domain assets package
 
 ### Phase 5: Thai Locale Plugin (Weeks 10-14)
+
 - [ ] Thai accounting rules
 - [ ] WHT/VAT/SSC calculations
 - [ ] Thai date formatting
@@ -403,6 +414,7 @@ model Payment { tenantId String ... }
 - [ ] Chart of accounts (TH)
 
 ### Phase 6: Templates & Documentation (Weeks 13-16)
+
 - [ ] SaaS template
 - [ ] Full ERP template
 - [ ] Migration guides
@@ -482,13 +494,13 @@ After extraction complete:
 
 ## 10. Risks & Mitigations
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Scope creep | Delay delivery | Strict phase gates |
-| Thai-specific tight coupling | Hard to extract | Early identification of boundaries |
-| Breaking changes | User migration pain | Semantic versioning + changelog |
-| Plugin performance overhead | Runtime cost | Lazy loading + code splitting |
-| Multi-tenancy complexity | Security bugs | Row-level security from day 1 |
+| Risk                         | Impact              | Mitigation                         |
+| ---------------------------- | ------------------- | ---------------------------------- |
+| Scope creep                  | Delay delivery      | Strict phase gates                 |
+| Thai-specific tight coupling | Hard to extract     | Early identification of boundaries |
+| Breaking changes             | User migration pain | Semantic versioning + changelog    |
+| Plugin performance overhead  | Runtime cost        | Lazy loading + code splitting      |
+| Multi-tenancy complexity     | Security bugs       | Row-level security from day 1      |
 
 ---
 
@@ -509,24 +521,24 @@ After extraction complete:
 
 ### Source Files Analyzed
 
-| File | Purpose |
-|------|---------|
-| `src/app/AGENTS.md` | SPA routing architecture, 173+ API routes |
-| `src/components/AGENTS.md` | 52 feature component dirs |
-| `src/lib/AGENTS.md` | 80+ service files |
-| `src/lib/thai-accounting.ts` | Thai-specific utilities (226 lines) |
-| `src/lib/auth.ts` | NextAuth configuration |
-| `src/lib/api-auth.ts` | Auth helpers (requireAuth, etc.) |
-| `src/stores/AGENTS.md` | Zustand stores (auth, theme, preferences) |
-| `prisma/AGENTS.md` | 280+ models, dual-schema system |
-| `design-system/AGENTS.md` | shadcn/ui + theme system |
-| `templates/AGENTS.md` | CSV import templates |
+| File                         | Purpose                                   |
+| ---------------------------- | ----------------------------------------- |
+| `src/app/AGENTS.md`          | SPA routing architecture, 173+ API routes |
+| `src/components/AGENTS.md`   | 52 feature component dirs                 |
+| `src/lib/AGENTS.md`          | 80+ service files                         |
+| `src/lib/thai-accounting.ts` | Thai-specific utilities (226 lines)       |
+| `src/lib/auth.ts`            | NextAuth configuration                    |
+| `src/lib/api-auth.ts`        | Auth helpers (requireAuth, etc.)          |
+| `src/stores/AGENTS.md`       | Zustand stores (auth, theme, preferences) |
+| `prisma/AGENTS.md`           | 280+ models, dual-schema system           |
+| `design-system/AGENTS.md`    | shadcn/ui + theme system                  |
+| `templates/AGENTS.md`        | CSV import templates                      |
 
 ### Key Thai-Specific Files to Extract
 
 ```
 src/lib/thai-accounting.ts          --> plugin-locale-th
-src/lib/thai-accounting-server.ts   --> plugin-locale-th  
+src/lib/thai-accounting-server.ts   --> plugin-locale-th
 src/lib/wht-service.ts              --> plugin-locale-th
 src/lib/tax-form-service.ts         --> plugin-locale-th
 src/lib/payroll-service.ts          --> domain-payroll (with thai hooks)
@@ -545,5 +557,5 @@ prisma/seed.ts                      --> plugin-locale-th/seeds
 
 ---
 
-*Plan generated by TIER3 subagent for Framework Extraction*
-*Review with: Architecture team, Thai accounting SME, Frontend team*
+_Plan generated by TIER3 subagent for Framework Extraction_ _Review with:
+Architecture team, Thai accounting SME, Frontend team_

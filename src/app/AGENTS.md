@@ -1,6 +1,6 @@
 # AGENTS.md - src/app/ Directory
 
-**Parent Reference**: [../AGENTS.md](../AGENTS.md)
+<!-- Parent: ../../AGENTS.md -->
 
 ## Purpose
 

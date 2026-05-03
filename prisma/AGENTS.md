@@ -1,3 +1,4 @@
+<!-- Parent: ../AGENTS.md -->
 # AGENTS.md - Prisma Database Schema
 
 This file provides essential guidance for AI coding agents working with the

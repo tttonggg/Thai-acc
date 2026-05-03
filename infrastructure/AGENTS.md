@@ -1,3 +1,4 @@
+<!-- Parent: ../AGENTS.md -->
 # AGENTS.md - Infrastructure Operations
 
 This file provides essential guidance for AI coding agents working on **Thai

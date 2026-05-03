@@ -1,68 +1,68 @@
 version: 2
 updates:
   # Enable version updates for npm
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "daily"
-      time: "09:00"
-      timezone: "Asia/Bangkok"
+      interval: 'daily'
+      time: '09:00'
+      timezone: 'Asia/Bangkok'
     open-pull-requests-limit: 10
     reviewers:
-      - "security-team"
-      - "dev-team"
+      - 'security-team'
+      - 'dev-team'
     assignees:
-      - "security-team"
+      - 'security-team'
     commit-message:
-      prefix: "security"
-      prefix-development: "deps"
-      include: "scope"
+      prefix: 'security'
+      prefix-development: 'deps'
+      include: 'scope'
     labels:
-      - "dependencies"
-      - "security"
+      - 'dependencies'
+      - 'security'
     # Security updates
     allow:
-      - dependency-type: "direct"
-      - dependency-type: "indirect"
+      - dependency-type: 'direct'
+      - dependency-type: 'indirect'
     groups:
       security-updates:
         patterns:
-          - "*"
+          - '*'
         update-types:
-          - "security:patch"
-          - "security:minor"
-          - "security:major"
+          - 'security:patch'
+          - 'security:minor'
+          - 'security:major'
     ignore:
       # Ignore major version updates for now (manual review required)
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
 
   # Enable version updates for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Asia/Bangkok"
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Asia/Bangkok'
     open-pull-requests-limit: 5
     reviewers:
-      - "devops-team"
+      - 'devops-team'
     labels:
-      - "dependencies"
-      - "ci-cd"
+      - 'dependencies'
+      - 'ci-cd'
 
   # Enable version updates for Docker
-  - package-ecosystem: "docker"
-    directory: "/"
+  - package-ecosystem: 'docker'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Asia/Bangkok"
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Asia/Bangkok'
     open-pull-requests-limit: 5
     reviewers:
-      - "devops-team"
+      - 'devops-team'
     labels:
-      - "dependencies"
-      - "docker"
+      - 'dependencies'
+      - 'docker'

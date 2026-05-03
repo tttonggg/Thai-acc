@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-04-25T11:00:02Z",
+  "date": "2026-04-25",
+  "test_type": "smoke",
+  "exit_code": 127,
+  "branch": "master",
+  "commit": "ee14e932c323c30e28b6fdf54522539c41f5ee92",
+  "author": "Thai Acc Backup",
+  "message": "fix: exclude permissions from zustand persist to fix hydration mismatch"
+}

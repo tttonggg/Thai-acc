@@ -28,11 +28,18 @@ import { formatThaiDate, formatCurrency } from '@/lib/thai-accounting';
 
 // Types
 interface InvoiceDetail {
+<<<<<<< Updated upstream
   id: string;
   invoiceNo: string;
   invoiceDate: string;
   dueDate?: string;
   customerId: string;
+=======
+  id: string
+  invoiceNo: string
+  invoiceDate: string
+  customerId: string
+>>>>>>> Stashed changes
   customer: {
     id: string;
     name: string;
@@ -246,9 +253,19 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
             <h1 className="text-2xl font-bold text-gray-800">
               {typeLabels[invoice.type]} {invoice.invoiceNo}
             </h1>
+<<<<<<< Updated upstream
             <div className="mt-1 flex items-center gap-2">
               <p className="text-gray-500">{formatThaiDate(invoice.invoiceDate)}</p>
               <Badge className={statusColors[invoice.status]}>{statusLabels[invoice.status]}</Badge>
+=======
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-gray-500">
+                {formatThaiDate(invoice.invoiceDate)}
+              </p>
+              <Badge className={statusColors[invoice.status]}>
+                {statusLabels[invoice.status]}
+              </Badge>
+>>>>>>> Stashed changes
             </div>
           </div>
         </div>

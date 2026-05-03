@@ -366,15 +366,15 @@ jobs:
         run: |
           # Determine current color
           CURRENT_COLOR=$(kubectl get svc thai-erp-staging -o jsonpath='{.spec.selector.color}' 2>/dev/null || echo "blue")
-          
+
           if [ "$CURRENT_COLOR" = "blue" ]; then
             NEW_COLOR="green"
           else
             NEW_COLOR="blue"
           fi
-          
+
           echo "Current color: $CURRENT_COLOR, Deploying to: $NEW_COLOR"
-          
+
           # Deploy to inactive environment
           helm upgrade --install thai-erp-staging ./infrastructure/helm \
             --namespace staging \
@@ -382,15 +382,15 @@ jobs:
             --set color=$NEW_COLOR \
             --set replicaCount=2 \
             --wait --timeout 10m
-          
+
           # Run smoke tests
           kubectl run smoke-test --rm -i --restart=Never \
             --image=curlimages/curl \
             -- curl -sf http://thai-erp-staging-$NEWColor.staging.svc.cluster.local/api/health
-          
+
           # Switch traffic
           kubectl patch svc thai-erp-staging -p '{"spec":{"selector":{"color":"'$NEW_COLOR'"}}}'
-          
+
           # Scale down old environment
           kubectl scale deployment thai-erp-staging-$CURRENT_COLOR --replicas=0 -n staging || true
 
@@ -455,15 +455,15 @@ jobs:
         run: |
           # Determine current color
           CURRENT_COLOR=$(kubectl get svc thai-erp -o jsonpath='{.spec.selector.color}' 2>/dev/null || echo "blue")
-          
+
           if [ "$CURRENT_COLOR" = "blue" ]; then
             NEW_COLOR="green"
           else
             NEW_COLOR="blue"
           fi
-          
+
           echo "Current color: $CURRENT_COLOR, Deploying to: $NEW_COLOR"
-          
+
           # Deploy to inactive environment
           helm upgrade --install thai-erp ./infrastructure/helm \
             --namespace production \
@@ -472,24 +472,24 @@ jobs:
             --set replicaCount=3 \
             --values ./infrastructure/helm/values-production.yaml \
             --wait --timeout 15m
-          
+
           # Run smoke tests
           kubectl run smoke-test --rm -i --restart=Never \
             --image=curlimages/curl \
             -- curl -sf http://thai-erp-$NEWColor.production.svc.cluster.local/api/health
-          
+
           # Run acceptance tests
           echo "Running acceptance tests..."
-          
+
           # Switch traffic
           kubectl patch svc thai-erp -p '{"spec":{"selector":{"color":"'$NEW_COLOR'"}}}'
-          
+
           # Monitor for 5 minutes
           sleep 300
-          
+
           # Verify no increase in error rate
           # If errors detected, rollback
-          
+
           # Scale down old environment after 1 hour
           kubectl scale deployment thai-erp-$CURRENT_COLOR --replicas=0 -n production || true
 

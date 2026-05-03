@@ -1,3 +1,4 @@
+<!-- Parent: ../AGENTS.md -->
 # AGENTS.md - Thai Accounting ERP System - Scripts Directory
 
 This file provides essential guidance for AI coding agents working on the
