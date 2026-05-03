@@ -45,7 +45,7 @@ jobs:
         run: npm run lint
 
       - name: Run Prettier check
-        run: bunx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md}"
+        run: npx prettier@3.8.3 --check "**/*.{ts,tsx,js,jsx,json,css,md}"
 
       - name: Generate Prisma client
         run: npx prisma generate
