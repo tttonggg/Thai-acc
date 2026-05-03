@@ -129,7 +129,7 @@ export function generateSecureToken(length: number = 32): string {
  * Generate cryptographically secure random bytes
  */
 export function generateSecureBytes(length: number = 32): string {
-  const words = (require('crypto-js') as any).lib.WordArray.random(length);
+  const words = CryptoJS.lib.WordArray.random(length);
   return words.toString(CryptoJS.enc.Hex);
 }
 

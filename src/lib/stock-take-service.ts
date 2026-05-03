@@ -4,6 +4,7 @@
 // ============================================
 
 import prisma from '@/lib/db';
+import { generateDocNumber } from '@/lib/api-utils';
 
 /**
  * Generate stock take number (ST-YYYY-XXXX)
@@ -384,9 +385,6 @@ export async function postStockTake(params: {
     const totalGain = varianceLines
       .filter((line) => line.varianceQty > 0)
       .reduce((sum, line) => sum + line.varianceQty * line.costPerUnit, 0);
-
-    // Import generateDocNumber for transaction-safe number generation
-    const { generateDocNumber } = require('@/lib/api-utils');
 
     // @ts-ignore
     const journalEntries: any[] = [];

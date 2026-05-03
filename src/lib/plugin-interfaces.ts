@@ -7,11 +7,11 @@ export interface PluginContext {
   config: Record<string, unknown>;
 }
 
-export type PluginHooks = Record<string, Function>;
+export type PluginHooks = Record<string, (...args: unknown[]) => unknown>;
 
 export interface PluginRoute {
   path: string;
-  handler: Function;
+  handler: (...args: unknown[]) => unknown;
 }
 
 export interface ERPPlugin {

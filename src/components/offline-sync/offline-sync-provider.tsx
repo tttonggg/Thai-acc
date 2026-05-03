@@ -129,35 +129,8 @@ export function OfflineSyncProvider({
     }
   };
 
-  const queueChange = useCallback(
-    async (operation: PendingChange['operation'], endpoint: string, data: unknown) => {
-      const change: PendingChange = {
-        id: crypto.randomUUID(),
-        timestamp: Date.now(),
-        operation,
-        endpoint,
-        data,
-        retries: 0,
-      };
-
-      const updated = [...pendingChanges, change];
-      await savePendingChanges(updated);
-
-      // Try to sync immediately if online
-      if (isOnline) {
-        syncNow();
-      }
-    },
-    [pendingChanges, isOnline]
-  );
-
-  const removePendingChange = useCallback(
-    async (id: string) => {
-      const updated = pendingChanges.filter((c) => c.id !== id);
-      await savePendingChanges(updated);
-    },
-    [pendingChanges]
-  );
+  // Ref to hold latest syncNow so queueChange can call it without circular dependency
+  const syncNowRef = useRef<() => Promise<void>>(async () => {});
 
   const syncNow = useCallback(async () => {
     if (isSyncing || !isOnline || pendingChanges.length === 0) return;
@@ -181,7 +154,6 @@ export function OfflineSyncProvider({
         if (response.ok) {
           completed.push(change.id);
         } else if (response.status === 409) {
-          // Conflict detected
           const serverData = await response.json();
           newConflicts.push({
             id: crypto.randomUUID(),
@@ -191,7 +163,6 @@ export function OfflineSyncProvider({
           });
           completed.push(change.id);
         } else {
-          // Retry — create new object instead of mutating
           const updatedChange: PendingChange = {
             ...change,
             retries: change.retries + 1,
@@ -213,11 +184,9 @@ export function OfflineSyncProvider({
       }
     }
 
-    // Remove completed changes
     const remaining = pendingChanges.filter((c) => !completed.includes(c.id));
     await savePendingChanges(remaining);
 
-    // Save conflicts
     if (newConflicts.length > 0) {
       await saveConflicts([...conflicts, ...newConflicts]);
     }
@@ -227,6 +196,38 @@ export function OfflineSyncProvider({
   }, [isSyncing, isOnline, pendingChanges, conflicts, maxRetries]);
 
   // Keep syncNowRef in sync with latest syncNow
+  useEffect(() => { syncNowRef.current = syncNow; }, [syncNow]);
+
+  const queueChange = useCallback(
+    async (operation: PendingChange['operation'], endpoint: string, data: unknown) => {
+      const change: PendingChange = {
+        id: crypto.randomUUID(),
+        timestamp: Date.now(),
+        operation,
+        endpoint,
+        data,
+        retries: 0,
+      };
+
+      const updated = [...pendingChanges, change];
+      await savePendingChanges(updated);
+
+      // Try to sync immediately if online
+      if (isOnline) {
+        syncNowRef.current();
+      }
+    },
+    [pendingChanges, isOnline]
+  );
+
+  const removePendingChange = useCallback(
+    async (id: string) => {
+      const updated = pendingChanges.filter((c) => c.id !== id);
+      await savePendingChanges(updated);
+    },
+    [pendingChanges]
+  );
+
   // Sync when coming online
   useEffect(() => {
     if (isOnline && pendingChanges.length > 0) {

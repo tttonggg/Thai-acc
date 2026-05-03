@@ -125,6 +125,7 @@ export function InvoiceTable({
   const [editInvoiceId, setEditInvoiceId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: invoices.length,
     getScrollElement: () => parentRef.current,
