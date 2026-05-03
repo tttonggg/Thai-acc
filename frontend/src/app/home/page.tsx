@@ -67,11 +67,11 @@ function SchemaMarkup() {
           "บันทึกรายรับรายจ่ายอัตโนมัติ",
           "งบทดลอง งบกำไรขาดทุน งบดุล",
         ],
-        aggregateRating: {
+        /* aggregateRating: {
           "@type": "AggregateRating",
           ratingValue: "4.8",
           ratingCount: "1240",
-        },
+        }, */
       },
       {
         "@type": "FAQPage",
