@@ -42,13 +42,13 @@ function BankAccountsTab() {
   const [accountToDelete, setAccountToDelete] = useState<BankAccount | null>(null)
   const { toast } = useToast()
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   const fetchAll = useCallback(async () => {
     setLoading(true)
     const res = await window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())
     if (res.success) setAccounts(res.data)
     setLoading(false)
   }, [])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     fetchAll()
   }, [fetchAll])
@@ -173,7 +173,6 @@ function ChequeRegisterTab() {
   const [chequeToDelete, setChequeToDelete] = useState<Cheque | null>(null)
   const { toast } = useToast()
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   const fetchAll = useCallback(async () => {
     setLoading(true)
     const [chRes, accRes] = await Promise.all([window.fetch(`/api/cheques`, { credentials: 'include' }).then(r => r.json()), window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())])
@@ -181,6 +180,7 @@ function ChequeRegisterTab() {
     if (accRes.success) setAccounts(accRes.data)
     setLoading(false)
   }, [])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     fetchAll()
   }, [fetchAll])
@@ -389,8 +389,8 @@ function ReconciliationTab() {
   }, [selectedAccountId])
 
   // Calculate book balance when cheques are selected/deselected
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (selectedAccountId && unreconciledCheques.length > 0) {
       const selectedChequeObjects = unreconciledCheques.filter(c => selectedCheques.has(c.id))
       const bookBalance = selectedChequeObjects.reduce((acc, cheque) => {
@@ -401,6 +401,7 @@ function ReconciliationTab() {
       const stmtBalance = parseFloat(statementBalance) || 0
       setDifference(stmtBalance - bookBalance)
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [selectedCheques, statementBalance, unreconciledCheques])
 
   const handleReconcile = async () => {
