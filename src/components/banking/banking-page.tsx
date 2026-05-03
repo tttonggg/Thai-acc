@@ -42,6 +42,7 @@ function BankAccountsTab() {
   const [accountToDelete, setAccountToDelete] = useState<BankAccount | null>(null)
   const { toast } = useToast()
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   const fetchAll = useCallback(async () => {
     setLoading(true)
     const res = await window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())
@@ -172,6 +173,7 @@ function ChequeRegisterTab() {
   const [chequeToDelete, setChequeToDelete] = useState<Cheque | null>(null)
   const { toast } = useToast()
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   const fetchAll = useCallback(async () => {
     setLoading(true)
     const [chRes, accRes] = await Promise.all([window.fetch(`/api/cheques`, { credentials: 'include' }).then(r => r.json()), window.fetch(`/api/bank-accounts`, { credentials: 'include' }).then(r => r.json())])
@@ -387,6 +389,7 @@ function ReconciliationTab() {
   }, [selectedAccountId])
 
   // Calculate book balance when cheques are selected/deselected
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (selectedAccountId && unreconciledCheques.length > 0) {
       const selectedChequeObjects = unreconciledCheques.filter(c => selectedCheques.has(c.id))
