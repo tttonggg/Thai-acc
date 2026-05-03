@@ -649,7 +649,8 @@ export function KeeratiSidebar({
 
               // Check if group has visible items (based on permissions)
               const visibleItems = group.items.filter(filterByPermission);
-              if (visibleItems.length === 0) return null;
+              // Always show settings group even if all items are hidden (items will be grayed out)
+              if (visibleItems.length === 0 && group.id !== 'settings') return null;
 
               return (
                 <div key={group.id} className="mb-2">
