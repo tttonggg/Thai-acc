@@ -48,7 +48,9 @@ function BankAccountsTab() {
     if (res.success) setAccounts(res.data)
     setLoading(false)
   }, [])
-  useEffect(() => { fetchAll() }, [fetchAll])
+  useEffect(() => {
+    fetchAll()
+  }, [fetchAll])
 
   const handleEdit = (account: BankAccount) => {
     setSelectedAccount(account)
@@ -177,7 +179,9 @@ function ChequeRegisterTab() {
     if (accRes.success) setAccounts(accRes.data)
     setLoading(false)
   }, [])
-  useEffect(() => { fetchAll() }, [fetchAll])
+  useEffect(() => {
+    fetchAll()
+  }, [fetchAll])
 
   const handleEdit = (cheque: Cheque) => {
     setSelectedCheque(cheque)
