@@ -343,6 +343,12 @@ const menuGroups: MenuGroup[] = [
         requiredPermission: { module: 'admin', action: 'users' },
       },
       {
+        id: 'role-management',
+        label: 'จัดการบทบาท (Role Management)',
+        icon: Shield,
+        requiredPermission: { module: 'admin', action: 'manage' },
+      },
+      {
         id: 'entities',
         label: 'บริษัทในเครือ (Entities)',
         icon: Building,
