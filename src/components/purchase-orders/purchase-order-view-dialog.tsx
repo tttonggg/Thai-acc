@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import {
   ShoppingCart,
@@ -19,18 +19,18 @@ import {
   Clock,
   Edit,
   History,
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
+} from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/components/ui/dialog'
 import {
   Table,
   TableBody,
@@ -38,81 +38,81 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { DocumentUpload } from '@/components/common/document-upload';
+} from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Separator } from '@/components/ui/separator'
+import { DocumentUpload } from '@/components/common/document-upload'
 
 interface Vendor {
-  id: string;
-  name: string;
-  code: string;
-  taxId?: string;
-  address?: string;
-  contactName?: string;
-  contactPhone?: string;
+  id: string
+  name: string
+  code: string
+  taxId?: string
+  address?: string
+  contactName?: string
+  contactPhone?: string
 }
 
 interface PurchaseOrderLine {
-  id: string;
-  lineNo: number;
-  productId?: string;
+  id: string
+  lineNo: number
+  productId?: string
   product?: {
-    id: string;
-    code: string;
-    name: string;
-  };
-  description: string;
-  quantity: number;
-  unit: string;
-  unitPrice: number;
-  discount: number;
-  vatRate: number;
-  vatAmount: number;
-  amount: number;
+    id: string
+    code: string
+    name: string
+  }
+  description: string
+  quantity: number
+  unit: string
+  unitPrice: number
+  discount: number
+  vatRate: number
+  vatAmount: number
+  amount: number
 }
 
 interface PurchaseOrder {
-  id: string;
-  orderNo: string;
-  orderDate: string;
-  vendorId: string;
-  vendor: Vendor;
-  status: 'DRAFT' | 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'PARTIAL' | 'RECEIVED' | 'CANCELLED';
-  subtotal: number;
-  vatAmount: number;
-  totalAmount: number;
-  expectedDate?: string;
-  shippingTerms?: string;
-  paymentTerms?: string;
-  deliveryAddress?: string;
-  notes?: string;
-  lines: PurchaseOrderLine[];
+  id: string
+  orderNo: string
+  orderDate: string
+  vendorId: string
+  vendor: Vendor
+  status: 'DRAFT' | 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'PARTIAL' | 'RECEIVED' | 'CANCELLED'
+  subtotal: number
+  vatAmount: number
+  totalAmount: number
+  expectedDate?: string
+  shippingTerms?: string
+  paymentTerms?: string
+  deliveryAddress?: string
+  notes?: string
+  lines: PurchaseOrderLine[]
   createdBy: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  confirmedAt?: string;
-  confirmedBy?: string;
-  shippedAt?: string;
-  shippedBy?: string;
-  receivedAt?: string;
-  receivedBy?: string;
-  cancelledAt?: string;
-  cancelledBy?: string;
-  cancelledReason?: string;
+    id: string
+    name: string
+    email: string
+  }
+  createdAt: string
+  confirmedAt?: string
+  confirmedBy?: string
+  shippedAt?: string
+  shippedBy?: string
+  receivedAt?: string
+  receivedBy?: string
+  cancelledAt?: string
+  cancelledBy?: string
+  cancelledReason?: string
   purchaseRequest?: {
-    id: string;
-    requestNo: string;
-  };
+    id: string
+    requestNo: string
+  }
   goodsReceipts?: Array<{
-    id: string;
-    receiptNo: string;
-    receiptDate: string;
-    quantity: number;
-  }>;
+    id: string
+    receiptNo: string
+    receiptDate: string
+    quantity: number
+  }>
 }
 
 // Status labels and colors
@@ -124,7 +124,7 @@ const statusLabels: Record<string, string> = {
   PARTIAL: 'รับบางส่วน',
   RECEIVED: 'รับสินค้าแล้ว',
   CANCELLED: 'ยกเลิก',
-};
+}
 
 const statusColors: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-800 border-gray-300',
@@ -134,15 +134,15 @@ const statusColors: Record<string, string> = {
   PARTIAL: 'bg-orange-100 text-orange-800 border-orange-300',
   RECEIVED: 'bg-green-100 text-green-800 border-green-300',
   CANCELLED: 'bg-red-100 text-red-800 border-red-300',
-};
+}
 
 interface PurchaseOrderViewDialogProps {
-  po: PurchaseOrder | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onAction: (poId: string, action: 'confirm' | 'receive' | 'ship' | 'cancel') => void;
-  processingAction: string | null;
-  onEdit: (po: PurchaseOrder) => void;
+  po: PurchaseOrder | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onAction: (poId: string, action: 'confirm' | 'receive' | 'ship' | 'cancel') => void
+  processingAction: string | null
+  onEdit: (po: PurchaseOrder) => void
 }
 
 export function PurchaseOrderViewDialog({
@@ -157,43 +157,45 @@ export function PurchaseOrderViewDialog({
     return `฿${(amount / 100).toLocaleString('th-TH', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    })}`;
-  };
+    })}`
+  }
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('th-TH');
-  };
+    if (!dateString) return '-'
+    return new Date(dateString).toLocaleDateString('th-TH')
+  }
 
   const formatDateTime = (dateString?: string) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('th-TH') + ' ' + date.toLocaleTimeString('th-TH');
-  };
+    if (!dateString) return '-'
+    const date = new Date(dateString)
+    return date.toLocaleDateString('th-TH') + ' ' + date.toLocaleTimeString('th-TH')
+  }
 
   const handlePrint = () => {
-    window.open(`/api/purchase-orders/${po?.id}/print`, '_blank');
-  };
+    window.open(`/api/purchase-orders/${po?.id}/print`, '_blank')
+  }
 
-  if (!po) return null;
+  if (!po) return null
 
-  const totalQuantity = po.lines.reduce((sum, line) => sum + line.quantity, 0);
-  const totalReceived = po.goodsReceipts?.reduce((sum, gr) => sum + gr.quantity, 0) || 0;
+  const totalQuantity = po.lines.reduce((sum, line) => sum + line.quantity, 0)
+  const totalReceived = po.goodsReceipts?.reduce((sum, gr) => sum + gr.quantity, 0) || 0
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto md:max-w-5xl">
+      <DialogContent className="max-w-[95vw] md:max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
             ใบสั่งซื้อ: {po.orderNo}
           </DialogTitle>
           <DialogDescription>
-            <div className="mt-2 flex items-center gap-4">
+            <div className="flex items-center gap-4 mt-2">
               <Badge className={statusColors[po.status]} variant="outline">
                 {statusLabels[po.status]}
               </Badge>
-              <span className="text-gray-500">วันที่: {formatDate(po.orderDate)}</span>
+              <span className="text-gray-500">
+                วันที่: {formatDate(po.orderDate)}
+              </span>
             </div>
           </DialogDescription>
         </DialogHeader>
@@ -210,7 +212,7 @@ export function PurchaseOrderViewDialog({
             {/* Vendor Info */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-sm">
+                <CardTitle className="text-sm flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
                   ข้อมูลผู้จำหน่าย
                 </CardTitle>
@@ -240,10 +242,10 @@ export function PurchaseOrderViewDialog({
             </Card>
 
             {/* Order Info */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm">
+                  <CardTitle className="text-sm flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     ข้อมูลการสั่งซื้อ
                   </CardTitle>
@@ -270,7 +272,7 @@ export function PurchaseOrderViewDialog({
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm">
+                  <CardTitle className="text-sm flex items-center gap-2">
                     <Truck className="h-4 w-4" />
                     เงื่อนไข
                   </CardTitle>
@@ -298,7 +300,7 @@ export function PurchaseOrderViewDialog({
             {po.purchaseRequest && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm">
+                  <CardTitle className="text-sm flex items-center gap-2">
                     <FileText className="h-4 w-4" />
                     อ้างอิงใบขอซื้อ
                   </CardTitle>
@@ -319,7 +321,7 @@ export function PurchaseOrderViewDialog({
                   <CardTitle className="text-sm">หมายเหตุ</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="rounded bg-gray-50 p-3 text-sm">{po.notes}</p>
+                  <p className="text-sm bg-gray-50 p-3 rounded">{po.notes}</p>
                 </CardContent>
               </Card>
             )}
@@ -328,7 +330,7 @@ export function PurchaseOrderViewDialog({
             <Card>
               <CardContent className="p-6">
                 <div className="flex justify-end">
-                  <div className="w-full space-y-3 md:w-80">
+                  <div className="w-full md:w-80 space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">รวมเป็นเงิน</span>
                       <span>{formatCurrency(po.subtotal)}</span>
@@ -351,13 +353,13 @@ export function PurchaseOrderViewDialog({
           <TabsContent value="items">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-sm">
+                <CardTitle className="text-sm flex items-center gap-2">
                   <Package className="h-4 w-4" />
                   รายการสินค้า ({po.lines?.length || 0} รายการ)
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-hidden rounded-lg border">
+                <div className="border rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -378,7 +380,9 @@ export function PurchaseOrderViewDialog({
                             <div>
                               <p className="font-medium">{line.description}</p>
                               {line.product && (
-                                <p className="text-xs text-gray-500">รหัส: {line.product.code}</p>
+                                <p className="text-xs text-gray-500">
+                                  รหัส: {line.product.code}
+                                </p>
                               )}
                             </div>
                           </TableCell>
@@ -391,7 +395,9 @@ export function PurchaseOrderViewDialog({
                           <TableCell className="text-right">
                             {line.discount > 0 ? `${line.discount}%` : '-'}
                           </TableCell>
-                          <TableCell className="text-right">{line.vatRate}%</TableCell>
+                          <TableCell className="text-right">
+                            {line.vatRate}%
+                          </TableCell>
                           <TableCell className="text-right font-medium">
                             {formatCurrency(line.amount)}
                           </TableCell>
@@ -403,35 +409,29 @@ export function PurchaseOrderViewDialog({
 
                 {/* Receipt Progress */}
                 {po.status !== 'DRAFT' && po.status !== 'CANCELLED' && (
-                  <div className="mt-6 rounded-lg bg-gray-50 p-4">
-                    <h4 className="mb-3 font-medium">ความคืบหน้าการรับสินค้า</h4>
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-medium mb-3">ความคืบหน้าการรับสินค้า</h4>
                     <div className="flex items-center gap-4">
                       <div className="flex-1">
-                        <div className="mb-1 flex justify-between text-sm">
-                          <span>
-                            รับแล้ว {totalReceived.toLocaleString('th-TH')} จาก{' '}
-                            {totalQuantity.toLocaleString('th-TH')} ชิ้น
-                          </span>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>รับแล้ว {totalReceived.toLocaleString('th-TH')} จาก {totalQuantity.toLocaleString('th-TH')} ชิ้น</span>
                           <span>{Math.round((totalReceived / totalQuantity) * 100) || 0}%</span>
                         </div>
-                        <div className="h-2 w-full rounded-full bg-gray-200">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
-                            className="h-2 rounded-full bg-blue-600 transition-all"
-                            style={{
-                              width: `${Math.min((totalReceived / totalQuantity) * 100, 100)}%`,
-                            }}
+                            className="bg-blue-600 h-2 rounded-full transition-all"
+                            style={{ width: `${Math.min((totalReceived / totalQuantity) * 100, 100)}%` }}
                           />
                         </div>
                       </div>
                     </div>
                     {po.goodsReceipts && po.goodsReceipts.length > 0 && (
                       <div className="mt-4">
-                        <p className="mb-2 text-sm font-medium">ประวัติการรับสินค้า:</p>
-                        <ul className="space-y-1 text-sm">
+                        <p className="text-sm font-medium mb-2">ประวัติการรับสินค้า:</p>
+                        <ul className="text-sm space-y-1">
                           {po.goodsReceipts.map((gr) => (
                             <li key={gr.id} className="text-gray-600">
-                              • {gr.receiptNo} - {formatDate(gr.receiptDate)} (
-                              {gr.quantity.toLocaleString('th-TH')} ชิ้น)
+                              • {gr.receiptNo} - {formatDate(gr.receiptDate)} ({gr.quantity.toLocaleString('th-TH')} ชิ้น)
                             </li>
                           ))}
                         </ul>
@@ -440,8 +440,8 @@ export function PurchaseOrderViewDialog({
                   </div>
                 )}
 
-                <div className="mt-6 flex justify-end">
-                  <div className="w-full space-y-3 md:w-80">
+                <div className="flex justify-end mt-6">
+                  <div className="w-full md:w-80 space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">รวมเป็นเงิน</span>
                       <span>{formatCurrency(po.subtotal)}</span>
@@ -464,7 +464,7 @@ export function PurchaseOrderViewDialog({
           <TabsContent value="history">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-sm">
+                <CardTitle className="text-sm flex items-center gap-2">
                   <History className="h-4 w-4" />
                   ประวัติการดำเนินการ
                 </CardTitle>
@@ -473,7 +473,7 @@ export function PurchaseOrderViewDialog({
                 <div className="space-y-4">
                   {/* Created */}
                   <div className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
                       <FileText className="h-4 w-4 text-blue-600" />
                     </div>
                     <div>
@@ -487,7 +487,7 @@ export function PurchaseOrderViewDialog({
                   {/* Confirmed */}
                   {po.confirmedAt && (
                     <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
+                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
                         <CheckCircle2 className="h-4 w-4 text-green-600" />
                       </div>
                       <div>
@@ -502,7 +502,7 @@ export function PurchaseOrderViewDialog({
                   {/* Shipped */}
                   {po.shippedAt && (
                     <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100">
+                      <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
                         <Ship className="h-4 w-4 text-purple-600" />
                       </div>
                       <div>
@@ -517,7 +517,7 @@ export function PurchaseOrderViewDialog({
                   {/* Received */}
                   {po.receivedAt && (
                     <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
+                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
                         <Package className="h-4 w-4 text-green-600" />
                       </div>
                       <div>
@@ -532,7 +532,7 @@ export function PurchaseOrderViewDialog({
                   {/* Cancelled */}
                   {po.cancelledAt && (
                     <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
+                      <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
                         <Ban className="h-4 w-4 text-red-600" />
                       </div>
                       <div>
@@ -555,11 +555,14 @@ export function PurchaseOrderViewDialog({
         </Tabs>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-2 border-t pt-4">
+        <div className="flex flex-wrap gap-2 pt-4 border-t">
           {/* Edit for Draft */}
           {po.status === 'DRAFT' && (
-            <Button variant="outline" onClick={() => onEdit(po)}>
-              <Edit className="mr-2 h-4 w-4" />
+            <Button
+              variant="outline"
+              onClick={() => onEdit(po)}
+            >
+              <Edit className="h-4 w-4 mr-2" />
               แก้ไข
             </Button>
           )}
@@ -572,9 +575,9 @@ export function PurchaseOrderViewDialog({
               disabled={processingAction === `${po.id}-confirm`}
             >
               {processingAction === `${po.id}-confirm` ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <CheckCircle2 className="mr-2 h-4 w-4" />
+                <CheckCircle2 className="h-4 w-4 mr-2" />
               )}
               ยืนยัน PO
             </Button>
@@ -588,9 +591,9 @@ export function PurchaseOrderViewDialog({
               disabled={processingAction === `${po.id}-ship`}
             >
               {processingAction === `${po.id}-ship` ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <Ship className="mr-2 h-4 w-4" />
+                <Ship className="h-4 w-4 mr-2" />
               )}
               จัดส่ง
             </Button>
@@ -604,9 +607,9 @@ export function PurchaseOrderViewDialog({
               disabled={processingAction === `${po.id}-receive`}
             >
               {processingAction === `${po.id}-receive` ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <Package className="mr-2 h-4 w-4" />
+                <Package className="h-4 w-4 mr-2" />
               )}
               รับสินค้า
             </Button>
@@ -620,21 +623,24 @@ export function PurchaseOrderViewDialog({
               disabled={processingAction === `${po.id}-cancel`}
             >
               {processingAction === `${po.id}-cancel` ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <Ban className="mr-2 h-4 w-4" />
+                <Ban className="h-4 w-4 mr-2" />
               )}
               ยกเลิก
             </Button>
           )}
 
           {/* Print */}
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" />
+          <Button
+            variant="outline"
+            onClick={handlePrint}
+          >
+            <Printer className="h-4 w-4 mr-2" />
             พิมพ์
           </Button>
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

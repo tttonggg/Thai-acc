@@ -50,16 +50,9 @@ model SystemSettings {
   whtPnd53Prof     Float    @default(3) // อัตราภาษีหัก ณ ที่จ่าย ค่าบริการวิชาชีพ (%)
   whtPnd53Contract Float    @default(1) // อัตราภาษีหัก ณ ที่จ่าย ค่าจ้างทำของ (%)
   whtPnd53Advert   Float    @default(2) // อัตราภาษีหัก ณ ที่จ่าย ค่าโฆษณา (%)
-  metadata               Json? // ข้อมูลส่วนขยาย
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
-  // Chart of account codes for sales/purchase transactions
-  salesReturnsAccountId  String? // Chart of account code for sales returns (default '4130')
-  vatOutputAccountId     String? // Chart of account code for VAT output (default '2132')
-  arAccountId            String? // Chart of account code for AR (default '1121')
-  purchaseAccountId      String? // Chart of account code for purchases (default '5100')
-  vatInputAccountId      String? // Chart of account code for VAT input (default '1131')
-  apAccountId            String? // Chart of account code for AP (default '2111')
+  metadata         Json? // ข้อมูลส่วนขยาย
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 // ============================================
@@ -115,8 +108,6 @@ model JournalEntry {
   createdById       String? // ผู้สร้าง
   approvedById      String? // ผู้อนุมัติ
   approvedAt        DateTime? // วันที่อนุมัติ
-  postedById        String? // ผู้ลงบัญชี
-  postedAt          DateTime? // วันที่ลงบัญชี
   idempotencyKey    String?            @unique // ✅ FIXED: Prevent duplicate journal entries
   notes             String? // หมายเหตุ
   isActive          Boolean            @default(true)
@@ -290,7 +281,6 @@ model Product {
   goodsReceiptNoteLines GoodsReceiptNoteLine[]
   quotationLines       QuotationLine[]
   salesOrderLines      SalesOrderLine[]
-  stockBatches         StockBatch[]
 
   @@index([deletedAt])
 }
@@ -1018,7 +1008,6 @@ model User {
   createdSOs          SalesOrder[]       @relation("SOCreator")
   updatedSOs          SalesOrder[]       @relation("SOUpdater")
   documentAttachments DocumentAttachment[]
-  userEmployees       UserEmployee[]
 }
 
 enum UserRole {
@@ -1140,7 +1129,6 @@ model Warehouse {
   stockMovements StockMovement[]
   stockTakes     StockTake[]
   goodsReceiptNotes GoodsReceiptNote[]
-  stockBatches      StockBatch[]
 }
 
 model WarehouseZone {
@@ -1196,29 +1184,6 @@ model StockMovement {
   @@index([productId])
   @@index([warehouseId])
   @@index([referenceId])
-}
-
-model StockBatch {
-  id           String    @id @default(cuid())
-  productId    String
-  product      Product   @relation(fields: [productId], references: [id])
-  warehouseId  String
-  warehouse    Warehouse @relation(fields: [warehouseId], references: [id])
-  batchNo      String?
-  batchDate    DateTime
-  expiryDate   DateTime?
-  quantity     Float     @default(0) // จำนวนคงเหลือใน batch (หน่วย)
-  unitCost     Int       @default(0) // ต้นทุนต่อหน่วย (สตางค์)
-  totalCost    Int       @default(0) // ต้นทุนรวม (สตางค์)
-  referenceId  String?
-  referenceNo  String?
-  notes        String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
-  @@index([productId])
-  @@index([warehouseId])
-  @@index([batchDate])
 }
 
 model StockTransfer {
@@ -1535,8 +1500,6 @@ model Employee {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   payrolls         Payroll[]
-  employeeRoles    EmployeeRole[]
-  userEmployees    UserEmployee[]
 
   @@index([deletedAt])
 }
@@ -1562,7 +1525,6 @@ model PayrollRun {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   payrolls        Payroll[]
-  providentFundContributions ProvidentFundContribution[]
 
   @@index([journalEntryId])
   @@index([createdById])
@@ -1601,109 +1563,7 @@ enum PayrollStatus {
 }
 
 // ============================================
-// ระบบลางาน (Leave Management)
-// ============================================
-enum LeaveStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  CANCELLED
-}
-
-model LeaveType {
-  id          String    @id @default(cuid())
-  code        String    @unique // รหัสประเภทการลา เช่น SN, ML, AL
-  name        String    // ชื่อประเภทการลา เช่น ลาป่วย, ลากิจ, ลาพักร้อน
-  defaultDays Float     @default(0) // จำนวนวันลามาตรฐานต่อปี
-  isActive    Boolean   @default(true)
-  notes       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  balances    LeaveBalance[]
-  requests    LeaveRequest[]
-
-  @@index([isActive])
-}
-
-model LeaveBalance {
-  id           String    @id @default(cuid())
-  employeeId   String
-  leaveTypeId  String
-  leaveType    LeaveType @relation(fields: [leaveTypeId], references: [id])
-  year         Int       // ปีที่คำนวณวันลา
-  totalDays    Float     @default(0) // จำนวนวันลาทั้งหมดในปี
-  usedDays     Float     @default(0) // จำนวนวันลาที่ใช้ไป
-  pendingDays  Float     @default(0) // จำนวนวันลาที่รออนุมัติ
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  requests     LeaveRequest[]
-
-  @@unique([employeeId, leaveTypeId, year])
-  @@index([employeeId])
-  @@index([leaveTypeId])
-}
-
-model LeaveRequest {
-  id           String      @id @default(cuid())
-  employeeId   String
-  leaveTypeId  String
-  leaveType    LeaveType   @relation(fields: [leaveTypeId], references: [id])
-  balanceId    String
-  balance      LeaveBalance @relation(fields: [balanceId], references: [id])
-  startDate    DateTime
-  endDate      DateTime
-  totalDays    Float       // จำนวนวันลาที่ขอ
-  reason       String?
-  status       LeaveStatus @default(PENDING)
-  approvedBy   String?
-  approvedAt   DateTime?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  @@index([employeeId])
-  @@index([leaveTypeId])
-  @@index([status])
-  @@index([startDate])
-}
-
-// ============================================
-// กองทุนสำรองเลี้ยงชีพ (Provident Fund)
-// ============================================
-model ProvidentFund {
-  id            String    @id @default(cuid())
-  name         String
-  employeeRate Float    // อัตราส่วนพนักงาน (เช่น 5 = 5%)
-  employerRate Float    // อัตราส่วนนายจ้าง (เช่น 5 = 5%)
-  maxMonthly   Int?      // หักสูงสุดต่อเดือน (สตางค์)
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  contributions ProvidentFundContribution[]
-
-  @@index([isActive])
-}
-
-model ProvidentFundContribution {
-  id               String    @id @default(cuid())
-  providentFundId  String
-  providentFund    ProvidentFund @relation(fields: [providentFundId], references: [id])
-  employeeId       String
-  payrollRunId     String?
-  payrollRun       PayrollRun? @relation(fields: [payrollRunId], references: [id])
-  employeePortion  Int       // ส่วนของพนักงาน (สตางค์)
-  employerPortion  Int       // ส่วนของนายจ้าง (สตางค์)
-  month            Int?      // เดือนที่คำนวณ
-  year             Int?      // ปีที่คำนวณ
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  @@index([employeeId])
-  @@index([providentFundId])
-  @@index([payrollRunId])
-}
-
-// ============================================
-// บันทึกกิจกรรม (Activity Log)
+// ประวัติการนำเข้าข้อมูล (Data Import History)
 // ============================================
 model DataImport {
   id           String       @id @default(cuid())
@@ -2824,15 +2684,7 @@ model Quotation {
   status          QuotationStatus  @default(DRAFT)
   notes           String? // หมายเหตุ
   terms           String? // เงื่อนไข
-  invoiceId       String? // ID ใบกำกับภาษี (เมื่อแปลงแล้ว)
   salesOrderId    String? // ID ใบสั่งขาย (ถ้าแปลงแล้ว)
-  contactPerson   String? // ผู้ติดต่อ
-  discountPercent Float           @default(0) // ส่วนลด (%)
-  internalNotes   String? // หมายเหตุภายใน
-  approvedAt      DateTime? // วันที่อนุมัติ
-  rejectionReason String? // เหตุผลที่ปฏิเสธ
-  sentAt          DateTime? // วันที่ส่งให้ลูกค้า
-  version         Int              @default(1) // รุ่นของใบเสนอราคา
   createdById      String?
   isActive        Boolean          @default(true)
   deletedAt       DateTime?
@@ -2896,70 +2748,4 @@ model CommentNotification {
   @@index([commentId])
   @@index([invoiceId])
   @@index([createdAt])
-}
-
-// ============================================
-// สิทธิ์และบทบาท / Permissions & Roles
-// ============================================
-model Permission {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  name      String
-  module    String
-  action    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  rolePermissions RolePermission[]
-}
-
-model Role {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  employeeRoles EmployeeRole[]
-  rolePermissions RolePermission[]
-}
-
-model RolePermission {
-  id           String   @id @default(cuid())
-  roleId       String
-  permissionId String
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  @@unique([roleId, permissionId])
-}
-
-model EmployeeRole {
-  id         String   @id @default(cuid())
-  employeeId String
-  roleId     String
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  @@unique([employeeId, roleId])
-}
-
-model UserEmployee {
-  id         String    @id @default(cuid())
-  userId     String
-  employeeId String
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  @@unique([userId])
-}
-
-model DocumentApproverConfig {
-  id            String   @id @default(cuid())
-  documentType  String
-  approvalOrder Int
-  roleId        String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 }

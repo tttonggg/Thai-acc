@@ -3,28 +3,28 @@
  * Client-side service for interacting with the document-attachment API
  */
 
-import type { User } from '@prisma/client';
+import type { User } from '@prisma/client'
 
 // API response type (dates serialized as strings via JSON)
 export interface DocumentAttachmentApiResponse {
-  id: string;
-  entityType: string;
-  entityId: string;
-  fileName: string;
-  storedFileName: string;
-  fileUrl: string;
-  fileSize: number;
-  mimeType: string | null;
-  uploadedById: string | null;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  uploadedBy: Pick<User, 'id' | 'name' | 'email'> | null;
+  id: string
+  entityType: string
+  entityId: string
+  fileName: string
+  storedFileName: string
+  fileUrl: string
+  fileSize: number
+  mimeType: string | null
+  uploadedById: string | null
+  createdAt: string
+  updatedAt: string
+  deletedAt: string | null
+  uploadedBy: Pick<User, 'id' | 'name' | 'email'> | null
 }
 
-const API_BASE = '/api/document-attachments';
+const API_BASE = '/api/document-attachments'
 
-export type DocumentAttachmentWithUploader = DocumentAttachmentApiResponse;
+export type DocumentAttachmentWithUploader = DocumentAttachmentApiResponse
 
 /**
  * Upload a document attachment
@@ -39,21 +39,21 @@ export async function uploadDocument(
   entityId: string
 ): Promise<DocumentAttachmentWithUploader> {
   // Ensure formData has the required fields
-  formData.append('entityType', entityType);
-  formData.append('entityId', entityId);
+  formData.append('entityType', entityType)
+  formData.append('entityId', entityId)
 
   const response = await fetch(API_BASE, {
     method: 'POST',
-    body: formData,
-  });
+    body: formData
+  })
 
-  const result = await response.json();
+  const result = await response.json()
 
   if (!response.ok || !result.success) {
-    throw new Error(result.error || 'อัปโหลดเอกสารแนบไม่สำเร็จ');
+    throw new Error(result.error || 'อัปโหลดเอกสารแนบไม่สำเร็จ')
   }
 
-  return result.data;
+  return result.data
 }
 
 /**
@@ -66,19 +66,19 @@ export async function getDocuments(
   entityType: string,
   entityId: string
 ): Promise<DocumentAttachmentWithUploader[]> {
-  const url = new URL(API_BASE, window.location.origin);
-  url.searchParams.append('entityType', entityType);
-  url.searchParams.append('entityId', entityId);
+  const url = new URL(API_BASE, window.location.origin)
+  url.searchParams.append('entityType', entityType)
+  url.searchParams.append('entityId', entityId)
 
-  const response = await fetch(url.toString());
+  const response = await fetch(url.toString())
 
-  const result = await response.json();
+  const result = await response.json()
 
   if (!response.ok || !result.success) {
-    throw new Error(result.error || 'ดึงข้อมูลเอกสารแนบไม่สำเร็จ');
+    throw new Error(result.error || 'ดึงข้อมูลเอกสารแนบไม่สำเร็จ')
   }
 
-  return result.data;
+  return result.data
 }
 
 /**
@@ -87,12 +87,12 @@ export async function getDocuments(
  */
 export async function deleteDocument(attachmentId: string): Promise<void> {
   const response = await fetch(`${API_BASE}/${attachmentId}`, {
-    method: 'DELETE',
-  });
+    method: 'DELETE'
+  })
 
-  const result = await response.json();
+  const result = await response.json()
 
   if (!response.ok || !result.success) {
-    throw new Error(result.error || 'ลบเอกสารแนบไม่สำเร็จ');
+    throw new Error(result.error || 'ลบเอกสารแนบไม่สำเร็จ')
   }
 }
