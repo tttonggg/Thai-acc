@@ -265,7 +265,7 @@ export async function POST(request: NextRequest) {
           debitNoteNo,
           debitNoteDate: validatedData.debitNoteDate,
           vendorId: validatedData.vendorId,
-          purchaseInvoiceId: validatedData.purchaseInvoiceId,
+          purchaseInvoice: validatedData.purchaseInvoiceId ? { connect: { id: validatedData.purchaseInvoiceId } } : undefined,
           reason: validatedData.reason,
           subtotal: bahtToSatang(validatedData.subtotal),
           vatRate: validatedData.vatRate,
@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
           totalAmount: bahtToSatang(validatedData.totalAmount),
           status: 'ISSUED',
           notes: validatedData.notes,
-        },
+        } as any,
         include: {
           vendor: true,
           purchaseInvoice: true,
@@ -414,6 +414,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Convert Satang to Baht for response
+    if (!completeDebitNote) {
+      return apiError('เกิดข้อผิดพลาดในการสร้างใบเพิ่มหนี้', 500);
+    }
     const debitNoteInBaht = {
       ...completeDebitNote,
       subtotal: satangToBaht(completeDebitNote.subtotal),
@@ -437,7 +440,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.message.includes('account not found')) {
       return apiError(`บัญชีไม่ถูกต้อง: ${error.message}`, 400);
     }
-    console.error('Error message:', error?.message);
+    console.error('Error message:', (error as any)?.message);
     return apiError('เกิดข้อผิดพลาดในการสร้างใบเพิ่มหนี้');
   }
 }

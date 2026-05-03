@@ -74,7 +74,7 @@ export function calculateNewValues(
  * Get revaluation history for an asset
  */
 export async function getAssetRevaluations(assetId: string) {
-  const revaluations = await prisma.assetRevaluation.findMany({
+  const revaluations = await (prisma as any).assetRevaluation.findMany({
     where: { assetId },
     orderBy: { revalDate: 'desc' },
     include: {
@@ -234,7 +234,7 @@ export async function createRevaluation(input: RevaluationInput): Promise<Revalu
     });
 
     // Create revaluation record
-    const revaluation = await tx.assetRevaluation.create({
+    const revaluation = await (tx as any).assetRevaluation.create({
       data: {
         assetId,
         revalDate,

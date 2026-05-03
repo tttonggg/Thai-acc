@@ -15,7 +15,7 @@ export async function createCustomerSecure(data: {
   if (data.taxId) {
     encryptedData.taxId = encrypt(data.taxId);
   }
-  return prisma.customer.create({ data: encryptedData });
+  return prisma.customer.create({ data: encryptedData as any });
 }
 
 export async function getCustomerSecure(id: string) {
@@ -37,7 +37,7 @@ export async function createVendorSecure(data: {
   const encryptedData = { ...data };
   if (data.taxId) encryptedData.taxId = encrypt(data.taxId);
   if (data.bankAccount) encryptedData.bankAccount = encrypt(data.bankAccount);
-  return prisma.vendor.create({ data: encryptedData });
+  return prisma.vendor.create({ data: encryptedData as any });
 }
 
 export async function getVendorSecure(id: string) {
@@ -64,7 +64,7 @@ export async function createEmployeeSecure(data: {
   if (data.bankAccountNo) encryptedData.bankAccountNo = encrypt(data.bankAccountNo);
   if (data.idCardNumber) encryptedData.idCardNumber = encrypt(data.idCardNumber);
   if (data.socialSecurityNo) encryptedData.socialSecurityNo = encrypt(data.socialSecurityNo);
-  return prisma.employee.create({ data: encryptedData });
+  return prisma.employee.create({ data: encryptedData as any });
 }
 
 export async function getEmployeeSecure(id: string) {
@@ -86,8 +86,8 @@ export async function createBankAccountSecure(data: {
   [key: string]: unknown;
 }) {
   const encryptedData = { ...data };
-  encryptedData.accountNumber = encrypt(data.accountNumber);
-  return prisma.bankAccount.create({ data: encryptedData });
+  encryptedData.accountNumber = encrypt(data.accountNumber) as string;
+  return prisma.bankAccount.create({ data: encryptedData as any });
 }
 
 export async function getBankAccountSecure(id: string) {

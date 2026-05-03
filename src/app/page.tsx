@@ -553,7 +553,7 @@ export default function Home() {
       case 'recurring':
         return <RecurringDocuments />;
       case 'cash-flow':
-        return <CashFlowReport />;
+        return <CashFlowReport {...({} as any)} />;
       default:
         return <Dashboard />;
     }

@@ -159,9 +159,9 @@ export async function processSingleDocument(
  */
 async function createInvoiceFromRecurring(
   recurring: any
-): Promise<{ documentId: string; error: string | null }> {
+): Promise<{ documentId: string | null; error: string | null }> {
   // Get the template invoice if referenceId is provided
-  let templateInvoice = null;
+  let templateInvoice: Awaited<ReturnType<typeof prisma.invoice.findUnique>> | null = null;
   if (recurring.referenceId) {
     templateInvoice = await prisma.invoice.findUnique({
       where: { id: recurring.referenceId },
@@ -217,7 +217,7 @@ async function createInvoiceFromRecurring(
       internalNotes: `Auto-generated from recurring document: ${recurring.title}`,
       terms: templateInvoice.terms,
       lines: {
-        create: templateInvoice.lines.map((line, index) => ({
+        create: (templateInvoice as any).lines.map((line: any, index: number) => ({
           lineNo: index + 1,
           productId: line.productId,
           description: line.description,
@@ -241,9 +241,9 @@ async function createInvoiceFromRecurring(
  */
 async function createExpenseFromRecurring(
   recurring: any
-): Promise<{ documentId: string; error: string | null }> {
+): Promise<{ documentId: string | null; error: string | null }> {
   // Get the template purchase invoice if referenceId is provided
-  let templateExpense = null;
+  let templateExpense: Awaited<ReturnType<typeof prisma.purchaseInvoice.findUnique>> | null = null;
   if (recurring.referenceId) {
     templateExpense = await prisma.purchaseInvoice.findUnique({
       where: { id: recurring.referenceId },
@@ -306,9 +306,9 @@ async function createExpenseFromRecurring(
  */
 async function createReceiptFromRecurring(
   recurring: any
-): Promise<{ documentId: string; error: string | null }> {
+): Promise<{ documentId: string | null; error: string | null }> {
   // Get the template receipt if referenceId is provided
-  let templateReceipt = null;
+  let templateReceipt: Awaited<ReturnType<typeof prisma.receipt.findUnique>> | null = null;
   if (recurring.referenceId) {
     templateReceipt = await prisma.receipt.findUnique({
       where: { id: recurring.referenceId },
@@ -346,13 +346,9 @@ async function createReceiptFromRecurring(
       receiptNo,
       receiptDate: now,
       customerId: templateReceipt.customerId,
-      reference: `Recurring: ${recurring.title} (${recurring.id})`,
       amount: templateReceipt.amount,
-      totalAmount: templateReceipt.totalAmount,
-      depositAmount: templateReceipt.depositAmount,
       status: 'DRAFT',
       notes: templateReceipt.notes,
-      internalNotes: `Auto-generated from recurring document: ${recurring.title}`,
     },
   });
 
@@ -471,7 +467,7 @@ export async function updateRecurringDocument(
 
   // If frequency or dayOfMonth changed, recalculate nextRunAt
   if (input.frequency !== undefined || input.dayOfMonth !== undefined) {
-    const newFrequency = input.frequency ?? existing.frequency;
+    const newFrequency = (input.frequency ?? existing.frequency) as RecurringFrequency;
     const newDayOfMonth = input.dayOfMonth ?? existing.dayOfMonth;
     const lastRun = existing.lastRunAt ?? existing.startDate;
     updateData.nextRunAt = calculateNextRun(lastRun, newFrequency, newDayOfMonth);

@@ -3,7 +3,8 @@
  * Uses Pino for high-performance logging
  */
 
-import pino from 'pino';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pino = require('pino') as any;
 import { randomUUID } from 'crypto';
 
 // Log level from environment or default
@@ -11,18 +12,18 @@ const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 const LOG_FORMAT = process.env.LOG_FORMAT || 'json';
 
 // Create base logger configuration
-const loggerConfig: pino.LoggerOptions = {
+const loggerConfig = {
   level: LOG_LEVEL,
   base: {
     pid: process.pid,
     env: process.env.NODE_ENV,
     version: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
   },
-  timestamp: pino.stdTimeFunctions.isoTime,
+  timestamp: pino.stdTimeFunctions?.isoTime || (() => new Date().toISOString()),
   formatters: {
-    level: (label) => ({ level: label }),
+    level: (label: string) => ({ level: label }),
   },
-};
+} as any;
 
 // Pretty print for development
 if (LOG_FORMAT === 'pretty' || process.env.NODE_ENV === 'development') {
@@ -86,7 +87,7 @@ export function logRequest(
   req: { method: string; url: string; headers: Record<string, unknown> },
   res: { statusCode: number; getHeaders: () => Record<string, unknown> },
   startTime: number,
-  logger: pino.Logger
+  logger: any
 ) {
   const duration = Date.now() - startTime;
 

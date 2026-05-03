@@ -56,7 +56,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: {
         status: 'POSTED',
         postedAt: new Date(),
-        postedById: session.user.id,
+        postedById: session.id,
       },
       include: {
         lines: {

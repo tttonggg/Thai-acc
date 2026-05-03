@@ -71,13 +71,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     // If fund changed, validate new fund has enough balance
     let newFund = existingVoucher.fund;
     if (fundId !== existingVoucher.fundId) {
-      newFund = await prisma.pettyCashFund.findUnique({ where: { id: fundId } });
-      if (!newFund) {
+      const fund = await prisma.pettyCashFund.findUnique({ where: { id: fundId } });
+      if (!fund) {
         return NextResponse.json(
           { success: false, error: 'ไม่พบกองทุนเงินสดย่อย' },
           { status: 404 }
         );
       }
+      newFund = fund;
     }
 
     const voucherAmount = parseFloat(amount);

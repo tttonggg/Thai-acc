@@ -19,6 +19,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       );
     }
 
+    const { id } = await params;
+
     const quotation = await prisma.quotation.findUnique({
       where: { id: id },
       include: {
@@ -58,7 +60,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: {
         status: 'SENT',
         sentAt: new Date(),
-        updatedById: session.user.id,
       },
       include: {
         customer: {

@@ -66,7 +66,7 @@ export async function postMonthlyDepreciation(scheduleId: string, userId?: strin
     const je = await tx.journalEntry.create({
       data: {
         entryNo,
-        entryDate: schedule.date,
+        entryDate: new Date(schedule.date),
         description: `ค่าเสื่อมราคา ${asset.name} ${schedule.date.getMonth() + 1}/${schedule.date.getFullYear()}`,
         status: 'POSTED',
         createdById: userId,
@@ -88,7 +88,7 @@ export async function postMonthlyDepreciation(scheduleId: string, userId?: strin
             },
           ],
         },
-      },
+      } as any,
     });
 
     await tx.depreciationSchedule.update({

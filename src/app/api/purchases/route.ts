@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
-import { requireAuth as requireAuthApi } from '@/lib/api-auth';
+import { requireAuth as requireAuthApi, AuthError } from '@/lib/api-auth';
 import {
   apiResponse,
   apiError,

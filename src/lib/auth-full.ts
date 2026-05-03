@@ -269,7 +269,7 @@ export async function registerUser(
       email,
       password: hashedPassword,
       name,
-      role,
+      role: role as any,
     },
   });
 

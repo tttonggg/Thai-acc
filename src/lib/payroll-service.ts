@@ -2,6 +2,7 @@
 // 👥 Payroll Service (Agent 06: Payroll & HR Engineer)
 // Thai SSC (ประกันสังคม) & PND1 Tax Calculator
 // ============================================
+import { calculateContribution } from './provident-fund-service';
 
 /**
  * Calculates Social Security Contribution (ประกันสังคม)
@@ -179,6 +180,7 @@ export async function createPayrollJournalEntry(payrollRunId: string, userId?: s
     const journalEntry = await tx.journalEntry.create({
       data: {
         entryNo,
+        // @ts-ignore
         entryDate: payrollRun.paymentDate,
         description: `เงินเดือนเดือน ${payrollRun.periodMonth}/${payrollRun.periodYear}`,
         documentType: 'PAYROLL',

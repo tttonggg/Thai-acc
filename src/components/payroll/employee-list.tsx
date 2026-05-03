@@ -278,7 +278,7 @@ export function EmployeeList() {
         open={showEdit}
         onClose={() => setShowEdit(false)}
         onSuccess={fetchAll}
-        employee={selectedEmployee}
+        employee={selectedEmployee as any}
       />
 
       {/* Delete Confirmation Dialog */}

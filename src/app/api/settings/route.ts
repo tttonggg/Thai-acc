@@ -131,7 +131,7 @@ export async function PUT(req: NextRequest) {
 
     // Update tax rates if provided
     if (validated.taxRates) {
-      if (company.systemSettings) {
+      if ((company as any).systemSettings) {
         // Update existing
         await db.systemSettings.update({
           where: { companyId: company.id },

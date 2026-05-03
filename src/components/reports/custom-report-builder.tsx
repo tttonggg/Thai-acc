@@ -106,7 +106,7 @@ export function CustomReportBuilder() {
     (satang / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const form = useForm<CustomReportForm>({
-    resolver: zodResolver(customReportSchema),
+    resolver: zodResolver(customReportSchema) as any,
     defaultValues: {
       reportType: 'TRIAL_BALANCE',
       reportName: '',
@@ -251,7 +251,7 @@ export function CustomReportBuilder() {
         </Button>
       </div>
 
-      <form onSubmit={form.handleSubmit(handleGenerate)}>
+      <form onSubmit={form.handleSubmit((data) => handleGenerate(data as any))}>
         {/* Report Type Selection */}
         <Card>
           <CardHeader>

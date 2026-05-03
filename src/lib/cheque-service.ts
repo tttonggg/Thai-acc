@@ -16,8 +16,8 @@ export async function createReceivedChequeJournalEntry(
   userId?: string,
   tx?: any
 ) {
-  const prismaTx = tx || prisma;
-  return await prismaTx.$transaction(async (ctx) => {
+  // Helper function to execute the core logic with a transaction client
+  const executeWithTx = async (ctx: any) => {
     const cheque = await ctx.cheque.findUnique({
       where: { id: chequeId },
       include: { bankAccount: true },
@@ -87,7 +87,14 @@ export async function createReceivedChequeJournalEntry(
     });
 
     return journalEntry;
-  });
+  };
+
+  // If tx is provided (already in a transaction), use it directly
+  // Otherwise create a new transaction
+  if (tx) {
+    return executeWithTx(tx);
+  }
+  return await prisma.$transaction(executeWithTx);
 }
 
 /**

@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         parameters: config,
         recipients: '',
         outputFormat: 'PDF',
-        createdBy: session.user?.id || 'system',
+        createdBy: session?.id || 'system',
         time: '00:00',
       },
     });

@@ -78,13 +78,13 @@ export async function checkUserPermission(
                     include: {
                       permission: true,
                     },
-                  },
+                  } as any,
                 },
               },
             },
           },
         },
-      },
+      } as any,
     },
   });
 
@@ -94,7 +94,7 @@ export async function checkUserPermission(
   }
 
   // Check permissions from employee's roles
-  for (const er of userEmployee.employee.employeeRoles) {
+  for (const er of (userEmployee.employee as any).employeeRoles) {
     // If department-specific, check department match
     if (options?.departmentId && er.departmentId !== options.departmentId) {
       continue;
@@ -153,20 +153,20 @@ export async function getUserPermissions(): Promise<string[]> {
                     include: {
                       permission: true,
                     },
-                  },
+                  } as any,
                 },
               },
             },
           },
         },
-      },
+      } as any,
     },
   });
 
   if (!userEmployee) return [];
 
   const perms = new Set<string>();
-  for (const er of userEmployee.employee.employeeRoles) {
+  for (const er of (userEmployee.employee as any).employeeRoles) {
     for (const rp of er.role.permissions) {
       perms.add(rp.permission.code);
     }

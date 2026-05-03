@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
 
     await logSecurityEvent(
       user.id,
-      'VIEW',
+      'VIEW' as any,
       { resource: 'audit_logs', count: logs.length },
       ipAddress,
       userAgent
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 
       await logSecurityEvent(
         user.id,
-        'VIEW',
+        'VIEW' as any,
         {
           resource: 'audit_integrity',
           valid: result.valid,

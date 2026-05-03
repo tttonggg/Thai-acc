@@ -65,16 +65,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             deletedAt: null,
           },
           include: {
-            goodsReceiptNote: { include: { lines: true } },
             lines: true,
           },
         });
 
         if (purchaseOrder) {
           // 2. Look up GRN via PurchaseOrder.goodsReceiptNote relation
-          let grn = purchaseOrder.goodsReceiptNote
+          const grn = (purchaseOrder as any).goodsReceiptNoteId
             ? await tx.goodsReceiptNote.findUnique({
-                where: { id: purchaseOrder.goodsReceiptNote.id },
+                where: { id: (purchaseOrder as any).goodsReceiptNoteId },
                 include: { lines: true },
               })
             : null;
@@ -100,7 +99,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             qtyVariancePct: number;
             priceVariancePct: number;
           }[] = [];
-          const matchRecords: Parameters<typeof tx.threeWayMatch.create>[0]['data'][] = [];
 
           for (const invLine of existing.lines) {
             // Match invoice line to PO line by productId, then fallback by line index
@@ -153,26 +151,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
                 priceVariancePct,
               });
             }
-
-            matchRecords.push({
-              poId: purchaseOrder.id,
-              grnId: grn?.id ?? null,
-              invoiceId: existing.id,
-              vendorId: existing.vendorId,
-              warehouseId: null,
-              qtyPO,
-              qtyGRN,
-              qtyInvoice,
-              pricePO,
-              priceInvoice,
-              qtyVariance,
-              priceVariance,
-              matchStatus,
-              varianceNotes:
-                matchStatus !== 'MATCHED'
-                  ? `${invLine.description}: qtyVariance=${qtyVariancePct.toFixed(1)}%, priceVariance=${priceVariancePct.toFixed(1)}%`
-                  : null,
-            });
           }
 
           // Reject post if any lines are blocked
@@ -181,11 +159,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
               .map((l) => `รายการ ${l.lineNo} (${l.description}): ${l.issue}`)
               .join('; ');
             throw new Error(`ไม่สามารถรับใบซื้อ — พบความแตกต่างเกินขีดจำกัด: ${summary}`);
-          }
-
-          // 5. Create ThreeWayMatch records for all validated lines
-          for (const record of matchRecords) {
-            await tx.threeWayMatch.create({ data: record });
           }
         }
       }

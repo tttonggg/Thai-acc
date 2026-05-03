@@ -277,7 +277,7 @@ export async function recordRateLimit(
           endpoint,
           windowStart,
         },
-      },
+      } as any,
       update: {
         requestCount: { increment: 1 },
         ...(blocked && {

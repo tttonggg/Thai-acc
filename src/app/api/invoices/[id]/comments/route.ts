@@ -1,8 +1,8 @@
+import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { z } from 'zod';
 import { invoiceCommentSchema, updateInvoiceCommentSchema } from '@/lib/validations';
-import { apiResponse, notFoundError, apiError } from '@/lib/api-utils';
-import { requireAuth } from '@/lib/api-utils';
+import { apiResponse, notFoundError, apiError, unauthorizedError, requireAuth, getClientIp } from '@/lib/api-utils';
 
 // GET /api/invoices/[id]/comments - List comments with threading
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -72,8 +72,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         });
 
         // Fetch mentioned users
+        const mentionsList = (comment.mentions as string[]) || [];
         const mentionedUsers = await Promise.all(
-          (comment.mentions || []).map(async (userId) => {
+          mentionsList.map(async (userId) => {
             const u = await db.user.findUnique({
               where: { id: userId },
               select: { id: true, name: true, email: true },
@@ -220,7 +221,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             parentId: newComment.parentId,
           },
           ipAddress: clientIp,
-        },
+        } as any,
       });
 
       return newComment;
@@ -237,7 +238,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           commentId: comment.id,
           isInternal: comment.isInternal,
           parentId: comment.parentId,
-          mentions: comment.mentions?.length || 0,
+          mentions: ((comment.mentions as string[]) || []).length || 0,
         },
         status: 'success',
       },

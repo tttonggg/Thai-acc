@@ -250,7 +250,7 @@ export function validateBackupCode(inputCode: string, hashedCodes: string[]): bo
  * Generate TOTP token (for testing purposes)
  */
 export function generateTOTPToken(secret: string): string {
-  return speakeasy.totp({
+  return (speakeasy as any).totp({
     secret,
     encoding: 'base32',
   });

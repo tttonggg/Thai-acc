@@ -98,6 +98,9 @@ export async function GET(request: NextRequest) {
               productId: true,
               quantity: true,
               amount: true,
+              unitPrice: true,
+              discount: true,
+              vatAmount: true,
             },
           },
           _count: {

@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
       const take = await tx.stockTake.create({
         data: {
           stockTakeNumber,
-          date: validatedData.date,
+          takeDate: validatedData.date,
           warehouseId: validatedData.warehouseId,
           status: 'DRAFT',
           notes: validatedData.notes,
@@ -178,10 +178,8 @@ export async function POST(request: NextRequest) {
       // Get all stock balances in ONE query
       const balances = await tx.stockBalance.findMany({
         where: {
-          productId_warehouseId: {
-            productId: { in: productIds },
-            warehouseId: validatedData.warehouseId,
-          },
+          productId: { in: productIds },
+          warehouseId: validatedData.warehouseId,
         },
       });
 
@@ -191,7 +189,7 @@ export async function POST(request: NextRequest) {
       // Get all products in ONE query
       const products = await tx.product.findMany({
         where: { id: { in: productIds } },
-        select: { id: true, cost: true },
+        select: { id: true, costPrice: true },
       });
 
       // Create a map for quick product lookup
@@ -210,19 +208,20 @@ export async function POST(request: NextRequest) {
 
           // Get product from map (no query!)
           const product = productMap.get(line.productId);
-          const unitCost = product?.cost || 0;
+          const unitCost = product?.costPrice || 0;
           const varianceValue = variance * unitCost;
 
           return tx.stockTakeLine.create({
             data: {
-              takeId: take.id,
+              stockTakeId: take.id,
               productId: line.productId,
-              systemQuantity: systemQty,
-              actualQuantity: actualQty,
-              varianceQuantity: variance,
+              expectedQty: systemQty,
+              actualQty: actualQty,
+              varianceQty: variance,
               varianceValue: varianceValue,
               notes: line.notes,
-            },
+              costPerUnit: unitCost,
+            } as any,
             include: {
               product: true,
             },
@@ -258,8 +257,8 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return apiError('ข้อมูลไม่ถูกต้อง', 400);
     }
-    console.error('Error message:', error?.message);
-    console.error('Error stack:', error?.stack);
-    return apiError(error?.message || 'เกิดข้อผิดพลาดในการสร้างการตรวจนับสต็อก');
+    console.error('Error message:', (error as any)?.message);
+    console.error('Error stack:', (error as any)?.stack);
+    return apiError((error as any)?.message || 'เกิดข้อผิดพลาดในการสร้างการตรวจนับสต็อก');
   }
 }

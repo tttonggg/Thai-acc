@@ -154,7 +154,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         }
 
         // 3. Create Revenue journal entry (via service)
-        const revenueResult = await createRevenueJournalEntry(tx, {
+        const revenueResult = await createRevenueJournalEntry(tx as any, {
           userId: user.id,
           invoiceId: existing.id,
           invoiceNo: existing.invoiceNo,
@@ -171,8 +171,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           data: {
             status: 'ISSUED',
             journalEntryId: revenueResult.journalEntryId,
-            issuedById: user.id,
-          },
+            issuedById: user.id as any,
+          } as any,
         });
 
         return invoice;

@@ -240,7 +240,7 @@ export async function updateWebhook(
     data: {
       ...data,
       ...(data.events && { events: data.events.join(',') }),
-    },
+    } as any,
   });
 }
 
@@ -300,7 +300,7 @@ export async function testWebhook(id: string): Promise<{
   }
 
   const payload: WebhookPayload = {
-    event: 'TEST',
+    event: 'TEST' as any,
     timestamp: new Date().toISOString(),
     data: { message: 'This is a test webhook from Thai Accounting ERP' },
   };

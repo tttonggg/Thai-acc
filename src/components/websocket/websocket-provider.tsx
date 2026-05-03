@@ -18,14 +18,14 @@ interface WebSocketContextType {
   subscribe: (channel: string, callback: (data: unknown) => void) => () => void;
 }
 
-interface WebSocketMessage {
+export interface WebSocketMessage {
   type: string;
   channel?: string;
   data: unknown;
   timestamp: number;
 }
 
-interface CollaborationUser {
+export interface CollaborationUser {
   id: string;
   name: string;
   avatar?: string;

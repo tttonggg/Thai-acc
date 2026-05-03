@@ -108,7 +108,7 @@ export async function requestLeave(params: {
   if (!balance) {
     // Initialize balance for this employee/year
     const newBalances = await initializeEmployeeBalances(employeeId, year);
-    balance = newBalances.find((b) => b.leaveTypeId === leaveTypeId);
+    balance = newBalances.find((b) => b.leaveTypeId === leaveTypeId) ?? null;
   }
 
   if (!balance) {
@@ -266,7 +266,7 @@ export async function cancelLeave(requestId: string, employeeId: string) {
 export async function getLeaveRequestById(id: string) {
   return await prisma.leaveRequest.findUnique({
     where: { id },
-    include: { leaveType: true, leaveBalance: true },
+    include: { leaveType: true, balance: true },
   });
 }
 

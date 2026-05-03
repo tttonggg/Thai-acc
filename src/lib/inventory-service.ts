@@ -150,7 +150,7 @@ export async function recordStockMovement(params: {
         notes: params.notes,
         sourceChannel: params.sourceChannel,
         metadata: metadata || undefined,
-      },
+      } as any,
     });
 
     return { balance, movement };

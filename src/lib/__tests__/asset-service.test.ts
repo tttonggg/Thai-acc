@@ -35,7 +35,7 @@ describe('Asset Service', () => {
   describe('generateDepreciationSchedule', () => {
     it('should generate monthly depreciation schedule', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.asset.findUnique.mockResolvedValue({
+      (mockPrisma.asset.findUnique as any).mockResolvedValue({
         id: 'asset-1',
         name: 'Test Computer',
         purchaseCost: 60000,
@@ -43,8 +43,8 @@ describe('Asset Service', () => {
         purchaseDate: new Date('2024-01-15'),
         usefulLifeYears: 5,
       });
-      mockPrisma.depreciationSchedule.deleteMany.mockResolvedValue({ count: 0 });
-      mockPrisma.depreciationSchedule.create.mockImplementation((data: any) =>
+      (mockPrisma.depreciationSchedule.deleteMany as any).mockResolvedValue({ count: 0 });
+      (mockPrisma.depreciationSchedule.create as any).mockImplementation((data: any) =>
         Promise.resolve({ id: 'sched-1', ...data.data })
       );
 
@@ -56,7 +56,7 @@ describe('Asset Service', () => {
 
     it('should calculate correct monthly depreciation amount', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.asset.findUnique.mockResolvedValue({
+      (mockPrisma.asset.findUnique as any).mockResolvedValue({
         id: 'asset-1',
         name: 'Test Equipment',
         purchaseCost: 60000,
@@ -64,10 +64,10 @@ describe('Asset Service', () => {
         purchaseDate: new Date('2024-01-15'),
         usefulLifeYears: 5,
       });
-      mockPrisma.depreciationSchedule.deleteMany.mockResolvedValue({ count: 0 });
+      (mockPrisma.depreciationSchedule.deleteMany as any).mockResolvedValue({ count: 0 });
 
       const createdSchedules: any[] = [];
-      mockPrisma.depreciationSchedule.create.mockImplementation((data: any) => {
+      (mockPrisma.depreciationSchedule.create as any).mockImplementation((data: any) => {
         createdSchedules.push(data.data);
         return Promise.resolve({ id: 'sched-1', ...data.data });
       });
@@ -82,7 +82,7 @@ describe('Asset Service', () => {
 
     it('should handle last month adjustment', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.asset.findUnique.mockResolvedValue({
+      (mockPrisma.asset.findUnique as any).mockResolvedValue({
         id: 'asset-1',
         name: 'Test Equipment',
         purchaseCost: 60000,
@@ -90,10 +90,10 @@ describe('Asset Service', () => {
         purchaseDate: new Date('2024-01-15'),
         usefulLifeYears: 5,
       });
-      mockPrisma.depreciationSchedule.deleteMany.mockResolvedValue({ count: 0 });
+      (mockPrisma.depreciationSchedule.deleteMany as any).mockResolvedValue({ count: 0 });
 
       const createdSchedules: any[] = [];
-      mockPrisma.depreciationSchedule.create.mockImplementation((data: any) => {
+      (mockPrisma.depreciationSchedule.create as any).mockImplementation((data: any) => {
         createdSchedules.push(data.data);
         return Promise.resolve({ id: 'sched-1', ...data.data });
       });
@@ -108,7 +108,7 @@ describe('Asset Service', () => {
 
     it('should delete existing unposted schedules before creating new', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.asset.findUnique.mockResolvedValue({
+      (mockPrisma.asset.findUnique as any).mockResolvedValue({
         id: 'asset-1',
         name: 'Test Equipment',
         purchaseCost: 50000,
@@ -116,8 +116,8 @@ describe('Asset Service', () => {
         purchaseDate: new Date('2024-01-15'),
         usefulLifeYears: 5,
       });
-      mockPrisma.depreciationSchedule.deleteMany.mockResolvedValue({ count: 10 });
-      mockPrisma.depreciationSchedule.create.mockResolvedValue({ id: 'sched-1' });
+      (mockPrisma.depreciationSchedule.deleteMany as any).mockResolvedValue({ count: 10 });
+      (mockPrisma.depreciationSchedule.create as any).mockResolvedValue({ id: 'sched-1' });
 
       await generateDepreciationSchedule('asset-1');
 
@@ -128,7 +128,7 @@ describe('Asset Service', () => {
 
     it('should throw error if asset not found', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.asset.findUnique.mockResolvedValue(null);
+      (mockPrisma.asset.findUnique as any).mockResolvedValue(null);
 
       await expect(generateDepreciationSchedule('nonexistent')).rejects.toThrow(
         'Asset nonexistent not found'
@@ -179,21 +179,21 @@ describe('Asset Service', () => {
           accumDepAccountId: 'acc-accum',
         },
       });
-      mockPrisma.journalEntry.count.mockResolvedValue(5);
-      mockPrisma.journalEntry.create.mockImplementation((data: any) =>
+      (mockPrisma.journalEntry.count as any).mockResolvedValue(5);
+      (mockPrisma.journalEntry.create as any).mockImplementation((data: any) =>
         Promise.resolve({
           id: 'je-1',
           ...data.data,
           lines: data.data.lines.create,
         })
       );
-      mockPrisma.depreciationSchedule.update.mockResolvedValue({ id: 'sched-1', posted: true });
+      (mockPrisma.depreciationSchedule.update as any).mockResolvedValue({ id: 'sched-1', posted: true });
 
       const result = await postMonthlyDepreciation('sched-1', 'user-1');
 
       expect(result).toBeDefined();
       expect(result.entryNo).toMatch(/^DEP-/);
-      expect(result.lines).toHaveLength(2);
+      expect((result as any).lines).toHaveLength(2);
     });
 
     it('should debit depreciation expense account', async () => {
@@ -210,10 +210,10 @@ describe('Asset Service', () => {
           accumDepAccountId: 'acc-accum-456',
         },
       });
-      mockPrisma.journalEntry.count.mockResolvedValue(0);
+      (mockPrisma.journalEntry.count as any).mockResolvedValue(0);
 
       let journalLines: any[] = [];
-      mockPrisma.journalEntry.create.mockImplementation((data: any) => {
+      (mockPrisma.journalEntry.create as any).mockImplementation((data: any) => {
         journalLines = data.data.lines.create;
         return Promise.resolve({
           id: 'je-1',
@@ -221,7 +221,7 @@ describe('Asset Service', () => {
           lines: data.data.lines.create,
         });
       });
-      mockPrisma.depreciationSchedule.update.mockResolvedValue({ id: 'sched-1', posted: true });
+      (mockPrisma.depreciationSchedule.update as any).mockResolvedValue({ id: 'sched-1', posted: true });
 
       await postMonthlyDepreciation('sched-1', 'user-1');
 
@@ -244,10 +244,10 @@ describe('Asset Service', () => {
           accumDepAccountId: 'acc-accum-456',
         },
       });
-      mockPrisma.journalEntry.count.mockResolvedValue(0);
+      (mockPrisma.journalEntry.count as any).mockResolvedValue(0);
 
       let journalLines: any[] = [];
-      mockPrisma.journalEntry.create.mockImplementation((data: any) => {
+      (mockPrisma.journalEntry.create as any).mockImplementation((data: any) => {
         journalLines = data.data.lines.create;
         return Promise.resolve({
           id: 'je-1',
@@ -255,7 +255,7 @@ describe('Asset Service', () => {
           lines: data.data.lines.create,
         });
       });
-      mockPrisma.depreciationSchedule.update.mockResolvedValue({ id: 'sched-1', posted: true });
+      (mockPrisma.depreciationSchedule.update as any).mockResolvedValue({ id: 'sched-1', posted: true });
 
       await postMonthlyDepreciation('sched-1', 'user-1');
 
@@ -301,8 +301,8 @@ describe('Asset Service', () => {
           accumDepAccountId: 'acc-accum',
         },
       });
-      mockPrisma.journalEntry.count.mockResolvedValue(0);
-      mockPrisma.journalEntry.create.mockResolvedValue({ id: 'je-123' });
+      (mockPrisma.journalEntry.count as any).mockResolvedValue(0);
+      (mockPrisma.journalEntry.create as any).mockResolvedValue({ id: 'je-123' });
 
       await postMonthlyDepreciation('sched-1', 'user-1');
 
@@ -316,13 +316,13 @@ describe('Asset Service', () => {
   describe('getAssetNetBookValue', () => {
     it('should return initial values when no depreciation posted', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.asset.findUnique.mockResolvedValue({
+      (mockPrisma.asset.findUnique as any).mockResolvedValue({
         id: 'asset-1',
         name: 'Test Computer',
         purchaseCost: 60000,
         salvageValue: 6000,
       });
-      mockPrisma.depreciationSchedule.findFirst.mockResolvedValue(null);
+      (mockPrisma.depreciationSchedule.findFirst as any).mockResolvedValue(null);
 
       const result = await getAssetNetBookValue('asset-1');
 
@@ -334,13 +334,13 @@ describe('Asset Service', () => {
 
     it('should return latest posted depreciation values', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.asset.findUnique.mockResolvedValue({
+      (mockPrisma.asset.findUnique as any).mockResolvedValue({
         id: 'asset-1',
         name: 'Test Computer',
         purchaseCost: 60000,
         salvageValue: 6000,
       });
-      mockPrisma.depreciationSchedule.findFirst.mockResolvedValue({
+      (mockPrisma.depreciationSchedule.findFirst as any).mockResolvedValue({
         accumulated: 18000,
         netBookValue: 42000,
       });
@@ -354,20 +354,20 @@ describe('Asset Service', () => {
 
     it('should throw error if asset not found', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.asset.findUnique.mockResolvedValue(null);
+      (mockPrisma.asset.findUnique as any).mockResolvedValue(null);
 
       await expect(getAssetNetBookValue('nonexistent')).rejects.toThrow('Asset not found');
     });
 
     it('should not go below salvage value', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.asset.findUnique.mockResolvedValue({
+      (mockPrisma.asset.findUnique as any).mockResolvedValue({
         id: 'asset-1',
         name: 'Test Computer',
         purchaseCost: 60000,
         salvageValue: 6000,
       });
-      mockPrisma.depreciationSchedule.findFirst.mockResolvedValue({
+      (mockPrisma.depreciationSchedule.findFirst as any).mockResolvedValue({
         accumulated: 54000, // Fully depreciated
         netBookValue: 6000, // At salvage value
       });

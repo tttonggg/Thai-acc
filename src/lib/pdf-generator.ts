@@ -373,7 +373,7 @@ export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     },
   });
 
-  yPos = (doc.previousAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Summary Section
   const summaryX = pageWidth - margin - 70;
@@ -447,7 +447,7 @@ export async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -621,7 +621,7 @@ export async function generateReceiptPDF(receipt: any): Promise<Uint8Array> {
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -735,7 +735,7 @@ export async function generateJournalEntryPDF(entry: any): Promise<Uint8Array> {
     },
   });
 
-  yPos = (doc.previousAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Balance Check
   const isBalanced = Math.abs(entry.totalDebit - entry.totalCredit) < 0.01;
@@ -760,7 +760,7 @@ export async function generateJournalEntryPDF(entry: any): Promise<Uint8Array> {
     doc.text(noteLines, margin, yPos);
   }
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -850,7 +850,7 @@ export async function generateTrialBalancePDF(data: ReportData): Promise<Uint8Ar
     align: 'center',
   });
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -946,7 +946,7 @@ export async function generateIncomeStatementPDF(data: ReportData): Promise<Uint
     },
   });
 
-  yPos = (doc.previousAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Footer with totals
   if (data.totals) {
@@ -967,7 +967,7 @@ export async function generateIncomeStatementPDF(data: ReportData): Promise<Uint
     align: 'center',
   });
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -1042,7 +1042,7 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
       },
     });
 
-    yPos = (doc.previousAutoTable as any).finalY + 3;
+    yPos = (doc as any).previousAutoTable?.finalY + 3;
   }
 
   // Total Assets
@@ -1090,7 +1090,7 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
       },
     });
 
-    yPos = (doc.previousAutoTable as any).finalY + 3;
+    yPos = (doc as any).previousAutoTable?.finalY + 3;
   }
 
   // Total Liabilities & Equity
@@ -1125,7 +1125,7 @@ export async function generateBalanceSheetPDF(data: ReportData): Promise<Uint8Ar
     align: 'center',
   });
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -1320,7 +1320,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
     },
   });
 
-  yPos = (doc.previousAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Deductions Section
   doc.setDrawColor(220, 53, 69); // Red
@@ -1373,7 +1373,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
     },
   });
 
-  yPos = (doc.previousAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Net Pay Section - Large and Prominent
   doc.setDrawColor(40, 167, 69); // Green
@@ -1469,7 +1469,7 @@ export async function generatePayslipPDF(data: PayslipData): Promise<Uint8Array>
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -1628,7 +1628,7 @@ export async function generatePP30PDF(data: {
     margin: { left: margin, right: margin },
   });
 
-  yPos = (doc.previousAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // VAT Records Table (if provided)
   if (data.vatRecords && data.vatRecords.length > 0) {
@@ -1673,7 +1673,7 @@ export async function generatePP30PDF(data: {
       margin: { left: margin, right: margin },
     });
 
-    yPos = (doc.previousAutoTable as any).finalY + 10;
+    yPos = (doc as any).previousAutoTable?.finalY + 10;
   }
 
   // Declaration Section
@@ -1720,7 +1720,7 @@ export async function generatePP30PDF(data: {
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 // PND3 Income Type names
@@ -1880,7 +1880,7 @@ export async function generatePND3PDF(data: {
     margin: { left: margin, right: margin },
   });
 
-  yPos = (doc.previousAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Withholding Records Table
   if (data.lines.length > 0) {
@@ -1929,7 +1929,7 @@ export async function generatePND3PDF(data: {
       margin: { left: margin, right: margin },
     });
 
-    yPos = (doc.previousAutoTable as any).finalY + 10;
+    yPos = (doc as any).previousAutoTable?.finalY + 10;
   }
 
   // Declaration Section
@@ -1976,7 +1976,7 @@ export async function generatePND3PDF(data: {
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 /**
@@ -2117,7 +2117,7 @@ export async function generatePND53PDF(data: {
     margin: { left: margin, right: margin },
   });
 
-  yPos = (doc.previousAutoTable as any).finalY + 10;
+  yPos = (doc as any).previousAutoTable?.finalY + 10;
 
   // Withholding Records Table
   if (data.lines.length > 0) {
@@ -2166,7 +2166,7 @@ export async function generatePND53PDF(data: {
       margin: { left: margin, right: margin },
     });
 
-    yPos = (doc.previousAutoTable as any).finalY + 10;
+    yPos = (doc as any).previousAutoTable?.finalY + 10;
   }
 
   // Declaration Section
@@ -2213,7 +2213,7 @@ export async function generatePND53PDF(data: {
     { align: 'center' }
   );
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }
 
 // Stub function for tax form PDF generation
@@ -2235,5 +2235,5 @@ export async function generatePDF(params: {
   const lines = doc.splitTextToSize(contentStr, 170);
   doc.text(lines, 20, 40);
 
-  return doc.output('arraybuffer') as Uint8Array;
+  return new Uint8Array(doc.output('arraybuffer'));
 }

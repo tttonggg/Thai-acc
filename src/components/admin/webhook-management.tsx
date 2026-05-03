@@ -331,7 +331,7 @@ export function WebhookManagement() {
                 <div className="flex-1">
                   <div className="mb-2 flex items-center gap-3">
                     <h3 className="text-lg font-semibold">{webhook.name}</h3>
-                    <Badge variant={webhook.isActive ? 'success' : 'secondary'}>
+                    <Badge variant={webhook.isActive ? 'default' : 'secondary'}>
                       {webhook.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </div>

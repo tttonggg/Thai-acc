@@ -25,7 +25,7 @@ const prismaInstance =
 
 // Track query performance in development
 if (process.env.NODE_ENV === 'development') {
-  prismaInstance.$on('query' as any, (e: any) => {
+  (prismaInstance as any).$on('query', (e: any) => {
     const duration = e.duration;
     const query = e.query;
 

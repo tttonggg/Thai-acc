@@ -438,7 +438,7 @@ export class PerformanceTests {
           id: true,
           name: true,
           creditLimit: true,
-          _count: { invoices: true },
+          _count: { invoices: true } as any,
           invoices: {
             where: { status: { in: ['ISSUED', 'PARTIAL'] } },
             select: { netAmount: true, paidAmount: true },

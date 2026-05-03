@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { checkPeriodStatus } from '@/lib/period-service';
+import { bahtToSatang } from '@/lib/currency';
 import {
   requireAuth,
   apiResponse,
@@ -10,6 +11,7 @@ import {
 } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
 import { generateWhtFromPayment } from '@/lib/wht-service';
+import { postPaymentToGL } from '@/lib/payment-gl-service';
 import { z } from 'zod';
 
 // Validation schema
@@ -306,9 +308,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!periodCheck.isValid) {
       return apiError(periodCheck.error || 'ไม่สามารถลงบัญชีในงวดที่ปิดแล้ว', 400);
     }
-
-    // Import the posting function
-    const { postPaymentToGL } = await import('../route');
 
     // Post to GL in a transaction
     await db.$transaction(async (tx) => {

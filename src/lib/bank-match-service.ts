@@ -79,8 +79,8 @@ export async function matchBankEntries(
           matched: true,
           matchedEntryId: matchResult.matchedEntryId,
           matchedEntryType: matchResult.matchedEntryType,
-          matchConfidence: matchResult.matchConfidence,
-        },
+          matchConfidence: (matchResult as any).matchConfidence,
+        } as any,
       });
     } else {
       unmatched.push({
@@ -325,7 +325,7 @@ async function findMatchByAmount(
           OR: [{ debit: amount }, { credit: amount }],
         },
       },
-    },
+    } as any,
     orderBy: { date: 'desc' },
   });
 

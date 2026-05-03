@@ -1,5 +1,7 @@
+import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { vendorSchema } from '@/lib/validations';
+import { requireAuth, apiResponse, notFoundError, unauthorizedError, apiError, forbiddenError } from '@/lib/api-utils';
 
 // GET /api/vendors/[id] - Get single vendor
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

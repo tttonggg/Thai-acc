@@ -43,7 +43,7 @@ import {
 } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { quotationSchema, quotationLineSchema } from '@/lib/validations';
 
@@ -84,10 +84,10 @@ export function QuotationForm({
   const [products, setProducts] = useState<Product[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [submitting, setSubmitting] = useState<'draft' | 'send' | null>(null);
-  const { toast } = useToast();
+  // toast imported from sonner
 
   const form = useForm<QuotationFormValues>({
-    resolver: zodResolver(quotationSchema),
+    resolver: zodResolver(quotationSchema) as any,
     defaultValues: {
       quotationDate: new Date().toISOString(),
       validUntil: addDays(new Date(), 30).toISOString(),
@@ -267,25 +267,19 @@ export function QuotationForm({
         }
       }
 
-      toast({
-        title: 'สำเร็จ',
-        description:
-          submitType === 'send'
-            ? mode === 'edit'
-              ? 'อัปเดตและส่งใบเสนอราคาเรียบร้อยแล้ว'
-              : 'สร้างและส่งใบเสนอราคาเรียบร้อยแล้ว'
-            : mode === 'edit'
-              ? 'อัปเดตใบเสนอราคาเรียบร้อยแล้ว'
-              : 'บันทึกใบเสนอราคาเรียบร้อยแล้ว',
-      });
+      toast(
+        submitType === 'send'
+          ? mode === 'edit'
+            ? 'อัปเดตและส่งใบเสนอราคาเรียบร้อยแล้ว'
+            : 'สร้างและส่งใบเสนอราคาเรียบร้อยแล้ว'
+          : mode === 'edit'
+            ? 'อัปเดตใบเสนอราคาเรียบร้อยแล้ว'
+            : 'บันทึกใบเสนอราคาเรียบร้อยแล้ว'
+      );
 
       if (onSuccess) onSuccess();
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'เกิดข้อผิดพลาด',
-        description: error instanceof Error ? error.message : 'กรุณาลองอีกครั้ง',
-      });
+      toast.error(error instanceof Error ? error.message : 'กรุณาลองอีกครั้ง');
     } finally {
       setSubmitting(null);
     }
@@ -296,7 +290,7 @@ export function QuotationForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => onSubmit(data, 'draft'))} className="space-y-6">
+      <form onSubmit={form.handleSubmit((data) => onSubmit(data as any, 'draft'))} className="space-y-6">
         {/* Header */}
         <Card>
           <CardHeader>
@@ -313,7 +307,7 @@ export function QuotationForm({
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               {/* Quotation Date */}
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="quotationDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
@@ -353,7 +347,7 @@ export function QuotationForm({
 
               {/* Valid Until */}
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="validUntil"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
@@ -399,7 +393,7 @@ export function QuotationForm({
 
               {/* Customer */}
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="customerId"
                 render={({ field }) => (
                   <FormItem>
@@ -435,7 +429,7 @@ export function QuotationForm({
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Contact Person */}
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="contactPerson"
                 render={({ field }) => (
                   <FormItem>
@@ -450,7 +444,7 @@ export function QuotationForm({
 
               {/* Reference */}
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="reference"
                 render={({ field }) => (
                   <FormItem>
@@ -467,7 +461,7 @@ export function QuotationForm({
             {/* Discount and VAT */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="discountPercent"
                 render={({ field }) => (
                   <FormItem>
@@ -488,7 +482,7 @@ export function QuotationForm({
               />
 
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="discountAmount"
                 render={({ field }) => (
                   <FormItem>
@@ -508,7 +502,7 @@ export function QuotationForm({
               />
 
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="vatRate"
                 render={({ field }) => (
                   <FormItem>
@@ -535,7 +529,7 @@ export function QuotationForm({
 
             {/* Terms */}
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="terms"
               render={({ field }) => (
                 <FormItem>
@@ -599,7 +593,7 @@ export function QuotationForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.description`}
                             render={({ field }) => (
                               <FormItem>
@@ -613,7 +607,7 @@ export function QuotationForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.quantity`}
                             render={({ field }) => (
                               <FormItem>
@@ -635,7 +629,7 @@ export function QuotationForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.unit`}
                             render={({ field }) => (
                               <FormItem>
@@ -649,7 +643,7 @@ export function QuotationForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.unitPrice`}
                             render={({ field }) => (
                               <FormItem>
@@ -671,7 +665,7 @@ export function QuotationForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.discount`}
                             render={({ field }) => (
                               <FormItem>
@@ -694,7 +688,7 @@ export function QuotationForm({
                         </TableCell>
                         <TableCell>
                           <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name={`lines.${index}.vatRate`}
                             render={({ field }) => (
                               <FormItem>
@@ -846,7 +840,7 @@ export function QuotationForm({
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="notes"
               render={({ field }) => (
                 <FormItem>
@@ -863,7 +857,7 @@ export function QuotationForm({
               )}
             />
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="internalNotes"
               render={({ field }) => (
                 <FormItem>
@@ -888,7 +882,7 @@ export function QuotationForm({
           <Button
             type="button"
             variant="outline"
-            onClick={form.handleSubmit((data) => onSubmit(data, 'draft'))}
+            onClick={form.handleSubmit((data) => onSubmit(data as any, 'draft'))}
             disabled={submitting !== null}
           >
             {submitting === 'draft' ? (
@@ -900,7 +894,7 @@ export function QuotationForm({
           </Button>
           <Button
             type="button"
-            onClick={form.handleSubmit((data) => onSubmit(data, 'send'))}
+            onClick={form.handleSubmit((data) => onSubmit(data as any, 'send'))}
             disabled={submitting !== null}
             className="bg-blue-600 hover:bg-blue-700"
           >

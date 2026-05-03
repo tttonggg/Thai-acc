@@ -14,6 +14,23 @@ import {
 
 // Mock the db module
 vi.mock('@/lib/db', () => ({
+  prisma: {
+    $transaction: vi.fn((callback: any) =>
+      callback({
+        payrollRun: {
+          findUnique: vi.fn(),
+          update: vi.fn(),
+        },
+        chartOfAccount: {
+          findUnique: vi.fn(),
+        },
+        journalEntry: {
+          count: vi.fn(),
+          create: vi.fn(),
+        },
+      })
+    ),
+  },
   default: {
     $transaction: vi.fn((callback: any) =>
       callback({
@@ -230,7 +247,7 @@ describe('Payroll Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       const result = await createPayrollJournalEntry('payroll-1', 'user-1');
 
@@ -247,7 +264,7 @@ describe('Payroll Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(createPayrollJournalEntry('nonexistent', 'user-1')).rejects.toThrow(
         'Payroll run nonexistent not found'
@@ -265,7 +282,7 @@ describe('Payroll Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(createPayrollJournalEntry('payroll-1', 'user-1')).rejects.toThrow(
         'Payroll already has journal entry'
@@ -296,7 +313,7 @@ describe('Payroll Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(createPayrollJournalEntry('payroll-1', 'user-1')).rejects.toThrow(
         'Required payroll accounts not found'
@@ -349,7 +366,7 @@ describe('Payroll Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await createPayrollJournalEntry('payroll-1', 'user-1');
     });

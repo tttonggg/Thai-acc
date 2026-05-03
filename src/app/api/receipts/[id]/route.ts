@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { z } from 'zod';
 import { requireAuth, requireRole } from '@/lib/api-utils';
-import { generateDocumentNumber } from '@/lib/thai-accounting';
+import { generateDocNumber } from '@/lib/api-utils';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 
 // Validation schema for receipt allocation

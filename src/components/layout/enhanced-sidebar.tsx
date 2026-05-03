@@ -317,7 +317,7 @@ export function EnhancedSidebar({
           currencyFormat: 'THB',
           emailNotifications: true,
           pushNotifications: true,
-        }}
+        } as any}
         onSave={() => setShowPreferences(false)}
       />
 

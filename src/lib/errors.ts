@@ -137,7 +137,7 @@ export class QueryError extends DatabaseError {
   constructor(query: string, originalError?: Error) {
     super(`Database query failed: ${query}`, originalError);
     this.name = 'QueryError';
-    this.context = { ...this.context, query };
+    Object.assign(this, { context: { ...this.context, query } });
     Object.setPrototypeOf(this, QueryError.prototype);
   }
 }

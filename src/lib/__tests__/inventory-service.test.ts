@@ -63,7 +63,7 @@ describe('Inventory Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       const result = await recordStockMovement({
         productId: 'prod-1',
@@ -107,7 +107,7 @@ describe('Inventory Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       const result = await recordStockMovement({
         productId: 'prod-1',
@@ -138,7 +138,7 @@ describe('Inventory Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(
         recordStockMovement({
@@ -177,7 +177,7 @@ describe('Inventory Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       const result = await recordStockMovement({
         productId: 'prod-1',
@@ -214,7 +214,7 @@ describe('Inventory Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       const result = await recordStockMovement({
         productId: 'prod-1',
@@ -231,7 +231,7 @@ describe('Inventory Service', () => {
   describe('COGS Calculation', () => {
     it('should calculate COGS based on current unit cost', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.stockBalance.findUnique.mockResolvedValue({
+      (mockPrisma.stockBalance.findUnique as any).mockResolvedValue({
         productId: 'prod-1',
         warehouseId: 'wh-1',
         unitCost: 50,
@@ -244,7 +244,7 @@ describe('Inventory Service', () => {
 
     it('should return 0 when no stock balance exists', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.stockBalance.findUnique.mockResolvedValue(null);
+      (mockPrisma.stockBalance.findUnique as any).mockResolvedValue(null);
 
       const cogs = await calculateCOGS('prod-1', 'wh-1', 10);
       expect(cogs).toBe(0);
@@ -252,7 +252,7 @@ describe('Inventory Service', () => {
 
     it('should handle zero quantity', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.stockBalance.findUnique.mockResolvedValue({
+      (mockPrisma.stockBalance.findUnique as any).mockResolvedValue({
         productId: 'prod-1',
         warehouseId: 'wh-1',
         unitCost: 50,
@@ -267,7 +267,7 @@ describe('Inventory Service', () => {
   describe('Inventory Valuation', () => {
     it('should calculate total inventory value', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.stockBalance.findMany.mockResolvedValue([
+      (mockPrisma.stockBalance.findMany as any).mockResolvedValue([
         {
           productId: 'prod-1',
           warehouseId: 'wh-1',
@@ -297,7 +297,7 @@ describe('Inventory Service', () => {
 
     it('should calculate valuation for all warehouses when no warehouse specified', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.stockBalance.findMany.mockResolvedValue([
+      (mockPrisma.stockBalance.findMany as any).mockResolvedValue([
         {
           productId: 'prod-1',
           warehouseId: 'wh-1',
@@ -326,7 +326,7 @@ describe('Inventory Service', () => {
 
     it('should handle empty inventory', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.stockBalance.findMany.mockResolvedValue([]);
+      (mockPrisma.stockBalance.findMany as any).mockResolvedValue([]);
 
       const result = await getInventoryValuation();
 
@@ -368,7 +368,7 @@ describe('Inventory Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       const metadata = { invoiceNo: 'INV-001', batchNo: 'B001' };
       await recordStockMovement({

@@ -325,9 +325,9 @@ export function InvoiceDetailPage({ invoiceId, onBack, onEdit }: InvoiceDetailPa
           <TabsTrigger value="comments">
             <MessageSquare className="mr-2 h-4 w-4" />
             คอมเมนต์
-            {invoice._count?.comments > 0 && (
+            {invoice._count?.comments != null && invoice._count.comments > 0 && (
               <Badge variant="secondary" className="ml-2">
-                {invoice._count.comments}
+                {invoice._count?.comments ?? 0}
               </Badge>
             )}
           </TabsTrigger>

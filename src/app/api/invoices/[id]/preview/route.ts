@@ -9,9 +9,10 @@ import prisma from '@/lib/db';
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireAuth();
+    const { id } = await params;
 
     const invoice = await prisma.invoice.findUnique({
-      where: { id: id },
+      where: { id },
       include: {
         customer: true,
         lines: true,

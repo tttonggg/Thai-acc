@@ -144,7 +144,7 @@ export function ActivityLogPage() {
         setTotal(data.meta.total);
         setTotalPages(data.meta.totalPages);
       } else {
-        throw new Error(data.error || 'Failed to fetch logs');
+        throw new Error((data as any).error || 'Failed to fetch logs');
       }
     } catch (error) {
       console.error('Failed to fetch activity logs:', error);

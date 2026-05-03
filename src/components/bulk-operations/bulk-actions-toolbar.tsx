@@ -234,10 +234,16 @@ export const createCommonBulkActions = (handlers: {
 export function useBulkSelection<T extends { id: string }>(items: T[]) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const toggleSelection = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
-    );
+  const toggleSelection = (idOrIds: string | string[]) => {
+    if (Array.isArray(idOrIds)) {
+      // When passed as onSelect(ids: string[]), treat as explicit selection
+      setSelectedIds(idOrIds);
+    } else {
+      // Single toggle
+      setSelectedIds((prev) =>
+        prev.includes(idOrIds) ? prev.filter((sid) => sid !== idOrIds) : [...prev, idOrIds]
+      );
+    }
   };
 
   const selectAll = () => {

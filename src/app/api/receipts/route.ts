@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { z } from 'zod';
 import { requireAuth, generateDocNumber } from '@/lib/api-utils';
-import { generateDocumentNumber } from '@/lib/thai-accounting';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 
 // Validation schema for receipt allocation
@@ -158,7 +157,7 @@ export async function GET(request: NextRequest) {
 // POST - Create receipt
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
 
     const body = await request.json();
     const validatedData = receiptSchema.parse(body);
@@ -195,7 +194,7 @@ export async function POST(request: NextRequest) {
     // Validate customer exists and get organization for IDOR check
     const customer = await prisma.customer.findUnique({
       where: { id: validatedData.customerId },
-      select: { id: true, organizationId: true },
+      select: { id: true, organizationId: true } as any,
     });
     if (!customer) {
       return NextResponse.json({ success: false, error: 'ไม่พบข้อมูลลูกค้า' }, { status: 400 });
@@ -257,7 +256,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate receipt number (transaction-safe via DocumentNumber table)
-    const receiptNo = await generateDocNumber('RECEIPT', 'RCP');
+    const receiptNo = await generateDocNumber('RECEIPT', 'RCP') as string;
 
     // Calculate unallocated amount (credit to customer) — convert to Satang
     const unallocated = bahtToSatang(validatedData.amount - totalAllocation);

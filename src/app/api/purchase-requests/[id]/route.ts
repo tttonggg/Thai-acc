@@ -44,13 +44,14 @@ const approvalSchema = z.object({
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
+    const { id } = await params;
 
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
     const pr = await prisma.purchaseRequest.findUnique({
-      where: { id: id },
+      where: { id },
       include: {
         requestedByUser: {
           select: {
@@ -157,6 +158,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
+    const { id } = await params;
 
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
@@ -164,7 +166,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     // Check if PR exists
     const existing = await prisma.purchaseRequest.findUnique({
-      where: { id: id },
+      where: { id },
     });
 
     if (!existing) {
@@ -195,7 +197,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     // Update PR
     const pr = await prisma.purchaseRequest.update({
-      where: { id: id },
+      where: { id },
       data: {
         ...validatedData,
         requiredDate: validatedData.requiredDate ? new Date(validatedData.requiredDate) : undefined,
@@ -269,6 +271,7 @@ export async function DELETE(
 ) {
   try {
     const session = await auth();
+    const { id } = await params;
 
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
@@ -276,7 +279,7 @@ export async function DELETE(
 
     // Check if PR exists
     const existing = await prisma.purchaseRequest.findUnique({
-      where: { id: id },
+      where: { id },
     });
 
     if (!existing) {
@@ -309,7 +312,7 @@ export async function DELETE(
 
     // Delete PR (cascade will delete lines)
     await prisma.purchaseRequest.delete({
-      where: { id: id },
+      where: { id },
     });
 
     return NextResponse.json({
@@ -332,6 +335,7 @@ export async function DELETE(
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
+    const { id } = await params;
 
     if (!session?.user) {
       return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
@@ -347,7 +351,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Check if PR exists
     const existing = await prisma.purchaseRequest.findUnique({
-      where: { id: id },
+      where: { id },
       include: {
         lines: true,
       },
@@ -372,7 +376,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         }
 
         await prisma.purchaseRequest.update({
-          where: { id: id },
+          where: { id },
           data: {
             status: 'PENDING',
             submittedAt: now,
@@ -390,7 +394,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         }
 
         await prisma.purchaseRequest.update({
-          where: { id: id },
+          where: { id },
           data: {
             status: 'APPROVED',
             approvedBy: session.user.id,
@@ -410,7 +414,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         }
 
         await prisma.purchaseRequest.update({
-          where: { id: id },
+          where: { id },
           data: {
             status: 'REJECTED',
             approvedBy: session.user.id,
@@ -430,7 +434,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         }
 
         await prisma.purchaseRequest.update({
-          where: { id: id },
+          where: { id },
           data: {
             status: 'CANCELLED',
           },

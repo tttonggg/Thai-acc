@@ -322,15 +322,15 @@ export async function exportTaxFormToPDF(taxFormId: string): Promise<Uint8Array>
     return generatePND3PDF({
       companyName: company?.name || '',
       companyTaxId: company?.taxId || '',
-      companyBranch: (company as any)?.branchCode,
-      companyAddress: company?.address,
+      companyBranch: (company as any)?.branchCode as string | undefined,
+      companyAddress: company?.address ?? undefined,
       month: taxForm.month,
       year: taxForm.year,
       totalAmount: taxForm.totalAmount,
       totalTax: taxForm.totalTax,
       lines: taxForm.lines.map((line) => ({
         payeeName: line.payeeName,
-        payeeTaxId: line.payeeTaxId,
+        payeeTaxId: line.payeeTaxId ?? undefined,
         description: line.description,
         incomeType: line.incomeType,
         incomeAmount: line.incomeAmount,
@@ -345,15 +345,15 @@ export async function exportTaxFormToPDF(taxFormId: string): Promise<Uint8Array>
     return generatePND53PDF({
       companyName: company?.name || '',
       companyTaxId: company?.taxId || '',
-      companyBranch: (company as any)?.branchCode,
-      companyAddress: company?.address,
+      companyBranch: (company as any)?.branchCode ?? undefined,
+      companyAddress: company?.address ?? undefined,
       month: taxForm.month,
       year: taxForm.year,
       totalAmount: taxForm.totalAmount,
       totalTax: taxForm.totalTax,
       lines: taxForm.lines.map((line) => ({
         payeeName: line.payeeName,
-        payeeTaxId: line.payeeTaxId,
+        payeeTaxId: line.payeeTaxId ?? undefined,
         description: line.description,
         incomeType: line.incomeType,
         incomeAmount: line.incomeAmount,
@@ -372,8 +372,8 @@ export async function exportTaxFormToPDF(taxFormId: string): Promise<Uint8Array>
     return generatePP30PDF({
       companyName: company?.name || '',
       companyTaxId: company?.taxId || '',
-      companyBranch: (company as any)?.branchCode,
-      companyAddress: company?.address,
+      companyBranch: (company as any)?.branchCode ?? undefined,
+      companyAddress: company?.address ?? undefined,
       month: taxForm.month,
       year: taxForm.year,
       outputVat: outputLine?.taxAmount || 0,
@@ -421,7 +421,7 @@ export async function exportTaxFormToPDF(taxFormId: string): Promise<Uint8Array>
  * Export tax form to Excel
  * ส่งออกแบบฟอร์มภาษีเป็น Excel
  */
-export async function exportTaxFormToExcel(taxFormId: string): Promise<Buffer> {
+export async function exportTaxFormToExcel(taxFormId: string): Promise<Uint8Array> {
   const taxForm = await prisma.taxForm.findUnique({
     where: { id: taxFormId },
     include: { lines: true },

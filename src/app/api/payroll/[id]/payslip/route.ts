@@ -8,10 +8,11 @@ import { generatePayslipPDF } from '@/lib/pdf-generator';
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireAuth();
+    const { id } = await params;
 
     // Fetch payroll record with employee and payroll run data
     const payroll = await prisma.payroll.findUnique({
-      where: { id: id },
+      where: { id },
       include: {
         employee: true,
         payrollRun: true,

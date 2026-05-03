@@ -272,7 +272,7 @@ export async function generatePeriodReconciliationReport(
     // Check against expected balance (would come from previous period + current period)
     // For now, just check if debits = credits for this account in this period
     const currentPeriodLines = lines.filter(
-      (l) => l.entry.date >= startDate && l.entry.date <= endDate && l.entry.status === 'POSTED'
+      (l) => (l.entryId as any).date >= startDate && (l.entryId as any).date <= endDate && (l.entryId as any).status === 'POSTED'
     );
 
     const currentDebitSum = currentPeriodLines.reduce((sum, l) => sum + l.debit, 0);

@@ -1,8 +1,7 @@
+import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { relatedDocumentSchema } from '@/lib/validations';
-import type { RelationType } from '@prisma/client';
-import { apiResponse, notFoundError, apiError } from '@/lib/api-utils';
-import { requireAuth } from '@/lib/api-utils';
+import { apiResponse, notFoundError, apiError, unauthorizedError, forbiddenError, requireAuth } from '@/lib/api-utils';
 
 interface RelatedDocumentDetails {
   id: string;
@@ -47,9 +46,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         where: {
           sourceModule: 'invoice',
           sourceId: id,
-        },
-        include: {
-          // We'll fetch related document details separately
         },
       }),
       // Documents that link to this invoice (as target)

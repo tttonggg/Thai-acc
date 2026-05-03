@@ -25,6 +25,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: 'ไม่ได้รับอนุญาต' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const quotation = await prisma.quotation.findUnique({
       where: { id: id },
       include: {
@@ -36,13 +38,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             taxId: true,
             address: true,
             phone: true,
-          },
-        },
-        invoice: {
-          select: {
-            id: true,
-            invoiceNo: true,
-            status: true,
           },
         },
         lines: {
@@ -59,7 +54,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             lineNo: 'asc',
           },
         },
-      },
+      } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     });
 
     if (!quotation) {
@@ -96,6 +91,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: 'ไม่มีสิทธิแก้ไข' }, { status: 403 });
     }
 
+    const { id } = await params;
+
     const quotation = await prisma.quotation.findUnique({
       where: { id: id },
     });
@@ -105,7 +102,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Can only edit DRAFT or REVISED quotations
-    if (!['DRAFT', 'REVISED', 'REJECTED'].includes(quotation.status)) {
+    const status = quotation.status as string;
+    if (!['DRAFT', 'REVISED', 'REJECTED'].includes(status)) {
       return NextResponse.json(
         {
           success: false,
@@ -124,7 +122,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       updatedById: session.user.id,
     };
 
-    if (quotation.status === 'REVISED') {
+    const currentStatus = quotation.status as string;
+    if (currentStatus === 'REVISED') {
       // Increment version when editing revised quotation
       const latestVersion = await prisma.quotation.findFirst({
         where: {
@@ -213,6 +212,8 @@ export async function DELETE(
     if (!['ADMIN', 'ACCOUNTANT'].includes(session.user.role as string)) {
       return NextResponse.json({ success: false, error: 'ไม่มีสิทธิลบ' }, { status: 403 });
     }
+
+    const { id } = await params;
 
     const quotation = await prisma.quotation.findUnique({
       where: { id: id },

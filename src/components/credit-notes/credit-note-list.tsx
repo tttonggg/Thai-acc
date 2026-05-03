@@ -107,9 +107,9 @@ export function CreditNoteList() {
     if (!cn || typeof cn !== 'object') return false;
 
     const matchesSearch =
-      cn.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cn.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cn.creditNoteNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cn.invoice?.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase());
+      (cn.invoice as any)?.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || cn.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -303,8 +303,8 @@ export function CreditNoteList() {
                   <TableRow key={cn.id}>
                     <TableCell className="font-mono">{cn.creditNoteNo}</TableCell>
                     <TableCell>{formatDate(cn.creditNoteDate)}</TableCell>
-                    <TableCell>{cn.customerName || '-'}</TableCell>
-                    <TableCell className="font-mono">{cn.invoice?.invoiceNo || '-'}</TableCell>
+                    <TableCell>{(cn as any).customerName || '-'}</TableCell>
+                    <TableCell className="font-mono">{(cn.invoice as any)?.invoiceNo || '-'}</TableCell>
                     <TableCell>{reasonLabels[cn.reason] || cn.reason}</TableCell>
                     <TableCell className="text-right">
                       ฿{(cn.subtotal ?? 0).toLocaleString()}

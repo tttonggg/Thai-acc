@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
     const endStr = endDate || end.toISOString().split('T')[0];
 
     // Return Excel file
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="income-statement-${startStr}-to-${endStr}.xlsx"`,

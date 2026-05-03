@@ -224,7 +224,6 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
     maxAge: 8 * 60 * 60, // 8 hours
   },
-  trustHost: true,
   secret: process.env.NEXTAUTH_SECRET || 'dev-only-secret-change-in-production',
   events: {
     async signOut({ token }) {
@@ -276,7 +275,7 @@ export async function registerUser(
       email,
       password: hashedPassword,
       name,
-      role,
+      role: role as any,
     },
   });
 

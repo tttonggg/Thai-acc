@@ -85,7 +85,7 @@ describe('Cheque Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       const result = await createReceivedChequeJournalEntry(
         'chq-1',
@@ -137,7 +137,7 @@ describe('Cheque Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await createReceivedChequeJournalEntry('chq-1', new Date('2024-03-15'));
     });
@@ -181,7 +181,7 @@ describe('Cheque Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await createReceivedChequeJournalEntry('chq-1', new Date('2024-03-15'));
     });
@@ -194,7 +194,7 @@ describe('Cheque Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(createReceivedChequeJournalEntry('nonexistent', new Date())).rejects.toThrow(
         'Cheque not found'
@@ -212,7 +212,7 @@ describe('Cheque Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(createReceivedChequeJournalEntry('chq-1', new Date())).rejects.toThrow(
         'Not a received cheque'
@@ -232,7 +232,7 @@ describe('Cheque Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(createReceivedChequeJournalEntry('chq-1', new Date())).rejects.toThrow(
         'Cheque already cleared'
@@ -263,7 +263,7 @@ describe('Cheque Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(createReceivedChequeJournalEntry('chq-1', new Date())).rejects.toThrow(
         'Accounts Receivable GL account not found'
@@ -311,7 +311,7 @@ describe('Cheque Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       const result = await createPaymentChequeJournalEntry('chq-2', new Date('2024-03-15'));
 
@@ -357,7 +357,7 @@ describe('Cheque Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await createPaymentChequeJournalEntry('chq-2', new Date('2024-03-15'));
     });
@@ -400,7 +400,7 @@ describe('Cheque Service', () => {
       };
 
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await createPaymentChequeJournalEntry('chq-2', new Date('2024-03-15'));
     });
@@ -409,7 +409,7 @@ describe('Cheque Service', () => {
   describe('clearCheque', () => {
     it('should route to received cheque function for RECEIVE type', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.cheque.findUnique.mockResolvedValue({
+      (mockPrisma.cheque.findUnique as any).mockResolvedValue({
         id: 'chq-1',
         type: 'RECEIVE',
         status: 'PENDING',
@@ -436,7 +436,7 @@ describe('Cheque Service', () => {
           create: vi.fn().mockResolvedValue({ id: 'je-1' }),
         },
       };
-      mockPrisma.$transaction.mockImplementation((callback: any) => callback(mockTx));
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       const result = await clearCheque('chq-1', new Date('2024-03-15'));
       expect(result).toBeDefined();
@@ -444,22 +444,32 @@ describe('Cheque Service', () => {
 
     it('should throw error if cheque already cleared', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.cheque.findUnique.mockResolvedValue({
-        id: 'chq-1',
-        type: 'RECEIVE',
-        status: 'CLEARED',
-      });
+      const mockTx = {
+        cheque: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'chq-1',
+            type: 'RECEIVE',
+            status: 'CLEARED',
+          }),
+        },
+      };
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(clearCheque('chq-1', new Date())).rejects.toThrow('Cheque already cleared');
     });
 
     it('should throw error if cheque is cancelled', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.cheque.findUnique.mockResolvedValue({
-        id: 'chq-1',
-        type: 'PAY',
-        status: 'CANCELLED',
-      });
+      const mockTx = {
+        cheque: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'chq-1',
+            type: 'PAY',
+            status: 'CANCELLED',
+          }),
+        },
+      };
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(clearCheque('chq-1', new Date())).rejects.toThrow(
         'Cannot clear cancelled cheque'
@@ -468,11 +478,16 @@ describe('Cheque Service', () => {
 
     it('should throw error if cheque is bounced', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.cheque.findUnique.mockResolvedValue({
-        id: 'chq-1',
-        type: 'RECEIVE',
-        status: 'BOUNCED',
-      });
+      const mockTx = {
+        cheque: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'chq-1',
+            type: 'RECEIVE',
+            status: 'BOUNCED',
+          }),
+        },
+      };
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(clearCheque('chq-1', new Date())).rejects.toThrow('Cannot clear bounced cheque');
     });
@@ -482,35 +497,41 @@ describe('Cheque Service', () => {
     it('should create reversing journal entry', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
 
-      // Mock top-level prisma calls (bounceCheque does NOT use $transaction)
-      mockPrisma.cheque.findUnique = vi.fn().mockResolvedValue({
-        id: 'chq-1',
-        chequeNo: 'CHQ001',
-        type: 'RECEIVE',
-        status: 'CLEARED',
-        journalEntryId: 'je-original',
-        bankAccount: {
-          id: 'bank-1',
-          bankName: 'ไทยพาณิชย์',
+      const mockTx = {
+        cheque: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'chq-1',
+            chequeNo: 'CHQ001',
+            type: 'RECEIVE',
+            status: 'CLEARED',
+            journalEntryId: 'je-original',
+            bankAccount: {
+              id: 'bank-1',
+              bankName: 'ไทยพาณิชย์',
+            },
+          }),
+          update: vi.fn(),
         },
-      });
-      mockPrisma.journalEntry.findUnique = vi.fn().mockResolvedValue({
-        id: 'je-original',
-        lines: [
-          { accountId: 'acc-1', debit: 50000, credit: 0 },
-          { accountId: 'acc-2', debit: 0, credit: 50000 },
-        ],
-      });
-      mockPrisma.journalEntry.count = vi.fn().mockResolvedValue(10);
-      mockPrisma.journalEntry.create = vi.fn().mockImplementation((data: any) =>
-        Promise.resolve({
-          id: 'je-reverse',
-          ...data.data,
-          lines: data.data.lines.create,
-        })
-      );
-      mockPrisma.journalEntry.update = vi.fn();
-      mockPrisma.cheque.update = vi.fn();
+        journalEntry: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'je-original',
+            lines: [
+              { accountId: 'acc-1', debit: 50000, credit: 0 },
+              { accountId: 'acc-2', debit: 0, credit: 50000 },
+            ],
+          }),
+          count: vi.fn().mockResolvedValue(10),
+          create: vi.fn().mockImplementation((data: any) =>
+            Promise.resolve({
+              id: 'je-reverse',
+              ...data.data,
+              lines: data.data.lines.create,
+            })
+          ),
+          update: vi.fn(),
+        },
+      };
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       const result = await bounceCheque('chq-1', new Date('2024-03-20'), 'เช็คเด้ง');
 
@@ -523,53 +544,70 @@ describe('Cheque Service', () => {
     it('should swap debit and credit in reversing entry', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
 
-      mockPrisma.cheque.findUnique = vi.fn().mockResolvedValue({
-        id: 'chq-1',
-        chequeNo: 'CHQ001',
-        type: 'RECEIVE',
-        status: 'CLEARED',
-        journalEntryId: 'je-original',
-        bankAccount: { id: 'bank-1' },
-      });
-      mockPrisma.journalEntry.findUnique = vi.fn().mockResolvedValue({
-        id: 'je-original',
-        lines: [
-          { accountId: 'acc-bank', debit: 50000, credit: 0 },
-          { accountId: 'acc-ar', debit: 0, credit: 50000 },
-        ],
-      });
-      mockPrisma.journalEntry.count = vi.fn().mockResolvedValue(0);
-      mockPrisma.journalEntry.create = vi.fn().mockImplementation((data: any) => {
-        const lines = data.data.lines.create;
-        // Original: Bank (debit 50000), AR (credit 50000)
-        // Reversed: Bank (credit 50000), AR (debit 50000)
-        const bankLine = lines.find((l: any) => l.accountId === 'acc-bank');
-        const arLine = lines.find((l: any) => l.accountId === 'acc-ar');
-        expect(bankLine.debit).toBe(0);
-        expect(bankLine.credit).toBe(50000);
-        expect(arLine.debit).toBe(50000);
-        expect(arLine.credit).toBe(0);
-        return Promise.resolve({ id: 'je-reverse', ...data.data, lines });
-      });
-      mockPrisma.journalEntry.update = vi.fn();
-      mockPrisma.cheque.update = vi.fn();
+      const mockTx = {
+        cheque: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'chq-1',
+            chequeNo: 'CHQ001',
+            type: 'RECEIVE',
+            status: 'CLEARED',
+            journalEntryId: 'je-original',
+            bankAccount: { id: 'bank-1' },
+          }),
+          update: vi.fn(),
+        },
+        journalEntry: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'je-original',
+            lines: [
+              { accountId: 'acc-bank', debit: 50000, credit: 0 },
+              { accountId: 'acc-ar', debit: 0, credit: 50000 },
+            ],
+          }),
+          count: vi.fn().mockResolvedValue(0),
+          create: vi.fn().mockImplementation((data: any) => {
+            const lines = data.data.lines.create;
+            // Original: Bank (debit 50000), AR (credit 50000)
+            // Reversed: Bank (credit 50000), AR (debit 50000)
+            const bankLine = lines.find((l: any) => l.accountId === 'acc-bank');
+            const arLine = lines.find((l: any) => l.accountId === 'acc-ar');
+            expect(bankLine.debit).toBe(0);
+            expect(bankLine.credit).toBe(50000);
+            expect(arLine.debit).toBe(50000);
+            expect(arLine.credit).toBe(0);
+            return Promise.resolve({ id: 'je-reverse', ...data.data, lines });
+          }),
+          update: vi.fn(),
+        },
+      };
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await bounceCheque('chq-1', new Date('2024-03-20'));
     });
 
     it('should throw error if cheque not found', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.cheque.findUnique = vi.fn().mockResolvedValue(null);
+      const mockTx = {
+        cheque: {
+          findUnique: vi.fn().mockResolvedValue(null),
+        },
+      };
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(bounceCheque('nonexistent', new Date())).rejects.toThrow('Cheque not found');
     });
 
     it('should throw error if no journal entry to reverse', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.cheque.findUnique = vi.fn().mockResolvedValue({
-        id: 'chq-1',
-        journalEntryId: null,
-      });
+      const mockTx = {
+        cheque: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'chq-1',
+            journalEntryId: null,
+          }),
+        },
+      };
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(bounceCheque('chq-1', new Date())).rejects.toThrow(
         'No journal entry found for this cheque'
@@ -578,11 +616,16 @@ describe('Cheque Service', () => {
 
     it('should throw error if already bounced', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.cheque.findUnique = vi.fn().mockResolvedValue({
-        id: 'chq-1',
-        status: 'BOUNCED',
-        journalEntryId: 'je-original',
-      });
+      const mockTx = {
+        cheque: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'chq-1',
+            status: 'BOUNCED',
+            journalEntryId: 'je-original',
+          }),
+        },
+      };
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await expect(bounceCheque('chq-1', new Date())).rejects.toThrow(
         'Cheque already marked as bounced'
@@ -592,29 +635,36 @@ describe('Cheque Service', () => {
     it('should include reason in description', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
 
-      mockPrisma.cheque.findUnique = vi.fn().mockResolvedValue({
-        id: 'chq-1',
-        chequeNo: 'CHQ001',
-        type: 'RECEIVE',
-        status: 'CLEARED',
-        journalEntryId: 'je-original',
-        bankAccount: { id: 'bank-1' },
-      });
-      mockPrisma.journalEntry.findUnique = vi.fn().mockResolvedValue({
-        id: 'je-original',
-        lines: [
-          { accountId: 'acc-1', debit: 50000, credit: 0 },
-          { accountId: 'acc-2', debit: 0, credit: 50000 },
-        ],
-      });
-      mockPrisma.journalEntry.count = vi.fn().mockResolvedValue(0);
-      mockPrisma.journalEntry.create = vi.fn().mockImplementation((data: any) => {
-        expect(data.data.description).toContain('เช็คเด้ง');
-        expect(data.data.description).toContain('CHQ001');
-        return Promise.resolve({ id: 'je-reverse', ...data.data });
-      });
-      mockPrisma.journalEntry.update = vi.fn();
-      mockPrisma.cheque.update = vi.fn();
+      const mockTx = {
+        cheque: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'chq-1',
+            chequeNo: 'CHQ001',
+            type: 'RECEIVE',
+            status: 'CLEARED',
+            journalEntryId: 'je-original',
+            bankAccount: { id: 'bank-1' },
+          }),
+          update: vi.fn(),
+        },
+        journalEntry: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'je-original',
+            lines: [
+              { accountId: 'acc-1', debit: 50000, credit: 0 },
+              { accountId: 'acc-2', debit: 0, credit: 50000 },
+            ],
+          }),
+          count: vi.fn().mockResolvedValue(0),
+          create: vi.fn().mockImplementation((data: any) => {
+            expect(data.data.description).toContain('เช็คเด้ง');
+            expect(data.data.description).toContain('CHQ001');
+            return Promise.resolve({ id: 'je-reverse', ...data.data });
+          }),
+          update: vi.fn(),
+        },
+      };
+      (mockPrisma.$transaction as any).mockImplementation((callback: any) => callback(mockTx));
 
       await bounceCheque('chq-1', new Date('2024-03-20'), 'เช็คเด้ง');
     });

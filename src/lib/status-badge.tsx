@@ -3,10 +3,14 @@
  * Ensures consistent badge colors and labels across all modules
  */
 
-import { Badge, BadgeProps } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
+import type { VariantProps } from 'class-variance-authority';
+import { badgeVariants } from '@/components/ui/badge';
+
+type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 
 export interface StatusConfig {
-  variant: BadgeProps['variant'];
+  variant: BadgeVariant;
   label: string;
 }
 

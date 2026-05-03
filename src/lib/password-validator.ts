@@ -89,10 +89,10 @@ export function checkPasswordStrength(password: string): PasswordStrengthResult 
     };
   }
 
-  // Use zxcvbn for strength analysis
-  const result = zxcvbn(password);
+  // Use zxcvbn for analysis
+  const result = (zxcvbn as any)(password);
 
-  // Enhance feedback with Thai Accounting specific suggestions
+  // Return validation result
   const suggestions: string[] = [...result.feedback.suggestions];
 
   if (!/[A-Z]/.test(password)) {
@@ -245,7 +245,7 @@ export function checkEnterprisePasswordPolicy(password: string): {
     errors.push('ต้องมีอักขระพิเศษอย่างน้อย 1 ตัว');
   }
 
-  const result = zxcvbn(password);
+  const result = (zxcvbn as any)(password);
   if (result.score < MINIMUM_SCORE) {
     errors.push('รหัสผ่านอ่อนแอเกินไป - กรุณาเพิ่มความซับซ้อน');
   }

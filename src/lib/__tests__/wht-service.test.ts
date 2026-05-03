@@ -26,7 +26,7 @@ describe('WHT Service', () => {
   describe('generateWhtFromPayment', () => {
     it('should create WHT record from payment with withholding', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.payment.findUnique.mockResolvedValue({
+      (mockPrisma.payment.findUnique as any).mockResolvedValue({
         id: 'pay-1',
         paymentNo: 'PMT-001',
         paymentDate: new Date('2024-03-15'),
@@ -57,8 +57,8 @@ describe('WHT Service', () => {
           },
         ],
       });
-      mockPrisma.withholdingTax.count.mockResolvedValue(5);
-      mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
+      (mockPrisma.withholdingTax.count as any).mockResolvedValue(5);
+      (mockPrisma.withholdingTax.create as any).mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
       );
 
@@ -73,7 +73,7 @@ describe('WHT Service', () => {
 
     it('should determine PND3 for individuals', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.payment.findUnique.mockResolvedValue({
+      (mockPrisma.payment.findUnique as any).mockResolvedValue({
         id: 'pay-1',
         paymentNo: 'PMT-001',
         paymentDate: new Date('2024-03-15'),
@@ -103,8 +103,8 @@ describe('WHT Service', () => {
           },
         ],
       });
-      mockPrisma.withholdingTax.count.mockResolvedValue(0);
-      mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
+      (mockPrisma.withholdingTax.count as any).mockResolvedValue(0);
+      (mockPrisma.withholdingTax.create as any).mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
       );
 
@@ -115,7 +115,7 @@ describe('WHT Service', () => {
 
     it('should return null when no withholding on invoice', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.payment.findUnique.mockResolvedValue({
+      (mockPrisma.payment.findUnique as any).mockResolvedValue({
         id: 'pay-1',
         allocations: [
           {
@@ -136,7 +136,7 @@ describe('WHT Service', () => {
 
     it('should return null when payment has no allocations', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.payment.findUnique.mockResolvedValue({
+      (mockPrisma.payment.findUnique as any).mockResolvedValue({
         id: 'pay-1',
         allocations: [],
       });
@@ -148,7 +148,7 @@ describe('WHT Service', () => {
 
     it('should return null when payment not found', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.payment.findUnique.mockResolvedValue(null);
+      (mockPrisma.payment.findUnique as any).mockResolvedValue(null);
 
       const result = await generateWhtFromPayment('nonexistent');
 
@@ -157,7 +157,7 @@ describe('WHT Service', () => {
 
     it('should determine PND53 for companies (name contains บริษัท)', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.payment.findUnique.mockResolvedValue({
+      (mockPrisma.payment.findUnique as any).mockResolvedValue({
         id: 'pay-1',
         paymentNo: 'PMT-001',
         paymentDate: new Date('2024-03-15'),
@@ -187,8 +187,8 @@ describe('WHT Service', () => {
           },
         ],
       });
-      mockPrisma.withholdingTax.count.mockResolvedValue(0);
-      mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
+      (mockPrisma.withholdingTax.count as any).mockResolvedValue(0);
+      (mockPrisma.withholdingTax.create as any).mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
       );
 
@@ -199,7 +199,7 @@ describe('WHT Service', () => {
 
     it('should calculate income amount after discount', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.payment.findUnique.mockResolvedValue({
+      (mockPrisma.payment.findUnique as any).mockResolvedValue({
         id: 'pay-1',
         paymentNo: 'PMT-001',
         paymentDate: new Date('2024-03-15'),
@@ -229,8 +229,8 @@ describe('WHT Service', () => {
           },
         ],
       });
-      mockPrisma.withholdingTax.count.mockResolvedValue(0);
-      mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
+      (mockPrisma.withholdingTax.count as any).mockResolvedValue(0);
+      (mockPrisma.withholdingTax.create as any).mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
       );
 
@@ -241,7 +241,7 @@ describe('WHT Service', () => {
 
     it('should handle missing product income type gracefully', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.payment.findUnique.mockResolvedValue({
+      (mockPrisma.payment.findUnique as any).mockResolvedValue({
         id: 'pay-1',
         paymentNo: 'PMT-001',
         paymentDate: new Date('2024-03-15'),
@@ -271,8 +271,8 @@ describe('WHT Service', () => {
           },
         ],
       });
-      mockPrisma.withholdingTax.count.mockResolvedValue(0);
-      mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
+      (mockPrisma.withholdingTax.count as any).mockResolvedValue(0);
+      (mockPrisma.withholdingTax.create as any).mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
       );
 
@@ -319,9 +319,9 @@ describe('WHT Service', () => {
 
     it('should create WHT record from receipt with withholding', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.receipt.findUnique.mockResolvedValue(mockReceiptWithAllocations());
-      mockPrisma.withholdingTax.count.mockResolvedValue(5);
-      mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
+      (mockPrisma.receipt.findUnique as any).mockResolvedValue(mockReceiptWithAllocations());
+      (mockPrisma.withholdingTax.count as any).mockResolvedValue(5);
+      (mockPrisma.withholdingTax.create as any).mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
       );
 
@@ -339,7 +339,7 @@ describe('WHT Service', () => {
 
     it('should determine PND3 for individual customers', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.receipt.findUnique.mockResolvedValue(
+      (mockPrisma.receipt.findUnique as any).mockResolvedValue(
         mockReceiptWithAllocations({
           allocations: [
             {
@@ -368,8 +368,8 @@ describe('WHT Service', () => {
           ],
         })
       );
-      mockPrisma.withholdingTax.count.mockResolvedValue(0);
-      mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
+      (mockPrisma.withholdingTax.count as any).mockResolvedValue(0);
+      (mockPrisma.withholdingTax.create as any).mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
       );
 
@@ -381,7 +381,7 @@ describe('WHT Service', () => {
 
     it('should return null when no allocations', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.receipt.findUnique.mockResolvedValue({
+      (mockPrisma.receipt.findUnique as any).mockResolvedValue({
         id: 'rcpt-1',
         allocations: [],
       });
@@ -393,7 +393,7 @@ describe('WHT Service', () => {
 
     it('should return null when receipt not found', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.receipt.findUnique.mockResolvedValue(null);
+      (mockPrisma.receipt.findUnique as any).mockResolvedValue(null);
 
       const result = await generateWhtFromReceipt('nonexistent');
 
@@ -402,7 +402,7 @@ describe('WHT Service', () => {
 
     it('should return null when allocations is undefined', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.receipt.findUnique.mockResolvedValue({
+      (mockPrisma.receipt.findUnique as any).mockResolvedValue({
         id: 'rcpt-1',
         // allocations is missing entirely
       });
@@ -414,13 +414,13 @@ describe('WHT Service', () => {
 
     it('should set correct tax month and year', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.receipt.findUnique.mockResolvedValue(
+      (mockPrisma.receipt.findUnique as any).mockResolvedValue(
         mockReceiptWithAllocations({
           receiptDate: new Date('2024-03-15'), // March
         })
       );
-      mockPrisma.withholdingTax.count.mockResolvedValue(0);
-      mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
+      (mockPrisma.withholdingTax.count as any).mockResolvedValue(0);
+      (mockPrisma.withholdingTax.create as any).mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
       );
 
@@ -433,9 +433,9 @@ describe('WHT Service', () => {
 
     it('should default to status PENDING', async () => {
       const mockPrisma = (await import('@/lib/db')).default;
-      mockPrisma.receipt.findUnique.mockResolvedValue(mockReceiptWithAllocations());
-      mockPrisma.withholdingTax.count.mockResolvedValue(0);
-      mockPrisma.withholdingTax.create.mockImplementation((data: any) =>
+      (mockPrisma.receipt.findUnique as any).mockResolvedValue(mockReceiptWithAllocations());
+      (mockPrisma.withholdingTax.count as any).mockResolvedValue(0);
+      (mockPrisma.withholdingTax.create as any).mockImplementation((data: any) =>
         Promise.resolve({ id: 'wht-1', ...data.data })
       );
 

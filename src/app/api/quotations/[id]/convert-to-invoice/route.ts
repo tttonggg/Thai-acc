@@ -19,6 +19,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       );
     }
 
+    const { id } = await params;
+
     const quotation = await prisma.quotation.findUnique({
       where: { id: id },
       include: {
@@ -105,7 +107,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           invoiceNo,
           invoiceDate: now,
           customerId: quotation.customerId,
-          contactPerson: quotation.contactPerson,
+          contactPerson: quotation.contactPerson as any,
           reference: `ใบเสนอราคา ${quotation.quotationNo}`,
           subtotal: quotation.subtotal,
           discountAmount: quotation.discountAmount,
@@ -113,13 +115,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           vatRate: quotation.vatRate,
           vatAmount: quotation.vatAmount,
           totalAmount: quotation.totalAmount,
-          status: 'POSTED',
+          status: 'POSTED' as any,
           type: 'TAX_INVOICE',
           terms: quotation.terms,
           notes: quotation.notes,
           internalNotes: quotation.internalNotes,
-          createdById: session.user.id,
-          updatedById: session.user.id,
+          createdById: session.user.id as string,
+          updatedById: session.user.id as string,
           lines: {
             create: quotation.lines.map((line) => ({
               lineNo: line.lineNo,
@@ -135,7 +137,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
               notes: line.notes,
             })),
           },
-        },
+        } as any,
       });
 
       // Update Quotation status
@@ -144,7 +146,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         data: {
           status: 'CONVERTED',
           invoiceId: invoice.id,
-          updatedById: session.user.id,
         },
         include: {
           customer: {

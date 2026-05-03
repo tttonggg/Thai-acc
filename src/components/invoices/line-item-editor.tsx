@@ -755,9 +755,9 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
           </span>
           {entry.quantityDiff !== undefined && entry.quantityDiff !== 0 && (
             <span
-              className={`text-xs ${entry.quantityDiff > 0 ? 'text-green-600' : 'text-red-600'}`}
+              className={`text-xs ${(entry.quantityDiff ?? 0) > 0 ? 'text-green-600' : 'text-red-600'}`}
             >
-              ({entry.quantityDiff > 0 ? '+' : ''}
+              {((entry.quantityDiff ?? 0) > 0 ? '+' : '')}
               {entry.quantityDiff})
             </span>
           )}
@@ -769,20 +769,20 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
       return (
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground line-through">
-            {formatCurrency(entry.beforeUnitPrice)}
+            {formatCurrency(entry.beforeUnitPrice ?? 0)}
           </span>
           <span className="text-muted-foreground">→</span>
           <span
             className={`font-medium ${entry.unitPriceDiff && entry.unitPriceDiff > 0 ? 'text-green-600' : 'text-red-600'}`}
           >
-            {formatCurrency(entry.afterUnitPrice || 0)}
+            {formatCurrency(entry.afterUnitPrice ?? 0)}
           </span>
           {entry.unitPriceDiff !== undefined && entry.unitPriceDiff !== 0 && (
             <span
-              className={`text-xs ${entry.unitPriceDiff > 0 ? 'text-green-600' : 'text-red-600'}`}
+              className={`text-xs ${(entry.unitPriceDiff ?? 0) > 0 ? 'text-green-600' : 'text-red-600'}`}
             >
-              ({entry.unitPriceDiff > 0 ? '+' : ''}
-              {formatCurrency(entry.unitPriceDiff)})
+              ({((entry.unitPriceDiff ?? 0) > 0 ? '+' : '')}
+              {formatCurrency(entry.unitPriceDiff ?? 0)})
             </span>
           )}
         </div>
@@ -801,9 +801,9 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
           </span>
           {entry.discountDiff !== undefined && entry.discountDiff !== 0 && (
             <span
-              className={`text-xs ${entry.discountDiff > 0 ? 'text-red-600' : 'text-green-600'}`}
+              className={`text-xs ${(entry.discountDiff ?? 0) > 0 ? 'text-red-600' : 'text-green-600'}`}
             >
-              ({entry.discountDiff > 0 ? '+' : ''}
+              ({(entry.discountDiff ?? 0) > 0 ? '+' : ''}
               {entry.discountDiff}%)
             </span>
           )}
@@ -873,15 +873,4 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
   );
 }
 
-// ============================================
-// Export Types
-// ============================================
 
-export type {
-  AuditEntry,
-  LineUpdateData,
-  InvoiceLineWithProduct,
-  InvoiceStatus,
-  Product,
-  LineItemEditorProps,
-};

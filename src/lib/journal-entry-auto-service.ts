@@ -114,7 +114,7 @@ export async function onInvoicePosted(invoiceId: string): Promise<CreateJEResult
   if (!p.isValid) throw new Error(p.error || 'ไม่สามารถสร้างรายการบัญชีในงวดที่ปิดแล้ว');
 
   return prisma.$transaction(async (tx) => {
-    const arCode = invoice.customer.accountReceivableCode || '1102';
+    const arCode = (invoice.customer as any).accountReceivableCode || '1102';
     const lines: JELine[] = [
       {
         accountId: await getAccountId(tx, arCode),

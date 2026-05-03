@@ -551,7 +551,7 @@ function StockMovementsTab() {
       <StockMovementEditDialog
         open={showEdit}
         onOpenChange={setShowEdit}
-        movement={selectedMovement}
+        movement={selectedMovement as any}
         onSuccess={fetchAll}
       />
     </div>
@@ -690,7 +690,7 @@ function WarehousesTab() {
       <WarehouseEditDialog
         open={showEdit}
         onOpenChange={setShowEdit}
-        warehouse={selectedWarehouse}
+        warehouse={selectedWarehouse as any}
         onSuccess={fetch}
       />
     </div>
@@ -985,7 +985,7 @@ function StockTransfersTab() {
       <StockTransferCompleteDialog
         open={showComplete}
         onOpenChange={setShowComplete}
-        transfer={selectedTransfer}
+        transfer={selectedTransfer as any}
         onSuccess={fetchAll}
       />
     </div>

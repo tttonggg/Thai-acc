@@ -355,7 +355,7 @@ export async function generateConsolidatedTrialBalance(
 
   // Get balances for each entity
   for (const entity of entities) {
-    const entityBalances = [];
+    const entityBalances: any[] = [];
 
     for (const account of accounts) {
       const lines = await prisma.journalLine.findMany({
@@ -379,7 +379,7 @@ export async function generateConsolidatedTrialBalance(
           accountName: account.name,
           debit,
           credit,
-        });
+        } as any);
       }
     }
 
@@ -387,7 +387,7 @@ export async function generateConsolidatedTrialBalance(
       entityId: entity.id,
       entityCode: entity.code,
       entityName: entity.name,
-      balances: entityBalances,
+      balances: entityBalances as any,
     });
   }
 
@@ -503,7 +503,7 @@ export async function generateInterCompanyReconciliationReport(
       const bToA = bToATx.reduce((sum, t) => sum + t.amount, 0);
 
       if (aToB > 0 || bToA > 0) {
-        const differences = [];
+        const differences: any[] = [];
 
         // Match transactions
         for (const tx of aToBTx) {
@@ -512,7 +512,7 @@ export async function generateInterCompanyReconciliationReport(
             documentNo: tx.documentNo,
             amount: tx.amount,
             status: match ? 'matched' : 'unmatched',
-          });
+          } as any);
         }
 
         report.pairs.push({
@@ -548,8 +548,8 @@ export async function initializePrimaryEntity(): Promise<Entity> {
   const company = await prisma.company.findFirst();
 
   return createEntity('HEAD', company?.name || 'บริษัทหลัก', {
-    nameEn: company?.nameEn,
-    taxId: company?.taxId,
+    nameEn: company?.nameEn ?? undefined,
+    taxId: company?.taxId ?? undefined,
     isPrimary: true,
   });
 }

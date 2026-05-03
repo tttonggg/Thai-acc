@@ -613,7 +613,7 @@ export function VendorList() {
 
       {/* Edit Dialog */}
       <VendorEditDialog
-        vendor={editDialog.vendor}
+        vendor={editDialog.vendor as any}
         open={editDialog.open}
         onOpenChange={(open) => setEditDialog({ open, vendor: null })}
         onSuccess={() => setRefreshKey((prev) => prev + 1)}

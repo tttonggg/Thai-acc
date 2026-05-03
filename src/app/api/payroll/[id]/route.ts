@@ -8,9 +8,10 @@ import prisma from '@/lib/db';
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireAuth();
+    const { id } = await params;
 
     const payrollRun = await prisma.payrollRun.findUnique({
-      where: { id: id },
+      where: { id },
       include: { payrolls: true },
     });
 
@@ -35,7 +36,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
       // Update payroll status to APPROVED
       const updated = await prisma.payrollRun.update({
-        where: { id: id },
+        where: { id },
         data: { status: 'APPROVED' },
         include: { payrolls: true },
       });
@@ -60,7 +61,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
       // Update payroll status to PAID
       const updated = await prisma.payrollRun.update({
-        where: { id: id },
+        where: { id },
         data: { status: 'PAID' },
         include: { payrolls: true },
       });
@@ -80,9 +81,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireAuth();
+    const { id } = await params;
 
     const payrollRun = await prisma.payrollRun.findUnique({
-      where: { id: id },
+      where: { id },
       include: {
         payrolls: {
           include: {
