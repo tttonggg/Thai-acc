@@ -24,6 +24,9 @@ export async function GET(request: NextRequest) {
           in: ['ISSUED', 'PARTIAL'],
         },
       },
+      include: {
+        customer: true,
+      },
       orderBy: {
         invoiceDate: 'asc',
       },

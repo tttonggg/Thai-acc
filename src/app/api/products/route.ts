@@ -29,6 +29,9 @@ export async function GET(request: NextRequest) {
     const products = await prisma.product.findMany({
       where,
       orderBy: { code: 'asc' },
+      include: {
+        stockBalances: true,
+      },
     });
 
     return NextResponse.json({ success: true, data: products });

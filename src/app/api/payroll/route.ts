@@ -39,7 +39,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const employees = await prisma.employee.findMany({ where: { isActive: true } });
+    const employees = await prisma.employee.findMany({
+      where: { isActive: true },
+      include: { payrolls: true },
+    });
     const count = await prisma.payrollRun.count();
     const runNo = `PAY-${periodYear}${String(periodMonth).padStart(2, '0')}-${String(count + 1).padStart(3, '0')}`;
 

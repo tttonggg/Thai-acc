@@ -47,31 +47,28 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     // NOTE: Receipt and Payment models do NOT have isReconciled field
     // Only cheques support reconciliation tracking currently
 
-    const unreconciledCheques = await prisma.cheque.findMany({
-      where: {
-        bankAccountId,
-        isReconciled: false,
-        status: { in: ['CLEARED', 'DEPOSITED'] }, // Only cleared/deposited cheques
-      },
-    });
-
-    // Fetch unreconciled receipts linked to this bank account
-    // NOTE: Receipt has no isReconciled field - filtered by status POSTED
-    const unreconciledReceipts = await prisma.receipt.findMany({
-      where: {
-        bankAccountId,
-        status: 'POSTED',
-      },
-    });
-
-    // Fetch unreconciled payments linked to this bank account
-    // NOTE: Payment has no isReconciled field - filtered by status POSTED
-    const unreconciledPayments = await prisma.payment.findMany({
-      where: {
-        bankAccountId,
-        status: 'POSTED',
-      },
-    });
+    // Calculate book balance from ALL unreconciled items in parallel
+    const [unreconciledCheques, unreconciledReceipts, unreconciledPayments] = await Promise.all([
+      prisma.cheque.findMany({
+        where: {
+          bankAccountId,
+          isReconciled: false,
+          status: { in: ['CLEARED', 'DEPOSITED'] },
+        },
+      }),
+      prisma.receipt.findMany({
+        where: {
+          bankAccountId,
+          status: 'POSTED',
+        },
+      }),
+      prisma.payment.findMany({
+        where: {
+          bankAccountId,
+          status: 'POSTED',
+        },
+      }),
+    ]);
 
     // Calculate book balance (deposits - withdrawals)
     let bookBalance = 0;
@@ -192,34 +189,34 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const bankAccountId = id;
 
-    // Fetch unreconciled cheques
-    const unreconciledCheques = await prisma.cheque.findMany({
-      where: {
-        bankAccountId,
-        isReconciled: false,
-      },
-      orderBy: { dueDate: 'desc' },
-    });
-
-    // Fetch unreconciled receipts linked to this bank account
-    // NOTE: Receipt has no isReconciled field - returning all posted receipts
-    const unreconciledReceipts = await prisma.receipt.findMany({
-      where: {
-        bankAccountId,
-        status: 'POSTED',
-      },
-      orderBy: { receiptDate: 'desc' },
-    });
-
-    // Fetch unreconciled payments linked to this bank account
-    // NOTE: Payment has no isReconciled field - returning all posted payments
-    const unreconciledPayments = await prisma.payment.findMany({
-      where: {
-        bankAccountId,
-        status: 'POSTED',
-      },
-      orderBy: { paymentDate: 'desc' },
-    });
+    // Fetch all unreconciled items in parallel
+    const [
+      unreconciledCheques,
+      unreconciledReceipts,
+      unreconciledPayments,
+    ] = await Promise.all([
+      prisma.cheque.findMany({
+        where: {
+          bankAccountId,
+          isReconciled: false,
+        },
+        orderBy: { dueDate: 'desc' },
+      }),
+      prisma.receipt.findMany({
+        where: {
+          bankAccountId,
+          status: 'POSTED',
+        },
+        orderBy: { receiptDate: 'desc' },
+      }),
+      prisma.payment.findMany({
+        where: {
+          bankAccountId,
+          status: 'POSTED',
+        },
+        orderBy: { paymentDate: 'desc' },
+      }),
+    ]);
 
     // Fetch reconciliation history
     const reconciliationHistory = await prisma.bankReconciliation.findMany({
