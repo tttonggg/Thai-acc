@@ -135,6 +135,7 @@ import {
   Menu,
   Shield,
 } from 'lucide-react';
+import { GlobalSearchModal } from '@/components/search/global-search-modal';
 import { QuickActionFab } from '@/components/layout/quick-action-fab';
 
 export type Module =
@@ -192,6 +193,23 @@ export default function Home() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Global Ctrl+K search shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Fetch permissions on mount and store in auth - MUST be at top level
   useEffect(() => {
@@ -649,6 +667,13 @@ export default function Home() {
 
       {/* Quick Action FAB */}
       <QuickActionFab onNavigate={(module) => setActiveModule(module as Module)} />
+
+      {/* Global Search Modal */}
+      <GlobalSearchModal
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onNavigate={(module) => setActiveModule(module as Module)}
+      />
     </div>
   );
 }
