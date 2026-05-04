@@ -5,6 +5,7 @@ import {
   Plus,
   FileText,
 } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
 import { eventBus, EVENTS } from '@/lib/events';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -718,9 +719,12 @@ export function InvoiceList() {
               </Button>
             </DialogTrigger>
           </Dialog>
-          <Alert>
-            <AlertDescription>ไม่พบข้อมูล</AlertDescription>
-          </Alert>
+          <EmptyState
+            icon={FileText}
+            title="ยังไม่มีใบกำกับภาษี"
+            description="เริ่มต้นสร้างใบกำกับภาษีฉบับแรกของคุณ"
+            action={{ label: 'สร้างเอกสารใหม่', onClick: () => setIsAddDialogOpen(true) }}
+          />
           <InvoiceForm
             open={isAddDialogOpen}
             onClose={() => setIsAddDialogOpen(false)}

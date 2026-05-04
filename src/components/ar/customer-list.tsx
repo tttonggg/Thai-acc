@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, Phone, Mail, MapPin } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -445,9 +446,12 @@ export function CustomerList() {
             </DialogContent>
           </Dialog>
         </div>
-        <Alert>
-          <AlertDescription>ไม่พบข้อมูล</AlertDescription>
-        </Alert>
+        <EmptyState
+          icon={Phone}
+          title="ยังไม่มีลูกค้า"
+          description="เริ่มต้นเพิ่มลูกค้าของคุณ"
+          action={{ label: 'เพิ่มลูกค้าใหม่', onClick: () => setIsAddDialogOpen(true) }}
+        />
       </div>
     );
   }

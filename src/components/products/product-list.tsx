@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, Eye, Package, Loader2 } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -302,11 +303,12 @@ export function ProductList() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           ) : filteredProducts.length === 0 ? (
-            <div className="p-12 text-center text-muted-foreground">
-              <Package className="mx-auto mb-4 h-12 w-12 opacity-50" />
-              <p className="text-lg font-medium">ไม่พบข้อมูลสินค้า</p>
-              <p className="mt-2 text-sm">ลองปรับตัวกรองหรือเพิ่มสินค้าใหม่</p>
-            </div>
+            <EmptyState
+              icon={Package}
+              title="ยังไม่มีสินค้า"
+              description="เริ่มต้นเพิ่มสินค้าหรือบริการของคุณ"
+              action={{ label: 'เพิ่มสินค้าใหม่', onClick: () => setShowForm(true) }}
+            />
           ) : (
             <ScrollArea className="w-full">
               <Table>

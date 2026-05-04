@@ -135,6 +135,7 @@ import {
   Menu,
   Shield,
 } from 'lucide-react';
+import { QuickActionFab } from '@/components/layout/quick-action-fab';
 
 export type Module =
   | 'dashboard'
@@ -645,6 +646,9 @@ export default function Home() {
         {/* Content Area */}
         <main className="flex-1 overflow-auto p-6"><Suspense fallback={<ModuleSkeleton />}>{renderModule()}</Suspense></main>
       </div>
+
+      {/* Quick Action FAB */}
+      <QuickActionFab onNavigate={(module) => setActiveModule(module as Module)} />
     </div>
   );
 }
