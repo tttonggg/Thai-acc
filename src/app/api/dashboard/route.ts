@@ -3,6 +3,7 @@ import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { satangToBaht } from '@/lib/currency';
 import { performanceMonitor } from '@/lib/performance-monitor';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET - Dashboard summary (requires authentication)
 export async function GET(request: NextRequest) {
@@ -225,7 +226,7 @@ export async function GET(request: NextRequest) {
     performanceMonitor.endRequest(reqStartTime, '/api/dashboard', 'GET', 200);
     response.headers.set('X-Response-Time', `${Date.now() - startTime}ms`);
     return response;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Dashboard API error:', error);
     console.error('Stack:', error?.stack);
 

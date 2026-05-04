@@ -10,6 +10,7 @@ import { requireAuth, requireRole, getClientIp } from '@/lib/api-utils';
 import { checkPasswordStrength, validatePasswordStrength } from '@/lib/password-validator';
 import { changePassword, resetPassword } from '@/lib/auth-full';
 import { logSecurityEvent } from '@/lib/audit-service';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // POST - Check password strength or change password
 export async function POST(request: NextRequest) {
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Password API error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },

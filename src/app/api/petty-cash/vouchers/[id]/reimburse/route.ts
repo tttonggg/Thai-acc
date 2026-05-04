@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { generateDocNumber } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * POST /api/petty-cash/vouchers/[id]/reimburse
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: result,
       message: 'เติมเงินสดย่อยสำเร็จ',
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการเติมเงินสดย่อย' },
       { status: 500 }

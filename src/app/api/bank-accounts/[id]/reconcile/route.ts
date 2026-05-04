@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { z } from 'zod';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema for reconciliation request
 const reconcileSchema = z.object({
@@ -168,7 +169,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         },
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'รูปแบบข้อมูลไม่ถูกต้อง' },
@@ -239,7 +240,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         reconciliationHistory,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

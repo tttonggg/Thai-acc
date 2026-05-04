@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { generateDepreciationSchedule, getAssetNetBookValue } from '@/lib/asset-service';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET /api/assets/[id] - Get single asset with depreciation schedules
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         ...nbv,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลสินทรัพย์' },
       { status: 500 }
@@ -189,7 +190,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         ...nbv,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถอัปเดตข้อมูลสินทรัพย์ได้' },
       { status: 500 }
@@ -254,7 +255,7 @@ export async function DELETE(
       success: true,
       message: 'ลบสินทรัพย์สำเร็จ',
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ success: false, error: 'ไม่สามารถลบสินทรัพย์ได้' }, { status: 500 });
   }
 }

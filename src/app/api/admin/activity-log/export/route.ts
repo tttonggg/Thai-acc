@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireRole } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET - Export activity logs to CSV (ADMIN only)
 export async function GET(request: NextRequest) {
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': `attachment; filename="activity-logs-${new Date().toISOString().split('T')[0]}.csv"`,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error exporting activity logs:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการส่งออกข้อมูล' },

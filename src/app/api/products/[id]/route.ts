@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET - Get single product by ID
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: product });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching product:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
@@ -120,7 +121,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({ success: true, data: product });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating product:', error);
 
     // Handle Prisma unique constraint error
@@ -180,7 +181,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบสินค้าเรียบร้อยแล้ว' });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error deleting product:', error);
 
     // Handle foreign key constraint error

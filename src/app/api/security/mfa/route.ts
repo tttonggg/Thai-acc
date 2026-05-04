@@ -11,6 +11,7 @@ import { requireAuth } from '@/lib/api-utils';
 import { generateMFASetup, verifyAndEnableMFA, disableMFA, isMFAEnabled } from '@/lib/mfa';
 import { logSecurityEvent } from '@/lib/audit-service';
 import { getClientIp } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // POST - Setup MFA (generate secret and QR code)
 export async function POST(request: NextRequest) {
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('MFA API error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -120,7 +121,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('MFA status error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },

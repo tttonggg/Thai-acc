@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { approveLeave } from '@/lib/leave-service';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -10,7 +11,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const result = await approveLeave(id, user.id);
     return NextResponse.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
 }

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { z } from 'zod';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema for creating/updating scheduled reports
 const scheduledReportSchema = z.object({
@@ -89,7 +90,7 @@ export async function GET(request: NextRequest) {
       data: reportsWithNextRun,
       count: reportsWithNextRun.length,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching scheduled reports:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch scheduled reports' },
@@ -146,7 +147,7 @@ export async function POST(request: NextRequest) {
         ),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating scheduled report:', error);
 
     if (error.name === 'ZodError') {

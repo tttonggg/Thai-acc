@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { invoiceLineEditSchema } from '@/lib/validations';
 import { headers } from 'next/headers';
 import { requireAuth, apiResponse, notFoundError, unauthorizedError, apiError, forbiddenError } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET /api/invoices/[id]/lines/[lineId] - Get single line item with audit history
 export async function GET(
@@ -339,7 +340,7 @@ export async function PUT(
     });
 
     return apiResponse(response);
-  } catch (error: any) {
+  } catch (error) {
     // Handle specific errors
     if (error.message === 'LINE_NOT_FOUND') {
       return notFoundError('ไม่พบรายการสินค้า');
@@ -503,7 +504,7 @@ export async function DELETE(
     });
 
     return apiResponse({ message: 'ลบรายการสินค้าสำเร็จ' });
-  } catch (error: any) {
+  } catch (error) {
     // Handle specific errors
     if (error.message === 'LINE_NOT_FOUND') {
       return notFoundError('ไม่พบรายการสินค้า');

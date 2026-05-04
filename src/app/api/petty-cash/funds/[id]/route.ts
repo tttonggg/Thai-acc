@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * GET /api/petty-cash/funds/[id]
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: fund });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
@@ -114,7 +115,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data: updatedFund,
       message: 'อัปเดตกองทุนเงินสดย่อยสำเร็จ',
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการอัปเดตกองทุนเงินสดย่อย' },
       { status: 500 }
@@ -175,7 +176,7 @@ export async function DELETE(
       success: true,
       message: 'ลบกองทุนเงินสดย่อยสำเร็จ',
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบกองทุนเงินสดย่อย' },
       { status: 500 }

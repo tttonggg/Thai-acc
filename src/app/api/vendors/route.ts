@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { requireAuth, apiResponse, apiError, unauthorizedError } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
 import { vendorSchema } from '@/lib/validations';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET /api/vendors - List vendors
 export async function GET(request: NextRequest) {
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     // Check for auth errors first
     if (
       error instanceof AuthError ||
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
     });
 
     return apiResponse(vendor, 201);
-  } catch (error: any) {
+  } catch (error) {
     // Check for auth errors first
     if (
       error instanceof AuthError ||

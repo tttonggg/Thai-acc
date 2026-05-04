@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import path from 'path';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Dynamic import to avoid bundling PDFKit on the client side
 async function generateFiftyTawiPDF(whtData: any, companyData: any): Promise<Buffer> {
@@ -195,7 +196,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         'Content-Length': pdfBuffer.length.toString(),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถสร้าง PDF ได้: ' + error.message },
       { status: 500 }

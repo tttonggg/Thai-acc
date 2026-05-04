@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { generateIncomeStatementExcel } from '@/lib/excel-export';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * GET /api/reports/income-statement/export/excel
@@ -138,7 +139,7 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': `attachment; filename="income-statement-${startStr}-to-${endStr}.xlsx"`,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

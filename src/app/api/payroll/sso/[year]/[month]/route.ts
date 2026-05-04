@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api-utils';
 import { generateSSOFilingData, getSSOSummary } from '@/lib/sso-filing-service';
+import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(
   request: NextRequest,
@@ -29,7 +30,7 @@ export async function GET(
         summary,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message },
       { status: error.message.includes('ไม่พบ') ? 404 : 500 }

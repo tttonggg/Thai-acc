@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET - List products (requires authentication)
 export async function GET(request: NextRequest) {
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: products });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Products API error:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: product }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating product:', error);
 
     // Handle Prisma unique constraint error

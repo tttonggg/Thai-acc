@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { requireRole } from '@/lib/api-utils';
 import { generateDocNumber } from '@/lib/api-utils';
 import { checkPeriodStatus } from '@/lib/period-service';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // POST - Post receipt (create journal entry)
 // Debits Cash/Bank and credits AR for customer payments
@@ -310,7 +311,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     );
 
     return NextResponse.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error posting receipt:', error);
 
     const errorMessage = error.message || 'เกิดข้อผิดพลาดในการลงบัญชีใบเสร็จรับเงิน';

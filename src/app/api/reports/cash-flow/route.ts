@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import type { ChartOfAccount, JournalLine, JournalEntry } from '@prisma/client';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * GET /api/reports/cash-flow
@@ -240,7 +241,7 @@ export async function GET(request: NextRequest) {
       period: { startDate: start.toISOString(), endDate: end.toISOString() },
       data,
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'AuthError') {
       return NextResponse.json(
         { success: false, error: error.message || 'กรุณาเข้าสู่ระบบ' },

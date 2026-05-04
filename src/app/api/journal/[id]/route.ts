@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { z } from 'zod';
 import { requireAuth, requireRole } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema
 const journalLineSchema = z.object({
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: entry });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
@@ -121,7 +122,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({ success: true, data: entry });
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
@@ -164,7 +165,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบรายการสำเร็จ' });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบ' },
       { status: 500 }

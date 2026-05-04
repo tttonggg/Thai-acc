@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api-utils';
 import prisma from '@/lib/db';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * GET /api/invoices/[id]/preview
@@ -93,7 +94,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         'Content-Type': 'text/html; charset=utf-8',
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Invoice preview error:', error);
 
     if (error.name === 'AuthError') {

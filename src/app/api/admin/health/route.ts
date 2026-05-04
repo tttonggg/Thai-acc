@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/api-utils';
 import { existsSync, statSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET /api/admin/health - System health metrics (ADMIN only)
 export async function GET(request: NextRequest) {
@@ -205,7 +206,7 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Health check API error:', error);
 
     // Handle auth errors

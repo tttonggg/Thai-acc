@@ -3,6 +3,7 @@ import prisma from '@/lib/db';
 import { z } from 'zod';
 import { requireAuth, getClientIp } from '@/lib/api-utils';
 import { logPost } from '@/lib/activity-logger';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * Validation schema for journal entry lines
@@ -215,7 +216,7 @@ export async function POST(request: NextRequest) {
       entryNo: journalEntry.entryNo,
       data: journalEntry,
     });
-  } catch (error: any) {
+  } catch (error) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

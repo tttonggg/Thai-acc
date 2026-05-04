@@ -3,6 +3,7 @@ import prisma from '@/lib/db';
 import { requireAuth, requireRole } from '@/lib/api-utils';
 import { logActivity } from '@/lib/activity-logger';
 import { getClientIp } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * POST /api/invoices/[id]/void
@@ -179,7 +180,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       message: 'ยกเลิกใบกำกับภาษีเรียบร้อยแล้ว',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error voiding invoice:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการยกเลิกใบกำกับภาษี' },

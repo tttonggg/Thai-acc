@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { requireAuth, requireRole } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema for company info
 const companyInfoSchema = z.object({
@@ -54,7 +55,7 @@ export async function GET(req: NextRequest) {
         fiscalYearStart: company.fiscalYearStart,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
@@ -127,7 +128,7 @@ export async function PUT(req: NextRequest) {
         logo: updated.logo,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(

@@ -10,6 +10,7 @@ import {
 import { apiResponse } from '@/lib/api-utils';
 import { z } from 'zod';
 import { db } from '@/lib/db';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema for updating stock take
 const updateStockTakeSchema = z.object({
@@ -57,7 +58,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 
     return apiResponse(stockTake);
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'AuthError') {
       return unauthorizedError();
     }
@@ -178,7 +179,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     });
 
     return apiResponse(stockTake);
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'AuthError') {
       return unauthorizedError();
     }
@@ -226,7 +227,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       message: 'ยกเลิกการตรวจนับสต็อกสำเร็จ',
       stockTake,
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'AuthError') {
       return unauthorizedError();
     }

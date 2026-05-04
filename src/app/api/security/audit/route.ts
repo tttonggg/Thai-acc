@@ -14,6 +14,7 @@ import {
   exportToJSON,
 } from '@/lib/audit-service';
 import { logSecurityEvent } from '@/lib/audit-service';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET - Get audit logs
 export async function GET(request: NextRequest) {
@@ -100,7 +101,7 @@ export async function GET(request: NextRequest) {
         hasMore: offset + logs.length < total,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Audit API error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -142,7 +143,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Audit POST error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },

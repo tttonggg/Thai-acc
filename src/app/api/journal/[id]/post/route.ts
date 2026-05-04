@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { checkPeriodStatus } from '@/lib/period-service';
 import { requireRole } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // POST - Post journal entry (change status from DRAFT to POSTED)
 // CRITICAL SECURITY: Requires ADMIN or ACCOUNTANT role
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: entry,
       message: 'ลงบัญชีสำเร็จ',
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลงบัญชี' },
       { status: 500 }

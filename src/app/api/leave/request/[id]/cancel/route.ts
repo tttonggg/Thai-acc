@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cancelLeave } from '@/lib/leave-service';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 export async function DELETE(
   request: NextRequest,
@@ -17,7 +18,7 @@ export async function DELETE(
 
     const result = await cancelLeave(id, employeeId);
     return NextResponse.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
 }

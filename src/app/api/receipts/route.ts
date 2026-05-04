@@ -3,6 +3,7 @@ import prisma from '@/lib/db';
 import { z } from 'zod';
 import { requireAuth, generateDocNumber } from '@/lib/api-utils';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema for receipt allocation
 const receiptAllocationSchema = z.object({
@@ -145,7 +146,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching receipts:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
@@ -311,7 +312,7 @@ export async function POST(request: NextRequest) {
     };
 
     return NextResponse.json({ success: true, data: receiptInBaht });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating receipt:', error.message);
     if (error.name === 'ZodError') {
       return NextResponse.json(

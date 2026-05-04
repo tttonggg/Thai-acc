@@ -11,6 +11,7 @@ import {
 } from '@/lib/recurring-document-service';
 import { requireAuth } from '@/lib/api-utils';
 import { getCsrfTokenFromHeaders, validateCsrfToken } from '@/lib/csrf-service-server';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema for create
 const createRecurringSchema = z.object({
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(result.total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error?.message?.includes('Unauthorized')) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
     } as any);
 
     return NextResponse.json({ success: true, data: recurring }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },

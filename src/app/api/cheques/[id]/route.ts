@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { clearCheque, bounceCheque } from '@/lib/cheque-service';
+import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: cheque });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลเช็ค' },
       { status: 500 }
@@ -118,7 +119,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     });
 
     return NextResponse.json({ success: true, data: updatedCheque });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถอัปเดตสถานะเช็คได้' },
       { status: 500 }
@@ -155,7 +156,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบเช็คสำเร็จ' });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ success: false, error: 'ไม่สามารถลบเช็คได้' }, { status: 500 });
   }
 }

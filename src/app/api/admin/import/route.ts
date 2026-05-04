@@ -3,6 +3,7 @@ import { requireRole } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
 import prisma from '@/lib/db';
 import { z } from 'zod';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET - Import history
 export async function GET(request: NextRequest) {
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
       limit,
       offset,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Import history error:', error);
 
     // Check for auth errors first
@@ -394,7 +395,7 @@ async function importData(
               data,
             });
           }
-        } catch (error: any) {
+        } catch (error) {
           result.errors++;
           result.errorDetails.push({
             row: i + 1,
@@ -411,7 +412,7 @@ async function importData(
         }
       }
     });
-  } catch (error: any) {
+  } catch (error) {
     result.success = false;
     result.errorDetails.push({
       row: 0,
@@ -626,7 +627,7 @@ export async function POST(request: NextRequest) {
       errorDetails: result.errorDetails.slice(0, 50),
       importId: importRecord?.id,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Import error:', error);
 
     // Update import record with error

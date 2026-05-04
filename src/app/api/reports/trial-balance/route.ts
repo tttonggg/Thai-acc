@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * GET /api/reports/trial-balance
@@ -157,7 +158,7 @@ export async function GET(request: NextRequest) {
         isBalanced: Math.abs(totalDebit - totalCredit) < 0.01,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

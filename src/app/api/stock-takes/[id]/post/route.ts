@@ -10,6 +10,7 @@ import {
 import { apiResponse } from '@/lib/api-utils';
 import { db } from '@/lib/db';
 import { recordStockMovement } from '@/lib/inventory-service';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // POST /api/stock-takes/[id]/post - Post stock take to GL and update stock
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -209,7 +210,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       data: updated,
       journalEntry,
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'AuthError') {
       return unauthorizedError();
     }

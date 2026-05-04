@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { z } from 'zod';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema for custom report configuration
 const customReportSchema = z.object({
@@ -147,7 +148,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: reportData,
     });
-  } catch (error: any) {
+  } catch (error) {
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(

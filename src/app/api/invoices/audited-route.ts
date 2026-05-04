@@ -8,6 +8,7 @@ import prisma from '@/lib/db';
 import { z } from 'zod';
 import { requireAuth, getClientIp } from '@/lib/api-auth';
 import { logInvoiceMutation } from '@/lib/audit-service';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema
 const invoiceLineSchema = z.object({
@@ -137,7 +138,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
@@ -244,7 +245,7 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({ success: true, data: createdInvoice });
-  } catch (error: any) {
+  } catch (error) {
     // Log failed creation attempt
     if (error.name !== 'ZodError') {
       const user = await requireAuth().catch(() => null);
@@ -319,7 +320,7 @@ export async function PUT(request: NextRequest) {
     );
 
     return NextResponse.json({ success: true, data: afterInvoice });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Invoice update error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการอัปเดต' },
@@ -375,7 +376,7 @@ export async function DELETE(request: NextRequest) {
     );
 
     return NextResponse.json({ success: true, data: afterInvoice });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Invoice delete error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบ' },

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
+import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
       orderBy: { employeeCode: 'asc' },
     });
     return NextResponse.json({ success: true, data: employees });
-  } catch (error: any) {
+  } catch (error) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
       },
     });
     return NextResponse.json({ success: true, data: employee }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(

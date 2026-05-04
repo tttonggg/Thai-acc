@@ -11,6 +11,7 @@ import { parseCamt053Xml, parseCamt053Json, isCamt053Content } from '@/lib/bank-
 import prisma from '@/lib/db';
 import fs from 'fs';
 import path from 'path';
+import { handleApiError } from '@/lib/api-error-handler';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB for bank statements
 
@@ -165,7 +166,7 @@ export async function POST(request: NextRequest) {
         })),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Bank statement import error:', error);
     return NextResponse.json(
       {

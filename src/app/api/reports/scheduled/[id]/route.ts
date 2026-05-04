@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { z } from 'zod';
+import { handleApiError } from '@/lib/api-error-handler';
 
 const scheduledReportSchema = z.object({
   name: z.string().min(1).optional(),
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: report });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching scheduled report:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch scheduled report' },
@@ -124,7 +125,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({ success: true, data: report });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating scheduled report:', error);
 
     if (error.name === 'ZodError') {
@@ -171,7 +172,7 @@ export async function DELETE(
       success: true,
       message: 'Scheduled report deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error deleting scheduled report:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete scheduled report' },

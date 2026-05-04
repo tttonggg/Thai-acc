@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEmployeeBalances } from '@/lib/leave-service';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(
   request: NextRequest,
@@ -15,7 +16,7 @@ export async function GET(
 
     const balances = await getEmployeeBalances(employeeId, year);
     return NextResponse.json({ success: true, data: balances });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

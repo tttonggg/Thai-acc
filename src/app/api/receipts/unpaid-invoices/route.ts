@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { satangToBaht } from '@/lib/currency';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET - Get unpaid invoices for a customer
 export async function GET(request: NextRequest) {
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: invoicesWithBalance,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching unpaid invoices:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },

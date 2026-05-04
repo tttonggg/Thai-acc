@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 interface AccountBalance {
   code: string;
@@ -140,7 +141,7 @@ export async function GET(request: NextRequest) {
       },
       data,
     });
-  } catch (error: any) {
+  } catch (error) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { createVoucherJournalEntry } from '@/lib/petty-cash-service';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * POST /api/petty-cash/vouchers/[id]/approve
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       message: 'อนุมัติใบเบิกเงินสดย่อยและบันทึกบัญชีสำเร็จ',
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการอนุมัติใบเบิกเงินสดย่อย' },
       { status: 500 }

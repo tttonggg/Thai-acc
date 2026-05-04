@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api-utils';
 import { db } from '@/lib/db';
+import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
         stockTakeCount,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Test API Error:', error);
     return NextResponse.json(
       {

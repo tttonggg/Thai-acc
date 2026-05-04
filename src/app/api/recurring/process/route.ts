@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { processRecurringDocuments, getDueDocuments } from '@/lib/recurring-document-service';
 import { requireAuth } from '@/lib/api-utils';
 import { getSchedulerStatus, triggerManualCheck } from '@/lib/scheduler';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // POST /api/recurring/process - Manually trigger processing
 // This endpoint is used by cron/scheduler to process due recurring documents
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
         processingResult: result,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error?.message?.includes('Unauthorized')) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
         })),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error?.message?.includes('Unauthorized')) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },

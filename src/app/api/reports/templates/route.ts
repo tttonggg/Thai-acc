@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { z } from 'zod';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema for template
 const templateSchema = z.object({
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: template,
     });
-  } catch (error: any) {
+  } catch (error) {
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -117,7 +118,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: templates,
     });
-  } catch (error: any) {
+  } catch (error) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

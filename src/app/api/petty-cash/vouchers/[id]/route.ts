@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * GET /api/petty-cash/vouchers/[id]
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: voucher });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
@@ -172,7 +173,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         message: 'อัปเดตใบเบิกเงินสดย่อยสำเร็จ',
       });
     }
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการอัปเดตใบเบิกเงินสดย่อย' },
       { status: 500 }
@@ -232,7 +233,7 @@ export async function DELETE(
       data: deletedVoucher,
       message: 'ลบใบเบิกเงินสดย่อยสำเร็จ',
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบใบเบิกเงินสดย่อย' },
       { status: 500 }

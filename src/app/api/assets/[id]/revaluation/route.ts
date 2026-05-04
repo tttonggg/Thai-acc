@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRevaluation } from '@/lib/asset-revaluation-service';
 import { requireAuth, canEdit } from '@/lib/api-utils';
 import { z } from 'zod';
+import { handleApiError } from '@/lib/api-error-handler';
 
 const revaluationSchema = z.object({
   newFairValue: z.number().int().positive('มูลค่ายุติธรรมต้องเป็นตัวเลขบวก'),
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       success: true,
       data: result,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Revaluation error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการบันทึกการตีราคา' },

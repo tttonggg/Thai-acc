@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: employee });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลพนักงาน' },
       { status: 500 }
@@ -81,7 +82,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     });
 
     return NextResponse.json({ success: true, data: updated });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถอัปเดตข้อมูลพนักงานได้' },
       { status: 500 }
@@ -125,7 +126,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบพนักงานสำเร็จ' });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json({ success: false, error: 'ไม่สามารถลบพนักงานได้' }, { status: 500 });
   }
 }

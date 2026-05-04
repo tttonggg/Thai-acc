@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { requireAuth, requireRole } from '@/lib/api-utils';
 import { generateDocNumber } from '@/lib/api-utils';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema for receipt allocation
 const receiptAllocationSchema = z.object({
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         })),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching receipt:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
@@ -194,7 +195,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     ]);
 
     return NextResponse.json({ success: true, data: receipt });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating receipt:', error);
     if (error.name === 'ZodError') {
       return NextResponse.json(
@@ -247,7 +248,7 @@ export async function DELETE(
     ]);
 
     return NextResponse.json({ success: true, message: 'ลบใบเสร็จรับเงินเรียบร้อยแล้ว' });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error deleting receipt:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบใบเสร็จรับเงิน' },

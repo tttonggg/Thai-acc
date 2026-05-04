@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api-utils';
 import prisma from '@/lib/db';
 import { generatePayslipPDF } from '@/lib/pdf-generator';
+import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         'Content-Length': pdfBuffer.byteLength.toString(),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'ไม่สามารถสร้างสลิปเงินเดือนได้' },
       { status: 500 }

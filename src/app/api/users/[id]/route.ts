@@ -3,6 +3,7 @@ import prisma from '@/lib/db';
 import { z } from 'zod';
 import * as bcrypt from 'bcryptjs';
 import { requireAuth, apiError } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 const userUpdateSchema = z.object({
   email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง').optional(),
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: user });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
@@ -128,7 +129,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({ success: true, data: user });
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
@@ -189,7 +190,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบผู้ใช้สำเร็จ' });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบ' },
       { status: 500 }

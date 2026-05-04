@@ -9,6 +9,7 @@ import {
 } from '@/lib/api-auth';
 import { apiResponse } from '@/lib/api-utils';
 import { db } from '@/lib/db';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // POST /api/stock-takes/[id]/approve - Approve stock take
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -62,7 +63,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       message: 'อนุมัติการตรวจนับสต็อกสำเร็จ',
       data: updated,
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'AuthError') {
       return unauthorizedError();
     }

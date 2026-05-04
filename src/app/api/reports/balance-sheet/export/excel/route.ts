@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
 import { generateBalanceSheetExcel } from '@/lib/excel-export';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * GET /api/reports/balance-sheet/export/excel
@@ -225,7 +226,7 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': `attachment; filename="balance-sheet-${dateStr}.xlsx"`,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

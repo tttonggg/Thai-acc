@@ -3,6 +3,7 @@ import prisma from '@/lib/db';
 import { requireAuth, requireRole } from '@/lib/api-utils';
 import { logActivity } from '@/lib/activity-logger';
 import { getClientIp } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 /**
  * POST /api/journal/[id]/reverse
@@ -148,7 +149,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: reversalEntry,
       message: 'ยกเลิกบันทึกบัญชีเรียบร้อยแล้ว',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error reversing journal entry:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการยกเลิกบันทึกบัญชี' },

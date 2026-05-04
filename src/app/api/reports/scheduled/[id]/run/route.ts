@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // POST /api/reports/scheduled/[id]/run - Run a scheduled report immediately
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         { status: 500 }
       );
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error running scheduled report:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to run scheduled report' },

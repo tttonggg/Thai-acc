@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateCsrfToken } from '@/lib/csrf';
 import { requireAuth } from '@/lib/api-utils';
+import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: { token },
     });
-  } catch (error: any) {
+  } catch (error) {
     // Auth errors should return 401, not 500
     if (error?.message?.includes('ไม่ได้รับอนุญาต') || error?.message?.includes('Unauthorized')) {
       console.warn('CSRF token request - unauthenticated:', error.message);

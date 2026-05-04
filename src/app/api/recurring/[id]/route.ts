@@ -10,6 +10,7 @@ import {
 } from '@/lib/recurring-document-service';
 import { requireAuth } from '@/lib/api-utils';
 import { getCsrfTokenFromHeaders, validateCsrfToken } from '@/lib/csrf-service-server';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema for update
 const updateRecurringSchema = z.object({
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const recurring = await getRecurringDocument(id);
 
     return NextResponse.json({ success: true, data: recurring });
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof RecurringDocumentNotFoundError) {
       return NextResponse.json({ success: false, error: 'ไม่พบเอกสารที่เกิดซ้ำ' }, { status: 404 });
     }
@@ -86,7 +87,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const recurring = await updateRecurringDocument(id, validatedData as any);
 
     return NextResponse.json({ success: true, data: recurring });
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
@@ -143,7 +144,7 @@ export async function DELETE(
     await deleteRecurringDocument(id);
 
     return NextResponse.json({ success: true, message: 'ลบเอกสารที่เกิดซ้ำเรียบร้อยแล้ว' });
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof RecurringDocumentNotFoundError) {
       return NextResponse.json({ success: false, error: 'ไม่พบเอกสารที่เกิดซ้ำ' }, { status: 404 });
     }

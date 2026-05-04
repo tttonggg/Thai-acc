@@ -16,6 +16,7 @@ import {
   getVersionUsage,
   TimeRange,
 } from '@/lib/services/analytics-service';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET /api/admin/analytics - Get analytics data
 export async function GET(req: NextRequest) {
@@ -77,7 +78,7 @@ export async function GET(req: NextRequest) {
       default:
         return NextResponse.json({ error: 'Invalid analytics type' }, { status: 400 });
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching analytics:', error);
 
     // Check for auth errors first

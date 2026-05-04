@@ -19,6 +19,7 @@ import {
 } from '@/lib/webhook-security';
 import { logSecurityEvent } from '@/lib/audit-service';
 import { prisma } from '@/lib/db';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // GET - List webhooks
 export async function GET(request: NextRequest) {
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
         secret: undefined, // Don't expose secret
       })),
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Webhooks GET error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -162,7 +163,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Webhooks POST error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -211,7 +212,7 @@ export async function PUT(request: NextRequest) {
         secret: undefined,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Webhooks PUT error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -250,7 +251,7 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'Webhook deleted',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Webhooks DELETE error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },

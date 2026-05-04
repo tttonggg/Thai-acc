@@ -7,6 +7,7 @@ import { getClientIp } from '@/lib/api-utils';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 import { validateCsrfToken, getCsrfTokenFromHeaders } from '@/lib/csrf-service-server';
 import { checkPeriodStatus } from '@/lib/period-service';
+import { handleApiError } from '@/lib/api-error-handler';
 
 // Validation schema
 const invoiceLineSchema = z.object({
@@ -147,7 +148,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     // Handle auth errors
     if (error?.statusCode === 401 || error?.message?.includes('Unauthorized')) {
       return NextResponse.json(
@@ -328,7 +329,7 @@ export async function POST(request: NextRequest) {
     };
 
     return NextResponse.json({ success: true, data: invoiceInBaht });
-  } catch (error: any) {
+  } catch (error) {
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
