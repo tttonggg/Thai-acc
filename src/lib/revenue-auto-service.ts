@@ -26,8 +26,8 @@ export interface RevenueJELine {
   accountCode: string;
   accountId: string;
   description: string;
-  debit: number;   // Satang
-  credit: number;  // Satang
+  debit: number; // Satang
+  credit: number; // Satang
 }
 
 export interface CreateRevenueJournalEntryResult {
@@ -155,9 +155,7 @@ export async function createCogsJournalEntry(
   ctx: { invoiceId: string; invoiceNo: string; invoiceDate: Date; userId: string },
   lines: Array<{ productId: string | null; quantity: number }>
 ): Promise<{ journalEntryId: string; entryNo: string; totalCOGS: number } | null> {
-  const productIds = lines
-    .map((l) => l.productId)
-    .filter((id): id is string => id !== null);
+  const productIds = lines.map((l) => l.productId).filter((id): id is string => id !== null);
 
   if (productIds.length === 0) return null;
 
@@ -185,7 +183,9 @@ export async function createCogsJournalEntry(
   ]);
 
   if (!cogsAccount || !inventoryAccount) {
-    throw new Error(`ไม่พบบัญชี: COGS (5110=${!!cogsAccount}), สินค้าคงเหลือ (1140=${!!inventoryAccount})`);
+    throw new Error(
+      `ไม่พบบัญชี: COGS (5110=${!!cogsAccount}), สินค้าคงเหลือ (1140=${!!inventoryAccount})`
+    );
   }
 
   const entryNo = await generateDocNumber('JOURNAL_ENTRY', 'JE');

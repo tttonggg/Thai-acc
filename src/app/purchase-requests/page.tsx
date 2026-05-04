@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { KeeratiSidebar } from '@/components/layout/keerati-sidebar'
-import { PurchaseRequestList } from '@/components/purchase-requests/purchase-request-list'
+import { useState } from 'react';
+import { KeeratiSidebar } from '@/components/layout/keerati-sidebar';
+import { PurchaseRequestList } from '@/components/purchase-requests/purchase-request-list';
 
 export default function PurchaseRequestsPage() {
-  const [activeModule, setActiveModule] = useState('purchase-requests')
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [activeModule, setActiveModule] = useState('purchase-requests');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -20,5 +20,5 @@ export default function PurchaseRequestsPage() {
         <PurchaseRequestList />
       </main>
     </div>
-  )
+  );
 }

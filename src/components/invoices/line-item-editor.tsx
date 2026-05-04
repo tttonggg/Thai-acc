@@ -757,7 +757,7 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
             <span
               className={`text-xs ${(entry.quantityDiff ?? 0) > 0 ? 'text-green-600' : 'text-red-600'}`}
             >
-              {((entry.quantityDiff ?? 0) > 0 ? '+' : '')}
+              {(entry.quantityDiff ?? 0) > 0 ? '+' : ''}
               {entry.quantityDiff})
             </span>
           )}
@@ -781,7 +781,7 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
             <span
               className={`text-xs ${(entry.unitPriceDiff ?? 0) > 0 ? 'text-green-600' : 'text-red-600'}`}
             >
-              ({((entry.unitPriceDiff ?? 0) > 0 ? '+' : '')}
+              ({(entry.unitPriceDiff ?? 0) > 0 ? '+' : ''}
               {formatCurrency(entry.unitPriceDiff ?? 0)})
             </span>
           )}
@@ -872,5 +872,3 @@ function AuditHistoryEntry({ entry }: AuditHistoryEntryProps) {
     </div>
   );
 }
-
-

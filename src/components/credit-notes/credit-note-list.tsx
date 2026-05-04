@@ -304,7 +304,9 @@ export function CreditNoteList() {
                     <TableCell className="font-mono">{cn.creditNoteNo}</TableCell>
                     <TableCell>{formatDate(cn.creditNoteDate)}</TableCell>
                     <TableCell>{(cn as any).customerName || '-'}</TableCell>
-                    <TableCell className="font-mono">{(cn.invoice as any)?.invoiceNo || '-'}</TableCell>
+                    <TableCell className="font-mono">
+                      {(cn.invoice as any)?.invoiceNo || '-'}
+                    </TableCell>
                     <TableCell>{reasonLabels[cn.reason] || cn.reason}</TableCell>
                     <TableCell className="text-right">
                       ฿{(cn.subtotal ?? 0).toLocaleString()}

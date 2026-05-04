@@ -74,39 +74,39 @@ export function OfflineSyncProvider({
   syncInterval = 30000,
   maxRetries = 3,
 }: OfflineSyncProviderProps) {
-  const { isOffline } = usePWA()
-  const isOnline = !isOffline
-  const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([])
-  const [isSyncing, setIsSyncing] = useState(false)
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
-  const [conflicts, setConflicts] = useState<Conflict[]>([])
+  const { isOffline } = usePWA();
+  const isOnline = !isOffline;
+  const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
+  const [conflicts, setConflicts] = useState<Conflict[]>([]);
 
   // Load pending changes from IndexedDB on mount
   useEffect(() => {
-    loadPendingChanges()
-    loadConflicts()
-  }, [])
+    loadPendingChanges();
+    loadConflicts();
+  }, []);
 
   // Sync when coming back online
   useEffect(() => {
     if (isOnline && pendingChanges.length > 0) {
-      syncNow()
+      syncNow();
     }
-  }, [isOnline])
+  }, [isOnline]);
 
   // Periodic sync
   useEffect(() => {
-    if (!isOnline) return
+    if (!isOnline) return;
 
     const interval = setInterval(() => {
       if (pendingChanges.length > 0) {
-        syncNow()
+        syncNow();
       }
-    }, syncInterval)
+    }, syncInterval);
 
-    return () => clearInterval(interval)
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnline, syncInterval])
+  }, [isOnline, syncInterval]);
 
   // Helper: load pending changes from IndexedDB
   const loadPendingChanges = async () => {
@@ -223,7 +223,9 @@ export function OfflineSyncProvider({
   }, [isSyncing, isOnline, pendingChanges, conflicts, maxRetries]);
 
   // Keep syncNowRef in sync with latest syncNow
-  useEffect(() => { syncNowRef.current = syncNow; }, [syncNow]);
+  useEffect(() => {
+    syncNowRef.current = syncNow;
+  }, [syncNow]);
 
   const queueChange = useCallback(
     async (operation: PendingChange['operation'], endpoint: string, data: unknown) => {

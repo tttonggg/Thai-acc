@@ -2,7 +2,14 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { z } from 'zod';
 import { invoiceCommentSchema, updateInvoiceCommentSchema } from '@/lib/validations';
-import { apiResponse, notFoundError, apiError, unauthorizedError, requireAuth, getClientIp } from '@/lib/api-utils';
+import {
+  apiResponse,
+  notFoundError,
+  apiError,
+  unauthorizedError,
+  requireAuth,
+  getClientIp,
+} from '@/lib/api-utils';
 
 // GET /api/invoices/[id]/comments - List comments with threading
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

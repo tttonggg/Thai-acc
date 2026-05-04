@@ -19,7 +19,9 @@ const updateStockTakeSchema = z.object({
     .optional(),
   warehouseId: z.string().optional(),
   notes: z.string().optional(),
-  status: z.enum(['DRAFT', 'IN_PROGRESS', 'PENDING_APPROVAL', 'APPROVED', 'POSTED', 'CANCELLED']).optional(),
+  status: z
+    .enum(['DRAFT', 'IN_PROGRESS', 'PENDING_APPROVAL', 'APPROVED', 'POSTED', 'CANCELLED'])
+    .optional(),
 });
 
 // Validation schema for stock take lines

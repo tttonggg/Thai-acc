@@ -382,7 +382,7 @@ export async function generateVarianceAnalysis(year: number): Promise<VarianceAn
     analysis.trends.push({
       accountId: budget.accountId,
       accountName: budget.account.name,
-      data: monthData.map(m => ({ ...m, isDetail: false })),
+      data: monthData.map((m) => ({ ...m, isDetail: false })),
     } as any);
   }
 

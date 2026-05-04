@@ -20,7 +20,7 @@ const approveSchema = z.object({
 async function canUserApprove(
   userId: string,
   userRole: string,
-  documentType: string,
+  documentType: string
 ): Promise<boolean> {
   // ADMIN can always approve
   if (userRole === 'ADMIN') return true;
@@ -86,11 +86,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // Check if user is allowed to approve based on config
-    const canApprove = await canUserApprove(
-      user.id,
-      user.role,
-      'PURCHASE_REQUEST'
-    );
+    const canApprove = await canUserApprove(user.id, user.role, 'PURCHASE_REQUEST');
 
     if (!canApprove) {
       return forbiddenError();

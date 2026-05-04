@@ -187,7 +187,10 @@ describe('Asset Service', () => {
           lines: data.data.lines.create,
         })
       );
-      (mockPrisma.depreciationSchedule.update as any).mockResolvedValue({ id: 'sched-1', posted: true });
+      (mockPrisma.depreciationSchedule.update as any).mockResolvedValue({
+        id: 'sched-1',
+        posted: true,
+      });
 
       const result = await postMonthlyDepreciation('sched-1', 'user-1');
 
@@ -221,7 +224,10 @@ describe('Asset Service', () => {
           lines: data.data.lines.create,
         });
       });
-      (mockPrisma.depreciationSchedule.update as any).mockResolvedValue({ id: 'sched-1', posted: true });
+      (mockPrisma.depreciationSchedule.update as any).mockResolvedValue({
+        id: 'sched-1',
+        posted: true,
+      });
 
       await postMonthlyDepreciation('sched-1', 'user-1');
 
@@ -255,7 +261,10 @@ describe('Asset Service', () => {
           lines: data.data.lines.create,
         });
       });
-      (mockPrisma.depreciationSchedule.update as any).mockResolvedValue({ id: 'sched-1', posted: true });
+      (mockPrisma.depreciationSchedule.update as any).mockResolvedValue({
+        id: 'sched-1',
+        posted: true,
+      });
 
       await postMonthlyDepreciation('sched-1', 'user-1');
 

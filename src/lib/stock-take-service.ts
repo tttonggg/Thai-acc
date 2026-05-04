@@ -135,7 +135,10 @@ export async function createStockTake(params: {
         // @ts-ignore
         totalSystemQty: lines.reduce((sum, line) => sum + line.systemQuantity, 0),
         // @ts-ignore
-        totalSystemValue: lines.reduce((sum, line) => sum + line.systemQuantity * line.costPerUnit, 0),
+        totalSystemValue: lines.reduce(
+          (sum, line) => sum + line.systemQuantity * line.costPerUnit,
+          0
+        ),
       },
     };
   });
@@ -271,10 +274,7 @@ export async function approveStockTake(params: { takeId: string; approverId: str
 
     // Calculate summary
     // @ts-ignore
-    const totalVarianceQty = updatedTake.lines.reduce(
-      (sum, line) => sum + line.varianceQty,
-      0
-    );
+    const totalVarianceQty = updatedTake.lines.reduce((sum, line) => sum + line.varianceQty, 0);
     // @ts-ignore
     const totalVarianceValue = updatedTake.lines.reduce(
       (sum, line) => sum + line.varianceQty * line.costPerUnit,

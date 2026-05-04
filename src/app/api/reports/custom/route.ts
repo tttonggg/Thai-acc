@@ -581,7 +581,7 @@ async function generateIncomeStatement(config: any, dateFilter: Date) {
  * Generate AR Aging report
  */
 async function generateAgingAR(config: any, dateFilter: Date) {
-  const customers = await prisma.customer.findMany({
+  const customers = (await prisma.customer.findMany({
     where: { isActive: true },
     include: {
       invoices: {
@@ -590,7 +590,7 @@ async function generateAgingAR(config: any, dateFilter: Date) {
         },
       },
     },
-  }) as any;
+  })) as any;
 
   const agingData = customers.map((customer: any) => {
     const agingBuckets = {
@@ -645,7 +645,7 @@ async function generateAgingAR(config: any, dateFilter: Date) {
  * Generate AP Aging report
  */
 async function generateAgingAP(config: any, dateFilter: Date) {
-  const vendors = await prisma.vendor.findMany({
+  const vendors = (await prisma.vendor.findMany({
     where: { isActive: true },
     include: {
       purchaseInvoices: {
@@ -654,7 +654,7 @@ async function generateAgingAP(config: any, dateFilter: Date) {
         },
       },
     },
-  }) as any;
+  })) as any;
 
   const agingData = vendors.map((vendor: any) => {
     const agingBuckets = {

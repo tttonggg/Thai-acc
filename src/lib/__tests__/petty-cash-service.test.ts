@@ -34,15 +34,17 @@ describe('Petty Cash Service', () => {
     const mockDb = (await import('../db')).db;
 
     // Mock $transaction to execute the callback immediately
-    (mockDb.$transaction as any).mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => {
-      return callback(mockDb);
-    });
+    (mockDb.$transaction as any).mockImplementation(
+      async (callback: (tx: unknown) => Promise<unknown>) => {
+        return callback(mockDb);
+      }
+    );
 
     // Mock journalEntry.findFirst (used in generateJournalEntryNumber)
     (mockDb.journalEntry.findFirst as any).mockResolvedValue(null); // first entry of the month
 
     // Mock journalEntry.create to return a complete entry
-(mockDb.journalEntry.create as any).mockResolvedValue({
+    (mockDb.journalEntry.create as any).mockResolvedValue({
       id: 'je-1',
       entryNo: 'JV-202401-0001',
       date: new Date('2024-01-15'),
@@ -98,13 +100,15 @@ describe('Petty Cash Service', () => {
   it('should call journalEntry.create with correct data', async () => {
     const mockDb = (await import('../db')).db;
 
-    (mockDb.$transaction as any).mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => {
-      return callback(mockDb);
-    });
+    (mockDb.$transaction as any).mockImplementation(
+      async (callback: (tx: unknown) => Promise<unknown>) => {
+        return callback(mockDb);
+      }
+    );
 
     (mockDb.journalEntry.findFirst as any).mockResolvedValue(null);
 
-(mockDb.journalEntry.create as any).mockResolvedValue({
+    (mockDb.journalEntry.create as any).mockResolvedValue({
       id: 'je-2',
       entryNo: 'JV-202401-0001',
       totalDebit: 200,

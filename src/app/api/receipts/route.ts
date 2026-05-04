@@ -256,7 +256,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate receipt number (transaction-safe via DocumentNumber table)
-    const receiptNo = await generateDocNumber('RECEIPT', 'RCP') as string;
+    const receiptNo = (await generateDocNumber('RECEIPT', 'RCP')) as string;
 
     // Calculate unallocated amount (credit to customer) — convert to Satang
     const unallocated = bahtToSatang(validatedData.amount - totalAllocation);

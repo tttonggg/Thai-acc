@@ -49,7 +49,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
             onError: (error) => {
               // Thai error toast for mutations
               toast.error('เกิดข้อผิดพลาด', {
-                description: (error as Error).message || 'ไม่สามารถดำเนินการได้ กรุณาลองใหม่อีกครั้ง',
+                description:
+                  (error as Error).message || 'ไม่สามารถดำเนินการได้ กรุณาลองใหม่อีกครั้ง',
               });
             },
           },

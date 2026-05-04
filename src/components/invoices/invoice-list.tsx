@@ -1,10 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  Plus,
-  FileText,
-} from 'lucide-react';
+import { Plus, FileText } from 'lucide-react';
 import { eventBus, EVENTS } from '@/lib/events';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -93,7 +90,7 @@ export function InvoiceList() {
         }
         setInvoices(invoicesData);
         if (result.pagination) {
-          setPagination(prev => ({ ...prev, ...result.pagination }));
+          setPagination((prev) => ({ ...prev, ...result.pagination }));
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'ข้อผิดพลาดในการโหลดข้อมูล';
@@ -879,7 +876,7 @@ export function InvoiceList() {
       {/* Pagination */}
       <InvoicePagination
         pagination={pagination}
-        onPageChange={(page) => setPagination(prev => ({ ...prev, page }))}
+        onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
       />
     </div>
   );

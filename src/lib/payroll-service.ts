@@ -13,9 +13,9 @@ export function calculateSSC(baseSalary: number): number {
   // 5% = 500 basis points (out of 10000)
   const sscRateBps = 500;
   const sscCeiling = 9900_00; // ฿9,900 in Satang (9900 Baht × 100)
-  const maxSSC = Math.round(sscCeiling * sscRateBps / 10000); // ฿495 in Satang
+  const maxSSC = Math.round((sscCeiling * sscRateBps) / 10000); // ฿495 in Satang
   // Multiply before divide to avoid floating-point errors
-  return Math.min(Math.round(baseSalary * sscRateBps / 10000), maxSSC);
+  return Math.min(Math.round((baseSalary * sscRateBps) / 10000), maxSSC);
 }
 
 /**
@@ -32,14 +32,14 @@ export function calculatePND1(annualIncome: number): number {
   let tax = 0;
   // Progressive rates 2024 (Thailand) - stored as basis points (e.g., 500 = 5%)
   const brackets = [
-    { limit: 150_000_00, rate: 0 },      // 0 - 150,000 = 0%
-    { limit: 300_000_00, rate: 500 },     // 150,001 - 300,000 = 5%
-    { limit: 500_000_00, rate: 1000 },    // 300,001 - 500,000 = 10%
-    { limit: 750_000_00, rate: 1500 },    // 500,001 - 750,000 = 15%
-    { limit: 1_000_000_00, rate: 2000 },  // 750,001 - 1,000,000 = 20%
-    { limit: 2_000_000_00, rate: 2500 },  // 1,000,001 - 2,000,000 = 25%
-    { limit: 5_000_000_00, rate: 3000 },  // 2,000,001 - 5,000,000 = 30%
-    { limit: Infinity, rate: 3500 },     // > 5,000,000 = 35%
+    { limit: 150_000_00, rate: 0 }, // 0 - 150,000 = 0%
+    { limit: 300_000_00, rate: 500 }, // 150,001 - 300,000 = 5%
+    { limit: 500_000_00, rate: 1000 }, // 300,001 - 500,000 = 10%
+    { limit: 750_000_00, rate: 1500 }, // 500,001 - 750,000 = 15%
+    { limit: 1_000_000_00, rate: 2000 }, // 750,001 - 1,000,000 = 20%
+    { limit: 2_000_000_00, rate: 2500 }, // 1,000,001 - 2,000,000 = 25%
+    { limit: 5_000_000_00, rate: 3000 }, // 2,000,001 - 5,000,000 = 30%
+    { limit: Infinity, rate: 3500 }, // > 5,000,000 = 35%
   ];
 
   let previousLimit = 0;
@@ -47,7 +47,7 @@ export function calculatePND1(annualIncome: number): number {
     if (taxableIncome <= previousLimit) break;
     const taxableInBracket = Math.min(taxableIncome, bracket.limit) - previousLimit;
     // Multiply before divide - use basis points math (divide by 10000)
-    tax += Math.round(taxableInBracket * bracket.rate / 10000);
+    tax += Math.round((taxableInBracket * bracket.rate) / 10000);
     previousLimit = bracket.limit;
   }
 

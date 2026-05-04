@@ -449,8 +449,7 @@ export async function updateSalesOrder(id: string, data: SalesOrderUpdateInput):
   }
 
   // Build update data
-  const updateData: any = {
-  };
+  const updateData: any = {};
 
   if (data.orderDate) updateData.orderDate = data.orderDate;
   if (data.customerId) updateData.customerId = data.customerId;

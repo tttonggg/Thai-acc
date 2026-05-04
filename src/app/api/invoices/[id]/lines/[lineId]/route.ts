@@ -2,7 +2,14 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { invoiceLineEditSchema } from '@/lib/validations';
 import { headers } from 'next/headers';
-import { requireAuth, apiResponse, notFoundError, unauthorizedError, apiError, forbiddenError } from '@/lib/api-utils';
+import {
+  requireAuth,
+  apiResponse,
+  notFoundError,
+  unauthorizedError,
+  apiError,
+  forbiddenError,
+} from '@/lib/api-utils';
 
 // GET /api/invoices/[id]/lines/[lineId] - Get single line item with audit history
 export async function GET(

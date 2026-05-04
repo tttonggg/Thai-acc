@@ -2,7 +2,13 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { z } from 'zod';
 import { updateInvoiceCommentSchema } from '@/lib/validations';
-import { requireAuth, apiResponse, notFoundError, unauthorizedError, apiError } from '@/lib/api-utils';
+import {
+  requireAuth,
+  apiResponse,
+  notFoundError,
+  unauthorizedError,
+  apiError,
+} from '@/lib/api-utils';
 
 // PUT /api/invoices/[id]/comments/[commentId] - Update comment
 export async function PUT(
@@ -132,30 +138,30 @@ export async function PUT(
 
       // Notify parent comment author if this is a reply
       if (comment.parentId) {
-          const parentComment = await tx.invoiceComment.findUnique({
-            where: { id: comment.parentId },
-            select: { userId: true },
+        const parentComment = await tx.invoiceComment.findUnique({
+          where: { id: comment.parentId },
+          select: { userId: true },
+        });
+
+        if (parentComment && parentComment.userId !== user.id) {
+          // Check if notification already exists
+          const existingNotification = await tx.commentNotification.findFirst({
+            where: {
+              userId: parentComment.userId,
+              commentId: commentId,
+              type: 'RESOLVED',
+            },
           });
 
-          if (parentComment && parentComment.userId !== user.id) {
-            // Check if notification already exists
-            const existingNotification = await tx.commentNotification.findFirst({
-              where: {
+          if (!existingNotification) {
+            await tx.commentNotification.create({
+              data: {
                 userId: parentComment.userId,
                 commentId: commentId,
+                invoiceId: id,
                 type: 'RESOLVED',
               },
             });
-
-            if (!existingNotification) {
-              await tx.commentNotification.create({
-                data: {
-                  userId: parentComment.userId,
-                  commentId: commentId,
-                  invoiceId: id,
-                  type: 'RESOLVED',
-                },
-              });
           }
         }
       }

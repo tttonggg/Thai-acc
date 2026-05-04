@@ -364,7 +364,10 @@ export function CreditNoteForm({ open, onClose, onSuccess, creditNoteId }: Credi
           <DialogDescription>สร้างใบลดหนี้สำหรับลูกค้าเพื่อลดหนี้จากใบกำกับภาษี</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={(values) => form.handleSubmit(onSubmit as any)(values as any)} className="space-y-6">
+        <form
+          onSubmit={(values) => form.handleSubmit(onSubmit as any)(values as any)}
+          className="space-y-6"
+        >
           {/* Header Section */}
           <Card>
             <CardHeader>

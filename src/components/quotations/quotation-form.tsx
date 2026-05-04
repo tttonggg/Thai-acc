@@ -290,7 +290,10 @@ export function QuotationForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => onSubmit(data as any, 'draft'))} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit((data) => onSubmit(data as any, 'draft'))}
+        className="space-y-6"
+      >
         {/* Header */}
         <Card>
           <CardHeader>

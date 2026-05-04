@@ -22,7 +22,7 @@ export function InvoicePagination({ pagination, onPageChange }: InvoicePaginatio
   if (totalPages <= 1) return null;
 
   const pages: (number | '...')[] = [];
-  
+
   if (totalPages <= 7) {
     for (let i = 1; i <= totalPages; i++) {
       pages.push(i);
@@ -30,14 +30,14 @@ export function InvoicePagination({ pagination, onPageChange }: InvoicePaginatio
   } else {
     pages.push(1);
     if (page > 3) pages.push('...');
-    
+
     const start = Math.max(2, page - 1);
     const end = Math.min(totalPages - 1, page + 1);
-    
+
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }
-    
+
     if (page < totalPages - 2) pages.push('...');
     pages.push(totalPages);
   }

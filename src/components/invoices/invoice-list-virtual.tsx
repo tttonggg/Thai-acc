@@ -212,7 +212,10 @@ export function InvoiceListVirtual({
         maxHeight={600}
         selectable
         selectedIds={selectedIds}
-        onSelect={(ids) => { if (Array.isArray(ids)) ids.forEach(id => toggleSelection(id)); else toggleSelection(ids); }}
+        onSelect={(ids) => {
+          if (Array.isArray(ids)) ids.forEach((id) => toggleSelection(id));
+          else toggleSelection(ids);
+        }}
         onRowClick={onView}
         emptyMessage="ไม่พบใบกำกับภาษี"
       />

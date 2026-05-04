@@ -2,15 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import {
-  Eye,
-  Edit,
-  Printer,
-  Download,
-  Loader2,
-  Send,
-  MessageSquare,
-} from 'lucide-react';
+import { Eye, Edit, Printer, Download, Loader2, Send, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { InvoiceEditDialog } from '@/components/invoices/invoice-edit-dialog';
@@ -183,7 +175,7 @@ export function InvoiceTable({
                   }}
                 >
                   <div
-                    className="grid grid-cols-12 items-center gap-2 border-t border-slate-700/50 px-4 py-2 transition-colors hover:bg-slate-800/30 cursor-pointer"
+                    className="grid cursor-pointer grid-cols-12 items-center gap-2 border-t border-slate-700/50 px-4 py-2 transition-colors hover:bg-slate-800/30"
                     onClick={() => onViewDetail(invoice.id)}
                   >
                     {/* เลขที่ */}
@@ -206,16 +198,14 @@ export function InvoiceTable({
                     </div>
 
                     {/* ลูกค้า */}
-                    <div className="col-span-2 text-sm text-slate-200 truncate">
+                    <div className="col-span-2 truncate text-sm text-slate-200">
                       {invoice.customerName}
                     </div>
 
                     {/* ยอดค้างรับ */}
                     <div className="col-span-1 text-right">
                       <span
-                        className={
-                          outstanding > 0 ? 'font-semibold text-red-400' : 'text-teal-400'
-                        }
+                        className={outstanding > 0 ? 'font-semibold text-red-400' : 'text-teal-400'}
                       >
                         ฿
                         {outstanding.toLocaleString('th-TH', {

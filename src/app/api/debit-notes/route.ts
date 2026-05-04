@@ -265,7 +265,9 @@ export async function POST(request: NextRequest) {
           debitNoteNo,
           debitNoteDate: validatedData.debitNoteDate,
           vendorId: validatedData.vendorId,
-          purchaseInvoice: validatedData.purchaseInvoiceId ? { connect: { id: validatedData.purchaseInvoiceId } } : undefined,
+          purchaseInvoice: validatedData.purchaseInvoiceId
+            ? { connect: { id: validatedData.purchaseInvoiceId } }
+            : undefined,
           reason: validatedData.reason,
           subtotal: bahtToSatang(validatedData.subtotal),
           vatRate: validatedData.vatRate,

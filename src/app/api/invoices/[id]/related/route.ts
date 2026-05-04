@@ -1,7 +1,14 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { relatedDocumentSchema } from '@/lib/validations';
-import { apiResponse, notFoundError, apiError, unauthorizedError, forbiddenError, requireAuth } from '@/lib/api-utils';
+import {
+  apiResponse,
+  notFoundError,
+  apiError,
+  unauthorizedError,
+  forbiddenError,
+  requireAuth,
+} from '@/lib/api-utils';
 
 interface RelatedDocumentDetails {
   id: string;

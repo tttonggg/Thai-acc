@@ -351,13 +351,13 @@ export function Dashboard({
     fetchDashboard();
 
     return () => {
-      eventBus.off(EVENTS.INVOICE_CREATED, handleChange)
-      eventBus.off(EVENTS.INVOICE_UPDATED, handleChange)
-      eventBus.off(EVENTS.INVOICE_DELETED, handleChange)
-      eventBus.off(EVENTS.RECEIPT_CREATED, handleChange)
-      eventBus.off(EVENTS.RECEIPT_UPDATED, handleChange)
-    }
-  }, [])
+      eventBus.off(EVENTS.INVOICE_CREATED, handleChange);
+      eventBus.off(EVENTS.INVOICE_UPDATED, handleChange);
+      eventBus.off(EVENTS.INVOICE_DELETED, handleChange);
+      eventBus.off(EVENTS.RECEIPT_CREATED, handleChange);
+      eventBus.off(EVENTS.RECEIPT_UPDATED, handleChange);
+    };
+  }, []);
 
   // Fetch module statistics
   useEffect(() => {

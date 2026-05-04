@@ -122,7 +122,13 @@ export async function DELETE(request: NextRequest) {
       action: 'DELETE',
       entityType: 'EmployeeRole',
       entityId: id,
-      beforeState: current ? { employeeId: current.employeeId, departmentId: current.departmentId, roleId: current.roleId } : null,
+      beforeState: current
+        ? {
+            employeeId: current.employeeId,
+            departmentId: current.departmentId,
+            roleId: current.roleId,
+          }
+        : null,
       afterState: null,
       ipAddress,
       userAgent,

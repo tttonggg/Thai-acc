@@ -29,11 +29,7 @@ export async function POST(request: NextRequest) {
     await requirePermission('admin', 'manage');
 
     const body = await request.json();
-    const {
-      documentType,
-      approvalOrder,
-      roleId,
-    } = body;
+    const { documentType, approvalOrder, roleId } = body;
 
     if (!documentType || !approvalOrder || !roleId) {
       return NextResponse.json(

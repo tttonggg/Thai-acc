@@ -198,9 +198,13 @@ async function createInvoiceFromRecurring(
     data: {
       invoiceNo,
       invoiceDate: now,
-      dueDate: templateInvoice.dueDate && templateInvoice.invoiceDate
-        ? new Date(now.getTime() + (templateInvoice.dueDate.getTime() - templateInvoice.invoiceDate.getTime()))
-        : undefined,
+      dueDate:
+        templateInvoice.dueDate && templateInvoice.invoiceDate
+          ? new Date(
+              now.getTime() +
+                (templateInvoice.dueDate.getTime() - templateInvoice.invoiceDate.getTime())
+            )
+          : undefined,
       customerId: templateInvoice.customerId,
       type: 'TAX_INVOICE',
       reference: `Recurring: ${recurring.title} (${recurring.id})`,
@@ -280,9 +284,13 @@ async function createExpenseFromRecurring(
     data: {
       invoiceNo,
       invoiceDate: now,
-      dueDate: templateExpense.dueDate && templateExpense.invoiceDate
-        ? new Date(now.getTime() + (templateExpense.dueDate.getTime() - templateExpense.invoiceDate.getTime()))
-        : undefined,
+      dueDate:
+        templateExpense.dueDate && templateExpense.invoiceDate
+          ? new Date(
+              now.getTime() +
+                (templateExpense.dueDate.getTime() - templateExpense.invoiceDate.getTime())
+            )
+          : undefined,
       vendorId: templateExpense.vendorId,
       reference: `Recurring: ${recurring.title} (${recurring.id})`,
       subtotal: templateExpense.subtotal,

@@ -2,9 +2,9 @@ import { db } from '@/lib/db';
 
 // Account codes for payment GL posting
 const PAYMENT_ACCOUNT_CODES = {
-  AP: '2110',           // เจ้าหนี้การค้า
-  CASH: '1110',         // เงินสด
-  BANK_PREFIX: '112',   // เงินฝากธนาคาร (prefix match)
+  AP: '2110', // เจ้าหนี้การค้า
+  CASH: '1110', // เงินสด
+  BANK_PREFIX: '112', // เงินฝากธนาคาร (prefix match)
   WHT_RECEIVABLE: '2130', // ภาษีหัก ณ ที่จ่าย
 } as const;
 

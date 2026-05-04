@@ -75,9 +75,9 @@ export async function recordStockMovement(params: {
           productId,
           warehouseId,
           batchDate: new Date(),
-          quantity,                    // remaining quantity in this batch
-          unitCost: unitCostSatang,    // Satang
-          totalCost: totalCostSatang,  // Satang
+          quantity, // remaining quantity in this batch
+          unitCost: unitCostSatang, // Satang
+          totalCost: totalCostSatang, // Satang
           referenceId: params.referenceId,
           referenceNo: params.referenceNo,
           notes: params.notes,
@@ -132,7 +132,11 @@ export async function recordStockMovement(params: {
         unitCost: Math.round(newUnitCost),
         totalCost: Math.round(newTotalCost),
       },
-      update: { quantity: newQty, unitCost: Math.round(newUnitCost), totalCost: Math.round(newTotalCost) },
+      update: {
+        quantity: newQty,
+        unitCost: Math.round(newUnitCost),
+        totalCost: Math.round(newTotalCost),
+      },
     });
 
     // StockMovement schema fields: date, type, quantity, unitCost, totalCost

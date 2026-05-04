@@ -308,16 +308,18 @@ export function EnhancedSidebar({
       <UserPreferencesDialog
         isOpen={showPreferences}
         onClose={() => setShowPreferences(false)}
-        preferences={{
-          theme: 'system',
-          density: 'normal',
-          language: 'th',
-          pageSize: 25,
-          dateFormat: 'DD/MM/YYYY',
-          currencyFormat: 'THB',
-          emailNotifications: true,
-          pushNotifications: true,
-        } as any}
+        preferences={
+          {
+            theme: 'system',
+            density: 'normal',
+            language: 'th',
+            pageSize: 25,
+            dateFormat: 'DD/MM/YYYY',
+            currencyFormat: 'THB',
+            emailNotifications: true,
+            pushNotifications: true,
+          } as any
+        }
         onSave={() => setShowPreferences(false)}
       />
 

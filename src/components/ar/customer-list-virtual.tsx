@@ -277,7 +277,11 @@ export function CustomerListVirtual({
         maxHeight={600}
         selectable
         selectedIds={selectedIds}
-        onSelect={(ids) => { const safeIds = Array.isArray(ids) ? ids : [ids]; selectedIdsRef.current = safeIds; toggleSelection(safeIds[0]); }}
+        onSelect={(ids) => {
+          const safeIds = Array.isArray(ids) ? ids : [ids];
+          selectedIdsRef.current = safeIds;
+          toggleSelection(safeIds[0]);
+        }}
         onRowClick={onView}
         emptyMessage="ไม่พบลูกค้า"
       />

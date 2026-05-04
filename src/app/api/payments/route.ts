@@ -294,4 +294,3 @@ export async function POST(request: Request) {
 }
 
 // Account codes for payment GL posting
-
