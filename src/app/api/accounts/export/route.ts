@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': `attachment; filename="chart-of-accounts-${new Date().toISOString().split('T')[0]}.csv"`,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       {
         error: 'Failed to export accounts',

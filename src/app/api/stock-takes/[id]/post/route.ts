@@ -210,7 +210,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       data: updated,
       journalEntry,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error.name === 'AuthError') {
       return unauthorizedError();
     }

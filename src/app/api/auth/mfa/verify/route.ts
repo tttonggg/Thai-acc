@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         backupCodes,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('MFA verify error:', error);
     return Response.json(
       {

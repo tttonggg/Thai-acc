@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     await requireAuth();
     // ThreeWayMatch model does not exist in schema - return empty result
     return NextResponse.json({ success: true, data: [], message: 'ThreeWayMatch not available' });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, data: null, message: 'Error fetching variance report' }, { status: 500 });
   }
 }

@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
     });
 
     return apiResponse({ budgets, year });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching budgets:', error);
     return errorResponse('Failed to fetch budgets', 500);
   }
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
     );
 
     return apiResponse({ budget });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating/updating budget:', error);
     if (error instanceof z.ZodError) {
       return errorResponse(error.issues[0].message, 400);

@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
     };
 
     return NextResponse.json({ success: true, data: settings });
-  } catch (error) {
+  } catch (error: unknown) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(
@@ -172,7 +172,7 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, message: 'บันทึกตั้งค่าเรียบร้อยแล้ว' });
-  } catch (error) {
+  } catch (error: unknown) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(

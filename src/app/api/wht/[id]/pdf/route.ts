@@ -196,9 +196,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         'Content-Length': pdfBuffer.length.toString(),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     return NextResponse.json(
-      { success: false, error: 'ไม่สามารถสร้าง PDF ได้: ' + error.message },
+      { success: false, error: 'ไม่สามารถสร้าง PDF ได้: ' + (err?.message ?? String(error)) },
       { status: 500 }
     );
   }

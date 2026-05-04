@@ -16,7 +16,7 @@ export async function GET(
 
     const balances = await getEmployeeBalances(employeeId, year);
     return NextResponse.json({ success: true, data: balances });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

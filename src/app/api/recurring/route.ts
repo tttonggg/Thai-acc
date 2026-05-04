@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(result.total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error?.message?.includes('Unauthorized')) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     } as any);
 
     return NextResponse.json({ success: true, data: recurring }, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },

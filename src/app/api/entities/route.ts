@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
     });
 
     return apiResponse({ entities });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching entities:', error);
     return errorResponse('Failed to fetch entities', 500);
   }
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
     });
 
     return apiResponse({ entity });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating entity:', error);
     if (error instanceof z.ZodError) {
       return errorResponse(error.issues[0].message, 400);

@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({ success: true, data: createdInvoice });
-  } catch (error) {
+  } catch (error: unknown) {
     // Log failed creation attempt
     if (error.name !== 'ZodError') {
       const user = await requireAuth().catch(() => null);
@@ -320,7 +320,7 @@ export async function PUT(request: NextRequest) {
     );
 
     return NextResponse.json({ success: true, data: afterInvoice });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Invoice update error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการอัปเดต' },
@@ -376,7 +376,7 @@ export async function DELETE(request: NextRequest) {
     );
 
     return NextResponse.json({ success: true, data: afterInvoice });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Invoice delete error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบ' },

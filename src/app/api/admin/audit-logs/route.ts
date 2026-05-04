@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
         offset: filters.offset,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Audit logs query error:', error);
     return Response.json({ success: false, error: 'Failed to fetch audit logs' }, { status: 500 });
   }
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       success: true,
       data: result,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Audit integrity check error:', error);
     return Response.json(
       { success: false, error: 'Failed to verify audit integrity' },

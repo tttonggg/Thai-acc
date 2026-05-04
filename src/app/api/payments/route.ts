@@ -125,7 +125,7 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
@@ -280,7 +280,7 @@ export async function POST(request: Request) {
     };
 
     return apiResponse(paymentInBaht, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }

@@ -55,8 +55,9 @@ export async function GET(req: NextRequest) {
         fiscalYearStart: company.fiscalYearStart,
       },
     });
-  } catch (error) {
-    if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
+  } catch (error: unknown) {
+    const err = error as { name?: string; statusCode?: number; message?: string };
+    if (error instanceof AuthError || err?.name === 'AuthError' || err?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
@@ -128,15 +129,15 @@ export async function PUT(req: NextRequest) {
         logo: updated.logo,
       },
     });
-  } catch (error) {
-    // Check for auth errors first
-    if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
+  } catch (error: unknown) {
+    const err = error as { name?: string; statusCode?: number; message?: string };
+    if (error instanceof AuthError || err?.name === 'AuthError' || err?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
       );
     }
-    if (error?.statusCode === 403) {
+    if (err?.statusCode === 403) {
       return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
     console.error('Error updating company:', error);

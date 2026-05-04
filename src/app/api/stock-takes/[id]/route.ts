@@ -58,7 +58,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 
     return apiResponse(stockTake);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error.name === 'AuthError') {
       return unauthorizedError();
     }
@@ -179,7 +179,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     });
 
     return apiResponse(stockTake);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error.name === 'AuthError') {
       return unauthorizedError();
     }
@@ -227,7 +227,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       message: 'ยกเลิกการตรวจนับสต็อกสำเร็จ',
       stockTake,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error.name === 'AuthError') {
       return unauthorizedError();
     }

@@ -18,7 +18,7 @@ export async function DELETE(
 
     const result = await cancelLeave(id, employeeId);
     return NextResponse.json({ success: true, data: result });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
 }

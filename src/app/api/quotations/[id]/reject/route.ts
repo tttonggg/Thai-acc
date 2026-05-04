@@ -85,7 +85,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: updatedQuotation,
       message: 'ปฏิเสธใบเสนอราคาเรียบร้อยแล้ว',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Quotation Reject Error:', error);
 
     if (error instanceof z.ZodError) {

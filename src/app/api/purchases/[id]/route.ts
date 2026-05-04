@@ -53,7 +53,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return apiResponse(purchase);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }
@@ -159,7 +159,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return apiResponse(purchase);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
@@ -220,7 +220,7 @@ export async function DELETE(
     ]);
 
     return apiResponse({ message: 'ลบใบซื้อสำเร็จ' });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }

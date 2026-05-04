@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: voucher });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
@@ -173,7 +173,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         message: 'อัปเดตใบเบิกเงินสดย่อยสำเร็จ',
       });
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการอัปเดตใบเบิกเงินสดย่อย' },
       { status: 500 }
@@ -233,7 +233,7 @@ export async function DELETE(
       data: deletedVoucher,
       message: 'ลบใบเบิกเงินสดย่อยสำเร็จ',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบใบเบิกเงินสดย่อย' },
       { status: 500 }

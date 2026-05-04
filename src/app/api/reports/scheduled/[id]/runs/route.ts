@@ -40,7 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching run history:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch run history' },

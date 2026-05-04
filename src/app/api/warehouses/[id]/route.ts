@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: warehouse });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลคลังสินค้า' },
       { status: 500 }
@@ -77,7 +77,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({ success: true, data: warehouse });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถอัปเดตข้อมูลคลังสินค้าได้' },
       { status: 500 }
@@ -114,7 +114,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบคลังสินค้าเรียบร้อยแล้ว' });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถลบคลังสินค้าได้' },
       { status: 500 }

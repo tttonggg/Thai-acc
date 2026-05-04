@@ -38,7 +38,8 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json({ success: true, data: result });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ success: false, error: err?.message ?? String(error) }, { status: 500 });
   }
 }

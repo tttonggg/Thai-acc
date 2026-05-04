@@ -237,7 +237,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         endDate,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Audit log fetch error:', error);
 
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {

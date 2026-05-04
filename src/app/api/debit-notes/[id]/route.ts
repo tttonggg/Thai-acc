@@ -37,8 +37,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return apiResponse(debitNote);
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    if (err instanceof Error && err.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
     return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลใบเพิ่มหนี้');
@@ -88,8 +89,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return apiResponse(updated);
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    if (err instanceof Error && err.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
     return apiError('เกิดข้อผิดพลาดในการแก้ไขใบเพิ่มหนี้');
@@ -138,8 +140,9 @@ export async function DELETE(
     });
 
     return apiResponse({ message: 'ลบใบเพิ่มหนี้เรียบร้อยแล้ว' });
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    if (err instanceof Error && err.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
     return apiError('เกิดข้อผิดพลาดในการลบใบเพิ่มหนี้');

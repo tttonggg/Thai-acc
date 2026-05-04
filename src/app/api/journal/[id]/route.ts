@@ -54,7 +54,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: entry });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
@@ -122,7 +122,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({ success: true, data: entry });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
@@ -165,7 +165,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบรายการสำเร็จ' });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบ' },
       { status: 500 }

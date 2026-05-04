@@ -26,8 +26,9 @@ export async function POST(request: NextRequest) {
         unmatched: result.unmatched.length,
       },
     });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ success: false, error: err?.message ?? String(error) }, { status: 500 });
   }
 }
 
@@ -53,7 +54,8 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ success: false, error: err?.message ?? String(error) }, { status: 500 });
   }
 }

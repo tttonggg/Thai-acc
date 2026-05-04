@@ -17,8 +17,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: account });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ success: false, error: err?.message ?? String(error) }, { status: 500 });
   }
 }
 
@@ -72,8 +73,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     });
 
     return NextResponse.json({ success: true, data: account });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ success: false, error: err?.message ?? String(error) }, { status: 500 });
   }
 }
 
@@ -117,7 +119,8 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบบัญชีธนาคารสำเร็จ' });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ success: false, error: err?.message ?? String(error) }, { status: 500 });
   }
 }

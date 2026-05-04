@@ -226,7 +226,7 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': `attachment; filename="balance-sheet-${dateStr}.xlsx"`,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

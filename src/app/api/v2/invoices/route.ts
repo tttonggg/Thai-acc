@@ -259,7 +259,7 @@ export async function GET(req: NextRequest) {
         balance: (totals._sum.totalAmount || 0) - (totals._sum.paidAmount || 0),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching invoices (v2):', error);
     return NextResponse.json({ error: 'Failed to fetch invoices', version: 'v2' }, { status: 500 });
   }
@@ -394,7 +394,7 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating invoice (v2):', error);
     return NextResponse.json({ error: 'Failed to create invoice', version: 'v2' }, { status: 500 });
   }

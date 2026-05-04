@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       success: true,
       invoiceNo,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

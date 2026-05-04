@@ -16,7 +16,7 @@ export async function GET() {
     });
 
     return NextResponse.json({ success: true, data: employeeRoles });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error) {
       return NextResponse.json({ success: false, error: error.message }, { status: 403 });
     }
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: employeeRole }, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error) {
       return NextResponse.json({ success: false, error: error.message }, { status: 403 });
     }
@@ -94,7 +94,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: { id } });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error) {
       return NextResponse.json({ success: false, error: error.message }, { status: 403 });
     }

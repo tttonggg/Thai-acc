@@ -99,7 +99,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         count: commentsWithUsers.length,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
@@ -256,7 +256,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     };
 
     return apiResponse(commentWithUser);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }

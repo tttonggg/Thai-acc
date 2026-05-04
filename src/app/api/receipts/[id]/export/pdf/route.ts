@@ -47,7 +47,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         'Content-Type': 'text/html; charset=utf-8',
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error generating receipt PDF:', error);
     return NextResponse.json(
       {

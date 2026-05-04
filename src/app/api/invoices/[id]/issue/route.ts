@@ -265,7 +265,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     return apiResponse({ message: 'ออกใบกำกับภาษีสำเร็จ', invoice: result });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error issuing invoice:', error);
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();

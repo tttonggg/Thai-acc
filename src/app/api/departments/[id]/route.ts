@@ -82,7 +82,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: department,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Department Fetch Error:', error);
     return NextResponse.json(
       {
@@ -206,7 +206,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data: department,
       message: 'อัปเดตแผนกสำเร็จ',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Department Update Error:', error);
 
     if (error instanceof z.ZodError) {
@@ -290,7 +290,7 @@ export async function DELETE(
       success: true,
       message: 'ลบแผนกสำเร็จ',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Department Deletion Error:', error);
     return NextResponse.json(
       {

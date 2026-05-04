@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         otpauthUrl: result.otpauthUrl,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('MFA setup error:', error);
     return Response.json(
       {

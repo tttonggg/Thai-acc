@@ -73,7 +73,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       message: 'ยืนยันใบสั่งซื้อเรียบร้อยแล้ว',
       data: updated,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }

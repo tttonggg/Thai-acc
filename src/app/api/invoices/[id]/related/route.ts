@@ -240,7 +240,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         adjusts: validRelations.filter((r) => r.relationType === 'ADJUSTS').length,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
@@ -381,7 +381,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       message: 'เชื่อมโยงเอกสารสำเร็จ',
       relation: result,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
@@ -484,7 +484,7 @@ export async function DELETE(
     return apiResponse({
       message: 'ลบความสัมพันธ์เอกสารสำเร็จ',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }

@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: invoicesWithBalance,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching unpaid invoices:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },

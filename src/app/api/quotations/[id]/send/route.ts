@@ -93,7 +93,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: updatedQuotation,
       message: 'ส่งใบเสนอราคาเรียบร้อยแล้ว',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Quotation Send Error:', error);
     return NextResponse.json(
       {

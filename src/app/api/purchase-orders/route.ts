@@ -191,7 +191,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Purchase Orders Fetch Error:', error);
     return NextResponse.json(
       {
@@ -405,7 +405,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Purchase Order Creation Error:', error);
 
     if (error instanceof z.ZodError) {

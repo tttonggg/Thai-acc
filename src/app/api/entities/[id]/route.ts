@@ -42,7 +42,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     return apiResponse({ entity });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching entity:', error);
     return errorResponse('Failed to fetch entity', 500);
   }
@@ -79,7 +79,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     });
 
     return apiResponse({ entity });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating entity:', error);
     if (error instanceof z.ZodError) {
       return errorResponse(error.issues[0].message, 400);
@@ -122,7 +122,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     });
 
     return apiResponse({ message: 'Entity deleted' });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting entity:', error);
     return errorResponse('Failed to delete entity', 500);
   }

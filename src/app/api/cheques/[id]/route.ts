@@ -23,7 +23,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: cheque });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลเช็ค' },
       { status: 500 }
@@ -119,7 +119,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     });
 
     return NextResponse.json({ success: true, data: updatedCheque });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถอัปเดตสถานะเช็คได้' },
       { status: 500 }
@@ -156,7 +156,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบเช็คสำเร็จ' });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: 'ไม่สามารถลบเช็คได้' }, { status: 500 });
   }
 }

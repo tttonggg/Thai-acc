@@ -15,10 +15,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: revaluations,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     console.error('Get revaluations error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
+      { success: false, error: err?.message ?? 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
     );
   }

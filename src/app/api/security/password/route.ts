@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
       try {
         validatePasswordStrength(newPassword);
-      } catch (error) {
+      } catch (error: unknown) {
         return NextResponse.json(
           { success: false, error: error instanceof Error ? error.message : 'Invalid password' },
           { status: 400 }
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Password API error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },

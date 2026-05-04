@@ -30,7 +30,7 @@ export async function GET(
         summary,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error.message },
       { status: error.message.includes('ไม่พบ') ? 404 : 500 }

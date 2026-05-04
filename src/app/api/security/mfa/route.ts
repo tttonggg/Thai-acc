@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('MFA API error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('MFA status error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },

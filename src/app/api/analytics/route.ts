@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
       success: true,
       data: dashboard,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching analytics:', error);
     return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
   }

@@ -115,7 +115,7 @@ export async function GET() {
         role: userRole,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to fetch permissions:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch permissions' },

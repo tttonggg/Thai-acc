@@ -43,7 +43,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: user });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
@@ -129,15 +129,16 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({ success: true, data: user });
-  } catch (error) {
-    if (error.name === 'ZodError') {
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
+        { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.issues },
         { status: 400 }
       );
     }
+    const message = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการอัปเดต';
     return NextResponse.json(
-      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการอัปเดต' },
+      { success: false, error: message },
       { status: 500 }
     );
   }
@@ -190,9 +191,10 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบผู้ใช้สำเร็จ' });
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการลบ';
     return NextResponse.json(
-      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบ' },
+      { success: false, error: message },
       { status: 500 }
     );
   }

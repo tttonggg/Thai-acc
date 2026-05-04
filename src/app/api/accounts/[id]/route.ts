@@ -51,7 +51,7 @@ export async function DELETE(
     });
 
     return apiResponse({ message: 'ลบบัญชีสำเร็จ' });
-  } catch (error) {
+  } catch (error: unknown) {
     return apiError('เกิดข้อผิดพลาดในการลบบัญชี', 500);
   }
 }
@@ -90,7 +90,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       isActive: account.isActive,
       notes: account.notes,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return apiError('เกิดข้อผิดพลาดในการอัปเดตบัญชี', 500);
   }
 }

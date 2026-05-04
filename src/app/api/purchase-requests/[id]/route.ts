@@ -142,7 +142,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: pr,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Purchase Request Fetch Error:', error);
     return NextResponse.json(
       {
@@ -240,7 +240,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data: pr,
       message: 'อัปเดตใบขอซื้อสำเร็จ',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Purchase Request Update Error:', error);
 
     if (error instanceof z.ZodError) {
@@ -319,7 +319,7 @@ export async function DELETE(
       success: true,
       message: 'ลบใบขอซื้อสำเร็จ',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Purchase Request Deletion Error:', error);
     return NextResponse.json(
       {
@@ -447,7 +447,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       success: true,
       message: `ดำเนินการสำเร็จ`,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Purchase Request Approval Error:', error);
 
     if (error instanceof z.ZodError) {

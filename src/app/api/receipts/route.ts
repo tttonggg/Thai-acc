@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching receipts:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
@@ -312,7 +312,7 @@ export async function POST(request: NextRequest) {
     };
 
     return NextResponse.json({ success: true, data: receiptInBaht });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating receipt:', error.message);
     if (error.name === 'ZodError') {
       return NextResponse.json(

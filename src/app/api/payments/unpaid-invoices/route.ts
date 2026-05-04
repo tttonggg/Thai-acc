@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       totalAPBalance,
       vendorId,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }

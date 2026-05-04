@@ -216,7 +216,7 @@ export async function POST(request: NextRequest) {
       entryNo: journalEntry.entryNo,
       data: journalEntry,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

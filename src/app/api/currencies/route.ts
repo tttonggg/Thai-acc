@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     });
 
     return apiResponse({ currencies });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching currencies:', error);
     return errorResponse('Failed to fetch currencies', 500);
   }
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
     });
 
     return apiResponse({ currency });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating/updating currency:', error);
     if (error instanceof z.ZodError) {
       return errorResponse(error.issues[0].message, 400);

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     await requireAuth();
     const types = await getLeaveTypes();
     return NextResponse.json({ success: true, data: types });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

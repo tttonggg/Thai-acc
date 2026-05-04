@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
       orderBy: { code: 'asc' },
     });
     return NextResponse.json({ success: true, data: warehouses });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return handleApiError(error);
   }
 }
 
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: warehouse }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return handleApiError(error);
   }
 }

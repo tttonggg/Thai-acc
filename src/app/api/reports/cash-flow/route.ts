@@ -241,7 +241,7 @@ export async function GET(request: NextRequest) {
       period: { startDate: start.toISOString(), endDate: end.toISOString() },
       data,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error.name === 'AuthError') {
       return NextResponse.json(
         { success: false, error: error.message || 'กรุณาเข้าสู่ระบบ' },

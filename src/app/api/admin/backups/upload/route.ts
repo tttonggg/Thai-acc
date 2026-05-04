@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
         createdAt: new Date().toISOString(),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Upload backup error:', error);
     return NextResponse.json({ success: false, error: 'ไม่สามารถอัปโหลดไฟล์ได้' }, { status: 500 });
   }

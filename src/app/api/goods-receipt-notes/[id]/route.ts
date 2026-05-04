@@ -87,7 +87,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return apiResponse({ ...grn, vendor, warehouse });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }
@@ -206,7 +206,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     ]);
 
     return apiResponse({ ...updatedGRN, vendor, warehouse });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }
@@ -327,7 +327,7 @@ export async function DELETE(
     });
 
     return apiResponse({ success: true, message: 'ยกเลิกใบรับสินค้าเรียบร้อยแล้ว' });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }

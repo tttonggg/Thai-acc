@@ -180,7 +180,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       message: 'ยกเลิกใบกำกับภาษีเรียบร้อยแล้ว',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error voiding invoice:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการยกเลิกใบกำกับภาษี' },

@@ -133,7 +133,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: result,
       message: 'เติมเงินสดย่อยสำเร็จ',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการเติมเงินสดย่อย' },
       { status: 500 }

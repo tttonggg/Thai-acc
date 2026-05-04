@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Check for auth errors first
     if (
       error instanceof AuthError ||
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     });
 
     return apiResponse(vendor, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     // Check for auth errors first
     if (
       error instanceof AuthError ||

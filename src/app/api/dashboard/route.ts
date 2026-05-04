@@ -226,7 +226,7 @@ export async function GET(request: NextRequest) {
     performanceMonitor.endRequest(reqStartTime, '/api/dashboard', 'GET', 200);
     response.headers.set('X-Response-Time', `${Date.now() - startTime}ms`);
     return response;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Dashboard API error:', error);
     console.error('Stack:', error?.stack);
 

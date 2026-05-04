@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
     });
 
     return apiResponse({ taxForms });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching tax forms:', error);
     return errorResponse('Failed to fetch tax forms', 500);
   }
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
     }
 
     return errorResponse('Invalid request', 400);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error processing tax form:', error);
     if (error instanceof z.ZodError) {
       return errorResponse(error.issues[0].message, 400);

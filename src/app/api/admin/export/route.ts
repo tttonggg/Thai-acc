@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
         'Content-Disposition': `attachment; filename="thai-erp-export-${new Date().toISOString().split('T')[0]}.csv"`,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Export error:', error);
     return NextResponse.json(
       {

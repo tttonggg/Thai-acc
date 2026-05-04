@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       success: true,
       data: formattedWebhooks,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching webhooks:', error);
     return NextResponse.json({ error: 'Failed to fetch webhooks' }, { status: 500 });
   }
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
         createdAt: webhook.createdAt,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating webhook:', error);
     return NextResponse.json({ error: 'Failed to create webhook' }, { status: 500 });
   }

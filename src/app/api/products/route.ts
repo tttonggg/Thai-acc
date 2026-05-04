@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: products });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Products API error:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: product }, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating product:', error);
 
     // Handle Prisma unique constraint error

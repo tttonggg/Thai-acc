@@ -46,20 +46,21 @@ export async function GET(request: NextRequest) {
       limit,
       offset,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { name?: string; statusCode?: number; message?: string };
     console.error('Import history error:', error);
 
     // Check for auth errors first
     if (
       error instanceof AuthError ||
-      error?.name === 'AuthError' ||
-      error?.statusCode === 401 ||
-      error.message?.includes('Unauthorized')
+      err?.name === 'AuthError' ||
+      err?.statusCode === 401 ||
+      err?.message?.includes('Unauthorized')
     ) {
       return NextResponse.json({ success: false, error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
     }
 
-    if (error?.statusCode === 403 || error.message?.includes('Forbidden')) {
+    if (err?.statusCode === 403 || err?.message?.includes('Forbidden')) {
       return NextResponse.json(
         { success: false, error: 'ไม่มีสิทธิ์เข้าถึง (ต้องการสิทธิ์ผู้ดูแลระบบ)' },
         { status: 403 }
@@ -251,7 +252,7 @@ function validateData(
     }
 
     return { valid: true, errors: [], data: validatedData };
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       error.issues.forEach((err) => {
         errors.push(`${err.path.join('.')}: ${err.message}`);
@@ -395,16 +396,17 @@ async function importData(
               data,
             });
           }
-        } catch (error) {
+        } catch (error: unknown) {
+          const err = error as { message?: string };
           result.errors++;
           result.errorDetails.push({
             row: i + 1,
-            error: error.message || 'เกิดข้อผิดพลาด',
+            error: err?.message || 'เกิดข้อผิดพลาด',
             data: record,
           });
           result.preview?.push({
             action: 'error',
-            error: error.message || 'เกิดข้อผิดพลาด',
+            error: err?.message || 'เกิดข้อผิดพลาด',
           });
 
           // Re-throw to rollback transaction
@@ -412,11 +414,12 @@ async function importData(
         }
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     result.success = false;
     result.errorDetails.push({
       row: 0,
-      error: `การนำเข้าข้อมูลล้มเหลว: ${error.message}`,
+      error: `การนำเข้าข้อมูลล้มเหลว: ${err?.message ?? String(error)}`,
     });
   }
 
@@ -576,7 +579,7 @@ export async function POST(request: NextRequest) {
               action: existing ? 'update' : 'create',
               data: validation.data,
             });
-          } catch (error) {
+          } catch (error: unknown) {
             preview.push({
               action: 'error',
               error: 'ไม่สามารถตรวจสอบข้อมูลได้',
@@ -627,7 +630,8 @@ export async function POST(request: NextRequest) {
       errorDetails: result.errorDetails.slice(0, 50),
       importId: importRecord?.id,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { name?: string; statusCode?: number; message?: string };
     console.error('Import error:', error);
 
     // Update import record with error
@@ -637,7 +641,7 @@ export async function POST(request: NextRequest) {
           where: { id: importRecord.id },
           data: {
             status: 'FAILED',
-            errorMessage: error.message || 'เกิดข้อผิดพลาด',
+            errorMessage: err?.message || 'เกิดข้อผิดพลาด',
           },
         });
       } catch (updateError) {
@@ -648,14 +652,14 @@ export async function POST(request: NextRequest) {
     // Check for auth errors first
     if (
       error instanceof AuthError ||
-      error?.name === 'AuthError' ||
-      error?.statusCode === 401 ||
-      error.message?.includes('Unauthorized')
+      err?.name === 'AuthError' ||
+      err?.statusCode === 401 ||
+      err?.message?.includes('Unauthorized')
     ) {
       return NextResponse.json({ success: false, error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
     }
 
-    if (error?.statusCode === 403 || error.message?.includes('Forbidden')) {
+    if (err?.statusCode === 403 || err?.message?.includes('Forbidden')) {
       return NextResponse.json(
         { success: false, error: 'ไม่มีสิทธิ์เข้าถึง (ต้องการสิทธิ์ผู้ดูแลระบบ)' },
         { status: 403 }
@@ -665,7 +669,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล',
+        error: err?.message || 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล',
       },
       { status: 500 }
     );

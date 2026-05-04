@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         processingResult: result,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error?.message?.includes('Unauthorized')) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         })),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error?.message?.includes('Unauthorized')) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },

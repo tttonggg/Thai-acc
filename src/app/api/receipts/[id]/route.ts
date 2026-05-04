@@ -95,7 +95,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         })),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching receipt:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
@@ -195,7 +195,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     ]);
 
     return NextResponse.json({ success: true, data: receipt });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating receipt:', error);
     if (error.name === 'ZodError') {
       return NextResponse.json(
@@ -248,7 +248,7 @@ export async function DELETE(
     ]);
 
     return NextResponse.json({ success: true, message: 'ลบใบเสร็จรับเงินเรียบร้อยแล้ว' });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting receipt:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบใบเสร็จรับเงิน' },

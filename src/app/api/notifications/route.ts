@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       notifications,
       unreadCount: notifications.filter((n) => !n.isRead).length,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching notifications:', error);
     return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
   }
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, notification });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating notification:', error);
     return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
   }
@@ -79,7 +79,7 @@ export async function DELETE(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error clearing notifications:', error);
     return NextResponse.json({ error: 'Failed to clear notifications' }, { status: 500 });
   }

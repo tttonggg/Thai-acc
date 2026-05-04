@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
         })),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Bank statement import error:', error);
     return NextResponse.json(
       {

@@ -78,18 +78,19 @@ export async function GET(req: NextRequest) {
       default:
         return NextResponse.json({ error: 'Invalid analytics type' }, { status: 400 });
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { statusCode?: number; message?: string };
     console.error('Error fetching analytics:', error);
 
     // Check for auth errors first
-    if (error?.statusCode === 401) {
+    if (err?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
       );
     }
 
-    if (error?.statusCode === 403) {
+    if (err?.statusCode === 403) {
       return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
 

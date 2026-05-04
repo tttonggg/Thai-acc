@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     });
 
     return apiResponse({ periods });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching periods:', error);
     return errorResponse('Failed to fetch periods', 500);
   }
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
       default:
         return errorResponse('Invalid action', 400);
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error processing period action:', error);
     if (error instanceof z.ZodError) {
       return errorResponse(error.issues[0].message, 400);

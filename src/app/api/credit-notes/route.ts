@@ -168,14 +168,14 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(validCreditNotes.length / limit),
       },
     });
-  } catch (error) {
-    console.error('Credit Notes API Error:', error);
-    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+  } catch (error: unknown) {
+    const err = error as { message?: string; name?: string };
+    if (err instanceof Error && err.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
-    if (error instanceof Error) {
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
+    if (err instanceof Error) {
+      console.error('Error message:', err.message);
+      console.error('Error stack:', err.stack);
     }
     return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลใบลดหนี้');
   }
@@ -401,8 +401,12 @@ export async function POST(request: NextRequest) {
     };
 
     return apiResponse({ success: true, data: creditNoteInBaht }, 201);
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { message?: string; name?: string };
     console.error('Credit Note Creation Error:', error);
+    if (err instanceof Error && err.message.includes('ไม่ได้รับอนุญาต')) {
+      return unauthorizedError();
+    }
     return unauthorizedError();
   }
 }

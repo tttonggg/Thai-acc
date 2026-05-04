@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: attachments,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching document attachments:', error);
     return NextResponse.json(
       {
@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: attachment,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating document attachment:', error);
     return NextResponse.json(
       {

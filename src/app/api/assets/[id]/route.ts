@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         ...nbv,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลสินทรัพย์' },
       { status: 500 }
@@ -190,7 +190,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         ...nbv,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถอัปเดตข้อมูลสินทรัพย์ได้' },
       { status: 500 }
@@ -255,7 +255,7 @@ export async function DELETE(
       success: true,
       message: 'ลบสินทรัพย์สำเร็จ',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: 'ไม่สามารถลบสินทรัพย์ได้' }, { status: 500 });
   }
 }

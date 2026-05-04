@@ -40,15 +40,16 @@ export async function GET(request: NextRequest) {
       data: records,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Check for auth errors first
-    if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
+    const err = error as { name?: string; statusCode?: number; message?: string };
+    if (error instanceof AuthError || err?.name === 'AuthError' || err?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
       );
     }
     console.error('WHT API error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: err?.message ?? 'Unknown error' }, { status: 500 });
   }
 }

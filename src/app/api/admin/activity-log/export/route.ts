@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': `attachment; filename="activity-logs-${new Date().toISOString().split('T')[0]}.csv"`,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error exporting activity logs:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการส่งออกข้อมูล' },

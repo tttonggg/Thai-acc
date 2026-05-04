@@ -181,7 +181,7 @@ export async function GET(request: NextRequest) {
       },
       accounts,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

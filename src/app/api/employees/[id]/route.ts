@@ -19,7 +19,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: employee });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูลพนักงาน' },
       { status: 500 }
@@ -82,7 +82,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     });
 
     return NextResponse.json({ success: true, data: updated });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถอัปเดตข้อมูลพนักงานได้' },
       { status: 500 }
@@ -126,7 +126,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบพนักงานสำเร็จ' });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: 'ไม่สามารถลบพนักงานได้' }, { status: 500 });
   }
 }

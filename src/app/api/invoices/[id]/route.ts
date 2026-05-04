@@ -50,7 +50,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     };
 
     return apiResponse(invoiceInBaht);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }
@@ -133,7 +133,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     return apiError('ไม่รองรับ action ที่ร้องขอ', 400);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }
@@ -194,7 +194,7 @@ export async function DELETE(
     ]);
 
     return apiResponse({ message: 'ลบใบกำกับภาษีเรียบร้อยแล้ว' });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('unauthorized')) {
       return unauthorizedError();
     }

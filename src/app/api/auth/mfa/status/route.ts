@@ -28,7 +28,7 @@ export async function GET() {
         verifiedAt: user?.mfaVerifiedAt,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('MFA status error:', error);
     return Response.json({ success: false, error: 'Failed to get MFA status' }, { status: 500 });
   }

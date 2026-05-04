@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     const valuation = await getInventoryValuation(warehouseId);
     return NextResponse.json({ success: true, data: valuation });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

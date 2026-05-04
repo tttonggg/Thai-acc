@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }
@@ -249,7 +249,7 @@ export async function POST(request: NextRequest) {
     });
 
     return apiResponse({ success: true, data: completeStockTake }, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }

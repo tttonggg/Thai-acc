@@ -393,7 +393,7 @@ export async function POST(request: NextRequest) {
         vendors: vendorsImported,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Provide user-friendly error messages
     if (error instanceof z.ZodError) {
       return NextResponse.json(

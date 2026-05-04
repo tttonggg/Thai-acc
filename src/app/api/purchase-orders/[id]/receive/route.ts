@@ -196,7 +196,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       message: allReceived ? 'รับสินค้าครบถ้วนเรียบร้อยแล้ว' : 'รับสินค้าบางส่วนเรียบร้อยแล้ว',
       data: result,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }

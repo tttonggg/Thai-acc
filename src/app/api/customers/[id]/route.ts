@@ -44,8 +44,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return apiResponse(customer);
-  } catch (error) {
-    if (error instanceof AuthError) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    if (err instanceof Error && err.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
     return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลลูกค้า');
@@ -90,11 +91,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return apiResponse(customer);
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+  } catch (error: unknown) {
+    const err = error as { message?: string; name?: string };
+    if (err instanceof Error && err.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
-    if (error instanceof Error && error.name === 'ZodError') {
+    if (err instanceof Error && err.name === 'ZodError') {
       return apiError('ข้อมูลไม่ถูกต้อง');
     }
     return apiError('เกิดข้อผิดพลาดในการแก้ไขลูกค้า');
@@ -137,8 +139,9 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     });
 
     return apiResponse({ message: 'ลบลูกค้าสำเร็จ' });
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    if (err instanceof Error && err.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
     return apiError('เกิดข้อผิดพลาดในการลบลูกค้า');

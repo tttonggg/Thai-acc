@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         secret: undefined, // Don't expose secret
       })),
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Webhooks GET error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Webhooks POST error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -212,7 +212,7 @@ export async function PUT(request: NextRequest) {
         secret: undefined,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Webhooks PUT error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -251,7 +251,7 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'Webhook deleted',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Webhooks DELETE error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },

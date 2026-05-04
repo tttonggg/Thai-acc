@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(validDebitNotes.length / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Debit Notes API Error:', error);
     if (
       error instanceof AuthError ||
@@ -425,7 +425,7 @@ export async function POST(request: NextRequest) {
     };
 
     return apiResponse({ success: true, data: debitNoteInBaht }, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Debit Note Creation Error:', error);
     if (
       error instanceof AuthError ||

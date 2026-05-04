@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     const result = await checkPeriodStatus(new Date(date));
     return apiResponse(result);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error checking period:', error);
     if (error instanceof z.ZodError) {
       return errorResponse(error.issues[0].message, 400);

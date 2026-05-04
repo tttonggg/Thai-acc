@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       try {
         await prisma.$queryRaw`SELECT 1`;
         dbStatus = 'healthy';
-      } catch (error) {
+      } catch (error: unknown) {
         dbStatus = 'error';
       }
     }
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
           percentage: (usedBytes / totalBytes) * 100,
         };
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // Fallback values if df command fails
       diskUsage = {
         free: 50 * 1024 * 1024 * 1024,
@@ -206,15 +206,16 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     console.error('Health check API error:', error);
 
     // Handle auth errors
-    if (error.message?.includes('Unauthorized') || error.message?.includes('401')) {
+    if (err?.message?.includes('Unauthorized') || err?.message?.includes('401')) {
       return NextResponse.json({ success: false, error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
     }
 
-    if (error.message?.includes('Forbidden') || error.message?.includes('403')) {
+    if (err?.message?.includes('Forbidden') || err?.message?.includes('403')) {
       return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
 

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: product });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching product:', error);
     return NextResponse.json(
       { success: false, error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
@@ -121,7 +121,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({ success: true, data: product });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating product:', error);
 
     // Handle Prisma unique constraint error
@@ -181,7 +181,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true, message: 'ลบสินค้าเรียบร้อยแล้ว' });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting product:', error);
 
     // Handle foreign key constraint error

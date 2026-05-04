@@ -80,7 +80,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return apiResponse(payment);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }
@@ -212,7 +212,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return apiResponse(payment);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }
@@ -260,7 +260,7 @@ export async function DELETE(
     });
 
     return apiResponse({ success: true, message: 'ลบใบจ่ายเงินเรียบร้อยแล้ว' });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }
@@ -341,7 +341,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     });
 
     return apiResponse(updatedPayment);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AuthError) {
       return unauthorizedError();
     }

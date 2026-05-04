@@ -99,20 +99,21 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { name?: string; statusCode?: number; message?: string; errors?: any };
     // Check for auth errors first
-    if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
+    if (error instanceof AuthError || err?.name === 'AuthError' || err?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
       );
     }
-    if (error?.statusCode === 403) {
+    if (err?.statusCode === 403) {
       return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
-    if (error.name === 'ZodError') {
+    if (err?.name === 'ZodError') {
       return NextResponse.json(
-        { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
+        { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: err.errors },
         { status: 400 }
       );
     }
@@ -160,15 +161,16 @@ export async function POST(request: NextRequest) {
       success: true,
       data: log,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { name?: string; statusCode?: number; message?: string };
     // Check for auth errors first
-    if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
+    if (error instanceof AuthError || err?.name === 'AuthError' || err?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
       );
     }
-    if (error?.statusCode === 403) {
+    if (err?.statusCode === 403) {
       return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
     console.error('Error creating activity log:', error);

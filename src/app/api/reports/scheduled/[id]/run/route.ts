@@ -85,7 +85,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         { status: 500 }
       );
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error running scheduled report:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to run scheduled report' },

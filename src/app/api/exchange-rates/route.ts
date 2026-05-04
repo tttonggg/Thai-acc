@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     });
 
     return apiResponse({ rates });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching exchange rates:', error);
     return errorResponse('Failed to fetch exchange rates', 500);
   }
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     );
 
     return apiResponse({ rate });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating exchange rate:', error);
     if (error instanceof z.ZodError) {
       return errorResponse(error.issues[0].message, 400);

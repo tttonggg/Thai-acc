@@ -37,7 +37,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
         'Content-Length': fileBuffer.length.toString(),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Download backup error:', error);
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถดาวน์โหลดไฟล์ได้' },

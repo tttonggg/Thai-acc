@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: reportData,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(

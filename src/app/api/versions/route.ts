@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
         },
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching API versions:', error);
     return NextResponse.json({ error: 'Failed to fetch API versions' }, { status: 500 });
   }

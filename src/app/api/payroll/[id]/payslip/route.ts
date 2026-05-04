@@ -85,7 +85,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         'Content-Length': pdfBuffer.byteLength.toString(),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error.message || 'ไม่สามารถสร้างสลิปเงินเดือนได้' },
       { status: 500 }

@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
         totalPages: Math.ceil(total / params.limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching invoices (v1):', error);
     return NextResponse.json({ error: 'Failed to fetch invoices', version: 'v1' }, { status: 500 });
   }
@@ -190,7 +190,7 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating invoice (v1):', error);
     return NextResponse.json({ error: 'Failed to create invoice', version: 'v1' }, { status: 500 });
   }

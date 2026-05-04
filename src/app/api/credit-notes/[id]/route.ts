@@ -57,8 +57,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     };
 
     return apiResponse(creditNoteInBaht);
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+  } catch (error: unknown) {
+    const err = error as { message?: string; name?: string };
+    if (err instanceof Error && err.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
     return apiError('เกิดข้อผิดพลาดในการดึงข้อมูลใบลดหนี้');
@@ -108,8 +109,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return apiResponse(updated);
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+  } catch (error: unknown) {
+    const err = error as { message?: string; name?: string };
+    if (err instanceof Error && err.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
     return apiError('เกิดข้อผิดพลาดในการแก้ไขใบลดหนี้');
@@ -158,8 +160,9 @@ export async function DELETE(
     });
 
     return apiResponse({ message: 'ลบใบลดหนี้เรียบร้อยแล้ว' });
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
+  } catch (error: unknown) {
+    const err = error as { message?: string; name?: string };
+    if (err instanceof Error && err.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
     return apiError('เกิดข้อผิดพลาดในการลบใบลดหนี้');

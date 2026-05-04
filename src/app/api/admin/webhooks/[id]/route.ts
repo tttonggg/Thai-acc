@@ -57,7 +57,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         })),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching webhook:', error);
     return NextResponse.json({ error: 'Failed to fetch webhook' }, { status: 500 });
   }
@@ -103,7 +103,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         updatedAt: webhook.updatedAt,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating webhook:', error);
     return NextResponse.json({ error: 'Failed to update webhook' }, { status: 500 });
   }
@@ -124,7 +124,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       success: true,
       message: 'Webhook deleted successfully',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting webhook:', error);
     return NextResponse.json({ error: 'Failed to delete webhook' }, { status: 500 });
   }

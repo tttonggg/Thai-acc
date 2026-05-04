@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': `attachment; filename="income-statement-${startStr}-to-${endStr}.xlsx"`,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

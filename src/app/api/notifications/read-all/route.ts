@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error marking all notifications as read:', error);
     return NextResponse.json(
       { error: 'Failed to mark all notifications as read' },

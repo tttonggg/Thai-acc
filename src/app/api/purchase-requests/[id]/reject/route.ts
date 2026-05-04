@@ -135,7 +135,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       message: 'ปฏิเสธใบขอซื้อเรียบร้อยแล้ว',
       data: updated,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return apiError(error.issues[0].message, 400);
     }

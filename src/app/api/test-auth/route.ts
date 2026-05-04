@@ -26,13 +26,16 @@ export async function GET(request: NextRequest) {
         stockTakeCount,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Test API Error:', error);
+    const err = error instanceof Error ? error : new Error(String(error));
+    const message = err.message;
+    const stack = err.stack;
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Unknown error',
-        stack: error.stack,
+        error: message,
+        stack,
       },
       { status: 500 }
     );

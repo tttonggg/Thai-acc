@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     const history = await getEmployeeLeaveHistory(employeeId, year);
     return NextResponse.json({ success: true, data: history });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: leaveRequest }, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
 }

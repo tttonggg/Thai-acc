@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       orderBy: [{ periodYear: 'desc' }, { periodMonth: 'desc' }],
     });
     return NextResponse.json({ success: true, data: runs });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: payrollRun }, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

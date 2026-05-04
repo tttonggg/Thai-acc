@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': `attachment; filename="thai-erp-backup-${new Date().toISOString().split('T')[0]}.json"`,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       {
         error: 'Failed to export data',

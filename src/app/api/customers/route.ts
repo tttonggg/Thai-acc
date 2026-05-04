@@ -81,9 +81,9 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
-    // Check for auth errors first
-    if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
+  } catch (error: unknown) {
+    const err = error as { name?: string; statusCode?: number; message?: string };
+    if (error instanceof AuthError || err?.name === 'AuthError' || err?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
@@ -126,23 +126,23 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: customer });
-  } catch (error) {
-    // Check for auth errors first
-    if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
+  } catch (error: unknown) {
+    const err = error as { name?: string; statusCode?: number; message?: string };
+    if (error instanceof AuthError || err?.name === 'AuthError' || err?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
       );
     }
-    if (error.name === 'ZodError') {
+    if (err?.name === 'ZodError') {
       return NextResponse.json(
-        { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
+        { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: err?.message },
         { status: 400 }
       );
     }
     console.error('Create customer error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการสร้างลูกค้า' },
+      { success: false, error: err?.message ?? 'เกิดข้อผิดพลาดในการสร้างลูกค้า' },
       { status: 500 }
     );
   }

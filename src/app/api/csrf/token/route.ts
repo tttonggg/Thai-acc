@@ -25,10 +25,10 @@ export async function GET(request: NextRequest) {
       success: true,
       data: { token },
     });
-  } catch (error) {
-    // Auth errors should return 401, not 500
-    if (error?.message?.includes('ไม่ได้รับอนุญาต') || error?.message?.includes('Unauthorized')) {
-      console.warn('CSRF token request - unauthenticated:', error.message);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    if (err?.message?.includes('ไม่ได้รับอนุญาต') || err?.message?.includes('Unauthorized')) {
+      console.warn('CSRF token request - unauthenticated:', err?.message);
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }

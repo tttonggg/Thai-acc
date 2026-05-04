@@ -149,7 +149,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: reversalEntry,
       message: 'ยกเลิกบันทึกบัญชีเรียบร้อยแล้ว',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error reversing journal entry:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการยกเลิกบันทึกบัญชี' },

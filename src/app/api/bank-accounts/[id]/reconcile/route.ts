@@ -166,8 +166,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         },
       },
     });
-  } catch (error) {
-    if (error.name === 'ZodError') {
+  } catch (error: unknown) {
+    const err = error as { name?: string; message?: string };
+    if (err?.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'รูปแบบข้อมูลไม่ถูกต้อง' },
         { status: 400 }
@@ -175,7 +176,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     return NextResponse.json(
-      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการกระทบยอด' },
+      { success: false, error: err?.message ?? 'เกิดข้อผิดพลาดในการกระทบยอด' },
       { status: 500 }
     );
   }
@@ -237,7 +238,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         reconciliationHistory,
       },
     });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ success: false, error: err?.message ?? String(error) }, { status: 500 });
   }
 }

@@ -35,15 +35,15 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(users);
-  } catch (error) {
+  } catch (error: unknown) {
     // Check for auth errors first
-    if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
+    if (error instanceof AuthError || (error as { name?: string }).name === 'AuthError' || (error as { statusCode?: number }).statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
       );
     }
-    if (error?.statusCode === 403) {
+    if ((error as { statusCode?: number }).statusCode === 403) {
       return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
     console.error('Users API error:', error);
@@ -101,26 +101,26 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(user);
-  } catch (error) {
+  } catch (error: unknown) {
     // Check for auth errors first
-    if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
+    if (error instanceof AuthError || (error as { name?: string }).name === 'AuthError' || (error as { statusCode?: number }).statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
       );
     }
-    if (error?.statusCode === 403) {
+    if ((error as { statusCode?: number }).statusCode === 403) {
       return NextResponse.json({ success: false, error: 'ไม่มีสิทธิ์เข้าถึง' }, { status: 403 });
     }
-    if (error.name === 'ZodError') {
+    if ((error as { name?: string }).name === 'ZodError') {
       return NextResponse.json(
-        { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
+        { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: (error as { errors?: unknown }).errors },
         { status: 400 }
       );
     }
     console.error('Create user error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการสร้างผู้ใช้' },
+      { success: false, error: (error as { message?: string }).message || 'เกิดข้อผิดพลาดในการสร้างผู้ใช้' },
       { status: 500 }
     );
   }

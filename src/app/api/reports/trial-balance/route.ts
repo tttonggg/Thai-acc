@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
         isBalanced: Math.abs(totalDebit - totalCredit) < 0.01,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       })),
       maxSessions: 3,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Sessions API error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -102,7 +102,7 @@ export async function DELETE(request: NextRequest) {
       { success: false, error: 'Session ID or all parameter required' },
       { status: 400 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Sessions delete error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Sessions post error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },

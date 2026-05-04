@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       data: reportsWithNextRun,
       count: reportsWithNextRun.length,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching scheduled reports:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch scheduled reports' },
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
         ),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating scheduled report:', error);
 
     if (error.name === 'ZodError') {

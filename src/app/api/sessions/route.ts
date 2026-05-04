@@ -30,7 +30,7 @@ export async function GET() {
       success: true,
       data: sessions,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Get sessions error:', error);
     return Response.json({ success: false, error: 'Failed to get sessions' }, { status: 500 });
   }
@@ -93,7 +93,7 @@ export async function DELETE(req: NextRequest) {
         count: invalidatedCount,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Delete sessions error:', error);
     return Response.json(
       { success: false, error: 'Failed to invalidate sessions' },

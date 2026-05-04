@@ -10,7 +10,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { id: employeeId } = await params;
     const contributions = await getEmployeeContributions(employeeId);
     return NextResponse.json({ success: true, data: contributions });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

@@ -41,7 +41,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: attachment,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching document attachment:', error);
     return NextResponse.json(
       {
@@ -116,7 +116,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       success: true,
       data: updated,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating document attachment:', error);
     return NextResponse.json(
       {
@@ -191,7 +191,7 @@ export async function DELETE(
     }
 
     return new NextResponse(null, { status: 204 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting document attachment:', error);
     return NextResponse.json(
       {

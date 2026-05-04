@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     try {
       await fs.copyFile(dbPath, preRestoreBackupPath);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Pre-restore backup failed:', error);
       // Continue with restore even if pre-restore backup fails
     }
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
         preRestoreBackup: preRestoreBackupFilename,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Restore error:', error);
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถคืนค่าข้อมูลได้' },

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: vouchers });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     ]);
 
     return NextResponse.json({ success: true, data: voucher }, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

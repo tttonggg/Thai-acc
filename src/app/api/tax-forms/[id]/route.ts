@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     return apiResponse({ taxForm });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching tax form:', error);
     return errorResponse('Failed to fetch tax form', 500);
   }
@@ -62,7 +62,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     });
 
     return apiResponse({ message: 'Tax form deleted' });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting tax form:', error);
     return errorResponse('Failed to delete tax form', 500);
   }

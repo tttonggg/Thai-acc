@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     await requireAuth();
     const funds = await listProvidentFunds();
     return NextResponse.json({ success: true, data: funds });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     const fund = await createProvidentFund({ name, employeeRate, employerRate, maxMonthly });
     return NextResponse.json({ success: true, data: fund }, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

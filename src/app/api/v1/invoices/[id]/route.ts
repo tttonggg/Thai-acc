@@ -52,7 +52,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       version: 'v1',
       data: invoice,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching invoice (v1):', error);
     return NextResponse.json({ error: 'Failed to fetch invoice', version: 'v1' }, { status: 500 });
   }
@@ -110,7 +110,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       version: 'v1',
       data: invoice,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating invoice (v1):', error);
     return NextResponse.json({ error: 'Failed to update invoice', version: 'v1' }, { status: 500 });
   }
@@ -151,7 +151,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       version: 'v1',
       message: 'Invoice deleted successfully',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting invoice (v1):', error);
     return NextResponse.json({ error: 'Failed to delete invoice', version: 'v1' }, { status: 500 });
   }

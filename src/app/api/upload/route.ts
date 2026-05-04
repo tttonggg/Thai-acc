@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
       type: file.type,
       extension: ext,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       {
         success: false,

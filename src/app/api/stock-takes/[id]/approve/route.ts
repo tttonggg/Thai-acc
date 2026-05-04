@@ -63,7 +63,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       message: 'อนุมัติการตรวจนับสต็อกสำเร็จ',
       data: updated,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error.name === 'AuthError') {
       return unauthorizedError();
     }

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       orderBy: { employeeCode: 'asc' },
     });
     return NextResponse.json({ success: true, data: employees });
-  } catch (error) {
+  } catch (error: unknown) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       },
     });
     return NextResponse.json({ success: true, data: employee }, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     // Check for auth errors first
     if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(

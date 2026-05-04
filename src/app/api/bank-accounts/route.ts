@@ -12,8 +12,9 @@ export async function GET(request: NextRequest) {
       orderBy: { code: 'asc' },
     });
     return NextResponse.json({ success: true, data: accounts });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ success: false, error: err?.message ?? String(error) }, { status: 500 });
   }
 }
 
@@ -42,7 +43,8 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: account }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    return NextResponse.json({ success: false, error: err?.message ?? String(error) }, { status: 500 });
   }
 }

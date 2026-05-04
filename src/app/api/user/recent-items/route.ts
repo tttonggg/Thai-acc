@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, items: recentItems });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching recent items:', error);
     return NextResponse.json({ error: 'Failed to fetch recent items' }, { status: 500 });
   }
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, item: recentItem });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error adding recent item:', error);
     return NextResponse.json({ error: 'Failed to add recent item' }, { status: 500 });
   }
@@ -78,7 +78,7 @@ export async function DELETE(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error clearing recent items:', error);
     return NextResponse.json({ error: 'Failed to clear recent items' }, { status: 500 });
   }

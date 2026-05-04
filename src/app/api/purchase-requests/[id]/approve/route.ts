@@ -188,7 +188,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       message: 'อนุมัติใบขอซื้อเรียบร้อยแล้ว',
       data: updated,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return apiError('ข้อมูลไม่ถูกต้อง: ' + error.issues.map((e) => e.message).join(', '), 400);
     }

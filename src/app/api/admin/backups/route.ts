@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
         databaseLocation: path.join(process.cwd(), 'prisma', 'dev.db'),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('List backups error:', error);
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถดึงรายการข้อมูลสำรองได้' },
@@ -124,7 +124,7 @@ export async function DELETE(req: NextRequest) {
       success: true,
       message: 'ลบข้อมูลสำรองเรียบร้อยแล้ว',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Delete backup error:', error);
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถลบข้อมูลสำรองได้' },

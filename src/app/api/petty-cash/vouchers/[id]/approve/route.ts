@@ -64,7 +64,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       message: 'อนุมัติใบเบิกเงินสดย่อยและบันทึกบัญชีสำเร็จ',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการอนุมัติใบเบิกเงินสดย่อย' },
       { status: 500 }

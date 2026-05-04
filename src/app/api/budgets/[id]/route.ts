@@ -34,7 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     return apiResponse({ budget });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching budget:', error);
     return errorResponse('Failed to fetch budget', 500);
   }
@@ -64,7 +64,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     });
 
     return apiResponse({ budget });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating budget:', error);
     if (error instanceof z.ZodError) {
       return errorResponse(error.issues[0].message, 400);
@@ -95,7 +95,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     });
 
     return apiResponse({ message: 'Budget deleted' });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting budget:', error);
     return errorResponse('Failed to delete budget', 500);
   }

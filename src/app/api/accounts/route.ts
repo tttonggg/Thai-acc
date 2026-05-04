@@ -32,7 +32,7 @@ export async function GET() {
     }));
 
     return NextResponse.json(transformedAccounts);
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       {
         error: 'Failed to fetch accounts',
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       isActive: account.isActive,
       notes: account.notes,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       {
         error: 'Failed to create account',

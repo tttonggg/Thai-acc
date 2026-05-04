@@ -172,7 +172,7 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('GR/IR Report error:', error);
     if (error?.name === 'AuthError' || error?.statusCode === 401) {
       return NextResponse.json(

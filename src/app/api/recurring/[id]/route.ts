@@ -39,7 +39,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const recurring = await getRecurringDocument(id);
 
     return NextResponse.json({ success: true, data: recurring });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof RecurringDocumentNotFoundError) {
       return NextResponse.json({ success: false, error: 'ไม่พบเอกสารที่เกิดซ้ำ' }, { status: 404 });
     }
@@ -87,7 +87,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const recurring = await updateRecurringDocument(id, validatedData as any);
 
     return NextResponse.json({ success: true, data: recurring });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { success: false, error: 'ข้อมูลไม่ถูกต้อง', details: error.errors },
@@ -144,7 +144,7 @@ export async function DELETE(
     await deleteRecurringDocument(id);
 
     return NextResponse.json({ success: true, message: 'ลบเอกสารที่เกิดซ้ำเรียบร้อยแล้ว' });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof RecurringDocumentNotFoundError) {
       return NextResponse.json({ success: false, error: 'ไม่พบเอกสารที่เกิดซ้ำ' }, { status: 404 });
     }

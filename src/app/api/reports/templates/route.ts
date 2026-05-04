@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: template,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: templates,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle auth errors
     if (error.name === 'AuthError') {
       return NextResponse.json(

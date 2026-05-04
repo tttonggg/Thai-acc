@@ -44,7 +44,7 @@ export async function GET() {
         events: w.events.split(','),
       })),
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('List webhooks error:', error);
     return Response.json({ success: false, error: 'Failed to fetch webhooks' }, { status: 500 });
   }
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Create webhook error:', error);
     return Response.json({ success: false, error: 'Failed to create webhook' }, { status: 500 });
   }

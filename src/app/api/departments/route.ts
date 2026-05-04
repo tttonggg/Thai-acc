@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: departments,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Departments Fetch Error:', error);
     return NextResponse.json(
       {
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Department Creation Error:', error);
 
     if (error instanceof z.ZodError) {

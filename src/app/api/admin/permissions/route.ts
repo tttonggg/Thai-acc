@@ -24,7 +24,7 @@ export async function GET() {
     );
 
     return NextResponse.json({ success: true, data: { permissions, grouped } });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error) {
       return NextResponse.json({ success: false, error: error.message }, { status: 403 });
     }

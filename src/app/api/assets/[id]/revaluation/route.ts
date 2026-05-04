@@ -51,10 +51,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       success: true,
       data: result,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     console.error('Revaluation error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'เกิดข้อผิดพลาดในการบันทึกการตีราคา' },
+      { success: false, error: err?.message ?? 'เกิดข้อผิดพลาดในการบันทึกการตีราคา' },
       { status: 500 }
     );
   }

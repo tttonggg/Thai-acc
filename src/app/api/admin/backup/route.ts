@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         timestamp: timestamp,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Backup creation error:', error);
     return NextResponse.json(
       { success: false, error: 'ไม่สามารถสร้างข้อมูลสำรองได้' },

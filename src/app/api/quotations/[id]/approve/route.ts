@@ -89,7 +89,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: updatedQuotation,
       message: 'อนุมัติใบเสนอราคาเรียบร้อยแล้ว',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Quotation Approve Error:', error);
     return NextResponse.json(
       {

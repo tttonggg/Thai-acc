@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: fund });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
@@ -115,7 +115,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data: updatedFund,
       message: 'อัปเดตกองทุนเงินสดย่อยสำเร็จ',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการอัปเดตกองทุนเงินสดย่อย' },
       { status: 500 }
@@ -176,7 +176,7 @@ export async function DELETE(
       success: true,
       message: 'ลบกองทุนเงินสดย่อยสำเร็จ',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลบกองทุนเงินสดย่อย' },
       { status: 500 }

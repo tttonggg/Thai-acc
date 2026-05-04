@@ -94,7 +94,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         'Content-Type': 'text/html; charset=utf-8',
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Invoice preview error:', error);
 
     if (error.name === 'AuthError') {

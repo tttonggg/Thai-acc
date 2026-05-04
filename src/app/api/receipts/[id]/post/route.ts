@@ -311,7 +311,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     );
 
     return NextResponse.json({ success: true, data: result });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error posting receipt:', error);
 
     const errorMessage = error.message || 'เกิดข้อผิดพลาดในการลงบัญชีใบเสร็จรับเงิน';

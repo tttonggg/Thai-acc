@@ -38,7 +38,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         'Content-Disposition': `attachment; filename="${filename}"`,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error exporting tax form:', error);
     return errorResponse('Failed to export tax form', 500);
   }

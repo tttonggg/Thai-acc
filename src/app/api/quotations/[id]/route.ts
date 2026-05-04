@@ -65,7 +65,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: quotation,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Quotation Fetch Error:', error);
     return NextResponse.json(
       {
@@ -172,7 +172,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data: updatedQuotation,
       message: 'แก้ไขใบเสนอราคาเรียบร้อยแล้ว',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Quotation Update Error:', error);
 
     if (error instanceof z.ZodError) {
@@ -244,7 +244,7 @@ export async function DELETE(
       success: true,
       message: 'ลบใบเสนอราคาเรียบร้อยแล้ว',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Quotation Delete Error:', error);
     return NextResponse.json(
       {

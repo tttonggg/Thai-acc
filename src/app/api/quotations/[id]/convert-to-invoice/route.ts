@@ -183,7 +183,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
       message: `แปลงใบเสนอราคาเป็นใบกำกับภาษีเรียบร้อยแล้ว (${result.invoice.invoiceNo})`,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Quotation Convert Error:', error);
     return NextResponse.json(
       {

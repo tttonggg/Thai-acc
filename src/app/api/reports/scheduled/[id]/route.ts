@@ -75,7 +75,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: report });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching scheduled report:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch scheduled report' },
@@ -125,7 +125,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({ success: true, data: report });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating scheduled report:', error);
 
     if (error.name === 'ZodError') {
@@ -172,7 +172,7 @@ export async function DELETE(
       success: true,
       message: 'Scheduled report deleted successfully',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting scheduled report:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete scheduled report' },

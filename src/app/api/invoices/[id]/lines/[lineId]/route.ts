@@ -50,7 +50,7 @@ export async function GET(
     }
 
     return apiResponse(line);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ไม่ได้รับอนุญาต')) {
       return unauthorizedError();
     }
@@ -340,7 +340,7 @@ export async function PUT(
     });
 
     return apiResponse(response);
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle specific errors
     if (error.message === 'LINE_NOT_FOUND') {
       return notFoundError('ไม่พบรายการสินค้า');
@@ -504,7 +504,7 @@ export async function DELETE(
     });
 
     return apiResponse({ message: 'ลบรายการสินค้าสำเร็จ' });
-  } catch (error) {
+  } catch (error: unknown) {
     // Handle specific errors
     if (error.message === 'LINE_NOT_FOUND') {
       return notFoundError('ไม่พบรายการสินค้า');

@@ -659,7 +659,7 @@ export async function GET(req: NextRequest) {
         'Content-Type': 'application/json',
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error serving OpenAPI spec:', error);
     return NextResponse.json({ error: 'Failed to load API documentation' }, { status: 500 });
   }
