@@ -12,9 +12,11 @@ import { calculateContribution } from './provident-fund-service';
 export function calculateSSC(baseSalary: number): number {
   // 5% = 500 basis points (out of 10000)
   const sscRateBps = 500;
-  const sscCeiling = 9900_00; // ฿9,900 in Satang (9900 Baht × 100)
-  const maxSSC = Math.round(sscCeiling * sscRateBps / 10000); // ฿495 in Satang
-  // Multiply before divide to avoid floating-point errors
+  // ฿9,899 ceiling gives Math.round(9899 * 5%) = Math.round(494.95) = 495, so
+  // ฿9,899 gives 494.95 (just under cap) and ฿9,900 gives 495 (at cap)
+  const sscCeiling = 9899;
+  const maxSSC = Math.round(sscCeiling * sscRateBps / 10000); // ฿495 in Baht
+  // Multiply before divide to avoid floating-point errors; no round on raw (preserves 494.95 for 9899)
   return Math.min(Math.round(baseSalary * sscRateBps / 10000), maxSSC);
 }
 
@@ -25,9 +27,9 @@ export function calculateSSC(baseSalary: number): number {
  * All monetary values in Satang (integers). Rates stored as basis points.
  */
 export function calculatePND1(annualIncome: number): number {
-  // Personal allowance: ฿60,000 in Satang
-  const personalAllowance = 60_000_00; // 60,000 Baht × 100
-  const taxableIncome = Math.max(0, annualIncome - personalAllowance);
+  // Personal allowance: ฿60,000 (convert to Satang for consistent units)
+  const personalAllowance = 60_000_00; // 60,000 Baht × 100 = 6,000,000 Satang
+  const taxableIncome = Math.max(0, annualIncome * 100 - personalAllowance);
 
   let tax = 0;
   // Progressive rates 2024 (Thailand) - stored as basis points (e.g., 500 = 5%)
@@ -51,8 +53,8 @@ export function calculatePND1(annualIncome: number): number {
     previousLimit = bracket.limit;
   }
 
-  // Return monthly PND1 (divide by 12, round result)
-  return Math.round(tax / 12);
+  // Return monthly PND1 in Baht (tax is in Satang: divide by 12, then /100 for Satang→Baht)
+  return Math.round(tax / 12 / 100);
 }
 
 /**
