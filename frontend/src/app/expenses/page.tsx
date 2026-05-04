@@ -6,6 +6,7 @@ import AppLayout from "@/components/AppLayout";
 import {
   usePurchaseOrders,
   usePurchaseInvoices,
+  usePaymentVouchers,
   useExpenseClaims,
 } from "@/hooks/useApi";
 import { formatCurrency, formatThaiDate } from "@/lib/utils";
@@ -14,6 +15,7 @@ import { Plus } from "lucide-react";
 const tabs = [
   { key: "purchase-orders", label: "ใบสั่งซื้อ" },
   { key: "purchase-invoices", label: "ใบแจ้งหนี้ซื้อ" },
+  { key: "payment-vouchers", label: "ใบสำคัญจ่าย" },
   { key: "expense-claims", label: "ใบเบิกค่าใช้จ่าย" },
 ];
 
@@ -60,6 +62,7 @@ export default function ExpensesPage() {
         {/* Tab Content */}
         {activeTab === "purchase-orders" && <PurchaseOrdersTab />}
         {activeTab === "purchase-invoices" && <PurchaseInvoicesTab />}
+        {activeTab === "payment-vouchers" && <PaymentVouchersTab />}
         {activeTab === "expense-claims" && <ExpenseClaimsTab />}
       </div>
     </AppLayout>
@@ -80,6 +83,7 @@ function StatusBadge({ status }: { status: string }) {
     rejected: "bg-red-50 text-red-700",
     submitted: "bg-blue-50 text-blue-700",
     active: "bg-green-50 text-green-700",
+    posted: "bg-green-50 text-green-700",
   };
   const labels: Record<string, string> = {
     draft: "ร่าง",
@@ -94,6 +98,7 @@ function StatusBadge({ status }: { status: string }) {
     rejected: "ปฏิเสธ",
     submitted: "ส่งอนุมัติ",
     active: "ใช้งาน",
+    posted: "บันทึกบัญชี",
   };
   return (
     <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-700"}`}>
@@ -177,6 +182,47 @@ function PurchaseInvoicesTab() {
                 <td className="px-6 py-4"><StatusBadge status={inv.status} /></td>
                 <td className="px-6 py-4 text-right text-sm font-medium text-gray-900">{formatCurrency(inv.total_amount)}</td>
                 <td className="px-6 py-4 text-right text-sm font-medium text-red-600">{formatCurrency(inv.total_amount - inv.paid_amount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+function PaymentVouchersTab() {
+  const { data: paymentVouchers, isLoading } = usePaymentVouchers();
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      {isLoading ? (
+        <div className="p-8 text-center text-gray-500">กำลังโหลด...</div>
+      ) : paymentVouchers?.length === 0 ? (
+        <div className="p-8 text-center text-gray-500">ยังไม่มีใบสำคัญจ่าย</div>
+      ) : (
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50/50">
+              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">เลขที่</th>
+              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">ผู้จำหน่าย</th>
+              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">วันที่จ่าย</th>
+              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">สถานะ</th>
+              <th className="text-right px-6 py-4 text-sm font-semibold text-gray-700">ยอดจ่าย</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paymentVouchers?.map((pv: any) => (
+              <tr key={pv.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                <td className="px-6 py-4">
+                  <Link href={`/expenses/payment-vouchers/${pv.id}`} className="font-medium text-peak-purple hover:underline">
+                    {pv.voucher_number}
+                  </Link>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900">{pv.contact?.name || "-"}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">{formatThaiDate(pv.payment_date)}</td>
+                <td className="px-6 py-4"><StatusBadge status={pv.status} /></td>
+                <td className="px-6 py-4 text-right text-sm font-medium text-gray-900">{formatCurrency(pv.total_amount)}</td>
               </tr>
             ))}
           </tbody>

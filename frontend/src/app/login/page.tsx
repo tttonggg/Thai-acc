@@ -30,8 +30,8 @@ export default function LoginPage() {
 
     try {
       const res = await authApi.login(email, password);
-      const { access_token, refresh_token, user } = res.data;
-      login(access_token, refresh_token, user);
+      const { access_token, user } = res.data;
+      login(access_token, user);
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.detail || "อีเมลหรือรหัสผ่านไม่ถูกต้อง");

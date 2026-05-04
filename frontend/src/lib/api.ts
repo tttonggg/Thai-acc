@@ -7,6 +7,7 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 // Add auth token to requests
@@ -38,14 +39,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (!refreshToken) {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        window.location.href = "/login";
-        return Promise.reject(error);
-      }
-
+      // Refresh token is stored in httpOnly cookie — no localStorage check needed
       if (isRefreshing) {
         // Wait for refresh to complete
         return new Promise((resolve) => {
@@ -60,12 +54,9 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await api.post("/auth/refresh", {
-          refresh_token: refreshToken,
-        });
-        const { access_token, refresh_token } = response.data;
+        const response = await api.post("/auth/refresh");
+        const { access_token } = response.data;
         localStorage.setItem("access_token", access_token);
-        localStorage.setItem("refresh_token", refresh_token);
         api.defaults.headers.common.Authorization = `Bearer ${access_token}`;
         onRefreshed(access_token);
         isRefreshing = false;
@@ -73,7 +64,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         isRefreshing = false;
         localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user_data");
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
@@ -95,8 +86,8 @@ export const authApi = {
     company_name: string;
     company_tax_id: string;
   }) => api.post("/auth/register", data),
-  refresh: (refreshToken: string) =>
-    api.post("/auth/refresh", { refresh_token: refreshToken }),
+  refresh: () => api.post("/auth/refresh"),
+  logout: () => api.post("/auth/logout"),
   changePassword: (data: { current_password: string; new_password: string }) =>
     api.post("/auth/change-password", data),
 };
@@ -228,6 +219,8 @@ export const accountingApi = {
     api.get("/accounting/reports/ar-aging", { params }),
   apAging: (params?: { as_of?: string }) =>
     api.get("/accounting/reports/ap-aging", { params }),
+  vatPP30: (params: { year: number; month: number }) =>
+    api.get("/accounting/reports/vat-pp30", { params }),
 };
 
 export const creditNoteApi = {
@@ -239,6 +232,17 @@ export const creditNoteApi = {
   confirm: (id: string) => api.post(`/credit-notes/${id}/confirm`),
   cancel: (id: string) => api.post(`/credit-notes/${id}/cancel`),
   delete: (id: string) => api.delete(`/credit-notes/${id}`),
+};
+
+export const paymentVoucherApi = {
+  list: (params?: { status?: string; contact_id?: string; from_date?: string; to_date?: string; search?: string }) =>
+    api.get("/payment-vouchers", { params }),
+  get: (id: string) => api.get(`/payment-vouchers/${id}`),
+  create: (data: any) => api.post("/payment-vouchers", data),
+  update: (id: string, data: any) => api.put(`/payment-vouchers/${id}`, data),
+  post: (id: string) => api.post(`/payment-vouchers/${id}/post`),
+  cancel: (id: string) => api.post(`/payment-vouchers/${id}/cancel`),
+  delete: (id: string) => api.delete(`/payment-vouchers/${id}`),
 };
 
 export const exchangeRateApi = {

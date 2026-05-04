@@ -17,6 +17,7 @@ import {
   stockAdjustmentApi,
   exchangeRateApi,
   creditNoteApi,
+  paymentVoucherApi,
 } from "@/lib/api";
 
 // Contacts
@@ -489,6 +490,14 @@ export function useAPAging(params?: { as_of?: string }) {
   });
 }
 
+export function useVATPP30(params: { year: number; month: number }) {
+  return useQuery({
+    queryKey: ["vat-pp30", params],
+    queryFn: () => accountingApi.vatPP30(params).then((res) => res.data),
+    enabled: !!params.year && !!params.month,
+  });
+}
+
 // Bank Accounts
 export function useBankAccounts(params?: { account_type?: string }) {
   return useQuery({
@@ -739,5 +748,72 @@ export function useDeleteCreditNote() {
   return useMutation({
     mutationFn: (id: string) => creditNoteApi.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["credit-notes"] }),
+  });
+}
+
+// Payment Vouchers
+export function usePaymentVouchers(
+  params?: { status?: string; contact_id?: string; from_date?: string; to_date?: string; search?: string }
+) {
+  return useQuery({
+    queryKey: ["payment-vouchers", params],
+    queryFn: () => paymentVoucherApi.list(params).then((res) => res.data),
+  });
+}
+
+export function usePaymentVoucher(id: string) {
+  return useQuery({
+    queryKey: ["payment-voucher", id],
+    queryFn: () => paymentVoucherApi.get(id).then((res) => res.data),
+    enabled: !!id,
+  });
+}
+
+export function useCreatePaymentVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: paymentVoucherApi.create,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["payment-vouchers"] }),
+  });
+}
+
+export function useUpdatePaymentVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => paymentVoucherApi.update(id, data),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["payment-vouchers"] });
+      queryClient.invalidateQueries({ queryKey: ["payment-voucher", vars.id] });
+    },
+  });
+}
+
+export function usePostPaymentVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => paymentVoucherApi.post(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["payment-vouchers"] });
+      queryClient.invalidateQueries({ queryKey: ["payment-voucher", id] });
+    },
+  });
+}
+
+export function useCancelPaymentVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => paymentVoucherApi.cancel(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["payment-vouchers"] });
+      queryClient.invalidateQueries({ queryKey: ["payment-voucher", id] });
+    },
+  });
+}
+
+export function useDeletePaymentVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => paymentVoucherApi.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["payment-vouchers"] }),
   });
 }

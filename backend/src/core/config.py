@@ -19,11 +19,12 @@ class Settings(BaseSettings):
     port: int = 8000
     
     # CORS
-    frontend_url: str = "http://localhost:3000"
+    frontend_url: str = "https://acc3.k56mm.uk"
     
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
 
 @lru_cache()

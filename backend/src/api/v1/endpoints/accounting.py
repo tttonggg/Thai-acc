@@ -10,6 +10,9 @@ from ....core.database import get_db
 from ....core.security import get_current_user
 from ....models.gl import ChartOfAccount, JournalEntry, JournalEntryLine
 from ....models.user import User
+from ....models.invoice import Invoice
+from ....models.purchase_invoice import PurchaseInvoice
+from ....models.contact import Contact
 
 router = APIRouter()
 
@@ -803,4 +806,142 @@ def ap_aging(
         grand_61_90=sum(i.days_61_90 for i in items),
         grand_over_90=sum(i.days_over_90 for i in items),
         grand_total=sum(i.total_outstanding for i in items),
+    )
+
+
+# ============================================================
+# P.P.30 VAT Report (ภ.พ.30)
+# ============================================================
+
+class VATPP30OutputVAT(BaseModel):
+    taxable_sales_amount: Decimal
+    output_vat_amount: Decimal
+    exempt_sales_amount: Decimal
+    non_taxable_sales_amount: Decimal
+    total_sales_amount: Decimal
+
+
+class VATPP30InputVAT(BaseModel):
+    taxable_purchases_amount: Decimal
+    input_vat_amount: Decimal
+    exempt_purchases_amount: Decimal
+
+
+class VATPP30Response(BaseModel):
+    year: int
+    month: int
+    period_label: str
+    output_vat: VATPP30OutputVAT
+    input_vat: VATPP30InputVAT
+    net_vat: Decimal
+    vat_payable: Decimal
+    vat_credit: Decimal
+
+    class Config:
+        from_attributes = True
+
+
+@router.get("/reports/vat-pp30", response_model=VATPP30Response)
+def vat_pp30(
+    year: int,  # Buddhist year
+    month: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Generate P.P.30 VAT report for a given month (Buddhist year)."""
+    if month < 1 or month > 12:
+        raise HTTPException(status_code=400, detail="Month must be between 1 and 12")
+
+    # Convert Buddhist year to Gregorian
+    gregorian_year = year - 543
+
+    # Calculate date range
+    from_date = date(gregorian_year, month, 1)
+    if month == 12:
+        to_date = date(gregorian_year + 1, 1, 1)
+    else:
+        to_date = date(gregorian_year, month + 1, 1)
+
+    # --- Output VAT (from invoices) ---
+    invoices = (
+        db.query(Invoice)
+        .filter(
+            Invoice.company_id == current_user.company_id,
+            Invoice.deleted_at.is_(None),
+            Invoice.status.in_(["sent", "paid", "partially_paid"]),
+            Invoice.issue_date >= from_date,
+            Invoice.issue_date < to_date,
+        )
+        .all()
+    )
+
+    taxable_sales_amount = Decimal("0")
+    output_vat_amount = Decimal("0")
+    exempt_sales_amount = Decimal("0")
+    non_taxable_sales_amount = Decimal("0")
+
+    for inv in invoices:
+        if inv.vat_rate > 0:
+            taxable_sales_amount += inv.subtotal or Decimal("0")
+            output_vat_amount += inv.vat_amount or Decimal("0")
+        else:
+            exempt_sales_amount += inv.subtotal or Decimal("0")
+
+    total_sales_amount = taxable_sales_amount + exempt_sales_amount + non_taxable_sales_amount
+
+    # --- Input VAT (from purchase invoices) ---
+    purchase_invoices = (
+        db.query(PurchaseInvoice)
+        .filter(
+            PurchaseInvoice.company_id == current_user.company_id,
+            PurchaseInvoice.deleted_at.is_(None),
+            PurchaseInvoice.status.in_(["received", "approved", "partially_paid", "paid"]),
+            PurchaseInvoice.bill_date >= from_date,
+            PurchaseInvoice.bill_date < to_date,
+        )
+        .all()
+    )
+
+    taxable_purchases_amount = Decimal("0")
+    input_vat_amount = Decimal("0")
+    exempt_purchases_amount = Decimal("0")
+
+    for inv in purchase_invoices:
+        if inv.vat_rate > 0:
+            taxable_purchases_amount += inv.subtotal or Decimal("0")
+            input_vat_amount += inv.vat_amount or Decimal("0")
+        else:
+            exempt_purchases_amount += inv.subtotal or Decimal("0")
+
+    # --- Net VAT ---
+    net_vat = output_vat_amount - input_vat_amount
+    vat_payable = max(Decimal("0"), net_vat)
+    vat_credit = max(Decimal("0"), -net_vat)
+
+    # Month labels in Thai
+    thai_months = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
+    ]
+    period_label = f"{thai_months[month - 1]} {year}"
+
+    return VATPP30Response(
+        year=year,
+        month=month,
+        period_label=period_label,
+        output_vat=VATPP30OutputVAT(
+            taxable_sales_amount=taxable_sales_amount,
+            output_vat_amount=output_vat_amount,
+            exempt_sales_amount=exempt_sales_amount,
+            non_taxable_sales_amount=non_taxable_sales_amount,
+            total_sales_amount=total_sales_amount,
+        ),
+        input_vat=VATPP30InputVAT(
+            taxable_purchases_amount=taxable_purchases_amount,
+            input_vat_amount=input_vat_amount,
+            exempt_purchases_amount=exempt_purchases_amount,
+        ),
+        net_vat=net_vat,
+        vat_payable=vat_payable,
+        vat_credit=vat_credit,
     )

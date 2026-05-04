@@ -1,6 +1,6 @@
 # Thai ACC — Development Status
 
-> **Last Updated:** 2026-05-03
+> **Last Updated:** 2026-05-04
 > **Version:** 0.3.0-alpha
 
 ---
@@ -33,6 +33,8 @@
 | **Stock Adjustments** | `models/stock_adjustment.py`, `api/v1/endpoints/stock_adjustments.py` | Initial/loss/damage/found/correction adjustments. Auto-update qty_on_hand. GL posting. Movement history |
 | **FIFO Costing** | `models/inventory_batch.py`, `services/gl_posting.py` | FIFO inventory batches from purchase invoices. COGS auto-calculation on invoice creation. FIFO layers API |
 | **Credit/Debit Notes** | `models/credit_note.py`, `api/v1/endpoints/credit_notes.py` | Sales credit notes (ลดหนี้) and debit notes (เพิ่มหนี้). Link to invoice. GL auto-posting + reversal on cancel |
+| **Payment Vouchers** | `models/payment_voucher.py`, `api/v1/endpoints/payment_vouchers.py` | AP payment recording (ใบสำคัญจ่าย). Multi-invoice lines. GL auto-posting: Dr. AP, Cr. Cash/Bank, Cr. WHT. Post/Cancel status flow |
+| **P.P.30 VAT Report** | `api/v1/endpoints/accounting.py` (extended) | Monthly VAT filing report (ภ.พ.30). Output VAT from invoices, input VAT from purchase invoices. Buddhist year input. Net VAT calculation |
 
 **Key Features:**
 - ✅ All endpoints filter by `company_id` (multi-tenant)
@@ -54,6 +56,7 @@
 | Page | Path | Features |
 |------|------|----------|
 | **Dashboard** | `/` | KPIs (sales, received, AR, overdue), project widget, recent activity |
+| **Landing Page** | `/home` | Dark navy hero, cyan accents, amber CTAs, JSON-LD schema, 10 FAQs, comparison table, pricing card |
 | **Contacts** | `/contacts` | List, search, type filter, credit limit display, **detail page with transaction history + summary cards**, edit form |
 | **Products** | `/products` | List, search, category filter, stock levels, **detail page with transaction history + summary cards**, edit form |
 | **Projects** | `/projects` | List with revenue/cost/profit columns, search, **detail page with financials panel + transaction history + budget progress**, edit form |
@@ -62,12 +65,12 @@
 | **Invoices** | Create, detail (with e-Tax panel), edit | Quotation conversion, due date, print support, e-Tax status |
 | **Receipts** | Create, detail | Payment form, WHT, invoice selector |
 | **Credit/Debit Notes** | List, create, detail | Type selector (credit/debit), invoice link, line items, confirm/cancel actions |
-| **Expenses** | `/expenses` | Tabbed: Purchase Orders, Purchase Invoices, Expense Claims |
+| **Expenses** | `/expenses` | Tabbed: Purchase Orders, Purchase Invoices, **Payment Vouchers**, Expense Claims |
 | **Accounting** | `/accounting` | Chart of Accounts, Journal Entries |
-| **Reports** | `/reports` | Trial Balance, Income Statement, Balance Sheet, AR Aging, AP Aging |
+| **Reports** | `/reports` | Trial Balance, Income Statement, Balance Sheet, AR Aging, AP Aging, **P.P.30 VAT Report** |
 | **Bank Accounts** | `/bank-accounts` | List, detail with reconciliation UI + statement import + auto-match |
 | **Settings** | `/settings` | Editable company profile, password change form |
-| **Login/Register** | `/login`, `/register` | Auth with JWT storage + automatic token refresh |
+| **Login/Register** | `/login`, `/register` | Auth with JWT storage + automatic token refresh (httpOnly cookie for refresh token) |
 
 **UI Features:**
 - ✅ PEAK-inspired purple→teal gradient branding
@@ -88,7 +91,7 @@
 - ✅ Exchange rate management API and auto-lookup
 - ✅ Automatic JWT token refresh via Axios interceptor
 
-### Database (9 Migrations)
+### Database (10 Migrations)
 
 | Migration | Tables / Changes |
 |-----------|-----------------|
@@ -101,8 +104,9 @@
 | `007` | companies.base_currency, exchange_rates, currency_code + exchange_rate on invoices/quotations/POs/PIs/receipts/claims |
 | `008` | inventory_batches (FIFO layers) |
 | `009` | credit_notes, credit_note_items |
+| `010` | payment_vouchers, payment_voucher_lines |
 
-### Tests (11 Test Files)
+### Tests (13 Test Files — 143 tests)
 
 | File | Coverage |
 |------|----------|
@@ -117,42 +121,52 @@
 | `test_bank_accounts.py` | CRUD, reconciliation, statement import (CSV), auto-match, unreconcile |
 | `test_e_tax.py` | XML generation, status flow, validation, RD spec compliance |
 | `test_credit_notes.py` | Create credit/debit notes, confirm/cancel, GL posting/reversal, company filtering |
+| `test_auth_cookies.py` | httpOnly refresh token cookie set/read/clear, httponly flag, SameSite |
+| `test_payment_vouchers.py` | Create, list, post/cancel, duplicate post guard, unpaid balance guard, delete draft, GL posting verification |
+| `test_vat_pp30.py` | Output/input VAT calculation, draft exclusion, month filtering, invalid month, VAT credit scenario |
+| `test_phase1_gaps.py` | Exchange rates, stock adjustments, FIFO layers, multi-currency invoices |
+
+### Deployment + Security + Agent-Native
+
+| Feature | Details |
+|---------|---------|
+| **HTTP → HTTPS** | nginx config ready with SSL directives (certbot pending on VPS) |
+| **CSP Header** | `Content-Security-Policy` with strict directives (self, unsafe-inline for Next.js) |
+| **HSTS** | `Strict-Transport-Security` header ready (uncomment after HTTPS) |
+| **API Docs Protected** | `/docs` and `/openapi.json` → 404 in production |
+| **httpOnly Refresh Token** | Refresh token stored in `httpOnly` cookie (not localStorage) — XSS protection |
+| **robots.txt** | AI bot rules (GPTBot, Claude-Web, etc.) + Content-Signal + Sitemap ref |
+| **Markdown Negotiation** | `Accept: text/markdown` returns landing page as markdown |
+| **API Catalog (RFC 9727)** | `/.well-known/api-catalog` → `application/linkset+json` |
+| **OAuth Discovery (RFC 8414)** | `/.well-known/oauth-authorization-server` |
+| **OAuth Protected Resource (RFC 9728)** | `/.well-known/oauth-protected-resource` |
+| **MCP Server Card (SEP-1649)** | `/.well-known/mcp/server-card.json` with serverInfo + transport + capabilities |
+| **Agent Skills Discovery (v0.2.0)** | `/.well-known/agent-skills/index.json` with $schema + sha256 digests |
+| **WebMCP** | `navigator.modelContext.provideContext()` with 5 tool definitions |
 
 ### Deployment
 
 | File | Purpose |
 |------|---------|
 | `docker-compose.prod.yml` | Production Docker Compose (port 3001) |
-| `nginx.prod.conf` | Nginx reverse proxy |
+| `nginx.prod.conf` | Nginx reverse proxy with CSP + security headers |
 | `deploy.sh` | VPS deployment script |
 | `Dockerfile` (backend + frontend) | Multi-stage builds |
 
 ---
 
-## ⏳ Feature Roadmap (Recommended Order)
+## ⏳ Feature Roadmap (Remaining)
 
-> **Orchestrator analysis:** Ordered by business value × dependency chain × complexity
+> **Status:** Core features complete. Remaining items are enhancements.
 
-| # | Feature | Priority | Why This Order | Complexity | Est. Time |
-|---|---------|----------|----------------|------------|-----------|
-| **1** | **~~Contact Detail Enhancements~~** | ✅ Done | Unified transaction history across 6 document types. Summary cards. Filter tabs. | Low | ~20 min |
-| **2** | **~~Product Detail Enhancements~~** | ✅ Done | Stock movement history. Sales/purchase summary cards. Filter tabs. | Low | ~20 min |
-| **3** | **~~Project Detail Enhancements~~** | ✅ Done | Budget progress bar. Financials panel (quoted/invoiced/received/cost/profit/margin). Transaction history. | Medium | ~25 min |
-| **4** | **~~Tests~~** | ✅ Done | PO, Purchase Invoice, Expense Claim, Accounting, Bank Reconciliation, e-Tax, Bank Statement. 90 integration tests passing. | Medium | ~30 min |
-| **5** | **~~Multi-currency~~** | ✅ Done | THB/USD/EUR/CNY/JPY/GBP support. Exchange rates API. Currency selector in forms. GL in base currency. | Medium | ~30 min |
-| **6** | **~~Inventory Management~~** | ✅ Done | FIFO costing with inventory batches, stock adjustments (initial/loss/damage/found/correction), movement history, FIFO layers UI. | High | ~45 min |
-| **7** | **Dashboard Charts** | Medium | Revenue trends, expense breakdown. Visual appeal, decision support. | Medium | ~25 min |
-| **8** | **SSL / Custom Domain** | Medium | Let's Encrypt. Production polish. Required before public launch. | Low | ~15 min |
-| **9** | **Payroll** | Low | Thai SSO, P.N.D.1K. Complex regulatory. Save for last. | High | ~60 min |
-| **10** | **Multi-company** | Low | Switch between company books. Enterprise feature. | High | ~40 min |
-| **11** | **Audit Trail UI** | Low | View change history on documents. Compliance feature. | Medium | ~30 min |
-
-### Why This Order?
-1. **Contact/Product/Project details first** — These are "quick wins" that use existing data. Users immediately see the value of all modules working together.
-2. **Tests next** — Once detail pages are done, the core feature set is stable. Tests lock in quality before adding complexity (multi-currency, inventory).
-3. **Multi-currency** — Opens the product to import/export businesses. Medium complexity, high business value.
-4. **Dashboard Charts + SSL** — Polish features. Make the product feel complete and production-ready.
-5. **Inventory + Payroll + Multi-company** — Advanced features for later. High complexity, smaller user base.
+| # | Feature | Priority | Status | Complexity |
+|---|---------|----------|--------|------------|
+| **1** | **SSL / HTTPS via Let's Encrypt** | Medium | ⏳ nginx ready, need certbot on VPS | Low |
+| **2** | **Dashboard Charts** | Medium | ⏳ Pending | Medium |
+| **3** | **Payroll** | Low | ⏳ Pending | High |
+| **4** | **Multi-company** | Low | ⏳ Pending | High |
+| **5** | **Audit Trail UI** | Low | ⏳ Pending | Medium |
+| **6** | **VPS Disk Auto-Cleanup** | High | ⏳ Docker prune cron job needed | Low |
 
 ---
 

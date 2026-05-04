@@ -176,3 +176,26 @@ def auth_headers(test_user):
     from src.core.security import create_access_token
     token = create_access_token({"sub": str(test_user.id), "company_id": str(test_user.company_id)})
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def test_purchase_invoice(client, test_contact, auth_headers):
+    """Create a test purchase invoice via API."""
+    response = client.post(
+        "/api/v1/purchase-invoices",
+        headers=auth_headers,
+        json={
+            "contact_id": str(test_contact.id),
+            "bill_date": "2026-05-01",
+            "due_date": "2026-06-01",
+            "items": [
+                {
+                    "description": "สินค้าทดสอบ",
+                    "quantity": "10",
+                    "unit_price": "100.00",
+                }
+            ],
+        },
+    )
+    assert response.status_code == 201
+    return response.json()

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import AppLayout from "@/components/AppLayout";
-import { useTrialBalance, useIncomeStatement, useBalanceSheet, useARAging, useAPAging } from "@/hooks/useApi";
+import { useTrialBalance, useIncomeStatement, useBalanceSheet, useARAging, useAPAging, useVATPP30 } from "@/hooks/useApi";
 import { formatCurrency } from "@/lib/utils";
-import { BarChart3, TrendingUp, Scale, ClipboardList, Users, UserCheck } from "lucide-react";
+import { BarChart3, TrendingUp, Scale, ClipboardList, Users, UserCheck, Receipt } from "lucide-react";
 
 function getFirstDayOfYear() {
   const d = new Date();
@@ -15,7 +15,10 @@ function getToday() {
   return new Date().toISOString().split("T")[0];
 }
 
-type Tab = "trial-balance" | "income-statement" | "balance-sheet" | "ar-aging" | "ap-aging";
+type Tab = "trial-balance" | "income-statement" | "balance-sheet" | "ar-aging" | "ap-aging" | "vat-pp30";
+
+const currentYear = new Date().getFullYear() + 543; // Buddhist year
+const currentMonth = new Date().getMonth() + 1;
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("trial-balance");
@@ -25,12 +28,15 @@ export default function ReportsPage() {
   const [bsDate, setBsDate] = useState(getToday());
   const [arDate, setArDate] = useState(getToday());
   const [apDate, setApDate] = useState(getToday());
+  const [vatYear, setVatYear] = useState(currentYear);
+  const [vatMonth, setVatMonth] = useState(currentMonth);
 
   const { data: tbData, isLoading: tbLoading } = useTrialBalance({ as_of: tbDate });
   const { data: isData, isLoading: isLoading } = useIncomeStatement({ from_date: isFromDate, to_date: isToDate });
   const { data: bsData, isLoading: bsLoading } = useBalanceSheet({ as_of: bsDate });
   const { data: arData, isLoading: arLoading } = useARAging({ as_of: arDate });
   const { data: apData, isLoading: apLoading } = useAPAging({ as_of: apDate });
+  const { data: vatData, isLoading: vatLoading } = useVATPP30({ year: vatYear, month: vatMonth });
 
   const tabs = [
     { id: "trial-balance" as Tab, label: "งบทดลอง", icon: ClipboardList },
@@ -38,6 +44,7 @@ export default function ReportsPage() {
     { id: "balance-sheet" as Tab, label: "งบดุล", icon: Scale },
     { id: "ar-aging" as Tab, label: "ลูกหนี้ Aging", icon: Users },
     { id: "ap-aging" as Tab, label: "เจ้าหนี้ Aging", icon: UserCheck },
+    { id: "vat-pp30" as Tab, label: "ภ.พ.30", icon: Receipt },
   ];
 
   return (
@@ -465,6 +472,125 @@ export default function ReportsPage() {
                 </table>
               )}
             </div>
+          </div>
+        )}
+
+        {/* P.P.30 VAT Report */}
+        {activeTab === "vat-pp30" && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <div className="flex items-center gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mr-2">ปี (พ.ศ.)</label>
+                  <input
+                    type="number"
+                    value={vatYear}
+                    onChange={(e) => setVatYear(Number(e.target.value))}
+                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-24"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mr-2">เดือน</label>
+                  <select
+                    value={vatMonth}
+                    onChange={(e) => setVatMonth(Number(e.target.value))}
+                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  >
+                    {["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"].map((m, i) => (
+                      <option key={i + 1} value={i + 1}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {vatLoading ? (
+              <div className="p-8 text-center text-gray-500">กำลังโหลด...</div>
+            ) : vatData ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100">
+                  <h3 className="font-semibold text-gray-900">รายงานภาษีมูลค่าเพิ่ม (ภ.พ.30)</h3>
+                  <p className="text-sm text-gray-500">{vatData.period_label}</p>
+                </div>
+
+                {/* Section 1: Output VAT */}
+                <div className="px-6 py-4 border-b border-gray-100">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">1. ภาษีขาย (Output VAT)</h4>
+                  <table className="w-full">
+                    <tbody>
+                      <tr className="border-b border-gray-50">
+                        <td className="py-2 text-sm text-gray-600">ยอดขายที่ต้องเสียภาษี (7%)</td>
+                        <td className="py-2 text-right text-sm font-medium">{formatCurrency(vatData.output_vat.taxable_sales_amount)}</td>
+                      </tr>
+                      <tr className="border-b border-gray-50">
+                        <td className="py-2 text-sm text-gray-600">ภาษีขาย</td>
+                        <td className="py-2 text-right text-sm font-medium text-blue-600">{formatCurrency(vatData.output_vat.output_vat_amount)}</td>
+                      </tr>
+                      <tr className="border-b border-gray-50">
+                        <td className="py-2 text-sm text-gray-600">ยอดขายที่ได้รับยกเว้น</td>
+                        <td className="py-2 text-right text-sm font-medium">{formatCurrency(vatData.output_vat.exempt_sales_amount)}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 text-sm font-semibold text-gray-900">รวมยอดขาย</td>
+                        <td className="py-2 text-right text-sm font-bold">{formatCurrency(vatData.output_vat.total_sales_amount)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Section 2: Input VAT */}
+                <div className="px-6 py-4 border-b border-gray-100">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">2. ภาษีซื้อ (Input VAT)</h4>
+                  <table className="w-full">
+                    <tbody>
+                      <tr className="border-b border-gray-50">
+                        <td className="py-2 text-sm text-gray-600">ยอดซื้อที่มีสิทธิหักภาษี (7%)</td>
+                        <td className="py-2 text-right text-sm font-medium">{formatCurrency(vatData.input_vat.taxable_purchases_amount)}</td>
+                      </tr>
+                      <tr className="border-b border-gray-50">
+                        <td className="py-2 text-sm text-gray-600">ภาษีซื้อ</td>
+                        <td className="py-2 text-right text-sm font-medium text-green-600">{formatCurrency(vatData.input_vat.input_vat_amount)}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 text-sm text-gray-600">ยอดซื้อที่ได้รับยกเว้น</td>
+                        <td className="py-2 text-right text-sm font-medium">{formatCurrency(vatData.input_vat.exempt_purchases_amount)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Section 3: Net VAT */}
+                <div className="px-6 py-4 bg-gray-50/50">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">3. สรุปภาษีที่ต้องชำระ</h4>
+                  <table className="w-full">
+                    <tbody>
+                      <tr className="border-b border-gray-50">
+                        <td className="py-2 text-sm text-gray-600">ภาษีขาย</td>
+                        <td className="py-2 text-right text-sm font-medium text-blue-600">{formatCurrency(vatData.output_vat.output_vat_amount)}</td>
+                      </tr>
+                      <tr className="border-b border-gray-50">
+                        <td className="py-2 text-sm text-gray-600">หัก ภาษีซื้อ</td>
+                        <td className="py-2 text-right text-sm font-medium text-green-600">-{formatCurrency(vatData.input_vat.input_vat_amount)}</td>
+                      </tr>
+                      <tr className="border-b border-gray-50">
+                        <td className="py-2 text-sm font-semibold text-gray-900">ภาษีสุทธิ</td>
+                        <td className={`py-2 text-right text-sm font-bold ${Number(vatData.net_vat) >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                          {Number(vatData.net_vat) >= 0 ? formatCurrency(vatData.net_vat) : `(${formatCurrency(Math.abs(Number(vatData.net_vat)))})`}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 text-sm font-semibold text-gray-900">
+                          {Number(vatData.vat_payable) > 0 ? "ภาษีที่ต้องชำระ" : "ภาษีชำระเกิน"}
+                        </td>
+                        <td className={`py-2 text-right text-lg font-bold ${Number(vatData.vat_payable) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                          {Number(vatData.vat_payable) > 0 ? formatCurrency(vatData.vat_payable) : formatCurrency(vatData.vat_credit)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
       </div>

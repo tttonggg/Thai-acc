@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .endpoints import auth, companies, contacts, products, projects, quotations, invoices, receipts, purchase_orders, purchase_invoices, expense_claims, accounting, bank_accounts, exchange_rates, stock_adjustments, credit_notes
+from .endpoints import auth, companies, contacts, products, projects, quotations, invoices, receipts, purchase_orders, purchase_invoices, expense_claims, accounting, bank_accounts, exchange_rates, stock_adjustments, credit_notes, payment_vouchers
 
 api_router = APIRouter()
 
@@ -19,3 +19,4 @@ api_router.include_router(bank_accounts.router, prefix="/bank-accounts", tags=["
 api_router.include_router(exchange_rates.router, prefix="/exchange-rates", tags=["Exchange Rates"])
 api_router.include_router(stock_adjustments.router, prefix="/stock-adjustments", tags=["Stock Adjustments"])
 api_router.include_router(credit_notes.router, prefix="/credit-notes", tags=["Credit Notes"])
+api_router.include_router(payment_vouchers.router, prefix="/payment-vouchers", tags=["Payment Vouchers"])

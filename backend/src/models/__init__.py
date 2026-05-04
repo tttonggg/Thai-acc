@@ -20,6 +20,7 @@ from .exchange_rate import ExchangeRate
 from .stock_adjustment import StockAdjustment, StockMovement
 from .inventory_batch import InventoryBatch
 from .credit_note import CreditNote, CreditNoteItem
+from .payment_voucher import PaymentVoucher, PaymentVoucherLine
 
 __all__ = [
     "BaseModel", "Company", "User", "Contact", "Product",
@@ -31,4 +32,5 @@ __all__ = [
     "ETaxSubmission", "BankStatementImport", "BankStatementLine",
     "ExchangeRate", "StockAdjustment", "StockMovement", "InventoryBatch",
     "CreditNote", "CreditNoteItem",
+    "PaymentVoucher", "PaymentVoucherLine",
 ]

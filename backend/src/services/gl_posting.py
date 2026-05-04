@@ -762,3 +762,133 @@ class GLPostingService:
         total_dr = sum(line.debit_amount for line in lines)
         total_cr = sum(line.credit_amount for line in lines)
         return total_dr == total_cr and total_dr > 0
+
+    def post_payment_voucher(self, voucher) -> JournalEntry | None:
+        """Post GL when payment voucher is posted.
+
+        Dr. Accounts Payable (เจ้าหนี้การค้า)          total_amount
+            Cr. Cash/Bank (เงินสด/ธนาคาร)              (total_amount - wht_amount)
+            Cr. WHT Payable (ภาษีหัก ณ ที่จ่าย)        wht_amount
+        """
+        from ..models.payment_voucher import PaymentVoucher
+        if not isinstance(voucher, PaymentVoucher):
+            return None
+
+        ap_account = self._get_account_by_code("21000")  # เจ้าหนี้การค้า
+        cash_account = self._get_account_by_code("11000")  # เงินสด
+        bank_account = self._get_account_by_code("11100")  # เงินฝากธนาคาร
+        wht_account = self._get_account_by_code("21400")  # ภาษีหัก ณ ที่จ่าย
+
+        if not ap_account:
+            return None
+
+        # Use bank account for bank_transfer/cheque/credit_card, cash for others
+        if voucher.payment_method in ["bank_transfer", "cheque", "credit_card"]:
+            cr_account = bank_account or cash_account
+        else:
+            cr_account = cash_account or bank_account
+
+        if not cr_account:
+            return None
+
+        lines = []
+
+        # Dr. Accounts Payable
+        lines.append({
+            "account_id": ap_account.id,
+            "debit": voucher.total_amount,
+            "credit": 0,
+            "description": f"จ่ายชำระเจ้าหนี้ {voucher.voucher_number}",
+            "contact_id": voucher.contact_id,
+        })
+
+        # Cr. Cash/Bank
+        net_payment = voucher.total_amount - voucher.wht_amount
+        lines.append({
+            "account_id": cr_account.id,
+            "debit": 0,
+            "credit": net_payment,
+            "description": f"จ่ายเงิน {voucher.voucher_number}",
+            "contact_id": voucher.contact_id,
+        })
+
+        # Cr. WHT Payable
+        if voucher.wht_amount > 0 and wht_account:
+            lines.append({
+                "account_id": wht_account.id,
+                "debit": 0,
+                "credit": voucher.wht_amount,
+                "description": f"ภาษีหัก ณ ที่จ่าย {voucher.voucher_number}",
+                "contact_id": voucher.contact_id,
+            })
+
+        return self._create_journal_entry(
+            entry_type="payment_voucher",
+            document_id=voucher.id,
+            document_number=voucher.voucher_number,
+            entry_date=voucher.payment_date,
+            description=f"บันทึกบัญชีจ่ายชำระ {voucher.voucher_number}",
+            lines=lines,
+        )
+
+    def reverse_payment_voucher(self, voucher) -> JournalEntry | None:
+        """Reverse GL when payment voucher is cancelled."""
+        from ..models.payment_voucher import PaymentVoucher
+        if not isinstance(voucher, PaymentVoucher):
+            return None
+
+        ap_account = self._get_account_by_code("21000")
+        cash_account = self._get_account_by_code("11000")
+        bank_account = self._get_account_by_code("11100")
+        wht_account = self._get_account_by_code("21400")
+
+        if not ap_account:
+            return None
+
+        if voucher.payment_method in ["bank_transfer", "cheque", "credit_card"]:
+            cr_account = bank_account or cash_account
+        else:
+            cr_account = cash_account or bank_account
+
+        if not cr_account:
+            return None
+
+        lines = []
+
+        # Reverse: Cr. AP
+        lines.append({
+            "account_id": ap_account.id,
+            "debit": 0,
+            "credit": voucher.total_amount,
+            "description": f"ยกเลิกใบสำคัญจ่าย {voucher.voucher_number}",
+            "contact_id": voucher.contact_id,
+        })
+
+        # Reverse: Dr. Cash/Bank
+        net_payment = voucher.total_amount - voucher.wht_amount
+        lines.append({
+            "account_id": cr_account.id,
+            "debit": net_payment,
+            "credit": 0,
+            "description": f"ยกเลิกใบสำคัญจ่าย {voucher.voucher_number}",
+            "contact_id": voucher.contact_id,
+        })
+
+        # Reverse: Dr. WHT
+        if voucher.wht_amount > 0 and wht_account:
+            lines.append({
+                "account_id": wht_account.id,
+                "debit": voucher.wht_amount,
+                "credit": 0,
+                "description": f"ยกเลิกใบสำคัญจ่าย {voucher.voucher_number}",
+                "contact_id": voucher.contact_id,
+            })
+
+        return self._create_journal_entry(
+            entry_type="payment_voucher_reversal",
+            document_id=voucher.id,
+            document_number=voucher.voucher_number,
+            entry_date=voucher.payment_date,
+            description=f"ยกเลิกใบสำคัญจ่าย {voucher.voucher_number}",
+            lines=lines,
+        )
