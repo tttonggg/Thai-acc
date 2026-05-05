@@ -191,6 +191,9 @@ jobs:
       - name: Build application
         run: npm run build
 
+      - name: Wait for dev server to be ready
+        run: npx wait-on http://localhost:3000 --timeout 120000
+
       - name: Run E2E tests
         run: npm run test:e2e || true
         env:

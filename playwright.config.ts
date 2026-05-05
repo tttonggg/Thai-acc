@@ -198,13 +198,15 @@ export default defineConfig({
     },
   ],
 
-  // Dev server configuration
-  // webServer: {
-  //   command: 'npm run dev',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: true, // Always reuse existing server
-  //   timeout: 120 * 1000,
-  // },
+  // Dev server configuration (used by webServer in CI)
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: false,
+    timeout: 120 * 1000,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  },
 
   // Metadata
   metadata: {
