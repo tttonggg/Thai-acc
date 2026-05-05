@@ -56,6 +56,7 @@ const WebhookManagement = lazy(() => import('@/components/admin').then(m => ({ d
 const ApiAnalytics = lazy(() => import('@/components/admin').then(m => ({ default: m.ApiAnalytics })));
 const RecurringDocuments = lazy(() => import('@/components/recurring/recurring-documents').then(m => ({ default: m.RecurringDocuments })));
 const SSOFiling = lazy(() => import('@/components/payroll/sso-filing').then(m => ({ default: m.SSOFiling })));
+const ApprovalConfigPage = lazy(() => import('@/components/approval/approval-config-page').then(m => ({ default: m.ApprovalConfigPage })));
 
 // Module loading skeleton fallback
 function ModuleSkeleton() {
@@ -178,6 +179,7 @@ export type Module =
   | 'data-import'
   | 'activity-log'
   | 'webhooks'
+  | 'approvals'
   | 'api-analytics'
   | 'cash-flow'
   | 'recurring'
@@ -290,6 +292,7 @@ export default function Home() {
         'approver-config': '/approver-config',
         entities: '/entities',
         currencies: '/currencies',
+        approvals: '/approvals',
         'accounting-periods': '/accounting-periods',
         budgets: '/budgets',
       };
@@ -349,6 +352,7 @@ export default function Home() {
         '/approver-config': 'approver-config',
         '/entities': 'entities',
         '/currencies': 'currencies',
+        '/approvals': 'approvals',
         '/accounting-periods': 'accounting-periods',
         '/budgets': 'budgets',
       };
@@ -545,6 +549,8 @@ export default function Home() {
         return <RoleManagement />;
       case 'approver-config':
         return <ApproverConfig />;
+      case 'approvals':
+        return <ApprovalConfigPage />;
       case 'entities':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">

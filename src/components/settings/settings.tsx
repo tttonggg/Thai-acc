@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy } from 'react';
+const ApprovalConfigPage = lazy(() => import('@/components/approval/approval-config-page').then(m => ({ default: m.ApprovalConfigPage })));
 import {
   Building2,
   FileText,
@@ -14,6 +15,7 @@ import {
   Loader2,
   RefreshCw,
   RotateCcw,
+  Shield,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -432,6 +434,10 @@ export function Settings() {
           <TabsTrigger value="backup">
             <Database className="mr-2 h-4 w-4" />
             สำรองข้อมูล
+          </TabsTrigger>
+          <TabsTrigger value="approvals">
+            <Shield className="mr-2 h-4 w-4" />
+            การอนุมัติ
           </TabsTrigger>
         </TabsList>
 
@@ -919,6 +925,10 @@ export function Settings() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="approvals" className="mt-6 space-y-4">
+          <ApprovalConfigPage />
         </TabsContent>
       </Tabs>
     </div>

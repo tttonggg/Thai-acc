@@ -360,6 +360,12 @@ const menuGroups: MenuGroup[] = [
         icon: PiggyBank,
         requiredPermission: { module: 'budget', action: 'read' },
       },
+      {
+        id: 'approvals',
+        label: 'การอนุมัติ (Approvals)',
+        icon: Shield,
+        requiredPermission: { module: 'admin', action: 'manage' },
+      },
     ],
   },
 ];
