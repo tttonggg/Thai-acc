@@ -28,6 +28,7 @@ import {
   TrendingDown,
   RefreshCw,
 } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -548,8 +549,13 @@ export function StockTakePage() {
                 <TableBody>
                   {filteredStockTakes.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="py-8 text-center text-gray-500">
-                        ไม่พบข้อมูลการตรวจนับสต็อก
+                      <TableCell colSpan={7}>
+                        <EmptyState
+                          icon={ClipboardList}
+                          title="ไม่พบข้อมูลการตรวจนับสต็อก"
+                          description="เริ่มต้นการตรวจนับสต็อกเพื่อตรวจสอบยอดคงเหลือ"
+                          action={{ label: 'สร้างการตรวจนับ', onClick: () => {} }}
+                        />
                       </TableCell>
                     </TableRow>
                   ) : (

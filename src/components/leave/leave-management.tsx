@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Calendar, Plus, Check, X, Clock, AlertCircle } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -418,12 +419,11 @@ export function LeaveManagement() {
         <TabsContent value="balances">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {balances.length === 0 ? (
-              <Card className="col-span-full">
-                <CardContent className="p-8 text-center text-gray-400">
-                  <Calendar className="mx-auto mb-2 h-10 w-10 opacity-30" />
-                  <p>ยังไม่มีข้อมูลยอดวันลา</p>
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon={Calendar}
+                title="ยังไม่มีข้อมูลยอดวันลา"
+                description="ยังไม่มีข้อมูลสิทธิ์วันลาของพนักงาน"
+              />
             ) : (
               balances.map((balance) => {
                 const available = balance.totalDays - balance.usedDays - balance.pendingDays;
@@ -490,9 +490,13 @@ export function LeaveManagement() {
                   <TableBody>
                     {requests.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="py-8 text-center text-gray-400">
-                          <Calendar className="mx-auto mb-2 h-10 w-10 opacity-30" />
-                          {requests.length === 0 ? 'ยังไม่มีคำขอลา' : 'ไม่พบคำขอลา'}
+                        <TableCell colSpan={7}>
+                          <EmptyState
+                            icon={Calendar}
+                            title="ยังไม่มีคำขอลา"
+                            description="พนักงานยังไม่ได้ส่งคำขอลา"
+                            action={{ label: 'สร้างคำขอลา', onClick: () => {} }}
+                          />
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -565,9 +569,12 @@ export function LeaveManagement() {
                   <TableBody>
                     {leaveTypes.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="py-8 text-center text-gray-400">
-                          <Calendar className="mx-auto mb-2 h-10 w-10 opacity-30" />
-                          ไม่พบประเภทการลา
+                        <TableCell colSpan={4}>
+                          <EmptyState
+                            icon={Calendar}
+                            title="ไม่พบประเภทการลา"
+                            description="ติดต่อผู้ดูแลระบบเพื่อตั้งค่าประเภทการลา"
+                          />
                         </TableCell>
                       </TableRow>
                     ) : (

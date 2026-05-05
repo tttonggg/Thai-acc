@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, Eye, FileText, Loader2 } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -261,9 +262,12 @@ export function PurchaseList({ refreshKey = 0, onRefresh }: PurchaseListProps) {
             สร้างใบซื้อใหม่
           </Button>
         </div>
-        <Alert>
-          <AlertDescription>ไม่พบข้อมูลใบซื้อ</AlertDescription>
-        </Alert>
+        <EmptyState
+          icon={FileText}
+          title="ยังไม่มีใบซื้อ"
+          description="เริ่มต้นสร้างใบซื้อเพื่อบันทึกซื้อสินค้าหรือบริการจากผู้ขาย"
+          action={{ label: 'สร้างใบซื้อ', onClick: () => setIsAddDialogOpen(true) }}
+        />
         <PurchaseForm
           open={isAddDialogOpen}
           onClose={() => setIsAddDialogOpen(false)}

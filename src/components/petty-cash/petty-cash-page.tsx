@@ -18,6 +18,7 @@ import {
   DollarSign,
   AlertCircle,
 } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -247,9 +248,13 @@ function FundsTab({ onFundsLoaded }: { onFundsLoaded: (funds: Fund[]) => void })
           );
         })}
         {funds.length === 0 && (
-          <div className="col-span-3 py-12 text-center text-gray-400">
-            <Wallet className="mx-auto mb-3 h-12 w-12 opacity-30" />
-            <p>ยังไม่มีกองทุนเงินสดย่อย</p>
+          <div className="col-span-3">
+            <EmptyState
+              icon={Wallet}
+              title="ยังไม่มีกองทุนเงินสดย่อย"
+              description="สร้างกองทุนเงินสดย่อยสำหรับจ่ายค่าใช้จ่ายเล็กน้อย"
+              action={{ label: 'สร้างกองทุน', onClick: () => {} }}
+            />
           </div>
         )}
       </div>

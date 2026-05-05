@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   FileCheck,
 } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -499,9 +500,13 @@ export function QuotationList() {
               <TableBody>
                 {filteredQuotations.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="py-8 text-center text-gray-500">
-                      <FileText className="mx-auto mb-4 h-12 w-12 text-gray-300" />
-                      <p>ไม่พบใบเสนอราคา</p>
+                    <TableCell colSpan={8}>
+                      <EmptyState
+                        icon={FileText}
+                        title="ยังไม่มีใบเสนอราคา"
+                        description="เริ่มต้นสร้างใบเสนอราคาเพื่อเสนอขายสินค้าหรือบริการ"
+                        action={{ label: 'สร้างใบเสนอราคา', onClick: () => setIsFormOpen(true) }}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

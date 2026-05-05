@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
 
 interface Project {
   id: string;
@@ -237,7 +238,12 @@ export function ProjectsPage() {
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">กำลังโหลด...</div>
           ) : projects.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">ไม่พบโปรเจกต์</div>
+            <EmptyState
+              icon={Briefcase}
+              title="ไม่พบโปรเจกต์"
+              description="เริ่มต้นสร้างโปรเจกต์เพื่อติดตามงานและรายได้"
+              action={{ label: 'สร้างโปรเจกต์', onClick: () => {} }}
+            />
           ) : (
             <Table>
               <TableHeader>

@@ -11,6 +11,7 @@ import {
   Power,
   RefreshCw,
 } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -443,8 +444,13 @@ function AssetListTab() {
               <TableBody>
                 {assets.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="py-8 text-center text-gray-400">
-                      ยังไม่มีสินทรัพย์ถาวร
+                    <TableCell colSpan={8}>
+                      <EmptyState
+                        icon={Building}
+                        title="ยังไม่มีสินทรัพย์ถาวร"
+                        description="เริ่มต้นลงทะเบียนสินทรัพย์ถาวรขององค์กร"
+                        action={{ label: 'เพิ่มสินทรัพย์', onClick: () => {} }}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

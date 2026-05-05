@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   ClipboardCheck,
 } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -625,9 +626,12 @@ export function GoodsReceiptNotesList() {
             สร้าง GRN ใหม่
           </Button>
         </div>
-        <Alert>
-          <AlertDescription>ไม่พบข้อมูลใบรับสินค้า</AlertDescription>
-        </Alert>
+        <EmptyState
+          icon={Package}
+          title="ยังไม่มีใบรับสินค้า"
+          description="สร้างใบรับสินค้าเมื่อได้รับสินค้าจากผู้ขาย"
+          action={{ label: 'สร้าง GRN', onClick: () => {} }}
+        />
       </div>
     );
   }
