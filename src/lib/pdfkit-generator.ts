@@ -541,6 +541,33 @@ export async function generateInvoicePDFWithPDFKit(invoice: any): Promise<Buffer
           { align: 'center' }
         );
 
+      // PromptPay QR Code — bottom left area (same as receipt)
+      const invoicePromptpayId = (invoice as any)?.promptpayId || (company as any)?.promptpayId;
+      if (invoicePromptpayId) {
+        try {
+          const amountSatang = invoice.netAmount ?? 0;
+          const amountBaht = amountSatang / 100;
+          const payload = promptpayQR({
+            accountNumber: invoicePromptpayId,
+            amount: amountBaht,
+            reference: invoice.invoiceNumber || '',
+          });
+          const qrSvg: string = qrToString(payload, { type: 'svg' }) as string;
+          const qrSize = 90;
+          const pageH = doc.page.height;
+          doc.image(qrSvg, margin, pageH - margin - qrSize, { width: qrSize, height: qrSize });
+          doc
+            .font(regularFontPath)
+            .fontSize(7)
+            .text('สแกนจ่ายด้วย PromptPay / Scan to pay', margin, pageH - margin - qrSize - 10, {
+              width: qrSize,
+              align: 'center',
+            });
+        } catch (qrErr) {
+          console.warn('QR generation failed:', qrErr);
+        }
+      }
+
       doc.end();
     } catch (error) {
       reject(error);
