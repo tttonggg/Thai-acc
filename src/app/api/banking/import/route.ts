@@ -141,7 +141,6 @@ export async function POST(request: NextRequest) {
         prisma.bankStatementEntry.create({
           data: {
             bankAccountId,
-            statementDate: entry.statementDate,
             valueDate: entry.valueDate,
             description: entry.description,
             amount: entry.amount,

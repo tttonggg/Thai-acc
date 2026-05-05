@@ -1507,20 +1507,28 @@ enum ChequeStatus {
 
 // Bank Statement Entry (for import from CAMT.053)
 model BankStatementEntry {
-  id              String    @id @default(cuid())
-  bankAccountId   String
-  bankAccount     BankAccount @relation(fields: [bankAccountId], references: [id])
-  statementDate   DateTime  // วันที่ในรายการเดินบัญชี
-  valueDate       DateTime  // วันที่ทำรายการ (value date)
-  description     String    // รายละเอียด
-  amount          Int       // จำนวนเงิน (สตางค์)
-  type            String    // CREDIT or DEBIT
-  reference       String?   // อ้างอิง
-  matched         Boolean   @default(false) // ถูก match หรือยัง
-  matchedEntryId  String?   // ID ของ receipt/payment/journal ที่ match แล้ว
-  matchedEntryType String?  // RECEIPT, PAYMENT, JOURNAL_ENTRY
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  bankAccountId      String
+  bankAccount       BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  valueDate          DateTime  // วันที่ทำรายการ
+  description        String    // รายละเอียด
+  amount             Int       // จำนวนเงิน (สตางค์)
+  type               String    @default("CREDIT") // CREDIT = เงินเข้า, DEBIT = เงินออก
+  reference          String?   // เลขอ้างอิง
+  matched            Boolean   @default(false)
+  matchedEntryId     String?
+  matchedEntryType   String?  // 'RECEIPT' | 'PAYMENT' | 'JOURNAL_ENTRY'
+  matchConfidence    Int?
+  matchReasons       String?   // JSON array of match reasons
+  reconciled         Boolean   @default(false)
+  bankReconciliationId String?
+  bankReconciliation BankReconciliation? @relation(fields: [bankReconciliationId], references: [id])
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([bankAccountId, matched])
+  @@index([amount])
+  @@index([valueDate])
 }
 
 // Bank Reconciliation
@@ -1539,6 +1547,7 @@ model BankReconciliation {
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
   cheques          Cheque[]
+  statements       BankStatementEntry[]
 }
 
 // ============================================

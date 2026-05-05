@@ -306,3 +306,157 @@ export function isCamt053Content(content: string): boolean {
     (trimmed.includes('<Ntry>') && trimmed.includes('<Amt>'))
   );
 }
+
+// ─── CSV Parser ───────────────────────────────────────────────────────────────
+
+export interface CsvBankEntry {
+  reference: string | null;
+  description: string;
+  amount: number; // Satang (integer)
+  type: 'CREDIT' | 'DEBIT';
+  valueDate: Date;
+  statementDate: Date;
+  creditDebitIndicator: 'CRDT' | 'DBIT';
+}
+
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function detectCSVFormat(headers: string[]): 'bbl' | 'scb' | 'kbank' | 'generic' {
+  const h = headers.map((x) => x.toLowerCase());
+  if (h.some((x) => x.includes('bbl') || x.includes('bank of thailand'))) return 'bbl';
+  if (h.some((x) => x.includes('scb') || x.includes('siam citi'))) return 'scb';
+  if (h.some((x) => x.includes('kbank') || x.includes('kasikorn'))) return 'kbank';
+  return 'generic';
+}
+
+function parseCSVDate(value: string): Date | null {
+  if (!value) return null;
+  // Try DD/MM/YYYY, YYYY-MM-DD, MM/DD/YYYY
+  const dm = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (dm) {
+    const [, d, m, y] = dm;
+    return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+  }
+  const iso = value.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) {
+    const [, y, m, d] = iso;
+    return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+  }
+  const parsed = new Date(value);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function parseCSVAmount(value: string): number {
+  if (!value) return 0;
+  const cleaned = value.replace(/[^0-9.\-]/g, '');
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return 0;
+  // Convert to satang
+  return Math.round(num * 100);
+}
+
+/**
+ * Parse a bank statement CSV string into structured entries.
+ * Supports BB-L, SCB, KBank, and generic CSV formats.
+ */
+export function parseCSV(content: string, statementDate?: Date): ParseResult {
+  const lines = content.trim().split(/\r?\n/);
+  if (lines.length < 2) {
+    return { success: false, entries: [], accountId: null, statementId: null, error: 'ไม่พบข้อมูลในไฟล์ CSV' };
+  }
+
+  const headers = parseCSVLine(lines[0]);
+  const format = detectCSVFormat(headers);
+
+  // Find column indices by format
+  let dateIdx = headers.findIndex((h) => /date|วันที่|วัน/gi.test(h));
+  let descIdx = headers.findIndex((h) => /desc|รายละเอียด|transaction|ข้อความ/gi.test(h));
+  let amountIdx = headers.findIndex((h) => /amount|จำนวน|มูลค่า/gi.test(h));
+  let debitIdx = headers.findIndex((h) => /debit|dr|เดบิต|ยอดออก/gi.test(h));
+  let creditIdx = headers.findIndex((h) => /credit|cr|เครดิต|ยอดเข้า/gi.test(h));
+  let refIdx = headers.findIndex((h) => /ref|เลขที่|reference|invoice/gi.test(h));
+  let balanceIdx = headers.findIndex((h) => /balance|ยอดคงเหลือ/gi.test(h));
+
+  // Fallbacks by format
+  if (dateIdx < 0) dateIdx = 0;
+  if (descIdx < 0) descIdx = Math.max(1, headers.length - 1);
+  if (amountIdx < 0 && debitIdx < 0 && creditIdx < 0) amountIdx = headers.length - 1;
+
+  const stmtDate = statementDate ?? new Date();
+  const entries: ParsedBankEntry[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const cols = parseCSVLine(line);
+    if (cols.length < 2) continue;
+
+    const valueDate = parseCSVDate(cols[dateIdx] ?? '');
+    if (!valueDate) continue;
+
+    const description = (cols[descIdx] ?? '').replace(/^[""]|[""]$/g, '');
+
+    let amount = 0;
+    let type: 'CREDIT' | 'DEBIT' = 'CREDIT';
+    let cdi: 'CRDT' | 'DBIT' = 'CRDT';
+
+    if (amountIdx >= 0) {
+      amount = parseCSVAmount(cols[amountIdx] ?? '');
+      type = amount >= 0 ? 'CREDIT' : 'DEBIT';
+      cdi = type === 'CREDIT' ? 'CRDT' : 'DBIT';
+    } else {
+      const debit = debitIdx >= 0 ? parseCSVAmount(cols[debitIdx] ?? '') : 0;
+      const credit = creditIdx >= 0 ? parseCSVAmount(cols[creditIdx] ?? '') : 0;
+      if (credit > 0) {
+        amount = credit;
+        type = 'CREDIT';
+        cdi = 'CRDT';
+      } else if (debit > 0) {
+        amount = debit;
+        type = 'DEBIT';
+        cdi = 'DBIT';
+      }
+    }
+
+    const reference = refIdx >= 0 ? (cols[refIdx] ?? '').replace(/^[""]|[""]$/g, '') : null;
+
+    entries.push({
+      reference: reference || null,
+      description,
+      amount: Math.abs(amount),
+      type,
+      valueDate,
+      statementDate: stmtDate,
+      creditDebitIndicator: cdi,
+    });
+  }
+
+  return {
+    success: true,
+    entries,
+    accountId: null,
+    statementId: null,
+  };
+}
