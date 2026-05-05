@@ -60,12 +60,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         where: {
           bankAccountId,
           status: 'POSTED',
+          isReconciled: false,
         },
       }),
       prisma.payment.findMany({
         where: {
           bankAccountId,
           status: 'POSTED',
+          isReconciled: false,
         },
       }),
     ]);
@@ -120,17 +122,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
               },
             });
           } else if (item.type === 'RECEIPT') {
-            // Receipt model has no isReconciled field - this is a no-op for now
-            // Schema would need to be extended to add isReconciled to Receipt
-            console.log(
-              `Receipt ${item.id} marked as reconciled (note: Receipt model lacks isReconciled field)`
-            );
+            await tx.receipt.update({
+              where: { id: item.id },
+              data: { isReconciled: true },
+            });
           } else if (item.type === 'PAYMENT') {
-            // Payment model has no isReconciled field - this is a no-op for now
-            // Schema would need to be extended to add isReconciled to Payment
-            console.log(
-              `Payment ${item.id} marked as reconciled (note: Payment model lacks isReconciled field)`
-            );
+            await tx.payment.update({
+              where: { id: item.id },
+              data: { isReconciled: true },
+            });
           }
         }
       });

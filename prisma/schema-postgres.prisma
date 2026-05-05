@@ -36,6 +36,34 @@ model Company {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   systemSettings  SystemSettings?
+  branchId        String?          // Currently selected branch (null = HQ view)
+  branch          Branch?          @relation(fields: [branchId], references: [id])
+  branches        Branch[]        // All branches for this company
+}
+
+// ============================================
+// สาขา / Branches
+// ============================================
+model Branch {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  code      String   // รหัสสาขา (e.g. "001")
+  name      String   // ชื่อสาขา (e.g. "สำนักงานใหญ่")
+  address   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Transaction links
+  invoices        Invoice[]
+  receipts        Receipt[]
+  journalEntries  JournalEntry[]
+  bankStatements  BankStatementEntry[]
+  purchaseInvoices PurchaseInvoice[]
+
+  @@unique([companyId, code])
+  @@index([companyId])
 }
 
 // ============================================
@@ -73,6 +101,7 @@ model SystemSettings {
   reminderDays1           Int               @default(7)
   reminderDays2           Int               @default(14)
   reminderDays3           Int               @default(30)
+  fiscalYearStart         Int?              @default(1) // เดือนที่เริ่มปีบัญชี (1-12)
 }
 
 // ============================================
@@ -593,6 +622,9 @@ model Receipt {
   exchangeRate  Float     @default(1)
   foreignAmount Int?
 
+  // Reconciliation tracking
+  isReconciled Boolean @default(false)
+
   @@index([customerId])
   @@index([bankAccountId])
   @@index([journalEntryId])
@@ -846,6 +878,9 @@ model Payment {
   // Project costing
   projectId     String?
   project       Project?  @relation("PaymentProject", fields: [projectId], references: [id])
+
+  // Reconciliation tracking
+  isReconciled Boolean @default(false)
 
   @@index([vendorId])
   @@index([bankAccountId])

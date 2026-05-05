@@ -73,6 +73,7 @@ model SystemSettings {
   reminderDays1           Int               @default(7)
   reminderDays2           Int               @default(14)
   reminderDays3           Int               @default(30)
+  fiscalYearStart         Int?              @default(1) // เดือนที่เริ่มปีบัญชี (1-12)
 }
 
 // ============================================
@@ -593,6 +594,9 @@ model Receipt {
   exchangeRate  Float     @default(1)
   foreignAmount Int?
 
+  // Reconciliation tracking
+  isReconciled Boolean @default(false)
+
   @@index([customerId])
   @@index([bankAccountId])
   @@index([journalEntryId])
@@ -846,6 +850,9 @@ model Payment {
   // Project costing
   projectId     String?
   project       Project?  @relation("PaymentProject", fields: [projectId], references: [id])
+
+  // Reconciliation tracking
+  isReconciled Boolean @default(false)
 
   @@index([vendorId])
   @@index([bankAccountId])

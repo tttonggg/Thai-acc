@@ -73,6 +73,7 @@ model SystemSettings {
   reminderDays1           Int               @default(7)
   reminderDays2           Int               @default(14)
   reminderDays3           Int               @default(30)
+  fiscalYearStart         Int?              @default(1) // เดือนที่เริ่มปีบัญชี (1-12)
 }
 
 // ============================================
@@ -150,10 +151,15 @@ model JournalEntry {
   stockTakes        StockTake[]        @relation("StockTakeJournal")
   goodsReceiptNotes GoodsReceiptNote[] @relation("GoodsReceiptNoteJournal")
 
+  // Project costing
+  projectId     String?
+  project       Project?  @relation("JournalEntryProject", fields: [projectId], references: [id])
+
   @@index([createdById])
   @@index([approvedById])
   @@index([reversingId])
   @@index([deletedAt])
+  @@index([projectId])
 }
 
 model JournalLine {
@@ -217,6 +223,7 @@ model Customer {
   creditNotes   CreditNote[]
   quotations    Quotation[]
   salesOrders   SalesOrder[]
+  projects      Project[]
 
   @@index([deletedAt])
 }
@@ -385,11 +392,16 @@ model Invoice {
   foreignAmount Int? // จำนวนเงินต่างประเทศ (สตางค์)
   autoReminder  Boolean   @default(true) // ส่งแจ้งเตือนอัตโนมัติเมื่อเกินกำหนด
 
+  // Project costing
+  projectId     String?
+  project       Project?  @relation("InvoiceProject", fields: [projectId], references: [id])
+
   @@index([customerId])
   @@index([journalEntryId])
   @@index([createdById])
   @@index([deletedAt])
   @@index([currencyId])
+  @@index([projectId])
 }
 
 model InvoiceLine {
@@ -581,6 +593,9 @@ model Receipt {
   currency      Currency? @relation(fields: [currencyId], references: [id])
   exchangeRate  Float     @default(1)
   foreignAmount Int?
+
+  // Reconciliation tracking
+  isReconciled Boolean @default(false)
 
   @@index([customerId])
   @@index([bankAccountId])
@@ -832,6 +847,13 @@ model Payment {
   exchangeRate  Float     @default(1)
   foreignAmount Int?
 
+  // Project costing
+  projectId     String?
+  project       Project?  @relation("PaymentProject", fields: [projectId], references: [id])
+
+  // Reconciliation tracking
+  isReconciled Boolean @default(false)
+
   @@index([vendorId])
   @@index([bankAccountId])
   @@index([journalEntryId])
@@ -839,6 +861,7 @@ model Payment {
   @@index([currencyId])
   @@index([createdById])
   @@index([updatedById])
+  @@index([projectId])
 }
 
 model PaymentLine {
@@ -3043,4 +3066,72 @@ model DocumentApproverConfig {
   roleId        String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+// ============================================
+// โปรเจกต์ / Project Costing
+// ============================================
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ProjectTransactionType {
+  REVENUE     // from invoices
+  EXPENSE     // from payments
+  TIME_COST   // manual labor cost
+}
+
+model Project {
+  id           String    @id @default(cuid())
+  name         String
+  code         String    @unique  // PRJ-001
+  description  String?
+  status       ProjectStatus @default(ACTIVE)
+  startDate    DateTime?
+  endDate      DateTime?
+  customerId   String?
+  customer     Customer? @relation(fields: [customerId], references: [id])
+
+  // Budget
+  budgetRevenue  Int?     // expected revenue in Satang
+  budgetCost     Int?     // budgeted cost in Satang
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  transactions ProjectTransaction[]
+  invoices     Invoice[]         @relation("InvoiceProject")
+  payments     Payment[]         @relation("PaymentProject")
+  journalEntries JournalEntry[]  @relation("JournalEntryProject")
+
+  @@index([customerId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model ProjectTransaction {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Links to existing documents (nullable for manual entries)
+  invoiceId   String?
+  paymentId   String?
+  journalEntryId String?
+  expenseId  String?
+
+  type        ProjectTransactionType
+  amount      Int     // in Satang
+  description String?
+  date        DateTime
+
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+  @@index([invoiceId])
+  @@index([paymentId])
+  @@index([journalEntryId])
 }
