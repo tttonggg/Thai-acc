@@ -307,7 +307,7 @@ export function ProductList() {
               icon={Package}
               title="ยังไม่มีสินค้า"
               description="เริ่มต้นเพิ่มสินค้าหรือบริการของคุณ"
-              action={{ label: 'เพิ่มสินค้าใหม่', onClick: () => setShowForm(true) }}
+              action={{ label: 'เพิ่มสินค้าใหม่', onClick: () => setIsAddDialogOpen(true) }}
             />
           ) : (
             <ScrollArea className="w-full">

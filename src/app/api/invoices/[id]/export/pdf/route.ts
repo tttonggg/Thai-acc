@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api-utils';
 import { prisma } from '@/lib/db';
-import { generateInvoicePDF } from '@/lib/pdf-generator';
+import { generateInvoicePDFWithPDFKit } from '@/lib/pdfkit-generator';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Generate PDF
-    const pdfBytes = await generateInvoicePDF(invoice);
+    const pdfBytes = await generateInvoicePDFWithPDFKit(invoice);
 
     // Return PDF file
     return new NextResponse(new Uint8Array(pdfBytes), {

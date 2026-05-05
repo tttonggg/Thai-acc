@@ -3,8 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api-utils';
 import prisma from '@/lib/db';
-import { generatePayslipPDF } from '@/lib/pdf-generator';
-import { handleApiError } from '@/lib/api-error-handler';
+import { generatePayslipPDFWithPDFKit } from '@/lib/pdfkit-generator';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -69,7 +68,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     };
 
     // Generate PDF
-    const pdfBuffer = await generatePayslipPDF(payslipData);
+    const pdfBuffer = await generatePayslipPDFWithPDFKit(payslipData);
 
     // Create filename
     const employeeName = `${payroll.employee.firstName}-${payroll.employee.lastName}`;
@@ -77,7 +76,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const filename = `payslip-${employeeName}-${month}-${payroll.payrollRun.periodYear}.pdf`;
 
     // Return PDF with appropriate headers
-    return new NextResponse(Buffer.from(pdfBuffer), {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
@@ -87,7 +86,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     });
   } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: error.message || 'ไม่สามารถสร้างสลิปเงินเดือนได้' },
+      { success: false, error: error instanceof Error ? error.message : 'ไม่สามารถสร้างสลิปเงินเดือนได้' },
       { status: 500 }
     );
   }
