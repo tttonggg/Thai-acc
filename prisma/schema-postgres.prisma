@@ -30,6 +30,7 @@ model Company {
   email           String? // อีเมล
   website         String? // เว็บไซต์
   logo            String? // โลโก้
+  promptpayId     String? // เลขพร้อมเพย์ (PromptPay ID)
   fiscalYearStart Int             @default(1) // เริ่มปีบัญชี (เดือน)
   metadata        Json? // ข้อมูลส่วนขยาย
   createdAt       DateTime        @default(now())

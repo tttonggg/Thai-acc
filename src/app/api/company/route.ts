@@ -21,6 +21,7 @@ const companyInfoSchema = z.object({
   email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง').optional().or(z.literal('')),
   website: z.string().optional(),
   logo: z.string().optional(),
+  promptpayId: z.string().optional(),
 });
 
 // GET /api/company - Fetch company info
@@ -52,6 +53,7 @@ export async function GET(req: NextRequest) {
         email: company.email,
         website: company.website,
         logo: company.logo,
+        promptpayId: company.promptpayId,
         fiscalYearStart: company.fiscalYearStart,
       },
     });
@@ -105,6 +107,7 @@ export async function PUT(req: NextRequest) {
         email: validated.email,
         website: validated.website,
         logo: validated.logo,
+        promptpayId: validated.promptpayId,
       },
     });
 
@@ -127,6 +130,7 @@ export async function PUT(req: NextRequest) {
         email: updated.email,
         website: updated.website,
         logo: updated.logo,
+        promptpayId: updated.promptpayId,
       },
     });
   } catch (error: unknown) {

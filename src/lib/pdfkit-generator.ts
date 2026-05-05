@@ -11,6 +11,8 @@ import PDFDocument from 'pdfkit';
 import { prisma } from '@/lib/db';
 import * as fs from 'fs';
 import * as path from 'path';
+import { toString as qrToString } from 'qrcode';
+import promptpayQR from 'promptpay-qr';
 
 // Type definitions for our data structures
 interface InvoiceData {
@@ -699,6 +701,33 @@ export async function generateReceiptPDFWithPDFKit(receipt: any): Promise<Buffer
         })
         .fillColor('black');
       yPos += 30;
+
+      // PromptPay QR Code — bottom left area
+      const promptpayId = receipt.promptpayId || (company as any)?.promptpayId;
+      if (promptpayId) {
+        try {
+          const amountSatang = receipt.netAmount ?? 0;
+          const amountBaht = amountSatang / 100;
+          const payload = promptpayQR({
+            accountNumber: promptpayId,
+            amount: amountBaht,
+            reference: receipt.receiptNo || '',
+          });
+          const qrSvg: string = qrToString(payload, { type: 'svg' }) as string;
+          const qrSize = 90;
+          const pageH = doc.page.height;
+          doc.image(qrSvg, margin, pageH - margin - qrSize, { width: qrSize, height: qrSize });
+          doc
+            .font(regularFontPath)
+            .fontSize(7)
+            .text('สแกนจ่ายด้วย PromptPay / Scan to pay', margin, pageH - margin - qrSize - 10, {
+              width: qrSize,
+              align: 'center',
+            });
+        } catch (qrErr) {
+          console.warn('QR generation failed:', qrErr);
+        }
+      }
 
       // Notes
       if (receipt.notes) {

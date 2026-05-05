@@ -18,6 +18,7 @@ import {
   RotateCcw,
   Shield,
   Mail,
+  QrCode,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,6 +52,7 @@ interface CompanyInfo {
   email: string;
   website: string;
   logo?: string;
+  promptpayId: string;
 }
 
 interface TaxRates {
@@ -100,6 +102,7 @@ export function Settings() {
     email: '',
     website: '',
     logo: '',
+    promptpayId: '',
   });
   const [taxRates, setTaxRates] = useState<TaxRates>({
     vatRate: 7,
@@ -174,6 +177,7 @@ export function Settings() {
               email: company.email || '',
               website: company.website || '',
               logo: company.logo || '',
+              promptpayId: (company as any).promptpayId || '',
             });
           }
 
@@ -447,7 +451,7 @@ export function Settings() {
       </div>
 
       <Tabs defaultValue="company">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="company">
             <Building2 className="mr-2 h-4 w-4" />
             ข้อมูลบริษัท
@@ -463,6 +467,10 @@ export function Settings() {
           <TabsTrigger value="backup">
             <Database className="mr-2 h-4 w-4" />
             สำรองข้อมูล
+          </TabsTrigger>
+          <TabsTrigger value="promptpay">
+            <QrCode className="mr-2 h-4 w-4" />
+            พร้อมเพย์
           </TabsTrigger>
           <TabsTrigger value="approvals">
             <Shield className="mr-2 h-4 w-4" />
@@ -639,6 +647,28 @@ export function Settings() {
                   )}
                   <p className="text-xs text-gray-500">รองรับไฟล์ PNG, JPG ขนาดไม่เกิน 2MB</p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="promptpay" className="mt-6 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>พร้อมเพย์ (PromptPay)</CardTitle>
+              <CardDescription>เลขพร้อมเพย์สำหรับแสดง QR Code บนใบเสร็จ</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="max-w-xs">
+                <Label htmlFor="promptpayId">เลขพร้อมเพย์</Label>
+                <Input
+                  id="promptpayId"
+                  placeholder="0-9999-00000-00-0"
+                  value={companyInfo.promptpayId}
+                  onChange={(e) =>
+                    setCompanyInfo((prev) => ({ ...prev, promptpayId: e.target.value }))
+                  }
+                />
               </div>
             </CardContent>
           </Card>
