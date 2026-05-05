@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
-import { recordStockMovement } from '@/lib/inventory-service';
+import { recordStockMovement, checkLowStock } from '@/lib/inventory-service';
 import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
@@ -180,6 +180,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Note: TRANSFER_IN will be created when the transfer is completed via PUT /api/stock/transfers/[id]
+
+    // Fire-and-forget low-stock check for outgoing transfer
+    checkLowStock(productId, fromWarehouseId).catch(console.error);
 
     return NextResponse.json(
       {

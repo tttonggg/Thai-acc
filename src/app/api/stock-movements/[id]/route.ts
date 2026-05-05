@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
-import { recordStockMovement } from '@/lib/inventory-service';
+import { recordStockMovement, checkLowStock } from '@/lib/inventory-service';
 import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -99,6 +99,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         notes: `ยกเลิกการเคลื่อนไหวเดิม: ${originalMovement.notes || '-'}`,
         sourceChannel: 'WEB',
       });
+
+      // Fire-and-forget low-stock check if reversal created a net outgoing movement
+      if (['ISSUE', 'TRANSFER_OUT', 'ADJUST'].includes(oppositeType)) {
+        checkLowStock(originalMovement.productId, originalMovement.warehouseId).catch(console.error);
+      }
 
       return NextResponse.json({
         success: true,

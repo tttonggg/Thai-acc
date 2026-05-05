@@ -188,3 +188,49 @@ export async function getInventoryValuation(warehouseId?: string) {
     },
   };
 }
+
+/**
+ * Check if a product is below its reorder point after a stock movement.
+ * Creates a LOW_STOCK notification for admins if below minQuantity.
+ * Called by API routes after recordStockMovement for OUTGOING movements.
+ */
+export async function checkLowStock(productId: string, warehouseId: string) {
+
+  const balance = await prisma.stockBalance.findUnique({
+    where: { productId_warehouseId: { productId, warehouseId } },
+    include: { product: true },
+  });
+
+  if (!balance) return;
+
+  const { quantity, product } = balance;
+  const minQty = product.minQuantity ?? 0;
+
+  // Only alert if: inventory-tracked product, has a minQuantity set, and below threshold
+  if (!product.isInventory || minQty <= 0 || quantity >= minQty) return;
+
+  // Find admin users to notify
+  const adminUsers = await prisma.user.findMany({
+    where: { role: { in: ['ADMIN', 'SUPERADMIN'] }, isActive: true },
+    select: { id: true },
+  });
+
+  const message =
+    quantity === 0
+      ? `สินค้า "${product.name}" หมดสต็อก — ต่ำกว่า minQuantity (${minQty} ${product.unit})`
+      : `สินค้า "${product.name}" เหลือ ${quantity} ${product.unit} — ต่ำกว่า minQuantity (${minQty} ${product.unit})`;
+
+  for (const admin of adminUsers) {
+    await prisma.notification.create({
+      data: {
+        userId: admin.id,
+        type: 'WARNING',
+        title: 'แจ้งเตือนสต็อกต่ำ',
+        message,
+        module: 'products',
+        recordId: productId,
+        actionUrl: '/products',
+      },
+    });
+  }
+}

@@ -542,6 +542,12 @@ export function Dashboard({
         <p className="mt-1 text-slate-400">ภาพรวมสถานะทางการเงินและบัญชี</p>
       </div>
 
+      {/* Low Stock Alert Banner */}
+      {(() => {
+        const { LowStockBanner } = require('@/components/dashboard/low-stock-banner');
+        return <LowStockBanner />;
+      })()}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <SummaryCard

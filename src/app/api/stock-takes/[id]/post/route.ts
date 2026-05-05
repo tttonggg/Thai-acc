@@ -9,7 +9,7 @@ import {
 } from '@/lib/api-auth';
 import { apiResponse } from '@/lib/api-utils';
 import { db } from '@/lib/db';
-import { recordStockMovement } from '@/lib/inventory-service';
+import { recordStockMovement, checkLowStock } from '@/lib/inventory-service';
 import { handleApiError } from '@/lib/api-error-handler';
 
 // POST /api/stock-takes/[id]/post - Post stock take to GL and update stock
@@ -185,6 +185,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           notes: `ปรับปรุงตามการตรวจนับ ${stockTake.stockTakeNumber}`,
           sourceChannel: 'STOCK_TAKE',
         });
+      }
+    }
+
+    // Fire-and-forget low-stock check for negative variances (stock decreases)
+    for (const line of stockTake.lines) {
+      if (line.varianceQty < -0.001) {
+        checkLowStock(line.productId, stockTake.warehouseId).catch(console.error);
       }
     }
 

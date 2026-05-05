@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
-import { recordStockMovement } from '@/lib/inventory-service';
+import { recordStockMovement, checkLowStock } from '@/lib/inventory-service';
 import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest) {
@@ -65,6 +65,11 @@ export async function POST(request: NextRequest) {
       notes,
       sourceChannel: 'WEB',
     });
+
+    // Fire-and-forget low-stock check for outgoing movements
+    if (['ISSUE', 'TRANSFER_OUT', 'ADJUST'].includes(type) && quantity > 0) {
+      checkLowStock(productId, warehouseId).catch(console.error);
+    }
 
     return NextResponse.json({ success: true, data: result }, { status: 201 });
   } catch (error: unknown) {

@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAuth } from '@/lib/api-utils';
-import { recordStockMovement } from '@/lib/inventory-service';
+import { recordStockMovement, checkLowStock } from '@/lib/inventory-service';
 import { handleApiError } from '@/lib/api-error-handler';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -112,6 +112,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             notes: `สูญหาย/เสียหายระหว่างการโอน: ${difference} หน่วย`,
             sourceChannel: 'WEB',
           });
+          // Fire-and-forget low-stock check after adjustment
+          checkLowStock(transfer.productId, transfer.fromWarehouseId).catch(console.error);
         }
       }
 

@@ -138,6 +138,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { GlobalSearchModal } from '@/components/search/global-search-modal';
+import { NotificationCenter } from '@/components/notifications/notification-center';
 import { QuickActionFab } from '@/components/layout/quick-action-fab';
 
 export type Module =
@@ -686,6 +687,9 @@ export default function Home() {
         onClose={() => setSearchOpen(false)}
         onNavigate={(module) => setActiveModule(module as Module)}
       />
+
+      {/* Notification Center */}
+      <NotificationCenter />
     </div>
   );
 }
