@@ -59,6 +59,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useThemeStore, themeColors, ThemeVariant } from '@/stores/theme-store';
 import { useAuthStore } from '@/stores/auth-store';
@@ -367,6 +374,12 @@ const menuGroups: MenuGroup[] = [
         requiredPermission: { module: 'budget', action: 'read' },
       },
       {
+        id: 'audit',
+        label: 'บันทึกตรวจสอบ (Audit)',
+        icon: Shield,
+        requiredPermission: { module: 'admin', action: 'manage' },
+      },
+      {
         id: 'approvals',
         label: 'การอนุมัติ (Approvals)',
         icon: Shield,
@@ -557,6 +570,27 @@ export function KeeratiSidebar({
   const authStore = useAuthStore();
 
   const isCollapsed = isSidebarCollapsed;
+
+  // Fetch branches and populate auth store on mount
+  useEffect(() => {
+    async function loadBranches() {
+      try {
+        const res = await fetch('/api/branches', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data?.length > 0) {
+            authStore.setBranches(data.data);
+            if (!authStore.selectedBranchId) {
+              authStore.setSelectedBranch(null); // ensure "all" is selected by default
+            }
+          }
+        }
+      } catch {
+        // silently ignore if branch API not available
+      }
+    }
+    loadBranches();
+  }, []);
 
   // Permission check helper
   const hasPermission = (module: string, action: string): boolean => {
@@ -750,10 +784,37 @@ export function KeeratiSidebar({
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="text-[var(--foreground)]">
                 บัญชีของฉัน
               </DropdownMenuLabel>
+
+              {/* Branch Selector */}
+              {authStore.branches.length > 0 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <div className="px-2 py-1.5">
+                    <p className="mb-1 text-xs text-[var(--muted-foreground)]">สาขา / Branch</p>
+                    <Select
+                      value={authStore.selectedBranchId ?? 'all'}
+                      onValueChange={(val) => authStore.setSelectedBranch(val === 'all' ? null : val)}
+                    >
+                      <SelectTrigger className="h-8 w-full text-xs">
+                        <SelectValue placeholder="ทุกสาขา" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">ทุกสาขา (All)</SelectItem>
+                        {authStore.branches.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>
+                            {b.code} — {b.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={onLogout}
