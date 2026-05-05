@@ -3,6 +3,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { signOut } from 'next-auth/react';
+import { AlertTriangle, Settings2 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useQueryClient } from '@tanstack/react-query';
 import { KeeratiSidebar } from '@/components/layout/keerati-sidebar';
@@ -51,6 +52,7 @@ const BackupRestorePage = lazy(() => import('@/components/admin/backup-restore-p
 const DataImportPage = lazy(() => import('@/components/admin/data-import-page').then(m => ({ default: m.DataImportPage })));
 const ActivityLogPage = lazy(() => import('@/components/admin/activity-log-page').then(m => ({ default: m.ActivityLogPage })));
 const RoleManagement = lazy(() => import('@/components/admin/role-management/role-management').then(m => ({ default: m.RoleManagement })));
+const AuditLogViewer = lazy(() => import('@/components/audit/audit-log-viewer').then(m => ({ default: m.AuditLogViewer })));
 const ApproverConfig = lazy(() => import('@/components/admin/approver-config/approver-config').then(m => ({ default: m.ApproverConfig })));
 const WebhookManagement = lazy(() => import('@/components/admin').then(m => ({ default: m.WebhookManagement })));
 const ApiAnalytics = lazy(() => import('@/components/admin').then(m => ({ default: m.ApiAnalytics })));
@@ -190,7 +192,8 @@ export type Module =
   | 'currencies'
   | 'accounting-periods'
   | 'budgets'
-  | 'tax-forms';
+  | 'tax-forms'
+  | 'audit';
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -198,6 +201,7 @@ export default function Home() {
   const [activeModule, setActiveModule] = useState<Module>('dashboard');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [fiscalYearStart, setFiscalYearStart] = useState<number | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
 
   // Global Ctrl+K search shortcut
@@ -239,6 +243,15 @@ export default function Home() {
         isActive: true,
       });
       loadPermissions();
+      // Fetch fiscalYearStart for blocking banner
+      fetch('/api/company', { credentials: 'include' })
+        .then(r => r.json())
+        .then(data => {
+          if (data.data?.fiscalYearStart != null) {
+            setFiscalYearStart(data.data.fiscalYearStart);
+          }
+        })
+        .catch(() => {});
       // NOTE: Plugin initialization (initPlugins) is server-only.
       // Real plugin system will be initialized via API route or server component,
       // not from client useEffect. Current plugins are stubs — no init needed.
@@ -299,6 +312,7 @@ export default function Home() {
         'accounting-periods': '/accounting-periods',
         budgets: '/budgets',
         'tax-forms': '/tax-forms',
+        audit: '/audit',
       };
 
       // Update URL when activeModule changes (using history API to avoid Next.js routing)
@@ -360,6 +374,7 @@ export default function Home() {
         '/accounting-periods': 'accounting-periods',
         '/budgets': 'budgets',
         '/tax-forms': 'tax-forms',
+        '/audit': 'audit',
       };
 
       const handlePopState = () => {
@@ -418,6 +433,13 @@ export default function Home() {
 
   // Authenticated - show main app
   const userRole = session.user?.role as 'ADMIN' | 'ACCOUNTANT' | 'USER' | 'VIEWER';
+
+  // Blocking banner when fiscal year not configured
+  const needsFiscalYearSetup = fiscalYearStart === null;
+
+  const handleGoToSettings = () => {
+    setActiveModule('settings');
+  };
 
   const renderModule = () => {
     switch (activeModule) {
@@ -558,6 +580,8 @@ export default function Home() {
         return <ApprovalConfigPage />;
       case 'tax-forms':
         return <TaxFormPage />;
+      case 'audit':
+        return <AuditLogViewer />;
       case 'entities':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
@@ -582,6 +606,8 @@ export default function Home() {
             <BudgetManagement />
           </PermissionGuard>
         );
+      case 'audit':
+        return <AuditLogViewer />;
       case 'recurring':
         return <RecurringDocuments />;
       case 'cash-flow':
@@ -634,6 +660,21 @@ export default function Home() {
     <div className="flex h-screen bg-slate-950">
       {/* Prefetch dashboard data on mount */}
       <DashboardPrefetch status={status} />
+
+      {/* Blocking banner: fiscal year not configured */}
+      {needsFiscalYearSetup && (
+        <div className="fixed inset-x-0 top-0 z-[100] flex items-center justify-center gap-3 bg-amber-900/90 px-4 py-3 text-sm font-medium text-amber-50 shadow-lg backdrop-blur">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <span>กรุณาตั้งค่าวันที่เริ่มปีบัญชีก่อนใช้งาน</span>
+          <button
+            onClick={handleGoToSettings}
+            className="ml-2 flex items-center gap-1.5 rounded-md bg-amber-600 px-3 py-1.5 text-xs font-semibold hover:bg-amber-500"
+          >
+            <Settings2 className="h-3.5 w-3.5" />
+            ไปตั้งค่า
+          </button>
+        </div>
+      )}
 
       {/* Mobile Hamburger Menu */}
       <div className="fixed left-4 top-4 z-50 md:hidden">

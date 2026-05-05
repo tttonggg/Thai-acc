@@ -22,6 +22,7 @@ const companyInfoSchema = z.object({
   website: z.string().optional(),
   logo: z.string().optional(),
   promptpayId: z.string().optional(),
+  fiscalYearStart: z.number().int().min(1).max(12).optional(),
 });
 
 // GET /api/company - Fetch company info
@@ -108,6 +109,7 @@ export async function PUT(req: NextRequest) {
         website: validated.website,
         logo: validated.logo,
         promptpayId: validated.promptpayId,
+        fiscalYearStart: validated.fiscalYearStart,
       },
     });
 
@@ -131,6 +133,7 @@ export async function PUT(req: NextRequest) {
         website: updated.website,
         logo: updated.logo,
         promptpayId: updated.promptpayId,
+        fiscalYearStart: updated.fiscalYearStart,
       },
     });
   } catch (error: unknown) {

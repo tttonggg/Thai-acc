@@ -19,7 +19,20 @@ import {
   Shield,
   Mail,
   QrCode,
+  MapPin,
+  Plus,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,6 +66,7 @@ interface CompanyInfo {
   website: string;
   logo?: string;
   promptpayId: string;
+  fiscalYearStart: number;
 }
 
 interface TaxRates {
@@ -71,6 +85,14 @@ interface DocumentNumberFormat {
   resetMonthly: boolean;
   resetYearly: boolean;
   currentNo: number;
+}
+
+interface Branch {
+  id: string;
+  code: string;
+  name: string;
+  address?: string;
+  isActive: boolean;
 }
 
 const DOCUMENT_TYPES = [
@@ -103,6 +125,7 @@ export function Settings() {
     website: '',
     logo: '',
     promptpayId: '',
+    fiscalYearStart: 1,
   });
   const [taxRates, setTaxRates] = useState<TaxRates>({
     vatRate: 7,
@@ -125,6 +148,12 @@ export function Settings() {
     reminderDays2: 14,
     reminderDays3: 30,
   });
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [branchDialogOpen, setBranchDialogOpen] = useState(false);
+  const [branchForm, setBranchForm] = useState({ code: '', name: '', address: '', isActive: true });
+  const [editingBranchId, setEditingBranchId] = useState<string | null>(null);
+  const [companyId, setCompanyId] = useState<string>('');
+  const [loadingBranches, setLoadingBranches] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -178,7 +207,9 @@ export function Settings() {
               website: company.website || '',
               logo: company.logo || '',
               promptpayId: (company as any).promptpayId || '',
+              fiscalYearStart: (company as any).fiscalYearStart ?? 1,
             });
+            setCompanyId(company.id);
           }
 
           if (tax) {
@@ -308,6 +339,106 @@ export function Settings() {
       title: 'รีเซ็ตค่าเริ่มต้น',
       description: 'รูปแบบเลขที่เอกสารถูกรีเซ็ตเรียบร้อยแล้ว',
     });
+  };
+
+  const fetchBranches = async () => {
+    if (!companyId) return;
+    setLoadingBranches(true);
+    try {
+      const response = await fetch(`/api/branches`, { credentials: 'include' });
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          setBranches(result.data);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch branches:', error);
+    } finally {
+      setLoadingBranches(false);
+    }
+  };
+
+  useEffect(() => {
+    if (companyId) {
+      fetchBranches();
+    }
+  }, [companyId]);
+
+  const handleOpenBranchDialog = (branch?: Branch) => {
+    if (branch) {
+      setEditingBranchId(branch.id);
+      setBranchForm({ code: branch.code, name: branch.name, address: branch.address || '', isActive: branch.isActive });
+    } else {
+      setEditingBranchId(null);
+      setBranchForm({ code: '', name: '', address: '', isActive: true });
+    }
+    setBranchDialogOpen(true);
+  };
+
+  const handleCloseBranchDialog = () => {
+    setBranchDialogOpen(false);
+    setEditingBranchId(null);
+    setBranchForm({ code: '', name: '', address: '', isActive: true });
+  };
+
+  const handleSaveBranch = async () => {
+    if (!branchForm.code || !branchForm.name) {
+      toast({ title: 'กรุณากรอกข้อมูลให้ครบ', variant: 'destructive' });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const url = editingBranchId ? `/api/branches/${editingBranchId}` : '/api/branches';
+      const method = editingBranchId ? 'PUT' : 'POST';
+      const body = editingBranchId
+        ? { code: branchForm.code, name: branchForm.name, address: branchForm.address, isActive: branchForm.isActive }
+        : { companyId, code: branchForm.code, name: branchForm.name, address: branchForm.address };
+
+      const response = await fetch(url, {
+        credentials: 'include',
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        toast({ title: editingBranchId ? 'แก้ไขสาขาสำเร็จ' : 'เพิ่มสาขาสำเร็จ' });
+        handleCloseBranchDialog();
+        fetchBranches();
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save branch');
+      }
+    } catch (error) {
+      console.error('Failed to save branch:', error);
+      toast({ title: 'ไม่สำเร็จ', description: error instanceof Error ? error.message : '', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteBranch = async (id: string) => {
+    if (!confirm('ต้องการลบสาขานี้ใช่หรือไม่?')) return;
+
+    try {
+      const response = await fetch(`/api/branches/${id}`, {
+        credentials: 'include',
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast({ title: 'ลบสาขาสำเร็จ' });
+        fetchBranches();
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete branch');
+      }
+    } catch (error) {
+      console.error('Failed to delete branch:', error);
+      toast({ title: 'ไม่สำเร็จ', description: error instanceof Error ? error.message : '', variant: 'destructive' });
+    }
   };
 
   const updateDocumentNumber = (index: number, field: keyof DocumentNumberFormat, value: any) => {
@@ -464,6 +595,10 @@ export function Settings() {
             <FileText className="mr-2 h-4 w-4" />
             ภาษี
           </TabsTrigger>
+          <TabsTrigger value="branches">
+            <MapPin className="mr-2 h-4 w-4" />
+            สาขา
+          </TabsTrigger>
           <TabsTrigger value="backup">
             <Database className="mr-2 h-4 w-4" />
             สำรองข้อมูล
@@ -583,6 +718,31 @@ export function Settings() {
                     value={companyInfo.website}
                     onChange={(e) => setCompanyInfo({ ...companyInfo, website: e.target.value })}
                   />
+                </div>
+                <div>
+                  <Label>เดือนที่เริ่มปีบัญชี</Label>
+                  <Select
+                    value={companyInfo.fiscalYearStart.toString()}
+                    onValueChange={(v) => setCompanyInfo({ ...companyInfo, fiscalYearStart: parseInt(v) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">มกราคม</SelectItem>
+                      <SelectItem value="2">กุมภาพันธ์</SelectItem>
+                      <SelectItem value="3">มีนาคม</SelectItem>
+                      <SelectItem value="4">เมษายน</SelectItem>
+                      <SelectItem value="5">พฤษภาคม</SelectItem>
+                      <SelectItem value="6">มิถุนายน</SelectItem>
+                      <SelectItem value="7">กรกฎาคม</SelectItem>
+                      <SelectItem value="8">สิงหาคม</SelectItem>
+                      <SelectItem value="9">กันยายน</SelectItem>
+                      <SelectItem value="10">ตุลาคม</SelectItem>
+                      <SelectItem value="11">พฤศจิกายน</SelectItem>
+                      <SelectItem value="12">ธันวาคม</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="mt-6 flex justify-end">
@@ -925,6 +1085,70 @@ export function Settings() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="branches" className="mt-6 space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>สาขา</CardTitle>
+                  <CardDescription>จัดการข้อมูลสาขาของบริษัท</CardDescription>
+                </div>
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => handleOpenBranchDialog()}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  เพิ่มสาขา
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loadingBranches ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                </div>
+              ) : branches.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  ยังไม่มีข้อมูลสาขา
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>รหัสสาขา</TableHead>
+                      <TableHead>ชื่อสาขา</TableHead>
+                      <TableHead>ที่อยู่</TableHead>
+                      <TableHead>สถานะ</TableHead>
+                      <TableHead className="text-right">จัดการ</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {branches.map((branch) => (
+                      <TableRow key={branch.id}>
+                        <TableCell className="font-mono">{branch.code}</TableCell>
+                        <TableCell>{branch.name}</TableCell>
+                        <TableCell className="text-gray-500">{branch.address || '-'}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded text-xs ${branch.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                            {branch.isActive ? 'ใช้งาน' : 'ไม่ใช้งาน'}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => handleOpenBranchDialog(branch)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDeleteBranch(branch.id)} className="text-red-600 hover:text-red-700">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="backup" className="mt-6 space-y-4">
           <Card>
             <CardHeader>
@@ -998,6 +1222,63 @@ export function Settings() {
           <EmailSettingsTab initial={emailSettings} />
         </TabsContent>
       </Tabs>
+
+      {/* Branch Dialog */}
+      <Dialog open={branchDialogOpen} onOpenChange={setBranchDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingBranchId ? 'แก้ไขสาขา' : 'เพิ่มสาขาใหม่'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="branchCode">รหัสสาขา</Label>
+              <Input
+                id="branchCode"
+                value={branchForm.code}
+                onChange={(e) => setBranchForm({ ...branchForm, code: e.target.value })}
+                placeholder="001"
+              />
+            </div>
+            <div>
+              <Label htmlFor="branchName">ชื่อสาขา</Label>
+              <Input
+                id="branchName"
+                value={branchForm.name}
+                onChange={(e) => setBranchForm({ ...branchForm, name: e.target.value })}
+                placeholder="สำนักงานใหญ่"
+              />
+            </div>
+            <div>
+              <Label htmlFor="branchAddress">ที่อยู่</Label>
+              <Textarea
+                id="branchAddress"
+                value={branchForm.address}
+                onChange={(e) => setBranchForm({ ...branchForm, address: e.target.value })}
+                placeholder="ที่อยู่สาขา (ไม่บังคับ)"
+              />
+            </div>
+            {editingBranchId && (
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="branchActive"
+                  checked={branchForm.isActive}
+                  onCheckedChange={(checked) => setBranchForm({ ...branchForm, isActive: checked })}
+                />
+                <Label htmlFor="branchActive">ใช้งาน</Label>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">ยกเลิก</Button>
+            </DialogClose>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleSaveBranch} disabled={saving}>
+              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              บันทึก
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
