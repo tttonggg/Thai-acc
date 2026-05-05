@@ -233,6 +233,12 @@ const menuGroups: MenuGroup[] = [
         requiredPermission: { module: 'report', action: 'read' },
       },
       {
+        id: 'tax-forms',
+        label: 'แบบฟอร์มภาษี (Tax Forms)',
+        icon: FileText,
+        requiredPermission: { module: 'report', action: 'read' },
+      },
+      {
         id: 'reports',
         label: 'Variance Report',
         icon: Activity,

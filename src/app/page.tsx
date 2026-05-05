@@ -57,6 +57,7 @@ const ApiAnalytics = lazy(() => import('@/components/admin').then(m => ({ defaul
 const RecurringDocuments = lazy(() => import('@/components/recurring/recurring-documents').then(m => ({ default: m.RecurringDocuments })));
 const SSOFiling = lazy(() => import('@/components/payroll/sso-filing').then(m => ({ default: m.SSOFiling })));
 const ApprovalConfigPage = lazy(() => import('@/components/approval/approval-config-page').then(m => ({ default: m.ApprovalConfigPage })));
+const TaxFormPage = lazy(() => import('@/components/tax-forms/tax-form-page').then(m => ({ default: m.TaxFormPage })));
 
 // Module loading skeleton fallback
 function ModuleSkeleton() {
@@ -187,7 +188,8 @@ export type Module =
   | 'entities'
   | 'currencies'
   | 'accounting-periods'
-  | 'budgets';
+  | 'budgets'
+  | 'tax-forms';
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -295,6 +297,7 @@ export default function Home() {
         approvals: '/approvals',
         'accounting-periods': '/accounting-periods',
         budgets: '/budgets',
+        'tax-forms': '/tax-forms',
       };
 
       // Update URL when activeModule changes (using history API to avoid Next.js routing)
@@ -355,6 +358,7 @@ export default function Home() {
         '/approvals': 'approvals',
         '/accounting-periods': 'accounting-periods',
         '/budgets': 'budgets',
+        '/tax-forms': 'tax-forms',
       };
 
       const handlePopState = () => {
@@ -551,6 +555,8 @@ export default function Home() {
         return <ApproverConfig />;
       case 'approvals':
         return <ApprovalConfigPage />;
+      case 'tax-forms':
+        return <TaxFormPage />;
       case 'entities':
         return (
           <PermissionGuard permission="SETTINGS_VIEW">
