@@ -20,7 +20,7 @@
 Every change must be coordinated. Direct commits to `master` are blocked.
 All work happens in named feature branches, reviewed before merge.
 
-### 2. Schema Is Sacred Shared Territory
+### Schema Is Sacred Shared Territory
 
 The database schema (`schema-sqlite.prisma`, `schema-postgres.prisma`) is shared code.
 Any schema change — new model, new field, new relation — must be:
@@ -30,6 +30,16 @@ Any schema change — new model, new field, new relation — must be:
 - Version-controlled (migration file created)
 
 No silent schema edits. No "I'll fix it later" schema changes.
+
+### Schema-First Planning Rule
+
+Before writing any implementation plan or spec that references a Prisma model:
+1. Read the actual model definition in `prisma/schema.prisma` (or `schema-postgres.prisma`)
+2. Note the exact field names, types, and relations
+3. If the plan assumes fields/relations that don't exist in the schema, flag the discrepancy
+
+Plans that skip this step may describe features that don't match reality. This wastes
+time and causes cascading fixes. The schema is always the source of truth.
 
 ### 3. Changes Must Be Explicitly Coordinated
 
