@@ -15,6 +15,19 @@ const taxRatesSchema = z.object({
   whtPnd53Advert: z.number().min(0).max(100),
 });
 
+const emailSettingsSchema = z.object({
+  smtpHost: z.string().optional(),
+  smtpPort: z.number().optional(),
+  smtpUser: z.string().optional(),
+  smtpPassword: z.string().optional(),
+  smtpFromEmail: z.string().optional(),
+  smtpFromName: z.string().optional(),
+  reminderEnabled: z.boolean().optional(),
+  reminderDays1: z.number().min(1).optional(),
+  reminderDays2: z.number().min(1).optional(),
+  reminderDays3: z.number().min(1).optional(),
+});
+
 const documentNumberFormatSchema = z.object({
   type: z.string(),
   prefix: z.string(),
@@ -26,6 +39,7 @@ const documentNumberFormatSchema = z.object({
 const settingsUpdateSchema = z.object({
   taxRates: taxRatesSchema.optional(),
   documentNumbers: z.array(documentNumberFormatSchema).optional(),
+  emailSettings: emailSettingsSchema.optional(),
 });
 
 // GET /api/settings - Fetch all settings
@@ -87,6 +101,31 @@ export async function GET(req: NextRequest) {
             whtPnd53Contract: 1,
             whtPnd53Advert: 2,
           },
+      emailSettings: company.systemSettings
+        ? {
+            smtpHost: company.systemSettings.smtpHost ?? '',
+            smtpPort: company.systemSettings.smtpPort ?? 587,
+            smtpUser: company.systemSettings.smtpUser ?? '',
+            smtpPassword: company.systemSettings.smtpPassword ?? '',
+            smtpFromEmail: company.systemSettings.smtpFromEmail ?? '',
+            smtpFromName: company.systemSettings.smtpFromName ?? '',
+            reminderEnabled: company.systemSettings.reminderEnabled ?? false,
+            reminderDays1: company.systemSettings.reminderDays1 ?? 7,
+            reminderDays2: company.systemSettings.reminderDays2 ?? 14,
+            reminderDays3: company.systemSettings.reminderDays3 ?? 30,
+          }
+        : {
+            smtpHost: '',
+            smtpPort: 587,
+            smtpUser: '',
+            smtpPassword: '',
+            smtpFromEmail: '',
+            smtpFromName: '',
+            reminderEnabled: false,
+            reminderDays1: 7,
+            reminderDays2: 14,
+            reminderDays3: 30,
+          },
       documentNumbers: documentNumbers.map((doc) => ({
         type: doc.type,
         prefix: doc.prefix,
@@ -144,6 +183,23 @@ export async function PUT(req: NextRequest) {
           data: {
             companyId: company.id,
             ...validated.taxRates,
+          },
+        });
+      }
+    }
+
+    // Update email settings if provided
+    if (validated.emailSettings) {
+      if ((company as any).systemSettings) {
+        await db.systemSettings.update({
+          where: { companyId: company.id },
+          data: validated.emailSettings,
+        });
+      } else {
+        await db.systemSettings.create({
+          data: {
+            companyId: company.id,
+            ...validated.emailSettings,
           },
         });
       }

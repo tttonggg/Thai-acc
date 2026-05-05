@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, lazy } from 'react';
 const ApprovalConfigPage = lazy(() => import('@/components/approval/approval-config-page').then(m => ({ default: m.ApprovalConfigPage })));
+const EmailSettingsTab = lazy(() => import('@/components/settings/email-settings-tab').then(m => ({ default: m.EmailSettingsTab })));
 import {
   Building2,
   FileText,
@@ -16,6 +17,7 @@ import {
   RefreshCw,
   RotateCcw,
   Shield,
+  Mail,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -108,6 +110,18 @@ export function Settings() {
     whtPnd53Advert: 2,
   });
   const [documentNumbers, setDocumentNumbers] = useState<DocumentNumberFormat[]>([]);
+  const [emailSettings, setEmailSettings] = useState({
+    smtpHost: '',
+    smtpPort: 587,
+    smtpUser: '',
+    smtpPassword: '',
+    smtpFromEmail: '',
+    smtpFromName: '',
+    reminderEnabled: false,
+    reminderDays1: 7,
+    reminderDays2: 14,
+    reminderDays3: 30,
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -127,7 +141,22 @@ export function Settings() {
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data) {
-          const { company, taxRates: tax, documentNumbers: docs } = result.data;
+          const { company, taxRates: tax, documentNumbers: docs, emailSettings: email } = result.data;
+
+          if (email) {
+            setEmailSettings({
+              smtpHost: email.smtpHost ?? '',
+              smtpPort: email.smtpPort ?? 587,
+              smtpUser: email.smtpUser ?? '',
+              smtpPassword: email.smtpPassword ?? '',
+              smtpFromEmail: email.smtpFromEmail ?? '',
+              smtpFromName: email.smtpFromName ?? '',
+              reminderEnabled: email.reminderEnabled ?? false,
+              reminderDays1: email.reminderDays1 ?? 7,
+              reminderDays2: email.reminderDays2 ?? 14,
+              reminderDays3: email.reminderDays3 ?? 30,
+            });
+          }
 
           if (company) {
             setCompanyInfo({
@@ -438,6 +467,10 @@ export function Settings() {
           <TabsTrigger value="approvals">
             <Shield className="mr-2 h-4 w-4" />
             การอนุมัติ
+          </TabsTrigger>
+          <TabsTrigger value="email">
+            <Mail className="mr-2 h-4 w-4" />
+            อีเมล
           </TabsTrigger>
         </TabsList>
 
@@ -929,6 +962,10 @@ export function Settings() {
 
         <TabsContent value="approvals" className="mt-6 space-y-4">
           <ApprovalConfigPage />
+        </TabsContent>
+
+        <TabsContent value="email" className="mt-6">
+          <EmailSettingsTab initial={emailSettings} />
         </TabsContent>
       </Tabs>
     </div>

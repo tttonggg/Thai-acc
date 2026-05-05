@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
 // Types
@@ -96,6 +97,7 @@ export function InvoiceForm({
     discountPercent: 0,
     withholdingRate: 0,
     notes: '',
+    autoReminder: true,
   });
 
   const [lines, setLines] = useState<InvoiceLine[]>([
@@ -904,6 +906,17 @@ export function InvoiceForm({
                   value={formData.notes}
                   onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
                   aria-label="หมายเหตุ"
+                />
+              </div>
+
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div>
+                  <p className="font-medium">ส่งแจ้งเตือนอัตโนมัติ</p>
+                  <p className="text-sm text-gray-500">แจ้งเตือนเมื่อเกินกำหนดชำระ</p>
+                </div>
+                <Switch
+                  checked={formData.autoReminder}
+                  onCheckedChange={(v) => setFormData((prev) => ({ ...prev, autoReminder: v }))}
                 />
               </div>
             </div>

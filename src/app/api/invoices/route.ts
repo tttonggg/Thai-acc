@@ -38,6 +38,7 @@ const invoiceSchema = z.object({
   notes: z.string().optional(),
   internalNotes: z.string().optional(),
   terms: z.string().optional(),
+  autoReminder: z.boolean().optional(),
   lines: z.array(invoiceLineSchema).min(1, 'ต้องมีอย่างน้อย 1 รายการ'),
 });
 
@@ -270,6 +271,7 @@ export async function POST(request: NextRequest) {
           notes: validatedData.notes,
           internalNotes: validatedData.internalNotes,
           terms: validatedData.terms,
+          autoReminder: validatedData.autoReminder ?? true,
           lines: {
             create: validatedData.lines.map((line, index) => ({
               lineNo: index + 1,

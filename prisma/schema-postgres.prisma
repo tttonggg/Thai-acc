@@ -60,6 +60,18 @@ model SystemSettings {
   purchaseAccountId      String? // Chart of account code for purchases (default '5100')
   vatInputAccountId      String? // Chart of account code for VAT input (default '1131')
   apAccountId            String? // Chart of account code for AP (default '2111')
+  // Email / SMTP settings
+  smtpHost                String?
+  smtpPort                Int               @default(587)
+  smtpUser                String?
+  smtpPassword            String?
+  smtpFromEmail           String?
+  smtpFromName             String?
+  // Auto-reminder settings
+  reminderEnabled         Boolean           @default(false)
+  reminderDays1           Int               @default(7)
+  reminderDays2           Int               @default(14)
+  reminderDays3           Int               @default(30)
 }
 
 // ============================================
@@ -370,6 +382,7 @@ model Invoice {
   currency      Currency? @relation(fields: [currencyId], references: [id])
   exchangeRate  Float     @default(1) // อัตราแลกเปลี่ยน (THB per 1 unit of foreign currency)
   foreignAmount Int? // จำนวนเงินต่างประเทศ (สตางค์)
+  autoReminder  Boolean   @default(true) // ส่งแจ้งเตือนอัตโนมัติเมื่อเกินกำหนด
 
   @@index([customerId])
   @@index([journalEntryId])
