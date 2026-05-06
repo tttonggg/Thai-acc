@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Globe, Copy, Check } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -65,6 +66,11 @@ export function CustomerEditDialog({
   const [hasTransactions, setHasTransactions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [portalEmail, setPortalEmail] = useState('');
+  const [hasPortalAccount, setHasPortalAccount] = useState(false);
+  const [isCreatingPortal, setIsCreatingPortal] = useState(false);
+  const [showPortalSuccess, setShowPortalSuccess] = useState(false);
+  const [tempPassword, setTempPassword] = useState('');
 
   // Pre-populate form when customer data changes
   useEffect(() => {
@@ -82,6 +88,8 @@ export function CustomerEditDialog({
       });
       // Check if customer has transactions (this would be an API call in real implementation)
       checkCustomerTransactions(customer.id);
+      // Check if customer already has a portal account
+      checkPortalAccount(customer.id);
     }
   }, [customer]);
 
@@ -97,6 +105,51 @@ export function CustomerEditDialog({
       }
     } catch (error) {
       console.error('Error checking customer transactions:', error);
+    }
+  };
+
+  const checkPortalAccount = async (customerId: string) => {
+    try {
+      const response = await fetch(`/api/portal/auth/check-account?customerId=${customerId}`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setHasPortalAccount(data.hasAccount);
+        if (data.email) setPortalEmail(data.email);
+      }
+    } catch (error) {
+      console.error('Error checking portal account:', error);
+    }
+  };
+
+  const handleCreatePortalAccount = async () => {
+    if (!customer || !portalEmail) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(portalEmail)) {
+      toast({ title: 'รูปแบบอีเมลไม่ถูกต้อง', variant: 'destructive' });
+      return;
+    }
+    setIsCreatingPortal(true);
+    try {
+      const res = await fetch('/api/portal/auth/create-account', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: customer.id, email: portalEmail }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setTempPassword(data.tempPassword);
+        setHasPortalAccount(true);
+        setShowPortalSuccess(true);
+        toast({ title: 'สร้างบัญชีพอร์ทัลสำเร็จ', description: 'กรุณาแจ้งรหัสผ่านชั่วคราวให้ลูกค้า' });
+      } else {
+        toast({ title: 'เกิดข้อผิดพลาด', description: data.error || 'ไม่สามารถสร้างบัญชีพอร์ทัลได้', variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'เกิดข้อผิดพลาด', description: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', variant: 'destructive' });
+    } finally {
+      setIsCreatingPortal(false);
     }
   };
 
@@ -375,6 +428,60 @@ export function CustomerEditDialog({
                   <p className="ml-2 text-sm text-gray-500">(ไม่สามารถระงับได้เนื่องจากมีรายการ)</p>
                 )}
               </div>
+            </div>
+
+            {/* Portal Account Section */}
+            <div className="rounded border border-blue-200 bg-blue-50 p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <Globe className="h-4 w-4 text-blue-600" />
+                <span className="font-medium text-blue-800">พอร์ทัลลูกค้า</span>
+              </div>
+              {hasPortalAccount ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700">{portalEmail || formData.email}</span>
+                  <span className="rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                    มีบัญชีพอร์ทัลแล้ว
+                  </span>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="อีเมลสำหรับเข้าพอร์ทัล"
+                    value={portalEmail}
+                    onChange={(e) => setPortalEmail(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleCreatePortalAccount}
+                    disabled={isCreatingPortal || !portalEmail}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isCreatingPortal ? 'กำลังสร้าง...' : 'สร้างบัญชีพอร์ทัล'}
+                  </Button>
+                </div>
+              )}
+              {showPortalSuccess && tempPassword && (
+                <div className="mt-3 rounded bg-yellow-50 p-3">
+                  <p className="mb-1 text-xs font-medium text-yellow-700">รหัสผ่านชั่วคราว (แจ้งให้ลูกค้าเปลี่ยนทันที):</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 rounded bg-white px-2 py-1 font-mono text-sm font-bold text-red-600">
+                      {tempPassword}
+                    </code>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      onClick={() => {
+                        navigator.clipboard.writeText(tempPassword);
+                        toast({ title: 'คัดลอกแล้ว' });
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
 
