@@ -9,6 +9,13 @@ export interface User {
   name: string | null;
   role: UserRole;
   isActive: boolean;
+  selectedBranchId?: string | null;
+}
+
+export interface BranchInfo {
+  id: string;
+  code: string;
+  name: string;
 }
 
 interface AuthState {
@@ -16,11 +23,15 @@ interface AuthState {
   permissions: string[]; // RBAC permissions from database
   isLoading: boolean;
   isAuthenticated: boolean;
+  branches: BranchInfo[]; // Available branches for current company
+  selectedBranchId: string | null; // null = all branches
 
   // Actions
   setUser: (user: User | null) => void;
   setPermissions: (permissions: string[]) => void;
   setLoading: (loading: boolean) => void;
+  setSelectedBranch: (id: string | null) => void;
+  setBranches: (branches: BranchInfo[]) => void;
   logout: () => void;
   hasPermission: (module: string, action: string) => boolean;
 }
@@ -32,6 +43,8 @@ export const useAuthStore = create<AuthState>()(
       permissions: [],
       isLoading: true,
       isAuthenticated: false,
+      branches: [],
+      selectedBranchId: null,
 
       setUser: (user) =>
         set({
@@ -44,12 +57,18 @@ export const useAuthStore = create<AuthState>()(
 
       setLoading: (loading) => set({ isLoading: loading }),
 
+      setSelectedBranch: (id) => set({ selectedBranchId: id }),
+
+      setBranches: (branches) => set({ branches }),
+
       logout: () => {
         set({
           user: null,
           permissions: [],
           isAuthenticated: false,
           isLoading: false,
+          branches: [],
+          selectedBranchId: null,
         });
       },
 
@@ -68,8 +87,9 @@ export const useAuthStore = create<AuthState>()(
       skipHydration: true,
       // Only persist user.id, user.role, and isAuthenticated - strip derived/permission state
       partialize: (state) => ({
-        user: state.user ? { id: state.user.id, role: state.user.role } : null,
+        user: state.user ? { id: state.user.id, role: state.user.role, selectedBranchId: state.user.selectedBranchId } : null,
         isAuthenticated: state.isAuthenticated,
+        selectedBranchId: state.selectedBranchId,
       }),
     }
   )
