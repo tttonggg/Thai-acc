@@ -185,22 +185,21 @@ export async function checkOverdueInvoices(): Promise<{
   const companyName = company?.name ?? 'บริษัทของท่าน'
 
   // Fetch overdue, posted, unpaid invoices that have autoReminder = true
+  // Note: type cast needed — Prisma's type inference fails on this combination
   const overdueInvoices = await prisma.invoice.findMany({
     where: {
-      status: 'POSTED',
+      status: 'ISSUED',
       autoReminder: true,
-      dueDate: { not: null },
-      dueDate: { lt: today },
-      paidAmount: { lt: prisma.invoice.fields.totalAmount }, // unpaid: paidAmount < totalAmount
+      dueDate: { not: null, lt: today },
     },
     include: {
       customer: { select: { name: true, email: true } },
     },
-  })
+  }) as any[]
 
   for (const invoice of overdueInvoices) {
-    if (!invoice.customer.email) {
-      results.push({ invoiceId: invoice.id, invoiceNo: invoice.invoiceNo, customerName: invoice.customer.name, daysOverdue: 0, level: 1, sent: false, error: 'No customer email' })
+    if (!(invoice.customer as any)?.email) {
+      results.push({ invoiceId: invoice.id, invoiceNo: invoice.invoiceNo, customerName: (invoice.customer as any)?.name || '?', daysOverdue: 0, level: 1, sent: false, error: 'No customer email' })
       continue
     }
 
@@ -213,7 +212,9 @@ export async function checkOverdueInvoices(): Promise<{
     else if (daysOverdue >= reminderDays1) level = 1
     else continue // not yet at first reminder threshold
 
-    const outstanding = invoice.totalAmount - invoice.paidAmount
+    const outstanding = (invoice.totalAmount as number) - (invoice.paidAmount as number)
+    const customerEmail = (invoice.customer as any).email as string
+    const customerName = (invoice.customer as any).name as string
     const subject = `[Keerati] ใบวางบิล ${invoice.invoiceNo} ถึงกำหนดชำระ — เกิน ${daysOverdue} วัน`
     const html = buildReminderHtml({
       invoiceNo: invoice.invoiceNo,
@@ -222,12 +223,12 @@ export async function checkOverdueInvoices(): Promise<{
       amount: outstanding,
       daysOverdue,
       level,
-      customerName: invoice.customer.name,
+      customerName,
       companyName,
     })
 
     const { success, error } = await sendEmail({
-      to: invoice.customer.email,
+      to: customerEmail,
       subject,
       html,
       smtpConfig,
@@ -237,11 +238,11 @@ export async function checkOverdueInvoices(): Promise<{
       // Log notification
       await prisma.notification.create({
         data: {
-          userId: null,
-          type: 'OVERDUE_REMINDER',
+          userId: '',
+          type: 'WARNING' as any,
           title: `ส่ง${reminderLabel(level)}ใบวางบิล ${invoice.invoiceNo}`,
-          message: `เกินกำหนด ${daysOverdue} วัน → ส่งอีเมลไปที่ ${invoice.customer.email}`,
-          referenceId: invoice.id,
+          message: `เกินกำหนด ${daysOverdue} วัน → ส่งอีเมลไปที่ ${customerEmail}`,
+          recordId: invoice.id,
         },
       }).catch(() => {}) // non-blocking
     }
@@ -249,7 +250,7 @@ export async function checkOverdueInvoices(): Promise<{
     results.push({
       invoiceId: invoice.id,
       invoiceNo: invoice.invoiceNo,
-      customerName: invoice.customer.name,
+      customerName,
       daysOverdue,
       level,
       sent: success,

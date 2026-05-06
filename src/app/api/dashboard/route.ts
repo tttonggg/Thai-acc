@@ -227,11 +227,12 @@ export async function GET(request: NextRequest) {
     response.headers.set('X-Response-Time', `${Date.now() - startTime}ms`);
     return response;
   } catch (error: unknown) {
+    const err = error as any;
     console.error('Dashboard API error:', error);
-    console.error('Stack:', error?.stack);
+    console.error('Stack:', err?.stack);
 
     // Check if it's an auth error
-    if (error?.name === 'AuthError' || error?.statusCode === 401) {
+    if (err?.name === 'AuthError' || err?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
@@ -242,7 +243,7 @@ export async function GET(request: NextRequest) {
     const errorResponse = NextResponse.json(
       {
         success: false,
-        error: 'เกิดข้อผิดพลาดในการดึงข้อมูล: ' + (error?.message || 'Unknown error'),
+        error: 'เกิดข้อผิดพลาดในการดึงข้อมูล: ' + (err?.message || 'Unknown error'),
       },
       { status: 500 }
     );

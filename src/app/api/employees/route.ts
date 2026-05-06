@@ -20,15 +20,16 @@ export async function GET(request: NextRequest) {
     });
     return NextResponse.json({ success: true, data: employees });
   } catch (error: unknown) {
+    const err = error as any;
     // Check for auth errors first
-    if (error instanceof AuthError || error?.name === 'AuthError' || error?.statusCode === 401) {
+    if (error instanceof AuthError || err?.name === 'AuthError' || err?.statusCode === 401) {
       return NextResponse.json(
         { success: false, error: 'ไม่ได้รับอนุญาต - กรุณาเข้าสู่ระบบ' },
         { status: 401 }
       );
     }
     console.error('Employees API error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: err?.message || 'Unknown error' }, { status: 500 });
   }
 }
 

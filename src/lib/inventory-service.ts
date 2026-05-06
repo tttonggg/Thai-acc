@@ -211,7 +211,7 @@ export async function checkLowStock(productId: string, warehouseId: string) {
 
   // Find admin users to notify
   const adminUsers = await prisma.user.findMany({
-    where: { role: { in: ['ADMIN', 'SUPERADMIN'] }, isActive: true },
+    where: { role: { in: ['ADMIN'] }, isActive: true },
     select: { id: true },
   });
 

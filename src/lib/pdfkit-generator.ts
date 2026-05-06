@@ -547,10 +547,8 @@ export async function generateInvoicePDFWithPDFKit(invoice: any): Promise<Buffer
         try {
           const amountSatang = invoice.netAmount ?? 0;
           const amountBaht = amountSatang / 100;
-          const payload = promptpayQR({
-            accountNumber: invoicePromptpayId,
+          const payload = promptpayQR(invoicePromptpayId, {
             amount: amountBaht,
-            reference: invoice.invoiceNumber || '',
           });
           const qrSvg: string = qrToString(payload, { type: 'svg' }) as string;
           const qrSize = 90;
@@ -735,10 +733,8 @@ export async function generateReceiptPDFWithPDFKit(receipt: any): Promise<Buffer
         try {
           const amountSatang = receipt.netAmount ?? 0;
           const amountBaht = amountSatang / 100;
-          const payload = promptpayQR({
-            accountNumber: promptpayId,
+          const payload = promptpayQR(promptpayId, {
             amount: amountBaht,
-            reference: receipt.receiptNo || '',
           });
           const qrSvg: string = qrToString(payload, { type: 'svg' }) as string;
           const qrSize = 90;

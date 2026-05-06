@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkOverdueInvoices } from '@/lib/email-service'
-import { requireAdmin } from '@/lib/api-auth'
 
 export async function GET(req: NextRequest) {
   // Optional: require secret header for cron security
