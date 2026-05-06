@@ -1560,6 +1560,8 @@ model Employee {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   payrolls         Payroll[]
+  balances         LeaveBalance[]
+  leaveRequests    LeaveRequest[]
 
   @@index([deletedAt])
 }
@@ -1585,6 +1587,7 @@ model PayrollRun {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   payrolls        Payroll[]
+  providentFundContributions ProvidentFundContribution[]
 
   @@index([journalEntryId])
   @@index([createdById])
@@ -1620,6 +1623,91 @@ enum PayrollStatus {
   DRAFT
   APPROVED
   PAID
+}
+
+// ============================================
+// ระบบลางาน (Leave Management - Phase 3b)
+// ============================================
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model LeaveType {
+  id          String        @id @default(cuid())
+  code        String        @unique
+  name        String
+  isActive    Boolean       @default(true)
+  defaultDays Int           @default(0)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  balances   LeaveBalance[]
+  requests   LeaveRequest[]
+}
+
+model LeaveBalance {
+  id          String        @id @default(cuid())
+  employeeId  String
+  leaveTypeId String
+  year        Int
+  totalDays   Float         @default(0)
+  usedDays    Float         @default(0)
+  pendingDays Float         @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  employee    Employee      @relation(fields: [employeeId], references: [id])
+  leaveType   LeaveType     @relation(fields: [leaveTypeId], references: [id])
+  requests    LeaveRequest[]
+
+  @@unique([employeeId, leaveTypeId, year])
+}
+
+model LeaveRequest {
+  id          String      @id @default(cuid())
+  employeeId  String
+  leaveTypeId String
+  balanceId   String
+  startDate   DateTime
+  endDate     DateTime
+  totalDays   Float
+  reason      String?
+  status      LeaveStatus @default(PENDING)
+  approvedBy  String?
+  approvedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  employee    Employee    @relation(fields: [employeeId], references: [id])
+  leaveType   LeaveType   @relation(fields: [leaveTypeId], references: [id])
+  balance     LeaveBalance @relation(fields: [balanceId], references: [id])
+}
+
+// ============================================
+// กองทุนสำรองเลี้ยงชีพ (Provident Fund - Phase 3b)
+// ============================================
+model ProvidentFund {
+  id            String                     @id @default(cuid())
+  name          String                     @unique
+  employeeRate  Float
+  employerRate  Float
+  maxMonthly    Float?
+  isActive      Boolean                    @default(true)
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+  contributions ProvidentFundContribution[]
+}
+
+model ProvidentFundContribution {
+  id              String        @id @default(cuid())
+  providentFundId String
+  employeeId      String
+  payrollRunId    String
+  employeePortion Float
+  employerPortion Float
+  createdAt       DateTime      @default(now())
+  providentFund   ProvidentFund @relation(fields: [providentFundId], references: [id])
+  payrollRun      PayrollRun    @relation(fields: [payrollRunId], references: [id])
 }
 
 // ============================================
