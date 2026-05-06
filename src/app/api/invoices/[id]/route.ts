@@ -10,6 +10,7 @@ import {
 import { apiResponse } from '@/lib/api-utils';
 import { db } from '@/lib/db';
 import { satangToBaht } from '@/lib/currency';
+import { logAudit } from '@/lib/audit-service';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -92,6 +93,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         data: { status: 'ISSUED' },
       });
 
+      // Audit POST (issue) action
+      await logAudit({
+        userId: user.id,
+        action: 'POST',
+        entityType: 'Invoice',
+        entityId: id,
+        beforeState: { status: invoice.status },
+        afterState: { status: updatedInvoice.status },
+        ipAddress: request.headers.get('x-forwarded-for') || '',
+        userAgent: request.headers.get('user-agent') || '',
+      }).catch((err) => console.error('Audit log failed:', err));
+
       return apiResponse(updatedInvoice);
     }
 
@@ -128,6 +141,44 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           terms: data.terms,
         },
       });
+
+      // Audit field-level changes
+      await logAudit({
+        userId: user.id,
+        action: 'UPDATE',
+        entityType: 'Invoice',
+        entityId: id,
+        beforeState: {
+          invoiceDate: invoice.invoiceDate,
+          dueDate: invoice.dueDate,
+          customerId: invoice.customerId,
+          type: invoice.type,
+          reference: invoice.reference,
+          poNumber: invoice.poNumber,
+          discountAmount: invoice.discountAmount,
+          discountPercent: invoice.discountPercent,
+          withholdingRate: invoice.withholdingRate,
+          notes: invoice.notes,
+          internalNotes: invoice.internalNotes,
+          terms: invoice.terms,
+        },
+        afterState: {
+          invoiceDate: updatedInvoice.invoiceDate,
+          dueDate: updatedInvoice.dueDate,
+          customerId: updatedInvoice.customerId,
+          type: updatedInvoice.type,
+          reference: updatedInvoice.reference,
+          poNumber: updatedInvoice.poNumber,
+          discountAmount: updatedInvoice.discountAmount,
+          discountPercent: updatedInvoice.discountPercent,
+          withholdingRate: updatedInvoice.withholdingRate,
+          notes: updatedInvoice.notes,
+          internalNotes: updatedInvoice.internalNotes,
+          terms: updatedInvoice.terms,
+        },
+        ipAddress: request.headers.get('x-forwarded-for') || '',
+        userAgent: request.headers.get('user-agent') || '',
+      }).catch((err) => console.error('Audit log failed:', err)); // non-blocking
 
       return apiResponse(updatedInvoice);
     }
@@ -192,6 +243,23 @@ export async function DELETE(
       db.invoiceLine.deleteMany({ where: { invoiceId: id } }),
       db.invoiceComment.deleteMany({ where: { invoiceId: id } }),
     ]);
+
+    // Audit DELETE
+    await logAudit({
+      userId: user.id,
+      action: 'DELETE',
+      entityType: 'Invoice',
+      entityId: id,
+      beforeState: {
+        invoiceNo: invoice.invoiceNo,
+        status: invoice.status,
+        totalAmount: invoice.totalAmount,
+        customerId: invoice.customerId,
+      },
+      afterState: null,
+      ipAddress: request.headers.get('x-forwarded-for') || '',
+      userAgent: request.headers.get('user-agent') || '',
+    }).catch((err) => console.error('Audit log failed:', err));
 
     return apiResponse({ message: 'ลบใบกำกับภาษีเรียบร้อยแล้ว' });
   } catch (error: unknown) {
