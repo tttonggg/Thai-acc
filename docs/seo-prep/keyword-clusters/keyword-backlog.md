@@ -1,7 +1,7 @@
 # Keyword Backlog — Thai Accounting ERP Niche
 
 > Status: 🔴 Research Needed  
-> Last Updated: 2026-05-05  
+> Last Updated: 2026-05-06  
 > Source: To be researched via DataForSEO / manual SERP analysis
 
 ---
@@ -18,9 +18,9 @@
 
 | Keyword | Intent | Volume Est. | Competition | Score | Cluster | Status |
 |---------|--------|------------|-------------|-------|--------|--------|
-| โปรแกรมบัญชีออนไลน์ | Commercial | TBD | TBD | — | accounting-software | 🔴 |
-| โปรแกรมบัญชี SMEs | Commercial | TBD | TBD | — | accounting-software | 🔴 |
-| ระบบ ERP บัญชี | Commercial | TBD | TBD | — | erp-system | 🔴 |
+| โปรแกรมบัญชีออนไลน์ | Commercial | High | High (FlowAccount, PEAK dominate) | 7/10 | accounting-software | 🟡 Analyzed 2026-05-06 |
+| โปรแกรมบัญชี SMEs | Commercial | High | High (FlowAccount, PEAK, SMEMOVE) | 6/10 | accounting-software | 🟡 Analyzed 2026-05-06 |
+| ระบบ ERP บัญชี | Commercial | High | Medium-High (Beecy article, Odoo, MAC-5) | 6/10 | erp-system | 🟡 Analyzed 2026-05-06 |
 | โปรแกรมบัญชีภาษี | Commercial | TBD | TBD | — | tax-accounting | 🔴 |
 | ซอฟต์แวร์ ERP ราคาถูก | Commercial | TBD | TBD | — | erp-system | 🔴 |
 

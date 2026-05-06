@@ -18,6 +18,7 @@ declare module 'next-auth' {
       role: string;
       mfaEnabled: boolean;
       mfaVerified: boolean;
+      customerId?: string; // For CUSTOMER_PORTAL role
     };
   }
   interface User {
@@ -27,6 +28,7 @@ declare module 'next-auth' {
     role: string;
     mfaEnabled: boolean;
     requiresMFA: boolean;
+    customerId?: string; // For CUSTOMER_PORTAL role
   }
 }
 
@@ -38,6 +40,7 @@ declare module 'next-auth/jwt' {
     role: string;
     mfaEnabled: boolean;
     mfaVerified: boolean;
+    customerId?: string; // For CUSTOMER_PORTAL role
   }
 }
 
@@ -160,6 +163,19 @@ export const authOptions: NextAuthOptions = {
           // Continue with login even if logging fails
         }
 
+        // For CUSTOMER_PORTAL users, fetch customerId from portal account
+        let customerId: string | undefined;
+        if (user.role === 'CUSTOMER_PORTAL') {
+          try {
+            const portalAccount = await prisma.customerPortalAccount.findUnique({
+              where: { userId: user.id },
+            });
+            customerId = portalAccount?.customerId;
+          } catch {
+            // Non-critical, continue without customerId
+          }
+        }
+
         return {
           id: user.id,
           email: user.email,
@@ -167,6 +183,7 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           mfaEnabled: user.mfaEnabled,
           requiresMFA: false,
+          customerId,
         };
       },
     }),
@@ -180,6 +197,9 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.mfaEnabled = user.mfaEnabled;
         token.mfaVerified = !user.requiresMFA;
+        if ('customerId' in user) {
+          token.customerId = user.customerId;
+        }
       }
 
       // Handle session rotation on privilege escalation
@@ -211,6 +231,7 @@ export const authOptions: NextAuthOptions = {
           role: token.role || 'USER',
           mfaEnabled: token.mfaEnabled || false,
           mfaVerified: token.mfaVerified || false,
+          customerId: token.customerId,
         };
       }
       return session;

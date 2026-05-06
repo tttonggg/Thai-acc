@@ -243,6 +243,7 @@ model Customer {
   quotations    Quotation[]
   salesOrders   SalesOrder[]
   projects      Project[]
+  portalAccounts CustomerPortalAccount[]
 
   @@index([deletedAt])
 }
@@ -1114,6 +1115,26 @@ model User {
   updatedSOs          SalesOrder[]       @relation("SOUpdater")
   documentAttachments DocumentAttachment[]
   userEmployees       UserEmployee[]
+  portalAccount       CustomerPortalAccount?
+}
+
+// ============================================
+// พอร์ทัลลูกค้า / Customer Portal
+// ============================================
+model CustomerPortalAccount {
+  id           String   @id @default(cuid())
+  customerId   String   @unique
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  password     String   // bcrypt hashed
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([userId])
 }
 
 enum UserRole {
@@ -1121,6 +1142,7 @@ enum UserRole {
   ACCOUNTANT // นักบัญชี
   USER // ผู้ใช้ทั่วไป
   VIEWER // ผู้ดูเท่านั้น
+  CUSTOMER_PORTAL // ลูกค้าเข้าพอร์ทัล
 }
 
 // ============================================

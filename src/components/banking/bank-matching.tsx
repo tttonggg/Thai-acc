@@ -13,6 +13,9 @@ import {
   Receipt,
   CreditCard,
   FileText,
+  ThumbsUp,
+  ThumbsDown,
+  Scale,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,6 +39,11 @@ interface BankStatementEntry {
 
 interface MatchSuggestion {
   entryId: string;
+  description: string;
+  amount: number;
+  type: 'CREDIT' | 'DEBIT';
+  valueDate: string;
+  reference: string | null;
   matchedEntryId: string | null;
   matchedEntryType: 'JOURNAL_ENTRY' | 'PAYMENT' | 'RECEIPT' | null;
   matchConfidence: number;
@@ -60,6 +68,9 @@ export function BankMatching() {
   const [entries, setEntries] = useState<MatchedEntries>({ matched: [], unmatched: [] });
   const [loading, setLoading] = useState(false);
   const [matching, setMatching] = useState(false);
+  const [statementBalance, setStatementBalance] = useState('');
+  const [statementDate, setStatementDate] = useState('');
+  const [reconciling, setReconciling] = useState(false);
   const { toast } = useToast();
 
   // Fetch bank accounts
@@ -148,6 +159,95 @@ export function BankMatching() {
     }
   };
 
+  const handleApprove = async (entryId: string, docId: string, docType: string, score: number, reasons: string[]) => {
+    try {
+      const res = await window
+        .fetch(`/api/banking/match-decision`, {
+          credentials: 'include',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entryId, decision: 'approve', docId, docType, score, reasons }),
+        })
+        .then((r) => r.json());
+      if (res.success) {
+        toast({ title: 'อนุมัติการจับคู่สำเร็จ' });
+        fetchEntries();
+      } else {
+        toast({ title: 'เกิดข้อผิดพลาด', description: res.error, variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'เกิดข้อผิดพลาด', variant: 'destructive' });
+    }
+  };
+
+  const handleReject = async (entryId: string) => {
+    try {
+      const res = await window
+        .fetch(`/api/banking/match-decision`, {
+          credentials: 'include',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entryId, decision: 'reject' }),
+        })
+        .then((r) => r.json());
+      if (res.success) {
+        toast({ title: 'ปฏิเสธการจับคู่แล้ว' });
+        fetchEntries();
+      }
+    } catch {
+      toast({ title: 'เกิดข้อผิดพลาด', variant: 'destructive' });
+    }
+  };
+
+  const handleReconcile = async () => {
+    if (!selectedAccountId || !statementDate || !statementBalance) {
+      toast({ title: 'กรุณากรอกวันที่และยอดเงิน', variant: 'destructive' });
+      return;
+    }
+    if (entries.matched.length === 0) {
+      toast({ title: 'ไม่มีรายการที่จับคู่ — ต้องจับคู่ก่อนกระทบยอด', variant: 'destructive' });
+      return;
+    }
+    setReconciling(true);
+    try {
+      // Build reconciledItems from matched entries (only those with matchedEntryId)
+      const reconciledItems = entries.matched
+        .filter((m) => m.matchedEntryId)
+        .map((m) => ({
+          id: m.matchedEntryId!,
+          type: m.matchedEntryType === 'RECEIPT' ? 'RECEIPT' : m.matchedEntryType === 'PAYMENT' ? 'PAYMENT' : 'CHEQUE',
+        }));
+
+      const res = await window
+        .fetch(`/api/bank-accounts/${selectedAccountId}/reconcile`, {
+          credentials: 'include',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            statementDate,
+            statementBalance: parseFloat(statementBalance) * 100, // convert Baht to Satang
+            reconciledItems,
+          }),
+        })
+        .then((r) => r.json());
+      if (res.success) {
+        toast({
+          title: 'กระทบยอดสำเร็จ',
+          description: `ยอดตามสมุด: ฿${formatBaht(parseFloat(statementBalance) * 100)}, ผลต่าง: ฿${formatBaht(res.data.difference)}`,
+        });
+        setStatementBalance('');
+        setStatementDate('');
+        fetchEntries();
+      } else {
+        toast({ title: 'เกิดข้อผิดพลาด', description: res.error, variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'เกิดข้อผิดพลาด', variant: 'destructive' });
+    } finally {
+      setReconciling(false);
+    }
+  };
+
   const formatBaht = (satang: number) => {
     return new Intl.NumberFormat('th-TH', {
       minimumFractionDigits: 2,
@@ -193,6 +293,26 @@ export function BankMatching() {
                   </option>
                 ))}
               </select>
+            </div>
+            <div className="w-40">
+              <Label>วันที่เดินบัญชี</Label>
+              <Input
+                type="date"
+                value={statementDate}
+                onChange={(e) => setStatementDate(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div className="w-48">
+              <Label>ยอดเงินตามสมุดบัญชี (บาท)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={statementBalance}
+                onChange={(e) => setStatementBalance(e.target.value)}
+                className="mt-1"
+              />
             </div>
             <Button
               onClick={handleAutoMatch}
@@ -348,72 +468,62 @@ export function BankMatching() {
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {highConfidence.map((match) => {
-                                const entry = entries.unmatched.find(
-                                  (e) => e.id === match.entryId
-                                ) || {
-                                  description: '-',
-                                  amount: 0,
-                                  type: 'DEBIT' as const,
-                                  valueDate: new Date().toISOString(),
-                                };
-                                return (
-                                  <TableRow key={match.entryId}>
-                                    <TableCell className="whitespace-nowrap">
-                                      {formatDate(entry.valueDate)}
-                                    </TableCell>
-                                    <TableCell
-                                      className="max-w-xs truncate"
-                                      title={entry.description}
+                              {highConfidence.map((match) => (
+                                <TableRow key={match.entryId}>
+                                  <TableCell className="whitespace-nowrap">
+                                    {formatDate(match.valueDate)}
+                                  </TableCell>
+                                  <TableCell
+                                    className="max-w-xs truncate"
+                                    title={match.description}
+                                  >
+                                    {match.description}
+                                  </TableCell>
+                                  <TableCell className="flex items-center gap-1">
+                                    {match.matchedEntryType === 'RECEIPT' && (
+                                      <Receipt className="h-3 w-3 text-blue-500" />
+                                    )}
+                                    {match.matchedEntryType === 'PAYMENT' && (
+                                      <CreditCard className="h-3 w-3 text-orange-500" />
+                                    )}
+                                    {match.matchedEntryType === 'JOURNAL_ENTRY' && (
+                                      <FileText className="h-3 w-3 text-gray-500" />
+                                    )}
+                                    <Badge variant="outline" className="text-xs">
+                                      {match.matchedEntryType === 'RECEIPT'
+                                        ? 'ใบเสร็จ'
+                                        : match.matchedEntryType === 'PAYMENT'
+                                          ? 'ใบจ่าย'
+                                          : match.matchedEntryType === 'JOURNAL_ENTRY'
+                                            ? 'สมุดรายวัน'
+                                            : '-'}
+                                    </Badge>
+                                    <span className="ml-1 text-xs text-gray-400">
+                                      {match.matchReason}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge variant="default" className="bg-green-600 text-xs">
+                                      {match.matchConfidence}%
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell
+                                    className={`text-right font-semibold ${match.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}
+                                  >
+                                    {match.type === 'CREDIT' ? '+' : '-'}฿
+                                    {formatBaht(match.amount)}
+                                  </TableCell>
+                                  <TableCell>
+                                    <button
+                                      onClick={() => handleUnmatch(match.entryId)}
+                                      className="cursor-pointer rounded p-1 transition-colors hover:bg-gray-100"
+                                      title="ยกเลิกการจับคู่"
                                     >
-                                      {entry.description}
-                                    </TableCell>
-                                    <TableCell className="flex items-center gap-1">
-                                      {match.matchedEntryType === 'RECEIPT' && (
-                                        <Receipt className="h-3 w-3 text-blue-500" />
-                                      )}
-                                      {match.matchedEntryType === 'PAYMENT' && (
-                                        <CreditCard className="h-3 w-3 text-orange-500" />
-                                      )}
-                                      {match.matchedEntryType === 'JOURNAL_ENTRY' && (
-                                        <FileText className="h-3 w-3 text-gray-500" />
-                                      )}
-                                      <Badge variant="outline" className="text-xs">
-                                        {match.matchedEntryType === 'RECEIPT'
-                                          ? 'ใบเสร็จ'
-                                          : match.matchedEntryType === 'PAYMENT'
-                                            ? 'ใบจ่าย'
-                                            : match.matchedEntryType === 'JOURNAL_ENTRY'
-                                              ? 'สมุดรายวัน'
-                                              : '-'}
-                                      </Badge>
-                                      <span className="ml-1 text-xs text-gray-400">
-                                        {match.matchReason}
-                                      </span>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Badge variant="default" className="bg-green-600 text-xs">
-                                        {match.matchConfidence}%
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell
-                                      className={`text-right font-semibold ${entry.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}
-                                    >
-                                      {entry.type === 'CREDIT' ? '+' : '-'}฿
-                                      {formatBaht(entry.amount)}
-                                    </TableCell>
-                                    <TableCell>
-                                      <button
-                                        onClick={() => handleUnmatch(match.entryId)}
-                                        className="cursor-pointer rounded p-1 transition-colors hover:bg-gray-100"
-                                        title="ยกเลิกการจับคู่"
-                                      >
-                                        <Unlink className="h-4 w-4 text-gray-400" />
-                                      </button>
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })}
+                                      <Unlink className="h-4 w-4 text-gray-400" />
+                                    </button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
                             </TableBody>
                           </Table>
                         </ScrollArea>
@@ -445,77 +555,91 @@ export function BankMatching() {
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {mediumLowConfidence.map((match) => {
-                                const entry = entries.unmatched.find(
-                                  (e) => e.id === match.entryId
-                                ) || {
-                                  description: '-',
-                                  amount: 0,
-                                  type: 'DEBIT' as const,
-                                  valueDate: new Date().toISOString(),
-                                };
-                                return (
-                                  <TableRow key={match.entryId}>
-                                    <TableCell className="whitespace-nowrap">
-                                      {formatDate(entry.valueDate)}
-                                    </TableCell>
-                                    <TableCell
-                                      className="max-w-xs truncate"
-                                      title={entry.description}
+                              {mediumLowConfidence.map((match) => (
+                                <TableRow key={match.entryId}>
+                                  <TableCell className="whitespace-nowrap">
+                                    {formatDate(match.valueDate)}
+                                  </TableCell>
+                                  <TableCell
+                                    className="max-w-xs truncate"
+                                    title={match.description}
+                                  >
+                                    {match.description}
+                                  </TableCell>
+                                  <TableCell className="flex items-center gap-1">
+                                    {match.matchedEntryType === 'RECEIPT' && (
+                                      <Receipt className="h-3 w-3 text-blue-500" />
+                                    )}
+                                    {match.matchedEntryType === 'PAYMENT' && (
+                                      <CreditCard className="h-3 w-3 text-orange-500" />
+                                    )}
+                                    {match.matchedEntryType === 'JOURNAL_ENTRY' && (
+                                      <FileText className="h-3 w-3 text-gray-500" />
+                                    )}
+                                    <Badge variant="outline" className="text-xs">
+                                      {match.matchedEntryType === 'RECEIPT'
+                                        ? 'ใบเสร็จ'
+                                        : match.matchedEntryType === 'PAYMENT'
+                                          ? 'ใบจ่าย'
+                                          : match.matchedEntryType === 'JOURNAL_ENTRY'
+                                            ? 'สมุดรายวัน'
+                                            : '-'}
+                                    </Badge>
+                                    <span className="ml-1 text-xs text-gray-400">
+                                      {match.matchReason}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge
+                                      variant={
+                                        match.matchConfidence >= 80 ? 'default' : 'secondary'
+                                      }
+                                      className={`text-xs ${match.matchConfidence >= 80 ? 'bg-yellow-600' : 'bg-orange-500'}`}
                                     >
-                                      {entry.description}
-                                    </TableCell>
-                                    <TableCell className="flex items-center gap-1">
-                                      {match.matchedEntryType === 'RECEIPT' && (
-                                        <Receipt className="h-3 w-3 text-blue-500" />
-                                      )}
-                                      {match.matchedEntryType === 'PAYMENT' && (
-                                        <CreditCard className="h-3 w-3 text-orange-500" />
-                                      )}
-                                      {match.matchedEntryType === 'JOURNAL_ENTRY' && (
-                                        <FileText className="h-3 w-3 text-gray-500" />
-                                      )}
-                                      <Badge variant="outline" className="text-xs">
-                                        {match.matchedEntryType === 'RECEIPT'
-                                          ? 'ใบเสร็จ'
-                                          : match.matchedEntryType === 'PAYMENT'
-                                            ? 'ใบจ่าย'
-                                            : match.matchedEntryType === 'JOURNAL_ENTRY'
-                                              ? 'สมุดรายวัน'
-                                              : '-'}
-                                      </Badge>
-                                      <span className="ml-1 text-xs text-gray-400">
-                                        {match.matchReason}
-                                      </span>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Badge
-                                        variant={
-                                          match.matchConfidence >= 80 ? 'default' : 'secondary'
-                                        }
-                                        className={`text-xs ${match.matchConfidence >= 80 ? 'bg-yellow-600' : 'bg-orange-500'}`}
-                                      >
-                                        {match.matchConfidence}%
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell
-                                      className={`text-right font-semibold ${entry.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}
-                                    >
-                                      {entry.type === 'CREDIT' ? '+' : '-'}฿
-                                      {formatBaht(entry.amount)}
-                                    </TableCell>
-                                    <TableCell>
+                                      {match.matchConfidence}%
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell
+                                    className={`text-right font-semibold ${match.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}
+                                  >
+                                    {match.type === 'CREDIT' ? '+' : '-'}฿
+                                    {formatBaht(match.amount)}
+                                  </TableCell>
+                                  <TableCell className="flex items-center gap-1">
+                                    {match.matchedEntryId ? (
                                       <button
-                                        onClick={() => handleUnmatch(match.entryId)}
-                                        className="cursor-pointer rounded p-1 transition-colors hover:bg-gray-100"
-                                        title="ยกเลิกการจับคู่"
+                                        onClick={() =>
+                                          handleApprove(
+                                            match.entryId,
+                                            match.matchedEntryId!,
+                                            match.matchedEntryType!,
+                                            match.matchConfidence,
+                                            [match.matchReason]
+                                          )
+                                        }
+                                        className="cursor-pointer rounded p-1 text-green-600 transition-colors hover:bg-green-50"
+                                        title="อนุมัติ"
                                       >
-                                        <Unlink className="h-4 w-4 text-gray-400" />
+                                        <ThumbsUp className="h-4 w-4" />
                                       </button>
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })}
+                                    ) : null}
+                                    <button
+                                      onClick={() => handleReject(match.entryId)}
+                                      className="cursor-pointer rounded p-1 text-red-500 transition-colors hover:bg-red-50"
+                                      title="ปฏิเสธ"
+                                    >
+                                      <ThumbsDown className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleUnmatch(match.entryId)}
+                                      className="cursor-pointer rounded p-1 text-gray-400 transition-colors hover:bg-gray-100"
+                                      title="ยกเลิกจับคู่"
+                                    >
+                                      <Unlink className="h-4 w-4" />
+                                    </button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
                             </TableBody>
                           </Table>
                         </ScrollArea>
@@ -525,6 +649,42 @@ export function BankMatching() {
                 </>
               );
             })()}
+
+          {/* Reconcile Button */}
+          {entries.matched.length > 0 && (
+            <Card className="border-blue-200 bg-blue-50/30">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Scale className="h-6 w-6 text-blue-600" />
+                    <div>
+                      <p className="font-semibold text-blue-800">กระทบยอดธนาคาร</p>
+                      <p className="text-sm text-blue-600">
+                        {entries.matched.length} รายการจับคู่แล้ว
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleReconcile}
+                    disabled={!statementDate || !statementBalance || reconciling}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {reconciling ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        กำลังกระทบยอด...
+                      </>
+                    ) : (
+                      <>
+                        <Scale className="mr-2 h-4 w-4" />
+                        ดำเนินการกระทบยอด
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Empty State */}
           {entries.unmatched.length === 0 && entries.matched.length === 0 && (

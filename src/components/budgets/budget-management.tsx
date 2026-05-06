@@ -19,11 +19,19 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { PiggyBank, Plus, RefreshCw, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
+import { PiggyBank, Plus, RefreshCw, AlertTriangle, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 
 interface Budget {
   id: string;
@@ -56,6 +64,17 @@ export function BudgetManagement() {
   const [report, setReport] = useState<any>(null);
   const [alertsDialog, setAlertsDialog] = useState(false);
   const [alerts, setAlerts] = useState<any[]>([]);
+  const [budgetDialog, setBudgetDialog] = useState(false);
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [formLoading, setFormLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    year: new Date().getFullYear(),
+    accountId: '',
+    amount: '',
+    alertAt: 80,
+    notes: '',
+  });
 
   useEffect(() => {
     fetchBudgets();
@@ -83,6 +102,95 @@ export function BudgetManagement() {
       }
     } catch (error) {
       console.error('Error fetching alerts:', error);
+    }
+  };
+
+  const fetchAccounts = async () => {
+    try {
+      const res = await fetch('/api/chart-of-accounts?type=EXPENSE&isDetail=true', { credentials: 'include' });
+      const data = await res.json();
+      if (data.accounts) {
+        setAccounts(data.accounts);
+      }
+    } catch (error) {
+      console.error('Error fetching accounts:', error);
+    }
+  };
+
+  const openBudgetDialog = async (budget?: Budget) => {
+    await fetchAccounts();
+    if (budget) {
+      setEditingBudget(budget);
+      setFormData({
+        year: budget.year,
+        accountId: budget.accountId,
+        amount: (budget.amount / 100).toString(),
+        alertAt: budget.alertAt,
+        notes: budget.notes || '',
+      });
+    } else {
+      setEditingBudget(null);
+      setFormData({
+        year: selectedYear,
+        accountId: '',
+        amount: '',
+        alertAt: 80,
+        notes: '',
+      });
+    }
+    setBudgetDialog(true);
+  };
+
+  const handleSaveBudget = async () => {
+    if (!formData.accountId || !formData.amount) {
+      toast.error('กรุณากรอกข้อมูลให้ครบ');
+      return;
+    }
+    setFormLoading(true);
+    try {
+      const satangAmount = Math.round(parseFloat(formData.amount) * 100);
+      const res = await fetch('/api/budgets', {
+        credentials: 'include',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          year: formData.year,
+          accountId: formData.accountId,
+          amount: satangAmount,
+          alertAt: formData.alertAt,
+          notes: formData.notes,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(editingBudget ? 'อัปเดตงบประมาณแล้ว' : 'สร้างงบประมาณแล้ว');
+        setBudgetDialog(false);
+        fetchBudgets();
+      } else {
+        toast.error(data.error || 'เกิดข้อผิดพลาด');
+      }
+    } catch (error) {
+      toast.error('เกิดข้อผิดพลาด');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleDeleteBudget = async (id: string) => {
+    if (!confirm('ยืนยันการลบงบประมาณนี้?')) return;
+    try {
+      const res = await fetch(`/api/budgets/${id}`, {
+        credentials: 'include',
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        toast.success('ลบงบประมาณแล้ว');
+        fetchBudgets();
+      } else {
+        toast.error('เกิดข้อผิดพลาด');
+      }
+    } catch {
+      toast.error('เกิดข้อผิดพลาด');
     }
   };
 
@@ -183,6 +291,10 @@ export function BudgetManagement() {
               จัดการงบประมาณ
             </CardTitle>
             <div className="flex gap-2">
+              <Button onClick={() => openBudgetDialog()}>
+                <Plus className="mr-2 h-4 w-4" />
+                เพิ่มงบประมาณ
+              </Button>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
@@ -224,13 +336,18 @@ export function BudgetManagement() {
                 <TableHead>ใช้จริง</TableHead>
                 <TableHead>คงเหลือ</TableHead>
                 <TableHead>สถานะ</TableHead>
+                <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {budgets.map((budget) => {
                 const usage = getUsagePercent(budget);
                 return (
-                  <TableRow key={budget.id}>
+                  <TableRow
+                    key={budget.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => openBudgetDialog(budget)}
+                  >
                     <TableCell className="font-medium">{budget.account.code}</TableCell>
                     <TableCell>{budget.account.name}</TableCell>
                     <TableCell>{(budget.amount / 100).toLocaleString()} บาท</TableCell>
@@ -244,12 +361,24 @@ export function BudgetManagement() {
                       {(budget.variance / 100).toLocaleString()} บาท
                     </TableCell>
                     <TableCell>{getStatusBadge(budget)}</TableCell>
+                    <TableCell>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteBudget(budget.id);
+                        }}
+                        className="cursor-pointer rounded p-1 text-red-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                        title="ลบ"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </TableCell>
                   </TableRow>
                 );
               })}
               {budgets.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
                     ไม่พบข้อมูลงบประมาณ
                   </TableCell>
                 </TableRow>
@@ -258,6 +387,101 @@ export function BudgetManagement() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Create / Edit Budget Dialog */}
+      <Dialog open={budgetDialog} onOpenChange={setBudgetDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingBudget ? 'แก้ไขงบประมาณ' : 'เพิ่มงบประมาณ'}
+            </DialogTitle>
+            <DialogDescription>
+              {editingBudget
+                ? `แก้ไขงบประมาณ ${editingBudget.account.name}`
+                : 'กำหนดวงเงินงบประมาณสำหรับบัญชีค่าใช้จ่าย'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>ปีงบประมาณ</Label>
+                <Input
+                  type="number"
+                  value={formData.year}
+                  onChange={(e) =>
+                    setFormData({ ...formData, year: parseInt(e.target.value) })
+                  }
+                  min={2020}
+                  max={2100}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>แจ้งเตือนเมื่อถึง (%)</Label>
+                <Input
+                  type="number"
+                  value={formData.alertAt}
+                  onChange={(e) =>
+                    setFormData({ ...formData, alertAt: parseInt(e.target.value) })
+                  }
+                  min={1}
+                  max={100}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>บัญชีค่าใช้จ่าย</Label>
+              <select
+                className="w-full rounded border px-3 py-2 text-sm"
+                value={formData.accountId}
+                onChange={(e) =>
+                  setFormData({ ...formData, accountId: e.target.value })
+                }
+                disabled={!!editingBudget}
+              >
+                <option value="">-- เลือกบัญชี --</option>
+                {accounts.map((acc) => (
+                  <option key={acc.id} value={acc.id}>
+                    {acc.code} - {acc.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>วงเงินงบประมาณ (บาท)</Label>
+              <Input
+                type="number"
+                placeholder="0.00"
+                value={formData.amount}
+                onChange={(e) =>
+                  setFormData({ ...formData, amount: e.target.value })
+                }
+                min={0}
+                step={0.01}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>หมายเหตุ</Label>
+              <textarea
+                className="w-full rounded border px-3 py-2 text-sm"
+                rows={2}
+                value={formData.notes}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
+                placeholder="รายละเอียดเพิ่มเติม..."
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setBudgetDialog(false)}>
+                ยกเลิก
+              </Button>
+              <Button onClick={handleSaveBudget} disabled={formLoading}>
+                {formLoading ? 'กำลังบันทึก...' : 'บันทึก'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={alertsDialog} onOpenChange={setAlertsDialog}>
         <DialogContent>
@@ -321,6 +545,67 @@ export function BudgetManagement() {
                   </p>
                 </div>
               </div>
+              <Table className="mt-4">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>รหัสบัญชี</TableHead>
+                    <TableHead>ชื่อบัญชี</TableHead>
+                    <TableHead className="text-right">งบประมาณ</TableHead>
+                    <TableHead className="text-right">ใช้จริง</TableHead>
+                    <TableHead className="text-right">ผลต่าง</TableHead>
+                    <TableHead className="text-center">% ใช้ไป</TableHead>
+                    <TableHead className="text-center">สถานะ</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {report.accounts.map((acc: any) => {
+                    const varianceSign = acc.variance >= 0 ? '+' : '';
+                    return (
+                      <TableRow key={acc.accountId}>
+                        <TableCell className="font-medium">{acc.accountCode}</TableCell>
+                        <TableCell>{acc.accountName}</TableCell>
+                        <TableCell className="text-right">
+                          {(acc.budget / 100).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {(acc.actual / 100).toLocaleString()}
+                        </TableCell>
+                        <TableCell
+                          className={`text-right font-semibold ${acc.variance >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        >
+                          {varianceSign}
+                          {(acc.variance / 100).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex items-center gap-2">
+                            <Progress
+                              value={Math.min(acc.usagePercent, 100)}
+                              className="h-2 flex-1"
+                            />
+                            <span className="text-xs text-muted-foreground">
+                              {acc.usagePercent.toFixed(0)}%
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {acc.status === 'OVER' && (
+                            <Badge variant="destructive">เกินงบ</Badge>
+                          )}
+                          {acc.status === 'CRITICAL' && (
+                            <Badge className="bg-orange-500">เสี่ยง</Badge>
+                          )}
+                          {acc.status === 'ON_TRACK' && (
+                            <Badge variant="secondary">ตามแผน</Badge>
+                          )}
+                          {acc.status === 'UNDER' && (
+                            <Badge className="bg-green-500">ปกติ</Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
           )}
         </DialogContent>

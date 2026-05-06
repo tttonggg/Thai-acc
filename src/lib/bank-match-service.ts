@@ -71,17 +71,6 @@ export async function matchBankEntries(
         matchConfidence: matchResult.matchConfidence,
         matchReason: matchResult.matchReason,
       });
-
-      // Mark as matched
-      await prisma.bankStatementEntry.update({
-        where: { id: entry.id },
-        data: {
-          matched: true,
-          matchedEntryId: matchResult.matchedEntryId,
-          matchedEntryType: matchResult.matchedEntryType,
-          matchConfidence: (matchResult as any).matchConfidence,
-        } as any,
-      });
     } else {
       unmatched.push({
         id: entry.id,
@@ -92,6 +81,23 @@ export async function matchBankEntries(
         reference: entry.reference,
       });
     }
+  }
+
+  // Batch-update all matched entries in a single transaction (atomic)
+  if (results.length > 0) {
+    await prisma.$transaction(
+      results.map((r) =>
+        prisma.bankStatementEntry.update({
+          where: { id: r.entryId },
+          data: {
+            matched: true,
+            matchedEntryId: r.matchedEntryId,
+            matchedEntryType: r.matchedEntryType,
+            matchConfidence: r.matchConfidence,
+          },
+        })
+      )
+    );
   }
 
   return { matched: results, unmatched };
@@ -390,7 +396,6 @@ export async function getUnmatchedEntries(bankAccountId: string) {
     orderBy: { valueDate: 'asc' },
     select: {
       id: true,
-      statementDate: true,
       valueDate: true,
       description: true,
       amount: true,
