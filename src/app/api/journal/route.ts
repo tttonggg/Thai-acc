@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { z } from 'zod';
-import { requireAuth, requireRole, generateDocNumber } from '@/lib/api-utils';
+import { requireAuth, requireRole, generateDocNumber, getClientIp } from '@/lib/api-utils';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 import { checkPeriodStatus } from '@/lib/period-service';
 import { handleApiError } from '@/lib/api-error-handler';
+import { logJournalMutation } from '@/lib/audit-service';
 
 // Validation schema for journal entry
 const journalLineSchema = z.object({
@@ -136,6 +137,8 @@ export async function POST(request: NextRequest) {
   try {
     // Require ACCOUNTANT or ADMIN role
     const user = await requireRole(['ACCOUNTANT', 'ADMIN']);
+    const ipAddress = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
 
     const body = await request.json();
     const validatedData = journalEntrySchema.parse(body);
@@ -210,6 +213,17 @@ export async function POST(request: NextRequest) {
         credit: satangToBaht(line.credit),
       })),
     };
+
+    // Audit log the creation
+    await logJournalMutation(
+      user.id,
+      entry.id,
+      'CREATE',
+      null,
+      entryInBaht as unknown as Record<string, unknown>,
+      ipAddress,
+      userAgent
+    );
 
     return NextResponse.json({ success: true, data: entryInBaht });
   } catch (error: unknown) {

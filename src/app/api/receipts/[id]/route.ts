@@ -5,6 +5,7 @@ import { requireAuth, requireRole } from '@/lib/api-utils';
 import { generateDocNumber } from '@/lib/api-utils';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 import { handleApiError } from '@/lib/api-error-handler';
+import { logReceiptMutation } from '@/lib/audit-service';
 
 // Validation schema for receipt allocation
 const receiptAllocationSchema = z.object({
@@ -107,7 +108,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 // PUT - Update receipt (draft only)
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
     await requireRole(['ACCOUNTANT', 'ADMIN']);
 
     const { id } = await params;
@@ -194,6 +195,19 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       }),
     ]);
 
+    // Audit logging - UPDATE
+    const ipAddressPut = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const userAgentPut = request.headers.get('user-agent') || 'unknown';
+    await logReceiptMutation(
+      user.id,
+      id,
+      'UPDATE',
+      existingReceipt as unknown as Record<string, unknown>,
+      receipt as unknown as Record<string, unknown>,
+      ipAddressPut,
+      userAgentPut
+    );
+
     return NextResponse.json({ success: true, data: receipt });
   } catch (error: unknown) {
     console.error('Error updating receipt:', error);
@@ -216,7 +230,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
     await requireRole(['ACCOUNTANT', 'ADMIN']);
 
     const { id } = await params;
@@ -246,6 +260,19 @@ export async function DELETE(
         data: { deletedAt: new Date(), isActive: false },
       }),
     ]);
+
+    // Audit logging - DELETE
+    const ipAddressDel = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const userAgentDel = request.headers.get('user-agent') || 'unknown';
+    await logReceiptMutation(
+      user.id,
+      id,
+      'DELETE',
+      receipt as unknown as Record<string, unknown>,
+      null,
+      ipAddressDel,
+      userAgentDel
+    );
 
     return NextResponse.json({ success: true, message: 'ลบใบเสร็จรับเงินเรียบร้อยแล้ว' });
   } catch (error: unknown) {

@@ -5,7 +5,9 @@ import {
   apiError,
   unauthorizedError,
   generateDocNumber,
+  getClientIp,
 } from '@/lib/api-utils';
+import { logPaymentMutation } from '@/lib/audit-service';
 import { z } from 'zod';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 import { generateWhtFromPayment } from '@/lib/wht-service';
@@ -137,6 +139,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
+    const ipAddress = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
 
     if (user.role === 'VIEWER') {
       return apiError('ไม่มีสิทธิ์สร้างใบจ่ายเงิน', 403);
@@ -278,6 +282,17 @@ export async function POST(request: Request) {
         whtAmount: satangToBaht(alloc.whtAmount),
       })),
     };
+
+    // Log payment creation to audit trail
+    await logPaymentMutation(
+      user.id,
+      payment.id,
+      validatedData.status === 'POSTED' ? 'POST' : 'CREATE',
+      null,
+      payment,
+      ipAddress,
+      userAgent
+    );
 
     return apiResponse(paymentInBaht, 201);
   } catch (error: unknown) {

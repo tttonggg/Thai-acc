@@ -8,10 +8,12 @@ import {
   apiError,
   unauthorizedError,
   forbiddenError,
+  getClientIp,
 } from '@/lib/api-utils';
 import { AuthError } from '@/lib/api-auth';
 import { generateWhtFromPayment } from '@/lib/wht-service';
 import { postPaymentToGL } from '@/lib/payment-gl-service';
+import { logPaymentMutation } from '@/lib/audit-service';
 import { z } from 'zod';
 
 // Validation schema
@@ -92,6 +94,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuth();
+    const ipAddress = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
     const { id } = await params;
 
     if (user.role === 'VIEWER') {
@@ -211,6 +215,17 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       },
     });
 
+    // Log payment update to audit trail
+    await logPaymentMutation(
+      user.id,
+      id,
+      'UPDATE',
+      existingPayment,
+      payment,
+      ipAddress,
+      userAgent
+    );
+
     return apiResponse(payment);
   } catch (error: unknown) {
     if (error instanceof AuthError) {
@@ -230,6 +245,8 @@ export async function DELETE(
 ) {
   try {
     const user = await requireAuth();
+    const ipAddress = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
     const { id } = await params;
 
     if (user.role !== 'ADMIN' && user.role !== 'ACCOUNTANT') {
@@ -259,6 +276,17 @@ export async function DELETE(
       where: { id: id },
     });
 
+    // Log payment deletion to audit trail
+    await logPaymentMutation(
+      user.id,
+      id,
+      'DELETE',
+      payment,
+      null,
+      ipAddress,
+      userAgent
+    );
+
     return apiResponse({ success: true, message: 'ลบใบจ่ายเงินเรียบร้อยแล้ว' });
   } catch (error: unknown) {
     if (error instanceof AuthError) {
@@ -272,6 +300,8 @@ export async function DELETE(
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuth();
+    const ipAddress = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
     const { id } = await params;
 
     if (user.role === 'VIEWER') {
@@ -339,6 +369,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         journalEntry: true,
       },
     });
+
+    // Log payment posting to audit trail
+    await logPaymentMutation(
+      user.id,
+      id,
+      'POST',
+      payment,
+      updatedPayment,
+      ipAddress,
+      userAgent
+    );
 
     return apiResponse(updatedPayment);
   } catch (error: unknown) {

@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/api-utils';
 import { generateDocNumber } from '@/lib/api-utils';
 import { checkPeriodStatus } from '@/lib/period-service';
 import { handleApiError } from '@/lib/api-error-handler';
+import { logReceiptMutation } from '@/lib/audit-service';
 
 // POST - Post receipt (create journal entry)
 // Debits Cash/Bank and credits AR for customer payments
@@ -35,6 +36,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!periodCheck.isValid) {
       return NextResponse.json({ success: false, error: periodCheck.error }, { status: 400 });
     }
+
+    // Capture DRAFT state before posting for audit log
+    const receiptBeforePost = await db.receipt.findUnique({
+      where: { id },
+      include: { customer: true, bankAccount: true, allocations: { include: { invoice: true } } },
+    });
 
     // Execute in transaction for data consistency
     const result = await db.$transaction(
@@ -308,6 +315,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         maxWait: 5000,
         timeout: 10000,
       }
+    );
+
+    // Audit logging - POST (journal entry created / receipt posted)
+    const ipAddressPost = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const userAgentPost = request.headers.get('user-agent') || 'unknown';
+    await logReceiptMutation(
+      user.id,
+      id,
+      'POST',
+      receiptBeforePost as unknown as Record<string, unknown>,
+      result as unknown as Record<string, unknown>,
+      ipAddressPost,
+      userAgentPost
     );
 
     return NextResponse.json({ success: true, data: result });

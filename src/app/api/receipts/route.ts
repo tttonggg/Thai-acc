@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { requireAuth, generateDocNumber } from '@/lib/api-utils';
 import { bahtToSatang, satangToBaht } from '@/lib/currency';
 import { handleApiError } from '@/lib/api-error-handler';
+import { logReceiptMutation } from '@/lib/audit-service';
 
 // Validation schema for receipt allocation
 const receiptAllocationSchema = z.object({
@@ -310,6 +311,19 @@ export async function POST(request: NextRequest) {
         whtAmount: satangToBaht(alloc.whtAmount),
       })),
     };
+
+    // Audit logging
+    const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    await logReceiptMutation(
+      user.id,
+      receipt.id,
+      'CREATE',
+      null,
+      receiptInBaht as unknown as Record<string, unknown>,
+      ipAddress,
+      userAgent
+    );
 
     return NextResponse.json({ success: true, data: receiptInBaht });
   } catch (error: unknown) {

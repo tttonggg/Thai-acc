@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { z } from 'zod';
-import { requireAuth, requireRole } from '@/lib/api-utils';
+import { requireAuth, requireRole, getClientIp } from '@/lib/api-utils';
 import { handleApiError } from '@/lib/api-error-handler';
+import { logJournalMutation } from '@/lib/audit-service';
 
 // Validation schema
 const journalLineSchema = z.object({
@@ -65,7 +66,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 // PUT - Update journal entry
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireRole(['ACCOUNTANT', 'ADMIN']);
+    const user = await requireRole(['ACCOUNTANT', 'ADMIN']);
+    const ipAddress = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
     const { id } = await params;
     const body = await request.json();
     const validatedData = journalEntrySchema.parse(body);
@@ -121,6 +124,17 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       },
     });
 
+    // Audit log the update
+    await logJournalMutation(
+      user.id,
+      id,
+      'UPDATE',
+      existing as unknown as Record<string, unknown>,
+      entry as unknown as Record<string, unknown>,
+      ipAddress,
+      userAgent
+    );
+
     return NextResponse.json({ success: true, data: entry });
   } catch (error: unknown) {
     if (error.name === 'ZodError') {
@@ -142,7 +156,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireRole(['ACCOUNTANT', 'ADMIN']);
+    const user = await requireRole(['ACCOUNTANT', 'ADMIN']);
+    const ipAddress = getClientIp(request.headers);
+    const userAgent = request.headers.get('user-agent') || 'unknown';
     const { id } = await params;
 
     const existing = await prisma.journalEntry.findUnique({
@@ -163,6 +179,17 @@ export async function DELETE(
     await prisma.journalEntry.delete({
       where: { id },
     });
+
+    // Audit log the deletion
+    await logJournalMutation(
+      user.id,
+      id,
+      'DELETE',
+      existing as unknown as Record<string, unknown>,
+      null,
+      ipAddress,
+      userAgent
+    );
 
     return NextResponse.json({ success: true, message: 'ลบรายการสำเร็จ' });
   } catch (error: unknown) {
